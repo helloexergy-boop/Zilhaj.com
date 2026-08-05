@@ -4,36 +4,32 @@
    ========================================================================== */
 
 :root {
-    /* 15. Islamic-Inspired Light Mode Palette */
-    --bg-main: #FAF7F0;             /* Warm ivory paper background */
-    --bg-card: rgba(255, 255, 255, 0.75); /* Glass surface */
-    --bg-card-solid: #FFFFFF;
-    --primary-emerald: #0B4D3C;     /* Deep mosque-dome green */
-    --primary-emerald-light: #1F7A5C;/* Hover / gradient green */
-    --primary-dark: #071A16;
-    --accent-gold: #C9A227;         /* Brass / dome-gold */
-    --secondary-maroon: #7A2E2E;    /* Manuscript border accent (sparingly) */
-    --text-main: #1C1B18;           /* Text Ink */
-    --text-muted: #6B6459;          /* Text Muted */
-    --border-color: rgba(11, 77, 60, 0.12);
+    /* 1. Color System Tokens */
+    --primary-dark: #0D3D2E;      /* Headers, footer, primary text on light bg */
+    --primary-mid: #145C42;       /* Gradients, hover states */
+    --primary-green: #0D3D2E;
+    --accent-gold: #C9A15A;       /* CTA buttons, active states, accents ONLY */
+    --neutral-ink: #1A1A1A;       /* Body headings */
+    --neutral-body: #4B5563;      /* Paragraph text */
+    --neutral-muted: #9CA3AF;     /* Placeholders, disabled, timestamps */
+    --bg-main: #F7F8F6;           /* Page background (soft warm off-white) */
+    --bg-card: #FFFFFF;           /* Cards on top of background */
+    --border-color: #E5E7EB;
+    --state-success: #16A34A;     /* Confirmed states */
+    --state-error: #DC2626;       /* Warnings/errors */
 
     /* Backward compatibility mappings */
-    --primary: #0B4D3C;
-    --primary-hover: #1F7A5C;
-    --primary-light: #FAF7F0;
+    --primary: #0D3D2E;
+    --primary-hover: #145C42;
+    --primary-light: #F7F8F6;
+    --text-main: #1A1A1A;
+    --text-muted: #4B5563;
 
-    /* 17. Typography System Tokens */
-    --font-heading: 'Fraunces', serif;
+    /* 2. Typography System Tokens */
+    --font-heading: 'Manrope', sans-serif;
     --font-body: 'Inter', sans-serif;
-    --font-arabic: 'Amiri', serif;
 
-    /* 18. Glassmorphism System Tokens */
-    --glass-bg: rgba(255, 255, 255, 0.65);
-    --glass-blur: blur(16px) saturate(180%);
-    --glass-border: 1px solid rgba(255, 255, 255, 0.4);
-    --glass-shadow: 0 8px 32px rgba(11, 77, 60, 0.08);
-
-    /* Spacing & Radius Tokens */
+    /* 3. Spacing & Radius System Tokens */
     --radius-button: 8px;
     --radius-input: 8px;
     --radius-card: 16px;
@@ -42,41 +38,16 @@
     --padding-card-mobile: 16px;
     --padding-section-desktop: 80px;
     --padding-section-mobile: 48px;
+    --grid-gap: 24px;
 
-    /* Shadows & Elevation Tokens */
+    /* 4. Shadows & Elevation Tokens */
     --shadow-resting: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-hover: 0 8px 24px rgba(11, 77, 60, 0.12);
-    --shadow-modal: 0 20px 40px rgba(7, 26, 22, 0.25);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.10);
+    --shadow-modal: 0 20px 40px rgba(0,0,0,0.15);
 
-    /* Motion Tokens */
-    --transition-standard: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-[data-theme="dark"] {
-    /* 15. Islamic-Inspired Dark Mode Palette */
-    --bg-main: #071A16;             /* Deep emerald-black background */
-    --bg-card: rgba(255, 255, 255, 0.05); /* Glass dark surface */
-    --bg-card-solid: #0E2923;
-    --primary-emerald: #1F7A5C;     /* Brighter emerald for dark contrast */
-    --primary-emerald-light: #2BA07B;
-    --primary-dark: #030D0B;
-    --accent-gold: #E0B84B;         /* Brighter gold for dark contrast */
-    --secondary-maroon: #A84242;
-    --text-main: #F5F1E6;           /* Warm off-white */
-    --text-muted: #A6A196;
-    --border-color: rgba(255, 255, 255, 0.1);
-
-    --primary: #1F7A5C;
-    --primary-hover: #2BA07B;
-    --primary-light: #071A16;
-
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-blur: blur(16px) saturate(180%);
-    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-
-    --shadow-resting: 0 2px 8px rgba(0,0,0,0.3);
-    --shadow-hover: 0 10px 30px rgba(0,0,0,0.5);
+    /* 5. Motion & Transition Tokens */
+    --transition-standard: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-entrance: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Global Loading Overlay Spinner */
@@ -3030,48 +3001,14 @@ p, body {
     animation: ringPulse 3s infinite !important;
 }
 
-/* Theme Toggle Button Styling */
-.theme-toggle-btn {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    color: var(--text-main);
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition-standard);
-    box-shadow: var(--shadow-resting);
-}
-
-.theme-toggle-btn:hover {
-    transform: scale(1.08) rotate(15deg);
-    border-color: var(--accent-gold);
-    color: var(--accent-gold);
-}
-
-/* Glassmorphism Classes */
-.glass-card, .how-step-card, .premium-card, .admin-stat-card, .modal-card {
-    background: var(--glass-bg) !important;
-    backdrop-filter: var(--glass-blur) !important;
-    -webkit-backdrop-filter: var(--glass-blur) !important;
-    border: var(--glass-border) !important;
-    box-shadow: var(--glass-shadow) !important;
-}
-
-/* Mihrab Arch Shape Top for Featured Cards */
-.mihrab-top {
-    border-top-left-radius: 40px 20px !important;
-    border-top-right-radius: 40px 20px !important;
-}
-
-/* Khatam 8-Point Star SVG Background Texture */
-.khatam-pattern-bg {
-    background-image: radial-gradient(rgba(201, 162, 39, 0.08) 1.5px, transparent 1.5px), radial-gradient(rgba(11, 77, 60, 0.05) 1.5px, transparent 1.5px);
-    background-size: 30px 30px;
-    background-position: 0 0, 15px 15px;
+/* Accessibility: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 
