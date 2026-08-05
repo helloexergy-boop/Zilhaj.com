@@ -98,8 +98,49 @@ class App {
         // Fetch real-time weather and visitor stats
         this.fetchFooterData();
 
+        this.initTheme();
         this.initNavbarScroll();
         this.initScrollReveal();
+    }
+
+    initTheme() {
+        const savedTheme = localStorage.getItem('umrah_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            this.updateThemeIcons(true);
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            this.updateThemeIcons(false);
+        }
+    }
+
+    toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        if (currentTheme === 'dark') {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('umrah_theme', 'light');
+            this.updateThemeIcons(false);
+            this.showToast('Switched to Light Theme ☀️', 'info');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('umrah_theme', 'dark');
+            this.updateThemeIcons(true);
+            this.showToast('Switched to Dark Theme 🌙', 'info');
+        }
+    }
+
+    updateThemeIcons(isDark) {
+        const sunIcon = document.querySelector('#themeToggleBtn .sun-icon');
+        const moonIcon = document.querySelector('#themeToggleBtn .moon-icon');
+        if (sunIcon && moonIcon) {
+            if (isDark) {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            } else {
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            }
+        }
     }
 
     initNavbarScroll() {
@@ -596,41 +637,54 @@ class App {
 
     renderHomePage() {
         return `
-            <!-- Full Width Dark Forest Green Hero Banner (Matching Spec Requirements) -->
-            <section class="hero-green-banner">
-                <div class="hero-green-container" style="max-width:900px !important; margin:0 auto !important; text-align:center;">
-                    <div class="hero-eyebrow-anim" style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(201, 161, 90, 0.2); border:1px solid rgba(201, 161, 90, 0.4); color:#C9A15A; padding:0.4rem 1.1rem; border-radius:999px; font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:1.2rem;">
+            <!-- Full Screen (100vh) Hero Banner with Video Background Overlay -->
+            <section class="hero-green-banner fullscreen-hero">
+                <!-- Video Background Support (Paste your MP4 / WebM video link in the src attribute below) -->
+                <video class="hero-bg-video" autoplay loop muted playsinline poster="https://images.unsplash.com/photo-1591604466107-ec97de577aff">
+                    <source src="${this.state.heroVideoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-grand-mosque-of-mecca-at-night-42173-large.mp4'}" type="video/mp4">
+                </video>
+                <!-- Dark Overlay Shield for Premium Contrast -->
+                <div class="hero-video-overlay"></div>
+
+                <div class="hero-green-container" style="max-width:920px !important; margin:0 auto !important; text-align:center; position:relative; z-index:2;">
+                    <div class="hero-eyebrow-anim" style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(229, 193, 88, 0.22); border:1px solid rgba(229, 193, 88, 0.45); color:#E5C158; padding:0.45rem 1.2rem; border-radius:999px; font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:1.4rem;">
                         ✨ PLAN YOUR SACRED JOURNEY
                     </div>
 
-                    <h1 class="hero-title-main" style="margin-bottom:0.8rem !important;">
+                    <h1 class="hero-title-main" style="margin-bottom:1rem !important;">
                         <span class="hero-h1-anim-1" style="display:block;">One Request.</span>
-                        <span class="hero-h1-anim-2" style="color:#C9A15A !important; display:block !important; margin-top:0.2rem !important;">Multiple Verified Offers.</span>
+                        <span class="hero-h1-anim-2" style="color:#E5C158 !important; display:block !important; margin-top:0.3rem !important;">Multiple Verified Offers.</span>
                     </h1>
 
-                    <p class="hero-subtext-anim" style="font-size:1.08rem !important; color:rgba(255, 255, 255, 0.92) !important; max-width:720px !important; margin:1.2rem auto 2.2rem !important; line-height:1.65 !important; font-weight:400 !important;">
+                    <p class="hero-subtext-anim" style="font-size:1.15rem !important; color:rgba(255, 255, 255, 0.95) !important; max-width:740px !important; margin:1.2rem auto 2.4rem !important; line-height:1.65 !important; font-weight:400 !important;">
                         Post one service request and let verified providers compete with transparent offers. Compare prices, choose confidently, and save time without sharing your personal details.
                     </p>
 
                     <!-- Trust Stats Row (With Count-Up Animation) -->
-                    <div class="hero-trust-anim" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5rem; max-width:640px; margin:0 auto 2.2rem; background:rgba(255,255,255,0.06); padding:1rem 1.5rem; border-radius:14px; border:1px solid rgba(255,255,255,0.12);">
+                    <div class="hero-trust-anim" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5rem; max-width:680px; margin:0 auto 2.5rem; background:rgba(10, 35, 28, 0.65); backdrop-filter:blur(10px); padding:1.2rem 1.8rem; border-radius:16px; border:1px solid rgba(255,255,255,0.18);">
                         <div>
-                            <div class="count-up-val" data-target="500+" style="font-size:1.6rem; font-weight:800; color:#C9A15A;">500+</div>
-                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.8); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Verified Agents</div>
+                            <div class="count-up-val" data-target="500+" style="font-size:1.8rem; font-weight:800; color:#E5C158;">500+</div>
+                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.85); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Verified Agents</div>
                         </div>
-                        <div style="border-left:1px solid rgba(255,255,255,0.15); border-right:1px solid rgba(255,255,255,0.15);">
-                            <div class="count-up-val" data-target="100%" style="font-size:1.6rem; font-weight:800; color:#ffffff;">100%</div>
-                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.8); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Privacy Control</div>
+                        <div style="border-left:1px solid rgba(255,255,255,0.2); border-right:1px solid rgba(255,255,255,0.2);">
+                            <div class="count-up-val" data-target="100%" style="font-size:1.8rem; font-weight:800; color:#ffffff;">100%</div>
+                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.85); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Privacy Control</div>
                         </div>
                         <div>
-                            <div class="count-up-val" data-target="12500+" style="font-size:1.6rem; font-weight:800; color:#C9A15A;">12,500+</div>
-                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.8); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Happy Pilgrims</div>
+                            <div class="count-up-val" data-target="12500+" style="font-size:1.8rem; font-weight:800; color:#E5C158;">12,500+</div>
+                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.85); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Happy Pilgrims</div>
                         </div>
                     </div>
 
                     <div class="hero-cta-anim" style="display:flex !important; justify-content:center !important; align-items:center !important; gap:1.2rem !important; flex-wrap:wrap !important;">
                         <button class="btn-start-journey" onclick="app.scrollToRequirementForm()">Start Your Journey</button>
-                        <button class="btn-my-requests" onclick="app.navigate('dashboard')" style="background:transparent !important; border:1.5px solid rgba(255,255,255,0.75) !important; color:#ffffff !important; font-weight:700 !important; font-size:0.95rem !important; padding:12px 28px !important; border-radius:8px !important; cursor:pointer !important;">My Requests</button>
+                        <button class="btn-my-requests" onclick="app.navigate('dashboard')" style="background:rgba(255,255,255,0.15) !important; backdrop-filter:blur(6px); border:1.5px solid rgba(255,255,255,0.85) !important; color:#ffffff !important; font-weight:700 !important; font-size:0.95rem !important; padding:12px 28px !important; border-radius:8px !important; cursor:pointer !important;">My Requests</button>
+                    </div>
+
+                    <!-- Scroll Down Indicator Arrow -->
+                    <div class="scroll-down-indicator" onclick="window.scrollTo({top: window.innerHeight - 65, behavior: 'smooth'})" style="margin-top:2rem; cursor:pointer; opacity:0.85; transition:all 0.3s ease;">
+                        <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.3rem; color:#ffffff;">Scroll to Explore</span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E5C158" stroke-width="2.5" class="bounce-arrow"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
                     </div>
                 </div>
             </section>
