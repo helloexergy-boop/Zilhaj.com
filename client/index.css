@@ -4,26 +4,79 @@
    ========================================================================== */
 
 :root {
-    --primary: #047857;
-    --primary-hover: #065f46;
-    --primary-light: #ecfdf5;
-    --primary-dark: #022c22;
-    --accent-gold: #d97706;
-    --accent-gold-light: #fef3c7;
-    --bg-main: #f8fafc;
-    --bg-card: #ffffff;
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --border-color: #e2e8f0;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-    --shadow-lg: 0 12px 24px rgba(0,0,0,0.12);
-    --radius-sm: 8px;
-    --radius-md: 14px;
-    --radius-lg: 20px;
-    --font-heading: 'Outfit', sans-serif;
-    --font-body: 'Plus Jakarta Sans', sans-serif;
-    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    /* 15. Islamic-Inspired Light Mode Palette */
+    --bg-main: #FAF7F0;             /* Warm ivory paper background */
+    --bg-card: rgba(255, 255, 255, 0.75); /* Glass surface */
+    --bg-card-solid: #FFFFFF;
+    --primary-emerald: #0B4D3C;     /* Deep mosque-dome green */
+    --primary-emerald-light: #1F7A5C;/* Hover / gradient green */
+    --primary-dark: #071A16;
+    --accent-gold: #C9A227;         /* Brass / dome-gold */
+    --secondary-maroon: #7A2E2E;    /* Manuscript border accent (sparingly) */
+    --text-main: #1C1B18;           /* Text Ink */
+    --text-muted: #6B6459;          /* Text Muted */
+    --border-color: rgba(11, 77, 60, 0.12);
+
+    /* Backward compatibility mappings */
+    --primary: #0B4D3C;
+    --primary-hover: #1F7A5C;
+    --primary-light: #FAF7F0;
+
+    /* 17. Typography System Tokens */
+    --font-heading: 'Fraunces', serif;
+    --font-body: 'Inter', sans-serif;
+    --font-arabic: 'Amiri', serif;
+
+    /* 18. Glassmorphism System Tokens */
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-blur: blur(16px) saturate(180%);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+    --glass-shadow: 0 8px 32px rgba(11, 77, 60, 0.08);
+
+    /* Spacing & Radius Tokens */
+    --radius-button: 8px;
+    --radius-input: 8px;
+    --radius-card: 16px;
+    --radius-pill: 999px;
+    --padding-card-desktop: 24px;
+    --padding-card-mobile: 16px;
+    --padding-section-desktop: 80px;
+    --padding-section-mobile: 48px;
+
+    /* Shadows & Elevation Tokens */
+    --shadow-resting: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-hover: 0 8px 24px rgba(11, 77, 60, 0.12);
+    --shadow-modal: 0 20px 40px rgba(7, 26, 22, 0.25);
+
+    /* Motion Tokens */
+    --transition-standard: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+    /* 15. Islamic-Inspired Dark Mode Palette */
+    --bg-main: #071A16;             /* Deep emerald-black background */
+    --bg-card: rgba(255, 255, 255, 0.05); /* Glass dark surface */
+    --bg-card-solid: #0E2923;
+    --primary-emerald: #1F7A5C;     /* Brighter emerald for dark contrast */
+    --primary-emerald-light: #2BA07B;
+    --primary-dark: #030D0B;
+    --accent-gold: #E0B84B;         /* Brighter gold for dark contrast */
+    --secondary-maroon: #A84242;
+    --text-main: #F5F1E6;           /* Warm off-white */
+    --text-muted: #A6A196;
+    --border-color: rgba(255, 255, 255, 0.1);
+
+    --primary: #1F7A5C;
+    --primary-hover: #2BA07B;
+    --primary-light: #071A16;
+
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-blur: blur(16px) saturate(180%);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+    --shadow-resting: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-hover: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 /* Global Loading Overlay Spinner */
@@ -2670,17 +2723,17 @@ html { scroll-behavior: smooth; }
 }
 
 .step-dot.active {
-    background: #047857 !important;
+    background: #0D3D2E !important;
     color: #ffffff !important;
-    border-color: #047857 !important;
-    box-shadow: 0 0 0 5px rgba(4, 120, 87, 0.25) !important;
+    border-color: #0D3D2E !important;
+    box-shadow: 0 0 0 5px rgba(13, 61, 46, 0.25) !important;
     transform: scale(1.1);
 }
 
 .step-dot.completed {
-    background: #10b981 !important;
+    background: #16A34A !important;
     color: #ffffff !important;
-    border-color: #10b981 !important;
+    border-color: #16A34A !important;
 }
 
 .form-step {
@@ -2702,6 +2755,325 @@ html { scroll-behavior: smooth; }
         transform: translateY(0);
     }
 }
+
+/* ==========================================================================
+   COMPLETE MODERNIZATION & ANIMATION SYSTEM (POINTS 1 TO 14)
+   ========================================================================== */
+
+/* 2. TYPOGRAPHY SCALE SITE-WIDE */
+h1 {
+    font-family: var(--font-heading) !important;
+    font-size: 60px !important;
+    line-height: 1.1 !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+    color: #ffffff;
+}
+
+h2 {
+    font-family: var(--font-heading) !important;
+    font-size: 36px !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+    color: var(--neutral-ink) !important;
+}
+
+h3 {
+    font-family: var(--font-heading) !important;
+    font-size: 20px !important;
+    line-height: 1.3 !important;
+    font-weight: 600 !important;
+    color: var(--neutral-ink) !important;
+}
+
+p, body {
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    font-weight: 400;
+    color: var(--neutral-body);
+}
+
+.small-label, label, small {
+    font-size: 13px;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+}
+
+/* Mobile Typography Scaling */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 36px !important;
+        line-height: 1.15 !important;
+    }
+    h2 {
+        font-size: 26px !important;
+        line-height: 1.25 !important;
+    }
+    .hero-green-banner {
+        padding: var(--padding-section-mobile) 16px !important;
+    }
+    .how-it-works-section, .main-container {
+        padding-top: var(--padding-section-mobile) !important;
+        padding-bottom: var(--padding-section-mobile) !important;
+    }
+    .how-step-card, .premium-card {
+        padding: var(--padding-card-mobile) !important;
+        border-radius: var(--radius-card) !important;
+    }
+}
+
+/* 3 & 4. SPACING, RADIUS & SHADOW ELEVATION RULES */
+.how-step-card, .premium-card, .amazon-tracker-container, .search-card, .admin-stat-card {
+    border-radius: var(--radius-card) !important;
+    padding: var(--padding-card-desktop) !important;
+    box-shadow: var(--shadow-resting) !important;
+    transition: var(--transition-standard) !important;
+}
+
+.how-step-card:hover, .premium-card:hover, .admin-stat-card:hover {
+    box-shadow: var(--shadow-hover) !important;
+    transform: translateY(-4px) !important;
+    border-color: rgba(201, 161, 90, 0.4) !important;
+}
+
+/* 5. SCROLL-REVEAL SYSTEM */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.scroll-reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.stagger-1 { transition-delay: 80ms; }
+.stagger-2 { transition-delay: 160ms; }
+.stagger-3 { transition-delay: 240ms; }
+.stagger-4 { transition-delay: 320ms; }
+
+/* 6. HERO SECTION FULL ANIMATION SEQUENCE & PARALLAX MESH */
+.hero-green-banner {
+    background: linear-gradient(135deg, #0D3D2E 0%, #145C42 60%, #064e3b 100%) !important;
+    padding: var(--padding-section-desktop) 24px !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-green-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(201, 161, 90, 0.12) 0%, transparent 65%);
+    pointer-events: none;
+    animation: slowMeshRotate 20s linear infinite;
+}
+
+@keyframes slowMeshRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-eyebrow-anim { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s backwards; }
+.hero-h1-anim-1 { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.30s backwards; }
+.hero-h1-anim-2 { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.45s backwards; }
+.hero-subtext-anim { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.60s backwards; }
+.hero-trust-anim { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.75s backwards; }
+.hero-cta-anim { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.90s backwards; }
+
+/* Primary Button Gold Pulse Glow */
+@keyframes goldPulseGlow {
+    0%, 100% { box-shadow: 0 4px 14px rgba(201, 161, 90, 0.35); }
+    50% { box-shadow: 0 8px 25px rgba(201, 161, 90, 0.65); transform: translateY(-1px); }
+}
+
+.btn-start-journey {
+    background: var(--accent-gold) !important;
+    color: #1A1A1A !important;
+    font-weight: 700 !important;
+    border-radius: var(--radius-button) !important;
+    padding: 12px 28px !important;
+    animation: goldPulseGlow 2.5s ease-in-out infinite;
+    transition: var(--transition-standard) !important;
+}
+
+.btn-start-journey:hover {
+    background: #d9ab5c !important;
+    transform: translateY(-2px) !important;
+}
+
+/* 7. HOW IT WORKS ANIMATED CONNECTOR & ICON BOUNCE */
+.how-step-card:hover .how-step-icon {
+    transform: scale(1.1) rotate(5deg) !important;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.how-it-works-grid {
+    gap: var(--grid-gap) !important;
+}
+
+/* 8. SPRING BOUNCE & FLOATING IDLE ANIMATIONS */
+@keyframes springIconBounce {
+    0% { transform: scale(0.6); opacity: 0; }
+    70% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.spring-icon-in {
+    animation: springIconBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+@keyframes floatIdle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+.idle-float {
+    animation: floatIdle 3s ease-in-out infinite;
+}
+
+/* 9. NAVIGATION MICRO-INTERACTIONS & STICKY GLASS */
+.nav-link {
+    position: relative;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 2.5px;
+    background: var(--accent-gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 99px;
+}
+
+.nav-link:hover::after, .nav-link.active::after {
+    transform: scaleX(1);
+}
+
+.navbar.scrolled {
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(12px) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 11 & 14. UNIVERSAL BUTTON INTERACTION STATES */
+.btn, .gradient-btn, .btn-gold, .btn-primary, .btn-social-chip {
+    border-radius: var(--radius-button) !important;
+    padding: 12px 28px !important;
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    transition: var(--transition-standard) !important;
+}
+
+.btn:hover, .gradient-btn:hover, .btn-gold:hover, .btn-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow-hover) !important;
+}
+
+.btn:active, .gradient-btn:active, .btn-gold:active, .btn-primary:active {
+    transform: translateY(0) scale(0.98) !important;
+    box-shadow: var(--shadow-resting) !important;
+}
+
+.btn:focus-visible, .gradient-btn:focus-visible {
+    outline: 2px solid var(--accent-gold) !important;
+    outline-offset: 2px !important;
+}
+
+/* 12. MODAL ENTRANCE SLIDE & CHECKBOX SVG ANIMATION */
+.modal-backdrop.active .modal-card {
+    animation: modalSpringIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalSpringIn {
+    from {
+        opacity: 0;
+        transform: scale(0.94) translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* 13. SINGLE FLOATING CHATBOT WIDGET WITH PULSE RING */
+@keyframes ringPulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+    70% { box-shadow: 0 0 0 14px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.robot-hello-badge {
+    animation: ringPulse 3s infinite !important;
+}
+
+/* Theme Toggle Button Styling */
+.theme-toggle-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-standard);
+    box-shadow: var(--shadow-resting);
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.08) rotate(15deg);
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+}
+
+/* Glassmorphism Classes */
+.glass-card, .how-step-card, .premium-card, .admin-stat-card, .modal-card {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+    border: var(--glass-border) !important;
+    box-shadow: var(--glass-shadow) !important;
+}
+
+/* Mihrab Arch Shape Top for Featured Cards */
+.mihrab-top {
+    border-top-left-radius: 40px 20px !important;
+    border-top-right-radius: 40px 20px !important;
+}
+
+/* Khatam 8-Point Star SVG Background Texture */
+.khatam-pattern-bg {
+    background-image: radial-gradient(rgba(201, 162, 39, 0.08) 1.5px, transparent 1.5px), radial-gradient(rgba(11, 77, 60, 0.05) 1.5px, transparent 1.5px);
+    background-size: 30px 30px;
+    background-position: 0 0, 15px 15px;
+}
+
 
 
 
