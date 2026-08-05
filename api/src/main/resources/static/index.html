@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMRAH TRAVELS – Journey of Faith, Comfort & Blessings</title>
+    <meta name="description"
+        content="Umrah Travels - Journey of Faith, Comfort & Blessings. Book 100% verified Umrah packages with hotels near Haram, return air tickets, and guided ziyarat.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Custom CSS Design System -->
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Main Navigation Header -->
+        <header class="navbar" id="navbar">
+            <div class="nav-container">
+                <a href="#" class="brand-logo" onclick="app.navigate('home')">
+                    <span class="logo-icon">🕋</span>
+                    <span class="logo-text">UMRAH <span class="logo-highlight">TRAVELS</span></span>
+                </a>
+
+                <nav class="nav-menu" id="navMenu">
+                    <a href="#packages" class="nav-link" onclick="app.navigate('packages')">Packages</a>
+                    <a href="#trust" class="nav-link" onclick="app.navigate('trust')">Why Choose Us</a>
+                    <a href="#dashboard" class="nav-link" id="dashboardNavLink" onclick="app.navigate('dashboard')">👤 Pilgrim Dashboard</a>
+                    <a href="#offers" class="nav-link" id="offersNavLink" onclick="app.navigate('offers')">
+                        🎁 Offers Available <span class="badge-count" id="userOfferBadge">0</span>
+                    </a>
+                </nav>
+
+                <div class="nav-auth-actions" id="navAuthActions">
+                    <!-- Dynamic Auth Button injected by JS -->
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Root Container -->
+        <main class="main-container" id="mainContainer">
+            <!-- Dynamic Page Views Injected by app.js -->
+        </main>
+
+        <!-- Dynamic Modal Backdrop Container -->
+        <div class="modal-backdrop" id="modalBackdrop">
+            <div class="modal-card" id="modalCard">
+                <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+                <div class="modal-content" id="modalContent"></div>
+            </div>
+        </div>
+
+        <!-- Global Toast Notification System -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-col">
+                    <div class="brand-logo footer-logo">
+                        <span class="logo-icon">🕋</span>
+                        <span class="logo-text">GoExergy <span class="logo-highlight">Umrah</span></span>
+                    </div>
+                    <p class="footer-desc">Connecting pilgrims with trusted, ministry-verified travel agencies
+                        worldwide. Sacred journeys made effortless, transparent, and memorable.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#" onclick="app.navigate('packages')">Browse Packages</a></li>
+                        <li><a href="#" onclick="app.navigate('trust')">Why Choose Us</a></li>
+                        <li><a href="#" onclick="app.openAuthModal('login')">Pilgrim Login</a></li>
+                        <li><a href="#" onclick="app.openAuthModal('register')">Pilgrim Registration</a></li>
+                        <li><a href="#" onclick="app.openAuthModal('admin-login')">🔑 Admin Login</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Pilgrim Assistance</h4>
+                    <ul>
+                        <li><span>📞 24/7 Helpline: +966 800 123 4567</span></li>
+                        <li><span>📧 Email: support@goexergy-umrah.com</span></li>
+                        <li><span>📍 Location: Makkah al-Mukarramah, KSA</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 GoExergy Umrah Platform. All Rights Reserved. Ministry Licensed Agent Network.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Application Script Logic -->
+    <script src="app.js"></script>
+</body>
+
+</html>
