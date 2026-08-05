@@ -97,117 +97,6 @@ class App {
 
         // Fetch real-time weather and visitor stats
         this.fetchFooterData();
-
-        this.initTheme();
-        this.initNavbarScroll();
-        this.initScrollReveal();
-    }
-
-    initTheme() {
-        const savedTheme = localStorage.getItem('umrah_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        if (savedTheme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            this.updateThemeIcons(true);
-        } else {
-            document.documentElement.removeAttribute('data-theme');
-            this.updateThemeIcons(false);
-        }
-    }
-
-    toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        if (currentTheme === 'dark') {
-            document.documentElement.removeAttribute('data-theme');
-            localStorage.setItem('umrah_theme', 'light');
-            this.updateThemeIcons(false);
-            this.showToast('Switched to Light Theme ☀️', 'info');
-        } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            localStorage.setItem('umrah_theme', 'dark');
-            this.updateThemeIcons(true);
-            this.showToast('Switched to Islamic Dark Theme 🌙', 'info');
-        }
-    }
-
-    updateThemeIcons(isDark) {
-        const sunIcon = document.querySelector('#themeToggleBtn .sun-icon');
-        const moonIcon = document.querySelector('#themeToggleBtn .moon-icon');
-        if (sunIcon && moonIcon) {
-            if (isDark) {
-                sunIcon.style.display = 'none';
-                moonIcon.style.display = 'block';
-            } else {
-                sunIcon.style.display = 'block';
-                moonIcon.style.display = 'none';
-            }
-        }
-    }
-
-    initNavbarScroll() {
-        window.addEventListener('scroll', () => {
-            const navbar = document.getElementById('navbar');
-            if (navbar) {
-                if (window.scrollY > 30) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-            }
-        });
-    }
-
-    initScrollReveal() {
-        if (!('IntersectionObserver' in window)) return;
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('in-view');
-                    const counterElements = entry.target.querySelectorAll('.count-up-val');
-                    counterElements.forEach(el => {
-                        if (!el.dataset.animated) {
-                            el.dataset.animated = 'true';
-                            this.animateCountUp(el);
-                        }
-                    });
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.15 });
-
-        setTimeout(() => {
-            document.querySelectorAll('.scroll-reveal, .how-step-card, .premium-card, .admin-stat-card').forEach(el => {
-                if (!el.classList.contains('scroll-reveal')) {
-                    el.classList.add('scroll-reveal');
-                }
-                observer.observe(el);
-            });
-        }, 100);
-    }
-
-    animateCountUp(el) {
-        const targetAttr = el.getAttribute('data-target') || el.innerText;
-        const target = parseInt(targetAttr.replace(/\D/g, '')) || 0;
-        if (target === 0) return;
-
-        const prefix = targetAttr.startsWith('₹') ? '₹' : (targetAttr.startsWith('👥') ? '👥 ' : '');
-        const suffix = targetAttr.endsWith('+') ? '+' : (targetAttr.endsWith('%') ? '%' : '');
-
-        let startTimestamp = null;
-        const duration = 1200;
-
-        const step = (timestamp) => {
-            if (!startTimestamp) startTimestamp = timestamp;
-            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            const easeProgress = 1 - (1 - progress) * (1 - progress);
-            const currentVal = Math.floor(easeProgress * target);
-            el.innerText = `${prefix}${currentVal.toLocaleString()}${suffix}`;
-            if (progress < 1) {
-                window.requestAnimationFrame(step);
-            } else {
-                el.innerText = targetAttr;
-            }
-        };
-        window.requestAnimationFrame(step);
     }
 
     async fetchFooterData() {
@@ -631,151 +520,54 @@ class App {
                 this.navigate('home');
             }
         }
-
-        setTimeout(() => this.initScrollReveal(), 50);
     }
 
     renderHomePage() {
         return `
-            <!-- Full Screen (100vh) Hero Banner with Video Background Overlay -->
-            <section class="hero-green-banner fullscreen-hero">
-                <!-- Video Background Support -->
-                <video class="hero-bg-video" autoplay loop muted playsinline poster="https://images.unsplash.com/photo-1591604466107-ec97de577aff">
-                    <source src="${this.state.heroVideoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-grand-mosque-of-mecca-at-night-42173-large.mp4'}" type="video/mp4">
-                </video>
-                <!-- Dark Overlay Shield -->
-                <div class="hero-video-overlay"></div>
-
-                <div class="hero-green-container" style="max-width:920px !important; margin:0 auto !important; text-align:center; position:relative; z-index:2;">
-                    <div class="hero-eyebrow-anim" style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(212, 175, 55, 0.2); border:1px solid rgba(212, 175, 55, 0.45); color:#E5C158; padding:0.45rem 1.2rem; border-radius:999px; font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:1.4rem;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-                        YOUR SACRED JOURNEY DESERVES FAIR PRICES
-                    </div>
-
-                    <h1 class="hero-title-main" style="margin-bottom:1rem !important;">
-                        <span class="hero-h1-anim-1" style="display:block;">Tell Us Your Dates Once.</span>
-                        <span class="hero-h1-anim-2" style="color:#E5C158 !important; display:block !important; margin-top:0.3rem !important;">Real Agencies Send Direct Prices.</span>
+            <!-- Full Width Dark Forest Green Hero Banner (Matching Reference Image) -->
+            <section class="hero-green-banner" style="background:#0f5132 !important; padding:5rem 1.5rem !important; text-align:center !important; color:#ffffff !important; width:100% !important; box-sizing:border-box !important; margin:0 !important;">
+                <div class="hero-green-container" style="max-width:900px !important; margin:0 auto !important;">
+                    <h1 class="hero-title-main" style="font-size:3.5rem !important; font-weight:800 !important; line-height:1.1 !important; color:#ffffff !important; letter-spacing:-1px !important; margin-bottom:0.8rem !important;">
+                        One Request.
+                        <span class="hero-title-gold" style="color:#f59e0b !important; display:block !important; margin-top:0.2rem !important;">Multiple Verified Offers.</span>
                     </h1>
-
-                    <p class="hero-subtext-anim" style="font-size:1.15rem !important; color:rgba(255, 255, 255, 0.95) !important; max-width:740px !important; margin:1.2rem auto 2.4rem !important; line-height:1.65 !important; font-weight:400 !important;">
-                        No phone calls, no hidden fees, no sharing your phone number. Verified travel providers in Srinagar, Makkah, and Madinah bid on your exact itinerary so you get the best deal.
+                    <p class="hero-subtext-clean" style="font-size:1.08rem !important; color:rgba(255, 255, 255, 0.92) !important; max-width:720px !important; margin:1.2rem auto 2.2rem !important; line-height:1.65 !important; font-weight:400 !important;">
+                        Post one service request and let verified providers compete with transparent offers. Compare prices, choose confidently, and save time without sharing your personal details.
                     </p>
-
-                    <!-- Trust Stats Row (With Count-Up Animation) -->
-                    <div class="hero-trust-anim" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5rem; max-width:680px; margin:0 auto 2.5rem; background:rgba(10, 35, 28, 0.65); backdrop-filter:blur(10px); padding:1.2rem 1.8rem; border-radius:16px; border:1px solid rgba(255,255,255,0.18);">
-                        <div>
-                            <div class="count-up-val" data-target="500+" style="font-size:1.8rem; font-weight:800; color:#E5C158;">500+</div>
-                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.85); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Hajj Ministry Verified</div>
-                        </div>
-                        <div style="border-left:1px solid rgba(255,255,255,0.2); border-right:1px solid rgba(255,255,255,0.2);">
-                            <div class="count-up-val" data-target="100%" style="font-size:1.8rem; font-weight:800; color:#ffffff;">100%</div>
-                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.85); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Direct Price Match</div>
-                        </div>
-                        <div>
-                            <div class="count-up-val" data-target="12500+" style="font-size:1.8rem; font-weight:800; color:#E5C158;">12,500+</div>
-                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.85); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Pilgrims Served</div>
-                        </div>
-                    </div>
-
-                    <div class="hero-cta-anim" style="display:flex !important; justify-content:center !important; align-items:center !important; gap:1.2rem !important; flex-wrap:wrap !important;">
-                        <button class="btn-start-journey" onclick="app.scrollToRequirementForm()">Start Your Journey</button>
-                        <button class="btn-my-requests" onclick="app.navigate('dashboard')" style="background:rgba(255,255,255,0.15) !important; backdrop-filter:blur(6px); border:1.5px solid rgba(255,255,255,0.85) !important; color:#ffffff !important; font-weight:700 !important; font-size:0.95rem !important; padding:12px 28px !important; border-radius:8px !important; cursor:pointer !important;">My Requests</button>
-                    </div>
-
-                    <!-- Scroll Down Indicator Arrow -->
-                    <div class="scroll-down-indicator" onclick="window.scrollTo({top: window.innerHeight - 65, behavior: 'smooth'})" style="margin-top:2rem; cursor:pointer; opacity:0.85; transition:all 0.3s ease;">
-                        <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.3rem; color:#ffffff;">Scroll to Explore</span>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E5C158" stroke-width="2.5" class="bounce-arrow"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                    <div class="hero-action-buttons" style="display:flex !important; justify-content:center !important; align-items:center !important; gap:1.2rem !important; flex-wrap:wrap !important;">
+                        <button class="btn-start-journey" onclick="app.scrollToRequirementForm()" style="background:#f59e0b !important; color:#0f172a !important; font-weight:800 !important; font-size:0.95rem !important; padding:0.85rem 2.2rem !important; border-radius:8px !important; border:none !important; cursor:pointer !important; box-shadow:0 4px 14px rgba(245,158,11,0.35) !important;">Start Your Journey</button>
+                        <button class="btn-my-requests" onclick="app.navigate('dashboard')" style="background:transparent !important; border:1.5px solid rgba(255,255,255,0.75) !important; color:#ffffff !important; font-weight:700 !important; font-size:0.95rem !important; padding:0.85rem 2.2rem !important; border-radius:8px !important; cursor:pointer !important;">My Requests</button>
                     </div>
                 </div>
             </section>
 
-            <!-- How It Works Section (Asymmetric 2+1 Layout + Vector SVGs + Mihrab Card) -->
-            <section class="how-it-works-section" style="padding:var(--padding-section-desktop) 1.5rem !important; background:var(--bg-main) !important; text-align:center !important; border-bottom:1px solid var(--border-color) !important;">
-                <div class="how-it-works-header scroll-reveal" style="max-width:650px !important; margin:0 auto 3rem !important;">
-                    <h2 class="how-it-works-title" style="margin-bottom:0.5rem !important;">How It Works</h2>
-                    <p class="how-it-works-subtitle" style="font-size:0.95rem !important; color:var(--text-muted) !important;">Three transparent steps to plan your Umrah pilgrimage</p>
+            <!-- How It Works Section (Matching Reference Image) -->
+            <section class="how-it-works-section" style="padding:4.5rem 1.5rem !important; background:#f8fafc !important; text-align:center !important; border-bottom:1px solid #e2e8f0 !important;">
+                <div class="how-it-works-header" style="max-width:650px !important; margin:0 auto 3rem !important;">
+                    <h2 class="how-it-works-title" style="font-size:2.2rem !important; font-weight:800 !important; color:#0f172a !important; margin-bottom:0.5rem !important;">How It Works</h2>
+                    <p class="how-it-works-subtitle" style="font-size:0.95rem !important; color:#64748b !important;">Three simple steps to plan your Umrah with confidence</p>
                 </div>
-
-                <div class="how-it-works-grid" style="display:flex !items-stretch !important; justify-content:center !important; max-width:1140px !important; margin:0 auto !important; gap:1.5rem !important; flex-wrap:wrap !important;">
-                    <!-- Step 1: Submit Request -->
-                    <div class="how-step-card glass-card scroll-reveal stagger-1" style="flex:1; min-width:280px; text-align:left !important; padding:2rem !important;">
-                        <div class="how-step-icon" style="width:52px !important; height:52px !important; background:rgba(11, 77, 60, 0.1) !important; color:var(--primary-emerald) !important; border-radius:12px !important; display:flex !important; align-items:center !important; justify-content:center !important; margin-bottom:1.2rem !important;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                        </div>
-                        <div style="font-size:0.75rem; font-weight:700; color:var(--accent-gold); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem;">Step 01</div>
-                        <h3 style="margin-bottom:0.6rem !important;">Post Itinerary & Budget</h3>
-                        <p style="font-size:0.9rem !important; color:var(--text-muted) !important; line-height:1.6 !important; margin:0 !important;">Select travel dates, group size, and preferred hotels near Makkah & Madinah. Your contact details remain 100% private.</p>
+                <div class="how-it-works-grid" style="display:flex !important; align-items:center !important; justify-content:center !important; gap:1rem !important; max-width:1140px !important; margin:0 auto !important; flex-wrap:wrap !important;">
+                    <div class="how-step-card" style="flex:1; min-width:260px; background:#ffffff !important; border-radius:16px !important; padding:2.5rem 1.8rem !important; box-shadow:0 10px 30px rgba(15,23,42,0.06) !important; border:1px solid #e2e8f0 !important; text-align:center !important;">
+                        <div class="how-step-icon" style="width:65px !important; height:65px !important; background:#dcfce7 !important; color:#047857 !important; border-radius:16px !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; font-weight:800 !important; margin:0 auto 1.5rem !important;">➕</div>
+                        <h4 style="font-size:1.2rem !important; font-weight:800 !important; color:#0f172a !important; margin-bottom:0.6rem !important;">Step 1: Submit Your Request</h4>
+                        <p style="font-size:0.9rem !important; color:#64748b !important; line-height:1.6 !important; margin:0 !important;">Tell us your travel dates, group size, budget, and preferences. Your details stay private and secure.</p>
                     </div>
 
-                    <!-- Step 2: Receive Offers (Featured Featured Asymmetric Mihrab Card) -->
-                    <div class="how-step-card glass-card mihrab-top scroll-reveal stagger-2" style="flex:1.2; min-width:300px; text-align:left !important; padding:2.2rem 2rem !important; border:2px solid var(--accent-gold) !important; background:rgba(201, 162, 39, 0.05) !important;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                            <div class="how-step-icon" style="width:56px !important; height:56px !important; background:var(--accent-gold) !important; color:#ffffff !important; border-radius:12px !important; display:flex !important; align-items:center !important; justify-content:center !important;">
-                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                            </div>
-                            <span style="background:var(--accent-gold); color:#ffffff; font-size:0.72rem; font-weight:800; padding:0.25rem 0.8rem; border-radius:99px; text-transform:uppercase; letter-spacing:0.05em;">Most Popular</span>
-                        </div>
-                        <div style="font-size:0.75rem; font-weight:700; color:var(--accent-gold); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem;">Step 02</div>
-                        <h3 style="margin-bottom:0.6rem !important;">Receive Verified Bids</h3>
-                        <p style="font-size:0.9rem !important; color:var(--text-muted) !important; line-height:1.6 !important; margin:0 !important;">Licensed Umrah travel agencies review your specs and send custom package bids directly to your dashboard.</p>
+                    <div class="step-arrow-divider" style="font-size:2.2rem !important; color:#047857 !important; font-weight:800 !important; padding:0 0.5rem !important;">➔</div>
+
+                    <div class="how-step-card" style="flex:1; min-width:260px; background:#ffffff !important; border-radius:16px !important; padding:2.5rem 1.8rem !important; box-shadow:0 10px 30px rgba(15,23,42,0.06) !important; border:1px solid #e2e8f0 !important; text-align:center !important;">
+                        <div class="how-step-icon" style="width:65px !important; height:65px !important; background:#dcfce7 !important; color:#047857 !important; border-radius:16px !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; font-weight:800 !important; margin:0 auto 1.5rem !important;">↙️</div>
+                        <h4 style="font-size:1.2rem !important; font-weight:800 !important; color:#0f172a !important; margin-bottom:0.6rem !important;">Step 2: Receive Offers</h4>
+                        <p style="font-size:0.9rem !important; color:#64748b !important; line-height:1.6 !important; margin:0 !important;">Verified travel agents review your request and send tailored offers that match your needs and budget.</p>
                     </div>
 
-                    <!-- Step 3: Choose Package -->
-                    <div class="how-step-card glass-card scroll-reveal stagger-3" style="flex:1; min-width:280px; text-align:left !important; padding:2rem !important;">
-                        <div class="how-step-icon" style="width:52px !important; height:52px !important; background:rgba(11, 77, 60, 0.1) !important; color:var(--primary-emerald) !important; border-radius:12px !important; display:flex !important; align-items:center !important; justify-content:center !important; margin-bottom:1.2rem !important;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                        </div>
-                        <div style="font-size:0.75rem; font-weight:700; color:var(--accent-gold); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem;">Step 03</div>
-                        <h3 style="margin-bottom:0.6rem !important;">Book with Price Guarantee</h3>
-                        <p style="font-size:0.9rem !important; color:var(--text-muted) !important; line-height:1.6 !important; margin:0 !important;">Compare package includes, hotel distance to Haram, and select your preferred offer with 100% price protection.</p>
-                    </div>
-                </div>
-            </section>
+                    <div class="step-arrow-divider" style="font-size:2.2rem !important; color:#047857 !important; font-weight:800 !important; padding:0 0.5rem !important;">➔</div>
 
-            <!-- Signature Interactive Feature: Live Makkah & Madinah Verified Agency Finder -->
-            <section class="signature-agency-finder scroll-reveal" style="padding:4rem 1.5rem; background:var(--bg-main); border-top:1px solid var(--border-color);">
-                <div style="max-width:1140px; margin:0 auto;">
-                    <div style="text-align:center; max-width:650px; margin:0 auto 2.5rem;">
-                        <span style="color:var(--accent-gold); font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">EXCLUSIVE PLATFORM FEATURE</span>
-                        <h2 style="margin:0.4rem 0;">Live Verified Agencies Near Haram</h2>
-                        <p style="color:var(--text-muted); font-size:0.95rem;">Interactive directory of licensed Umrah agencies with direct hotel ground presence in Makkah & Madinah.</p>
-                    </div>
-
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem;">
-                        <!-- Makkah Agency Card -->
-                        <div class="glass-card" style="padding:1.8rem; border-radius:16px; border-top:4px solid var(--primary-emerald);">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                                <span style="background:rgba(11, 77, 60, 0.1); color:var(--primary-emerald); font-size:0.75rem; font-weight:800; padding:0.3rem 0.8rem; border-radius:99px;">MAKKAH AL-MUKARRAMAH</span>
-                                <span style="color:var(--state-success); font-size:0.8rem; font-weight:700;">🟢 24 Verified Online</span>
-                            </div>
-                            <h3 style="font-size:1.15rem; margin-bottom:0.4rem;">Clock Tower & Ajyad Zone</h3>
-                            <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.2rem;">Average Hotel Distance: 250m - 600m from Masjid al-Haram entrance.</p>
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(201, 162, 39, 0.1); padding:0.8rem 1rem; border-radius:8px; margin-bottom:1.2rem;">
-                                <div>
-                                    <div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">AVG PACKAGE RANGE</div>
-                                    <div style="font-size:1.1rem; font-weight:800; color:var(--text-main);">₹78,000 - ₹1,45,000</div>
-                                </div>
-                                <button class="btn btn-primary" onclick="app.scrollToRequirementForm()" style="font-size:0.82rem; padding:8px 16px;">Request Quotes</button>
-                            </div>
-                        </div>
-
-                        <!-- Madinah Agency Card -->
-                        <div class="glass-card" style="padding:1.8rem; border-radius:16px; border-top:4px solid var(--accent-gold);">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                                <span style="background:rgba(201, 162, 39, 0.15); color:var(--accent-gold); font-size:0.75rem; font-weight:800; padding:0.3rem 0.8rem; border-radius:99px;">MADINAH AL-MUNAWWARAH</span>
-                                <span style="color:var(--state-success); font-size:0.8rem; font-weight:700;">🟢 18 Verified Online</span>
-                            </div>
-                            <h3 style="font-size:1.15rem; margin-bottom:0.4rem;">Markaziyah Central Zone</h3>
-                            <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.2rem;">Direct access to Al-Masjid an-Nabawi Northern & Southern gates.</p>
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(11, 77, 60, 0.1); padding:0.8rem 1rem; border-radius:8px; margin-bottom:1.2rem;">
-                                <div>
-                                    <div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">AVG PACKAGE RANGE</div>
-                                    <div style="font-size:1.1rem; font-weight:800; color:var(--text-main);">₹65,000 - ₹1,25,000</div>
-                                </div>
-                                <button class="btn btn-primary" onclick="app.scrollToRequirementForm()" style="font-size:0.82rem; padding:8px 16px;">Request Quotes</button>
-                            </div>
-                        </div>
+                    <div class="how-step-card" style="flex:1; min-width:260px; background:#ffffff !important; border-radius:16px !important; padding:2.5rem 1.8rem !important; box-shadow:0 10px 30px rgba(15,23,42,0.06) !important; border:1px solid #e2e8f0 !important; text-align:center !important;">
+                        <div class="how-step-icon" style="width:65px !important; height:65px !important; background:#dcfce7 !important; color:#047857 !important; border-radius:16px !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; font-weight:800 !important; margin:0 auto 1.5rem !important;">🛡️</div>
+                        <h4 style="font-size:1.2rem !important; font-weight:800 !important; color:#0f172a !important; margin-bottom:0.6rem !important;">Step 3: Choose Package</h4>
+                        <p style="font-size:0.9rem !important; color:#64748b !important; line-height:1.6 !important; margin:0 !important;">Compare offers, check details, and confidently select the option that fits your journey perfectly.</p>
                     </div>
                 </div>
             </section>
