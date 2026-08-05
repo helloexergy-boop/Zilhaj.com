@@ -97,6 +97,76 @@ class App {
 
         // Fetch real-time weather and visitor stats
         this.fetchFooterData();
+
+        this.initNavbarScroll();
+        this.initScrollReveal();
+    }
+
+    initNavbarScroll() {
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (navbar) {
+                if (window.scrollY > 30) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+        });
+    }
+
+    initScrollReveal() {
+        if (!('IntersectionObserver' in window)) return;
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    const counterElements = entry.target.querySelectorAll('.count-up-val');
+                    counterElements.forEach(el => {
+                        if (!el.dataset.animated) {
+                            el.dataset.animated = 'true';
+                            this.animateCountUp(el);
+                        }
+                    });
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        setTimeout(() => {
+            document.querySelectorAll('.scroll-reveal, .how-step-card, .premium-card, .admin-stat-card').forEach(el => {
+                if (!el.classList.contains('scroll-reveal')) {
+                    el.classList.add('scroll-reveal');
+                }
+                observer.observe(el);
+            });
+        }, 100);
+    }
+
+    animateCountUp(el) {
+        const targetAttr = el.getAttribute('data-target') || el.innerText;
+        const target = parseInt(targetAttr.replace(/\D/g, '')) || 0;
+        if (target === 0) return;
+
+        const prefix = targetAttr.startsWith('₹') ? '₹' : (targetAttr.startsWith('👥') ? '👥 ' : '');
+        const suffix = targetAttr.endsWith('+') ? '+' : (targetAttr.endsWith('%') ? '%' : '');
+
+        let startTimestamp = null;
+        const duration = 1200;
+
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const easeProgress = 1 - (1 - progress) * (1 - progress);
+            const currentVal = Math.floor(easeProgress * target);
+            el.innerText = `${prefix}${currentVal.toLocaleString()}${suffix}`;
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            } else {
+                el.innerText = targetAttr;
+            }
+        };
+        window.requestAnimationFrame(step);
     }
 
     async fetchFooterData() {
@@ -520,54 +590,78 @@ class App {
                 this.navigate('home');
             }
         }
+
+        setTimeout(() => this.initScrollReveal(), 50);
     }
 
     renderHomePage() {
         return `
-            <!-- Full Width Dark Forest Green Hero Banner (Matching Reference Image) -->
-            <section class="hero-green-banner" style="background:#0f5132 !important; padding:5rem 1.5rem !important; text-align:center !important; color:#ffffff !important; width:100% !important; box-sizing:border-box !important; margin:0 !important;">
-                <div class="hero-green-container" style="max-width:900px !important; margin:0 auto !important;">
-                    <h1 class="hero-title-main" style="font-size:3.5rem !important; font-weight:800 !important; line-height:1.1 !important; color:#ffffff !important; letter-spacing:-1px !important; margin-bottom:0.8rem !important;">
-                        One Request.
-                        <span class="hero-title-gold" style="color:#f59e0b !important; display:block !important; margin-top:0.2rem !important;">Multiple Verified Offers.</span>
+            <!-- Full Width Dark Forest Green Hero Banner (Matching Spec Requirements) -->
+            <section class="hero-green-banner">
+                <div class="hero-green-container" style="max-width:900px !important; margin:0 auto !important; text-align:center;">
+                    <div class="hero-eyebrow-anim" style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(201, 161, 90, 0.2); border:1px solid rgba(201, 161, 90, 0.4); color:#C9A15A; padding:0.4rem 1.1rem; border-radius:999px; font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:1.2rem;">
+                        ✨ PLAN YOUR SACRED JOURNEY
+                    </div>
+
+                    <h1 class="hero-title-main" style="margin-bottom:0.8rem !important;">
+                        <span class="hero-h1-anim-1" style="display:block;">One Request.</span>
+                        <span class="hero-h1-anim-2" style="color:#C9A15A !important; display:block !important; margin-top:0.2rem !important;">Multiple Verified Offers.</span>
                     </h1>
-                    <p class="hero-subtext-clean" style="font-size:1.08rem !important; color:rgba(255, 255, 255, 0.92) !important; max-width:720px !important; margin:1.2rem auto 2.2rem !important; line-height:1.65 !important; font-weight:400 !important;">
+
+                    <p class="hero-subtext-anim" style="font-size:1.08rem !important; color:rgba(255, 255, 255, 0.92) !important; max-width:720px !important; margin:1.2rem auto 2.2rem !important; line-height:1.65 !important; font-weight:400 !important;">
                         Post one service request and let verified providers compete with transparent offers. Compare prices, choose confidently, and save time without sharing your personal details.
                     </p>
-                    <div class="hero-action-buttons" style="display:flex !important; justify-content:center !important; align-items:center !important; gap:1.2rem !important; flex-wrap:wrap !important;">
-                        <button class="btn-start-journey" onclick="app.scrollToRequirementForm()" style="background:#f59e0b !important; color:#0f172a !important; font-weight:800 !important; font-size:0.95rem !important; padding:0.85rem 2.2rem !important; border-radius:8px !important; border:none !important; cursor:pointer !important; box-shadow:0 4px 14px rgba(245,158,11,0.35) !important;">Start Your Journey</button>
-                        <button class="btn-my-requests" onclick="app.navigate('dashboard')" style="background:transparent !important; border:1.5px solid rgba(255,255,255,0.75) !important; color:#ffffff !important; font-weight:700 !important; font-size:0.95rem !important; padding:0.85rem 2.2rem !important; border-radius:8px !important; cursor:pointer !important;">My Requests</button>
+
+                    <!-- Trust Stats Row (With Count-Up Animation) -->
+                    <div class="hero-trust-anim" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5rem; max-width:640px; margin:0 auto 2.2rem; background:rgba(255,255,255,0.06); padding:1rem 1.5rem; border-radius:14px; border:1px solid rgba(255,255,255,0.12);">
+                        <div>
+                            <div class="count-up-val" data-target="500+" style="font-size:1.6rem; font-weight:800; color:#C9A15A;">500+</div>
+                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.8); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Verified Agents</div>
+                        </div>
+                        <div style="border-left:1px solid rgba(255,255,255,0.15); border-right:1px solid rgba(255,255,255,0.15);">
+                            <div class="count-up-val" data-target="100%" style="font-size:1.6rem; font-weight:800; color:#ffffff;">100%</div>
+                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.8); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Privacy Control</div>
+                        </div>
+                        <div>
+                            <div class="count-up-val" data-target="12500+" style="font-size:1.6rem; font-weight:800; color:#C9A15A;">12,500+</div>
+                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.8); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Happy Pilgrims</div>
+                        </div>
+                    </div>
+
+                    <div class="hero-cta-anim" style="display:flex !important; justify-content:center !important; align-items:center !important; gap:1.2rem !important; flex-wrap:wrap !important;">
+                        <button class="btn-start-journey" onclick="app.scrollToRequirementForm()">Start Your Journey</button>
+                        <button class="btn-my-requests" onclick="app.navigate('dashboard')" style="background:transparent !important; border:1.5px solid rgba(255,255,255,0.75) !important; color:#ffffff !important; font-weight:700 !important; font-size:0.95rem !important; padding:12px 28px !important; border-radius:8px !important; cursor:pointer !important;">My Requests</button>
                     </div>
                 </div>
             </section>
 
-            <!-- How It Works Section (Matching Reference Image) -->
-            <section class="how-it-works-section" style="padding:4.5rem 1.5rem !important; background:#f8fafc !important; text-align:center !important; border-bottom:1px solid #e2e8f0 !important;">
-                <div class="how-it-works-header" style="max-width:650px !important; margin:0 auto 3rem !important;">
-                    <h2 class="how-it-works-title" style="font-size:2.2rem !important; font-weight:800 !important; color:#0f172a !important; margin-bottom:0.5rem !important;">How It Works</h2>
-                    <p class="how-it-works-subtitle" style="font-size:0.95rem !important; color:#64748b !important;">Three simple steps to plan your Umrah with confidence</p>
+            <!-- How It Works Section (Staggered Scroll & Icon Bounce) -->
+            <section class="how-it-works-section" style="padding:var(--padding-section-desktop) 1.5rem !important; background:var(--bg-main) !important; text-align:center !important; border-bottom:1px solid var(--border-color) !important;">
+                <div class="how-it-works-header scroll-reveal" style="max-width:650px !important; margin:0 auto 3rem !important;">
+                    <h2 class="how-it-works-title" style="margin-bottom:0.5rem !important;">How It Works</h2>
+                    <p class="how-it-works-subtitle" style="font-size:0.95rem !important; color:var(--neutral-body) !important;">Three simple steps to plan your Umrah with confidence</p>
                 </div>
-                <div class="how-it-works-grid" style="display:flex !important; align-items:center !important; justify-content:center !important; gap:1rem !important; max-width:1140px !important; margin:0 auto !important; flex-wrap:wrap !important;">
-                    <div class="how-step-card" style="flex:1; min-width:260px; background:#ffffff !important; border-radius:16px !important; padding:2.5rem 1.8rem !important; box-shadow:0 10px 30px rgba(15,23,42,0.06) !important; border:1px solid #e2e8f0 !important; text-align:center !important;">
-                        <div class="how-step-icon" style="width:65px !important; height:65px !important; background:#dcfce7 !important; color:#047857 !important; border-radius:16px !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; font-weight:800 !important; margin:0 auto 1.5rem !important;">➕</div>
-                        <h4 style="font-size:1.2rem !important; font-weight:800 !important; color:#0f172a !important; margin-bottom:0.6rem !important;">Step 1: Submit Your Request</h4>
-                        <p style="font-size:0.9rem !important; color:#64748b !important; line-height:1.6 !important; margin:0 !important;">Tell us your travel dates, group size, budget, and preferences. Your details stay private and secure.</p>
+                <div class="how-it-works-grid" style="display:flex !important; align-items:center !important; justify-content:center !important; max-width:1140px !important; margin:0 auto !important; flex-wrap:wrap !important;">
+                    <div class="how-step-card scroll-reveal stagger-1" style="flex:1; min-width:260px; background:#ffffff !important; text-align:center !important;">
+                        <div class="how-step-icon" style="width:65px !important; height:65px !important; background:#E6F4EA !important; color:#0D3D2E !important; border-radius:16px !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; font-weight:800 !important; margin:0 auto 1.5rem !important;">➕</div>
+                        <h3 style="margin-bottom:0.6rem !important;">Step 1: Submit Request</h3>
+                        <p style="font-size:0.9rem !important; color:var(--neutral-body) !important; line-height:1.6 !important; margin:0 !important;">Tell us your travel dates, group size, budget, and preferences. Your details stay private and secure.</p>
                     </div>
 
-                    <div class="step-arrow-divider" style="font-size:2.2rem !important; color:#047857 !important; font-weight:800 !important; padding:0 0.5rem !important;">➔</div>
+                    <div class="step-arrow-divider flow-connector-line" style="font-size:2.2rem !important; color:var(--accent-gold) !important; font-weight:800 !important; padding:0 0.5rem !important;">➔</div>
 
-                    <div class="how-step-card" style="flex:1; min-width:260px; background:#ffffff !important; border-radius:16px !important; padding:2.5rem 1.8rem !important; box-shadow:0 10px 30px rgba(15,23,42,0.06) !important; border:1px solid #e2e8f0 !important; text-align:center !important;">
-                        <div class="how-step-icon" style="width:65px !important; height:65px !important; background:#dcfce7 !important; color:#047857 !important; border-radius:16px !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; font-weight:800 !important; margin:0 auto 1.5rem !important;">↙️</div>
-                        <h4 style="font-size:1.2rem !important; font-weight:800 !important; color:#0f172a !important; margin-bottom:0.6rem !important;">Step 2: Receive Offers</h4>
-                        <p style="font-size:0.9rem !important; color:#64748b !important; line-height:1.6 !important; margin:0 !important;">Verified travel agents review your request and send tailored offers that match your needs and budget.</p>
+                    <div class="how-step-card scroll-reveal stagger-2" style="flex:1; min-width:260px; background:#ffffff !important; text-align:center !important;">
+                        <div class="how-step-icon" style="width:65px !important; height:65px !important; background:#FEF3C7 !important; color:#C9A15A !important; border-radius:16px !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; font-weight:800 !important; margin:0 auto 1.5rem !important;">↙️</div>
+                        <h3 style="margin-bottom:0.6rem !important;">Step 2: Receive Offers</h3>
+                        <p style="font-size:0.9rem !important; color:var(--neutral-body) !important; line-height:1.6 !important; margin:0 !important;">Verified travel agents review your request and send tailored offers that match your needs and budget.</p>
                     </div>
 
-                    <div class="step-arrow-divider" style="font-size:2.2rem !important; color:#047857 !important; font-weight:800 !important; padding:0 0.5rem !important;">➔</div>
+                    <div class="step-arrow-divider flow-connector-line" style="font-size:2.2rem !important; color:var(--accent-gold) !important; font-weight:800 !important; padding:0 0.5rem !important;">➔</div>
 
-                    <div class="how-step-card" style="flex:1; min-width:260px; background:#ffffff !important; border-radius:16px !important; padding:2.5rem 1.8rem !important; box-shadow:0 10px 30px rgba(15,23,42,0.06) !important; border:1px solid #e2e8f0 !important; text-align:center !important;">
-                        <div class="how-step-icon" style="width:65px !important; height:65px !important; background:#dcfce7 !important; color:#047857 !important; border-radius:16px !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; font-weight:800 !important; margin:0 auto 1.5rem !important;">🛡️</div>
-                        <h4 style="font-size:1.2rem !important; font-weight:800 !important; color:#0f172a !important; margin-bottom:0.6rem !important;">Step 3: Choose Package</h4>
-                        <p style="font-size:0.9rem !important; color:#64748b !important; line-height:1.6 !important; margin:0 !important;">Compare offers, check details, and confidently select the option that fits your journey perfectly.</p>
+                    <div class="how-step-card scroll-reveal stagger-3" style="flex:1; min-width:260px; background:#ffffff !important; text-align:center !important;">
+                        <div class="how-step-icon" style="width:65px !important; height:65px !important; background:#E6F4EA !important; color:#16A34A !important; border-radius:16px !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; font-weight:800 !important; margin:0 auto 1.5rem !important;">🛡️</div>
+                        <h3 style="margin-bottom:0.6rem !important;">Step 3: Choose Package</h3>
+                        <p style="font-size:0.9rem !important; color:var(--neutral-body) !important; line-height:1.6 !important; margin:0 !important;">Compare offers, check details, and confidently select the option that fits your journey perfectly.</p>
                     </div>
                 </div>
             </section>
