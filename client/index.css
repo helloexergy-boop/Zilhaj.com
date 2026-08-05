@@ -2830,9 +2830,24 @@ p, body {
 /* 6. HERO SECTION FULL ANIMATION SEQUENCE & PARALLAX MESH */
 .hero-green-banner {
     background: linear-gradient(135deg, #0D3D2E 0%, #145C42 60%, #064e3b 100%) !important;
-    padding: var(--padding-section-desktop) 24px !important;
+    min-height: calc(100vh - 65px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 3rem 1.5rem !important;
     position: relative;
     overflow: hidden;
+    box-sizing: border-box !important;
+}
+
+@keyframes bounceArrow {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(8px); }
+    60% { transform: translateY(4px); }
+}
+.bounce-arrow {
+    animation: bounceArrow 2s infinite;
 }
 
 .hero-green-banner::before {

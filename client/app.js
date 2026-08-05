@@ -632,6 +632,12 @@ class App {
                         <button class="btn-start-journey" onclick="app.scrollToRequirementForm()">Start Your Journey</button>
                         <button class="btn-my-requests" onclick="app.navigate('dashboard')" style="background:transparent !important; border:1.5px solid rgba(255,255,255,0.75) !important; color:#ffffff !important; font-weight:700 !important; font-size:0.95rem !important; padding:12px 28px !important; border-radius:8px !important; cursor:pointer !important;">My Requests</button>
                     </div>
+
+                    <!-- Scroll Down Indicator Arrow -->
+                    <div class="scroll-down-indicator" onclick="window.scrollTo({top: window.innerHeight - 65, behavior: 'smooth'})" style="margin-top:2.2rem; cursor:pointer; opacity:0.85; transition:all 0.3s ease;">
+                        <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.3rem; color:#ffffff;">Scroll to Explore</span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A15A" stroke-width="2.5" class="bounce-arrow"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                    </div>
                 </div>
             </section>
 
