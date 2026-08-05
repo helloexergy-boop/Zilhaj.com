@@ -101,6 +101,7 @@ class App {
         this.initTheme();
         this.initNavbarScroll();
         this.initScrollReveal();
+        this.initHeroVideoPlaylist();
     }
 
     initTheme() {
@@ -141,6 +142,65 @@ class App {
                 moonIcon.style.display = 'none';
             }
         }
+    }
+
+    initHeroVideoPlaylist() {
+        // ============================================================================
+        // HERO VIDEO PLAYLIST CONFIGURATION
+        // Add or replace your MP4 / WebM video URLs in the array below:
+        // ============================================================================
+        this.heroVideos = [
+            'https://assets.mixkit.co/videos/preview/mixkit-grand-mosque-of-mecca-at-night-42173-large.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-mosque-42171-large.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-mosque-architecture-at-dusk-42172-large.mp4'
+        ];
+        this.currentVideoIndex = 0;
+
+        setTimeout(() => {
+            const videoElement = document.getElementById('heroBgVideo');
+            if (!videoElement) return;
+
+            videoElement.onended = () => {
+                this.playNextHeroVideo();
+            };
+        }, 300);
+    }
+
+    playNextHeroVideo() {
+        if (!this.heroVideos || this.heroVideos.length === 0) return;
+        this.currentVideoIndex = (this.currentVideoIndex + 1) % this.heroVideos.length;
+        this.loadHeroVideo(this.currentVideoIndex);
+    }
+
+    playPrevHeroVideo() {
+        if (!this.heroVideos || this.heroVideos.length === 0) return;
+        this.currentVideoIndex = (this.currentVideoIndex - 1 + this.heroVideos.length) % this.heroVideos.length;
+        this.loadHeroVideo(this.currentVideoIndex);
+    }
+
+    playHeroVideoIndex(index) {
+        if (!this.heroVideos || index >= this.heroVideos.length) return;
+        this.currentVideoIndex = index;
+        this.loadHeroVideo(index);
+    }
+
+    loadHeroVideo(index) {
+        const videoElement = document.getElementById('heroBgVideo');
+        if (!videoElement) return;
+
+        videoElement.src = this.heroVideos[index];
+        videoElement.play().catch(e => console.log('Video play policy:', e));
+        this.updateVideoDots();
+    }
+
+    updateVideoDots() {
+        document.querySelectorAll('#videoSlideDots .video-slide-dot').forEach((dot, idx) => {
+            if (idx === this.currentVideoIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
     }
 
     initNavbarScroll() {
@@ -637,14 +697,26 @@ class App {
 
     renderHomePage() {
         return `
-            <!-- Full Screen (100vh) Hero Banner with Video Background Overlay -->
+            <!-- Full Screen (100vh) Video Slideshow Hero Banner -->
             <section class="hero-green-banner fullscreen-hero">
-                <!-- Video Background Support (Paste your MP4 / WebM video link in the src attribute below) -->
-                <video class="hero-bg-video" autoplay loop muted playsinline poster="https://images.unsplash.com/photo-1591604466107-ec97de577aff">
-                    <source src="${this.state.heroVideoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-grand-mosque-of-mecca-at-night-42173-large.mp4'}" type="video/mp4">
+                <!-- Video Slideshow Player (Switches automatically when video ends) -->
+                <video class="hero-bg-video" id="heroBgVideo" autoplay muted playsinline poster="https://images.unsplash.com/photo-1591604466107-ec97de577aff">
+                    <source src="https://assets.mixkit.co/videos/preview/mixkit-grand-mosque-of-mecca-at-night-42173-large.mp4" type="video/mp4">
                 </video>
-                <!-- Dark Overlay Shield for Premium Contrast -->
+
+                <!-- Dark Overlay Shield -->
                 <div class="hero-video-overlay"></div>
+
+                <!-- Video Slideshow Controls & Progress Dots -->
+                <div class="video-slide-controls">
+                    <button class="video-arrow-btn" onclick="app.playPrevHeroVideo()" title="Previous Video">❮</button>
+                    <div class="video-slide-dots" id="videoSlideDots">
+                        <span class="video-slide-dot active" onclick="app.playHeroVideoIndex(0)" title="Video 1"></span>
+                        <span class="video-slide-dot" onclick="app.playHeroVideoIndex(1)" title="Video 2"></span>
+                        <span class="video-slide-dot" onclick="app.playHeroVideoIndex(2)" title="Video 3"></span>
+                    </div>
+                    <button class="video-arrow-btn" onclick="app.playNextHeroVideo()" title="Next Video">❯</button>
+                </div>
 
                 <div class="hero-green-container" style="max-width:920px !important; margin:0 auto !important; text-align:center; position:relative; z-index:2;">
                     <div class="hero-eyebrow-anim" style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(229, 193, 88, 0.22); border:1px solid rgba(229, 193, 88, 0.45); color:#E5C158; padding:0.45rem 1.2rem; border-radius:999px; font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:1.4rem;">
