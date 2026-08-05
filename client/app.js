@@ -3,8 +3,8 @@
  * Journey of Faith, Comfort & Blessings
  */
 
-const API_BASE = window.API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? 'http://localhost:8080/api' 
+const API_BASE = window.API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:8080/api'
     : '/api');
 
 // ============================================================================
@@ -100,7 +100,6 @@ class App {
 
         this.initNavbarScroll();
         this.initScrollReveal();
-        this.initHeroVideoPlaylist();
     }
 
     initHeroVideoPlaylist() {
@@ -109,20 +108,63 @@ class App {
         // Add or replace your MP4 / WebM video URLs in the array below:
         // ============================================================================
         this.heroVideos = [
-            'https://assets.mixkit.co/videos/preview/mixkit-grand-mosque-of-mecca-at-night-42173-large.mp4',
-            'https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-mosque-42171-large.mp4',
-            'https://assets.mixkit.co/videos/preview/mixkit-mosque-architecture-at-dusk-42172-large.mp4'
+            'hero-video-1.mp4',
+            'hero-video-2.mp4',
+            'hero-video-3.mp4',
+            'hero-video-4.mp4'
         ];
+
         this.currentVideoIndex = 0;
+        this._heroVideoActive = 'A'; // Track which video element is on top
 
-        setTimeout(() => {
-            const videoElement = document.getElementById('heroBgVideo');
-            if (!videoElement) return;
+        const vidA = document.getElementById('heroBgVideoA');
+        const vidB = document.getElementById('heroBgVideoB');
+        if (!vidA || !vidB) return;
 
-            videoElement.onended = () => {
-                this.playNextHeroVideo();
-            };
-        }, 300);
+        [vidA, vidB].forEach(v => {
+            v.muted = true;
+            v.playsInline = true;
+            v.removeAttribute('poster');
+        });
+
+        // Start first video on A instantly
+        vidA.src = this.heroVideos[0];
+        vidA.style.opacity = '1';
+        vidA.style.zIndex = '1';
+        vidB.style.opacity = '0';
+        vidB.style.zIndex = '0';
+
+        vidA.play().catch(e => console.log('Autoplay:', e));
+
+        // Preload next video into B silently
+        const preloadNext = () => {
+            const nextIndex = (this.currentVideoIndex + 1) % this.heroVideos.length;
+            const dormant = this._heroVideoActive === 'A' ? vidB : vidA;
+            dormant.src = this.heroVideos[nextIndex];
+            dormant.load();
+        };
+
+        vidA.onended = () => this.playNextHeroVideo();
+        vidA.ontimeupdate = function() {
+            // Preload next ~3s before current ends
+            if (this.duration && this.currentTime >= this.duration - 3) {
+                this.ontimeupdate = null;
+                preloadNext();
+            }
+        };
+        vidB.onended = () => this.playNextHeroVideo();
+        vidB.ontimeupdate = function() {
+            if (this.duration && this.currentTime >= this.duration - 3) {
+                this.ontimeupdate = null;
+                preloadNext();
+            }
+        };
+
+        vidA.onerror = () => { console.warn('Video A error'); this.playNextHeroVideo(); };
+        vidB.onerror = () => { console.warn('Video B error'); this.playNextHeroVideo(); };
+
+        preloadNext();
+        this.updateVideoDots();
     }
 
     playNextHeroVideo() {
@@ -144,11 +186,67 @@ class App {
     }
 
     loadHeroVideo(index) {
-        const videoElement = document.getElementById('heroBgVideo');
-        if (!videoElement) return;
+        const vidA = document.getElementById('heroBgVideoA');
+        const vidB = document.getElementById('heroBgVideoB');
+        if (!vidA || !vidB) return;
 
-        videoElement.src = this.heroVideos[index];
-        videoElement.play().catch(e => console.log('Video play policy:', e));
+        let videoSrc = this.heroVideos[index];
+        if (videoSrc && videoSrc.startsWith('http')) {
+            videoSrc = `/api/video-proxy?url=${encodeURIComponent(videoSrc)}`;
+        }
+
+        const incoming = this._heroVideoActive === 'A' ? vidB : vidA;
+        const outgoing = this._heroVideoActive === 'A' ? vidA : vidB;
+        this._heroVideoActive = this._heroVideoActive === 'A' ? 'B' : 'A';
+
+        // Load new video into the dormant layer (already preloaded in most cases)
+        if (incoming.src !== window.location.origin + '/' + videoSrc && !videoSrc.startsWith('/api')) {
+            incoming.src = videoSrc;
+            incoming.load();
+        }
+
+        incoming.muted = true;
+        incoming.playsInline = true;
+        incoming.removeAttribute('poster');
+
+        // Bring incoming on top and play, then fade out the old
+        incoming.style.zIndex = '2';
+        outgoing.style.zIndex = '1';
+
+        const startCrossfade = () => {
+            incoming.style.opacity = '1';
+            outgoing.style.opacity = '0';
+            setTimeout(() => {
+                outgoing.pause();
+                outgoing.style.zIndex = '0';
+            }, 700);
+        };
+
+        const playPromise = incoming.play();
+        if (playPromise !== undefined) {
+            playPromise.then(startCrossfade).catch(e => {
+                startCrossfade();
+                console.log('Video play info:', e);
+            });
+        } else {
+            startCrossfade();
+        }
+
+        // Set up next preload on the new active video
+        const preloadNext = () => {
+            const nextIndex = (this.currentVideoIndex + 1) % this.heroVideos.length;
+            const dormant = this._heroVideoActive === 'A' ? vidB : vidA;
+            dormant.src = this.heroVideos[nextIndex];
+            dormant.load();
+        };
+        incoming.ontimeupdate = function() {
+            if (this.duration && this.currentTime >= this.duration - 3) {
+                this.ontimeupdate = null;
+                preloadNext();
+            }
+        };
+        incoming.onended = () => this.playNextHeroVideo();
+
         this.updateVideoDots();
     }
 
@@ -166,7 +264,7 @@ class App {
         window.addEventListener('scroll', () => {
             const navbar = document.getElementById('navbar');
             if (navbar) {
-                if (window.scrollY > 30) {
+                if (window.scrollY > 20) {
                     navbar.classList.add('scrolled');
                 } else {
                     navbar.classList.remove('scrolled');
@@ -242,12 +340,12 @@ class App {
             if (meccaRes.ok && madinahRes.ok) {
                 const meccaData = await meccaRes.json();
                 const madinahData = await madinahRes.json();
-                
+
                 if (Array.isArray(meccaData) && meccaData.length > 0 && Array.isArray(madinahData) && madinahData.length > 0) {
                     const meccaTemp = Math.round(meccaData[0].Temperature.Metric.Value);
                     const madinahTemp = Math.round(madinahData[0].Temperature.Metric.Value);
                     const humidity = meccaData[0].RelativeHumidity || '--';
-                    
+
                     let wind = '--';
                     if (meccaData[0].Wind && meccaData[0].Wind.Speed && meccaData[0].Wind.Speed.Metric) {
                         wind = Math.round(meccaData[0].Wind.Speed.Metric.Value);
@@ -281,10 +379,10 @@ class App {
                 // Increment by 1 for this session
                 baseCount += 1;
                 localStorage.setItem('umrah_visitor_count', baseCount);
-                
+
                 // Convert to array of digits and pad to 7 digits
                 const digitArray = baseCount.toString().padStart(7, '0').split('');
-                
+
                 visitorContainer.innerHTML = digitArray.map(digit => `<div class="counter-digit">${digit}</div>`).join('');
             }
         } catch (e) {
@@ -460,10 +558,10 @@ class App {
                 await this.fetchUserData();
                 this.showSuccessModal(
                     `Welcome back, ${userObj.name}! 🌙`,
-                    'You have successfully logged in. Taking you to your dashboard.',
-                    () => this.navigate('dashboard')
+                    'You have successfully logged in. Taking you to the home page.',
+                    () => this.navigate('home')
                 );
-                setTimeout(() => this.navigate('dashboard'), 4000);
+                setTimeout(() => this.navigate('home'), 4000);
             }
         } else {
             this.showToast(res?.message || 'Invalid email or password', 'error');
@@ -503,10 +601,10 @@ class App {
         this.closeModal();
         this.showSuccessModal(
             `Account Created! Welcome, ${newUserObj.name}! 🎉`,
-            'Your account has been set up successfully. Taking you to your dashboard.',
-            () => this.navigate('dashboard')
+            'Your account has been set up successfully. Taking you to the home page.',
+            () => this.navigate('home')
         );
-        setTimeout(() => this.navigate('dashboard'), 4000);
+        setTimeout(() => this.navigate('home'), 4000);
     }
 
     async loginWithGoogle() {
@@ -539,9 +637,9 @@ class App {
             this.showSuccessModal(
                 `Signed in with Google! 🟢`,
                 `Welcome back, ${googleUser.name}! Your account has been authenticated successfully.`,
-                () => this.navigate('dashboard')
+                () => this.navigate('home')
             );
-            setTimeout(() => this.navigate('dashboard'), 4000);
+            setTimeout(() => this.navigate('home'), 4000);
         }, 600);
     }
 
@@ -631,6 +729,7 @@ class App {
 
         if (page === 'home' || page === 'packages') {
             main.innerHTML = this.renderHomePage();
+            this.initHeroVideoPlaylist();
         } else if (page === 'guides') {
             main.innerHTML = this.renderGuidesPage();
         } else if (page === 'trust') {
@@ -658,65 +757,55 @@ class App {
         return `
             <!-- Full Screen (100vh) Video Slideshow Hero Banner -->
             <section class="hero-green-banner fullscreen-hero">
-                <!-- Video Background Player (Auto-switches to next video on end) -->
-                <video class="hero-bg-video" id="heroBgVideo" autoplay muted playsinline poster="https://images.unsplash.com/photo-1591604466107-ec97de577aff">
-                    <source src="https://assets.mixkit.co/videos/preview/mixkit-grand-mosque-of-mecca-at-night-42173-large.mp4" type="video/mp4">
-                </video>
 
-                <!-- Dark Overlay Shield -->
+                <!-- Dual Video Crossfade Background (A/B stacked, seamless transition) -->
+                <video class="hero-bg-video hero-bg-video-layer" id="heroBgVideoA" autoplay muted playsinline preload="auto" src="hero-video-1.mp4" style="opacity:1; z-index:1;"></video>
+                <video class="hero-bg-video hero-bg-video-layer" id="heroBgVideoB" muted playsinline preload="auto" style="opacity:0; z-index:0;"></video>
+
+                <!-- Cinematic Gradient Overlay -->
                 <div class="hero-video-overlay"></div>
 
-                <!-- Video Slideshow Controls & Progress Dots -->
-                <div class="video-slide-controls">
-                    <button class="video-arrow-btn" onclick="app.playPrevHeroVideo()" title="Previous Video">❮</button>
-                    <div class="video-slide-dots" id="videoSlideDots">
-                        <span class="video-slide-dot active" onclick="app.playHeroVideoIndex(0)" title="Video 1"></span>
-                        <span class="video-slide-dot" onclick="app.playHeroVideoIndex(1)" title="Video 2"></span>
-                        <span class="video-slide-dot" onclick="app.playHeroVideoIndex(2)" title="Video 3"></span>
-                    </div>
-                    <button class="video-arrow-btn" onclick="app.playNextHeroVideo()" title="Next Video">❯</button>
-                </div>
+                <!-- Hero Content -->
+                <div class="hero-green-container" style="max-width:860px !important; margin:0 auto !important; text-align:center; position:relative; z-index:4;">
 
-                <div class="hero-green-container" style="max-width:900px !important; margin:0 auto !important; text-align:center; position:relative; z-index:2;">
-                    <div class="hero-eyebrow-anim" style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(201, 161, 90, 0.2); border:1px solid rgba(201, 161, 90, 0.4); color:#C9A15A; padding:0.4rem 1.1rem; border-radius:999px; font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:1.2rem;">
-                        ✨ PLAN YOUR SACRED JOURNEY
+                    <!-- Eyebrow Badge -->
+                    <div class="hero-eyebrow-anim" style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(0,0,0,0.45); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid rgba(212,175,90,0.65); color:#F3D98A; padding:0.48rem 1.3rem; border-radius:999px; font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:1.4rem; text-shadow:0 1px 4px rgba(0,0,0,0.8); box-shadow:0 4px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);">
+                        ✦ PLAN YOUR SACRED JOURNEY
                     </div>
 
-                    <h1 class="hero-title-main" style="margin-bottom:0.8rem !important;">
-                        <span class="hero-h1-anim-1" style="display:block;">One Request.</span>
-                        <span class="hero-h1-anim-2" style="color:#C9A15A !important; display:block !important; margin-top:0.2rem !important;">Multiple Verified Offers.</span>
+                    <!-- Main Headline -->
+                    <h1 class="hero-title-main" style="margin-bottom:1rem !important; line-height:1.1 !important;">
+                        <span class="hero-h1-anim-1" style="display:block; font-size:clamp(2.2rem, 5.5vw, 4rem); font-weight:900; letter-spacing:-0.02em; color:#FFFFFF; text-shadow:0 2px 40px rgba(0,0,0,0.9), 0 1px 6px rgba(0,0,0,0.95);">One Request.</span>
+                        <span class="hero-h1-anim-2" style="display:block; font-size:clamp(2.2rem, 5.5vw, 4rem); font-weight:900; letter-spacing:-0.02em; margin-top:0.1rem; background:linear-gradient(90deg,#F9E07A 0%,#E8B84B 40%,#FFD580 70%,#C9953A 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; filter:drop-shadow(0 3px 12px rgba(232,184,75,0.55));">Multiple Verified Offers.</span>
                     </h1>
 
-                    <p class="hero-subtext-anim" style="font-size:1.08rem !important; color:rgba(255, 255, 255, 0.92) !important; max-width:720px !important; margin:1.2rem auto 2.2rem !important; line-height:1.65 !important; font-weight:400 !important;">
-                        Post one service request and let verified providers compete with transparent offers. Compare prices, choose confidently, and save time without sharing your personal details.
+                    <!-- Sub Text -->
+                    <p class="hero-subtext-anim" style="font-size:1.08rem !important; color:rgba(255,255,255,0.9) !important; max-width:680px !important; margin:0 auto 2.4rem !important; line-height:1.7 !important; font-weight:400 !important; text-shadow:0 1px 12px rgba(0,0,0,0.9);">
+                        Post one request and receive transparent offers from verified Umrah travel providers. Compare, choose, and save—without sharing your personal details.
                     </p>
 
-                    <!-- Trust Stats Row (With Count-Up Animation) -->
-                    <div class="hero-trust-anim" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5rem; max-width:640px; margin:0 auto 2.2rem; background:rgba(255,255,255,0.06); padding:1rem 1.5rem; border-radius:14px; border:1px solid rgba(255,255,255,0.12);">
-                        <div>
-                            <div class="count-up-val" data-target="500+" style="font-size:1.6rem; font-weight:800; color:#C9A15A;">500+</div>
-                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.8); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Verified Agents</div>
+                    <!-- Trust Stats (Glassmorphism Card) -->
+                    <div class="hero-trust-anim" style="display:grid; grid-template-columns:repeat(3,1fr); gap:0; max-width:580px; margin:0 auto 2.4rem; background:rgba(0,0,0,0.42); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); border-radius:16px; border:1px solid rgba(212,175,90,0.35); box-shadow:0 16px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06); overflow:hidden;">
+                        <div style="padding:1rem 0.5rem;">
+                            <div class="count-up-val" data-target="500+" style="font-size:1.8rem; font-weight:800; color:#F9E07A; letter-spacing:-0.01em; text-shadow:0 2px 10px rgba(249,224,122,0.4);">500+</div>
+                            <div style="font-size:0.72rem; color:rgba(255,255,255,0.75); font-weight:600; text-transform:uppercase; letter-spacing:0.08em; margin-top:0.2rem;">Verified Agents</div>
                         </div>
-                        <div style="border-left:1px solid rgba(255,255,255,0.15); border-right:1px solid rgba(255,255,255,0.15);">
-                            <div class="count-up-val" data-target="100%" style="font-size:1.6rem; font-weight:800; color:#ffffff;">100%</div>
-                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.8); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Privacy Control</div>
+                        <div style="padding:1rem 0.5rem; border-left:1px solid rgba(255,255,255,0.1); border-right:1px solid rgba(255,255,255,0.1);">
+                            <div class="count-up-val" data-target="100%" style="font-size:1.8rem; font-weight:800; color:#FFFFFF; letter-spacing:-0.01em;">100%</div>
+                            <div style="font-size:0.72rem; color:rgba(255,255,255,0.75); font-weight:600; text-transform:uppercase; letter-spacing:0.08em; margin-top:0.2rem;">Privacy Control</div>
                         </div>
-                        <div>
-                            <div class="count-up-val" data-target="12500+" style="font-size:1.6rem; font-weight:800; color:#C9A15A;">12,500+</div>
-                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.8); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Happy Customers</div>
+                        <div style="padding:1rem 0.5rem;">
+                            <div class="count-up-val" data-target="12500+" style="font-size:1.8rem; font-weight:800; color:#F9E07A; letter-spacing:-0.01em; text-shadow:0 2px 10px rgba(249,224,122,0.4);">12,500+</div>
+                            <div style="font-size:0.72rem; color:rgba(255,255,255,0.75); font-weight:600; text-transform:uppercase; letter-spacing:0.08em; margin-top:0.2rem;">Happy Customers</div>
                         </div>
                     </div>
 
-                    <div class="hero-cta-anim" style="display:flex !important; justify-content:center !important; align-items:center !important; gap:1.2rem !important; flex-wrap:wrap !important;">
-                        <button class="btn-start-journey" onclick="app.scrollToRequirementForm()">Start Your Journey</button>
-                        <button class="btn-my-requests" onclick="app.navigate('dashboard')" style="background:transparent !important; border:1.5px solid rgba(255,255,255,0.75) !important; color:#ffffff !important; font-weight:700 !important; font-size:0.95rem !important; padding:12px 28px !important; border-radius:8px !important; cursor:pointer !important;">My Requests</button>
+                    <!-- CTA Buttons -->
+                    <div class="hero-cta-anim" style="display:flex; justify-content:center; align-items:center; gap:1rem; flex-wrap:wrap;">
+                        <button onclick="app.scrollToRequirementForm()" style="background:linear-gradient(135deg,#E8B84B 0%,#C9953A 100%); color:#0A1A12; font-weight:800; font-size:0.95rem; padding:14px 32px; border-radius:10px; border:none; cursor:pointer; letter-spacing:0.02em; box-shadow:0 6px 28px rgba(232,184,75,0.55), 0 2px 8px rgba(0,0,0,0.3); transition:all 0.25s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 36px rgba(232,184,75,0.65),0 3px 12px rgba(0,0,0,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(232,184,75,0.55),0 2px 8px rgba(0,0,0,0.3)'">✦ Start Your Journey</button>
+                        <button onclick="app.navigate('dashboard')" style="background:rgba(255,255,255,0.08); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); color:#FFFFFF; font-weight:700; font-size:0.95rem; padding:13px 30px; border-radius:10px; border:1.5px solid rgba(255,255,255,0.5); cursor:pointer; letter-spacing:0.02em; box-shadow:0 4px 20px rgba(0,0,0,0.35); transition:all 0.25s ease;" onmouseover="this.style.background='rgba(255,255,255,0.16)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.transform=''">My Requests</button>
                     </div>
 
-                    <!-- Scroll Down Indicator Arrow -->
-                    <div class="scroll-down-indicator" onclick="window.scrollTo({top: window.innerHeight - 65, behavior: 'smooth'})" style="margin-top:2.2rem; cursor:pointer; opacity:0.85; transition:all 0.3s ease;">
-                        <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.3rem; color:#ffffff;">Scroll to Explore</span>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A15A" stroke-width="2.5" class="bounce-arrow"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
-                    </div>
                 </div>
             </section>
 
@@ -753,16 +842,16 @@ class App {
 
             <!-- Live Request Submission Container -->
             <div id="requestFormAnchor" style="max-width:950px; margin:3.5rem auto; padding:0 1.5rem;">
-                ${this.state.currentUser?.role === 'ROLE_ADMIN' 
-                    ? `
+                ${this.state.currentUser?.role === 'ROLE_ADMIN'
+                ? `
                         <div style="background:#fefce8; border:1.5px solid #fde68a; border-radius:14px; padding:2rem; text-align:center;">
                             <h3 style="color:#854d0e; margin-bottom:0.8rem;">👑 Administrator Mode</h3>
                             <p style="color:#713f12; margin-bottom:1.2rem;">You are logged in as an Administrator. You cannot submit pilgrim travel requests.</p>
                             <button class="btn btn-gold" onclick="app.navigate('admin')">Go to Admin Dashboard</button>
                         </div>
-                      ` 
-                    : this.renderCustomRequirementForm()
-                }
+                      `
+                : this.renderCustomRequirementForm()
+            }
             </div>
         `;
     }
@@ -1058,23 +1147,23 @@ class App {
             el.classList.remove('active');
             el.style.display = 'none';
         });
-        
+
         const currentDotEl = document.getElementById(`dot${this.currentFormStep}`);
-        if(currentDotEl) {
+        if (currentDotEl) {
             currentDotEl.classList.remove('active');
             currentDotEl.classList.add('completed');
         }
-        
+
         this.currentFormStep = step;
-        
+
         const newStepEl = document.getElementById(`step${this.currentFormStep}`);
         const newDotEl = document.getElementById(`dot${this.currentFormStep}`);
-        if(newStepEl) {
+        if (newStepEl) {
             newStepEl.classList.add('active');
             newStepEl.style.display = 'block';
         }
-        if(newDotEl) newDotEl.classList.add('active');
-        
+        if (newDotEl) newDotEl.classList.add('active');
+
         const anchor = document.getElementById('requestFormAnchor');
         if (anchor) {
             anchor.scrollIntoView({ behavior: 'smooth' });
@@ -1087,20 +1176,20 @@ class App {
             el.classList.remove('active');
             el.style.display = 'none';
         });
-        
+
         const currentDotEl = document.getElementById(`dot${this.currentFormStep}`);
-        if(currentDotEl) currentDotEl.classList.remove('active');
-        
+        if (currentDotEl) currentDotEl.classList.remove('active');
+
         this.currentFormStep = step;
-        
+
         const newStepEl = document.getElementById(`step${this.currentFormStep}`);
         const newDotEl = document.getElementById(`dot${this.currentFormStep}`);
-        if(newStepEl) {
+        if (newStepEl) {
             newStepEl.classList.add('active');
             newStepEl.style.display = 'block';
         }
-        if(newDotEl) newDotEl.classList.remove('completed');
-        
+        if (newDotEl) newDotEl.classList.remove('completed');
+
         const anchor = document.getElementById('requestFormAnchor');
         if (anchor) {
             anchor.scrollIntoView({ behavior: 'smooth' });
@@ -1252,19 +1341,19 @@ class App {
                     : '';
                 return '<div style="background:white; border-radius:14px; padding:1.5rem; border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">' +
                     '<div>' +
-                        '<div style="display:flex; align-items:center; gap:0.8rem; margin-bottom:0.5rem;">' +
-                            '<span class="status-badge status-' + statusClass + '">' + (b.status || 'PENDING') + '</span>' +
-                            '<span style="font-size:0.85rem; color:var(--text-muted);">Booking Ref: ' + b.id + '</span>' +
-                        '</div>' +
-                        '<h4 style="font-size:1.2rem;">' + this.escapeHtml(b.packageTitle) + '</h4>' +
-                        '<p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.2rem;">Agency: ' + this.escapeHtml(b.agentName || 'UMRAH TRAVELS') + ' | Travel Date: ' + (b.travelDate || 'TBD') + '</p>' +
-                        '<p style="font-size:1.2rem; font-weight:800; color:var(--primary); margin-top:0.4rem;">Total Paid: ' + this.formatCurrency(b.totalPrice) + '</p>' +
+                    '<div style="display:flex; align-items:center; gap:0.8rem; margin-bottom:0.5rem;">' +
+                    '<span class="status-badge status-' + statusClass + '">' + (b.status || 'PENDING') + '</span>' +
+                    '<span style="font-size:0.85rem; color:var(--text-muted);">Booking Ref: ' + b.id + '</span>' +
+                    '</div>' +
+                    '<h4 style="font-size:1.2rem;">' + this.escapeHtml(b.packageTitle) + '</h4>' +
+                    '<p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.2rem;">Agency: ' + this.escapeHtml(b.agentName || 'UMRAH TRAVELS') + ' | Travel Date: ' + (b.travelDate || 'TBD') + '</p>' +
+                    '<p style="font-size:1.2rem; font-weight:800; color:var(--primary); margin-top:0.4rem;">Total Paid: ' + this.formatCurrency(b.totalPrice) + '</p>' +
                     '</div>' +
                     '<div style="display:flex; gap:0.8rem;">' +
-                        '<a href="' + API_BASE + '/invoice/' + b.id + '" target="_blank" class="btn btn-outline btn-sm">📄 Download PDF</a>' +
-                        cancelBtn +
+                    '<a href="' + API_BASE + '/invoice/' + b.id + '" target="_blank" class="btn btn-outline btn-sm">📄 Download PDF</a>' +
+                    cancelBtn +
                     '</div>' +
-                '</div>';
+                    '</div>';
             }).join('');
             bookingRows = '<div style="display:flex; flex-direction:column; gap:1.5rem;">' + bookingRows + '</div>';
         } else {
@@ -1273,22 +1362,22 @@ class App {
                 '<h3>No bookings yet</h3>' +
                 '<p style="margin:0.5rem 0 1.5rem;">Your confirmed travel bookings will appear here.</p>' +
                 '<button class="btn btn-primary" onclick="app.navigate(\'home\')">Browse Packages</button>' +
-            '</div>';
+                '</div>';
         }
 
         return '<div class="main-container" style="max-width:1000px; margin:3rem auto; padding:0 1.5rem;">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">' +
-                '<div>' +
-                    '<h2 style="margin:0;">🎫 My Bookings &amp; Travel Tickets</h2>' +
-                    '<p style="color:#64748b; font-size:0.9rem; margin-top:0.3rem;">View your reservations, payment receipts, and download official PDF travel vouchers.</p>' +
-                '</div>' +
-                '<div style="display:flex; gap:0.6rem;">' +
-                    '<button class="btn btn-outline btn-sm" onclick="app.navigate(\'dashboard\')">← Back to Dashboard</button>' +
-                    '<button class="btn btn-outline btn-sm" onclick="app.navigate(\'home\')">← Back to Home</button>' +
-                '</div>' +
+            '<div>' +
+            '<h2 style="margin:0;">🎫 My Bookings &amp; Travel Tickets</h2>' +
+            '<p style="color:#64748b; font-size:0.9rem; margin-top:0.3rem;">View your reservations, payment receipts, and download official PDF travel vouchers.</p>' +
+            '</div>' +
+            '<div style="display:flex; gap:0.6rem;">' +
+            '<button class="btn btn-outline btn-sm" onclick="app.navigate(\'dashboard\')">← Back to Dashboard</button>' +
+            '<button class="btn btn-outline btn-sm" onclick="app.navigate(\'home\')">← Back to Home</button>' +
+            '</div>' +
             '</div>' +
             bookingRows +
-        '</div>';
+            '</div>';
     }
 
     showLoading(message = 'Processing your request...') {
@@ -1305,7 +1394,7 @@ class App {
 
     generateMockAgentOffers(req) {
         const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-        
+
         const mock1 = {
             id: 'off-' + Date.now() + '-1',
             requirementId: req.id,
@@ -1407,11 +1496,11 @@ class App {
                     ${requirements.length > 0 ? `
                         <div style="display:flex; flex-direction:column; gap:1.8rem;">
                             ${requirements.map(r => {
-                                const reqOffers = allOffers.filter(o => o.requirementId === r.id);
-                                const isConfirmed = r.status === 'CONFIRMED';
-                                const isBidding = r.status === 'BIDDING' || r.status === 'PENDING';
-                                
-                                return `
+            const reqOffers = allOffers.filter(o => o.requirementId === r.id);
+            const isConfirmed = r.status === 'CONFIRMED';
+            const isBidding = r.status === 'BIDDING' || r.status === 'PENDING';
+
+            return `
                                     <div class="amazon-tracker-container">
                                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem; border-bottom:1px solid #f1f5f9; padding-bottom:1rem;">
                                             <div>
@@ -1450,7 +1539,7 @@ class App {
                                         </div>
                                     </div>
                                 `;
-                            }).join('')}
+        }).join('')}
                         </div>
                     ` : `
                         <div style="text-align:center; padding:2.5rem; color:var(--text-muted);">
@@ -1535,8 +1624,8 @@ class App {
                 ${requirements.length > 0 ? `
                     <div style="display:flex; flex-direction:column; gap:2rem;">
                         ${requirements.map(req => {
-                            const offersForReq = allOffers.filter(o => o.requirementId === req.id);
-                            return `
+            const offersForReq = allOffers.filter(o => o.requirementId === req.id);
+            return `
                                 <div style="background:white; border-radius:16px; border:1px solid #cbd5e1; padding:1.8rem; box-shadow:0 6px 20px rgba(0,0,0,0.04);">
                                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-bottom:1.5px dashed #e2e8f0; padding-bottom:1rem; margin-bottom:1.2rem;">
                                         <div>
@@ -1574,7 +1663,7 @@ class App {
                                     </div>
                                 </div>
                             `;
-                        }).join('')}
+        }).join('')}
                     </div>
                 ` : `
                     <div style="background:white; border-radius:14px; padding:3rem; text-align:center; color:#64748b;">
@@ -2109,7 +2198,7 @@ class App {
     switchAdminTab(tabId) {
         document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.admin-tab-content').forEach(content => content.style.display = 'none');
-        
+
         document.getElementById(`tab-btn-${tabId}`).classList.add('active');
         document.getElementById(`tab-content-${tabId}`).style.display = 'block';
     }
@@ -2210,7 +2299,7 @@ class App {
                             <tbody>
                                 ${reqs.length > 0 ? reqs.map(r => `
                                     <tr>
-                                        <td><span style="background:#e2e8f0; color:#475569; padding:0.3rem 0.6rem; border-radius:6px; font-size:0.75rem; font-weight:700;">${(r.id || '').substring(0,8)}</span></td>
+                                        <td><span style="background:#e2e8f0; color:#475569; padding:0.3rem 0.6rem; border-radius:6px; font-size:0.75rem; font-weight:700;">${(r.id || '').substring(0, 8)}</span></td>
                                         <td>
                                             <strong style="color:#0f172a;">${this.escapeHtml(r.userName || 'Pilgrim User')}</strong><br>
                                             <small style="color:#64748b;">${this.escapeHtml(r.userEmail || 'user@example.com')}</small><br>
@@ -2297,12 +2386,12 @@ class App {
                             </thead>
                             <tbody>
                                 ${offers.length > 0 ? offers.map(o => {
-                                    const linkedReq = reqs.find(r => r.id === o.requirementId) || {};
-                                    return `
+            const linkedReq = reqs.find(r => r.id === o.requirementId) || {};
+            return `
                                     <tr>
                                         <td>
-                                            <span style="background:#e0e7ff; color:#3730a3; padding:0.25rem 0.5rem; border-radius:6px; font-size:0.7rem; font-weight:700; margin-bottom:0.3rem; display:inline-block;">Offer: ${(o.id || '').substring(0,8)}</span><br>
-                                            <span style="background:#e2e8f0; color:#475569; padding:0.25rem 0.5rem; border-radius:6px; font-size:0.7rem; font-weight:700;">Req: ${(o.requirementId || '').substring(0,8)}</span>
+                                            <span style="background:#e0e7ff; color:#3730a3; padding:0.25rem 0.5rem; border-radius:6px; font-size:0.7rem; font-weight:700; margin-bottom:0.3rem; display:inline-block;">Offer: ${(o.id || '').substring(0, 8)}</span><br>
+                                            <span style="background:#e2e8f0; color:#475569; padding:0.25rem 0.5rem; border-radius:6px; font-size:0.7rem; font-weight:700;">Req: ${(o.requirementId || '').substring(0, 8)}</span>
                                         </td>
                                         <td>
                                             <strong style="color:#0f172a;">${this.escapeHtml(linkedReq.userName || 'Pilgrim User')}</strong><br>
@@ -2351,7 +2440,7 @@ class App {
                                     <tr>
                                         <td>
                                             <strong style="color:#047857; font-size:1.05rem; background:#ecfdf5; padding:0.3rem 0.7rem; border-radius:8px; border:1px solid #a7f3d0;">${b.id}</strong><br>
-                                            ${b.requirementId ? `<small style="color:#64748b; display:inline-block; margin-top:0.4rem;">Req: ${(b.requirementId || '').substring(0,8)}</small>` : ''}
+                                            ${b.requirementId ? `<small style="color:#64748b; display:inline-block; margin-top:0.4rem;">Req: ${(b.requirementId || '').substring(0, 8)}</small>` : ''}
                                         </td>
                                         <td>
                                             <strong style="color:#0f172a;">${this.escapeHtml(b.userName || 'Pilgrim User')}</strong><br>
@@ -2937,13 +3026,13 @@ class App {
                                 </label>
                                 <div style="display:flex; flex-direction:column; gap:0.9rem; max-height:420px; overflow-y:auto; padding-right:0.4rem;">
                                     ${(() => {
-                                        const allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-                                        const existingPackageIds = allOffers.filter(o => o.requirementId === reqId && o.packageId).map(o => o.packageId);
-                                        
-                                        return this.state.packages.length > 0 ? this.state.packages.map((p, idx) => {
-                                            const isOffered = existingPackageIds.includes(p.id);
-                                            const bgStyle = isOffered ? 'opacity: 0.6; background: #f1f5f9; cursor: not-allowed;' : 'background: #ffffff; cursor: pointer;';
-                                            return `
+                const allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+                const existingPackageIds = allOffers.filter(o => o.requirementId === reqId && o.packageId).map(o => o.packageId);
+
+                return this.state.packages.length > 0 ? this.state.packages.map((p, idx) => {
+                    const isOffered = existingPackageIds.includes(p.id);
+                    const bgStyle = isOffered ? 'opacity: 0.6; background: #f1f5f9; cursor: not-allowed;' : 'background: #ffffff; cursor: pointer;';
+                    return `
                                                 <label style="display:flex; align-items:flex-start; gap:1rem; ${bgStyle} border:1.5px solid #cbd5e1; border-radius:14px; padding:1.1rem; transition:all 0.2s ease; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
                                                     <input type="radio" name="offerPackageSelect" value="${p.id}" ${idx === 0 && !isOffered ? 'checked' : ''} ${isOffered ? 'disabled' : ''} style="margin-top:0.3rem; accent-color:#047857; width:18px; height:18px;">
                                                     <div style="flex:1;">
@@ -2962,8 +3051,8 @@ class App {
                                                     </div>
                                                 </label>
                                             `;
-                                        }).join('') : '<p style="color:#64748b; text-align:center; padding:2rem;">No packages currently listed. Switch tab to "Build Custom Package Offer".</p>';
-                                    })()}
+                }).join('') : '<p style="color:#64748b; text-align:center; padding:2rem;">No packages currently listed. Switch tab to "Build Custom Package Offer".</p>';
+            })()}
                                 </div>
                             </div>
 

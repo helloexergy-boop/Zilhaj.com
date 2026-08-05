@@ -18,39 +18,36 @@
 </head>
 
 <body>
-    <div id="app">
-        <!-- Main Navigation Header -->
-        <header class="navbar" id="navbar">
-            <div class="nav-container">
-                <a href="#" class="brand-logo" onclick="app.navigate('home')">
-                    <span class="logo-badge">🕋</span>
-                    <span class="logo-text">UMRAH <span class="logo-highlight">TRAVELS</span></span>
-                </a>
-
-                <!-- Mobile Navigation Hamburger Button (Hidden on Desktop) -->
-                <button class="mobile-nav-toggle" onclick="app.toggleMobileMenu()"
-                    style="display:none !important;">☰</button>
-
-                <nav class="nav-menu" id="navMenu">
-                    <a href="#home" class="nav-link active" onclick="app.navigate('home')">Home</a>
-                    <a href="#guides" class="nav-link" onclick="app.navigate('guides')">Hajj & Umrah Guides</a>
-                    <a href="#offers" class="nav-link" id="offersNavLink" onclick="app.navigate('offers')">
-                        🎁 Offers Available <span class="badge-count" id="userOfferBadge">0</span>
+    <div id="app">        <!-- Floating Pill Navbar -->
+        <div class="navbar-wrapper" id="navbarWrapper">
+            <header class="navbar" id="navbar">
+                <div class="nav-container">
+                    <!-- Logo Left -->
+                    <a href="#" class="brand-logo" onclick="app.navigate('home')">
+                        <span class="logo-badge">🕋</span>
+                        <span class="logo-text">UMRAH <span class="logo-highlight">TRAVELS</span></span>
                     </a>
-                </nav>
 
-                <!-- Navbar Menu Auth Actions with Login & Sign Up Buttons -->
-                <div class="nav-auth-actions" id="navAuthActions">
-                    <div style="display:flex; align-items:center; gap:0.6rem;">
-                        <button class="btn btn-outline" onclick="app.openAuthModal('login')"
-                            style="border:1.5px solid #0f172a; color:#0f172a; font-weight:700; border-radius:8px; padding:0.45rem 1.1rem; font-size:0.88rem; background:transparent; cursor:pointer;">Login</button>
-                        <button class="btn btn-primary" onclick="app.openAuthModal('register')"
-                            style="background:#047857; color:white; font-weight:700; border-radius:8px; padding:0.45rem 1.1rem; border:none; font-size:0.88rem; cursor:pointer;">Sign
-                            Up</button>
+                    <!-- Mobile Hamburger (Hidden on Desktop) -->
+                    <button class="mobile-nav-toggle" onclick="app.toggleMobileMenu()" style="display:none !important;">☰</button>
+
+                    <!-- Center Nav Links -->
+                    <nav class="nav-menu" id="navMenu">
+                        <a href="#home" class="nav-link active" onclick="app.navigate('home')">Home</a>
+                        <a href="#guides" class="nav-link" onclick="app.navigate('guides')">Hajj &amp; Umrah Guides</a>
+                        <a href="#offers" class="nav-link" id="offersNavLink" onclick="app.navigate('offers')">
+                            🎁 Offers <span class="badge-count" id="userOfferBadge">0</span>
+                        </a>
+                    </nav>
+
+                    <!-- Right: Auth Actions -->
+                    <div class="nav-auth-actions" id="navAuthActions">
+                        <button class="btn btn-outline" onclick="app.openAuthModal('login')">Login</button>
+                        <button class="btn btn-primary" onclick="app.openAuthModal('register')">Sign Up</button>
                     </div>
                 </div>
-            </div>
-        </header>
+            </header>
+        </div>
 
         <!-- Main Content Root Container -->
         <main class="main-container" id="mainContainer">

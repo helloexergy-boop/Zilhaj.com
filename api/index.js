@@ -1,11 +1,13 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { MongoClient } = require('mongodb');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '../client')));
 
 const MONGODB_URI = process.env.MONGODB_URI || process.env.SPRING_DATA_MONGODB_URI || 'mongodb+srv://rajuranjanxbkj_db_user:mSORiUdT4m8ey11k@cluster0.bwdhkat.mongodb.net/umrah_db?retryWrites=true&w=majority';
 
@@ -231,6 +233,34 @@ app.get('/api/admin/analytics', async (req, res) => {
     } catch (err) {
         res.json({ totalRequirements: 12, totalOffers: 28, totalBookings: 8, totalPackages: 5, totalRevenue: 985000 });
     }
+});
+// VIDEO PROXY ROUTE (Fixes Content-Disposition: attachment on external video CDNs like Pexels)
+const httpsModule = require('https');
+const httpModule = require('http');
+
+app.get('/api/video-proxy', (req, res) => {
+    const videoUrl = req.query.url;
+    if (!videoUrl) return res.status(400).send('URL parameter required');
+
+    const fetchStream = (targetUrl, redirectCount = 0) => {
+        if (redirectCount > 5) return res.status(500).send('Too many redirects');
+        const client = targetUrl.startsWith('https') ? httpsModule : httpModule;
+        client.get(targetUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (stream) => {
+            if (stream.statusCode >= 300 && stream.statusCode < 400 && stream.headers.location) {
+                return fetchStream(stream.headers.location, redirectCount + 1);
+            }
+            res.setHeader('Content-Type', stream.headers['content-type'] || 'video/mp4');
+            res.setHeader('Content-Disposition', 'inline');
+            if (stream.headers['content-length']) res.setHeader('Content-Length', stream.headers['content-length']);
+            if (stream.headers['accept-ranges']) res.setHeader('Accept-Ranges', stream.headers['accept-ranges']);
+            stream.pipe(res);
+        }).on('error', (err) => {
+            console.error('Video proxy error:', err);
+            res.status(500).send('Error streaming video');
+        });
+    };
+
+    fetchStream(videoUrl);
 });
 
 module.exports = app;
