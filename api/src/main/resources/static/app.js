@@ -663,7 +663,7 @@ class App {
                     <source src="https://assets.mixkit.co/videos/preview/mixkit-grand-mosque-of-mecca-at-night-42173-large.mp4" type="video/mp4">
                 </video>
 
-                <!-- Dark Gradient Overlay Shield for Ultra-High Contrast -->
+                <!-- Dark Overlay Shield -->
                 <div class="hero-video-overlay"></div>
 
                 <!-- Video Slideshow Controls & Progress Dots -->
@@ -677,50 +677,45 @@ class App {
                     <button class="video-arrow-btn" onclick="app.playNextHeroVideo()" title="Next Video">❯</button>
                 </div>
 
-                <!-- Main Glassmorphic Content Card (Preserving Exact User Text & Slogan) -->
-                <div class="hero-green-container" style="max-width:920px !important; margin:0 auto !important; text-align:center; position:relative; z-index:2; background:rgba(10, 35, 28, 0.58); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); padding:2.5rem 2rem; border-radius:24px; border:1px solid rgba(229, 193, 88, 0.35); box-shadow:0 20px 50px rgba(0,0,0,0.35);">
-                    <!-- Eyebrow Slogan Badge -->
-                    <div class="hero-eyebrow-anim" style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(229, 193, 88, 0.22); border:1px solid rgba(229, 193, 88, 0.5); color:#E5C158; padding:0.45rem 1.25rem; border-radius:999px; font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:1.2rem;">
+                <div class="hero-green-container" style="max-width:900px !important; margin:0 auto !important; text-align:center; position:relative; z-index:2;">
+                    <div class="hero-eyebrow-anim" style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(201, 161, 90, 0.2); border:1px solid rgba(201, 161, 90, 0.4); color:#C9A15A; padding:0.4rem 1.1rem; border-radius:999px; font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:1.2rem;">
                         ✨ PLAN YOUR SACRED JOURNEY
                     </div>
 
-                    <!-- Main H1 Title Slogan -->
                     <h1 class="hero-title-main" style="margin-bottom:0.8rem !important;">
-                        <span class="hero-h1-anim-1" style="display:block; color:#ffffff;">One Request.</span>
-                        <span class="hero-h1-anim-2" style="color:#E5C158 !important; display:block !important; margin-top:0.2rem !important; text-shadow:0 2px 15px rgba(229, 193, 88, 0.4);">Multiple Verified Offers.</span>
+                        <span class="hero-h1-anim-1" style="display:block;">One Request.</span>
+                        <span class="hero-h1-anim-2" style="color:#C9A15A !important; display:block !important; margin-top:0.2rem !important;">Multiple Verified Offers.</span>
                     </h1>
 
-                    <!-- Paragraph Subtitle -->
-                    <p class="hero-subtext-anim" style="font-size:1.08rem !important; color:rgba(255, 255, 255, 0.95) !important; max-width:720px !important; margin:1.2rem auto 2.2rem !important; line-height:1.65 !important; font-weight:400 !important;">
+                    <p class="hero-subtext-anim" style="font-size:1.08rem !important; color:rgba(255, 255, 255, 0.92) !important; max-width:720px !important; margin:1.2rem auto 2.2rem !important; line-height:1.65 !important; font-weight:400 !important;">
                         Post one service request and let verified providers compete with transparent offers. Compare prices, choose confidently, and save time without sharing your personal details.
                     </p>
 
                     <!-- Trust Stats Row (With Count-Up Animation) -->
-                    <div class="hero-trust-anim" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5rem; max-width:640px; margin:0 auto 2.2rem; background:rgba(255,255,255,0.08); backdrop-filter:blur(8px); padding:1rem 1.5rem; border-radius:14px; border:1px solid rgba(255,255,255,0.18);">
+                    <div class="hero-trust-anim" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5rem; max-width:640px; margin:0 auto 2.2rem; background:rgba(255,255,255,0.06); padding:1rem 1.5rem; border-radius:14px; border:1px solid rgba(255,255,255,0.12);">
                         <div>
-                            <div class="count-up-val" data-target="500+" style="font-size:1.6rem; font-weight:800; color:#E5C158;">500+</div>
-                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.85); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Verified Agents</div>
+                            <div class="count-up-val" data-target="500+" style="font-size:1.6rem; font-weight:800; color:#C9A15A;">500+</div>
+                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.8); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Verified Agents</div>
                         </div>
-                        <div style="border-left:1px solid rgba(255,255,255,0.2); border-right:1px solid rgba(255,255,255,0.2);">
+                        <div style="border-left:1px solid rgba(255,255,255,0.15); border-right:1px solid rgba(255,255,255,0.15);">
                             <div class="count-up-val" data-target="100%" style="font-size:1.6rem; font-weight:800; color:#ffffff;">100%</div>
-                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.85); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Privacy Control</div>
+                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.8); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Privacy Control</div>
                         </div>
                         <div>
-                            <div class="count-up-val" data-target="12500+" style="font-size:1.6rem; font-weight:800; color:#E5C158;">12,500+</div>
-                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.85); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Happy Pilgrims</div>
+                            <div class="count-up-val" data-target="12500+" style="font-size:1.6rem; font-weight:800; color:#C9A15A;">12,500+</div>
+                            <div style="font-size:0.78rem; color:rgba(255,255,255,0.8); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Happy Customers</div>
                         </div>
                     </div>
 
-                    <!-- CTA Actions -->
                     <div class="hero-cta-anim" style="display:flex !important; justify-content:center !important; align-items:center !important; gap:1.2rem !important; flex-wrap:wrap !important;">
-                        <button class="btn-start-journey" onclick="app.scrollToRequirementForm()" style="background:linear-gradient(135deg, #E5C158 0%, #C9A15A 100%) !important; color:#071A16 !important; font-weight:800 !important; font-size:0.95rem !important; padding:13px 32px !important; border-radius:8px !important; border:none !important; cursor:pointer !important; box-shadow:0 4px 20px rgba(229, 193, 88, 0.4) !important;">Start Your Journey</button>
-                        <button class="btn-my-requests" onclick="app.navigate('dashboard')" style="background:rgba(255,255,255,0.15) !important; backdrop-filter:blur(6px); border:1.5px solid rgba(255,255,255,0.85) !important; color:#ffffff !important; font-weight:700 !important; font-size:0.95rem !important; padding:12px 28px !important; border-radius:8px !important; cursor:pointer !important;">My Requests</button>
+                        <button class="btn-start-journey" onclick="app.scrollToRequirementForm()">Start Your Journey</button>
+                        <button class="btn-my-requests" onclick="app.navigate('dashboard')" style="background:transparent !important; border:1.5px solid rgba(255,255,255,0.75) !important; color:#ffffff !important; font-weight:700 !important; font-size:0.95rem !important; padding:12px 28px !important; border-radius:8px !important; cursor:pointer !important;">My Requests</button>
                     </div>
 
                     <!-- Scroll Down Indicator Arrow -->
-                    <div class="scroll-down-indicator" onclick="window.scrollTo({top: window.innerHeight - 65, behavior: 'smooth'})" style="margin-top:1.8rem; cursor:pointer; opacity:0.9; transition:all 0.3s ease;">
+                    <div class="scroll-down-indicator" onclick="window.scrollTo({top: window.innerHeight - 65, behavior: 'smooth'})" style="margin-top:2.2rem; cursor:pointer; opacity:0.85; transition:all 0.3s ease;">
                         <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.3rem; color:#ffffff;">Scroll to Explore</span>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E5C158" stroke-width="2.5" class="bounce-arrow"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A15A" stroke-width="2.5" class="bounce-arrow"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
                     </div>
                 </div>
             </section>
