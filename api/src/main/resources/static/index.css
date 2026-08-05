@@ -3030,48 +3030,56 @@ p, body {
     animation: ringPulse 3s infinite !important;
 }
 
-/* Theme Toggle Button Styling */
-.theme-toggle-btn {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    color: var(--text-main);
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition-standard);
-    box-shadow: var(--shadow-resting);
+/* Full Screen 100vh Hero Banner */
+.fullscreen-hero {
+    min-height: calc(100vh - 65px) !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    overflow: hidden !important;
+    padding: 3rem 1.5rem !important;
 }
 
-.theme-toggle-btn:hover {
-    transform: scale(1.08) rotate(15deg);
-    border-color: var(--accent-gold);
-    color: var(--accent-gold);
+.hero-bg-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: 0;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    filter: brightness(0.65) contrast(1.1);
 }
 
-/* Glassmorphism Classes */
-.glass-card, .how-step-card, .premium-card, .admin-stat-card, .modal-card {
-    background: var(--glass-bg) !important;
-    backdrop-filter: var(--glass-blur) !important;
-    -webkit-backdrop-filter: var(--glass-blur) !important;
-    border: var(--glass-border) !important;
-    box-shadow: var(--glass-shadow) !important;
+.hero-video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(7, 26, 22, 0.78) 0%, rgba(15, 76, 58, 0.65) 60%, rgba(7, 26, 22, 0.85) 100%);
+    z-index: 1;
 }
 
-/* Mihrab Arch Shape Top for Featured Cards */
-.mihrab-top {
-    border-top-left-radius: 40px 20px !important;
-    border-top-right-radius: 40px 20px !important;
+/* Reduced Section Gaps for Tight, Modern Layout */
+.how-it-works-section, .signature-agency-finder, .main-container {
+    padding-top: 48px !important;
+    padding-bottom: 48px !important;
 }
 
-/* Khatam 8-Point Star SVG Background Texture */
-.khatam-pattern-bg {
-    background-image: radial-gradient(rgba(201, 162, 39, 0.08) 1.5px, transparent 1.5px), radial-gradient(rgba(11, 77, 60, 0.05) 1.5px, transparent 1.5px);
-    background-size: 30px 30px;
-    background-position: 0 0, 15px 15px;
+/* Bouncing Arrow */
+@keyframes bounceArrow {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(8px); }
+    60% { transform: translateY(4px); }
+}
+.bounce-arrow {
+    animation: bounceArrow 2s infinite;
 }
 
 
