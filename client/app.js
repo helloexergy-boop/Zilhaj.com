@@ -108,9 +108,9 @@ class App {
         // Add or replace your MP4 / WebM video URLs in the array below:
         // ============================================================================
         this.heroVideos = [
+            'hero-video-3.mp4',
             'hero-video-1.mp4',
             'hero-video-2.mp4',
-            'hero-video-3.mp4',
             'hero-video-4.mp4'
         ];
 
@@ -145,7 +145,7 @@ class App {
         };
 
         vidA.onended = () => this.playNextHeroVideo();
-        vidA.ontimeupdate = function() {
+        vidA.ontimeupdate = function () {
             // Preload next ~3s before current ends
             if (this.duration && this.currentTime >= this.duration - 3) {
                 this.ontimeupdate = null;
@@ -153,7 +153,7 @@ class App {
             }
         };
         vidB.onended = () => this.playNextHeroVideo();
-        vidB.ontimeupdate = function() {
+        vidB.ontimeupdate = function () {
             if (this.duration && this.currentTime >= this.duration - 3) {
                 this.ontimeupdate = null;
                 preloadNext();
@@ -239,7 +239,7 @@ class App {
             dormant.src = this.heroVideos[nextIndex];
             dormant.load();
         };
-        incoming.ontimeupdate = function() {
+        incoming.ontimeupdate = function () {
             if (this.duration && this.currentTime >= this.duration - 3) {
                 this.ontimeupdate = null;
                 preloadNext();

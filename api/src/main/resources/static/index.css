@@ -1536,6 +1536,7 @@ textarea.form-control {
         border-top: 1px solid #f1f5f9;
         align-items: center;
         text-align: center;
+    }
 }
 
 /* Fully Modern Custom Requirement Card Styling */
@@ -1985,7 +1986,6 @@ textarea.form-control {
 
 .gradient-btn { background: linear-gradient(135deg, #047857 0%, #065f46 60%, #022c22 100%); color: #ffffff; padding: 1.2rem 2rem; border-radius: 16px; border: none; font-weight: 800; font-size: 1.15rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(4, 120, 87, 0.35); font-family: inherit; width: 100%; letter-spacing: 0.5px; }
 .gradient-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(4, 120, 87, 0.45); }
-}
 
 /* =========================================================
    Redesigned Multi-Step Form CSS
@@ -3188,7 +3188,374 @@ p, body {
     }
 }
 
+/* ==========================================================================
+   COMPREHENSIVE MOBILE & TABLET RESPONSIVE DESIGN
+   ========================================================================== */
 
+/* ---- TABLET: max-width 768px ---- */
+@media (max-width: 768px) {
 
+    /* --- Floating Navbar → Full-width with Hamburger --- */
+    .navbar-wrapper {
+        padding: 6px 8px !important;
+    }
 
+    .navbar {
+        border-radius: 12px !important;
+        max-width: 100% !important;
+    }
+
+    .nav-container {
+        padding: 0.5rem 0.8rem !important;
+        flex-wrap: wrap;
+    }
+
+    .brand-logo {
+        font-size: 0.9rem !important;
+    }
+
+    .logo-badge {
+        width: 22px !important;
+        height: 22px !important;
+        font-size: 0.65rem !important;
+    }
+
+    /* Show hamburger, hide desktop nav links and auth */
+    .mobile-nav-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background: none !important;
+        border: none !important;
+        font-size: 1.4rem !important;
+        color: #374151 !important;
+        cursor: pointer;
+        padding: 4px 8px !important;
+        border-radius: 8px;
+        order: 3;
+    }
+
+    .nav-menu {
+        display: none !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        order: 4;
+        gap: 0 !important;
+        background: #ffffff;
+        border-top: 1px solid #e5e7eb;
+        padding: 0.5rem 0 !important;
+        margin-top: 0.5rem;
+    }
+
+    .nav-menu.show-mobile {
+        display: flex !important;
+    }
+
+    .nav-menu .nav-link {
+        width: 100% !important;
+        padding: 0.65rem 1rem !important;
+        border-radius: 8px !important;
+        font-size: 0.92rem !important;
+    }
+
+    .nav-auth-actions {
+        display: none !important;
+        width: 100% !important;
+        order: 5;
+        padding: 0.5rem 0 0 !important;
+        border-top: 1px solid #e5e7eb;
+        margin-top: 0.25rem;
+        gap: 0.5rem !important;
+    }
+
+    .nav-menu.show-mobile ~ .nav-auth-actions {
+        display: flex !important;
+    }
+
+    .nav-auth-actions .btn-outline,
+    .nav-auth-actions .btn.btn-outline {
+        flex: 1;
+    }
+
+    .nav-auth-actions .btn-primary,
+    .nav-auth-actions .btn.btn-primary {
+        flex: 1;
+    }
+
+    /* --- Hero Section --- */
+    .hero-green-banner {
+        min-height: 85vh !important;
+        padding: 2rem 1rem !important;
+    }
+
+    .hero-green-container {
+        max-width: 100% !important;
+        padding: 0 0.5rem !important;
+    }
+
+    .hero-eyebrow-anim {
+        font-size: 0.65rem !important;
+        padding: 0.35rem 0.9rem !important;
+    }
+
+    /* --- Package Grid → single column --- */
+    .packages-grid-layout {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+        padding: 0 0.5rem !important;
+    }
+
+    /* --- How It Works Grid → single column --- */
+    .how-it-works-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1.2rem !important;
+    }
+
+    .how-it-works-section {
+        padding: 2rem 1rem !important;
+    }
+
+    .how-it-works-title {
+        font-size: 1.6rem !important;
+    }
+
+    /* --- Stats row in hero → stack or wrap --- */
+    .hero-stats-row,
+    [style*="display:flex"][style*="gap"] > div[style*="backdrop-filter"] {
+        flex-wrap: wrap !important;
+    }
+
+    /* --- Travel Cards → full width stack --- */
+    .travel-card {
+        flex-direction: column !important;
+    }
+
+    .travel-card-image {
+        width: 100% !important;
+        height: 180px !important;
+    }
+
+    .travel-card-pricing {
+        width: 100% !important;
+        border-left: none !important;
+        border-top: 1px solid #f1f5f9 !important;
+    }
+
+    /* --- Forms → single column --- */
+    .form-grid-2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    .requirement-card {
+        padding: 1.5rem 1rem !important;
+        border-radius: 14px !important;
+    }
+
+    /* --- Step Indicator (multi-step form) → smaller --- */
+    .step-indicator {
+        gap: 0.25rem !important;
+    }
+
+    .step-dot {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.75rem !important;
+    }
+
+    /* --- Admin Grid → single column --- */
+    .admin-grid,
+    .admin-stats-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* --- Auth Modal → full width --- */
+    .two-col-auth-modal {
+        grid-template-columns: 1fr !important;
+        max-width: 95vw !important;
+        margin: 0.5rem !important;
+    }
+
+    .auth-left-banner {
+        display: none !important;
+    }
+
+    .auth-right-panel {
+        padding: 1.5rem 1.2rem !important;
+    }
+
+    /* --- Chatbot --- */
+    .chatbot-box {
+        width: calc(100vw - 24px) !important;
+        right: 12px !important;
+        bottom: 70px !important;
+        max-height: 65vh !important;
+    }
+
+    /* --- Footer columns → stack --- */
+    .footer-grid,
+    .footer-columns {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem !important;
+    }
+
+    /* --- Section paddings --- */
+    .main-container > section,
+    .main-container > div {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    /* --- Dashboard sections --- */
+    .dashboard-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* --- Offer cards grid --- */
+    .offers-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* --- Generic grids with minmax → force single column --- */
+    [style*="grid-template-columns: repeat(auto"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* --- Amazon stepper → compact --- */
+    .amazon-stepper-row {
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+    }
+
+    .stepper-node {
+        padding: 0 0.25rem !important;
+    }
+
+    .stepper-icon-circle {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .stepper-label {
+        font-size: 0.65rem !important;
+    }
+}
+
+/* ---- SMALL MOBILE: max-width 480px ---- */
+@media (max-width: 480px) {
+
+    .navbar-wrapper {
+        padding: 4px 4px !important;
+    }
+
+    .navbar {
+        border-radius: 10px !important;
+    }
+
+    .nav-container {
+        padding: 0.4rem 0.6rem !important;
+    }
+
+    .brand-logo {
+        font-size: 0.82rem !important;
+    }
+
+    /* Hero text sizing */
+    .hero-green-banner h1,
+    .hero-title-main {
+        font-size: 1.6rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .hero-green-banner h2 {
+        font-size: 1.2rem !important;
+    }
+
+    .hero-green-banner p {
+        font-size: 0.82rem !important;
+    }
+
+    .hero-eyebrow-anim {
+        font-size: 0.58rem !important;
+        padding: 0.3rem 0.7rem !important;
+        letter-spacing: 0.08em !important;
+    }
+
+    /* Hero CTA Buttons */
+    .hero-green-banner button,
+    .hero-green-banner .btn {
+        font-size: 0.82rem !important;
+        padding: 0.6rem 1rem !important;
+    }
+
+    /* Cards general */
+    .premium-card,
+    .how-step-card {
+        padding: 1rem !important;
+        border-radius: 12px !important;
+    }
+
+    /* Package cards */
+    .travel-card-image {
+        height: 150px !important;
+    }
+
+    /* Step indicator even smaller */
+    .step-dot {
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 0.7rem !important;
+    }
+
+    /* Modal adjustments */
+    .modal-card {
+        margin: 0.5rem !important;
+        border-radius: 14px !important;
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+    }
+
+    .two-col-auth-modal {
+        max-width: 100vw !important;
+        border-radius: 14px !important;
+    }
+
+    /* Video slide controls */
+    .video-slide-dots {
+        gap: 4px !important;
+    }
+
+    .video-slide-dot {
+        width: 8px !important;
+        height: 8px !important;
+    }
+
+    .video-slide-dot.active {
+        width: 20px !important;
+    }
+
+    /* Footer */
+    .footer-section {
+        padding: 2rem 1rem !important;
+    }
+
+    /* General body text */
+    body {
+        font-size: 0.9rem;
+    }
+
+    /* Requirement card form */
+    .btn-custom-submit {
+        font-size: 0.9rem !important;
+        padding: 0.8rem 1.5rem !important;
+    }
+}
+
+/* ---- LANDSCAPE PHONES & SMALL TABLETS ---- */
+@media (max-width: 768px) and (orientation: landscape) {
+    .hero-green-banner {
+        min-height: auto !important;
+        padding: 3rem 1rem !important;
+    }
+}
 
