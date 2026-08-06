@@ -1120,9 +1120,9 @@ class App {
                         
                         <div class="form-group" style="margin-bottom:1.4rem;">
                             <label style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:0.4rem; margin-bottom:0.6rem; font-size:0.92rem;">
-                                📅 Preferred Travel Date Range *
+                                📅 Preferred Departure Date *
                             </label>
-                            <input type="text" id="reqDateRange" class="form-control premium-input" placeholder="e.g. 15 March 2026 - 28 March 2026">
+                            <input type="date" id="reqDateRange" class="form-control premium-input" required>
                         </div>
 
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.4rem;">
@@ -1146,23 +1146,17 @@ class App {
                             </div>
                         </div>
 
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;">
-                            <div class="form-group">
-                                <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">⏳ Package Duration</label>
-                                <select id="reqDuration" class="form-control premium-input">
-                                    <option value="10">10 Days Short Tour</option>
-                                    <option value="14">14 Days Standard Sacred Journey</option>
-                                    <option value="18" selected>18 Days Recommended Tour</option>
-                                    <option value="21">21 Days Extended Stay</option>
-                                    <option value="25">25 Days Full Sacred Journey</option>
-                                    <option value="28">28 Days Ramadan Special</option>
-                                    <option value="30">30 Days Full Month</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">💰 Maximum Budget (₹)</label>
-                                <input type="number" id="reqBudget" class="form-control premium-input" placeholder="e.g. 125000" value="125000">
-                            </div>
+                        <div class="form-group">
+                            <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">⏳ Package Duration *</label>
+                            <select id="reqDuration" class="form-control premium-input" required>
+                                <option value="10">10 Days Short Tour</option>
+                                <option value="14">14 Days Standard Sacred Journey</option>
+                                <option value="18" selected>18 Days Recommended Tour</option>
+                                <option value="21">21 Days Extended Stay</option>
+                                <option value="25">25 Days Full Sacred Journey</option>
+                                <option value="28">28 Days Ramadan Special</option>
+                                <option value="30">30 Days Full Month</option>
+                            </select>
                         </div>
                     </div>
                     <button type="button" class="gradient-btn" onclick="app.nextFormStep(2)">Next Step →</button>
@@ -1252,6 +1246,18 @@ class App {
     currentFormStep = 1;
 
     nextFormStep(step) {
+        const activeStepEl = document.getElementById(`step${this.currentFormStep}`);
+        if (activeStepEl && step > this.currentFormStep) {
+            const reqInputs = activeStepEl.querySelectorAll('input[required], select[required], textarea[required]');
+            for (let input of reqInputs) {
+                if (!input.value || !input.value.trim()) {
+                    input.focus();
+                    this.showToast('Please fill out all required fields before proceeding.', 'error');
+                    return;
+                }
+            }
+        }
+
         // Remove active class from ALL form steps to guarantee only 1 section is visible at a time
         document.querySelectorAll('.form-step').forEach(el => {
             el.classList.remove('active');
@@ -3890,14 +3896,11 @@ class App {
     async callGeminiApi(userPrompt) {
         if (!CHATBOT_API_KEY) return null;
         try {
-            const systemContext = `You are the official AI Assistant for GoExergy Umrah & Hajj reverse-bidding travel platform.
-Website Information:
-- Platform: GoExergy connects Zaireen directly with 100% verified travel agencies.
-- How it works: Zaireen fill out a custom travel request form (departure date, duration, travelers count, hotel preference, budget).
-- Reverse Bidding: Verified travel agents review the request and submit tailored discounted package offers (15-20% off original price).
-- Features: 100% Verified Agents, Best Price Guarantee, Dual-column Amazon-style Order Review before paying, 24/7 Customer Support (+966 800 123 4567 / 9541692891), Complete Hajj & Umrah Step-by-Step Guides.
-- Payment Options: Instant UPI (GPay, PhonePe, Paytm), Credit/Debit Cards, Net Banking, Direct Bank Transfer / Office Visit.
-- Nusuk Permits: Rawdah Al-Sharifa permits must be issued through the official Nusuk mobile app.
+            const systemContext = `You are the official AI Assistant for GoExergy Umrah & Hajj travel platform.
+CRITICAL GUARDRAILS & RULES:
+1. ONLY answer queries directly related to Umrah, Hajj, Islamic pilgrimage travel, hotel accommodations in Makkah & Madinah, visa processing, flights, Nusuk permits, or GoExergy platform services.
+2. If the user query is about UNRELATED or PROHIBITED topics (e.g. coding, general sports, politics, entertainment, general math, illegal content, weather outside KSA), you MUST politely decline:
+   "⚠️ I am trained exclusively as the GoExergy Umrah & Hajj Travel Assistant. I cannot answer queries on unrelated or prohibited topics. Please ask me about Umrah travel requirements, Nusuk permits, packages, flights, or hotels!"
 
 User Query: "${userPrompt}"
 Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) specifically relevant to GoExergy and Umrah travel.`;
@@ -3923,6 +3926,11 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
 
     getCustomWebsiteAnswer(input) {
         const lower = (input || '').toLowerCase();
+
+        const offTopicKeywords = ['python', 'java', 'code', 'coding', 'script', 'football', 'cricket', 'movie', 'song', 'politics', 'election', 'game', 'anime', 'recipe', 'hack', 'password', 'porn', 'casino', 'gambling'];
+        if (offTopicKeywords.some(k => lower.includes(k))) {
+            return '⚠️ I am trained exclusively as the GoExergy Umrah & Hajj Travel Assistant. I cannot answer queries on unrelated or prohibited topics. Please ask me about Umrah travel requirements, Nusuk permits, packages, flights, or hotels!';
+        }
 
         if (lower.includes('issue') || lower.includes('not work') || lower.includes('button') || lower.includes('problem') || lower.includes('bug') || lower.includes('error')) {
             return '🛠️ Troubleshooting & Support: If any button or form is not responding, please refresh your browser page (Ctrl+F5) to load the latest update. You can also contact our 24/7 Helpline at +966 800 123 4567 or 9541692891 for instant help!';
@@ -4002,8 +4010,23 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
 
         typingDiv.style.fontStyle = 'normal';
         typingDiv.style.color = '#0f172a';
-        typingDiv.innerText = reply;
+        typingDiv.innerHTML = reply + this.getChatbotIssueListHtml();
         msgContainer.scrollTop = msgContainer.scrollHeight;
+    }
+
+    getChatbotIssueListHtml() {
+        return `
+            <div style="margin-top:0.8rem; padding-top:0.6rem; border-top:1px dashed #cbd5e1; font-size:0.8rem;">
+                <strong style="color:#047857; display:block; margin-bottom:0.4rem; font-size:0.78rem;">📌 Common Topics & Quick Issues:</strong>
+                <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
+                    <button type="button" onclick="app.handleChatIssue('How to post custom Umrah requirement?')" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; border-radius:6px; padding:0.25rem 0.5rem; font-size:0.75rem; cursor:pointer;">📝 Post Requirement</button>
+                    <button type="button" onclick="app.handleChatIssue('What are the Nusuk Rawdah permit rules?')" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; border-radius:6px; padding:0.25rem 0.5rem; font-size:0.75rem; cursor:pointer;">🕌 Rawdah Permits</button>
+                    <button type="button" onclick="app.handleChatIssue('How does reverse bidding work?')" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; border-radius:6px; padding:0.25rem 0.5rem; font-size:0.75rem; cursor:pointer;">💰 Reverse Bidding</button>
+                    <button type="button" onclick="app.handleChatIssue('What hotels and meals are included?')" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; border-radius:6px; padding:0.25rem 0.5rem; font-size:0.75rem; cursor:pointer;">🏨 Hotels & Meals</button>
+                    <button type="button" onclick="app.handleChatIssue('How to contact 24/7 Zaireen Support?')" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; border-radius:6px; padding:0.25rem 0.5rem; font-size:0.75rem; cursor:pointer;">📞 24/7 Support</button>
+                </div>
+            </div>
+        `;
     }
 
     async handleChatIssue(questionText) {
@@ -4032,7 +4055,7 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
 
         typingDiv.style.fontStyle = 'normal';
         typingDiv.style.color = '#0f172a';
-        typingDiv.innerText = reply;
+        typingDiv.innerHTML = reply + this.getChatbotIssueListHtml();
         msgContainer.scrollTop = msgContainer.scrollHeight;
     }
 

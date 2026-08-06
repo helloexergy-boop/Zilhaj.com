@@ -40,8 +40,8 @@
     --radius-pill: 999px;
     --padding-card-desktop: 24px;
     --padding-card-mobile: 16px;
-    --padding-section-desktop: 80px;
-    --padding-section-mobile: 48px;
+    --padding-section-desktop: 36px;
+    --padding-section-mobile: 24px;
     --grid-gap: 24px;
 
     /* 4. Shadows & Elevation Tokens */
@@ -3770,7 +3770,7 @@ p, body {
 .liquid-glass-wrapper {
     position: relative;
     max-width: 1180px;
-    margin: 3.5rem auto 4.5rem auto;
+    margin: 1.5rem auto 2rem auto;
     padding: 0 1.5rem;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }

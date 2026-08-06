@@ -177,10 +177,9 @@
                             <div class="form-group" style="margin-bottom:1.4rem;">
                                 <label
                                     style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:0.4rem; margin-bottom:0.6rem; font-size:0.92rem;">
-                                    📅 Preferred Travel Date Range *
+                                    📅 Preferred Departure Date *
                                 </label>
-                                <input type="text" id="reqDateRange" class="form-control premium-input"
-                                    placeholder="e.g. 15 March 2026 - 28 March 2026" required>
+                                <input type="date" id="reqDateRange" class="form-control premium-input" required>
                             </div>
 
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.4rem;">
@@ -211,29 +210,21 @@
                                 </div>
                             </div>
 
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;">
-                                <div class="form-group">
-                                    <label
-                                        style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">⏳
-                                        Package Duration</label>
-                                    <select id="reqDuration" class="form-control premium-input">
-                                        <option value="10">10 Days Short Tour</option>
-                                        <option value="14">14 Days Standard Sacred Journey</option>
-                                        <option value="18" selected>18 Days Recommended Tour</option>
-                                        <option value="21">21 Days Extended Stay</option>
-                                        <option value="25">25 Days Full Sacred Journey</option>
-                                        <option value="28">28 Days Ramadan Special</option>
-                                        <option value="30">30 Days Full Month</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label
-                                        style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">💰
-                                        Maximum Budget (₹)</label>
-                                    <input type="number" id="reqBudget" class="form-control premium-input"
-                                        placeholder="e.g. 125000" value="125000">
-                                </div>
+                            <div class="form-group">
+                                <label
+                                    style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">⏳
+                                    Package Duration *</label>
+                                <select id="reqDuration" class="form-control premium-input" required>
+                                    <option value="10">10 Days Short Tour</option>
+                                    <option value="14">14 Days Standard Sacred Journey</option>
+                                    <option value="18" selected>18 Days Recommended Tour</option>
+                                    <option value="21">21 Days Extended Stay</option>
+                                    <option value="25">25 Days Full Sacred Journey</option>
+                                    <option value="28">28 Days Ramadan Special</option>
+                                    <option value="30">30 Days Full Month</option>
+                                </select>
                             </div>
+                        </div>
                         </div>
                         <button type="button" class="gradient-btn" onclick="app.nextFormStep(2)">Next Step →</button>
                     </div>
@@ -287,8 +278,8 @@
                                     style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; padding:1rem; text-align:center;">
                                     <label
                                         style="font-weight:700; color:#0f172a; margin-bottom:0.5rem; font-size:0.88rem; display:block;">👨
-                                        Males</label>
-                                    <input type="number" id="reqMales" class="form-control" min="0" value="1"
+                                        Males *</label>
+                                    <input type="number" id="reqMales" class="form-control" min="0" value="1" required
                                         oninput="app.calcTotalTravelers()" placeholder="0"
                                         style="border:1.5px solid #cbd5e1; border-radius:10px; padding:0.6rem 0.8rem; font-size:1.1rem; font-weight:800; width:100%; text-align:center; box-sizing:border-box;">
                                 </div>
@@ -296,8 +287,8 @@
                                     style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; padding:1rem; text-align:center;">
                                     <label
                                         style="font-weight:700; color:#0f172a; margin-bottom:0.5rem; font-size:0.88rem; display:block;">👩
-                                        Females</label>
-                                    <input type="number" id="reqFemales" class="form-control" min="0" value="1"
+                                        Females *</label>
+                                    <input type="number" id="reqFemales" class="form-control" min="0" value="1" required
                                         oninput="app.calcTotalTravelers()" placeholder="0"
                                         style="border:1.5px solid #cbd5e1; border-radius:10px; padding:0.6rem 0.8rem; font-size:1.1rem; font-weight:800; width:100%; text-align:center; box-sizing:border-box;">
                                 </div>
@@ -305,8 +296,8 @@
                                     style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; padding:1rem; text-align:center;">
                                     <label
                                         style="font-weight:700; color:#0f172a; margin-bottom:0.5rem; font-size:0.88rem; display:block;">👶
-                                        Children(0-5 years)</label>
-                                    <input type="number" id="reqChildren" class="form-control" min="0" value="0"
+                                        Children(0-5 years) *</label>
+                                    <input type="number" id="reqChildren" class="form-control" min="0" value="0" required
                                         oninput="app.calcTotalTravelers()" placeholder="0"
                                         style="border:1.5px solid #cbd5e1; border-radius:10px; padding:0.6rem 0.8rem; font-size:1.1rem; font-weight:800; width:100%; text-align:center; box-sizing:border-box;">
                                 </div>
@@ -345,7 +336,7 @@
                                         Additional Preferences &amp; Requests</h3>
                                 </div>
                             </div>
-                            <textarea id="reqNotes" class="form-control premium-input" rows="4"
+                            <textarea id="reqNotes" class="form-control premium-input" rows="4" required
                                 placeholder="e.g. Prefer direct flights, wheelchair assistance needed, vegetarian meals..."
                                 style="resize:vertical;"></textarea>
                         </div>
@@ -600,13 +591,13 @@
                 </div>
 
                 <div class="footer-links">
-                    <h4>Portals</h4>
+                    <h4>Official Portals</h4>
                     <ul>
-                        <li><a href="#">Ministry of Hajj</a></li>
-                        <li><a href="#">Nusuk Portal</a></li>
-                        <li><a href="#">Saudi Vision 2030</a></li>
-                        <li><a href="#">E-Visa Check</a></li>
-                        <li><a href="#">Zaireen Grievance</a></li>
+                        <li><a href="https://www.haj.gov.sa/" target="_blank" rel="noopener noreferrer">Ministry of Hajj & Umrah</a></li>
+                        <li><a href="https://www.nusuk.sa/" target="_blank" rel="noopener noreferrer">Nusuk Official Portal</a></li>
+                        <li><a href="https://www.vision2030.gov.sa/" target="_blank" rel="noopener noreferrer">Saudi Vision 2030</a></li>
+                        <li><a href="https://ksavisa.sa/" target="_blank" rel="noopener noreferrer">Saudi E-Visa Portal</a></li>
+                        <li><a href="https://sar.com.sa/" target="_blank" rel="noopener noreferrer">Haramain Railway (SAR)</a></li>
                     </ul>
                 </div>
 
