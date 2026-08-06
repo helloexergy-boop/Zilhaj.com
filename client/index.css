@@ -239,7 +239,7 @@ a:hover {
 .navbar {
     pointer-events: all;
     width: 100%;
-    max-width: 1060px;
+    max-width: 1200px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 250, 230, 0.92) 100%) !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;

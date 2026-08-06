@@ -239,7 +239,7 @@ a:hover {
 .navbar {
     pointer-events: all;
     width: 100%;
-    max-width: 1060px;
+    max-width: 1200px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 250, 230, 0.92) 100%) !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
@@ -2066,11 +2066,14 @@ textarea.form-control {
    LIQUID GLASS FOOTER – Premium Light Theme
    ========================================================= */
 
+/* Outer footer wrapper with ambient gradient background */
 .custom-footer {
     position: relative;
     overflow: hidden;
     background: linear-gradient(160deg, #f0f4ff 0%, #e8ecf8 30%, #eef2fb 60%, #f5f0ff 100%);
 }
+
+/* Decorative ambient blobs behind footer */
 .custom-footer::before {
     content: '';
     position: absolute;
@@ -2093,6 +2096,8 @@ textarea.form-control {
     border-radius: 50%;
     pointer-events: none;
 }
+
+/* Top bar: weather info strip with glass effect */
 .custom-footer-top {
     background: rgba(255, 255, 255, 0.55);
     backdrop-filter: blur(20px) saturate(180%);
@@ -2107,6 +2112,8 @@ textarea.form-control {
     font-weight: 600;
     letter-spacing: 0.2px;
 }
+
+/* Main content grid */
 .custom-footer-main {
     background: transparent;
     color: #1e293b;
@@ -2117,6 +2124,8 @@ textarea.form-control {
     position: relative;
     z-index: 1;
 }
+
+/* Logo block */
 .footer-logo-block {
     display: flex;
     flex-direction: column;
@@ -2129,12 +2138,15 @@ textarea.form-control {
     height: 90px;
     object-fit: cover;
 }
+
+/* Liquid glass icon circle */
 .footer-logo-block > div:first-child {
     background: rgba(255,255,255,0.7) !important;
     backdrop-filter: blur(12px) !important;
     border: 1.5px solid rgba(99,102,241,0.2) !important;
     box-shadow: 0 8px 32px rgba(99,102,241,0.12), inset 0 1px 0 rgba(255,255,255,0.8) !important;
 }
+
 .footer-title {
     font-size: 1.3rem;
     font-weight: 800;
@@ -2154,6 +2166,8 @@ textarea.form-control {
     color: #64748b;
     line-height: 1.7;
 }
+
+/* Link columns */
 .footer-links h4 {
     font-size: 0.78rem;
     font-weight: 800;
@@ -2196,6 +2210,8 @@ textarea.form-control {
     transform: translateX(2px);
     color: #6366f1;
 }
+
+/* Visitor Counter */
 .visitor-counter-box {
     margin-top: 1rem;
 }
@@ -2220,6 +2236,8 @@ textarea.form-control {
     font-weight: 800;
     box-shadow: 0 2px 8px rgba(99,102,241,0.12);
 }
+
+/* Feedback button – glass style */
 .feedback-btn {
     background: rgba(99,102,241,0.1);
     backdrop-filter: blur(12px);
@@ -2239,6 +2257,17 @@ textarea.form-control {
     box-shadow: 0 4px 16px rgba(99,102,241,0.25);
     transform: translateY(-1px);
 }
+
+/* AQI box */
+.footer-links > div[style*="dashed"] {
+    background: rgba(255,255,255,0.6) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(99,102,241,0.2) !important;
+    color: #475569 !important;
+    border-radius: 10px !important;
+}
+
+/* Bottom bar */
 .custom-footer-bottom {
     background: rgba(255,255,255,0.45);
     backdrop-filter: blur(24px) saturate(200%);

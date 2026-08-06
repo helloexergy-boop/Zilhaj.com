@@ -135,7 +135,9 @@ class App {
         });
 
         // Start first video on A instantly
-        vidA.src = this.heroVideos[0];
+        if (!vidA.src.endsWith(this.heroVideos[0])) {
+            vidA.src = this.heroVideos[0];
+        }
         vidA.style.opacity = '1';
         vidA.style.zIndex = '1';
         vidB.style.opacity = '0';
@@ -766,7 +768,7 @@ class App {
             <section class="hero-green-banner fullscreen-hero">
 
                 <!-- Dual Video Crossfade Background (A/B stacked, seamless transition) -->
-                <video class="hero-bg-video hero-bg-video-layer" id="heroBgVideoA" autoplay muted playsinline preload="auto" src="hero-video-1.mp4" style="opacity:1; z-index:1;"></video>
+                <video class="hero-bg-video hero-bg-video-layer" id="heroBgVideoA" autoplay muted playsinline preload="auto" src="hero-video-2.mp4" style="opacity:1; z-index:1;"></video>
                 <video class="hero-bg-video hero-bg-video-layer" id="heroBgVideoB" muted playsinline preload="auto" style="opacity:0; z-index:0;"></video>
 
                 <!-- Cinematic Gradient Overlay -->
