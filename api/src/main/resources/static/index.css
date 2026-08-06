@@ -15,7 +15,7 @@
     --neutral-ink: #1A1A1A;       /* Body headings */
     --neutral-body: #4B5563;      /* Paragraph text */
     --neutral-muted: #9CA3AF;     /* Placeholders, disabled, timestamps */
-    --bg-main: #FDF9EC;           /* Subtle warm yellow-tinted off-white */
+    --bg-main: #D8F3DC;           /* Pastel mint green background */
     --bg-card: #FFFFFF;           /* Cards on top of background */
     --border-color: #E5E7EB;
     --state-success: #16A34A;     /* Confirmed states */
@@ -188,7 +188,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    background: linear-gradient(135deg, #FDFBF7 0%, #FEF5D4 100%) !important;
+    background: #D8F3DC !important;
     background-attachment: fixed !important;
     color: var(--text-main);
     line-height: 1.65;
