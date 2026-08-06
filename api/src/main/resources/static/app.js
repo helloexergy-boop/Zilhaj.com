@@ -1306,7 +1306,7 @@ class App {
 
     handleStartJourneyClick() {
         if (!this.state.currentUser) {
-            alert('⚠️ Please log in or create an account to start your sacred journey requirement!');
+            this.showToast('Please log in or create an account to start your travel request.', 'info');
             this.openAuthModal('login');
             return;
         }
@@ -1325,14 +1325,54 @@ class App {
     nextFormStep(step) {
         const activeStepEl = document.getElementById(`step${this.currentFormStep}`);
         if (activeStepEl && step > this.currentFormStep) {
+            // Clear previous error messages & styles
+            activeStepEl.querySelectorAll('.field-error-msg').forEach(msg => msg.remove());
+            activeStepEl.querySelectorAll('.input-field-error').forEach(el => {
+                el.classList.remove('input-field-error');
+                el.style.border = '';
+                el.style.backgroundColor = '';
+                el.style.boxShadow = '';
+            });
+
             const reqInputs = activeStepEl.querySelectorAll('input[required], select[required], textarea[required]');
+            let firstInvalidInput = null;
+
             for (let input of reqInputs) {
                 if (!input.value || !input.value.trim()) {
-                    input.focus();
-                    alert('⚠️ Please fill out all required fields before proceeding!');
-                    this.showToast('Please fill out all required fields before proceeding.', 'error');
-                    return;
+                    if (!firstInvalidInput) firstInvalidInput = input;
+
+                    // Apply prominent red error styling on the input bar
+                    input.classList.add('input-field-error');
+
+                    // Append inline red warning message below the field container
+                    const parentGroup = input.closest('.form-group') || input.parentElement;
+                    if (parentGroup && !parentGroup.querySelector('.field-error-msg')) {
+                        const errorMsg = document.createElement('div');
+                        errorMsg.className = 'field-error-msg';
+                        errorMsg.innerHTML = '⚠️ Required field — please fill in to continue';
+                        parentGroup.appendChild(errorMsg);
+                    }
+
+                    // Auto-clear red warning when user enters data
+                    const clearError = () => {
+                        input.classList.remove('input-field-error');
+                        input.style.border = '';
+                        input.style.backgroundColor = '';
+                        input.style.boxShadow = '';
+                        const parent = input.closest('.form-group') || input.parentElement;
+                        if (parent) {
+                            parent.querySelectorAll('.field-error-msg').forEach(m => m.remove());
+                        }
+                    };
+                    input.addEventListener('input', clearError, { once: true });
+                    input.addEventListener('change', clearError, { once: true });
                 }
+            }
+
+            if (firstInvalidInput) {
+                firstInvalidInput.focus();
+                this.showToast('Please fill in the red highlighted required fields before proceeding.', 'error');
+                return;
             }
         }
 

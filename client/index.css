@@ -4033,5 +4033,29 @@ p, body {
     .carousel-nav-btn.next { right: -6px; }
 }
 
+/* Inline Red Field Warning & Shake Effect */
+@keyframes fieldShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.input-field-error {
+    border: 2px solid #dc2626 !important;
+    background-color: #fef2f2 !important;
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15) !important;
+    animation: fieldShake 0.3s ease-in-out;
+}
+
+.field-error-msg {
+    color: #dc2626;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-top: 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
 
 
