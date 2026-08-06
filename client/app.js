@@ -2799,6 +2799,14 @@ class App {
         document.getElementById('modalBackdrop').classList.remove('active');
     }
 
+    openLoginModal() {
+        this.openAuthModal('login');
+    }
+
+    openRegisterModal() {
+        this.openAuthModal('register');
+    }
+
     openAuthModal(mode = 'login') {
         const isAdminMode = mode === 'admin-login';
         const isLogin = mode === 'login' || mode === 'admin-login';
