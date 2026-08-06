@@ -55,7 +55,7 @@ class App {
                     id: 'pkg-1',
                     agentName: 'UMRAH TRAVELS',
                     title: '18-Day Deluxe Umrah Package',
-                    description: 'Journey of Faith, Comfort & Blessings. Complete 18 days pilgrimage featuring top 5-star hotels near Haram, return air tickets, Indian buffet meals, and guided ziyarat.',
+                    description: 'Journey of Faith, Comfort & Blessings. Complete 18 days sacred journey featuring top 5-star hotels near Haram, return air tickets, Indian buffet meals, and guided ziyarat.',
                     price: 125000,
                     durationDays: 18,
                     distanceToHaramMakkah: 600,
@@ -97,6 +97,13 @@ class App {
 
         // Fetch real-time weather and visitor stats
         this.fetchFooterData();
+
+        // Start Review Carousel Auto-play (slideshow)
+        setInterval(() => {
+            if (document.getElementById('ZaireenReviewTrack')) {
+                this.slideReviewCarousel(1);
+            }
+        }, 3500);
 
         this.initNavbarScroll();
         this.initScrollReveal();
@@ -509,7 +516,7 @@ class App {
                 token: 'master-admin-token'
             };
         } else {
-            // Check registered local users list or default pilgrim user
+            // Check registered local users list or default Zaireen user
             const registeredUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
             const foundUser = registeredUsers.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
             if (foundUser) {
@@ -521,11 +528,11 @@ class App {
                     role: foundUser.role || 'ROLE_USER',
                     token: 'user-local-token'
                 };
-            } else if (email.trim().toLowerCase() === 'user@pilgrim.com') {
+            } else if (email.trim().toLowerCase() === 'user@Zaireen.com') {
                 userObj = {
                     id: 'usr-1',
                     name: 'Tariq Mahmood',
-                    email: 'user@pilgrim.com',
+                    email: 'user@Zaireen.com',
                     phone: '9541692891',
                     role: 'ROLE_USER',
                     token: 'user-default-token'
@@ -593,7 +600,7 @@ class App {
         // Try API endpoint in background
         this.apiCall('/auth/register', 'POST', { name, email, password, phone, role, companyName });
 
-        // Auto-login newly registered pilgrim!
+        // Auto-login newly registered Zaireen!
         this.state.currentUser = newUserObj;
         localStorage.setItem('umrah_user', JSON.stringify(newUserObj));
 
@@ -614,8 +621,8 @@ class App {
         setTimeout(() => {
             const googleUser = {
                 id: 'goog-' + Date.now(),
-                name: 'Pilgrim User (Google)',
-                email: 'pilgrim.google@gmail.com',
+                name: 'Zaireen User (Google)',
+                email: 'Zaireen.google@gmail.com',
                 phone: '9541692891',
                 role: 'ROLE_USER',
                 token: 'google-oauth-token-' + Date.now(),
@@ -689,7 +696,7 @@ class App {
                     id: 'pkg-1',
                     agentName: 'UMRAH TRAVELS',
                     title: '18-Day Deluxe Umrah Package',
-                    description: 'Journey of Faith, Comfort & Blessings. Complete 18 days pilgrimage featuring top 5-star hotels near Haram, return air tickets, Indian buffet meals, and guided ziyarat.',
+                    description: 'Journey of Faith, Comfort & Blessings. Complete 18 days sacred journey featuring top 5-star hotels near Haram, return air tickets, Indian buffet meals, and guided ziyarat.',
                     price: 125000,
                     durationDays: 18,
                     distanceToHaramMakkah: 600,
@@ -703,7 +710,7 @@ class App {
                     flightRoute: 'Return Air Ticket (SXR-JED-MED-SXR)',
                     sharingType: '4/5 Sharing Accommodation',
                     complimentaryServices: ['Ahram Kit', 'Laundry Service', '5 Litres Zamzam Water'],
-                    importantNote: 'Rawdah permits must be booked by the pilgrim through the Nusuk App, subject to availability. The company is not responsible for the booking, availability, approval, or non-issuance of the Rawdah permit.',
+                    importantNote: 'Rawdah permits must be booked by the Zaireen through the Nusuk App, subject to availability. The company is not responsible for the booking, availability, approval, or non-issuance of the Rawdah permit.',
                     contactPhone: '9541692891',
                     includes: { flights: true, visa: true, transport: true, meals: true, ziyarah: true },
                     imageUrls: ['https://images.unsplash.com/photo-1591604466107-ec97de577aff']
@@ -769,18 +776,18 @@ class App {
                 <div class="hero-green-container" style="max-width:860px !important; margin:0 auto !important; text-align:center; position:relative; z-index:4;">
 
                     <!-- Eyebrow Badge -->
-                    <div class="hero-eyebrow-anim" style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(0,0,0,0.45); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid rgba(212,175,90,0.65); color:#F3D98A; padding:0.48rem 1.3rem; border-radius:999px; font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:1.4rem; text-shadow:0 1px 4px rgba(0,0,0,0.8); box-shadow:0 4px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);">
+                    <div class="hero-eyebrow-anim" style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(0,0,0,0.55); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(212,175,90,0.7); color:#F3D98A; padding:0.5rem 1.4rem; border-radius:999px; font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.14em; margin-bottom:1.6rem; text-shadow:0 1px 6px rgba(0,0,0,1); box-shadow:0 4px 24px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.10);">
                         ✦ PLAN YOUR SACRED JOURNEY
                     </div>
 
                     <!-- Main Headline -->
-                    <h1 class="hero-title-main" style="margin-bottom:1rem !important; line-height:1.1 !important;">
-                        <span class="hero-h1-anim-1" style="display:block; font-size:clamp(2.2rem, 5.5vw, 4rem); font-weight:900; letter-spacing:-0.02em; color:#FFFFFF; text-shadow:0 2px 40px rgba(0,0,0,0.9), 0 1px 6px rgba(0,0,0,0.95);">One Request.</span>
-                        <span class="hero-h1-anim-2" style="display:block; font-size:clamp(2.2rem, 5.5vw, 4rem); font-weight:900; letter-spacing:-0.02em; margin-top:0.1rem; background:linear-gradient(90deg,#F9E07A 0%,#E8B84B 40%,#FFD580 70%,#C9953A 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; filter:drop-shadow(0 3px 12px rgba(232,184,75,0.55));">Multiple Verified Offers.</span>
+                    <h1 class="hero-title-main" style="margin-bottom:1rem !important; line-height:1.08 !important;">
+                        <span class="hero-h1-anim-1" style="display:block; font-size:clamp(2.8rem, 6.5vw, 5rem); font-weight:900; letter-spacing:-0.03em; color:#FFFFFF; text-shadow:0 2px 8px rgba(0,0,0,1), 0 4px 32px rgba(0,0,0,0.9), 0 8px 60px rgba(0,0,0,0.6);">One Request.</span>
+                        <span class="hero-h1-anim-2" style="display:block; font-size:clamp(2.8rem, 6.5vw, 5rem); font-weight:900; letter-spacing:-0.03em; margin-top:0.05rem; background:linear-gradient(90deg,#F9E07A 0%,#E8B84B 40%,#FFD580 70%,#C9953A 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; filter:drop-shadow(0 4px 16px rgba(232,184,75,0.65)) drop-shadow(0 2px 8px rgba(0,0,0,0.9));">Multiple Verified Offers.</span>
                     </h1>
 
                     <!-- Sub Text -->
-                    <p class="hero-subtext-anim" style="font-size:1.08rem !important; color:rgba(255,255,255,0.9) !important; max-width:680px !important; margin:0 auto 2.4rem !important; line-height:1.7 !important; font-weight:400 !important; text-shadow:0 1px 12px rgba(0,0,0,0.9);">
+                    <p class="hero-subtext-anim" style="font-size:1.12rem !important; color:rgba(255,255,255,0.95) !important; max-width:680px !important; margin:0 auto 2.4rem !important; line-height:1.75 !important; font-weight:400 !important; text-shadow:0 1px 4px rgba(0,0,0,1), 0 2px 20px rgba(0,0,0,0.9);">
                         Post one request and receive transparent offers from verified Umrah travel providers. Compare, choose, and save—without sharing your personal details.
                     </p>
 
@@ -846,13 +853,114 @@ class App {
                 ? `
                         <div style="background:#fefce8; border:1.5px solid #fde68a; border-radius:14px; padding:2rem; text-align:center;">
                             <h3 style="color:#854d0e; margin-bottom:0.8rem;">👑 Administrator Mode</h3>
-                            <p style="color:#713f12; margin-bottom:1.2rem;">You are logged in as an Administrator. You cannot submit pilgrim travel requests.</p>
+                            <p style="color:#713f12; margin-bottom:1.2rem;">You are logged in as an Administrator. You cannot submit Zaireen travel requests.</p>
                             <button class="btn btn-gold" onclick="app.navigate('admin')">Go to Admin Dashboard</button>
                         </div>
                       `
                 : this.renderCustomRequirementForm()
             }
             </div>
+            ${this.renderLiquidGlassFeedbackSection()}
+        `;
+    }
+
+    renderLiquidGlassFeedbackSection() {
+        return `
+            <!-- Modern & Aesthetic Liquid Glass Zaireen Review Carousel Slider -->
+            <section class="liquid-glass-wrapper" id="liquidFeedbackSection">
+                <div class="reviews-section-header">
+                    <h2 class="reviews-section-title">Read reviews from <span>Zaireen</span></h2>
+                    <p class="reviews-section-subtitle">Real experiences from Zaireen who posted their Umrah requirements and saved on reverse bidding</p>
+                </div>
+
+                <div class="liquid-carousel-outer">
+                    <div class="liquid-carousel-container">
+                        <!-- Navigation Prev/Next Buttons -->
+                        <button type="button" class="carousel-nav-btn prev" onclick="app.slideReviewCarousel(-1)" aria-label="Previous Review">❮</button>
+                        
+                        <!-- Track Viewport -->
+                        <div class="carousel-viewport">
+                            <div class="carousel-track" id="ZaireenReviewTrack" style="transform: translateX(0px);">
+                                
+                                <!-- Card 1 (No Profile Image as requested!) -->
+                                <div class="Zaireen-review-card">
+                                    <div>
+                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                        <h3 class="card-headline-title">SAVED ₹35,000 WITH REVERSE BIDDING</h3>
+                                        <div class="card-author-name">Tariq Ahmad Bhat • Srinagar</div>
+                                    </div>
+                                    <p class="card-review-text">
+                                        I submitted my 18-day Umrah requirement and received 4 verified agent quotes within 2 hours. Got a 5-star hotel near Haram for 25% lower price!
+                                    </p>
+                                </div>
+
+                                <!-- Card 2 (No Profile Image as requested!) -->
+                                <div class="Zaireen-review-card">
+                                    <div>
+                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                        <h3 class="card-headline-title">BOOKED 5-STAR HARAM HOTEL AT BUDGET PRICE</h3>
+                                        <div class="card-author-name">Shafiq Ur Rehman • Delhi</div>
+                                    </div>
+                                    <p class="card-review-text">
+                                        The reverse bidding system is incredible. Travel agents competed to give us their lowest package prices. Smooth, transparent, and trustworthy experience!
+                                    </p>
+                                </div>
+
+                                <!-- Card 3 (No Profile Image as requested!) -->
+                                <div class="Zaireen-review-card">
+                                    <div>
+                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                        <h3 class="card-headline-title">SUPER FAST AGENT RESPONSES</h3>
+                                        <div class="card-author-name">Dr. Ayesha Malik • Mumbai</div>
+                                    </div>
+                                    <p class="card-review-text">
+                                        I was worried about organizing Umrah for my family of 6. Within an hour of posting our details, 3 verified agents sent complete itineraries.
+                                    </p>
+                                </div>
+
+                                <!-- Card 4 (No Profile Image as requested!) -->
+                                <div class="Zaireen-review-card">
+                                    <div>
+                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                        <h3 class="card-headline-title">RAMADAN SPECIAL DISCOUNT MATCH</h3>
+                                        <div class="card-author-name">Mohammad Owais • Hyderabad</div>
+                                    </div>
+                                    <p class="card-review-text">
+                                        Reverse bidding helped me secure a 14-day Ramadan package under 200m from Masjid al-Haram at an unbeatable group rate. Highly recommended!
+                                    </p>
+                                </div>
+
+                                <!-- Card 5 (No Profile Image as requested!) -->
+                                <div class="Zaireen-review-card">
+                                    <div>
+                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                        <h3 class="card-headline-title">100% TRANSPARENT & RELIABLE</h3>
+                                        <div class="card-author-name">Shazia Parveen • Bangalore</div>
+                                    </div>
+                                    <p class="card-review-text">
+                                        Very easy to fill out requirement form and directly communicate with top agents. No hidden fees or unexpected charges.
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <button type="button" class="carousel-nav-btn next" onclick="app.slideReviewCarousel(1)" aria-label="Next Review">❯</button>
+                    </div>
+
+                    <!-- Pagination Dots -->
+                    <div class="carousel-dots-wrapper" id="carouselDotsWrapper">
+                        <div class="carousel-dot active" onclick="app.goToReviewSlide(0)"></div>
+                        <div class="carousel-dot" onclick="app.goToReviewSlide(1)"></div>
+                        <div class="carousel-dot" onclick="app.goToReviewSlide(2)"></div>
+                    </div>
+                </div>
+            </section>
         `;
     }
 
@@ -909,7 +1017,7 @@ class App {
                     <div>
                         <div class="travel-original-price">${this.formatCurrency(originalPrice)}</div>
                         <div class="travel-final-price">${this.formatCurrency(pkg.price)}</div>
-                        <div class="travel-price-unit">per pilgrim (all taxes incl.)</div>
+                        <div class="travel-price-unit">per Zaireen (all taxes incl.)</div>
                     </div>
 
                     <div class="travel-actions">
@@ -959,7 +1067,7 @@ class App {
                 </ul>
 
                 <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:10px; padding:0.9rem; font-size:0.85rem; color:#991b1b; margin-bottom:1.5rem;">
-                    <strong>📌 Important Note:</strong> ${this.escapeHtml(pkg.importantNote || 'Rawdah permits must be booked by the pilgrim through the Nusuk App, subject to availability. The company is not responsible for the booking, availability, approval, or non-issuance of the Rawdah permit.')}
+                    <strong>📌 Important Note:</strong> ${this.escapeHtml(pkg.importantNote || 'Rawdah permits must be booked by the Zaireen through the Nusuk App, subject to availability. The company is not responsible for the booking, availability, approval, or non-issuance of the Rawdah permit.')}
                 </div>
 
                 <div style="display:flex; justify-content:space-between; align-items:center; background:#ecfdf5; padding:1rem; border-radius:10px; border:1px solid #a7f3d0;">
@@ -975,7 +1083,7 @@ class App {
 
     renderCustomRequirementForm() {
         return `
-            <div style="max-width:820px; margin:2.5rem auto; padding:0 1rem; display:flex; flex-direction:column; gap:1.8rem; font-family:'Outfit', sans-serif;">
+            <div style="max-width:820px; margin:2.5rem auto; padding:0 1rem; display:flex; flex-direction:column; gap:1.8rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
 
                 <!-- Header Eyebrow & Title Card -->
                 <div style="background:linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border-radius:20px; padding:2rem; border:1.5px solid #bbf7d0; box-shadow:0 10px 30px rgba(4,120,87,0.06); text-align:center;">
@@ -1041,10 +1149,10 @@ class App {
                                 <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">⏳ Package Duration</label>
                                 <select id="reqDuration" class="form-control premium-input">
                                     <option value="10">10 Days Short Tour</option>
-                                    <option value="14">14 Days Standard Pilgrimage</option>
+                                    <option value="14">14 Days Standard Sacred Journey</option>
                                     <option value="18" selected>18 Days Recommended Tour</option>
                                     <option value="21">21 Days Extended Stay</option>
-                                    <option value="25">25 Days Full Pilgrimage</option>
+                                    <option value="25">25 Days Full Sacred Journey</option>
                                     <option value="28">28 Days Ramadan Special</option>
                                     <option value="30">30 Days Full Month</option>
                                 </select>
@@ -1285,7 +1393,7 @@ class App {
 
     renderTrustPage() {
         return `
-            <div class="main-container" style="max-width:1140px; margin:3.5rem auto; padding:0 1.5rem;">
+            <div class="main-container" style="max-width:1140px; margin:7rem auto 3.5rem; padding:0 1.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem; flex-wrap:wrap; gap:1rem;">
                     <button class="btn btn-outline btn-sm" onclick="app.navigate('home')">← Back to Home</button>
                     <div style="text-align:center; flex:1;">
@@ -1365,7 +1473,7 @@ class App {
                 '</div>';
         }
 
-        return '<div class="main-container" style="max-width:1000px; margin:3rem auto; padding:0 1.5rem;">' +
+        return '<div class="main-container" style="max-width:1000px; margin:7rem auto 3rem; padding:0 1.5rem;">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">' +
             '<div>' +
             '<h2 style="margin:0;">🎫 My Bookings &amp; Travel Tickets</h2>' +
@@ -1449,7 +1557,7 @@ class App {
         const bookings = allBookings.filter(b => b.userId === user.id || b.userEmail === user.email);
 
         return `
-            <div class="main-container" style="max-width:1050px; margin:2.5rem auto; padding:0 1.5rem;">
+            <div class="main-container" style="max-width:1050px; margin:7rem auto 3.5rem; padding:0 1.5rem;">
                 <!-- Header User Profile Banner -->
                 <div style="background:linear-gradient(135deg, #047857 0%, #064e3b 100%); border-radius:16px; padding:2rem; color:white; box-shadow:0 8px 25px rgba(4, 120, 87, 0.25); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem; margin-bottom:2.5rem;">
                     <div>
@@ -1609,7 +1717,7 @@ class App {
         const allOffers = allOffersList.filter(o => o.userId === user.id || userReqIds.includes(o.requirementId));
 
         return `
-            <div class="main-container" style="max-width:950px; margin:3rem auto; padding:0 1.5rem;">
+            <div class="main-container" style="max-width:950px; margin:7rem auto 3rem; padding:0 1.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
                     <div>
                         <h2 style="margin:0;">🎁 Offers Available — Competitive Agent Bids</h2>
@@ -1738,7 +1846,7 @@ class App {
             departureDate: '12 August 2026',
             durationDays: 18,
             inclusions: ['Return Air Tickets (SXR–JED–MED–SXR)', '5-Star Buffet Meals (3x Daily)', 'Airport & Intercity AC Transfers', 'Ahram Kit', '5 Litres Zamzam Water', 'Half-Day Guided Ziyarat (Makkah & Madinah)', 'Visa Processing Assistance', 'Laundry Service'],
-            specialNote: 'Rawdah Al-Sharifa permits must be booked by each pilgrim individually through the official Nusuk Mobile App. Slot issuance is managed directly by Saudi Ministry authorities.'
+            specialNote: 'Rawdah Al-Sharifa permits must be booked by each Zaireen individually through the official Nusuk Mobile App. Slot issuance is managed directly by Saudi Ministry authorities.'
         };
 
         const savings = Math.max(0, (offer.originalPrice || 0) - (offer.discountedPrice || 0));
@@ -1762,7 +1870,7 @@ class App {
         }
 
         this.openModal(`
-            <div style="padding:0; font-family:'Outfit',sans-serif; color:#0f172a; height:100vh; display:flex; flex-direction:column; background:#f1f5f9; overflow:hidden;">
+            <div style="padding:0; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color:#0f172a; height:100vh; display:flex; flex-direction:column; background:#f1f5f9; overflow:hidden;">
 
                 <!-- ══ FULL SCREEN STEPPER HEADER WITH BACK BUTTON ══ -->
                 <div class="glass-header" style="background:#0f172a; padding:1.2rem 2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-bottom:4px solid #047857; flex-shrink:0;">
@@ -1882,7 +1990,7 @@ class App {
                             <div style="display:flex; align-items:flex-start; gap:0.8rem;">
                                 <span style="font-size:1.4rem;">ℹ️</span>
                                 <div>
-                                    <div style="font-size:0.85rem; font-weight:800; color:#854d0e; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:0.3rem;">Pilgrim Advisory & Permit Notes</div>
+                                    <div style="font-size:0.85rem; font-weight:800; color:#854d0e; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:0.3rem;">Zaireen Advisory & Permit Notes</div>
                                     <p style="font-size:0.85rem; color:#713f12; line-height:1.6; margin:0;">${this.escapeHtml(offer.specialNote)}</p>
                                 </div>
                             </div>
@@ -1972,7 +2080,7 @@ class App {
         };
 
         const savings = Math.max(0, (offer.originalPrice || 0) - (offer.discountedPrice || 0));
-        const user = this.state.currentUser || { name: 'Lead Pilgrim', phone: '9541692891', email: 'pilgrim@example.com' };
+        const user = this.state.currentUser || { name: 'Lead Zaireen', phone: '9541692891', email: 'Zaireen@example.com' };
 
         // Make modal 100% full screen
         const modal = document.getElementById('modalCard');
@@ -1991,7 +2099,7 @@ class App {
         }
 
         this.openModal(`
-            <div style="padding:0; font-family:'Outfit',sans-serif; color:#0f172a; height:100vh; display:flex; flex-direction:column; background:#f1f5f9; overflow:hidden;">
+            <div style="padding:0; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color:#0f172a; height:100vh; display:flex; flex-direction:column; background:#f1f5f9; overflow:hidden;">
 
                 <!-- ══ FULL SCREEN STEPPER HEADER WITH BACK BUTTON ══ -->
                 <div class="glass-header" style="background:#0f172a; padding:1.2rem 2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-bottom:4px solid #047857; flex-shrink:0;">
@@ -2043,7 +2151,7 @@ class App {
                                     </div>
                                     <div>
                                         <label style="font-size:0.78rem; font-weight:700; color:#475569; display:block; margin-bottom:0.35rem;">Email Address *</label>
-                                        <input type="email" id="payEmail" class="form-control" required value="${this.escapeHtml(user.email || 'pilgrim@example.com')}" placeholder="e.g. pilgrim@example.com" style="border:1.5px solid #cbd5e1; border-radius:10px; padding:0.75rem 1rem; font-size:0.92rem; width:100%; outline:none;">
+                                        <input type="email" id="payEmail" class="form-control" required value="${this.escapeHtml(user.email || 'Zaireen@example.com')}" placeholder="e.g. Zaireen@example.com" style="border:1.5px solid #cbd5e1; border-radius:10px; padding:0.75rem 1rem; font-size:0.92rem; width:100%; outline:none;">
                                     </div>
                                 </div>
                             </div>
@@ -2206,11 +2314,11 @@ class App {
     async renderAdminPage() {
         const main = document.getElementById('mainContainer');
         main.innerHTML = `
-            <div class="admin-container" style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+            <div class="admin-container" style="max-width: 1400px; margin: 6rem auto 2rem; padding: 0 2rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
                     <div>
                         <h2 style="margin:0; color:#0f172a; font-size:2rem; font-weight:800;">👑 Admin Panel</h2>
-                        <p style="color:#64748b; font-size:1rem; margin-top:0.3rem;">Manage Pilgrim Requests, Offers, and Orders</p>
+                        <p style="color:#64748b; font-size:1rem; margin-top:0.3rem;">Manage Zaireen Requests, Offers, and Orders</p>
                     </div>
                     <div style="display:flex; gap:0.6rem;">
                         <button class="btn btn-outline" style="font-weight:700;" onclick="app.navigate('dashboard')">← Back to Dashboard</button>
@@ -2230,7 +2338,7 @@ class App {
 
         this.state.admin.requirements = reqs;
 
-        const totalPilgrims = reqs.reduce((sum, r) => sum + (r.travelersCount || 1), 0);
+        const totalZaireen = reqs.reduce((sum, r) => sum + (r.travelersCount || 1), 0);
         const pendingReqs = reqs.filter(r => r.status !== 'CONFIRMED' && r.status !== 'OFFERED').length;
         const totalRev = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
 
@@ -2251,8 +2359,8 @@ class App {
                     <div style="color:#64748b; font-size:0.85rem; font-weight:700; margin-top:0.4rem; text-transform:uppercase; letter-spacing:0.5px;">🎁 Offers Dispatched</div>
                 </div>
                 <div style="background:white; padding:1.5rem; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.04); border-left:4px solid #10b981;">
-                    <div style="font-size:2rem; font-weight:800; color:#10b981; line-height:1;">${totalPilgrims}</div>
-                    <div style="color:#64748b; font-size:0.85rem; font-weight:700; margin-top:0.4rem; text-transform:uppercase; letter-spacing:0.5px;">👥 Total Pilgrims</div>
+                    <div style="font-size:2rem; font-weight:800; color:#10b981; line-height:1;">${totalZaireen}</div>
+                    <div style="color:#64748b; font-size:0.85rem; font-weight:700; margin-top:0.4rem; text-transform:uppercase; letter-spacing:0.5px;">👥 Total Zaireen</div>
                 </div>
                 <div style="background:white; padding:1.5rem; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.04); border-left:4px solid #047857;">
                     <div style="font-size:2rem; font-weight:800; color:#1e293b; line-height:1;">${bookings.length}</div>
@@ -2288,7 +2396,7 @@ class App {
                             <thead>
                                 <tr>
                                     <th>Req ID</th>
-                                    <th>Pilgrim Profile</th>
+                                    <th>Zaireen Profile</th>
                                     <th>Requested Services</th>
                                     <th>Group Details</th>
                                     <th>Max Budget</th>
@@ -2301,7 +2409,7 @@ class App {
                                     <tr>
                                         <td><span style="background:#e2e8f0; color:#475569; padding:0.3rem 0.6rem; border-radius:6px; font-size:0.75rem; font-weight:700;">${(r.id || '').substring(0, 8)}</span></td>
                                         <td>
-                                            <strong style="color:#0f172a;">${this.escapeHtml(r.userName || 'Pilgrim User')}</strong><br>
+                                            <strong style="color:#0f172a;">${this.escapeHtml(r.userName || 'Zaireen User')}</strong><br>
                                             <small style="color:#64748b;">${this.escapeHtml(r.userEmail || 'user@example.com')}</small><br>
                                             <small style="color:#047857; font-weight:700;">📞 ${this.escapeHtml(r.userPhone || 'N/A')}</small>
                                         </td>
@@ -2363,7 +2471,7 @@ class App {
                                             </div>
                                         </td>
                                     </tr>
-                                `).join('') : `<tr><td colspan="7" style="text-align:center; padding:3rem; color:#64748b; font-size:1.1rem;">No active pilgrim requests found.</td></tr>`}
+                                `).join('') : `<tr><td colspan="7" style="text-align:center; padding:3rem; color:#64748b; font-size:1.1rem;">No active Zaireen requests found.</td></tr>`}
                             </tbody>
                         </table>
                     </div>
@@ -2378,7 +2486,7 @@ class App {
                             <thead>
                                 <tr>
                                     <th>Offer ID / Req ID</th>
-                                    <th>Pilgrim Info</th>
+                                    <th>Zaireen Info</th>
                                     <th>Package Offered</th>
                                     <th>Pricing Structure</th>
                                     <th>Status</th>
@@ -2394,7 +2502,7 @@ class App {
                                             <span style="background:#e2e8f0; color:#475569; padding:0.25rem 0.5rem; border-radius:6px; font-size:0.7rem; font-weight:700;">Req: ${(o.requirementId || '').substring(0, 8)}</span>
                                         </td>
                                         <td>
-                                            <strong style="color:#0f172a;">${this.escapeHtml(linkedReq.userName || 'Pilgrim User')}</strong><br>
+                                            <strong style="color:#0f172a;">${this.escapeHtml(linkedReq.userName || 'Zaireen User')}</strong><br>
                                             <small style="color:#64748b;">${this.escapeHtml(linkedReq.userEmail || 'user@example.com')}</small>
                                         </td>
                                         <td>
@@ -2428,7 +2536,7 @@ class App {
                             <thead>
                                 <tr>
                                     <th>Booking Ref</th>
-                                    <th>Customer / Pilgrim</th>
+                                    <th>Customer / Zaireen</th>
                                     <th>Booked Package</th>
                                     <th>Total Paid</th>
                                     <th>Order Date</th>
@@ -2443,13 +2551,13 @@ class App {
                                             ${b.requirementId ? `<small style="color:#64748b; display:inline-block; margin-top:0.4rem;">Req: ${(b.requirementId || '').substring(0, 8)}</small>` : ''}
                                         </td>
                                         <td>
-                                            <strong style="color:#0f172a;">${this.escapeHtml(b.userName || 'Pilgrim User')}</strong><br>
+                                            <strong style="color:#0f172a;">${this.escapeHtml(b.userName || 'Zaireen User')}</strong><br>
                                             <small style="color:#64748b;">${this.escapeHtml(b.userEmail || 'user@example.com')}</small><br>
                                             <small style="color:#047857; font-weight:700;">📞 ${this.escapeHtml(b.userPhone || 'N/A')}</small>
                                         </td>
                                         <td>
                                             <strong style="color:#0f172a; font-size:0.95rem;">${this.escapeHtml(b.packageTitle)}</strong><br>
-                                            <small style="color:#64748b;">📅 ${b.travelDate || '12 AUGUST'} | 👥 ${b.travelersCount || 1} Pilgrims</small>
+                                            <small style="color:#64748b;">📅 ${b.travelDate || '12 AUGUST'} | 👥 ${b.travelersCount || 1} Zaireen</small>
                                         </td>
                                         <td>
                                             <strong style="color:#047857; font-size:1.15rem;">${this.formatCurrency(b.totalPrice)}</strong>
@@ -2574,7 +2682,7 @@ class App {
         const isAdminMode = mode === 'admin-login';
         const isLogin = mode === 'login' || mode === 'admin-login';
 
-        const defaultEmail = isAdminMode ? 'admin@umrah.com' : (mode === 'login' ? 'user@pilgrim.com' : '');
+        const defaultEmail = isAdminMode ? 'admin@umrah.com' : (mode === 'login' ? 'user@Zaireen.com' : '');
         const defaultPass = isLogin ? 'password123' : '';
 
         this.openModal(`
@@ -2592,7 +2700,7 @@ class App {
                             ${mode === 'admin-login' ? 'Master Control & Management.' : ''}
                         </h2>
                         <p class="auth-hero-subtext">
-                            ${isAdminMode ? 'Manage reverse bidding travel requests, dispatch custom package offers, and track verified pilgrim orders in real time.' : 'Submit your travel preferences and let 100% verified travel agencies send you direct package offers. Compare prices easily and book your Umrah trip with full confidence.'}
+                            ${isAdminMode ? 'Manage reverse bidding travel requests, dispatch custom package offers, and track verified Zaireen orders in real time.' : 'Submit your travel preferences and let 100% verified travel agencies send you direct package offers. Compare prices easily and book your Umrah trip with full confidence.'}
                         </p>
                     </div>
 
@@ -2604,7 +2712,7 @@ class App {
                             <div class="auth-testimonial-avatar">👨</div>
                             <div>
                                 <div style="font-weight:800; font-size:0.9rem; color:#ffffff;">Tariq Mahmood</div>
-                                <div style="font-size:0.78rem; color:rgba(255,255,255,0.85);">Verified Pilgrim • Kashmir</div>
+                                <div style="font-size:0.78rem; color:rgba(255,255,255,0.85);">Verified Zaireen • Kashmir</div>
                             </div>
                         </div>
                     </div>
@@ -2624,7 +2732,7 @@ class App {
                         ${mode === 'admin-login' ? 'Admin Portal Login' : ''}
                     </h3>
                     <p class="auth-panel-subtitle">
-                        ${mode === 'login' ? 'Enter your registered credentials to access your pilgrim dashboard.' : ''}
+                        ${mode === 'login' ? 'Enter your registered credentials to access your Zaireen dashboard.' : ''}
                         ${mode === 'register' ? 'Get started to access reverse bidding Umrah packages with verified agents.' : ''}
                         ${mode === 'admin-login' ? 'Authorized management access for system administration.' : ''}
                     </p>
@@ -2723,8 +2831,8 @@ class App {
                             <a href="#" onclick="app.openAuthModal('login')" style="color:#047857; font-weight:800; text-decoration:none;">Login</a>
                         ` : ''}
                         ${mode === 'admin-login' ? `
-                            Pilgrim User? 
-                            <a href="#" onclick="app.openAuthModal('login')" style="color:#047857; font-weight:800; text-decoration:none;">Pilgrim Login</a>
+                            Zaireen User? 
+                            <a href="#" onclick="app.openAuthModal('login')" style="color:#047857; font-weight:800; text-decoration:none;">Zaireen Login</a>
                         ` : ''}
                     </div>
                 </div>
@@ -2847,7 +2955,7 @@ class App {
             id: 'pkg-' + Date.now(),
             agentName: 'UMRAH TRAVELS',
             title,
-            description: `Journey of Faith, Comfort & Blessings. Complete ${duration} days pilgrimage featuring top hotels near Haram, return air tickets, Indian buffet meals, and guided ziyarat.`,
+            description: `Journey of Faith, Comfort & Blessings. Complete ${duration} days sacred journey featuring top hotels near Haram, return air tickets, Indian buffet meals, and guided ziyarat.`,
             price,
             durationDays: duration,
             distanceToHaramMakkah: distMakkah,
@@ -2890,16 +2998,16 @@ class App {
         const req = this.state.admin.requirements.find(r => r.id === reqId || r.userId === userId);
 
         this.openModal(`
-            <div style="display:flex; flex-direction:column; height:100%; max-height:88vh; font-family:'Outfit', sans-serif;">
+            <div style="display:flex; flex-direction:column; height:100%; max-height:88vh; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                 <!-- HEADER STRIP -->
                 <div style="background:linear-gradient(135deg, #022c22 0%, #047857 100%); color:#ffffff; padding:1.2rem 2rem; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #10b981;">
                     <div>
                         <div style="display:flex; align-items:center; gap:0.6rem;">
                             <span style="font-size:1.6rem;">👑</span>
-                            <h3 style="margin:0; font-size:1.35rem; font-weight:800; color:#ffffff; letter-spacing:-0.3px;">Pilgrim Request &amp; Send Offer</h3>
+                            <h3 style="margin:0; font-size:1.35rem; font-weight:800; color:#ffffff; letter-spacing:-0.3px;">Zaireen Request &amp; Send Offer</h3>
                         </div>
                         <p style="margin:0.2rem 0 0 2.2rem; font-size:0.88rem; color:#a7f3d0;">
-                            Review pilgrim request details on the left, then select or build an offer on the right.
+                            Review Zaireen request details on the left, then select or build an offer on the right.
                         </p>
                     </div>
                     <div style="display:flex; align-items:center; gap:1rem;">
@@ -2912,23 +3020,23 @@ class App {
                 <!-- MAIN 2-COLUMN CONTAINER -->
                 <div style="display:grid; grid-template-columns: 38% 62%; flex:1; overflow:hidden; background:#f8fafc;">
                     
-                    <!-- LEFT COLUMN: FULL PILGRIM DOSSIER (Scrollable) -->
+                    <!-- LEFT COLUMN: FULL ZAIREEN DOSSIER (Scrollable) -->
                     <div style="padding:1.5rem; overflow-y:auto; border-right:1px solid #e2e8f0; background:#ffffff; display:flex; flex-direction:column; gap:1.2rem;">
                         
                         <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:0.8rem; border-bottom:1.5px dashed #cbd5e1;">
                             <h4 style="margin:0; font-weight:800; color:#0f172a; font-size:1.05rem; display:flex; align-items:center; gap:0.5rem;">
-                                <span>📋</span> PILGRIM DETAILS
+                                <span>📋</span> ZAIREEN DETAILS
                             </h4>
                             <span style="background:${req && req.status === 'OFFERED' ? '#dbeafe' : '#fef3c7'}; color:${req && req.status === 'OFFERED' ? '#1d4ed8' : '#b45309'}; padding:0.25rem 0.75rem; border-radius:99px; font-size:0.78rem; font-weight:800; text-transform:uppercase;">
                                 ${req ? req.status : 'BIDDING'}
                             </span>
                         </div>
 
-                        <!-- PILGRIM PERSONAL DETAILS CARD -->
+                        <!-- ZAIREEN PERSONAL DETAILS CARD -->
                         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:1.1rem;">
-                            <div style="font-size:0.78rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.6rem;">👤 Pilgrim Profile</div>
-                            <div style="font-size:1.1rem; font-weight:800; color:#0f172a;">${this.escapeHtml(req ? req.userName : 'Pilgrim')}</div>
-                            <div style="font-size:0.88rem; color:#475569; margin-top:0.3rem;">✉️ ${this.escapeHtml(req ? req.userEmail : 'user@pilgrim.com')}</div>
+                            <div style="font-size:0.78rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.6rem;">👤 Zaireen Profile</div>
+                            <div style="font-size:1.1rem; font-weight:800; color:#0f172a;">${this.escapeHtml(req ? req.userName : 'Zaireen')}</div>
+                            <div style="font-size:0.88rem; color:#475569; margin-top:0.3rem;">✉️ ${this.escapeHtml(req ? req.userEmail : 'user@Zaireen.com')}</div>
                             <div style="font-size:0.88rem; color:#047857; font-weight:700; margin-top:0.2rem;">📞 ${this.escapeHtml(req ? req.userPhone : '9541692891')}</div>
                         </div>
 
@@ -3000,7 +3108,7 @@ class App {
 
                         <!-- SPECIAL INSTRUCTIONS & NOTES -->
                         <div style="background:#faf5ff; border:1.5px solid #e9d5ff; border-radius:14px; padding:1.1rem;">
-                            <div style="font-size:0.78rem; font-weight:800; color:#6b21a8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.4rem;">📝 Special Pilgrim Requests</div>
+                            <div style="font-size:0.78rem; font-weight:800; color:#6b21a8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.4rem;">📝 Special Zaireen Requests</div>
                             <p style="font-size:0.88rem; color:#4c1d95; margin:0; line-height:1.5; font-style:italic;">
                                 "${this.escapeHtml(req ? req.specialNotes || 'No special requirements mentioned.' : 'No special requirements mentioned.')}"
                             </p>
@@ -3068,7 +3176,7 @@ class App {
                             </div>
 
                             <button type="submit" class="gradient-btn" style="padding:1rem 2rem; font-size:1.1rem;">
-                                🚀 SEND OFFER TO PILGRIM NOW
+                                🚀 SEND OFFER TO ZAIREEN NOW
                             </button>
                         </form>
 
@@ -3081,7 +3189,7 @@ class App {
 
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.2rem;">
                                 <div class="form-group">
-                                    <label style="font-weight:700; color:#0f172a; font-size:0.9rem; display:block; margin-bottom:0.4rem;">Offered Price per Pilgrim (₹) *</label>
+                                    <label style="font-weight:700; color:#0f172a; font-size:0.9rem; display:block; margin-bottom:0.4rem;">Offered Price per Zaireen (₹) *</label>
                                     <input type="number" id="custPrice" class="form-control premium-input" required value="${req ? req.maxBudget : 125000}">
                                 </div>
                                 <div class="form-group">
@@ -3118,7 +3226,7 @@ class App {
                             </div>
 
                             <button type="submit" class="gradient-btn" style="padding:1rem 2rem; font-size:1.1rem;">
-                                🚀 PUBLISH &amp; DISPATCH CUSTOM OFFER TO PILGRIM
+                                🚀 PUBLISH &amp; DISPATCH CUSTOM OFFER TO ZAIREEN
                             </button>
                         </form>
                     </div>
@@ -3273,7 +3381,7 @@ class App {
             if (offersLink) offersLink.style.display = 'inline-flex';
         }
 
-        this.showToast(`Custom offer for "${offerObj.packageTitle}" sent to pilgrim! It is now live on the Available Offers tab.`, 'success');
+        this.showToast(`Custom offer for "${offerObj.packageTitle}" sent to Zaireen! It is now live on the Available Offers tab.`, 'success');
         this.closeModal();
 
         if (this.state.currentPage === 'admin') {
@@ -3329,7 +3437,7 @@ class App {
                         <input type="date" id="bookDate" class="form-control" required value="2026-08-12">
                     </div>
                     <div class="form-group" style="margin-bottom:1rem;">
-                        <label>Number of Pilgrims</label>
+                        <label>Number of Zaireen</label>
                         <input type="number" id="bookCount" class="form-control" min="1" max="${pkg.availableSeats}" value="1" onchange="document.getElementById('calcTotal').innerText = app.formatCurrency(this.value * ${pkg.price})">
                     </div>
                     <div class="form-group" style="margin-bottom:1rem;">
@@ -3337,7 +3445,7 @@ class App {
                         <input type="tel" id="bookPhone" class="form-control" required value="9541692891">
                     </div>
                     
-                    <h4 style="margin-top:1.2rem; margin-bottom:0.8rem;">Pilgrim 1 Passport Info</h4>
+                    <h4 style="margin-top:1.2rem; margin-bottom:0.8rem;">Zaireen 1 Passport Info</h4>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
                         <div class="form-group">
                             <label>Full Legal Name</label>
@@ -3454,7 +3562,7 @@ class App {
                     <div style="text-align:center; flex:1;">
                         <div class="section-eyebrow" style="margin-bottom:0.4rem;">—— SACRED KNOWLEDGE & RITUALS ——</div>
                         <h2 style="font-size:2.4rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem;">Hajj & Umrah Complete Guides</h2>
-                        <p style="color:#64748b; font-size:1rem; max-width:700px; margin:0 auto;">Essential step-by-step rituals, Miqat boundaries, Ihram rules, Nusuk permits, and spiritual advice for your sacred pilgrimage.</p>
+                        <p style="color:#64748b; font-size:1rem; max-width:700px; margin:0 auto;">Essential step-by-step rituals, Miqat boundaries, Ihram rules, Nusuk permits, and spiritual advice for your sacred sacred journey.</p>
                     </div>
                     <div style="width:130px;"></div>
                 </div>
@@ -3561,7 +3669,7 @@ class App {
     openContactModal() {
         this.openModal(`
             <div class="modal-header">
-                <h3>📞 Contact Pilgrim Support (24/7)</h3>
+                <h3>📞 Contact Zaireen Support (24/7)</h3>
             </div>
             <div class="modal-body">
                 <p style="font-size:0.9rem; color:#64748b; margin-bottom:1.5rem;">Have questions about travel dates, custom requirements, or agent offers? Reach out to us anytime.</p>
@@ -3593,7 +3701,7 @@ class App {
     openFeedbackModal() {
         this.openModal(`
             <div class="modal-header">
-                <h3>⭐ Pilgrim Feedback & Rating</h3>
+                <h3>⭐ Zaireen Feedback & Rating</h3>
             </div>
             <div class="modal-body">
                 <p style="font-size:0.9rem; color:#64748b; margin-bottom:1.2rem;">Share your experience with GoExergy Umrah reverse bidding platform.</p>
@@ -3606,7 +3714,7 @@ class App {
                         <label>Your Feedback Comments</label>
                         <textarea id="feedbackText" class="form-control" rows="3" required placeholder="What did you like about getting competitive package offers?"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width:100%;">Submit Pilgrim Rating ⭐</button>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Submit Zaireen Rating ⭐</button>
                 </form>
             </div>
         `);
@@ -3615,6 +3723,150 @@ class App {
     submitFeedback() {
         this.showToast('Thank you for your valuable feedback!', 'success');
         this.closeModal();
+    }
+
+    /* ============================================================================
+       LIQUID GLASS FEEDBACK SLIDER LOGIC
+       ============================================================================ */
+    onFeedbackSliderChange(val) {
+        const rating = parseInt(val, 10);
+        const rangeInput = document.getElementById('glassFeedbackRange');
+        if (rangeInput) {
+            const percent = ((rating - 1) / 4) * 100;
+            rangeInput.style.setProperty('--slider-percent', `${percent}%`);
+        }
+
+        // Tick active state update
+        const tickItems = document.querySelectorAll('.slider-tick-item');
+        tickItems.forEach((tick, idx) => {
+            if (idx + 1 === rating) {
+                tick.classList.add('active');
+            } else {
+                tick.classList.remove('active');
+            }
+        });
+
+        // Config per rating tier
+        const ratingConfig = {
+            1: { emoji: '😞', scoreText: '1.0 / 5.0 — Needs Improvement', desc: 'We apologize if your experience was unsatisfactory. Please share how we can improve!', color: '#e11d48' },
+            2: { emoji: '😐', scoreText: '2.0 / 5.0 — Below Average', desc: 'We appreciate your honest rating and will work hard to address any concerns.', color: '#ea580c' },
+            3: { emoji: '🙂', scoreText: '3.0 / 5.0 — Good Experience', desc: 'Thank you! We aim to make your sacred journey booking process smooth and effortless.', color: '#d97706' },
+            4: { emoji: '😊', scoreText: '4.0 / 5.0 — Great Experience!', desc: 'Awesome! We are glad you found posting your travel requirement easy.', color: '#059669' },
+            5: { emoji: '🤩', scoreText: '5.0 / 5.0 — Outstanding Loved It!', desc: 'We\'re thrilled! Verified agents are actively reviewing your requirement.', color: '#047857' }
+        };
+
+        const current = ratingConfig[rating] || ratingConfig[5];
+        const emojiBadge = document.getElementById('liquidEmojiBadge');
+        const scoreText = document.getElementById('liquidScoreText');
+        const descText = document.getElementById('liquidDescText');
+
+        if (emojiBadge) {
+            emojiBadge.textContent = current.emoji;
+            emojiBadge.classList.remove('pop-anim');
+            void emojiBadge.offsetWidth; // Trigger reflow
+            emojiBadge.classList.add('pop-anim');
+        }
+        if (scoreText) {
+            scoreText.textContent = current.scoreText;
+            scoreText.style.color = current.color;
+        }
+        if (descText) {
+            descText.textContent = current.desc;
+        }
+    }
+
+    setFeedbackSliderValue(val) {
+        const rangeInput = document.getElementById('glassFeedbackRange');
+        if (rangeInput) {
+            rangeInput.value = val;
+            this.onFeedbackSliderChange(val);
+        }
+    }
+
+    toggleFeedbackChip(chip) {
+        if (chip) {
+            chip.classList.toggle('selected');
+        }
+    }
+
+    submitLiquidGlassFeedback() {
+        const rangeInput = document.getElementById('glassFeedbackRange');
+        const rating = rangeInput ? rangeInput.value : 5;
+        const selectedChips = Array.from(document.querySelectorAll('.liquid-chip.selected')).map(c => c.textContent.trim());
+        const note = document.getElementById('liquidFeedbackNote') ? document.getElementById('liquidFeedbackNote').value : '';
+
+        const feedbackData = {
+            rating: parseInt(rating, 10),
+            highlights: selectedChips,
+            comments: note,
+            timestamp: new Date().toISOString()
+        };
+
+        const existingList = JSON.parse(localStorage.getItem('umrah_liquid_feedback') || '[]');
+        existingList.push(feedbackData);
+        localStorage.setItem('umrah_liquid_feedback', JSON.stringify(existingList));
+
+        const formView = document.getElementById('liquidFeedbackFormView');
+        const successView = document.getElementById('liquidFeedbackSuccessView');
+
+        if (formView && successView) {
+            formView.style.display = 'none';
+            successView.style.display = 'block';
+        }
+
+        this.showToast('JazakAllah Khair! Your rating & feedback has been saved.', 'success');
+    }
+
+    resetLiquidGlassFeedbackForm() {
+        const formView = document.getElementById('liquidFeedbackFormView');
+        const successView = document.getElementById('liquidFeedbackSuccessView');
+
+        if (formView && successView) {
+            successView.style.display = 'none';
+            formView.style.display = 'block';
+        }
+    }
+
+    slideReviewCarousel(direction) {
+        const track = document.getElementById('ZaireenReviewTrack');
+        if (!track) return;
+        
+        if (this.currentReviewSlide === undefined) this.currentReviewSlide = 0;
+        
+        const totalCards = track.children.length;
+        let cardsPerView = 3;
+        if (window.innerWidth <= 640) cardsPerView = 1;
+        else if (window.innerWidth <= 992) cardsPerView = 2;
+
+        const maxSlide = Math.max(0, totalCards - cardsPerView);
+        this.currentReviewSlide += direction;
+
+        if (this.currentReviewSlide < 0) this.currentReviewSlide = maxSlide;
+        if (this.currentReviewSlide > maxSlide) this.currentReviewSlide = 0;
+
+        this.goToReviewSlide(this.currentReviewSlide);
+    }
+
+    goToReviewSlide(slideIndex) {
+        const track = document.getElementById('ZaireenReviewTrack');
+        if (!track) return;
+
+        this.currentReviewSlide = slideIndex;
+        let cardsPerView = 3;
+        if (window.innerWidth <= 640) cardsPerView = 1;
+        else if (window.innerWidth <= 992) cardsPerView = 2;
+
+        const cardWidthPercent = 100 / cardsPerView;
+        const shiftPercent = slideIndex * cardWidthPercent;
+
+        track.style.transform = `translateX(-${shiftPercent}%)`;
+
+        // Update active dot
+        const dots = document.querySelectorAll('.carousel-dot');
+        dots.forEach((dot, idx) => {
+            if (idx === slideIndex) dot.classList.add('active');
+            else dot.classList.remove('active');
+        });
     }
 
     toggleMobileMenu() {
@@ -3638,8 +3890,8 @@ class App {
         try {
             const systemContext = `You are the official AI Assistant for GoExergy Umrah & Hajj reverse-bidding travel platform.
 Website Information:
-- Platform: GoExergy connects pilgrims directly with 100% verified travel agencies.
-- How it works: Pilgrims fill out a custom travel request form (departure date, duration, travelers count, hotel preference, budget).
+- Platform: GoExergy connects Zaireen directly with 100% verified travel agencies.
+- How it works: Zaireen fill out a custom travel request form (departure date, duration, travelers count, hotel preference, budget).
 - Reverse Bidding: Verified travel agents review the request and submit tailored discounted package offers (15-20% off original price).
 - Features: 100% Verified Agents, Best Price Guarantee, Dual-column Amazon-style Order Review before paying, 24/7 Customer Support (+966 800 123 4567 / 9541692891), Complete Hajj & Umrah Step-by-Step Guides.
 - Payment Options: Instant UPI (GPay, PhonePe, Paytm), Credit/Debit Cards, Net Banking, Direct Bank Transfer / Office Visit.
@@ -3707,13 +3959,13 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
             return '🚪 Cancellations: You can view or cancel any active travel request anytime from your User Dashboard by clicking "Cancel Request".';
         }
         if (lower.includes('login') || lower.includes('signup') || lower.includes('register') || lower.includes('account')) {
-            return '👤 Account Sign In: Click the "Login" or "Sign Up" button in the top navigation bar to create or access your pilgrim account.';
+            return '👤 Account Sign In: Click the "Login" or "Sign Up" button in the top navigation bar to create or access your Zaireen account.';
         }
         if (lower.includes('contact') || lower.includes('support') || lower.includes('phone') || lower.includes('number') || lower.includes('help')) {
-            return '📞 24/7 Pilgrim Support: Call us anytime at +966 800 123 4567 or 9541692891, or send an email to support@goexergy-umrah.com.';
+            return '📞 24/7 Zaireen Support: Call us anytime at +966 800 123 4567 or 9541692891, or send an email to support@goexergy-umrah.com.';
         }
         if (lower.includes('why') || lower.includes('choose')) {
-            return '🌟 Why Choose Us: 100% Verified Travel Agents, Transparent Pricing, Zero Hidden Fees, Best Price Guarantee, and 24/7 Pilgrim Support!';
+            return '🌟 Why Choose Us: 100% Verified Travel Agents, Transparent Pricing, Zero Hidden Fees, Best Price Guarantee, and 24/7 Zaireen Support!';
         }
 
         return `Thank you for reaching out! GoExergy helps you get the best Umrah package offers from verified travel agents. You can submit a travel request, compare offers, and book securely. Feel free to ask about prices, hotels, flights, or guides!`;
