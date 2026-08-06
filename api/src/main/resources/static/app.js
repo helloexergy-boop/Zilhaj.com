@@ -1099,205 +1099,200 @@ class App {
 
     renderCustomRequirementForm() {
         return `
-            <div style="max-width:820px; margin:2.5rem auto; padding:0 1rem; display:flex; flex-direction:column; gap:1.8rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            <div style="max-width:820px; margin:2.5rem auto; padding:0 1rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                <!-- Single Unified Requirement Card -->
+                <div style="background:#ffffff; border-radius:24px; border:1.5px solid #e2e8f0; box-shadow:0 12px 35px rgba(0,0,0,0.04); padding:2.5rem 2.2rem;">
 
-                <!-- Header Eyebrow & Title Card -->
-                <div style="background:linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border-radius:20px; padding:2rem; border:1.5px solid #bbf7d0; box-shadow:0 10px 30px rgba(4,120,87,0.06); text-align:center;">
-                    <div style="display:inline-flex; align-items:center; gap:0.5rem; background:#dcfce7; color:#047857; padding:0.4rem 1.1rem; border-radius:99px; font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:0.8rem;">
-                        ✨ EASY UMRAH PACKAGES
+                    <!-- Top Unified Header Section -->
+                    <div style="text-align:center; padding-bottom:1.8rem; border-bottom:1.5px dashed #e2e8f0; margin-bottom:2rem;">
+                        <div style="display:inline-flex; align-items:center; gap:0.5rem; background:#ecfdf5; color:#047857; padding:0.4rem 1.1rem; border-radius:99px; font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:0.8rem;">
+                            ✨ EASY UMRAH PACKAGES
+                        </div>
+                        <h2 style="font-size:2.2rem; font-weight:900; color:#0f172a; margin:0 0 0.5rem; letter-spacing:-0.5px;">Post Your Travel Requirement</h2>
+                        <p style="font-size:0.95rem; color:#64748b; margin:0 auto; max-width:620px; line-height:1.6;">
+                            Enter your travel dates, group size, and preferences. Verified travel agents will send you their best price offers!
+                        </p>
                     </div>
-                    <h2 style="font-size:2rem; font-weight:800; color:#0f172a; margin:0 0 0.5rem; letter-spacing:-0.5px;">Post Your Travel Requirement</h2>
-                    <p style="font-size:0.95rem; color:#64748b; margin:0 auto; max-width:620px; line-height:1.6;">
-                        Enter your travel dates, group size, and preferences. Verified travel agents will send you their best price offers!
-                    </p>
-                </div>
 
-            <!-- Multi-Step Form Wrapper -->
-            <div class="step-indicator">
-                <div class="step-dot active" id="dot1">1</div>
-                <div class="step-dot" id="dot2">2</div>
-                <div class="step-dot" id="dot3">3</div>
-            </div>
-            
-            <form onsubmit="event.preventDefault(); app.submitRequirementForm();" style="display:flex; flex-direction:column; gap:1.8rem;">
+                    <form onsubmit="event.preventDefault(); app.submitRequirementForm();" style="display:flex; flex-direction:column; gap:1.5rem;">
 
-                <!-- STEP 1: Travel & Accommodation -->
-                <div class="form-step active" id="step1">
-                    <div class="premium-card" style="margin-bottom:1.5rem;">
-                        <div style="display:flex; align-items:center; gap:0.8rem; border-bottom:1.5px dashed #e2e8f0; padding-bottom:1rem; margin-bottom:1.5rem;">
-                            <div style="width:42px; height:42px; background:#dcfce7; color:#047857; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800;">📅</div>
-                            <div>
-                                <h3 style="font-size:1.15rem; font-weight:800; color:#0f172a; margin:0;">1. Travel & Hotel Preferences</h3>
-                                <p style="font-size:0.82rem; color:#64748b; margin:0.15rem 0 0 0;">Specify when and how you prefer to travel</p>
+                        <!-- STEP 1: Travel & Accommodation -->
+                        <div class="form-step active" id="step1">
+                            <div style="display:flex; align-items:center; gap:0.8rem; border-bottom:1.5px dashed #e2e8f0; padding-bottom:1rem; margin-bottom:1.5rem;">
+                                <div style="width:42px; height:42px; background:#dcfce7; color:#047857; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800;">📅</div>
+                                <div>
+                                    <h3 style="font-size:1.2rem; font-weight:800; color:#0f172a; margin:0;">1. Travel & Hotel Preferences</h3>
+                                    <p style="font-size:0.82rem; color:#64748b; margin:0.15rem 0 0 0;">Specify when and how you prefer to travel</p>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="form-group" style="margin-bottom:1.4rem;">
-                            <label style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:0.4rem; margin-bottom:0.6rem; font-size:0.92rem;">
-                                📅 Preferred Departure Date *
-                            </label>
-                            <input type="date" id="reqDateRange" class="form-control premium-input" required>
-                        </div>
-
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.4rem;">
-                            <div class="form-group">
+                            
+                            <div class="form-group" style="margin-bottom:1.4rem;">
                                 <label style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:0.4rem; margin-bottom:0.6rem; font-size:0.92rem;">
-                                    ✈️ Departure City *
+                                    📅 PREFERRED DEPARTURE DATE *
                                 </label>
-                                <input type="text" id="reqDepartureCity" class="form-control premium-input" placeholder="e.g. Srinagar / Delhi / Mumbai">
+                                <input type="date" id="reqDateRange" class="form-control premium-input" required>
                             </div>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.4rem;">
+                                <div class="form-group">
+                                    <label style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:0.4rem; margin-bottom:0.6rem; font-size:0.92rem;">
+                                        ✈️ DEPARTURE CITY *
+                                    </label>
+                                    <input type="text" id="reqDepartureCity" class="form-control premium-input" placeholder="e.g. Srinagar / Delhi / Mumbai" required>
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:0.4rem; margin-bottom:0.6rem; font-size:0.92rem;">
+                                        🏨 HOTEL STAR CATEGORY *
+                                    </label>
+                                    <select id="reqHotelType" class="form-control premium-input" required>
+                                        <option value="" disabled selected>Select Hotel Class...</option>
+                                        <option value="5-Star Luxury (< 300m from Haram)">🌟 5-Star Luxury (&lt; 300m from Haram)</option>
+                                        <option value="4-Star Deluxe (< 600m from Haram)">⭐ 4-Star Deluxe (&lt; 600m from Haram)</option>
+                                        <option value="3-Star Standard (< 900m from Haram)">🏨 3-Star Standard (&lt; 900m from Haram)</option>
+                                        <option value="Economy / Budget Accommodation">🪙 Economy / Budget Accommodation</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <div class="form-group">
-                                <label style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:0.4rem; margin-bottom:0.6rem; font-size:0.92rem;">
-                                    🏨 Hotel Star Category *
-                                </label>
-                                <select id="reqHotelType" class="form-control premium-input" required>
-                                    <option value="" disabled selected>Select Hotel Class...</option>
-                                    <option value="5-Star Luxury (< 300m from Haram)">🌟 5-Star Luxury (&lt; 300m from Haram)</option>
-                                    <option value="4-Star Deluxe (< 600m from Haram)">⭐ 4-Star Deluxe (&lt; 600m from Haram)</option>
-                                    <option value="3-Star Standard (< 900m from Haram)">🏨 3-Star Standard (&lt; 900m from Haram)</option>
-                                    <option value="Economy / Budget Accommodation">🪙 Economy / Budget Accommodation</option>
+                                <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">⏳ PACKAGE DURATION *</label>
+                                <select id="reqDuration" class="form-control premium-input" required>
+                                    <option value="10">10 Days Short Tour</option>
+                                    <option value="14">14 Days Standard Sacred Journey</option>
+                                    <option value="18" selected>18 Days Recommended Tour</option>
+                                    <option value="21">21 Days Extended Stay</option>
+                                    <option value="25">25 Days Full Sacred Journey</option>
+                                    <option value="28">28 Days Ramadan Special</option>
+                                    <option value="30">30 Days Full Month</option>
                                 </select>
                             </div>
+
+                            <div style="display:flex; justify-content:flex-end; margin-top:1.8rem;">
+                                <button type="button" onclick="app.nextFormStep(2)" style="background:linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); color:#ffffff; font-weight:700; font-size:0.95rem; padding:0.8rem 2.2rem; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(79, 70, 229, 0.35); transition:all 0.2s ease;">Next Step →</button>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">⏳ Package Duration *</label>
-                            <select id="reqDuration" class="form-control premium-input" required>
-                                <option value="10">10 Days Short Tour</option>
-                                <option value="14">14 Days Standard Sacred Journey</option>
-                                <option value="18" selected>18 Days Recommended Tour</option>
-                                <option value="21">21 Days Extended Stay</option>
-                                <option value="25">25 Days Full Sacred Journey</option>
-                                <option value="28">28 Days Ramadan Special</option>
-                                <option value="30">30 Days Full Month</option>
-                            </select>
+                        <!-- STEP 2: Contact & Group Size -->
+                        <div class="form-step" id="step2">
+                            <div style="display:flex; align-items:center; gap:0.8rem; border-bottom:1.5px dashed #e2e8f0; padding-bottom:1rem; margin-bottom:1.5rem;">
+                                <div style="width:42px; height:42px; background:#dbeafe; color:#1d4ed8; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800;">📍</div>
+                                <div>
+                                    <h3 style="font-size:1.2rem; font-weight:800; color:#0f172a; margin:0;">2. Contact & Group Details</h3>
+                                </div>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.4rem;">
+                                <div class="form-group">
+                                    <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">STATE *</label>
+                                    <select id="reqState" class="form-control premium-input" required>
+                                        <option value="" disabled selected>Select State...</option>
+                                        <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                        <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                        <option value="Assam">Assam</option>
+                                        <option value="Bihar">Bihar</option>
+                                        <option value="Chandigarh">Chandigarh</option>
+                                        <option value="Chhattisgarh">Chhattisgarh</option>
+                                        <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                                        <option value="Delhi">Delhi</option>
+                                        <option value="Goa">Goa</option>
+                                        <option value="Gujarat">Gujarat</option>
+                                        <option value="Haryana">Haryana</option>
+                                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                        <option value="Jharkhand">Jharkhand</option>
+                                        <option value="Karnataka">Karnataka</option>
+                                        <option value="Kerala">Kerala</option>
+                                        <option value="Ladakh">Ladakh</option>
+                                        <option value="Lakshadweep">Lakshadweep</option>
+                                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                        <option value="Maharashtra">Maharashtra</option>
+                                        <option value="Manipur">Manipur</option>
+                                        <option value="Meghalaya">Meghalaya</option>
+                                        <option value="Mizoram">Mizoram</option>
+                                        <option value="Nagaland">Nagaland</option>
+                                        <option value="Odisha">Odisha</option>
+                                        <option value="Puducherry">Puducherry</option>
+                                        <option value="Punjab">Punjab</option>
+                                        <option value="Rajasthan">Rajasthan</option>
+                                        <option value="Sikkim">Sikkim</option>
+                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                        <option value="Telangana">Telangana</option>
+                                        <option value="Tripura">Tripura</option>
+                                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                        <option value="Uttarakhand">Uttarakhand</option>
+                                        <option value="West Bengal">West Bengal</option>
+                                        <option value="Other International / NRI">Other International / NRI</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">DISTRICT *</label>
+                                    <input type="text" id="reqDistrict" class="form-control premium-input" placeholder="e.g. Srinagar" required>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom:2rem;">
+                                <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">FULL STREET ADDRESS *</label>
+                                <input type="text" id="reqAddress" class="form-control premium-input" placeholder="House/Flat No., Street, Area..." required>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:1.6rem;">
+                                <div class="form-group" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                                    <label style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.88rem; display:block;">👨 MALES *</label>
+                                    <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                                        <button type="button" onclick="app.adjustCounter('reqMales', -1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer;">-</button>
+                                        <input type="number" id="reqMales" min="0" value="1" required readonly style="width:40px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
+                                        <button type="button" onclick="app.adjustCounter('reqMales', 1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer;">+</button>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                                    <label style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.88rem; display:block;">👩 FEMALES *</label>
+                                    <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                                        <button type="button" onclick="app.adjustCounter('reqFemales', -1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer;">-</button>
+                                        <input type="number" id="reqFemales" min="0" value="1" required readonly style="width:40px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
+                                        <button type="button" onclick="app.adjustCounter('reqFemales', 1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer;">+</button>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                                    <label style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.82rem; display:block;">👶 CHILDREN(&lt;5 YRS) *</label>
+                                    <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                                        <button type="button" onclick="app.adjustCounter('reqChildren', -1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer;">-</button>
+                                        <input type="number" id="reqChildren" min="0" value="0" required readonly style="width:40px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
+                                        <button type="button" onclick="app.adjustCounter('reqChildren', 1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer;">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="background:linear-gradient(135deg, #ecfdf5 0%, #dcfce7 100%); border:1.5px solid #86efac; border-radius:14px; padding:0.9rem 1.4rem; display:flex; align-items:center; justify-content:space-between;">
+                                <div style="display:flex; align-items:center; gap:0.6rem;">
+                                    <span style="font-size:1.4rem;">👥</span>
+                                    <span style="font-weight:800; color:#065f46; font-size:0.95rem;">Total Group Size</span>
+                                </div>
+                                <input type="text" id="totalTravelersBadge" readonly value="2" style="border:2px solid #047857; border-radius:10px; padding:0.4rem 1rem; font-size:1.1rem; font-weight:800; color:#047857; width:110px; text-align:center; background:#ffffff; box-sizing:border-box;">
+                            </div>
+
+                            <div style="display:flex; gap:1rem; margin-top:1.8rem;">
+                                <button type="button" style="background:#ffffff; color:#475569; border:1.5px solid #cbd5e1; border-radius:10px; font-weight:700; font-size:0.95rem; padding:0.8rem; cursor:pointer; width:30%; transition:all 0.2s ease;" onclick="app.prevFormStep(1)">← Back</button>
+                                <button type="button" style="background:#0f172a; color:#ffffff; border-radius:10px; font-weight:700; font-size:0.95rem; padding:0.8rem; border:none; cursor:pointer; width:70%; box-shadow:0 4px 14px rgba(15,23,42,0.25); transition:all 0.2s ease;" onclick="app.nextFormStep(3)">Next Step →</button>
+                            </div>
                         </div>
-                    </div>
-                    <button type="button" class="gradient-btn" onclick="app.nextFormStep(2)">Next Step →</button>
+
+                        <!-- STEP 3: Notes -->
+                        <div class="form-step" id="step3">
+                            <div style="display:flex; align-items:center; gap:0.8rem; border-bottom:1.5px dashed #e2e8f0; padding-bottom:1rem; margin-bottom:1.2rem;">
+                                <div style="width:42px; height:42px; background:#f3e8ff; color:#7e22ce; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800;">📝</div>
+                                <div>
+                                    <h3 style="font-size:1.2rem; font-weight:800; color:#0f172a; margin:0;">3. Additional Preferences &amp; Requests</h3>
+                                </div>
+                            </div>
+                            <textarea id="reqNotes" class="form-control premium-input" rows="4" required placeholder="e.g. Prefer direct flights, wheelchair assistance needed, vegetarian meals..." style="resize:vertical;"></textarea>
+
+                            <div style="display:flex; gap:1rem; margin-top:1.8rem;">
+                                <button type="button" style="background:#ffffff; color:#475569; border:1.5px solid #cbd5e1; border-radius:10px; font-weight:700; font-size:0.95rem; padding:0.8rem; cursor:pointer; width:30%; transition:all 0.2s ease;" onclick="app.prevFormStep(2)">← Back</button>
+                                <button type="submit" style="background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; border-radius:10px; font-weight:800; font-size:0.95rem; padding:0.8rem; border:none; cursor:pointer; width:70%; box-shadow:0 4px 14px rgba(4,120,87,0.35); transition:all 0.2s ease;">🚀 SUBMIT REQUEST</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-
-                <!-- STEP 2: Contact & Group Size -->
-                <div class="form-step" id="step2">
-                    <div class="premium-card" style="margin-bottom:1.5rem;">
-                        <div style="display:flex; align-items:center; gap:0.8rem; border-bottom:1.5px dashed #e2e8f0; padding-bottom:1rem; margin-bottom:1.5rem;">
-                            <div style="width:42px; height:42px; background:#dbeafe; color:#1d4ed8; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800;">📍</div>
-                            <div>
-                                <h3 style="font-size:1.15rem; font-weight:800; color:#0f172a; margin:0;">2. Contact & Group Details</h3>
-                            </div>
-                        </div>
-
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.4rem;">
-                            <div class="form-group">
-                                <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">State *</label>
-                                <select id="reqState" class="form-control premium-input" required>
-                                    <option value="" disabled selected>Select State...</option>
-                                    <option value="Jammu and Kashmir">Jammu and Kashmir</option>
-                                    <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
-                                    <option value="Andhra Pradesh">Andhra Pradesh</option>
-                                    <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                                    <option value="Assam">Assam</option>
-                                    <option value="Bihar">Bihar</option>
-                                    <option value="Chandigarh">Chandigarh</option>
-                                    <option value="Chhattisgarh">Chhattisgarh</option>
-                                    <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
-                                    <option value="Delhi">Delhi</option>
-                                    <option value="Goa">Goa</option>
-                                    <option value="Gujarat">Gujarat</option>
-                                    <option value="Haryana">Haryana</option>
-                                    <option value="Himachal Pradesh">Himachal Pradesh</option>
-                                    <option value="Jharkhand">Jharkhand</option>
-                                    <option value="Karnataka">Karnataka</option>
-                                    <option value="Kerala">Kerala</option>
-                                    <option value="Ladakh">Ladakh</option>
-                                    <option value="Lakshadweep">Lakshadweep</option>
-                                    <option value="Madhya Pradesh">Madhya Pradesh</option>
-                                    <option value="Maharashtra">Maharashtra</option>
-                                    <option value="Manipur">Manipur</option>
-                                    <option value="Meghalaya">Meghalaya</option>
-                                    <option value="Mizoram">Mizoram</option>
-                                    <option value="Nagaland">Nagaland</option>
-                                    <option value="Odisha">Odisha</option>
-                                    <option value="Puducherry">Puducherry</option>
-                                    <option value="Punjab">Punjab</option>
-                                    <option value="Rajasthan">Rajasthan</option>
-                                    <option value="Sikkim">Sikkim</option>
-                                    <option value="Tamil Nadu">Tamil Nadu</option>
-                                    <option value="Telangana">Telangana</option>
-                                    <option value="Tripura">Tripura</option>
-                                    <option value="Uttar Pradesh">Uttar Pradesh</option>
-                                    <option value="Uttarakhand">Uttarakhand</option>
-                                    <option value="West Bengal">West Bengal</option>
-                                    <option value="Other International / NRI">Other International / NRI</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">District *</label>
-                                <input type="text" id="reqDistrict" class="form-control premium-input" placeholder="e.g. Srinagar" required>
-                            </div>
-                        </div>
-                        <div class="form-group" style="margin-bottom:2rem;">
-                            <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">Full Street Address *</label>
-                            <input type="text" id="reqAddress" class="form-control premium-input" placeholder="House/Flat No., Street, Area..." required>
-                        </div>
-
-                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:1.6rem;">
-                        <div class="form-group" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
-                            <label style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.88rem; display:block;">👨 Males *</label>
-                            <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
-                                <button type="button" onclick="app.adjustCounter('reqMales', -1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer;">-</button>
-                                <input type="number" id="reqMales" min="0" value="1" required readonly style="width:40px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
-                                <button type="button" onclick="app.adjustCounter('reqMales', 1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer;">+</button>
-                            </div>
-                        </div>
-                        <div class="form-group" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
-                            <label style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.88rem; display:block;">👩 Females *</label>
-                            <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
-                                <button type="button" onclick="app.adjustCounter('reqFemales', -1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer;">-</button>
-                                <input type="number" id="reqFemales" min="0" value="1" required readonly style="width:40px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
-                                <button type="button" onclick="app.adjustCounter('reqFemales', 1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer;">+</button>
-                            </div>
-                        </div>
-                        <div class="form-group" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
-                            <label style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.82rem; display:block;">👶 Children(&lt;5 yrs) *</label>
-                            <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
-                                <button type="button" onclick="app.adjustCounter('reqChildren', -1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer;">-</button>
-                                <input type="number" id="reqChildren" min="0" value="0" required readonly style="width:40px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
-                                <button type="button" onclick="app.adjustCounter('reqChildren', 1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer;">+</button>
-                            </div>
-                        </div>
-                    </div>
-                        
-                        <div style="background:linear-gradient(135deg, #ecfdf5 0%, #dcfce7 100%); border:1.5px solid #86efac; border-radius:14px; padding:0.9rem 1.4rem; display:flex; align-items:center; justify-content:space-between;">
-                            <div style="display:flex; align-items:center; gap:0.6rem;">
-                                <span style="font-size:1.4rem;">👥</span>
-                                <span style="font-weight:800; color:#065f46; font-size:0.95rem;">Total Group Size</span>
-                            </div>
-                            <input type="text" id="totalTravelersBadge" readonly value="2" style="border:2px solid #047857; border-radius:10px; padding:0.4rem 1rem; font-size:1.1rem; font-weight:800; color:#047857; width:110px; text-align:center; background:#ffffff; box-sizing:border-box;">
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:1rem;">
-                        <button type="button" class="gradient-btn" style="background:linear-gradient(135deg, #64748b, #475569); box-shadow:none; width:30%;" onclick="app.prevFormStep(1)">← Back</button>
-                        <button type="button" class="gradient-btn" style="width:70%;" onclick="app.nextFormStep(3)">Next Step →</button>
-                    </div>
-                </div>
-
-                <!-- STEP 3: Notes -->
-                <div class="form-step" id="step3">
-                    <div class="premium-card" style="margin-bottom:1.5rem;">
-                        <div style="display:flex; align-items:center; gap:0.8rem; border-bottom:1.5px dashed #e2e8f0; padding-bottom:1rem; margin-bottom:1.2rem;">
-                            <div style="width:42px; height:42px; background:#f3e8ff; color:#7e22ce; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800;">📝</div>
-                            <div>
-                                <h3 style="font-size:1.15rem; font-weight:800; color:#0f172a; margin:0;">3. Additional Preferences &amp; Requests</h3>
-                            </div>
-                        </div>
-                        <textarea id="reqNotes" class="form-control premium-input" rows="4" placeholder="e.g. Prefer direct flights, wheelchair assistance needed, vegetarian meals..." style="resize:vertical;"></textarea>
-                    </div>
-                    <div style="display:flex; gap:1rem;">
-                        <button type="button" class="gradient-btn" style="background:linear-gradient(135deg, #64748b, #475569); box-shadow:none; width:30%;" onclick="app.prevFormStep(2)">← Back</button>
-                        <button type="submit" class="gradient-btn" style="width:70%;">🚀 SUBMIT REQUEST</button>
-                    </div>
-                </div>
-            </form>
             </div>
         `;
     }
