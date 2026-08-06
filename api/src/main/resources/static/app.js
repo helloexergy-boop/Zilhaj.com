@@ -115,9 +115,9 @@ class App {
         // Add or replace your MP4 / WebM video URLs in the array below:
         // ============================================================================
         this.heroVideos = [
+            'hero-video-2.mp4',
             'hero-video-3.mp4',
             'hero-video-1.mp4',
-            'hero-video-2.mp4',
             'hero-video-4.mp4'
         ];
 
@@ -768,7 +768,7 @@ class App {
             <section class="hero-green-banner fullscreen-hero">
 
                 <!-- Dual Video Crossfade Background (A/B stacked, seamless transition) -->
-                <video class="hero-bg-video hero-bg-video-layer" id="heroBgVideoA" autoplay muted playsinline preload="auto" src="hero-video-2.mp4" style="opacity:1; z-index:1;"></video>
+                <video class="hero-bg-video hero-bg-video-layer" id="heroBgVideoA" autoplay muted playsinline preload="auto" src="hero-video-3.mp4" style="opacity:1; z-index:1;"></video>
                 <video class="hero-bg-video hero-bg-video-layer" id="heroBgVideoB" muted playsinline preload="auto" style="opacity:0; z-index:0;"></video>
 
                 <!-- Cinematic Gradient Overlay -->
@@ -3832,9 +3832,9 @@ class App {
     slideReviewCarousel(direction) {
         const track = document.getElementById('ZaireenReviewTrack');
         if (!track) return;
-        
+
         if (this.currentReviewSlide === undefined) this.currentReviewSlide = 0;
-        
+
         const totalCards = track.children.length;
         let cardsPerView = 3;
         if (window.innerWidth <= 640) cardsPerView = 1;
