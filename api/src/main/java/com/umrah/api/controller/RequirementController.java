@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Controller managing custom pilgrim travel package requirement submissions.
+ * Controller managing custom Zaireen travel package requirement submissions.
  */
 @RestController
 @RequestMapping("/api")
@@ -42,7 +42,7 @@ public class RequirementController {
 
     /**
      * POST /api/requirements
-     * Submits a custom travel package request from a pilgrim.
+     * Submits a custom travel package request from a Zaireen.
      */
     @PostMapping("/requirements")
     @PreAuthorize("isAuthenticated()")
@@ -66,7 +66,7 @@ public class RequirementController {
 
     /**
      * GET /api/requirements/user/{userId}
-     * Retrieves custom requirements submitted by a specific pilgrim.
+     * Retrieves custom requirements submitted by a specific Zaireen.
      */
     @GetMapping("/requirements/user/{userId}")
     @PreAuthorize("isAuthenticated()")
@@ -82,7 +82,7 @@ public class RequirementController {
 
     /**
      * GET /api/admin/requirements
-     * Retrieves all pilgrim custom package requirements for Admin matching. (Requires ROLE_ADMIN)
+     * Retrieves all Zaireen custom package requirements for Admin matching. (Requires ROLE_ADMIN)
      */
     @GetMapping("/admin/requirements")
     @PreAuthorize("hasRole('ADMIN')")

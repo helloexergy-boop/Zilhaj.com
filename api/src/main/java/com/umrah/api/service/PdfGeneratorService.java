@@ -62,7 +62,7 @@ public class PdfGeneratorService {
             document.add(metaTable);
 
             // Customer Details Section
-            Paragraph custHeader = new Paragraph("PILGRIM & TRAVELER INFORMATION", subTitleFont);
+            Paragraph custHeader = new Paragraph("ZAIREEN & TRAVELER INFORMATION", subTitleFont);
             custHeader.setSpacingAfter(8);
             document.add(custHeader);
 

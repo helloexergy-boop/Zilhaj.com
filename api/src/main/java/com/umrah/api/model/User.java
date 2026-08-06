@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 /**
  * User Entity Document stored in MongoDB under the 'users' collection.
- * Represents registered users of the platform (Pilgrims/Travelers, Travel Agents, or Admins).
+ * Represents registered users of the platform (Zaireen/Travelers, Travel Agents, or Admins).
  */
 @Document(collection = "users")
 public class User {

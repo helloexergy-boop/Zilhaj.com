@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 /**
  * Requirement Document stored in MongoDB under 'requirements' collection.
- * Allows pilgrims to submit custom package requests for Admin review and recommendation.
+ * Allows Zaireen to submit custom package requests for Admin review and recommendation.
  */
 @Document(collection = "requirements")
 public class Requirement {

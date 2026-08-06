@@ -32,7 +32,7 @@ public class UmrahPackage {
     // Price per person in USD (or local currency)
     private double price;
 
-    // Total duration of the pilgrimage package in days
+    // Total duration of the sacred journey package in days
     private int durationDays;
 
     // Walking distance in meters from the Makkah hotel to Masjid al-Haram
@@ -66,7 +66,7 @@ public class UmrahPackage {
     private String flightRoute = "Return Air Ticket (SXR-JED-MED-SXR)";
     private String sharingType = "4/5 Sharing Accommodation";
     private List<String> complimentaryServices = List.of("Ahram Kit", "Laundry Service", "5 Litres Zamzam Water");
-    private String importantNote = "Rawdah permits must be booked by the pilgrim through the Nusuk App, subject to availability. The company is not responsible for the booking, availability, approval, or non-issuance of the Rawdah permit.";
+    private String importantNote = "Rawdah permits must be booked by the Zaireen through the Nusuk App, subject to availability. The company is not responsible for the booking, availability, approval, or non-issuance of the Rawdah permit.";
     private String contactPhone = "9541692891";
 
     // Inner static class defining package inclusions

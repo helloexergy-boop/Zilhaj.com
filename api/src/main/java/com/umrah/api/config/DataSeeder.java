@@ -65,8 +65,8 @@ public class DataSeeder implements CommandLineRunner {
             agent.setReviewCount(128);
             Agent savedAgent = agentRepository.save(agent);
 
-            // 4. Seed Standard Pilgrim User Account (email: user@pilgrim.com / password: password123)
-            User pilgrim = new User("Tariq Mahmood", "user@pilgrim.com", passwordEncoder.encode("password123"), "+919541692891", "ROLE_USER");
+            // 4. Seed Standard Zaireen User Account (email: user@Zaireen.com / password: password123)
+            User pilgrim = new User("Tariq Mahmood", "user@Zaireen.com", passwordEncoder.encode("password123"), "+919541692891", "ROLE_USER");
             userRepository.save(pilgrim);
 
             // 5. Seed Authentic Sample Umrah Packages from Poster
@@ -76,7 +76,7 @@ public class DataSeeder implements CommandLineRunner {
                     savedAgent.getId(),
                     savedAgent.getCompanyName(),
                     "18-Day Deluxe Umrah Package",
-                    "Journey of Faith, Comfort & Blessings. Complete 18 days pilgrimage package featuring top hotels near Haram, return air tickets, Indian buffet meals, and guided ziyarat.",
+                    "Journey of Faith, Comfort & Blessings. Complete 18 days sacred journey package featuring top hotels near Haram, return air tickets, Indian buffet meals, and guided ziyarat.",
                     125000.00,
                     18,
                     600, // 600 meters to Makkah Haram
@@ -94,7 +94,7 @@ public class DataSeeder implements CommandLineRunner {
             pkg1.setFlightRoute("Return Air Ticket (SXR-JED-MED-SXR)");
             pkg1.setSharingType("4/5 Sharing Accommodation");
             pkg1.setComplimentaryServices(Arrays.asList("Ahram Kit", "Laundry Service", "5 Litres Zamzam Water"));
-            pkg1.setImportantNote("Rawdah permits must be booked by the pilgrim through the Nusuk App, subject to availability. The company is not responsible for the booking, availability, approval, or non-issuance of the Rawdah permit.");
+            pkg1.setImportantNote("Rawdah permits must be booked by the Zaireen through the Nusuk App, subject to availability. The company is not responsible for the booking, availability, approval, or non-issuance of the Rawdah permit.");
             pkg1.setContactPhone("9541692891");
 
             UmrahPackage savedPkg1 = packageRepository.save(pkg1);
@@ -105,7 +105,7 @@ public class DataSeeder implements CommandLineRunner {
 
             logger.info("Sample database seeding completed successfully!");
             logger.info("Pre-configured Login Credentials:");
-            logger.info("   User:  email=user@pilgrim.com   password=password123");
+            logger.info("   User:  email=user@Zaireen.com   password=password123");
             logger.info("   Agent: email=agent@alharam.com  password=password123");
             logger.info("   Admin: email=admin@umrah.com    password=password123");
         }
