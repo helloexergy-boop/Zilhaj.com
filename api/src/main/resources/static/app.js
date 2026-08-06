@@ -2807,52 +2807,57 @@ class App {
         const defaultPass = isLogin ? 'password123' : '';
 
         this.openModal(`
-            <div class="two-col-auth-modal">
-                <!-- LEFT BRAND BANNER (PIXEL PERFECT MATCHING USER IMAGE) -->
-                <div class="auth-left-banner ${isAdminMode ? 'admin-banner-theme' : ''}">
+            <div class="two-col-auth-modal" style="display: grid; grid-template-columns: 45% 55%; background: #ffffff; border-radius: 24px; overflow: hidden; max-width: 960px; width: 100%; margin: 0 auto; box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.15); position: relative; border: 1px solid rgba(226, 232, 240, 0.8);">
+                <!-- LEFT BRAND BANNER (PIXEL PERFECT MATCHING MOCKUP IMAGE) -->
+                <div class="auth-left-banner ${isAdminMode ? 'admin-banner-theme' : ''}" style="background: linear-gradient(145deg, #022c22 0%, #047857 55%, #065f46 100%); padding: 3rem 2.2rem 2.5rem; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; margin: 0.75rem; border-radius: 20px;">
                     <div>
-                        <div class="auth-brand-logo">
+                        <!-- Brand Label -->
+                        <div class="auth-brand-logo" style="display: flex; align-items: center; gap: 0.6rem; font-size: 1.25rem; font-weight: 800; letter-spacing: 0.5px; color: #ffffff; margin-bottom: 2rem;">
                             <span>🕋</span>
-                            <span>UMRAH <span style="color:#f59e0b;">TRAVELS</span></span>
+                            <span>UMRAH <span style="color:#fbbf24;">TRAVELS</span></span>
                         </div>
-                        <h2 class="auth-hero-heading">
+                        
+                        <h2 class="auth-hero-heading" style="font-size: 2.2rem; font-weight: 800; line-height: 1.2; color: #ffffff; margin: 0 0 1rem 0; letter-spacing: -0.8px;">
                             ${mode === 'login' ? 'Welcome back to your sacred journey.' : ''}
                             ${mode === 'register' ? 'Start your journey with us.' : ''}
                             ${mode === 'admin-login' ? 'Master Control & Management.' : ''}
                         </h2>
-                        <p class="auth-hero-subtext">
+                        
+                        <p class="auth-hero-subtext" style="font-size: 0.92rem; color: rgba(255, 255, 255, 0.92); line-height: 1.65; margin-bottom: 2rem; font-weight: 400;">
                             ${isAdminMode ? 'Manage reverse bidding travel requests, dispatch custom package offers, and track verified Zaireen orders in real time.' : 'Submit your travel preferences and let 100% verified travel agencies send you direct package offers. Compare prices easily and book your Umrah trip with full confidence.'}
                         </p>
                     </div>
 
-                    <div class="auth-testimonial-card">
-                        <p class="auth-testimonial-quote">
+                    <!-- Testimonial Quote Box -->
+                    <div class="auth-testimonial-card" style="background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 18px; padding: 1.3rem 1.4rem; margin-top: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.08);">
+                        <p class="auth-testimonial-quote" style="font-size: 0.85rem; color: #ffffff; line-height: 1.55; font-weight: 500; margin: 0 0 1rem 0;">
                             "Booking our family Umrah package through GoExergy saved us over ₹35,000. Verified 5-star hotels right next to Al-Haram!"
                         </p>
-                        <div class="auth-testimonial-user">
-                            <div class="auth-testimonial-avatar">👨</div>
+                        <div class="auth-testimonial-user" style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div class="auth-testimonial-avatar" style="width: 38px; height: 38px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 2px solid rgba(255, 255, 255, 0.8);">👨</div>
                             <div>
-                                <div style="font-weight:800; font-size:0.9rem; color:#ffffff;">Tariq Mahmood</div>
-                                <div style="font-size:0.78rem; color:rgba(255,255,255,0.85);">Verified Zaireen • Kashmir</div>
+                                <div style="font-weight: 800; font-size: 0.85rem; color: #ffffff;">Tariq Mahmood</div>
+                                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.85);">Verified Zaireen • Kashmir</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="auth-dots-indicator">
-                        <div class="auth-dot active"></div>
-                        <div class="auth-dot"></div>
-                        <div class="auth-dot"></div>
+                    <!-- Dots Indicator -->
+                    <div class="auth-dots-indicator" style="display: flex; gap: 0.45rem; justify-content: flex-start; margin-top: 1.6rem; padding-left: 0.5rem;">
+                        <span class="auth-dot active" style="width: 24px; height: 8px; border-radius: 99px; background: #fbbf24; display: inline-block;"></span>
+                        <span class="auth-dot" style="width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.35); display: inline-block;"></span>
+                        <span class="auth-dot" style="width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.35); display: inline-block;"></span>
                     </div>
                 </div>
 
-                <!-- RIGHT FORM PANEL (PIXEL PERFECT MATCHING USER IMAGE) -->
-                <div class="auth-right-panel">
-                    <h3 class="auth-panel-title">
+                <!-- RIGHT FORM PANEL (PIXEL PERFECT MATCHING MOCKUP IMAGE) -->
+                <div class="auth-right-panel" style="padding: 3rem 2.8rem 2.5rem; display: flex; flex-direction: column; justify-content: center; background: #ffffff; box-sizing: border-box;">
+                    <h3 class="auth-panel-title" style="font-size: 1.85rem; font-weight: 800; color: #0f172a; margin-bottom: 0.3rem; letter-spacing: -0.6px;">
                         ${mode === 'login' ? 'Sign in to account' : ''}
                         ${mode === 'register' ? 'Create new account' : ''}
                         ${mode === 'admin-login' ? 'Admin Portal Login' : ''}
                     </h3>
-                    <p class="auth-panel-subtitle">
+                    <p class="auth-panel-subtitle" style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.8rem; line-height: 1.5;">
                         ${mode === 'login' ? 'Enter your registered credentials to access your Zaireen dashboard.' : ''}
                         ${mode === 'register' ? 'Get started to access reverse bidding Umrah packages with verified agents.' : ''}
                         ${mode === 'admin-login' ? 'Authorized management access for system administration.' : ''}
@@ -2860,100 +2865,97 @@ class App {
 
                     ${!isAdminMode ? `
                         <!-- SOCIAL BUTTONS ROW (GOOGLE & LINKEDIN CHIPS MATCHING IMAGE) -->
-                        <div class="social-auth-row">
-                            <button type="button" class="btn-social-chip" onclick="app.loginWithGoogle()">
+                        <div class="social-auth-row" style="display: flex; gap: 0.9rem; margin-bottom: 1.4rem;">
+                            <button type="button" class="btn-social-chip" onclick="app.loginWithGoogle()" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.6rem; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 0.8rem 1rem; font-size: 0.88rem; font-weight: 700; color: #334155; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
                                 <svg width="18" height="18" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                                     <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z"/>
                                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                                 </svg>
-                                <span>Sign up with Google</span>
+                                <span style="font-weight:700;">Sign up with Google</span>
                             </button>
-                            <button type="button" class="btn-social-chip" onclick="app.loginWithGoogle()">
+                            <button type="button" class="btn-social-chip" onclick="app.loginWithGoogle()" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.6rem; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 0.8rem 1rem; font-size: 0.88rem; font-weight: 700; color: #334155; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="#0A66C2">
                                     <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
                                 </svg>
-                                <span>Sign up with LinkedIn</span>
+                                <span style="font-weight:700;">Sign up with LinkedIn</span>
                             </button>
                         </div>
 
-                        <div style="display:flex; align-items:center; margin:1.2rem 0 1.5rem; gap:0.8rem;">
-                            <div style="flex:1; height:1px; background:#e2e8f0;"></div>
-                            <span style="font-size:0.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Or</span>
-                            <div style="flex:1; height:1px; background:#e2e8f0;"></div>
+                        <div style="display: flex; align-items: center; margin: 1.2rem 0 1.5rem; gap: 0.8rem;">
+                            <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+                            <span style="font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">OR</span>
+                            <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
                         </div>
                     ` : ''}
 
-                    <form onsubmit="event.preventDefault(); app.handleAuthSubmit('${mode}');">
+                    <form onsubmit="event.preventDefault(); app.handleAuthSubmit('${mode}');" style="display: flex; flex-direction: column; gap: 1.1rem;">
                         ${!isLogin ? `
-                            <div class="ref-input-group">
-                                <label>Full Name</label>
-                                <input type="text" id="authName" class="ref-input-field" required placeholder="Tariq Mahmood">
+                            <div class="ref-input-group" style="margin-bottom: 0;">
+                                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Full Name</label>
+                                <input type="text" id="authName" class="ref-input-field" required placeholder="Tariq Mahmood" style="width: 100%; height: 48px; padding: 0 1.1rem; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; outline: none; transition: all 0.2s;" onfocus="this.style.borderColor='#00875a'">
                             </div>
                         ` : ''}
 
-                        <div class="ref-input-group">
-                            <label>Email Address</label>
-                            <input type="email" id="authEmail" class="ref-input-field" required value="${defaultEmail}" placeholder="Your email">
+                        <div class="ref-input-group" style="margin-bottom: 0;">
+                            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Email Address</label>
+                            <input type="email" id="authEmail" class="ref-input-field" required value="${defaultEmail}" placeholder="${mode === 'register' ? 'Your email' : 'user@Zaireen.com'}" style="width: 100%; height: 48px; padding: 0 1.1rem; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; outline: none; transition: all 0.2s;" onfocus="this.style.borderColor='#00875a'">
                         </div>
 
-                        <div class="ref-input-group">
-                            <label>${mode === 'register' ? 'Create a password' : 'Password'}</label>
-                            <div class="ref-input-field-wrap">
-                                <input type="password" id="authPassword" class="ref-input-field" required value="${defaultPass}" placeholder="••••••••">
-                                <button type="button" id="eyeToggleBtn" class="ref-input-toggle-pwd" onclick="app.togglePasswordVisibility()">👁️</button>
+                        <div class="ref-input-group" style="margin-bottom: 0;">
+                            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">${mode === 'register' ? 'Create a password' : 'Password'}</label>
+                            <div class="ref-input-field-wrap" style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="authPassword" class="ref-input-field" required value="${defaultPass}" placeholder="••••••••" style="width: 100%; height: 48px; padding: 0 2.5rem 0 1.1rem; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; outline: none; transition: all 0.2s;" onfocus="this.style.borderColor='#00875a'">
+                                <button type="button" id="eyeToggleBtn" class="ref-input-toggle-pwd" onclick="app.togglePasswordVisibility()" style="position: absolute; right: 1rem; background: none; border: none; cursor: pointer; font-size: 1.1rem; color: #94a3b8; padding: 0; outline: none;">👁️</button>
                             </div>
                         </div>
 
                         ${!isLogin ? `
-                            <div class="ref-input-group">
-                                <label>Phone Number</label>
-                                <input type="tel" id="authPhone" class="ref-input-field" required placeholder="e.g. 9541692891">
+                            <div class="ref-input-group" style="margin-bottom: 0;">
+                                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Phone Number</label>
+                                <input type="tel" id="authPhone" class="ref-input-field" required placeholder="e.g. 9541692891" style="width: 100%; height: 48px; padding: 0 1.1rem; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; outline: none; transition: all 0.2s;" onfocus="this.style.borderColor='#00875a'">
                             </div>
 
                             <!-- PASSWORD CHECKLIST MATCHING REFERENCE IMAGE -->
-                            <div style="display:flex; flex-direction:column; gap:0.4rem; margin-bottom:1.4rem; background:#f8fafc; padding:0.8rem 1rem; border-radius:12px; border:1px solid #e2e8f0;">
-                                <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; color:#475569; font-weight:600; cursor:pointer;">
-                                    <input type="checkbox" checked disabled style="accent-color:#047857; width:15px; height:15px;"> Uppercase letter
+                            <div style="display: flex; flex-direction: column; gap: 0.45rem; background: #f8fafc; padding: 0.9rem 1.1rem; border-radius: 12px; border: 1px solid #cbd5e1; margin-top: 0.2rem;">
+                                <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; color: #475569; font-weight: 600; cursor: pointer;">
+                                    <input type="checkbox" checked disabled style="accent-color: #00875a; width: 16px; height: 16px;"> Uppercase letter
                                 </label>
-                                <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; color:#475569; font-weight:600; cursor:pointer;">
-                                    <input type="checkbox" checked disabled style="accent-color:#047857; width:15px; height:15px;"> Lowercase letter
+                                <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; color: #475569; font-weight: 600; cursor: pointer;">
+                                    <input type="checkbox" checked disabled style="accent-color: #00875a; width: 16px; height: 16px;"> Lowercase letter
                                 </label>
-                                <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; color:#475569; font-weight:600; cursor:pointer;">
-                                    <input type="checkbox" checked disabled style="accent-color:#047857; width:15px; height:15px;"> Number
+                                <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; color: #475569; font-weight: 600; cursor: pointer;">
+                                    <input type="checkbox" checked disabled style="accent-color: #00875a; width: 16px; height: 16px;"> Number
                                 </label>
-                                <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; color:#475569; font-weight:600; cursor:pointer;">
-                                    <input type="checkbox" checked disabled style="accent-color:#047857; width:15px; height:15px;"> Symbol (e.g. !@#$%^&*)
-                                </label>
-                                <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; color:#475569; font-weight:600; cursor:pointer;">
-                                    <input type="checkbox" checked disabled style="accent-color:#047857; width:15px; height:15px;"> Must be 8 characters
+                                <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; color: #475569; font-weight: 600; cursor: pointer;">
+                                    <input type="checkbox" checked disabled style="accent-color: #00875a; width: 16px; height: 16px;"> Symbol (e.g. !@#$\%^&*)
                                 </label>
                             </div>
                         ` : ''}
 
-                        <button type="submit" class="btn-ref-submit ${isAdminMode ? 'btn-gold-theme' : ''}">
+                        <button type="submit" class="btn-ref-submit ${isAdminMode ? 'btn-gold-theme' : ''}" style="width: 100%; height: 50px; background: #00875a; color: #ffffff; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 800; letter-spacing: 0.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 0.6rem; transition: all 0.2s;" onmouseover="this.style.background='#006644'" onmouseout="this.style.background='#00875a'">
                             ${mode === 'login' ? 'SIGN IN' : ''}
-                            ${mode === 'register' ? 'SIGN UP' : ''}
+                            ${mode === 'register' ? 'Create new account' : ''}
                             ${mode === 'admin-login' ? 'ADMIN LOGIN' : ''}
                         </button>
                     </form>
 
                     <!-- SWITCHER FOOTER LINK MATCHING REFERENCE IMAGE -->
-                    <div style="margin-top:1.8rem; text-align:center; font-size:0.9rem; color:#64748b;">
+                    <div style="margin-top: 1.8rem; text-align: center; font-size: 0.9rem; color: #64748b;">
                         ${mode === 'login' ? `
                             Don't have an account? 
-                            <a href="#" onclick="app.openAuthModal('register')" style="color:#047857; font-weight:800; text-decoration:none;">Sign Up</a>
-                            <span style="margin:0 0.5rem; color:#cbd5e1;">|</span>
-                            <a href="#" onclick="app.openAuthModal('admin-login')" style="color:#64748b; font-weight:600;">Admin Login</a>
+                            <a href="#" onclick="app.openAuthModal('register')" style="color: #00875a; font-weight: 800; text-decoration: none;">Sign Up</a>
+                            <span style="margin: 0 0.5rem; color: #cbd5e1;">|</span>
+                            <a href="#" onclick="app.openAuthModal('admin-login')" style="color: #64748b; font-weight: 600; text-decoration: none;">Admin Login</a>
                         ` : ''}
                         ${mode === 'register' ? `
                             Already have an account? 
-                            <a href="#" onclick="app.openAuthModal('login')" style="color:#047857; font-weight:800; text-decoration:none;">Login</a>
+                            <a href="#" onclick="app.openAuthModal('login')" style="color: #00875a; font-weight: 800; text-decoration: none;">Login</a>
                         ` : ''}
                         ${mode === 'admin-login' ? `
                             Zaireen User? 
-                            <a href="#" onclick="app.openAuthModal('login')" style="color:#047857; font-weight:800; text-decoration:none;">Zaireen Login</a>
+                            <a href="#" onclick="app.openAuthModal('login')" style="color: #00875a; font-weight: 800; text-decoration: none;">Zaireen Login</a>
                         ` : ''}
                     </div>
                 </div>

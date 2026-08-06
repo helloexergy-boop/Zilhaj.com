@@ -4077,5 +4077,21 @@ p, body {
     outline: none !important;
 }
 
+.modal-card:has(.two-col-auth-modal) .modal-close-btn {
+    background: #e8f5e9 !important;
+    color: #15803d !important;
+    font-weight: bold !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    top: 1.5rem !important;
+    right: 1.5rem !important;
+}
+
+
 
 
