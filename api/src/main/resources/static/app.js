@@ -811,8 +811,8 @@ class App {
 
                     <!-- CTA Buttons -->
                     <div class="hero-cta-anim" style="display:flex; justify-content:center; align-items:center; gap:1rem; flex-wrap:wrap;">
-                        <button onclick="app.scrollToRequirementForm()" style="background:linear-gradient(135deg,#E8B84B 0%,#C9953A 100%); color:#0A1A12; font-weight:800; font-size:0.95rem; padding:14px 32px; border-radius:10px; border:none; cursor:pointer; letter-spacing:0.02em; box-shadow:0 6px 28px rgba(232,184,75,0.55), 0 2px 8px rgba(0,0,0,0.3); transition:all 0.25s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 36px rgba(232,184,75,0.65),0 3px 12px rgba(0,0,0,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(232,184,75,0.55),0 2px 8px rgba(0,0,0,0.3)'">✦ Start Your Journey</button>
-                        <button onclick="app.navigate('dashboard')" style="background:rgba(255,255,255,0.08); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); color:#FFFFFF; font-weight:700; font-size:0.95rem; padding:13px 30px; border-radius:10px; border:1.5px solid rgba(255,255,255,0.5); cursor:pointer; letter-spacing:0.02em; box-shadow:0 4px 20px rgba(0,0,0,0.35); transition:all 0.25s ease;" onmouseover="this.style.background='rgba(255,255,255,0.16)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.transform=''">My Requests</button>
+                        <button onclick="app.handleStartJourneyClick()" style="background:linear-gradient(135deg,#E8B84B 0%,#C9953A 100%); color:#0A1A12; font-weight:800; font-size:0.95rem; padding:14px 32px; border-radius:10px; border:none; cursor:pointer; letter-spacing:0.02em; box-shadow:0 6px 28px rgba(232,184,75,0.55), 0 2px 8px rgba(0,0,0,0.3); transition:all 0.25s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 36px rgba(232,184,75,0.65),0 3px 12px rgba(0,0,0,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(232,184,75,0.55),0 2px 8px rgba(0,0,0,0.3)'">✦ Start Your Journey</button>
+                        ${this.state.currentUser ? `<button onclick="app.navigate('dashboard')" style="background:rgba(255,255,255,0.08); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); color:#FFFFFF; font-weight:700; font-size:0.95rem; padding:13px 30px; border-radius:10px; border:1.5px solid rgba(255,255,255,0.5); cursor:pointer; letter-spacing:0.02em; box-shadow:0 4px 20px rgba(0,0,0,0.35); transition:all 0.25s ease;" onmouseover="this.style.background='rgba(255,255,255,0.16)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.transform=''">My Requests</button>` : ''}
                     </div>
 
                 </div>
@@ -851,16 +851,30 @@ class App {
 
             <!-- Live Request Submission Container -->
             <div id="requestFormAnchor" style="max-width:950px; margin:3.5rem auto; padding:0 1.5rem;">
-                ${this.state.currentUser?.role === 'ROLE_ADMIN'
-                ? `
+                ${!this.state.currentUser
+                    ? `
+                        <div class="premium-card" style="text-align:center; padding:3.5rem 2rem; background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border:1.5px solid #cbd5e1; border-radius:24px; box-shadow:0 12px 35px rgba(0,0,0,0.04);">
+                            <div style="width:70px; height:70px; background:#e6f4ea; color:#047857; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2.2rem; margin:0 auto 1.2rem auto;">🕋</div>
+                            <h3 style="font-size:1.6rem; font-weight:800; color:#0f172a; margin-bottom:0.6rem;">Post Your Sacred Journey Requirement</h3>
+                            <p style="color:#64748b; max-width:540px; margin:0 auto 1.8rem auto; font-size:0.95rem; line-height:1.6;">
+                                Please log in or create your free account to access the custom travel request form and receive direct reverse-bidding offers from verified Umrah operators.
+                            </p>
+                            <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+                                <button class="gradient-btn" style="max-width:200px;" onclick="app.openAuthModal('login')">🔑 Login to Continue</button>
+                                <button class="gradient-btn" style="max-width:200px; background:linear-gradient(135deg,#047857 0%,#065f46 100%);" onclick="app.openAuthModal('register')">✨ Create Account</button>
+                            </div>
+                        </div>
+                    `
+                    : this.state.currentUser?.role === 'ROLE_ADMIN'
+                    ? `
                         <div style="background:#fefce8; border:1.5px solid #fde68a; border-radius:14px; padding:2rem; text-align:center;">
                             <h3 style="color:#854d0e; margin-bottom:0.8rem;">👑 Administrator Mode</h3>
                             <p style="color:#713f12; margin-bottom:1.2rem;">You are logged in as an Administrator. You cannot submit Zaireen travel requests.</p>
                             <button class="btn btn-gold" onclick="app.navigate('admin')">Go to Admin Dashboard</button>
                         </div>
-                      `
-                : this.renderCustomRequirementForm()
-            }
+                    `
+                    : this.renderCustomRequirementForm()
+                }
             </div>
             ${this.renderLiquidGlassFeedbackSection()}
         `;
@@ -1136,7 +1150,7 @@ class App {
                                 <label style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:0.4rem; margin-bottom:0.6rem; font-size:0.92rem;">
                                     🏨 Hotel Star Category *
                                 </label>
-                                <select id="reqHotelType" class="form-control premium-input">
+                                <select id="reqHotelType" class="form-control premium-input" required>
                                     <option value="" disabled selected>Select Hotel Class...</option>
                                     <option value="5-Star Luxury (< 300m from Haram)">🌟 5-Star Luxury (&lt; 300m from Haram)</option>
                                     <option value="4-Star Deluxe (< 600m from Haram)">⭐ 4-Star Deluxe (&lt; 600m from Haram)</option>
@@ -1175,38 +1189,83 @@ class App {
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.4rem;">
                             <div class="form-group">
                                 <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">State *</label>
-                                <select id="reqState" class="form-control premium-input">
+                                <select id="reqState" class="form-control premium-input" required>
                                     <option value="" disabled selected>Select State...</option>
-                                    <option>Jammu and Kashmir</option>
-                                    <option>Delhi</option>
-                                    <option>Maharashtra</option>
-                                    <option>Other</option>
+                                    <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                    <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                    <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                    <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                    <option value="Assam">Assam</option>
+                                    <option value="Bihar">Bihar</option>
+                                    <option value="Chandigarh">Chandigarh</option>
+                                    <option value="Chhattisgarh">Chhattisgarh</option>
+                                    <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                                    <option value="Delhi">Delhi</option>
+                                    <option value="Goa">Goa</option>
+                                    <option value="Gujarat">Gujarat</option>
+                                    <option value="Haryana">Haryana</option>
+                                    <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                    <option value="Jharkhand">Jharkhand</option>
+                                    <option value="Karnataka">Karnataka</option>
+                                    <option value="Kerala">Kerala</option>
+                                    <option value="Ladakh">Ladakh</option>
+                                    <option value="Lakshadweep">Lakshadweep</option>
+                                    <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                    <option value="Maharashtra">Maharashtra</option>
+                                    <option value="Manipur">Manipur</option>
+                                    <option value="Meghalaya">Meghalaya</option>
+                                    <option value="Mizoram">Mizoram</option>
+                                    <option value="Nagaland">Nagaland</option>
+                                    <option value="Odisha">Odisha</option>
+                                    <option value="Puducherry">Puducherry</option>
+                                    <option value="Punjab">Punjab</option>
+                                    <option value="Rajasthan">Rajasthan</option>
+                                    <option value="Sikkim">Sikkim</option>
+                                    <option value="Tamil Nadu">Tamil Nadu</option>
+                                    <option value="Telangana">Telangana</option>
+                                    <option value="Tripura">Tripura</option>
+                                    <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                    <option value="Uttarakhand">Uttarakhand</option>
+                                    <option value="West Bengal">West Bengal</option>
+                                    <option value="Other International / NRI">Other International / NRI</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">District *</label>
-                                <input type="text" id="reqDistrict" class="form-control premium-input" placeholder="e.g. Srinagar">
+                                <input type="text" id="reqDistrict" class="form-control premium-input" placeholder="e.g. Srinagar" required>
                             </div>
                         </div>
                         <div class="form-group" style="margin-bottom:2rem;">
                             <label style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">Full Street Address *</label>
-                            <input type="text" id="reqAddress" class="form-control premium-input" placeholder="House/Flat No., Street, Area...">
+                            <input type="text" id="reqAddress" class="form-control premium-input" placeholder="House/Flat No., Street, Area..." required>
                         </div>
 
-                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.2rem; margin-bottom:1.6rem;">
-                            <div class="form-group" style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; padding:1rem; text-align:center;">
-                                <label style="font-weight:700; color:#0f172a; margin-bottom:0.5rem; font-size:0.88rem; display:block;">👨 Males</label>
-                                <input type="number" id="reqMales" class="form-control" min="0" value="1" oninput="app.calcTotalTravelers()" placeholder="0" style="border:1.5px solid #cbd5e1; border-radius:10px; padding:0.6rem 0.8rem; font-size:1.1rem; font-weight:800; width:100%; text-align:center; box-sizing:border-box;">
-                            </div>
-                            <div class="form-group" style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; padding:1rem; text-align:center;">
-                                <label style="font-weight:700; color:#0f172a; margin-bottom:0.5rem; font-size:0.88rem; display:block;">👩 Females</label>
-                                <input type="number" id="reqFemales" class="form-control" min="0" value="1" oninput="app.calcTotalTravelers()" placeholder="0" style="border:1.5px solid #cbd5e1; border-radius:10px; padding:0.6rem 0.8rem; font-size:1.1rem; font-weight:800; width:100%; text-align:center; box-sizing:border-box;">
-                            </div>
-                            <div class="form-group" style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; padding:1rem; text-align:center;">
-                                <label style="font-weight:700; color:#0f172a; margin-bottom:0.5rem; font-size:0.88rem; display:block;">👶 Children</label>
-                                <input type="number" id="reqChildren" class="form-control" min="0" value="0" oninput="app.calcTotalTravelers()" placeholder="0" style="border:1.5px solid #cbd5e1; border-radius:10px; padding:0.6rem 0.8rem; font-size:1.1rem; font-weight:800; width:100%; text-align:center; box-sizing:border-box;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:1.6rem;">
+                        <div class="form-group" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                            <label style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.88rem; display:block;">👨 Males *</label>
+                            <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                                <button type="button" onclick="app.adjustCounter('reqMales', -1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer;">-</button>
+                                <input type="number" id="reqMales" min="0" value="1" required readonly style="width:40px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
+                                <button type="button" onclick="app.adjustCounter('reqMales', 1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer;">+</button>
                             </div>
                         </div>
+                        <div class="form-group" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                            <label style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.88rem; display:block;">👩 Females *</label>
+                            <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                                <button type="button" onclick="app.adjustCounter('reqFemales', -1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer;">-</button>
+                                <input type="number" id="reqFemales" min="0" value="1" required readonly style="width:40px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
+                                <button type="button" onclick="app.adjustCounter('reqFemales', 1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer;">+</button>
+                            </div>
+                        </div>
+                        <div class="form-group" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                            <label style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.82rem; display:block;">👶 Children(&lt;5 yrs) *</label>
+                            <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                                <button type="button" onclick="app.adjustCounter('reqChildren', -1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer;">-</button>
+                                <input type="number" id="reqChildren" min="0" value="0" required readonly style="width:40px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
+                                <button type="button" onclick="app.adjustCounter('reqChildren', 1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer;">+</button>
+                            </div>
+                        </div>
+                    </div>
                         
                         <div style="background:linear-gradient(135deg, #ecfdf5 0%, #dcfce7 100%); border:1.5px solid #86efac; border-radius:14px; padding:0.9rem 1.4rem; display:flex; align-items:center; justify-content:space-between;">
                             <div style="display:flex; align-items:center; gap:0.6rem;">
@@ -1245,6 +1304,24 @@ class App {
 
     currentFormStep = 1;
 
+    handleStartJourneyClick() {
+        if (!this.state.currentUser) {
+            alert('⚠️ Please log in or create an account to start your sacred journey requirement!');
+            this.openAuthModal('login');
+            return;
+        }
+        this.scrollToRequirementForm();
+    }
+
+    adjustCounter(id, delta) {
+        const input = document.getElementById(id);
+        if (!input) return;
+        let val = parseInt(input.value) || 0;
+        val = Math.max(0, val + delta);
+        input.value = val;
+        this.calcTotalTravelers();
+    }
+
     nextFormStep(step) {
         const activeStepEl = document.getElementById(`step${this.currentFormStep}`);
         if (activeStepEl && step > this.currentFormStep) {
@@ -1252,6 +1329,7 @@ class App {
             for (let input of reqInputs) {
                 if (!input.value || !input.value.trim()) {
                     input.focus();
+                    alert('⚠️ Please fill out all required fields before proceeding!');
                     this.showToast('Please fill out all required fields before proceeding.', 'error');
                     return;
                 }
