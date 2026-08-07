@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const https = require('https');
 const { MongoClient } = require('mongodb');
 
 const app = express();
@@ -273,6 +274,61 @@ function getMailTransporter() {
     return null;
 }
 
+// Twilio REST API Helper (No External NPM Required)
+async function sendTwilioSMS(toPhone, messageBody) {
+    const accountSid = process.env.TWILIO_ACCOUNT_SID || 'ACb93b668ec4cf8e044bb3977226a290f7';
+    const authToken = process.env.TWILIO_AUTH_TOKEN || 'd3e585d6bfeeb35f62bd21ae09c3a3ad';
+    const fromPhone = process.env.TWILIO_PHONE_NUMBER || '+917889866214';
+
+    if (!accountSid || !authToken || !fromPhone) return false;
+
+    let formattedPhone = toPhone.trim();
+    if (!formattedPhone.startsWith('+')) {
+        formattedPhone = '+91' + formattedPhone.replace(/\D/g, '');
+    }
+
+    const postData = new URLSearchParams({
+        To: formattedPhone,
+        From: fromPhone,
+        Body: messageBody
+    }).toString();
+
+    const authHeader = 'Basic ' + Buffer.from(`${accountSid}:${authToken}`).toString('base64');
+
+    return new Promise((resolve) => {
+        const req = https.request({
+            hostname: 'api.twilio.com',
+            path: `/2010-04-01/Accounts/${accountSid}/Messages.json`,
+            method: 'POST',
+            headers: {
+                'Authorization': authHeader,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': Buffer.byteLength(postData)
+            }
+        }, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                    console.log(`[TWILIO] SMS OTP sent successfully to ${formattedPhone}`);
+                    resolve(true);
+                } else {
+                    console.warn(`[TWILIO] SMS send failed (${res.statusCode}):`, data);
+                    resolve(false);
+                }
+            });
+        });
+
+        req.on('error', (err) => {
+            console.warn('[TWILIO] Connection error:', err.message);
+            resolve(false);
+        });
+
+        req.write(postData);
+        req.end();
+    });
+}
+
 app.post('/api/auth/send-otp', async (req, res) => {
     const { contact, purpose = 'Verification' } = req.body;
     if (!contact) return res.status(400).json({ error: 'Email or phone number is required' });
@@ -281,6 +337,8 @@ app.post('/api/auth/send-otp', async (req, res) => {
     const isEmail = contact.includes('@');
 
     let sentViaEmail = false;
+    let sentViaSms = false;
+
     if (isEmail) {
         const transporter = getMailTransporter();
         if (transporter) {
@@ -309,13 +367,17 @@ app.post('/api/auth/send-otp', async (req, res) => {
                 console.warn('[AUTH] Gmail OTP send error:', err.message);
             }
         }
+    } else {
+        // Send SMS via Twilio
+        sentViaSms = await sendTwilioSMS(contact, `Your Umrah Travels ${purpose} code is: ${code}. Valid for 10 minutes.`);
     }
 
     res.json({
         success: true,
-        message: sentViaEmail ? `Verification code sent to ${contact} via Gmail` : `OTP sent to ${contact}`,
+        message: sentViaEmail ? `Verification code sent to ${contact} via Gmail` : (sentViaSms ? `SMS OTP sent to ${contact} via Twilio` : `OTP sent to ${contact}`),
         otp: code,
-        sentViaEmail
+        sentViaEmail,
+        sentViaSms
     });
 });
 
