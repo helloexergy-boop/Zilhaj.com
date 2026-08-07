@@ -263,7 +263,7 @@ app.post('/api/auth/login', async (req, res) => {
 // Nodemailer Transporter Setup for Gmail App Password
 function getMailTransporter() {
     const gmailUser = process.env.GMAIL_USER || process.env.SMTP_USER || 'hello.exergy@gmail.com';
-    const gmailPass = process.env.GMAIL_PASS || process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS;
+    const gmailPass = process.env.GMAIL_PASS || process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || 'gjok vyma ilqs etfl';
     if (gmailPass) {
         return nodemailer.createTransport({
             service: 'gmail',
