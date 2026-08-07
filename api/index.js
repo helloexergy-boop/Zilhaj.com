@@ -241,25 +241,105 @@ app.post('/api/bookings', async (req, res) => {
     res.status(201).json(booking);
 });
 
-// AUTH ENDPOINTS
+// AUTH ENDPOINTS - STRICT DATABASE AUTHENTICATION
+app.post('/api/auth/register', async (req, res) => {
+    const { name, email, password, phone, role } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    try {
+        const db = await connectToDatabase();
+        const existingUser = await db.collection('users').findOne({ email: cleanEmail });
+
+        if (existingUser) {
+            return res.status(400).json({ error: 'An account with this email already exists! Please log in.' });
+        }
+
+        const newUser = {
+            id: 'usr-' + Date.now(),
+            name: name || 'Pilgrim User',
+            email: cleanEmail,
+            password: password, // Stored for exact password matching
+            phone: phone || '',
+            role: role || 'ROLE_USER',
+            createdAt: new Date()
+        };
+
+        await db.collection('users').insertOne(newUser);
+
+        const token = 'jwt-token-' + Date.now();
+        res.status(201).json({
+            success: true,
+            user: {
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                phone: newUser.phone,
+                role: newUser.role,
+                token
+            }
+        });
+    } catch (err) {
+        console.error('[AUTH] Register error:', err.message);
+        res.status(500).json({ error: 'Database connection failed. Please try again.' });
+    }
+});
+
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
-    if (email === 'admin@umrah.com' && password === 'password123') {
+
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Please enter your email and password' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Admin hardcoded bypass for administration portal
+    if (cleanEmail === 'admin@umrah.com' && password === 'password123') {
         return res.json({
-            id: 'admin-1',
-            name: 'System Admin',
-            email: 'admin@umrah.com',
-            role: 'ROLE_ADMIN',
-            token: 'mock-admin-jwt-token-' + Date.now()
+            success: true,
+            user: {
+                id: 'admin-1',
+                name: 'System Admin',
+                email: 'admin@umrah.com',
+                role: 'ROLE_ADMIN',
+                token: 'admin-token-' + Date.now()
+            }
         });
     }
-    return res.json({
-        id: 'usr-1',
-        name: email ? email.split('@')[0] : 'Tariq Mahmood',
-        email: email || 'user@pilgrim.com',
-        role: 'ROLE_USER',
-        token: 'mock-user-jwt-token-' + Date.now()
-    });
+
+    try {
+        const db = await connectToDatabase();
+        const user = await db.collection('users').findOne({ email: cleanEmail });
+
+        if (!user) {
+            return res.status(401).json({ error: 'No account found with this email. Please create an account first!' });
+        }
+
+        if (user.password !== password) {
+            return res.status(401).json({ error: 'Incorrect password! Please check your password and try again.' });
+        }
+
+        const token = 'jwt-token-' + Date.now();
+        res.json({
+            success: true,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                role: user.role,
+                token
+            }
+        });
+    } catch (err) {
+        console.error('[AUTH] Login error:', err.message);
+        res.status(500).json({ error: 'Server authentication error. Please try again.' });
+    }
 });
 
 // Nodemailer Transporter Setup for Gmail App Password

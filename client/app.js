@@ -3372,8 +3372,78 @@ class App {
             const email = (emailEl && emailEl.value.trim()) ? emailEl.value.trim() : `${inputIdentifier.replace(/\D/g, '')}@zaireen.com`;
             const phone = (phoneEl && phoneEl.value.trim()) ? phoneEl.value.trim() : (inputIdentifier.match(/^\+?\d+$/) ? inputIdentifier : '9541692891');
 
-            this.register(name, email, password, phone, 'ROLE_USER', '');
-            this.state.otpVerified = false; // Reset after successful registration
+            this.register(name, email, password, phone, 'ROLE_USER');
+            this.state.otpVerified = false; // Reset after registration attempt
+        }
+    }
+
+    async register(name, email, password, phone, role = 'ROLE_USER') {
+        try {
+            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                ? 'http://localhost:3000/api/auth/register'
+                : '/api/auth/register';
+
+            const response = await fetch(apiEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password, phone, role })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                this.showToast(`⚠️ ${data.error || 'Registration failed'}`, 'error');
+                return;
+            }
+
+            if (data && data.user) {
+                this.state.currentUser = data.user;
+                localStorage.setItem('umrah_user', JSON.stringify(data.user));
+                this.renderAuthNav();
+                this.closeModal();
+                this.showSuccessModal('🎉 Account Created Successfully!', `Welcome to Umrah Travels, ${data.user.name}. Your account is now active.`);
+            }
+        } catch (err) {
+            console.error('Registration error:', err);
+            this.showToast('⚠️ Could not connect to server. Please check your internet connection.', 'error');
+        }
+    }
+
+    async login(email, password) {
+        try {
+            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                ? 'http://localhost:3000/api/auth/login'
+                : '/api/auth/login';
+
+            const response = await fetch(apiEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                this.showToast(`❌ ${data.error || 'Login failed. Invalid credentials.'}`, 'error');
+                return;
+            }
+
+            if (data && data.user) {
+                this.state.currentUser = data.user;
+                localStorage.setItem('umrah_user', JSON.stringify(data.user));
+                this.renderAuthNav();
+                this.closeModal();
+
+                if (data.user.role === 'ROLE_ADMIN') {
+                    this.showToast(`👑 Welcome Admin, ${data.user.name}!`, 'success');
+                    this.navigate('admin');
+                } else {
+                    this.showToast(`👋 Welcome back, ${data.user.name}!`, 'success');
+                }
+            }
+        } catch (err) {
+            console.error('Login error:', err);
+            this.showToast('⚠️ Could not connect to authentication server.', 'error');
         }
     }
 
