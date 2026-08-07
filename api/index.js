@@ -331,10 +331,10 @@ async function sendTwilioSMS(toPhone, messageBody) {
 }
 
 app.post('/api/auth/send-otp', async (req, res) => {
-    const { contact, purpose = 'Verification' } = req.body;
+    const { contact, code: clientCode, purpose = 'Verification' } = req.body;
     if (!contact) return res.status(400).json({ error: 'Email or phone number is required' });
 
-    const code = Math.floor(1000 + Math.random() * 9000).toString();
+    const code = (clientCode && clientCode.toString().trim()) || Math.floor(1000 + Math.random() * 9000).toString();
     const isEmail = contact.includes('@');
 
     let sentViaEmail = false;

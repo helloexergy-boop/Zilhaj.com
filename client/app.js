@@ -3213,7 +3213,7 @@ class App {
         const target = emailInput ? emailInput.value.trim() : '';
 
         if (!target) {
-            this.showToast(`⚠️ Please enter your email or phone number first!`, 'error');
+            this.showToast('⚠️ Please enter your email or phone number first!', 'error');
             if (emailInput) emailInput.focus();
             return;
         }
@@ -3224,35 +3224,42 @@ class App {
             otpBox.style.display = 'block';
         }
 
-        // Generate 4-digit code
+        // Generate 4-digit verification code
         const code = Math.floor(1000 + Math.random() * 9000).toString();
         this.state.generatedOtp = code;
         this.state.otpVerified = false;
 
-        // Call server API endpoint to send Gmail email/SMS
-        let serverCode = null;
+        // Call backend server API endpoint to send Nodemailer Gmail / Twilio SMS
         try {
-            const res = await this.apiCall('/auth/send-otp', 'POST', { contact: target });
-            if (res && res.otp) {
-                serverCode = res.otp.toString();
-            }
-        } catch (e) {
-            // Ignore offline/fallback error
-        }
+            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                ? 'http://localhost:3000/api/auth/send-otp'
+                : '/api/auth/send-otp';
 
-        // Store server code (or fallback code)
-        this.state.generatedOtp = serverCode || Math.floor(1000 + Math.random() * 9000).toString();
-        this.state.otpVerified = false;
+            const response = await fetch(apiEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contact: target, code: code })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.otp) {
+                    this.state.generatedOtp = data.otp.toString();
+                }
+            }
+        } catch (err) {
+            console.warn('[AUTH] OTP Send API call notice:', err);
+        }
 
         const alertBox = document.getElementById('otpSentAlert');
         if (alertBox) {
             alertBox.style.display = 'block';
-            alertBox.innerHTML = `📩 Verification code sent to <b>${target}</b>`;
+            alertBox.innerHTML = `📩 Verification code sent to <b>${target}</b>. Please check your inbox.`;
         }
 
         const otpInput = document.getElementById('authOtpCode');
         if (otpInput) {
-            otpInput.value = ''; // User inputs the code themselves from their email
+            otpInput.value = '';
             otpInput.focus();
         }
 
@@ -3267,23 +3274,38 @@ class App {
         const msg = document.getElementById('otpStatusMsg');
 
         if (!codeEntered) {
-            this.showToast('Please enter the OTP code sent to you', 'error');
+            this.showToast('Please enter the verification code sent to your email', 'error');
             return;
         }
 
         let verified = false;
 
-        // Check against client-stored server code or fallback
-        if (codeEntered === this.state.generatedOtp || codeEntered === '1234') {
+        // Compare entered code with stored server OTP code or test fallback
+        if (this.state.generatedOtp && codeEntered === this.state.generatedOtp.trim()) {
+            verified = true;
+        } else if (codeEntered === '1234') {
             verified = true;
         } else {
+            // Also attempt backend API verification
             try {
-                const res = await this.apiCall('/auth/verify-otp', 'POST', { contact: target, code: codeEntered, expectedOtp: this.state.generatedOtp });
-                if (res && res.success) {
-                    verified = true;
+                const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                    ? 'http://localhost:3000/api/auth/verify-otp'
+                    : '/api/auth/verify-otp';
+
+                const response = await fetch(apiEndpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contact: target, code: codeEntered, expectedOtp: this.state.generatedOtp })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.success) {
+                        verified = true;
+                    }
                 }
-            } catch (e) {
-                verified = false;
+            } catch (err) {
+                console.warn('[AUTH] Verify API call notice:', err);
             }
         }
 
@@ -3296,7 +3318,7 @@ class App {
             this.showToast('🎉 OTP verified successfully!', 'success');
         } else {
             this.state.otpVerified = false;
-            this.showToast('❌ Invalid OTP code. Please check your inbox and try again.', 'error');
+            this.showToast('❌ Invalid OTP code. Please check your inbox and enter the exact code received.', 'error');
         }
     }
 
