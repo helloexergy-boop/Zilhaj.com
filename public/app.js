@@ -3039,45 +3039,48 @@ class App {
                                 </span>
                             </div>
 
-                            <!-- EMAIL OR PHONE NUMBER WITH INLINE SEND OTP BUTTON -->
-                            <div class="auth-field-group" style="margin-bottom: 0.9rem;">
+                            <!-- EMAIL OR PHONE NUMBER WITH CLEAN SEND OTP BUTTON -->
+                            <div class="auth-field-group">
                                 <label>Email or Phone Number</label>
-                                <div style="display: flex; align-items: center; position: relative;">
-                                    <input type="text" id="authEmail" required placeholder="name@company.com" style="padding-right: 92px;">
-                                    <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.35rem 0.7rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#2563eb'; this.style.color='#ffffff';" onmouseout="this.style.background='#eff6ff'; this.style.color='#2563eb';">
+                                <div style="display: flex; gap: 0.4rem; align-items: center;">
+                                    <input type="text" id="authEmail" required placeholder="name@company.com" style="flex: 1; padding-right: 0.85rem;">
+                                    <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="height: 44px; padding: 0 0.95rem; background: #eff6ff; color: #2563eb; border: 1.5px solid #2563eb; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='#2563eb'; this.style.color='#ffffff';" onmouseout="this.style.background='#eff6ff'; this.style.color='#2563eb';">
                                         Send OTP
                                     </button>
                                 </div>
                             </div>
 
                             <!-- DYNAMIC OTP VERIFICATION INPUT BOX (REVEALS ON SEND OTP) -->
-                            <div id="otpSectionBox" style="display: none; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 0.65rem 0.75rem; margin-bottom: 0.9rem; transition: all 0.2s;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                                    <label style="font-size: 0.72rem; font-weight: 800; color: #166534; margin: 0; display: flex; align-items: center; gap: 0.3rem;">
+                            <div id="otpSectionBox" style="display: none; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 0.75rem 0.85rem; margin-bottom: 1rem; transition: all 0.2s;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                    <label style="font-size: 0.76rem; font-weight: 800; color: #166534; margin: 0; display: flex; align-items: center; gap: 0.3rem;">
                                         <span>🔑</span> ENTER VERIFICATION CODE
                                     </label>
                                 </div>
                                 <div style="display: flex; gap: 0.4rem; align-items: center;">
-                                    <input type="text" id="authOtpCode" placeholder="Enter 4-digit OTP" maxlength="6" style="flex: 1; height: 36px; padding: 0 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; font-weight: 800; letter-spacing: 2px; text-align: center; background: #ffffff;">
-                                    <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="background: #0f172a; color: #ffffff; border: none; border-radius: 6px; padding: 0 0.85rem; height: 36px; font-size: 0.76rem; font-weight: 700; cursor: pointer;">
-                                        Verify
+                                    <input type="text" id="authOtpCode" placeholder="Enter 4-digit OTP" maxlength="6" style="flex: 1; height: 38px; padding: 0 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; font-weight: 800; letter-spacing: 2px; text-align: center; background: #ffffff;">
+                                    <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="background: #0f172a; color: #ffffff; border: none; border-radius: 6px; padding: 0 0.95rem; height: 38px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+                                        Verify OTP
                                     </button>
                                 </div>
-                                <div id="otpSentAlert" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 0.25rem 0.45rem; border-radius: 6px; font-size: 0.72rem; font-weight: 700; margin-top: 0.3rem;"></div>
-                                <div id="otpStatusMsg" style="font-size: 0.74rem; color: #16a34a; font-weight: 800; margin-top: 0.3rem; display: none;">✓ Verified Successfully</div>
+                                <div id="otpSentAlert" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 0.35rem 0.55rem; border-radius: 6px; font-size: 0.76rem; font-weight: 700; margin-top: 0.4rem;"></div>
+                                <div id="otpStatusMsg" style="font-size: 0.76rem; color: #16a34a; font-weight: 800; margin-top: 0.35rem; display: none;">✓ Verified Successfully</div>
                             </div>
 
-                            <!-- PASSWORD FIELD -->
-                            <div class="auth-field-group" style="margin-bottom: 0.4rem;">
-                                <label>Password</label>
-                                <input type="password" id="authPassword" required placeholder="Enter your password" onkeyup="app.checkPasswordStrength(this.value)">
-                                <button type="button" class="field-icon" onclick="app.togglePasswordVisibility()" style="background: none; border: none; cursor: pointer; padding: 0;">
-                                    <svg width="17" height="17" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                </button>
+                            <!-- PASSWORDS ROW (PASSWORD & CONFIRM PASSWORD) -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.4rem;">
+                                <div class="auth-field-group" style="margin-bottom: 0;">
+                                    <label>Password</label>
+                                    <input type="password" id="authPassword" required placeholder="••••••••" onkeyup="app.checkPasswordStrength(this.value)">
+                                </div>
+                                <div class="auth-field-group" style="margin-bottom: 0;">
+                                    <label>Confirm</label>
+                                    <input type="password" id="authPasswordConfirm" required placeholder="••••••••">
+                                </div>
                             </div>
 
                             <!-- PASSWORD STRENGTH BAR -->
-                            <div style="margin-bottom: 0.85rem;">
+                            <div style="margin-bottom: 0.9rem;">
                                 <div style="display: flex; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; gap: 3px; margin-bottom: 0.25rem;">
                                     <div id="strBar1" style="flex: 1; background: #e2e8f0; transition: all 0.2s;"></div>
                                     <div id="strBar2" style="flex: 1; background: #e2e8f0; transition: all 0.2s;"></div>
@@ -3228,7 +3231,7 @@ class App {
         this.state.generatedOtp = code;
         this.state.otpVerified = false;
 
-        // Try API endpoint or fallback
+        // Call server API endpoint to send Gmail email/SMS
         try {
             await this.apiCall('/auth/send-otp', 'POST', { contact: target });
         } catch (e) {
@@ -3238,16 +3241,16 @@ class App {
         const alertBox = document.getElementById('otpSentAlert');
         if (alertBox) {
             alertBox.style.display = 'block';
-            alertBox.innerHTML = `📩 OTP sent to <b>${target}</b>! Code: <span style="letter-spacing:1.5px; font-size:0.92rem; background:#2563eb; color:#fff; padding:0.1rem 0.45rem; border-radius:4px; font-weight:800;">${code}</span>`;
+            alertBox.innerHTML = `📩 Verification code sent to <b>${target}</b>. Please check your inbox and enter the 4-digit OTP code below.`;
         }
 
         const otpInput = document.getElementById('authOtpCode');
         if (otpInput) {
-            otpInput.value = code; // Auto-fill code for frictionless testing
+            otpInput.value = ''; // User inputs the code themselves from their email
             otpInput.focus();
         }
 
-        this.showToast(`📩 OTP Code sent to ${target}! Code: ${code}`, 'success');
+        this.showToast(`📩 Verification code sent to ${target}. Please check your inbox.`, 'success');
     }
 
     async verifySignupOtp() {
