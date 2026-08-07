@@ -3493,14 +3493,15 @@ class App {
             if (data && data.user) {
                 this.state.currentUser = data.user;
                 localStorage.setItem('umrah_user', JSON.stringify(data.user));
-                this.renderAuthNav();
                 this.closeModal();
+                this.renderAuthNav();
+                this.navigate('home');
 
                 if (data.user.role === 'ROLE_ADMIN') {
                     this.showToast(`👑 Welcome Admin, ${data.user.name}!`, 'success');
                     this.navigate('admin');
                 } else {
-                    this.showToast(`👋 Welcome back, ${data.user.name}!`, 'success');
+                    this.showSuccessModal('✓ Logged In Successfully!', `Welcome back, ${data.user.name}. Your account is verified.`);
                 }
             }
         } catch (err) {
