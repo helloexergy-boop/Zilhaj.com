@@ -2941,6 +2941,8 @@ class App {
     openAuthModal(mode = 'login') {
         const isAdminMode = mode === 'admin-login';
         const isLogin = mode === 'login' || mode === 'admin-login';
+        const isForgot = mode === 'forgot-password';
+        const isRegister = mode === 'register';
 
         // Reset signup OTP state on modal open
         this.state.otpVerified = false;
@@ -2951,184 +2953,254 @@ class App {
         const defaultPass = isLogin ? 'password123' : '';
 
         this.openModal(`
-            <div class="two-col-auth-modal">
+            <div class="two-col-auth-modal" style="border: 1px solid #bbf7d0;">
                 
                 <!-- LEFT FORM PANEL -->
                 <div style="padding: 2.2rem 2.4rem; display: flex; flex-direction: column; justify-content: space-between; background: #ffffff; box-sizing: border-box; z-index: 2;">
                     
                     <div>
                         <!-- BRAND LOGO HEADER -->
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
-                            <div style="width: 28px; height: 28px; background: #2563eb; border-radius: 7px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 0.85rem; box-shadow: 0 4px 10px rgba(37,99,235,0.25);">
-                                🕋
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.4rem;">
+                            <div style="display: flex; align-items: center; gap: 0.55rem;">
+                                <div style="width: 34px; height: 34px; background: linear-gradient(135deg, #047857 0%, #065f46 100%); border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1rem; box-shadow: 0 4px 12px rgba(4,120,87,0.25);">
+                                    🕋
+                                </div>
+                                <span style="font-weight: 800; font-size: 1.15rem; color: #0f172a; letter-spacing: -0.3px;">Umrah Travels</span>
                             </div>
-                            <span style="font-weight: 800; font-size: 1.05rem; color: #0f172a; letter-spacing: -0.3px;">Umrah Travels</span>
                         </div>
 
                         <!-- TITLE & EYEBROW -->
                         <div style="margin-bottom: 1.3rem;">
-                            <p style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin: 0 0 0.2rem 0;">
-                                ${mode === 'login' ? 'Welcome back' : ''}
-                                ${mode === 'register' ? 'Start your journey' : ''}
-                                ${mode === 'admin-login' ? 'Administrator Portal' : ''}
+                            <p style="font-size: 0.85rem; font-weight: 800; color: #047857; text-transform: uppercase; letter-spacing: 0.8px; margin: 0 0 0.2rem 0;">
+                                ${isLogin ? 'Welcome Back' : ''}
+                                ${isRegister ? 'Easy & Secure Travel Booking' : ''}
+                                ${isForgot ? 'Account Recovery' : ''}
                             </p>
                             <h2 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.4px;">
-                                ${mode === 'login' ? 'Sign In to Umrah Travels' : ''}
-                                ${mode === 'register' ? 'Sign Up to Umrah Travels' : ''}
-                                ${mode === 'admin-login' ? 'Admin Portal Access' : ''}
+                                ${isLogin ? 'Sign In to Your Account' : ''}
+                                ${isRegister ? 'Create Your Free Account' : ''}
+                                ${isForgot ? 'Reset Your Password' : ''}
                             </h2>
                         </div>
 
-                        <!-- FORM -->
-                        <form onsubmit="event.preventDefault(); app.handleAuthSubmit('${mode}');" style="display: flex; flex-direction: column;">
-                            ${!isLogin ? `
-                                <!-- FULL NAME FIELD -->
+                        ${isForgot ? `
+                            <!-- FORGOT PASSWORD FORM -->
+                            <form onsubmit="event.preventDefault(); app.handleForgotPasswordSubmit();" style="display: flex; flex-direction: column;">
                                 <div class="auth-field-group">
-                                    <label>Full Name</label>
-                                    <input type="text" id="authName" required placeholder="John Doe">
-                                    <span class="field-icon">
-                                        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                    </span>
-                                </div>
-
-                                <!-- EMAIL / PHONE TAB SELECTION -->
-                                <div style="margin-bottom: 0.8rem;">
-                                    <div style="display: flex; gap: 0.2rem; background: #f1f5f9; padding: 0.12rem; border-radius: 6px; margin-bottom: 0.5rem; width: 100%;">
-                                        <button type="button" id="tabEmailBtn" onclick="app.switchSignupTab('email')" style="flex: 1; padding: 0.25rem; border: none; border-radius: 5px; font-weight: 700; font-size: 0.72rem; background: #ffffff; color: #0f172a; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.06);">Email</button>
-                                        <button type="button" id="tabPhoneBtn" onclick="app.switchSignupTab('phone')" style="flex: 1; padding: 0.25rem; border: none; border-radius: 5px; font-weight: 700; font-size: 0.72rem; background: transparent; color: #64748b; cursor: pointer;">Phone</button>
-                                    </div>
-
-                                    <div id="signupEmailGroup">
-                                        <div class="auth-field-group" style="margin-bottom: 0;">
-                                            <label>E-mail</label>
-                                            <input type="email" id="authEmail" placeholder="example@email.com">
-                                            <span class="field-icon">
-                                                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div id="signupPhoneGroup" style="display: none;">
-                                        <div class="auth-field-group" style="margin-bottom: 0;">
-                                            <label>Phone Number</label>
-                                            <input type="tel" id="authPhone" placeholder="9541692891">
-                                            <span class="field-icon">
-                                                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- OTP VERIFICATION INLINE -->
-                                <div id="otpSectionBox" style="background: #f8fafc; border: 1.5px dashed #2563eb; border-radius: 8px; padding: 0.4rem 0.55rem; margin-bottom: 0.85rem;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.2rem;">
-                                        <label style="font-size: 0.68rem; font-weight: 800; color: #1d4ed8; margin: 0; display: flex; align-items: center; gap: 0.2rem;">
-                                            <span>🔑</span> OTP VERIFICATION
-                                        </label>
-                                        <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="background: #2563eb; color: #ffffff; border: none; border-radius: 4px; padding: 0.15rem 0.45rem; font-size: 0.68rem; font-weight: 800; cursor: pointer;">
-                                            Send OTP
-                                        </button>
-                                    </div>
-                                    <div style="display: flex; gap: 0.3rem; align-items: center;">
-                                        <input type="text" id="authOtpCode" placeholder="4-digit OTP" maxlength="6" style="flex: 1; height: 28px; padding: 0 0.4rem; border: 1.5px solid #cbd5e1; border-radius: 4px; font-size: 0.78rem; font-weight: 800; letter-spacing: 1px; text-align: center;">
-                                        <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="background: #0f172a; color: #ffffff; border: none; border-radius: 4px; padding: 0 0.55rem; height: 28px; font-size: 0.7rem; font-weight: 800; cursor: pointer;">
-                                            Verify
-                                        </button>
-                                    </div>
-                                    <div id="otpSentAlert" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 0.18rem 0.35rem; border-radius: 4px; font-size: 0.68rem; font-weight: 700; margin-top: 0.2rem;"></div>
-                                    <div id="otpStatusMsg" style="font-size: 0.7rem; color: #16a34a; font-weight: 800; margin-top: 0.18rem; display: none;">✓ Contact Verified</div>
-                                </div>
-
-                                <!-- PASSWORDS ROW -->
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.85rem;">
-                                    <div class="auth-field-group" style="margin-bottom: 0;">
-                                        <label>Password</label>
-                                        <input type="password" id="authPassword" required placeholder="••••••••">
-                                    </div>
-                                    <div class="auth-field-group" style="margin-bottom: 0;">
-                                        <label>Confirm</label>
-                                        <input type="password" id="authPasswordConfirm" placeholder="••••••••">
-                                    </div>
-                                </div>
-                            ` : `
-                                <!-- LOGIN FIELDS -->
-                                <div class="auth-field-group">
-                                    <label>E-mail</label>
-                                    <input type="text" id="authEmail" required value="${defaultEmail}" placeholder="example@email.com">
+                                    <label>Registered E-mail</label>
+                                    <input type="email" id="forgotEmail" required placeholder="name@example.com">
                                     <span class="field-icon">
                                         <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                                     </span>
                                 </div>
 
-                                <div class="auth-field-group" style="margin-bottom: 1.2rem;">
-                                    <label>Password</label>
-                                    <input type="password" id="authPassword" required value="${defaultPass}" placeholder="••••••••">
-                                    <button type="button" class="field-icon" onclick="app.togglePasswordVisibility()">
-                                        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                    </button>
+                                <div id="forgotOtpSection" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 0.7rem 0.8rem; margin-bottom: 1rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                        <span style="font-size: 0.74rem; font-weight: 800; color: #047857;">📩 Reset Code (Gmail OTP)</span>
+                                        <button type="button" id="btnForgotSendOtp" onclick="app.sendForgotPasswordOtp()" style="background: #047857; color: #ffffff; border: none; border-radius: 6px; padding: 0.3rem 0.65rem; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: background 0.2s;">
+                                            Send Code
+                                        </button>
+                                    </div>
+                                    <input type="text" id="forgotOtpCode" placeholder="Enter 4-digit code" maxlength="6" style="width: 100%; height: 38px; padding: 0 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; font-weight: 800; letter-spacing: 2px; text-align: center; background: #ffffff;">
                                 </div>
-                            `}
 
-                            <!-- PRIMARY SUBMIT BUTTON -->
-                            <button type="submit" style="width: 100%; height: 44px; background: #3b82f6; color: #ffffff; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(59,130,246,0.3); font-family: inherit;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
-                                ${mode === 'login' ? 'Sign In' : ''}
-                                ${mode === 'register' ? 'Sign Up' : ''}
-                                ${mode === 'admin-login' ? 'Admin Login' : ''}
-                            </button>
-                        </form>
+                                <div class="auth-field-group">
+                                    <label>New Password</label>
+                                    <input type="password" id="forgotNewPassword" required placeholder="••••••••">
+                                </div>
 
-                        <!-- DIVIDER -->
-                        <div style="display: flex; align-items: center; margin: 1rem 0; gap: 0.6rem;">
-                            <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-                            <span style="font-size: 0.7rem; color: #94a3b8; font-weight: 500;">
-                                ${mode === 'login' ? 'or sign in with' : 'or sign up with'}
-                            </span>
-                            <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-                        </div>
+                                <button type="submit" style="width: 100%; height: 44px; background: #047857; color: #ffffff; border: none; border-radius: 9px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(4,120,87,0.3); font-family: inherit;" onmouseover="this.style.background='#065f46'" onmouseout="this.style.background='#047857'">
+                                    Reset Password &amp; Sign In
+                                </button>
+                            </form>
+                        ` : `
+                            <!-- LOGIN / REGISTER FORM -->
+                            <form onsubmit="event.preventDefault(); app.handleAuthSubmit('${mode}');" style="display: flex; flex-direction: column;">
+                                ${isRegister ? `
+                                    <!-- FULL NAME FIELD -->
+                                    <div class="auth-field-group">
+                                        <label>Full Name</label>
+                                        <input type="text" id="authName" required placeholder="John Doe">
+                                        <span class="field-icon">
+                                            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                        </span>
+                                    </div>
 
-                        <!-- 3 SOCIAL LOGIN BUTTONS ROW -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem;">
-                            <button type="button" onclick="app.switchSignupTab('phone')" style="height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#e2e8f0'">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                            </button>
+                                    <!-- EMAIL / PHONE TAB SELECTION -->
+                                    <div style="margin-bottom: 0.8rem;">
+                                        <div style="display: flex; gap: 0.3rem; background: #D8F3DC; padding: 0.2rem; border-radius: 8px; margin-bottom: 0.6rem; width: 100%; border: 1px solid #bbf7d0;">
+                                            <button type="button" id="tabEmailBtn" onclick="app.switchSignupTab('email')" style="flex: 1; padding: 0.35rem; border: none; border-radius: 6px; font-weight: 800; font-size: 0.76rem; background: #ffffff; color: #047857; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.2s;">📧 Email Signup</button>
+                                            <button type="button" id="tabPhoneBtn" onclick="app.switchSignupTab('phone')" style="flex: 1; padding: 0.35rem; border: none; border-radius: 6px; font-weight: 700; font-size: 0.76rem; background: transparent; color: #047857; cursor: pointer; transition: all 0.2s;">📱 Phone Signup</button>
+                                        </div>
 
-                            <button type="button" onclick="app.loginWithGoogle()" style="height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#e2e8f0'">
+                                        <div id="signupEmailGroup">
+                                            <div class="auth-field-group" style="margin-bottom: 0;">
+                                                <label>E-mail Address</label>
+                                                <input type="email" id="authEmail" placeholder="example@email.com">
+                                                <span class="field-icon">
+                                                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div id="signupPhoneGroup" style="display: none;">
+                                            <div class="auth-field-group" style="margin-bottom: 0;">
+                                                <label>Phone Number</label>
+                                                <input type="tel" id="authPhone" placeholder="+91 9541692891">
+                                                <span class="field-icon">
+                                                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- OTP VERIFICATION INLINE (PRO CLEAN DESIGN) -->
+                                    <div id="otpSectionBox" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 0.6rem 0.75rem; margin-bottom: 0.85rem; transition: all 0.2s;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                                            <label style="font-size: 0.72rem; font-weight: 800; color: #047857; margin: 0; display: flex; align-items: center; gap: 0.3rem;">
+                                                <span>🔒</span> REAL-TIME OTP VERIFICATION
+                                            </label>
+                                            <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="background: #047857; color: #ffffff; border: none; border-radius: 6px; padding: 0.25rem 0.65rem; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: background 0.2s;">
+                                                Send OTP
+                                            </button>
+                                        </div>
+                                        <div style="display: flex; gap: 0.4rem; align-items: center;">
+                                            <input type="text" id="authOtpCode" placeholder="Enter 4-digit OTP" maxlength="6" style="flex: 1; height: 36px; padding: 0 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.86rem; font-weight: 800; letter-spacing: 2px; text-align: center; background: #ffffff;">
+                                            <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="background: #064e3b; color: #ffffff; border: none; border-radius: 6px; padding: 0 0.85rem; height: 36px; font-size: 0.76rem; font-weight: 700; cursor: pointer; transition: background 0.2s;">
+                                                Verify
+                                            </button>
+                                        </div>
+                                        <div id="otpSentAlert" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 0.25rem 0.45rem; border-radius: 6px; font-size: 0.72rem; font-weight: 700; margin-top: 0.3rem;"></div>
+                                        <div id="otpStatusMsg" style="font-size: 0.74rem; color: #16a34a; font-weight: 800; margin-top: 0.3rem; display: none;">✓ Contact Verified Successfully</div>
+                                    </div>
+
+                                    <!-- PASSWORDS ROW -->
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                        <div class="auth-field-group" style="margin-bottom: 0;">
+                                            <label>Password</label>
+                                            <input type="password" id="authPassword" required placeholder="••••••••">
+                                        </div>
+                                        <div class="auth-field-group" style="margin-bottom: 0;">
+                                            <label>Confirm</label>
+                                            <input type="password" id="authPasswordConfirm" required placeholder="••••••••">
+                                        </div>
+                                    </div>
+                                ` : `
+                                    <!-- LOGIN FIELDS -->
+                                    <div class="auth-field-group">
+                                        <label>E-mail or Phone</label>
+                                        <input type="text" id="authEmail" required value="${defaultEmail}" placeholder="example@email.com">
+                                        <span class="field-icon">
+                                            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                        </span>
+                                    </div>
+
+                                    <div class="auth-field-group" style="margin-bottom: 0.5rem;">
+                                        <label>Password</label>
+                                        <input type="password" id="authPassword" required value="${defaultPass}" placeholder="••••••••">
+                                        <button type="button" class="field-icon" onclick="app.togglePasswordVisibility()">
+                                            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        </button>
+                                    </div>
+
+                                    <div style="display: flex; justify-content: flex-end; margin-bottom: 1.1rem;">
+                                        <a href="#" onclick="event.preventDefault(); app.openForgotPasswordModal();" style="font-size: 0.78rem; font-weight: 700; color: #047857; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#065f46'" onmouseout="this.style.color='#047857'">
+                                            Forgot Password?
+                                        </a>
+                                    </div>
+                                `}
+
+                                <!-- PRIMARY SUBMIT BUTTON -->
+                                <button type="submit" style="width: 100%; height: 44px; background: #047857; color: #ffffff; border: none; border-radius: 9px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(4,120,87,0.25); font-family: inherit;" onmouseover="this.style.background='#065f46'" onmouseout="this.style.background='#047857'">
+                                    ${isLogin ? 'Sign In' : ''}
+                                    ${isRegister ? 'Sign Up' : ''}
+                                </button>
+                            </form>
+
+                            <!-- DIVIDER -->
+                            <div style="display: flex; align-items: center; margin: 1.1rem 0 0.9rem 0; gap: 0.6rem;">
+                                <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+                                <span style="font-size: 0.74rem; color: #94a3b8; font-weight: 600;">
+                                    ${isLogin ? 'or sign in with' : 'or sign up with'}
+                                </span>
+                                <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+                            </div>
+
+                            <!-- GOOGLE SIGN IN OPTION ONLY -->
+                            <button type="button" onclick="app.loginWithGoogle()" style="width: 100%; height: 42px; border: 1.5px solid #cbd5e1; border-radius: 9px; background: #ffffff; display: flex; align-items: center; justify-content: center; gap: 0.6rem; cursor: pointer; transition: all 0.2s; font-weight: 700; font-size: 0.86rem; color: #0f172a;" onmouseover="this.style.borderColor='#047857'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#ffffff';">
                                 <svg width="18" height="18" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                                     <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z"/>
                                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                                 </svg>
+                                <span>Continue with Google</span>
                             </button>
+                        `}
 
-                            <button type="button" onclick="${mode === 'admin-login' ? "app.openAuthModal('login')" : "app.openAuthModal('admin-login')"}" style="height: 42px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#e2e8f0'">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="#000000"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.54c.67-.82 1.13-1.96.99-3.1-.98.04-2.18.66-2.88 1.47-.62.72-1.16 1.88-1.01 3 1.09.08 2.22-.55 2.9-1.37z"/></svg>
-                            </button>
+                        <!-- FOOTER SWITCH LINK -->
+                        <div style="margin-top: 1.1rem; font-size: 0.82rem; color: #64748b; text-align: center;">
+                            ${isLogin ? `
+                                Don't have an account? <a href="#" onclick="event.preventDefault(); app.openAuthModal('register');" style="color: #047857; font-weight: 700; text-decoration: none;">Sign up</a>
+                            ` : ''}
+                            ${isRegister ? `
+                                Already have an account? <a href="#" onclick="event.preventDefault(); app.openAuthModal('login');" style="color: #047857; font-weight: 700; text-decoration: none;">Sign in</a>
+                            ` : ''}
+                            ${isForgot ? `
+                                Remembered your password? <a href="#" onclick="event.preventDefault(); app.openAuthModal('login');" style="color: #047857; font-weight: 700; text-decoration: none;">Back to Sign in</a>
+                            ` : ''}
                         </div>
-                    </div>
 
-                    <!-- FOOTER SWITCH LINK -->
-                    <div style="margin-top: 1rem; font-size: 0.8rem; color: #64748b;">
-                        ${mode === 'login' ? `
-                            Don't have an account? <a href="#" onclick="app.openAuthModal('register')" style="color: #2563eb; font-weight: 700; text-decoration: none;">Sign up</a>
-                        ` : ''}
-                        ${mode === 'register' ? `
-                            Have an account? <a href="#" onclick="app.openAuthModal('login')" style="color: #2563eb; font-weight: 700; text-decoration: none;">Sign in</a>
-                        ` : ''}
-                        ${mode === 'admin-login' ? `
-                            Zaireen User? <a href="#" onclick="app.openAuthModal('login')" style="color: #2563eb; font-weight: 700; text-decoration: none;">User Sign in</a>
-                        ` : ''}
                     </div>
-
                 </div>
 
-                <!-- RIGHT ART PANEL -->
-                <div class="auth-art-panel">
-                    <div style="position: relative; z-index: 2; color: #ffffff; text-align: right; width: 100%;">
-                        <div style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(255,255,255,0.25); backdrop-filter: blur(10px); padding: 0.3rem 0.8rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; color: #ffffff; border: 1px solid rgba(255,255,255,0.35);">
-                            <span>•</span><span>•</span><span style="display:inline-block; width:16px; height:3px; background:#ffffff; border-radius:2px; vertical-align:middle;"></span>
+                <!-- RIGHT ART & BRANDING PANEL (Pastel Mint Accent #D8F3DC Gradient) -->
+                <div class="auth-art-panel" style="background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #065f46 100%); padding: 2.5rem 2.2rem; display: flex; flex-direction: column; justify-content: space-between; color: #ffffff; position: relative; overflow: hidden;">
+                    
+                    <!-- Decorative Mint #D8F3DC Glow Pattern -->
+                    <div style="position: absolute; inset: 0; background-image: radial-gradient(circle at 20% 20%, rgba(216, 243, 220, 0.25) 0%, transparent 45%), radial-gradient(circle at 80% 80%, rgba(167, 243, 208, 0.2) 0%, transparent 50%); pointer-events: none;"></div>
+
+                    <!-- Top Badge -->
+                    <div style="position: relative; z-index: 2;">
+                        <span style="background: rgba(216, 243, 220, 0.22); backdrop-filter: blur(8px); padding: 0.38rem 0.9rem; border-radius: 99px; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.5px; color: #D8F3DC; border: 1px solid rgba(216, 243, 220, 0.35); display: inline-flex; align-items: center; gap: 0.45rem;">
+                            <span>🕋</span> GoExergy Umrah Platform
+                        </span>
+                    </div>
+
+                    <!-- Middle Content -->
+                    <div style="position: relative; z-index: 2; margin: 2rem 0;">
+                        <h3 style="font-size: 1.55rem; font-weight: 800; line-height: 1.3; margin: 0 0 0.8rem 0; letter-spacing: -0.4px; color: #ffffff;">
+                            Book Your Sacred Journey with Peace &amp; Confidence
+                        </h3>
+                        <p style="font-size: 0.88rem; color: #D8F3DC; line-height: 1.6; margin: 0 0 1.5rem 0;">
+                            Join thousands of travelers booking verified Umrah packages, direct hotels near Haram, and custom bidding.
+                        </p>
+
+                        <div style="display: flex; flex-direction: column; gap: 0.7rem; font-size: 0.83rem; font-weight: 700; color: #ffffff;">
+                            <div style="display: flex; align-items: center; gap: 0.55rem;">
+                                <span style="color: #6ee7b7; font-weight: 900;">✓</span> 100% Certified Umrah &amp; Hajj Packages
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.55rem;">
+                                <span style="color: #6ee7b7; font-weight: 900;">✓</span> Direct 5-Star Haram Accommodations
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.55rem;">
+                                <span style="color: #6ee7b7; font-weight: 900;">✓</span> Real-Time Custom Bidding &amp; Best Price Guarantee
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.55rem;">
+                                <span style="color: #6ee7b7; font-weight: 900;">✓</span> 24/7 Travel Assistance in Makkah &amp; Madinah
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Bottom Rating Card -->
+                    <div style="position: relative; z-index: 2; background: rgba(255, 255, 255, 0.14); backdrop-filter: blur(12px); border-radius: 12px; padding: 0.85rem 1.1rem; border: 1px solid rgba(216, 243, 220, 0.28); display: flex; align-items: center; gap: 0.8rem;">
+                        <div style="font-size: 1.5rem;">⭐️</div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 0.88rem; color: #ffffff;">4.9 / 5 Customer Rating</div>
+                            <div style="font-size: 0.74rem; color: #D8F3DC; font-weight: 600;">Trusted by 10,000+ Happy Travelers</div>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
