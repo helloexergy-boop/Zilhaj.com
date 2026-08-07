@@ -2947,264 +2947,238 @@ class App {
         // Reset signup OTP state on modal open
         this.state.otpVerified = false;
         this.state.generatedOtp = null;
-        this.state.signupTab = 'email';
 
         const defaultEmail = isAdminMode ? 'admin@umrah.com' : (mode === 'login' ? 'user@zaireen.com' : '');
         const defaultPass = isLogin ? 'password123' : '';
 
         this.openModal(`
-            <div class="two-col-auth-modal" style="border: 1px solid #bbf7d0;">
+            <div style="max-width: 440px; margin: 0 auto; background: #ffffff; padding: 2.2rem 2.4rem; border-radius: 16px; box-shadow: 0 12px 36px rgba(0,0,0,0.12); border: 1px solid #e2e8f0; font-family: inherit; box-sizing: border-box;">
                 
-                <!-- LEFT FORM PANEL -->
-                <div style="padding: 2.2rem 2.4rem; display: flex; flex-direction: column; justify-content: space-between; background: #ffffff; box-sizing: border-box; z-index: 2;">
-                    
-                    <div>
-                        <!-- BRAND LOGO HEADER -->
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.4rem;">
-                            <div style="display: flex; align-items: center; gap: 0.55rem;">
-                                <div style="width: 34px; height: 34px; background: linear-gradient(135deg, #047857 0%, #065f46 100%); border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1rem; box-shadow: 0 4px 12px rgba(4,120,87,0.25);">
-                                    🕋
-                                </div>
-                                <span style="font-weight: 800; font-size: 1.15rem; color: #0f172a; letter-spacing: -0.3px;">Umrah Travels</span>
-                            </div>
+                <!-- BRAND HEADER -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem;">
+                    <div style="display: flex; align-items: center; gap: 0.55rem;">
+                        <div style="width: 34px; height: 34px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1rem; box-shadow: 0 4px 10px rgba(37,99,235,0.25);">
+                            🕋
                         </div>
-
-                        <!-- TITLE & EYEBROW -->
-                        <div style="margin-bottom: 1.3rem;">
-                            <p style="font-size: 0.85rem; font-weight: 800; color: #047857; text-transform: uppercase; letter-spacing: 0.8px; margin: 0 0 0.2rem 0;">
-                                ${isLogin ? 'Welcome Back' : ''}
-                                ${isRegister ? 'Easy & Secure Travel Booking' : ''}
-                                ${isForgot ? 'Account Recovery' : ''}
-                            </p>
-                            <h2 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.4px;">
-                                ${isLogin ? 'Sign In to Your Account' : ''}
-                                ${isRegister ? 'Create Your Free Account' : ''}
-                                ${isForgot ? 'Reset Your Password' : ''}
-                            </h2>
-                        </div>
-
-                        ${isForgot ? `
-                            <!-- FORGOT PASSWORD FORM -->
-                            <form onsubmit="event.preventDefault(); app.handleForgotPasswordSubmit();" style="display: flex; flex-direction: column;">
-                                <div class="auth-field-group">
-                                    <label>Registered E-mail</label>
-                                    <input type="email" id="forgotEmail" required placeholder="name@example.com">
-                                    <span class="field-icon">
-                                        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                    </span>
-                                </div>
-
-                                <div id="forgotOtpSection" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 0.7rem 0.8rem; margin-bottom: 1rem;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                                        <span style="font-size: 0.74rem; font-weight: 800; color: #047857;">📩 Reset Code (Gmail OTP)</span>
-                                        <button type="button" id="btnForgotSendOtp" onclick="app.sendForgotPasswordOtp()" style="background: #047857; color: #ffffff; border: none; border-radius: 6px; padding: 0.3rem 0.65rem; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: background 0.2s;">
-                                            Send Code
-                                        </button>
-                                    </div>
-                                    <input type="text" id="forgotOtpCode" placeholder="Enter 4-digit code" maxlength="6" style="width: 100%; height: 38px; padding: 0 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; font-weight: 800; letter-spacing: 2px; text-align: center; background: #ffffff;">
-                                </div>
-
-                                <div class="auth-field-group">
-                                    <label>New Password</label>
-                                    <input type="password" id="forgotNewPassword" required placeholder="••••••••">
-                                </div>
-
-                                <button type="submit" style="width: 100%; height: 44px; background: #047857; color: #ffffff; border: none; border-radius: 9px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(4,120,87,0.3); font-family: inherit;" onmouseover="this.style.background='#065f46'" onmouseout="this.style.background='#047857'">
-                                    Reset Password &amp; Sign In
-                                </button>
-                            </form>
-                        ` : `
-                            <!-- LOGIN / REGISTER FORM -->
-                            <form onsubmit="event.preventDefault(); app.handleAuthSubmit('${mode}');" style="display: flex; flex-direction: column;">
-                                ${isRegister ? `
-                                    <!-- FULL NAME FIELD -->
-                                    <div class="auth-field-group">
-                                        <label>Full Name</label>
-                                        <input type="text" id="authName" required placeholder="John Doe">
-                                        <span class="field-icon">
-                                            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                        </span>
-                                    </div>
-
-                                    <!-- EMAIL / PHONE TAB SELECTION -->
-                                    <div style="margin-bottom: 0.8rem;">
-                                        <div style="display: flex; gap: 0.3rem; background: #D8F3DC; padding: 0.2rem; border-radius: 8px; margin-bottom: 0.6rem; width: 100%; border: 1px solid #bbf7d0;">
-                                            <button type="button" id="tabEmailBtn" onclick="app.switchSignupTab('email')" style="flex: 1; padding: 0.35rem; border: none; border-radius: 6px; font-weight: 800; font-size: 0.76rem; background: #ffffff; color: #047857; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.2s;">📧 Email Signup</button>
-                                            <button type="button" id="tabPhoneBtn" onclick="app.switchSignupTab('phone')" style="flex: 1; padding: 0.35rem; border: none; border-radius: 6px; font-weight: 700; font-size: 0.76rem; background: transparent; color: #047857; cursor: pointer; transition: all 0.2s;">📱 Phone Signup</button>
-                                        </div>
-
-                                        <div id="signupEmailGroup">
-                                            <div class="auth-field-group" style="margin-bottom: 0;">
-                                                <label>E-mail Address</label>
-                                                <input type="email" id="authEmail" placeholder="example@email.com">
-                                                <span class="field-icon">
-                                                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div id="signupPhoneGroup" style="display: none;">
-                                            <div class="auth-field-group" style="margin-bottom: 0;">
-                                                <label>Phone Number</label>
-                                                <input type="tel" id="authPhone" placeholder="+91 9541692891">
-                                                <span class="field-icon">
-                                                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- OTP VERIFICATION INLINE (PRO CLEAN DESIGN) -->
-                                    <div id="otpSectionBox" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 0.6rem 0.75rem; margin-bottom: 0.85rem; transition: all 0.2s;">
-                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                                            <label style="font-size: 0.72rem; font-weight: 800; color: #047857; margin: 0; display: flex; align-items: center; gap: 0.3rem;">
-                                                <span>🔒</span> REAL-TIME OTP VERIFICATION
-                                            </label>
-                                            <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="background: #047857; color: #ffffff; border: none; border-radius: 6px; padding: 0.25rem 0.65rem; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: background 0.2s;">
-                                                Send OTP
-                                            </button>
-                                        </div>
-                                        <div style="display: flex; gap: 0.4rem; align-items: center;">
-                                            <input type="text" id="authOtpCode" placeholder="Enter 4-digit OTP" maxlength="6" style="flex: 1; height: 36px; padding: 0 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.86rem; font-weight: 800; letter-spacing: 2px; text-align: center; background: #ffffff;">
-                                            <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="background: #064e3b; color: #ffffff; border: none; border-radius: 6px; padding: 0 0.85rem; height: 36px; font-size: 0.76rem; font-weight: 700; cursor: pointer; transition: background 0.2s;">
-                                                Verify
-                                            </button>
-                                        </div>
-                                        <div id="otpSentAlert" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 0.25rem 0.45rem; border-radius: 6px; font-size: 0.72rem; font-weight: 700; margin-top: 0.3rem;"></div>
-                                        <div id="otpStatusMsg" style="font-size: 0.74rem; color: #16a34a; font-weight: 800; margin-top: 0.3rem; display: none;">✓ Contact Verified Successfully</div>
-                                    </div>
-
-                                    <!-- PASSWORDS ROW -->
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.85rem;">
-                                        <div class="auth-field-group" style="margin-bottom: 0;">
-                                            <label>Password</label>
-                                            <input type="password" id="authPassword" required placeholder="••••••••">
-                                        </div>
-                                        <div class="auth-field-group" style="margin-bottom: 0;">
-                                            <label>Confirm</label>
-                                            <input type="password" id="authPasswordConfirm" required placeholder="••••••••">
-                                        </div>
-                                    </div>
-                                ` : `
-                                    <!-- LOGIN FIELDS -->
-                                    <div class="auth-field-group">
-                                        <label>E-mail or Phone</label>
-                                        <input type="text" id="authEmail" required value="${defaultEmail}" placeholder="example@email.com">
-                                        <span class="field-icon">
-                                            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                        </span>
-                                    </div>
-
-                                    <div class="auth-field-group" style="margin-bottom: 0.5rem;">
-                                        <label>Password</label>
-                                        <input type="password" id="authPassword" required value="${defaultPass}" placeholder="••••••••">
-                                        <button type="button" class="field-icon" onclick="app.togglePasswordVisibility()">
-                                            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        </button>
-                                    </div>
-
-                                    <div style="display: flex; justify-content: flex-end; margin-bottom: 1.1rem;">
-                                        <a href="#" onclick="event.preventDefault(); app.openForgotPasswordModal();" style="font-size: 0.78rem; font-weight: 700; color: #047857; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#065f46'" onmouseout="this.style.color='#047857'">
-                                            Forgot Password?
-                                        </a>
-                                    </div>
-                                `}
-
-                                <!-- PRIMARY SUBMIT BUTTON -->
-                                <button type="submit" style="width: 100%; height: 44px; background: #047857; color: #ffffff; border: none; border-radius: 9px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(4,120,87,0.25); font-family: inherit;" onmouseover="this.style.background='#065f46'" onmouseout="this.style.background='#047857'">
-                                    ${isLogin ? 'Sign In' : ''}
-                                    ${isRegister ? 'Sign Up' : ''}
-                                </button>
-                            </form>
-
-                            <!-- DIVIDER -->
-                            <div style="display: flex; align-items: center; margin: 1.1rem 0 0.9rem 0; gap: 0.6rem;">
-                                <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-                                <span style="font-size: 0.74rem; color: #94a3b8; font-weight: 600;">
-                                    ${isLogin ? 'or sign in with' : 'or sign up with'}
-                                </span>
-                                <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-                            </div>
-
-                            <!-- GOOGLE SIGN IN OPTION ONLY -->
-                            <button type="button" onclick="app.loginWithGoogle()" style="width: 100%; height: 42px; border: 1.5px solid #cbd5e1; border-radius: 9px; background: #ffffff; display: flex; align-items: center; justify-content: center; gap: 0.6rem; cursor: pointer; transition: all 0.2s; font-weight: 700; font-size: 0.86rem; color: #0f172a;" onmouseover="this.style.borderColor='#047857'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#ffffff';">
-                                <svg width="18" height="18" viewBox="0 0 24 24">
-                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                    <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z"/>
-                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                                </svg>
-                                <span>Continue with Google</span>
-                            </button>
-                        `}
-
-                        <!-- FOOTER SWITCH LINK -->
-                        <div style="margin-top: 1.1rem; font-size: 0.82rem; color: #64748b; text-align: center;">
-                            ${isLogin ? `
-                                Don't have an account? <a href="#" onclick="event.preventDefault(); app.openAuthModal('register');" style="color: #047857; font-weight: 700; text-decoration: none;">Sign up</a>
-                            ` : ''}
-                            ${isRegister ? `
-                                Already have an account? <a href="#" onclick="event.preventDefault(); app.openAuthModal('login');" style="color: #047857; font-weight: 700; text-decoration: none;">Sign in</a>
-                            ` : ''}
-                            ${isForgot ? `
-                                Remembered your password? <a href="#" onclick="event.preventDefault(); app.openAuthModal('login');" style="color: #047857; font-weight: 700; text-decoration: none;">Back to Sign in</a>
-                            ` : ''}
-                        </div>
-
+                        <span style="font-weight: 800; font-size: 1.15rem; color: #0f172a; letter-spacing: -0.3px;">Umrah Travels</span>
                     </div>
                 </div>
 
-                <!-- RIGHT ART & BRANDING PANEL (Pastel Mint Accent #D8F3DC Gradient) -->
-                <div class="auth-art-panel" style="background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #065f46 100%); padding: 2.5rem 2.2rem; display: flex; flex-direction: column; justify-content: space-between; color: #ffffff; position: relative; overflow: hidden;">
-                    
-                    <!-- Decorative Mint #D8F3DC Glow Pattern -->
-                    <div style="position: absolute; inset: 0; background-image: radial-gradient(circle at 20% 20%, rgba(216, 243, 220, 0.25) 0%, transparent 45%), radial-gradient(circle at 80% 80%, rgba(167, 243, 208, 0.2) 0%, transparent 50%); pointer-events: none;"></div>
+                <!-- TITLE & SUBTITLE -->
+                <div style="margin-bottom: 1.4rem;">
+                    <h2 style="font-size: 1.65rem; font-weight: 800; color: #0f172a; margin: 0 0 0.2rem 0; letter-spacing: -0.4px;">
+                        ${isLogin ? 'Log in' : ''}
+                        ${isRegister ? 'Create account' : ''}
+                        ${isForgot ? 'Reset password' : ''}
+                    </h2>
+                    <p style="font-size: 0.84rem; color: #64748b; margin: 0;">
+                        ${isLogin ? 'Welcome back to your travel portal.' : ''}
+                        ${isRegister ? 'Secure access to your travel booking tools.' : ''}
+                        ${isForgot ? 'Enter your registered email to reset password.' : ''}
+                    </p>
+                </div>
 
-                    <!-- Top Badge -->
-                    <div style="position: relative; z-index: 2;">
-                        <span style="background: rgba(216, 243, 220, 0.22); backdrop-filter: blur(8px); padding: 0.38rem 0.9rem; border-radius: 99px; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.5px; color: #D8F3DC; border: 1px solid rgba(216, 243, 220, 0.35); display: inline-flex; align-items: center; gap: 0.45rem;">
-                            <span>🕋</span> GoExergy Umrah Platform
-                        </span>
-                    </div>
-
-                    <!-- Middle Content -->
-                    <div style="position: relative; z-index: 2; margin: 2rem 0;">
-                        <h3 style="font-size: 1.55rem; font-weight: 800; line-height: 1.3; margin: 0 0 0.8rem 0; letter-spacing: -0.4px; color: #ffffff;">
-                            Book Your Sacred Journey with Peace &amp; Confidence
-                        </h3>
-                        <p style="font-size: 0.88rem; color: #D8F3DC; line-height: 1.6; margin: 0 0 1.5rem 0;">
-                            Join thousands of travelers booking verified Umrah packages, direct hotels near Haram, and custom bidding.
-                        </p>
-
-                        <div style="display: flex; flex-direction: column; gap: 0.7rem; font-size: 0.83rem; font-weight: 700; color: #ffffff;">
-                            <div style="display: flex; align-items: center; gap: 0.55rem;">
-                                <span style="color: #6ee7b7; font-weight: 900;">✓</span> 100% Certified Umrah &amp; Hajj Packages
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 0.55rem;">
-                                <span style="color: #6ee7b7; font-weight: 900;">✓</span> Direct 5-Star Haram Accommodations
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 0.55rem;">
-                                <span style="color: #6ee7b7; font-weight: 900;">✓</span> Real-Time Custom Bidding &amp; Best Price Guarantee
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 0.55rem;">
-                                <span style="color: #6ee7b7; font-weight: 900;">✓</span> 24/7 Travel Assistance in Makkah &amp; Madinah
-                            </div>
+                ${isForgot ? `
+                    <!-- FORGOT PASSWORD FORM -->
+                    <form onsubmit="event.preventDefault(); app.handleForgotPasswordSubmit();" style="display: flex; flex-direction: column;">
+                        <div class="auth-field-group">
+                            <label>Registered E-mail</label>
+                            <input type="email" id="forgotEmail" required placeholder="name@company.com">
+                            <span class="field-icon">
+                                <svg width="17" height="17" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            </span>
                         </div>
-                    </div>
 
-                    <!-- Bottom Rating Card -->
-                    <div style="position: relative; z-index: 2; background: rgba(255, 255, 255, 0.14); backdrop-filter: blur(12px); border-radius: 12px; padding: 0.85rem 1.1rem; border: 1px solid rgba(216, 243, 220, 0.28); display: flex; align-items: center; gap: 0.8rem;">
-                        <div style="font-size: 1.5rem;">⭐️</div>
-                        <div>
-                            <div style="font-weight: 800; font-size: 0.88rem; color: #ffffff;">4.9 / 5 Customer Rating</div>
-                            <div style="font-size: 0.74rem; color: #D8F3DC; font-weight: 600;">Trusted by 10,000+ Happy Travelers</div>
+                        <div id="forgotOtpSection" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.65rem 0.75rem; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                                <span style="font-size: 0.74rem; font-weight: 800; color: #1d4ed8;">📩 Reset Code (Gmail OTP)</span>
+                                <button type="button" id="btnForgotSendOtp" onclick="app.sendForgotPasswordOtp()" style="background: #2563eb; color: #ffffff; border: none; border-radius: 6px; padding: 0.25rem 0.6rem; font-size: 0.72rem; font-weight: 700; cursor: pointer;">
+                                    Send OTP
+                                </button>
+                            </div>
+                            <input type="text" id="forgotOtpCode" placeholder="Enter 4-digit code" maxlength="6" style="width: 100%; height: 36px; padding: 0 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; font-weight: 800; letter-spacing: 2px; text-align: center; background: #ffffff;">
                         </div>
+
+                        <div class="auth-field-group">
+                            <label>New Password</label>
+                            <input type="password" id="forgotNewPassword" required placeholder="Enter new password">
+                        </div>
+
+                        <button type="submit" style="width: 100%; height: 44px; background: #2563eb; color: #ffffff; border: none; border-radius: 8px; font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37,99,235,0.25); margin-top: 0.4rem;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                            Reset Password &amp; Log In
+                        </button>
+                    </form>
+                ` : `
+                    <!-- GOOGLE SIGN IN BUTTON -->
+                    <button type="button" onclick="app.loginWithGoogle()" style="width: 100%; height: 42px; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; display: flex; align-items: center; justify-content: center; gap: 0.65rem; cursor: pointer; transition: all 0.2s; font-weight: 600; font-size: 0.88rem; color: #1e293b;" onmouseover="this.style.borderColor='#cbd5e1'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#ffffff';">
+                        <svg width="18" height="18" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                    </button>
+
+                    <!-- DIVIDER -->
+                    <div style="display: flex; align-items: center; margin: 1.1rem 0; gap: 0.6rem;">
+                        <div style="flex: 1; height: 1px; background: #f1f5f9;"></div>
+                        <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">${isLogin ? 'or' : 'OR'}</span>
+                        <div style="flex: 1; height: 1px; background: #f1f5f9;"></div>
                     </div>
 
+                    <!-- LOGIN / REGISTER FORM -->
+                    <form onsubmit="event.preventDefault(); app.handleAuthSubmit('${mode}');" style="display: flex; flex-direction: column;">
+                        ${isRegister ? `
+                            <!-- FULL NAME FIELD -->
+                            <div class="auth-field-group">
+                                <label>Full Name</label>
+                                <input type="text" id="authName" required placeholder="John Doe">
+                                <span class="field-icon">
+                                    <svg width="17" height="17" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                </span>
+                            </div>
+
+                            <!-- EMAIL OR PHONE NUMBER WITH INLINE SEND OTP BUTTON -->
+                            <div class="auth-field-group" style="margin-bottom: 0.9rem;">
+                                <label>Email or Phone Number</label>
+                                <div style="display: flex; align-items: center; position: relative;">
+                                    <input type="text" id="authEmail" required placeholder="name@company.com" style="padding-right: 92px;">
+                                    <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.35rem 0.7rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#2563eb'; this.style.color='#ffffff';" onmouseout="this.style.background='#eff6ff'; this.style.color='#2563eb';">
+                                        Send OTP
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- DYNAMIC OTP VERIFICATION INPUT BOX (REVEALS ON SEND OTP) -->
+                            <div id="otpSectionBox" style="display: none; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 0.65rem 0.75rem; margin-bottom: 0.9rem; transition: all 0.2s;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                                    <label style="font-size: 0.72rem; font-weight: 800; color: #166534; margin: 0; display: flex; align-items: center; gap: 0.3rem;">
+                                        <span>🔑</span> ENTER VERIFICATION CODE
+                                    </label>
+                                </div>
+                                <div style="display: flex; gap: 0.4rem; align-items: center;">
+                                    <input type="text" id="authOtpCode" placeholder="Enter 4-digit OTP" maxlength="6" style="flex: 1; height: 36px; padding: 0 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; font-weight: 800; letter-spacing: 2px; text-align: center; background: #ffffff;">
+                                    <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="background: #0f172a; color: #ffffff; border: none; border-radius: 6px; padding: 0 0.85rem; height: 36px; font-size: 0.76rem; font-weight: 700; cursor: pointer;">
+                                        Verify
+                                    </button>
+                                </div>
+                                <div id="otpSentAlert" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 0.25rem 0.45rem; border-radius: 6px; font-size: 0.72rem; font-weight: 700; margin-top: 0.3rem;"></div>
+                                <div id="otpStatusMsg" style="font-size: 0.74rem; color: #16a34a; font-weight: 800; margin-top: 0.3rem; display: none;">✓ Verified Successfully</div>
+                            </div>
+
+                            <!-- PASSWORD FIELD -->
+                            <div class="auth-field-group" style="margin-bottom: 0.4rem;">
+                                <label>Password</label>
+                                <input type="password" id="authPassword" required placeholder="Enter your password" onkeyup="app.checkPasswordStrength(this.value)">
+                                <button type="button" class="field-icon" onclick="app.togglePasswordVisibility()" style="background: none; border: none; cursor: pointer; padding: 0;">
+                                    <svg width="17" height="17" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </button>
+                            </div>
+
+                            <!-- PASSWORD STRENGTH BAR -->
+                            <div style="margin-bottom: 0.85rem;">
+                                <div style="display: flex; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; gap: 3px; margin-bottom: 0.25rem;">
+                                    <div id="strBar1" style="flex: 1; background: #e2e8f0; transition: all 0.2s;"></div>
+                                    <div id="strBar2" style="flex: 1; background: #e2e8f0; transition: all 0.2s;"></div>
+                                    <div id="strBar3" style="flex: 1; background: #e2e8f0; transition: all 0.2s;"></div>
+                                </div>
+                                <span id="strText" style="font-size: 0.7rem; color: #94a3b8; font-weight: 600;">Password strength: Weak</span>
+                            </div>
+
+                            <!-- TERMS CHECKBOX -->
+                            <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 1.1rem; font-size: 0.78rem; color: #64748b;">
+                                <input type="checkbox" id="termsCheck" required style="width: 15px; height: 15px; accent-color: #2563eb; cursor: pointer;">
+                                <label for="termsCheck" style="margin: 0; cursor: pointer;">
+                                    I agree to the <a href="#" style="color: #2563eb; text-decoration: none; font-weight: 600;">Terms of Service</a> and <a href="#" style="color: #2563eb; text-decoration: none; font-weight: 600;">Privacy Policy</a>.
+                                </label>
+                            </div>
+                        ` : `
+                            <!-- LOGIN FIELDS -->
+                            <div class="auth-field-group">
+                                <label>Email or Username</label>
+                                <input type="text" id="authEmail" required value="${defaultEmail}" placeholder="Enter your email">
+                                <span class="field-icon">
+                                    <svg width="17" height="17" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                </span>
+                            </div>
+
+                            <div class="auth-field-group" style="margin-bottom: 0.6rem;">
+                                <label>Password</label>
+                                <input type="password" id="authPassword" required value="${defaultPass}" placeholder="Enter your password">
+                                <button type="button" class="field-icon" onclick="app.togglePasswordVisibility()" style="background: none; border: none; cursor: pointer; padding: 0;">
+                                    <svg width="17" height="17" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </button>
+                            </div>
+
+                            <!-- REMEMBER ME & FORGOT PASSWORD ROW -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; font-size: 0.78rem;">
+                                <label style="display: flex; align-items: center; gap: 0.35rem; color: #64748b; cursor: pointer; margin: 0;">
+                                    <input type="checkbox" style="width: 14px; height: 14px; accent-color: #2563eb;"> Remember me
+                                </label>
+                                <a href="#" onclick="event.preventDefault(); app.openForgotPasswordModal();" style="color: #2563eb; font-weight: 600; text-decoration: none;">
+                                    Forgot password?
+                                </a>
+                            </div>
+                        `}
+
+                        <!-- PRIMARY ACTION BUTTON -->
+                        <button type="submit" style="width: 100%; height: 44px; background: #2563eb; color: #ffffff; border: none; border-radius: 8px; font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37,99,235,0.25); font-family: inherit;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                            ${isLogin ? 'Log in' : ''}
+                            ${isRegister ? 'Verify &amp; Sign Up' : ''}
+                        </button>
+                    </form>
+                `}
+
+                <!-- FOOTER SWITCH LINK -->
+                <div style="margin-top: 1.2rem; font-size: 0.82rem; color: #64748b; text-align: center;">
+                    ${isLogin ? `
+                        Don't have an account? <a href="#" onclick="event.preventDefault(); app.openAuthModal('register');" style="color: #2563eb; font-weight: 700; text-decoration: none;">Sign up</a>
+                    ` : ''}
+                    ${isRegister ? `
+                        Already have an account? <a href="#" onclick="event.preventDefault(); app.openAuthModal('login');" style="color: #2563eb; font-weight: 700; text-decoration: none;">Log in</a>
+                    ` : ''}
+                    ${isForgot ? `
+                        Remembered your password? <a href="#" onclick="event.preventDefault(); app.openAuthModal('login');" style="color: #2563eb; font-weight: 700; text-decoration: none;">Back to Log in</a>
+                    ` : ''}
                 </div>
 
             </div>
         `);
+    }
+
+    checkPasswordStrength(val) {
+        const b1 = document.getElementById('strBar1');
+        const b2 = document.getElementById('strBar2');
+        const b3 = document.getElementById('strBar3');
+        const txt = document.getElementById('strText');
+        if (!b1 || !b2 || !b3 || !txt) return;
+
+        if (!val || val.length === 0) {
+            b1.style.background = '#e2e8f0';
+            b2.style.background = '#e2e8f0';
+            b3.style.background = '#e2e8f0';
+            txt.innerText = 'Password strength: Weak';
+            txt.style.color = '#94a3b8';
+        } else if (val.length < 6) {
+            b1.style.background = '#ef4444';
+            b2.style.background = '#e2e8f0';
+            b3.style.background = '#e2e8f0';
+            txt.innerText = 'Password strength: Weak';
+            txt.style.color = '#ef4444';
+        } else if (val.length < 10) {
+            b1.style.background = '#f59e0b';
+            b2.style.background = '#f59e0b';
+            b3.style.background = '#e2e8f0';
+            txt.innerText = 'Password strength: Medium';
+            txt.style.color = '#f59e0b';
+        } else {
+            b1.style.background = '#10b981';
+            b2.style.background = '#10b981';
+            b3.style.background = '#10b981';
+            txt.innerText = 'Password strength: Strong';
+            txt.style.color = '#10b981';
+        }
     }
 
     switchSignupTab(tab) {
@@ -3234,16 +3208,19 @@ class App {
     }
 
     async sendSignupOtp() {
-        const emailVal = document.getElementById('authEmail')?.value.trim() || '';
-        const phoneVal = document.getElementById('authPhone')?.value.trim() || '';
-        const activeTab = this.state.signupTab || 'email';
+        const emailInput = document.getElementById('authEmail');
+        const target = emailInput ? emailInput.value.trim() : '';
 
-        const target = activeTab === 'email' ? emailVal : phoneVal;
         if (!target) {
-            this.showToast(`⚠️ Please enter your ${activeTab === 'email' ? 'email address' : 'phone number'} first!`, 'error');
-            const targetEl = activeTab === 'email' ? document.getElementById('authEmail') : document.getElementById('authPhone');
-            if (targetEl) targetEl.focus();
+            this.showToast(`⚠️ Please enter your email or phone number first!`, 'error');
+            if (emailInput) emailInput.focus();
             return;
+        }
+
+        // Reveal the OTP input box smoothly
+        const otpBox = document.getElementById('otpSectionBox');
+        if (otpBox) {
+            otpBox.style.display = 'block';
         }
 
         // Generate 4-digit code
@@ -3253,7 +3230,7 @@ class App {
 
         // Try API endpoint or fallback
         try {
-            await this.apiCall('/auth/send-otp', 'POST', { contact: target, type: activeTab });
+            await this.apiCall('/auth/send-otp', 'POST', { contact: target });
         } catch (e) {
             // Ignore offline/fallback error
         }
@@ -3261,7 +3238,7 @@ class App {
         const alertBox = document.getElementById('otpSentAlert');
         if (alertBox) {
             alertBox.style.display = 'block';
-            alertBox.innerHTML = `📩 OTP sent to <b>${target}</b>! Code: <span style="letter-spacing:1.5px; font-size:0.92rem; background:#047857; color:#fff; padding:0.1rem 0.4rem; border-radius:4px;">${code}</span>`;
+            alertBox.innerHTML = `📩 OTP sent to <b>${target}</b>! Code: <span style="letter-spacing:1.5px; font-size:0.92rem; background:#2563eb; color:#fff; padding:0.1rem 0.45rem; border-radius:4px; font-weight:800;">${code}</span>`;
         }
 
         const otpInput = document.getElementById('authOtpCode');
@@ -3270,7 +3247,7 @@ class App {
             otpInput.focus();
         }
 
-        this.showToast(`📩 OTP Code sent to ${target}! Your code is: ${code}`, 'success');
+        this.showToast(`📩 OTP Code sent to ${target}! Code: ${code}`, 'success');
     }
 
     async verifySignupOtp() {

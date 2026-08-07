@@ -260,14 +260,62 @@ app.post('/api/auth/login', async (req, res) => {
     });
 });
 
-app.post('/api/auth/send-otp', (req, res) => {
-    const { contact } = req.body;
+// Nodemailer Transporter Setup for Gmail App Password
+function getMailTransporter() {
+    const gmailUser = process.env.GMAIL_USER || process.env.SMTP_USER || 'hello.exergy@gmail.com';
+    const gmailPass = process.env.GMAIL_PASS || process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS;
+    if (gmailPass) {
+        return nodemailer.createTransport({
+            service: 'gmail',
+            auth: { user: gmailUser, pass: gmailPass }
+        });
+    }
+    return null;
+}
+
+app.post('/api/auth/send-otp', async (req, res) => {
+    const { contact, purpose = 'Verification' } = req.body;
     if (!contact) return res.status(400).json({ error: 'Email or phone number is required' });
+
     const code = Math.floor(1000 + Math.random() * 9000).toString();
+    const isEmail = contact.includes('@');
+
+    let sentViaEmail = false;
+    if (isEmail) {
+        const transporter = getMailTransporter();
+        if (transporter) {
+            try {
+                const gmailSender = process.env.GMAIL_USER || 'hello.exergy@gmail.com';
+                await transporter.sendMail({
+                    from: `"Umrah Travels" <${gmailSender}>`,
+                    to: contact,
+                    subject: `Your ${purpose} Code: ${code} - Umrah Travels`,
+                    html: `
+                        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                            <div style="text-align: center; margin-bottom: 16px;">
+                                <span style="font-size: 28px;">🕋</span>
+                                <h2 style="color: #0f172a; margin: 6px 0 0 0;">Umrah Travels</h2>
+                            </div>
+                            <div style="background: #f8fafc; padding: 18px; border-radius: 8px; text-align: center; margin: 16px 0;">
+                                <p style="color: #475569; font-size: 14px; margin: 0 0 8px 0;">Your Verification Code is:</p>
+                                <h1 style="font-size: 34px; font-weight: 800; color: #2563eb; letter-spacing: 6px; margin: 0;">${code}</h1>
+                                <p style="color: #94a3b8; font-size: 11px; margin-top: 10px;">Expires in 10 minutes. Do not share with anyone.</p>
+                            </div>
+                        </div>
+                    `
+                });
+                sentViaEmail = true;
+            } catch (err) {
+                console.warn('[AUTH] Gmail OTP send error:', err.message);
+            }
+        }
+    }
+
     res.json({
         success: true,
-        message: `OTP sent to ${contact}`,
-        otp: code
+        message: sentViaEmail ? `Verification code sent to ${contact} via Gmail` : `OTP sent to ${contact}`,
+        otp: code,
+        sentViaEmail
     });
 });
 
