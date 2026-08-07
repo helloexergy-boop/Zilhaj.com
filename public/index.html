@@ -468,20 +468,13 @@
                         </p>
                         <button type="button" class="btn-liquid-glass" style="max-width: 280px; margin: 0 auto;" onclick="app.resetLiquidGlassFeedbackForm()">
                             <span>🔄 Edit Rating</span>
-                        </button>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-
-        <!-- Circular Live AI Robot Assistant Chatbot Widget (Modern & Aesthetic Glassmorphic Design) -->
+                        <        <!-- Circular Live AI Robot Assistant Chatbot Widget (Modern & Aesthetic Glassmorphic Design) -->
         <div class="chatbot-floating-wrapper" id="chatbotWrapper"
             style="position:fixed !important; bottom:25px !important; right:25px !important; z-index:99999 !important; display:flex !important; flex-direction:column !important; align-items:flex-end !important;">
 
             <!-- Live Floating Speech Bubble Tooltip -->
             <div class="robot-hello-badge" onclick="app.toggleChatbot()"
-                style="background:rgba(255, 255, 255, 0.95) !important; backdrop-filter:blur(10px) !important; color:#0f172a !important; font-weight:700 !important; font-size:0.82rem !important; padding:0.5rem 1rem !important; border-radius:20px !important; box-shadow:0 10px 25px rgba(0,0,0,0.12) !important; border:1.5px solid rgba(16,185,129,0.3) !important; margin-bottom:10px !important; display:flex !important; align-items:center !important; gap:0.5rem !important; cursor:pointer !important;">
+                style="background:rgba(255, 255, 255, 0.96) !important; backdrop-filter:blur(10px) !important; color:#0f172a !important; font-weight:700 !important; font-size:0.82rem !important; padding:0.5rem 1rem !important; border-radius:20px !important; box-shadow:0 10px 25px rgba(0,0,0,0.12) !important; border:1.5px solid rgba(16,185,129,0.35) !important; margin-bottom:10px !important; display:flex !important; align-items:center !important; gap:0.5rem !important; cursor:pointer !important;">
                 <span style="font-size:0.95rem;">✨</span>
                 <span>AI Assistant</span>
                 <span
@@ -490,73 +483,78 @@
 
             <!-- Modern Circular Robot Avatar Button with Dual Gradient & Glow -->
             <button class="chatbot-circle-btn" onclick="app.toggleChatbot()"
-                style="width:64px !important; height:64px !important; border-radius:50% !important; background:linear-gradient(135deg, #10b981 0%, #047857 60%, #064e3b 100%) !important; color:#ffffff !important; border:2.5px solid rgba(255,255,255,0.9) !important; cursor:pointer !important; box-shadow:0 12px 30px rgba(4, 120, 87, 0.45), 0 0 18px rgba(16, 185, 129, 0.4) !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:2rem !important; position:relative !important; transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;">
-                <div style="transform:scale(1.05); filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🤖</div>
+                style="width:64px !important; height:64px !important; border-radius:50% !important; background:linear-gradient(135deg, #059669 0%, #047857 50%, #064e3b 100%) !important; color:#ffffff !important; border:2.5px solid rgba(255,255,255,0.95) !important; cursor:pointer !important; box-shadow:0 12px 30px rgba(4, 120, 87, 0.45), 0 0 20px rgba(16, 185, 129, 0.5) !important; display:flex !important; align-items:center !important; justify-content:center !important; position:relative !important; transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;">
+                <span style="font-size:1.8rem; filter:drop-shadow(0 2px 5px rgba(0,0,0,0.3));">🤖</span>
                 <span
-                    style="position:absolute; top:3px; right:3px; width:13px; height:13px; background:#10b981; border:2.5px solid white; border-radius:50%; box-shadow:0 0 6px rgba(16,185,129,0.8);"></span>
+                    style="position:absolute; top:2px; right:2px; width:13px; height:13px; background:#10b981; border:2.5px solid white; border-radius:50%; box-shadow:0 0 8px rgba(16,185,129,0.9);"></span>
             </button>
 
-            <!-- Chat Window Box -->
+            <!-- Chat Window Box (Optimized Pro Size 390px x 530px) -->
             <div class="chatbot-box" id="chatbotBox"
-                style="display:none; position:absolute; bottom:78px; right:0; width:365px; height:490px; background:#ffffff; border-radius:20px; box-shadow:0 25px 60px rgba(0,0,0,0.22); border:1px solid #e2e8f0; flex-direction:column; overflow:hidden;">
+                style="display:none; position:absolute; bottom:82px; right:0; width:390px; max-width:92vw; height:530px; max-height:82vh; background:#ffffff; border-radius:22px; box-shadow:0 25px 65px rgba(0,0,0,0.25); border:1.5px solid rgba(4,120,87,0.2); flex-direction:column; overflow:hidden; z-index:99999;">
+                
+                <!-- Chatbot Header with Improved AI Logo -->
                 <div class="chatbot-header"
-                    style="background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; padding:1.1rem 1.3rem; font-weight:700; font-size:0.95rem; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; align-items:center; gap:0.6rem;">
-                        <span
-                            style="font-size:1.3rem; background:rgba(255,255,255,0.2); padding:0.3rem; border-radius:50%; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;">🤖</span>
+                    style="background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; padding:1.1rem 1.3rem; font-weight:700; font-size:0.95rem; display:flex; justify-space-between:space-between; align-items:center; box-shadow:0 4px 12px rgba(4,120,87,0.15);">
+                    <div style="display:flex; align-items:center; gap:0.7rem;">
+                        <div style="width:38px; height:38px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius:12px; display:inline-flex; align-items:center; justify-content:center; color:#ffffff; font-size:1.25rem; font-weight:900; box-shadow:0 4px 14px rgba(16,185,129,0.35); border:1.5px solid rgba(255,255,255,0.4);">
+                            🤖
+                        </div>
                         <div>
-                            <div style="font-weight:800; font-size:0.95rem; letter-spacing:0.3px;">GoExergy AI Guide
+                            <div style="font-weight:800; font-size:0.98rem; letter-spacing:-0.2px; color:#ffffff;">GoExergy AI Guide</div>
+                            <div style="font-size:0.73rem; color:#a7f3d0; font-weight:600; display:flex; align-items:center; gap:0.3rem;">
+                                <span style="width:6px; height:6px; background:#34d399; border-radius:50%; display:inline-block;"></span> Powered by Gemini AI
                             </div>
-                            <div style="font-size:0.72rem; color:#a7f3d0; font-weight:500;">Powered by Gemini AI 🟢
-                                Online</div>
                         </div>
                     </div>
                     <button onclick="app.toggleChatbot()"
-                        style="background:rgba(255,255,255,0.2); border:none; color:white; cursor:pointer; font-size:1rem; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;">✕</button>
+                        style="background:rgba(255,255,255,0.2); border:none; color:white; cursor:pointer; font-size:1rem; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">✕</button>
                 </div>
+
                 <div class="chatbot-messages" id="chatbotMessages"
-                    style="flex:1; padding:1rem; overflow-y:auto; display:flex; flex-direction:column; gap:0.8rem; background:#f8fafc;">
+                    style="flex:1; padding:1.1rem; overflow-y:auto; display:flex; flex-direction:column; gap:0.85rem; background:#f8fafc;">
                     <div class="chat-msg bot"
-                        style="background:#ffffff; color:#0f172a; padding:0.8rem 1rem; border-radius:14px; font-size:0.86rem; border:1px solid #e2e8f0; line-height:1.5;">
-                        Assalamu Alaikum! I am your AI Travel Robot Assistant powered by Gemini. How can I assist your
-                        journey today? Type your question or click a topic below:</div>
+                        style="background:#ffffff; color:#0f172a; padding:0.85rem 1.1rem; border-radius:16px; font-size:0.88rem; border:1.5px solid #e2e8f0; line-height:1.55; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                        Assalamu Alaikum! I am your AI Travel Guide Assistant powered by Gemini. How can I assist your sacred journey today? Type your question or click a topic below:
+                    </div>
 
                     <!-- Quick Issue Option Chips -->
                     <div class="chat-issue-chips"
                         style="display:flex; flex-direction:column; gap:0.45rem; margin-top:0.2rem;">
                         <button onclick="app.handleChatIssue('How to submit a travel request?')"
-                            style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.55rem 0.85rem; border-radius:10px; font-size:0.81rem; font-weight:600; text-align:left; cursor:pointer;">
+                            style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.6rem 0.9rem; border-radius:10px; font-size:0.82rem; font-weight:700; text-align:left; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
                             📝 How to submit a travel request?
                         </button>
                         <button onclick="app.handleChatIssue('How do agent offers work?')"
-                            style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.55rem 0.85rem; border-radius:10px; font-size:0.81rem; font-weight:600; text-align:left; cursor:pointer;">
+                            style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.6rem 0.9rem; border-radius:10px; font-size:0.82rem; font-weight:700; text-align:left; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
                             🎁 How do agent offers work?
                         </button>
                         <button onclick="app.handleChatIssue('What are the rules for Umrah & Ihram?')"
-                            style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.55rem 0.85rem; border-radius:10px; font-size:0.81rem; font-weight:600; text-align:left; cursor:pointer;">
+                            style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.6rem 0.9rem; border-radius:10px; font-size:0.82rem; font-weight:700; text-align:left; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
                             🕋 Umrah & Ihram rules guide
                         </button>
                         <button onclick="app.handleChatIssue('How to get Nusuk Rawdah permit?')"
-                            style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.55rem 0.85rem; border-radius:10px; font-size:0.81rem; font-weight:600; text-align:left; cursor:pointer;">
+                            style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.6rem 0.9rem; border-radius:10px; font-size:0.82rem; font-weight:700; text-align:left; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
                             📜 How to get Nusuk Rawdah permit?
                         </button>
                         <button onclick="app.handleChatIssue('How to cancel my travel request?')"
-                            style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.55rem 0.85rem; border-radius:10px; font-size:0.81rem; font-weight:600; text-align:left; cursor:pointer;">
+                            style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.6rem 0.9rem; border-radius:10px; font-size:0.82rem; font-weight:700; text-align:left; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
                             ❌ How to cancel my travel request?
                         </button>
                         <button onclick="app.handleChatIssue('How to contact 24/7 Support?')"
-                            style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.55rem 0.85rem; border-radius:10px; font-size:0.81rem; font-weight:600; text-align:left; cursor:pointer;">
+                            style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.6rem 0.9rem; border-radius:10px; font-size:0.82rem; font-weight:700; text-align:left; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
                             📞 Contact 24/7 Customer Support
                         </button>
                     </div>
                 </div>
+                
                 <div class="chatbot-input-row"
-                    style="display:flex; padding:0.8rem; background:#ffffff; border-top:1px solid #e2e8f0; gap:0.5rem;">
+                    style="display:flex; padding:0.85rem; background:#ffffff; border-top:1.5px solid #e2e8f0; gap:0.5rem; align-items:center;">
                     <input type="text" id="chatbotInput" placeholder="Ask AI Assistant anything..."
                         onkeypress="if(event.key==='Enter') app.sendChatMessage();"
-                        style="flex:1; border:1px solid #cbd5e1; border-radius:10px; padding:0.6rem 0.9rem; font-size:0.85rem; outline:none;">
+                        style="flex:1; border:1.5px solid #cbd5e1; border-radius:10px; padding:0.65rem 0.95rem; font-size:0.88rem; outline:none; font-family:inherit;">
                     <button onclick="app.sendChatMessage()"
-                        style="background:#047857; color:white; border:none; border-radius:10px; padding:0.6rem 1.1rem; font-weight:700; font-size:0.84rem; cursor:pointer;">Send</button>
+                        style="background:#047857; color:white; border:none; border-radius:10px; padding:0.65rem 1.2rem; font-weight:800; font-size:0.86rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#065f46'" onmouseout="this.style.background='#047857'">Send</button>
                 </div>
             </div>
         </div>
@@ -654,10 +652,6 @@
                         <span>Copyrights © GoExergy Umrah</span>
                         <span style="color:#cbd5e1;">|</span>
                         <span>All rights Reserved</span>
-                        <span style="color:#cbd5e1;">|</span>
-                        <a href="/api/download-zip" download="GoExergy_Project_Source.zip" style="color:#2563eb; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem;">
-                            <span>📦</span> Download Project ZIP
-                        </a>
                     </div>
                     <div>
                         Developed and Maintained by WDC GoExergy

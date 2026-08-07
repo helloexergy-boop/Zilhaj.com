@@ -110,11 +110,11 @@ class App {
 
         document.addEventListener('click', (e) => {
             const box = document.getElementById('chatbotBox');
-            const toggleBtn = document.querySelector('.chatbot-circle-btn');
-            if (box && box.style.display === 'flex') {
-                if (!box.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
-                    box.style.display = 'none';
-                }
+            if (!box) return;
+            const isInsideBox = box.contains(e.target);
+            const isClickOnToggle = e.target.closest('#chatbotWrapper') || e.target.closest('[onclick*="Chatbot"]') || e.target.closest('.chatbot-circle-btn');
+            if (box.style.display === 'flex' && !isInsideBox && !isClickOnToggle) {
+                box.style.display = 'none';
             }
         });
     }
@@ -4471,6 +4471,14 @@ class App {
             const input = document.getElementById('chatbotInput');
             if (input) input.focus();
         }
+    }
+
+    openChatbot() {
+        const box = document.getElementById('chatbotBox');
+        if (!box) return;
+        box.style.display = 'flex';
+        const input = document.getElementById('chatbotInput');
+        if (input) input.focus();
     }
 
     async callGeminiApi(userPrompt) {
