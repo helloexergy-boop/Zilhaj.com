@@ -316,12 +316,8 @@ app.post('/api/auth/login', async (req, res) => {
         const db = await connectToDatabase();
         const user = await db.collection('users').findOne({ email: cleanEmail });
 
-        if (!user) {
-            return res.status(401).json({ error: 'No account found with this email. Please create an account first!' });
-        }
-
-        if (user.password !== password) {
-            return res.status(401).json({ error: 'Incorrect password! Please check your password and try again.' });
+        if (!user || user.password !== password) {
+            return res.status(401).json({ error: 'Invalid email or password' });
         }
 
         const token = 'jwt-token-' + Date.now();

@@ -800,11 +800,11 @@ class App {
     renderHomePage() {
         return `
             <!-- Full Screen (100vh) Video Slideshow Hero Banner -->
-            <section class="hero-green-banner fullscreen-hero">
+            <section class="hero-green-banner fullscreen-hero" style="background: #0f172a url('https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat;">
 
                 <!-- Dual Video Crossfade Background (A/B stacked, seamless transition) -->
-                <video class="hero-bg-video hero-bg-video-layer" id="heroBgVideoA" autoplay muted playsinline preload="auto" src="hero-bg.mp4" style="opacity:1; z-index:1;"></video>
-                <video class="hero-bg-video hero-bg-video-layer" id="heroBgVideoB" muted playsinline preload="auto" style="opacity:0; z-index:0;"></video>
+                <video class="hero-bg-video hero-bg-video-layer" id="heroBgVideoA" autoplay muted playsinline loop preload="auto" poster="https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=1920&q=80" src="hero-bg.mp4" style="opacity:1; z-index:1;"></video>
+                <video class="hero-bg-video hero-bg-video-layer" id="heroBgVideoB" muted playsinline loop preload="auto" poster="https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=1920&q=80" style="opacity:0; z-index:0;"></video>
 
                 <!-- Cinematic Gradient Overlay -->
                 <div class="hero-video-overlay"></div>
@@ -3451,7 +3451,7 @@ class App {
             const data = await response.json();
 
             if (!response.ok) {
-                this.showFormError(`<b>Authentication Error</b><br>${data.error || 'Login failed. Invalid credentials.'}`);
+                this.showFormError(data.error || 'Invalid email or password');
                 return;
             }
 
