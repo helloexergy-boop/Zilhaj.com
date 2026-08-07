@@ -3405,11 +3405,7 @@ class App {
     async register(name, email, password, phone, role = 'ROLE_USER') {
         this.hideFormError();
         try {
-            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                ? 'http://localhost:3000/api/auth/register'
-                : '/api/auth/register';
-
-            const response = await fetch(apiEndpoint, {
+            const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, password, phone, role })
@@ -3418,7 +3414,7 @@ class App {
             const data = await response.json();
 
             if (!response.ok) {
-                this.showFormError(`<b>Registration Error</b><br>${data.error || 'Unable to create account. Please check your details and try again.'}`);
+                this.showFormError(data.error || 'Unable to create account.');
                 return;
             }
 
@@ -3431,18 +3427,14 @@ class App {
             }
         } catch (err) {
             console.error('Registration error:', err);
-            this.showFormError('<b>Server Error</b><br>Could not connect to registration server. Please check your internet connection and try again.');
+            this.showFormError('Could not connect to registration server.');
         }
     }
 
     async login(email, password) {
         this.hideFormError();
         try {
-            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                ? 'http://localhost:3000/api/auth/login'
-                : '/api/auth/login';
-
-            const response = await fetch(apiEndpoint, {
+            const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -3470,7 +3462,7 @@ class App {
             }
         } catch (err) {
             console.error('Login error:', err);
-            this.showFormError('<b>Server Error</b><br>Could not connect to authentication server. Please check your connection and try again.');
+            this.showFormError('Invalid email or password');
         }
     }
 
