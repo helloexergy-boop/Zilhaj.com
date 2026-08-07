@@ -3051,20 +3051,18 @@ class App {
                             </div>
 
                             <!-- DYNAMIC OTP VERIFICATION INPUT BOX (REVEALS ON SEND OTP) -->
-                            <div id="otpSectionBox" style="display: none; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 0.75rem 0.85rem; margin-bottom: 1rem; transition: all 0.2s;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                                    <label style="font-size: 0.76rem; font-weight: 800; color: #166534; margin: 0; display: flex; align-items: center; gap: 0.3rem;">
-                                        <span>🔑</span> ENTER VERIFICATION CODE
-                                    </label>
+                            <div id="otpSectionBox" style="display: none; margin-bottom: 0.9rem;">
+                                <div class="auth-field-group" style="margin-bottom: 0;">
+                                    <label>Verification Code</label>
+                                    <div style="display: flex; gap: 0.4rem; align-items: center;">
+                                        <input type="text" id="authOtpCode" placeholder="4-digit OTP" maxlength="6" style="flex: 1; text-align: center; letter-spacing: 2px; font-weight: 700; padding-right: 0.85rem;">
+                                        <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="height: 44px; padding: 0 1.1rem; background: #2563eb; color: #ffffff; border: none; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                                            Verify
+                                        </button>
+                                    </div>
                                 </div>
-                                <div style="display: flex; gap: 0.4rem; align-items: center;">
-                                    <input type="text" id="authOtpCode" placeholder="Enter 4-digit OTP" maxlength="6" style="flex: 1; height: 38px; padding: 0 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; font-weight: 800; letter-spacing: 2px; text-align: center; background: #ffffff;">
-                                    <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="background: #0f172a; color: #ffffff; border: none; border-radius: 6px; padding: 0 0.95rem; height: 38px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
-                                        Verify OTP
-                                    </button>
-                                </div>
-                                <div id="otpSentAlert" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 0.35rem 0.55rem; border-radius: 6px; font-size: 0.76rem; font-weight: 700; margin-top: 0.4rem;"></div>
-                                <div id="otpStatusMsg" style="font-size: 0.76rem; color: #16a34a; font-weight: 800; margin-top: 0.35rem; display: none;">✓ Verified Successfully</div>
+                                <div id="otpSentAlert" style="display: none; font-size: 0.76rem; color: #2563eb; font-weight: 600; margin-top: 0.35rem;"></div>
+                                <div id="otpStatusMsg" style="font-size: 0.78rem; color: #16a34a; font-weight: 800; margin-top: 0.35rem; display: none;">✓ Verified</div>
                             </div>
 
                             <!-- PASSWORDS ROW (PASSWORD & CONFIRM PASSWORD) -->
@@ -3232,16 +3230,24 @@ class App {
         this.state.otpVerified = false;
 
         // Call server API endpoint to send Gmail email/SMS
+        let serverCode = null;
         try {
-            await this.apiCall('/auth/send-otp', 'POST', { contact: target });
+            const res = await this.apiCall('/auth/send-otp', 'POST', { contact: target });
+            if (res && res.otp) {
+                serverCode = res.otp.toString();
+            }
         } catch (e) {
             // Ignore offline/fallback error
         }
 
+        // Store server code (or fallback code)
+        this.state.generatedOtp = serverCode || Math.floor(1000 + Math.random() * 9000).toString();
+        this.state.otpVerified = false;
+
         const alertBox = document.getElementById('otpSentAlert');
         if (alertBox) {
             alertBox.style.display = 'block';
-            alertBox.innerHTML = `📩 Verification code sent to <b>${target}</b>. Please check your inbox and enter the 4-digit OTP code below.`;
+            alertBox.innerHTML = `📩 Verification code sent to <b>${target}</b>`;
         }
 
         const otpInput = document.getElementById('authOtpCode');
@@ -3250,34 +3256,47 @@ class App {
             otpInput.focus();
         }
 
-        this.showToast(`📩 Verification code sent to ${target}. Please check your inbox.`, 'success');
+        this.showToast(`📩 Verification code sent to ${target}`, 'success');
     }
 
     async verifySignupOtp() {
         const otpInput = document.getElementById('authOtpCode');
+        const emailInput = document.getElementById('authEmail');
         const codeEntered = otpInput ? otpInput.value.trim() : '';
+        const target = emailInput ? emailInput.value.trim() : '';
         const msg = document.getElementById('otpStatusMsg');
-        const box = document.getElementById('otpSectionBox');
 
         if (!codeEntered) {
-            this.showToast('Please enter the OTP code sent to your contact', 'error');
+            this.showToast('Please enter the OTP code sent to you', 'error');
             return;
         }
 
+        let verified = false;
+
+        // Check against client-stored server code or fallback
         if (codeEntered === this.state.generatedOtp || codeEntered === '1234') {
+            verified = true;
+        } else {
+            try {
+                const res = await this.apiCall('/auth/verify-otp', 'POST', { contact: target, code: codeEntered, expectedOtp: this.state.generatedOtp });
+                if (res && res.success) {
+                    verified = true;
+                }
+            } catch (e) {
+                verified = false;
+            }
+        }
+
+        if (verified) {
             this.state.otpVerified = true;
             if (msg) {
                 msg.style.display = 'block';
-                msg.innerHTML = '✓ Contact Verified via OTP';
+                msg.innerHTML = '✓ Verified';
             }
-            if (box) {
-                box.style.borderColor = '#059669';
-                box.style.background = '#f0fdf4';
-            }
-            this.showToast('🎉 OTP verified successfully! You can now create your account.', 'success');
+            this.showToast('🎉 OTP verified successfully!', 'success');
         } else {
             this.state.otpVerified = false;
-            this.showToast('❌ Invalid OTP code. Please check and try again.', 'error');
+            this.showToast('❌ Invalid OTP code. Please check your inbox and try again.', 'error');
         }
     }
 
