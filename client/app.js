@@ -107,7 +107,6 @@ class App {
 
         this.initNavbarScroll();
         this.initScrollReveal();
-        this.initHeroImageSlideshow();
 
         document.addEventListener('click', (e) => {
             const box = document.getElementById('chatbotBox');
@@ -120,22 +119,166 @@ class App {
         });
     }
 
-    initHeroImageSlideshow() {
-        if (this.heroSlideInterval) clearInterval(this.heroSlideInterval);
+    initHeroVideoPlaylist() {
+        // ============================================================================
+        // HERO VIDEO SLIDESHOW PLAYLIST CONFIGURATION
+        // How to add your own videos:
+        // Option 1 (Local Video): Save your MP4 file in the "public" folder (e.g. myvideo.mp4)
+        //          and add 'myvideo.mp4' to the array below.
+        // Option 2 (Online Video URL): Add direct HTTP/HTTPS link to any .mp4 file.
+        // ============================================================================
+        this.heroVideos = [
+            'hero-video-2.mp4',
+            'hero-video-3.mp4',
+            ''
+        ];
 
-        const container = document.getElementById('heroImageSlideshow');
-        if (!container) return;
+        this.currentVideoIndex = 0;
+        this._heroVideoActive = 'A'; // Track which video element is on top
 
-        let currentIndex = 0;
-        const slides = container.querySelectorAll('.hero-slide');
-        if (!slides || slides.length === 0) return;
+        const vidA = document.getElementById('heroBgVideoA');
+        const vidB = document.getElementById('heroBgVideoB');
+        if (!vidA || !vidB) return;
 
-        // Automatically rotate photo slides every 4.5 seconds
-        this.heroSlideInterval = setInterval(() => {
-            slides[currentIndex].classList.remove('active');
-            currentIndex = (currentIndex + 1) % slides.length;
-            slides[currentIndex].classList.add('active');
-        }, 4500);
+        [vidA, vidB].forEach(v => {
+            v.muted = true;
+            v.playsInline = true;
+            v.removeAttribute('poster');
+        });
+
+        // Start first video on A instantly
+        if (!vidA.src || vidA.src === '' || vidA.src.includes('hero-video-')) {
+            vidA.src = this.heroVideos[0];
+        }
+        vidA.style.opacity = '1';
+        vidA.style.zIndex = '1';
+        vidB.style.opacity = '0';
+        vidB.style.zIndex = '0';
+
+        vidA.play().catch(e => console.log('Autoplay:', e));
+
+        // Preload next video into B silently
+        const preloadNext = () => {
+            const nextIndex = (this.currentVideoIndex + 1) % this.heroVideos.length;
+            const dormant = this._heroVideoActive === 'A' ? vidB : vidA;
+            dormant.src = this.heroVideos[nextIndex];
+            dormant.load();
+        };
+
+        vidA.onended = () => this.playNextHeroVideo();
+        vidA.ontimeupdate = function () {
+            // Preload next ~3s before current ends
+            if (this.duration && this.currentTime >= this.duration - 3) {
+                this.ontimeupdate = null;
+                preloadNext();
+            }
+        };
+        vidB.onended = () => this.playNextHeroVideo();
+        vidB.ontimeupdate = function () {
+            if (this.duration && this.currentTime >= this.duration - 3) {
+                this.ontimeupdate = null;
+                preloadNext();
+            }
+        };
+
+        vidA.onerror = () => { console.warn('Video A error'); this.playNextHeroVideo(); };
+        vidB.onerror = () => { console.warn('Video B error'); this.playNextHeroVideo(); };
+
+        preloadNext();
+        this.updateVideoDots();
+    }
+
+    playNextHeroVideo() {
+        if (!this.heroVideos || this.heroVideos.length === 0) return;
+        this.currentVideoIndex = (this.currentVideoIndex + 1) % this.heroVideos.length;
+        this.loadHeroVideo(this.currentVideoIndex);
+    }
+
+    playPrevHeroVideo() {
+        if (!this.heroVideos || this.heroVideos.length === 0) return;
+        this.currentVideoIndex = (this.currentVideoIndex - 1 + this.heroVideos.length) % this.heroVideos.length;
+        this.loadHeroVideo(this.currentVideoIndex);
+    }
+
+    playHeroVideoIndex(index) {
+        if (!this.heroVideos || index >= this.heroVideos.length) return;
+        this.currentVideoIndex = index;
+        this.loadHeroVideo(index);
+    }
+
+    loadHeroVideo(index) {
+        const vidA = document.getElementById('heroBgVideoA');
+        const vidB = document.getElementById('heroBgVideoB');
+        if (!vidA || !vidB) return;
+
+        let videoSrc = this.heroVideos[index];
+        if (videoSrc && videoSrc.startsWith('http')) {
+            videoSrc = `/api/video-proxy?url=${encodeURIComponent(videoSrc)}`;
+        }
+
+        const incoming = this._heroVideoActive === 'A' ? vidB : vidA;
+        const outgoing = this._heroVideoActive === 'A' ? vidA : vidB;
+        this._heroVideoActive = this._heroVideoActive === 'A' ? 'B' : 'A';
+
+        // Load new video into the dormant layer (already preloaded in most cases)
+        if (incoming.src !== window.location.origin + '/' + videoSrc && !videoSrc.startsWith('/api')) {
+            incoming.src = videoSrc;
+            incoming.load();
+        }
+
+        incoming.muted = true;
+        incoming.playsInline = true;
+        incoming.removeAttribute('poster');
+
+        // Bring incoming on top and play, then fade out the old
+        incoming.style.zIndex = '2';
+        outgoing.style.zIndex = '1';
+
+        const startCrossfade = () => {
+            incoming.style.opacity = '1';
+            outgoing.style.opacity = '0';
+            setTimeout(() => {
+                outgoing.pause();
+                outgoing.style.zIndex = '0';
+            }, 700);
+        };
+
+        const playPromise = incoming.play();
+        if (playPromise !== undefined) {
+            playPromise.then(startCrossfade).catch(e => {
+                startCrossfade();
+                console.log('Video play info:', e);
+            });
+        } else {
+            startCrossfade();
+        }
+
+        // Set up next preload on the new active video
+        const preloadNext = () => {
+            const nextIndex = (this.currentVideoIndex + 1) % this.heroVideos.length;
+            const dormant = this._heroVideoActive === 'A' ? vidB : vidA;
+            dormant.src = this.heroVideos[nextIndex];
+            dormant.load();
+        };
+        incoming.ontimeupdate = function () {
+            if (this.duration && this.currentTime >= this.duration - 3) {
+                this.ontimeupdate = null;
+                preloadNext();
+            }
+        };
+        incoming.onended = () => this.playNextHeroVideo();
+
+        this.updateVideoDots();
+    }
+
+    updateVideoDots() {
+        document.querySelectorAll('#videoSlideDots .video-slide-dot').forEach((dot, idx) => {
+            if (idx === this.currentVideoIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
     }
 
     initNavbarScroll() {
@@ -651,27 +794,63 @@ class App {
             }
         }
 
-        setTimeout(() => {
-            this.initScrollReveal();
-            if (page === 'home') this.initHeroImageSlideshow();
-        }, 50);
+        setTimeout(() => this.initScrollReveal(), 50);
+    }
+
+    initHeroVideoPlaylist() {
+        const slideA = document.getElementById('heroSlideLayerA');
+        const slideB = document.getElementById('heroSlideLayerB');
+        const videoBg = document.getElementById('heroBgVideo');
+        if (!slideA || !slideB) return;
+
+        const mediaList = [
+            { type: 'image', url: 'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg' },
+            { type: 'image', url: 'https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=1920&q=80' },
+            { type: 'image', url: 'https://images.unsplash.com/photo-1565552645632-d725f8bfc19a?auto=format&fit=crop&w=1920&q=80' },
+            { type: 'video', url: 'hero-bg.mp4', poster: 'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg' }
+        ];
+
+        let index = 0;
+        if (this.heroMediaInterval) clearInterval(this.heroMediaInterval);
+
+        this.heroMediaInterval = setInterval(() => {
+            index = (index + 1) % mediaList.length;
+            const current = mediaList[index];
+
+            const targetActive = (index % 2 === 0) ? slideA : slideB;
+            const targetHidden = (index % 2 === 0) ? slideB : slideA;
+
+            if (current.type === 'image') {
+                targetActive.style.backgroundImage = `url('${current.url}')`;
+                targetActive.style.opacity = '1';
+                targetHidden.style.opacity = '0';
+                if (videoBg) videoBg.style.opacity = '0';
+            } else if (current.type === 'video') {
+                targetActive.style.backgroundImage = `url('${current.poster}')`;
+                targetActive.style.opacity = '1';
+                targetHidden.style.opacity = '0';
+                if (videoBg) {
+                    videoBg.style.opacity = '0.55';
+                    videoBg.play().catch(() => {});
+                }
+            }
+        }, 5000);
     }
 
     renderHomePage() {
         return `
-            <!-- Full Screen (100vh) Photo Slideshow Hero Banner -->
-            <section class="hero-green-banner fullscreen-hero">
+            <!-- Full Screen (100vh) Photo & Video Slideshow Hero Banner -->
+            <section class="hero-green-banner fullscreen-hero" style="background: #0f172a url('https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg') center center / cover no-repeat;">
 
-                <!-- Cinematic Photo Slideshow Background -->
-                <div class="hero-image-slideshow" id="heroImageSlideshow">
-                    <div class="hero-slide active" style="background-image: url('https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=1920&q=80');"></div>
-                    <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=1920&q=80');"></div>
-                    <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1920&q=80');"></div>
-                    <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=1920&q=80');"></div>
+                <!-- Photo & Video Slideshow Background Container -->
+                <div id="heroBgSlideContainer" style="position:absolute; inset:0; z-index:1; overflow:hidden;">
+                    <div id="heroSlideLayerA" style="position:absolute; inset:0; background: url('https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg') center center / cover no-repeat; transition: opacity 1.2s ease-in-out; opacity:1; z-index:1;"></div>
+                    <div id="heroSlideLayerB" style="position:absolute; inset:0; background: url('https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat; transition: opacity 1.2s ease-in-out; opacity:0; z-index:2;"></div>
+                    <video class="hero-bg-video" id="heroBgVideo" autoplay muted playsinline loop preload="auto" poster="https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg" src="hero-bg.mp4" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition: opacity 1.2s ease-in-out; z-index:3;"></video>
                 </div>
 
                 <!-- Cinematic Gradient Overlay -->
-                <div class="hero-video-overlay"></div>
+                <div class="hero-video-overlay" style="z-index:4;"></div>
 
                 <!-- Hero Content -->
                 <div class="hero-green-container" style="max-width:860px !important; margin:0 auto !important; text-align:center; position:relative; z-index:4;">
