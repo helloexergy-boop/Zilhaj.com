@@ -2978,6 +2978,14 @@ class App {
                     </p>
                 </div>
 
+                <!-- IN-FORM ERROR ALERT CONTAINER -->
+                <div id="authFormAlert" style="display: none; background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 0.75rem 0.9rem; margin-bottom: 1.1rem; color: #991b1b; font-size: 0.82rem; font-weight: 600; line-height: 1.45; transition: all 0.2s;">
+                    <div style="display: flex; align-items: flex-start; gap: 0.45rem;">
+                        <span style="font-size: 1rem; line-height: 1;">⚠️</span>
+                        <div id="authFormAlertText" style="flex: 1;"></div>
+                    </div>
+                </div>
+
                 ${isForgot ? `
                     <!-- FORGOT PASSWORD FORM -->
                     <form onsubmit="event.preventDefault(); app.handleForgotPasswordSubmit();" style="display: flex; flex-direction: column;">
@@ -3198,22 +3206,38 @@ class App {
         if (tab === 'email') {
             if (emailGrp) emailGrp.style.display = 'block';
             if (phoneGrp) phoneGrp.style.display = 'none';
-            if (emailBtn) { emailBtn.style.background = '#ffffff'; emailBtn.style.color = '#0f172a'; emailBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)'; }
-            if (phoneBtn) { phoneBtn.style.background = 'transparent'; phoneBtn.style.color = '#64748b'; phoneBtn.style.boxShadow = 'none'; }
         } else {
             if (emailGrp) emailGrp.style.display = 'none';
             if (phoneGrp) phoneGrp.style.display = 'block';
-            if (phoneBtn) { phoneBtn.style.background = '#ffffff'; phoneBtn.style.color = '#0f172a'; phoneBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)'; }
-            if (emailBtn) { emailBtn.style.background = 'transparent'; emailBtn.style.color = '#64748b'; emailBtn.style.boxShadow = 'none'; }
+        }
+    }
+
+    showFormError(message) {
+        const alertBox = document.getElementById('authFormAlert');
+        const alertText = document.getElementById('authFormAlertText');
+        if (alertBox && alertText) {
+            alertText.innerHTML = message;
+            alertBox.style.display = 'block';
+            alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+            this.showToast(message, 'error');
+        }
+    }
+
+    hideFormError() {
+        const alertBox = document.getElementById('authFormAlert');
+        if (alertBox) {
+            alertBox.style.display = 'none';
         }
     }
 
     async sendSignupOtp() {
+        this.hideFormError();
         const emailInput = document.getElementById('authEmail');
         const target = emailInput ? emailInput.value.trim() : '';
 
         if (!target) {
-            this.showToast('⚠️ Please enter your email or phone number first!', 'error');
+            this.showFormError('<b>Missing Contact Details</b><br>Please enter your email address or mobile phone number above before clicking <b>"Send OTP"</b>.');
             if (emailInput) emailInput.focus();
             return;
         }
@@ -3267,6 +3291,7 @@ class App {
     }
 
     async verifySignupOtp() {
+        this.hideFormError();
         const otpInput = document.getElementById('authOtpCode');
         const emailInput = document.getElementById('authEmail');
         const codeEntered = otpInput ? otpInput.value.trim() : '';
@@ -3274,7 +3299,7 @@ class App {
         const msg = document.getElementById('otpStatusMsg');
 
         if (!codeEntered) {
-            this.showToast('Please enter the verification code sent to your email', 'error');
+            this.showFormError('<b>Missing Code</b><br>Please enter the 4-digit verification code sent to your email inbox.');
             return;
         }
 
@@ -3318,7 +3343,7 @@ class App {
             this.showToast('🎉 OTP verified successfully!', 'success');
         } else {
             this.state.otpVerified = false;
-            this.showToast('❌ Invalid OTP code. Please check your inbox and enter the exact code received.', 'error');
+            this.showFormError('<b>Invalid Verification Code</b><br>The OTP code you entered does not match the code sent to your email. Please check your inbox and enter the exact 4-digit code.');
         }
     }
 
@@ -3336,6 +3361,7 @@ class App {
     }
 
     handleAuthSubmit(mode) {
+        this.hideFormError();
         const emailEl = document.getElementById('authEmail');
         const phoneEl = document.getElementById('authPhone');
         const passwordEl = document.getElementById('authPassword');
@@ -3345,7 +3371,7 @@ class App {
         const password = passwordEl ? passwordEl.value.trim() : '';
 
         if (!inputIdentifier || !password) {
-            this.showToast('Please enter your contact details and password', 'error');
+            this.showFormError('<b>Incomplete Form</b><br>Please enter both your email/phone and password to proceed.');
             return;
         }
 
@@ -3354,20 +3380,19 @@ class App {
         } else if (mode === 'register') {
             // STRICT REQUIREMENT: OTP must be verified before signup happens!
             if (!this.state.otpVerified) {
-                this.showToast('⚠️ OTP Verification Required: Please click "Send OTP" and enter the verification code before creating your account!', 'error');
+                this.showFormError('<b>OTP Verification Required</b><br>Please click <b>"Send OTP"</b> next to your email/phone, check your inbox, and click <b>"Verify"</b> before creating your account.');
                 const box = document.getElementById('otpSectionBox');
                 if (box) {
-                    box.style.borderColor = '#dc2626';
-                    box.style.background = '#fef2f2';
                     box.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
                 return;
             }
 
             if (confirmPassEl && confirmPassEl.value.trim() && confirmPassEl.value.trim() !== password) {
-                this.showToast('Passwords do not match. Please recheck.', 'error');
+                this.showFormError('<b>Password Mismatch</b><br>The password and confirm password fields do not match. Please recheck your passwords.');
                 return;
             }
+
             const name = document.getElementById('authName')?.value || 'Zaireen Pilgrim';
             const email = (emailEl && emailEl.value.trim()) ? emailEl.value.trim() : `${inputIdentifier.replace(/\D/g, '')}@zaireen.com`;
             const phone = (phoneEl && phoneEl.value.trim()) ? phoneEl.value.trim() : (inputIdentifier.match(/^\+?\d+$/) ? inputIdentifier : '9541692891');
@@ -3378,6 +3403,7 @@ class App {
     }
 
     async register(name, email, password, phone, role = 'ROLE_USER') {
+        this.hideFormError();
         try {
             const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
                 ? 'http://localhost:3000/api/auth/register'
@@ -3392,7 +3418,7 @@ class App {
             const data = await response.json();
 
             if (!response.ok) {
-                this.showToast(`⚠️ ${data.error || 'Registration failed'}`, 'error');
+                this.showFormError(`<b>Registration Error</b><br>${data.error || 'Unable to create account. Please check your details and try again.'}`);
                 return;
             }
 
@@ -3405,11 +3431,12 @@ class App {
             }
         } catch (err) {
             console.error('Registration error:', err);
-            this.showToast('⚠️ Could not connect to server. Please check your internet connection.', 'error');
+            this.showFormError('<b>Server Error</b><br>Could not connect to registration server. Please check your internet connection and try again.');
         }
     }
 
     async login(email, password) {
+        this.hideFormError();
         try {
             const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
                 ? 'http://localhost:3000/api/auth/login'
@@ -3424,7 +3451,7 @@ class App {
             const data = await response.json();
 
             if (!response.ok) {
-                this.showToast(`❌ ${data.error || 'Login failed. Invalid credentials.'}`, 'error');
+                this.showFormError(`<b>Authentication Error</b><br>${data.error || 'Login failed. Invalid credentials.'}`);
                 return;
             }
 
@@ -3443,7 +3470,7 @@ class App {
             }
         } catch (err) {
             console.error('Login error:', err);
-            this.showToast('⚠️ Could not connect to authentication server.', 'error');
+            this.showFormError('<b>Server Error</b><br>Could not connect to authentication server. Please check your connection and try again.');
         }
     }
 
