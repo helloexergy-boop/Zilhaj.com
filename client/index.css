@@ -4992,7 +4992,136 @@ p, body {
         bottom: 64px !important;
         right: -6px !important;
         border-radius: 18px !important;
+/* ==========================================================================
+   Dashboard Revamped Travel Offer Cards & Timeline CSS System
+   ========================================================================== */
+.dashboard-offer-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+    padding: 1.8rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    margin-bottom: 1.8rem;
+}
+
+.dashboard-offer-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+    border-color: #cbd5e1;
+}
+
+.badge-package-category {
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 0.35rem 0.85rem;
+    border-radius: 99px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.badge-package-category.premium {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+.badge-package-category.standard {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+/* Color Coded Dashboard Buttons */
+.btn-dashboard-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0.65rem 1.4rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-dashboard-action.btn-view {
+    background: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+.btn-dashboard-action.btn-view:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.btn-dashboard-action.btn-book {
+    background: #047857;
+    color: #ffffff;
+    font-weight: 800;
+    box-shadow: 0 4px 14px rgba(4, 120, 87, 0.35);
+}
+.btn-dashboard-action.btn-book:hover {
+    background: #065f46;
+    transform: translateY(-1px);
+}
+
+.btn-dashboard-action.btn-delete {
+    background: #dc2626;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.25);
+}
+.btn-dashboard-action.btn-delete:hover {
+    background: #b91c1c;
+    transform: translateY(-1px);
+}
+
+/* Ritual Step Cards Timeline Grid (4 Steps) */
+.ritual-timeline-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .ritual-timeline-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
+}
+
+@media (max-width: 600px) {
+    .ritual-timeline-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ritual-step-card {
+    background: #ffffff;
+    border: 1.5px solid #a7f3d0;
+    border-radius: 16px;
+    padding: 1.2rem 1rem;
+    border-top: 4px solid #10b981;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.ritual-step-badge {
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.25rem 0.6rem;
+    border-radius: 99px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    display: inline-block;
+    margin-bottom: 0.6rem;
 }
 
 
