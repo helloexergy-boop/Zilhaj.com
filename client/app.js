@@ -805,12 +805,12 @@ class App {
 
         const mediaList = [
             { type: 'image', url: 'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg' },
-            { type: 'video', url: 'hero-bg.mp4' },
+            { type: 'video', url: 'hero-video-3.mp4' },
             { type: 'image', url: 'https://images.pexels.com/photos/38498727/pexels-photo-38498727.jpeg' },
-            { type: 'video', url: 'hero-bg.mp4' },
+            { type: 'video', url: 'hero-video-2.mp4' },
             { type: 'image', url: 'https://images.pexels.com/photos/28209449/pexels-photo-28209449.jpeg' },
             { type: 'image', url: 'https://images.pexels.com/photos/26436662/pexels-photo-26436662.jpeg' },
-            { type: 'video', url: 'hero-bg.mp4' }
+            { type: 'video', url: 'hero-video-4.mp4' }
         ];
 
         let index = 0;
@@ -855,7 +855,7 @@ class App {
                 <div id="heroBgSlideContainer" style="position:absolute; inset:0; z-index:1; overflow:hidden;">
                     <div id="heroSlideLayerA" style="position:absolute; inset:0; background: url('https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg') center center / cover no-repeat; transition: opacity 1.2s ease-in-out; opacity:1; z-index:1;"></div>
                     <div id="heroSlideLayerB" style="position:absolute; inset:0; background: url('https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat; transition: opacity 1.2s ease-in-out; opacity:0; z-index:2;"></div>
-                    <video class="hero-bg-video" id="heroBgVideo" autoplay muted playsinline loop preload="auto" poster="https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg" src="hero-bg.mp4" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition: opacity 1.2s ease-in-out; z-index:3;"></video>
+                    <video class="hero-bg-video" id="heroBgVideo" autoplay muted playsinline loop preload="auto" poster="https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg" src="hero-video-3.mp4" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition: opacity 1.2s ease-in-out; z-index:3;"></video>
                 </div>
 
                 <!-- Cinematic Gradient Overlay -->
