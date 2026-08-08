@@ -3151,49 +3151,48 @@ class App {
                                     <span class="auth-input-icon">👤</span>
                                 </div>
 
-                                <!-- EMAIL OR PHONE INPUT WITH SEND OTP BUTTON -->
-                                <div style="display: flex; gap: 0.5rem; align-items: stretch; margin-bottom: 1rem;">
-                                    <div class="auth-input-wrapper" style="flex: 1; margin-bottom: 0;">
+                                <!-- EMAIL OR PHONE INPUT WITH INLINE SEND OTP BUTTON -->
+                                <div class="auth-input-wrapper" style="display: flex; align-items: center; padding-right: 0.4rem;">
+                                    <div style="flex: 1; min-width: 0;">
                                         <label class="auth-input-label">Email Address or Mobile Phone</label>
                                         <input type="text" id="authEmail" required placeholder="name@domain.com or +91..." class="auth-input-field">
-                                        <span class="auth-input-icon">✉</span>
                                     </div>
-                                    <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="height: 100%; min-height: 52px; padding: 0 1.1rem; background: #198754; color: #ffffff; border: none; border-radius: 12px; font-size: 0.85rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='#146c43'" onmouseout="this.style.background='#198754'">
+                                    <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="height: 38px; padding: 0 0.95rem; background: #198754; color: #ffffff; border: none; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='#146c43'" onmouseout="this.style.background='#198754'">
                                         Send OTP
                                     </button>
                                 </div>
 
                                 <!-- DYNAMIC OTP VERIFICATION INPUT BOX (REVEALS ON SEND OTP) -->
-                                <div id="otpSectionBox" style="display: none; margin-bottom: 1rem;">
-                                    <div style="display: flex; gap: 0.5rem; align-items: stretch;">
-                                        <div class="auth-input-wrapper" style="flex: 1; margin-bottom: 0;">
+                                <div id="otpSectionBox" style="display: none; margin-bottom: 0.8rem;">
+                                    <div class="auth-input-wrapper" style="display: flex; align-items: center; padding-right: 0.4rem; margin-bottom: 0;">
+                                        <div style="flex: 1; min-width: 0;">
                                             <label class="auth-input-label">Verification Code (Check Inbox)</label>
                                             <input type="text" id="authOtpCode" placeholder="4-digit OTP" maxlength="6" class="auth-input-field" style="text-align: center; letter-spacing: 3px; font-weight: 800;">
                                         </div>
-                                        <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="height: 100%; min-height: 52px; padding: 0 1.2rem; background: #198754; color: #ffffff; border: none; border-radius: 12px; font-size: 0.85rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='#146c43'" onmouseout="this.style.background='#198754'">
+                                        <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="height: 38px; padding: 0 1rem; background: #198754; color: #ffffff; border: none; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='#146c43'" onmouseout="this.style.background='#198754'">
                                             Verify
                                         </button>
                                     </div>
-                                    <div id="otpSentAlert" style="display: none; font-size: 0.76rem; color: #198754; font-weight: 700; margin-top: 0.35rem;"></div>
-                                    <div id="otpStatusMsg" style="font-size: 0.78rem; color: #198754; font-weight: 800; margin-top: 0.35rem; display: none;">✓ Verified</div>
+                                    <div id="otpSentAlert" style="display: none; font-size: 0.76rem; color: #198754; font-weight: 700; margin-top: 0.25rem;"></div>
+                                    <div id="otpStatusMsg" style="font-size: 0.78rem; color: #198754; font-weight: 800; margin-top: 0.25rem; display: none;">✓ Verified</div>
                                 </div>
 
-                                <!-- PASSWORD INPUT -->
-                                <div class="auth-input-wrapper">
-                                    <label class="auth-input-label">Password</label>
-                                    <input type="password" id="authPassword" required placeholder="••••••••" class="auth-input-field" onkeyup="app.checkPasswordStrength(this.value)">
-                                    <button type="button" onclick="app.togglePasswordVisibility()" class="auth-input-icon">🔒</button>
-                                </div>
-
-                                <!-- CONFIRM PASSWORD INPUT -->
-                                <div class="auth-input-wrapper">
-                                    <label class="auth-input-label">Confirm Password</label>
-                                    <input type="password" id="authPasswordConfirm" required placeholder="••••••••" class="auth-input-field">
-                                    <span class="auth-input-icon">🔒</span>
+                                <!-- PASSWORDS ROW (2-COLUMN GRID FOR EXACT SYMMETRY) -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.8rem;">
+                                    <div class="auth-input-wrapper" style="margin-bottom: 0;">
+                                        <label class="auth-input-label">Password</label>
+                                        <input type="password" id="authPassword" required placeholder="••••••••" class="auth-input-field" onkeyup="app.checkPasswordStrength(this.value)">
+                                        <button type="button" onclick="app.togglePasswordVisibility()" class="auth-input-icon" style="right: 0.5rem;">🔒</button>
+                                    </div>
+                                    <div class="auth-input-wrapper" style="margin-bottom: 0;">
+                                        <label class="auth-input-label">Confirm Password</label>
+                                        <input type="password" id="authPasswordConfirm" required placeholder="••••••••" class="auth-input-field">
+                                        <span class="auth-input-icon" style="right: 0.5rem;">🔒</span>
+                                    </div>
                                 </div>
 
                                 <!-- PASSWORD STRENGTH TEXT -->
-                                <div style="margin-bottom: 0.9rem;">
+                                <div style="margin-bottom: 0.8rem;">
                                     <span id="strText" style="font-size: 0.76rem; color: #6b7280; font-weight: 600;">Password strength: Weak</span>
                                 </div>
 
