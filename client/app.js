@@ -665,53 +665,94 @@ class App {
     async loginWithGoogle() {
         const modal = document.getElementById('modalCard');
         if (modal) {
-            modal.style.maxWidth = '440px';
-            modal.style.padding = '1.8rem 1.5rem';
+            modal.style.maxWidth = '460px';
+            modal.style.padding = '1.8rem 1.6rem';
         }
 
         this.openModal(`
-            <div style="text-align: center; font-family: 'Inter', -apple-system, sans-serif;">
-                <!-- Google G Logo -->
-                <div style="margin-bottom: 0.8rem;">
-                    <svg width="48" height="48" viewBox="0 0 24 24">
+            <div style="font-family: 'Inter', -apple-system, sans-serif; color: #111827;">
+                <!-- Header with Google Logo -->
+                <div style="text-align: center; margin-bottom: 1.3rem;">
+                    <svg width="42" height="42" viewBox="0 0 24 24" style="margin-bottom: 0.5rem;">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                         <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z"/>
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                     </svg>
-                </div>
-                <h3 style="font-size: 1.3rem; font-weight: 800; color: #111827; margin-bottom: 0.3rem;">Sign in with Google</h3>
-                <p style="font-size: 0.86rem; color: #6b7280; margin-bottom: 1.3rem;">Choose your Google account to authenticate</p>
-
-                <!-- Primary Detected Active Google Account Card -->
-                <div onclick="app.completeGoogleAuth('Raju Ranjan', 'rajuranjanxbkj@gmail.com')" style="display: flex; align-items: center; gap: 0.85rem; padding: 0.9rem 1.1rem; border: 1.5px solid #10b981; border-radius: 14px; cursor: pointer; text-align: left; transition: all 0.2s; margin-bottom: 0.85rem; background: #f0fdf4;" onmouseover="this.style.background='#dcfce7';" onmouseout="this.style.background='#f0fdf4';">
-                    <div style="width: 42px; height: 42px; border-radius: 50%; background: #047857; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.15rem; flex-shrink: 0;">
-                        R
-                    </div>
-                    <div style="flex: 1; min-width: 0;">
-                        <div style="font-weight: 700; font-size: 0.95rem; color: #111827;">Raju Ranjan</div>
-                        <div style="font-size: 0.8rem; color: #6b7280;">rajuranjanxbkj@gmail.com</div>
-                    </div>
-                    <span style="font-size: 0.75rem; color: #047857; font-weight: 700; background: #bbf7d0; padding: 0.25rem 0.55rem; border-radius: 6px;">Active Account</span>
+                    <h3 style="font-size: 1.35rem; font-weight: 800; color: #111827; margin: 0 0 0.25rem 0;">Choose an account</h3>
+                    <p style="font-size: 0.86rem; color: #6b7280; margin: 0;">to continue to <b style="color: #047857;">Umrah Travels</b></p>
                 </div>
 
-                <!-- Custom Google Account Toggle Form -->
-                <details style="text-align: left; font-size: 0.85rem; color: #374151; margin-top: 0.8rem;">
-                    <summary style="cursor: pointer; font-weight: 700; color: #047857; padding: 0.4rem 0;">+ Use another Google account</summary>
+                <!-- Account List matching user screenshot -->
+                <div style="display: flex; flex-direction: column; gap: 0.55rem; margin-bottom: 1rem;">
+                    
+                    <!-- 1. Animesh (rajuranjanxbkj@gmail.com) -->
+                    <div onclick="app.completeGoogleAuth('Animesh', 'rajuranjanxbkj@gmail.com')" style="display: flex; align-items: center; gap: 0.9rem; padding: 0.75rem 0.9rem; border: 1px solid #e5e7eb; border-radius: 12px; cursor: pointer; transition: all 0.2s; background: #ffffff;" onmouseover="this.style.background='#f0fdf4'; this.style.borderColor='#10b981';" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#e5e7eb';">
+                        <div style="width: 38px; height: 38px; border-radius: 50%; background: #d97706; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; flex-shrink: 0;">
+                            A
+                        </div>
+                        <div style="flex: 1; min-width: 0; text-align: left;">
+                            <div style="font-weight: 700; font-size: 0.9rem; color: #111827;">Animesh</div>
+                            <div style="font-size: 0.78rem; color: #6b7280;">rajuranjanxbkj@gmail.com</div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Raju Ranjan (raju_2025bite128@nitsri.ac.in) -->
+                    <div onclick="app.completeGoogleAuth('Raju Ranjan', 'raju_2025bite128@nitsri.ac.in')" style="display: flex; align-items: center; gap: 0.9rem; padding: 0.75rem 0.9rem; border: 1px solid #e5e7eb; border-radius: 12px; cursor: pointer; transition: all 0.2s; background: #ffffff;" onmouseover="this.style.background='#f0fdf4'; this.style.borderColor='#10b981';" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#e5e7eb';">
+                        <div style="width: 38px; height: 38px; border-radius: 50%; background: #2563eb; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; flex-shrink: 0;">
+                            R
+                        </div>
+                        <div style="flex: 1; min-width: 0; text-align: left;">
+                            <div style="font-weight: 700; font-size: 0.9rem; color: #111827;">Raju Ranjan</div>
+                            <div style="font-size: 0.78rem; color: #6b7280;">raju_2025bite128@nitsri.ac.in</div>
+                        </div>
+                    </div>
+
+                    <!-- 3. CampusNotes (campusnotesnitsri@gmail.com) -->
+                    <div onclick="app.completeGoogleAuth('CampusNotes', 'campusnotesnitsri@gmail.com')" style="display: flex; align-items: center; gap: 0.9rem; padding: 0.75rem 0.9rem; border: 1px solid #e5e7eb; border-radius: 12px; cursor: pointer; transition: all 0.2s; background: #ffffff;" onmouseover="this.style.background='#f0fdf4'; this.style.borderColor='#10b981';" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#e5e7eb';">
+                        <div style="width: 38px; height: 38px; border-radius: 50%; background: #4f46e5; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; flex-shrink: 0;">
+                            C
+                        </div>
+                        <div style="flex: 1; min-width: 0; text-align: left;">
+                            <div style="font-weight: 700; font-size: 0.9rem; color: #111827;">CampusNotes</div>
+                            <div style="font-size: 0.78rem; color: #6b7280;">campusnotesnitsri@gmail.com</div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Exergy Platform (hello.exergy@gmail.com) -->
+                    <div onclick="app.completeGoogleAuth('Exergy Platform', 'hello.exergy@gmail.com')" style="display: flex; align-items: center; gap: 0.9rem; padding: 0.75rem 0.9rem; border: 1px solid #e5e7eb; border-radius: 12px; cursor: pointer; transition: all 0.2s; background: #ffffff;" onmouseover="this.style.background='#f0fdf4'; this.style.borderColor='#10b981';" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#e5e7eb';">
+                        <div style="width: 38px; height: 38px; border-radius: 50%; background: #047857; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; flex-shrink: 0;">
+                            E
+                        </div>
+                        <div style="flex: 1; min-width: 0; text-align: left;">
+                            <div style="font-weight: 700; font-size: 0.9rem; color: #111827;">Exergy Platform</div>
+                            <div style="font-size: 0.78rem; color: #6b7280;">hello.exergy@gmail.com</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 5. Use another account (Custom Input Box) -->
+                <details style="text-align: left; font-size: 0.85rem; color: #374151; border-top: 1px solid #f1f5f9; padding-top: 0.6rem;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #047857; padding: 0.4rem 0;">👤 Use another account</summary>
                     <div style="margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.55rem;">
-                        <input type="text" id="customGoogleName" placeholder="Your Google Name (e.g. Ali Khan)" style="width: 100%; height: 40px; padding: 0 0.8rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box;">
-                        <input type="email" id="customGoogleEmail" placeholder="Your Google Email (e.g. ali@gmail.com)" style="width: 100%; height: 40px; padding: 0 0.8rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box;">
-                        <button type="button" onclick="const n=document.getElementById('customGoogleName').value; const e=document.getElementById('customGoogleEmail').value; if(e) app.completeGoogleAuth(n||e.split('@')[0], e);" style="height: 40px; background: #047857; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 0.3rem;">
-                            Continue with this Google Account
+                        <input type="text" id="customGoogleName" placeholder="Your Name (e.g. Ali Khan)" style="width: 100%; height: 38px; padding: 0 0.8rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem; box-sizing: border-box;">
+                        <input type="email" id="customGoogleEmail" placeholder="Your Google Email (e.g. ali@gmail.com)" style="width: 100%; height: 38px; padding: 0 0.8rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem; box-sizing: border-box;">
+                        <button type="button" onclick="const n=document.getElementById('customGoogleName').value; const e=document.getElementById('customGoogleEmail').value; if(e) app.completeGoogleAuth(n||e.split('@')[0], e);" style="height: 38px; background: #047857; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 0.2rem;">
+                            Sign in with custom Google Account
                         </button>
                     </div>
                 </details>
+
+                <p style="font-size: 0.73rem; color: #9ca3af; margin-top: 1.1rem; line-height: 1.4;">
+                    Before using this app, you can review Umrah Travels' <b>Privacy Policy</b> and <b>Terms of Service</b>.
+                </p>
             </div>
         `);
     }
 
     async redirectToGoogleOAuth() {
-        this.completeGoogleAuth('Raju Ranjan', 'rajuranjanxbkj@gmail.com');
+        this.completeGoogleAuth('Animesh', 'rajuranjanxbkj@gmail.com');
     }
 
     async completeGoogleAuth(name, email) {
