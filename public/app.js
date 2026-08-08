@@ -664,7 +664,7 @@ class App {
 
     async loginWithGoogle() {
         this.closeModal();
-        this.showToast('Connecting to Google Identity Services...', 'info');
+        this.showToast('Redirecting to Google Sign-In Consent Screen...', 'info');
         
         try {
             const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -674,22 +674,12 @@ class App {
             const res = await fetch(apiEndpoint);
             const data = await res.json();
 
-            // Check if Client ID is configured in .env
-            const isConfigured = data.url && !data.url.includes('googleclientid.apps.googleusercontent.com');
-
-            if (isConfigured) {
-                // Open real Google OAuth consent screen in a popup window
-                const width = 500, height = 600;
-                const left = (window.innerWidth - width) / 2;
-                const top = (window.innerHeight - height) / 2;
-                window.open(data.url, 'Google OAuth', `width=${width},height=${height},top=${top},left=${left}`);
-            } else {
-                // Seamless Google authentication for active Google user
-                this.completeGoogleAuth('Raju Ranjan', 'rajuranjanxbkj@gmail.com');
+            if (data && data.url) {
+                window.location.href = data.url;
             }
         } catch (e) {
             console.error('Google OAuth error:', e);
-            this.completeGoogleAuth('Raju Ranjan', 'rajuranjanxbkj@gmail.com');
+            this.showToast('Could not initiate Google Sign-In redirect', 'error');
         }
     }
 
