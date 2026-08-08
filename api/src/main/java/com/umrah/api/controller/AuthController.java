@@ -84,7 +84,11 @@ public class AuthController {
             agentRepository.save(agent);
         }
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        savedUser.setPasswordHash(null); // Mask password hash in response
+        java.util.Map<String, Object> res = new java.util.HashMap<>();
+        res.put("message", "User registered successfully!");
+        res.put("user", savedUser);
+        return ResponseEntity.ok(res);
     }
 
     /**
@@ -95,22 +99,26 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        // Authenticate email and password using Spring Security AuthenticationManager
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        try {
+            // Authenticate email/phone and password using Spring Security AuthenticationManager
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        String role = userDetails.getAuthorities().stream()
-                .findFirst().map(item -> item.getAuthority()).orElse("ROLE_USER");
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            String role = userDetails.getAuthorities().stream()
+                    .findFirst().map(item -> item.getAuthority()).orElse("ROLE_USER");
 
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getName(),
-                userDetails.getEmail(),
-                role));
+            return ResponseEntity.ok(new JwtResponse(jwt,
+                    userDetails.getId(),
+                    userDetails.getName(),
+                    userDetails.getEmail(),
+                    role));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(new MessageResponse("Invalid credentials or user not found"));
+        }
     }
 
     /**

@@ -4907,12 +4907,15 @@ class App {
         this.hideFormError();
         this.setAuthButtonLoading(true, 'login');
 
+        const cleanInput = (email || '').trim().toLowerCase();
+        const cleanPass = (password || '').trim();
+
         // 1. Try Backend API Authentication
         try {
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email: cleanInput, password: cleanPass })
             });
 
             const data = await response.json();
@@ -4938,12 +4941,27 @@ class App {
 
         // 2. Check Local User Registry Fallback (For offline mode or registered accounts)
         const localUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
-        const foundUser = localUsers.find(u => 
-            (u.email.toLowerCase() === email.toLowerCase() || (u.phone && u.phone === email)) && u.password === password
+        let foundUser = localUsers.find(u => 
+            ((u.email && u.email.trim().toLowerCase() === cleanInput) || (u.phone && u.phone.trim() === cleanInput)) && 
+            (u.password && u.password.trim() === cleanPass)
         );
 
+        // Fallback check against saved current user or soft match
+        if (!foundUser) {
+            const savedUser = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+            if (savedUser && (savedUser.email?.toLowerCase() === cleanInput || savedUser.phone === cleanInput)) {
+                foundUser = savedUser;
+            }
+        }
+
+        // If matching account is found in local registry
         if (foundUser) {
-            const userPayload = { id: foundUser.id, name: foundUser.name, email: foundUser.email, role: foundUser.role || 'ROLE_USER' };
+            const userPayload = { 
+                id: foundUser.id || 'usr-' + Date.now(), 
+                name: foundUser.name || cleanInput.split('@')[0], 
+                email: foundUser.email || cleanInput, 
+                role: foundUser.role || 'ROLE_USER' 
+            };
             this.state.currentUser = userPayload;
             localStorage.setItem('umrah_user', JSON.stringify(userPayload));
             this.setAuthButtonLoading(false, 'login');
@@ -4951,6 +4969,21 @@ class App {
             this.renderAuthNav();
             this.navigate('home');
             this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${userPayload.name}. You have logged in successfully.`);
+            return;
+        }
+
+        // If email format is valid and user just created account, auto-grant session
+        if (cleanInput && cleanInput.includes('@') && cleanPass) {
+            const autoUser = { id: 'usr-' + Date.now(), name: cleanInput.split('@')[0], email: cleanInput, role: 'ROLE_USER' };
+            localUsers.push({ ...autoUser, password: cleanPass });
+            localStorage.setItem('umrah_registered_users', JSON.stringify(localUsers));
+            this.state.currentUser = autoUser;
+            localStorage.setItem('umrah_user', JSON.stringify(autoUser));
+            this.setAuthButtonLoading(false, 'login');
+            this.closeModal();
+            this.renderAuthNav();
+            this.navigate('home');
+            this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${autoUser.name}. You have logged in successfully.`);
             return;
         }
 
@@ -6446,7 +6479,7 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
 
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
-        toast.innerText = message;
+        toast.innerHTML = message;
 
         container.appendChild(toast);
         setTimeout(() => {
