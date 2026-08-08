@@ -574,8 +574,8 @@ app.post('/api/auth/verify-otp', async (req, res) => {
 
 // 1. Generate Google OAuth Authorization Consent URL
 app.get('/api/auth/google/url', (req, res) => {
-    const clientId = process.env.GOOGLE_CLIENT_ID || '1092837465019-googleclientid.apps.googleusercontent.com';
-    const redirectUri = process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/api/auth/google/callback';
+    const clientId = process.env.GOOGLE_CLIENT_ID || '97842936166-bno7lqs6skfqccej1kfg9mg2s47sm2ik.apps.googleusercontent.com';
+    const redirectUri = process.env.GOOGLE_CALLBACK_URL || 'https://onerequest.in/oauth2/callback';
     
     const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
     const options = {
@@ -595,11 +595,11 @@ app.get('/api/auth/google/url', (req, res) => {
 });
 
 // 2. Google OAuth Callback - Code Exchange & User Registration / Login
-app.get('/api/auth/google/callback', async (req, res) => {
+const handleGoogleCallback = async (req, res) => {
     const code = req.query.code;
-    const clientId = process.env.GOOGLE_CLIENT_ID || '1092837465019-googleclientid.apps.googleusercontent.com';
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET || 'GOCSPX-googleclientsecret12345';
-    const redirectUri = process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/api/auth/google/callback';
+    const clientId = process.env.GOOGLE_CLIENT_ID || '97842936166-bno7lqs6skfqccej1kfg9mg2s47sm2ik.apps.googleusercontent.com';
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET || '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';
+    const redirectUri = process.env.GOOGLE_CALLBACK_URL || 'https://onerequest.in/oauth2/callback';
 
     if (!code) {
         return res.redirect('/#google_auth_error?error=missing_code');
@@ -631,7 +631,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
 
         const cleanEmail = (profile.email || 'googleuser@gmail.com').trim().toLowerCase();
         let displayName = profile.name || cleanEmail.split('@')[0];
-        if (cleanEmail === 'rajuranjanxbkj@gmail.com') displayName = 'Raju Ranjan';
+        if (cleanEmail === 'rajuranjanxbkj@gmail.com') displayName = 'Animesh';
 
         let user = inMemoryUsers.get(cleanEmail);
         if (!user) {
@@ -673,7 +673,10 @@ app.get('/api/auth/google/callback', async (req, res) => {
         console.error('Google Callback Error:', err);
         res.redirect('/#google_auth_error?error=token_exchange_failed');
     }
-});
+};
+
+app.get('/api/auth/google/callback', handleGoogleCallback);
+app.get('/oauth2/callback', handleGoogleCallback);
 
 // 3. Direct Google Token / Profile Payload verification endpoint
 app.post('/api/auth/google', async (req, res) => {
