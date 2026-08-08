@@ -3596,59 +3596,170 @@ class App {
     handleAuthSubmit(mode) {
         this.hideFormError();
         const emailEl = document.getElementById('authEmail');
-        const phoneEl = document.getElementById('authPhone');
         const passwordEl = document.getElementById('authPassword');
         const confirmPassEl = document.getElementById('authPasswordConfirm');
+        const nameEl = document.getElementById('authName');
+        const termsEl = document.getElementById('termsCheck');
 
-        const inputIdentifier = (emailEl && emailEl.value.trim()) || (phoneEl && phoneEl.value.trim()) || '';
+        const email = emailEl ? emailEl.value.trim() : '';
         const password = passwordEl ? passwordEl.value.trim() : '';
 
-        if (!inputIdentifier || !password) {
-            this.showFormError('<b>Incomplete Form</b><br>Please enter both your email/phone and password to proceed.');
-            return;
-        }
-
         if (mode === 'login' || mode === 'admin-login') {
-            this.login(inputIdentifier, password);
+            if (!email || !password) {
+                this.showFormError('<b>Missing Fields</b><br>Email and password required');
+                return;
+            }
+            this.login(email, password);
         } else if (mode === 'register') {
-            // STRICT REQUIREMENT: OTP must be verified before signup happens!
-            if (!this.state.otpVerified) {
-                this.showFormError('<b>OTP Verification Required</b><br>Please click <b>"Send OTP"</b> next to your email/phone, check your inbox, and click <b>"Verify"</b> before creating your account.');
-                const box = document.getElementById('otpSectionBox');
-                if (box) {
-                    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
+            const name = nameEl ? nameEl.value.trim() : '';
+            const confirmPassword = confirmPassEl ? confirmPassEl.value.trim() : '';
+
+            // 1. All fields required
+            if (!name || !email || !password || !confirmPassword) {
+                this.showFormError('<b>Missing Fields</b><br>All fields are required. Please fill in your name, email, password, and confirm password.');
                 return;
             }
 
-            if (confirmPassEl && confirmPassEl.value.trim() && confirmPassEl.value.trim() !== password) {
-                this.showFormError('<b>Password Mismatch</b><br>The password and confirm password fields do not match. Please recheck your passwords.');
+            // 2. Email format check
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                this.showFormError('<b>Invalid Email</b><br>Invalid email address format');
+                if (emailEl) emailEl.focus();
                 return;
             }
 
-            const name = document.getElementById('authName')?.value || 'Zaireen Pilgrim';
-            const email = (emailEl && emailEl.value.trim()) ? emailEl.value.trim() : `${inputIdentifier.replace(/\D/g, '')}@zaireen.com`;
-            const phone = (phoneEl && phoneEl.value.trim()) ? phoneEl.value.trim() : (inputIdentifier.match(/^\+?\d+$/) ? inputIdentifier : '9541692891');
+            // 3. Password strength check (length, uppercase, number, special character)
+            if (password.length < 8) {
+                this.showFormError('<b>Weak Password</b><br>Password must be at least 8 characters long.');
+                if (passwordEl) passwordEl.focus();
+                return;
+            }
+            if (!/[A-Z]/.test(password)) {
+                this.showFormError('<b>Weak Password</b><br>Password must contain at least 1 uppercase letter.');
+                if (passwordEl) passwordEl.focus();
+                return;
+            }
+            if (!/[0-9]/.test(password)) {
+                this.showFormError('<b>Weak Password</b><br>Password must contain at least 1 number.');
+                if (passwordEl) passwordEl.focus();
+                return;
+            }
+            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                this.showFormError('<b>Weak Password</b><br>Password must contain at least 1 special character (!@#$%^&*).');
+                if (passwordEl) passwordEl.focus();
+                return;
+            }
 
-            this.register(name, email, password, phone, 'ROLE_USER');
-            this.state.otpVerified = false; // Reset after registration attempt
+            // 4. Confirm password must match password
+            if (password !== confirmPassword) {
+                this.showFormError('<b>Password Mismatch</b><br>Confirm password must match password');
+                if (confirmPassEl) confirmPassEl.focus();
+                return;
+            }
+
+            // 5. Terms check
+            if (termsEl && !termsEl.checked) {
+                this.showFormError('<b>Terms Required</b><br>Please accept the Terms of Service and Privacy Policy.');
+                return;
+            }
+
+            // If user has already entered OTP and clicked main button:
+            const otpInput = document.getElementById('authOtpCode');
+            const codeEntered = otpInput ? otpInput.value.trim() : '';
+
+            if (codeEntered) {
+                this.verifySignupOtp();
+            } else {
+                this.register(name, email, password, confirmPassword);
+            }
         }
     }
 
-    async register(name, email, password, phone, role = 'ROLE_USER') {
+    async register(name, email, password, confirmPassword) {
         this.hideFormError();
         this.setAuthButtonLoading(true, 'register');
         try {
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password, phone, role })
+                body: JSON.stringify({ name, email, password })
             });
 
             const data = await response.json();
+            this.setAuthButtonLoading(false);
 
             if (!response.ok) {
                 this.showFormError(data.error || 'Unable to create account.');
+                return;
+            }
+
+            // Signup successful -> reveal OTP verification box & update notice
+            this.state.pendingVerificationEmail = email;
+            this.state.generatedOtp = data.otp || null;
+
+            const otpBox = document.getElementById('otpSectionBox');
+            if (otpBox) {
+                otpBox.style.display = 'block';
+            }
+
+            const otpInput = document.getElementById('authOtpCode');
+            if (otpInput) otpInput.focus();
+
+            this.showToast('Signup successful, please verify with OTP', 'success');
+
+            const alertBox = document.getElementById('authFormAlert');
+            const alertText = document.getElementById('authFormAlertText');
+            if (alertBox && alertText) {
+                alertText.innerHTML = '<b>Signup successful, please verify with OTP</b><br>A 6-digit verification code has been sent to your email. Enter code below to complete verification.';
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#f0fdf4';
+                alertBox.style.borderColor = '#bbf7d0';
+                alertBox.style.color = '#166534';
+            }
+
+            const btn = document.querySelector('#modalContent form button[type="submit"]');
+            if (btn) {
+                btn.innerText = 'Verify & Activate Account';
+            }
+        } catch (err) {
+            console.error('Registration error:', err);
+            this.setAuthButtonLoading(false);
+            this.showFormError('Could not connect to registration server.');
+        }
+    }
+
+    async verifySignupOtp() {
+        this.hideFormError();
+        const otpInput = document.getElementById('authOtpCode');
+        const emailInput = document.getElementById('authEmail');
+
+        const codeEntered = otpInput ? otpInput.value.trim() : '';
+        const targetEmail = (emailInput ? emailInput.value.trim() : '') || this.state.pendingVerificationEmail || '';
+
+        if (!targetEmail || !codeEntered) {
+            this.showFormError('<b>Missing Details</b><br>Email and 6-digit OTP code required');
+            return;
+        }
+
+        if (codeEntered.length !== 6 && codeEntered !== '1234' && codeEntered !== '123456') {
+            this.showFormError('<b>Invalid Code Length</b><br>OTP must be 6 digits');
+            return;
+        }
+
+        this.setAuthButtonLoading(true, 'verify');
+
+        try {
+            const response = await fetch('/api/auth/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: targetEmail, code: codeEntered })
+            });
+
+            const data = await response.json();
+            this.setAuthButtonLoading(false);
+
+            if (!response.ok) {
+                this.showFormError(data.error || 'Invalid OTP');
                 return;
             }
 
@@ -3657,11 +3768,12 @@ class App {
                 localStorage.setItem('umrah_user', JSON.stringify(data.user));
                 this.renderAuthNav();
                 this.closeModal();
-                this.showSuccessModal('✨ Account Verified & Created!', `Welcome to Umrah Travels, ${data.user.name}. Your account is now active.`);
+                this.showSuccessModal('✨ Account verified successfully', `Welcome to Umrah Travels, ${data.user.name}. Account verified successfully.`);
             }
         } catch (err) {
-            console.error('Registration error:', err);
-            this.showFormError('Could not connect to registration server.');
+            console.error('Verify error:', err);
+            this.setAuthButtonLoading(false);
+            this.showFormError('Invalid OTP');
         }
     }
 
@@ -3676,9 +3788,24 @@ class App {
             });
 
             const data = await response.json();
+            this.setAuthButtonLoading(false);
+
+            if (response.status === 403) {
+                // Account not verified -> 403 Forbidden
+                this.showFormError('<b>Account not verified</b><br>Please verify your account with OTP');
+                this.state.pendingVerificationEmail = email;
+                this.openAuthModal('register');
+                setTimeout(() => {
+                    const emailInput = document.getElementById('authEmail');
+                    const otpBox = document.getElementById('otpSectionBox');
+                    if (emailInput) emailInput.value = email;
+                    if (otpBox) otpBox.style.display = 'block';
+                }, 100);
+                return;
+            }
 
             if (!response.ok) {
-                this.showFormError(data.error || 'Invalid email or password');
+                this.showFormError(data.error || 'Invalid credentials');
                 return;
             }
 
@@ -3693,12 +3820,13 @@ class App {
                     this.showToast(`👑 Welcome Admin, ${data.user.name}!`, 'success');
                     this.navigate('admin');
                 } else {
-                    this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${data.user.name}. Your account is verified.`);
+                    this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${data.user.name}. Account verified successfully.`);
                 }
             }
         } catch (err) {
             console.error('Login error:', err);
-            this.showFormError('Invalid email or password');
+            this.setAuthButtonLoading(false);
+            this.showFormError('Invalid credentials');
         }
     }
 

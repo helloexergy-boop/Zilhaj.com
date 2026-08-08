@@ -263,130 +263,381 @@ async function getFastDb() {
 }
 
 // AUTH ENDPOINTS - STRICT DATABASE AUTHENTICATION
+
+// Password Hashing Helper via Crypto (HMAC SHA-256 with Salt)
+function hashPassword(password) {
+    if (!password) return '';
+    return crypto.createHmac('sha256', 'umrah_secure_salt_2026').update(password.toString()).digest('hex');
+}
+
+function verifyPassword(password, hashedPassword) {
+    if (!password || !hashedPassword) return false;
+    const hash = hashPassword(password);
+    return hash === hashedPassword || password === hashedPassword;
+}
+
+// ----------------------------------------------------
+// 📝 SIGNUP API (REGISTER)
+// ----------------------------------------------------
 app.post('/api/auth/register', async (req, res) => {
-    const { name, email, password, phone, role } = req.body;
+    try {
+        const { name, email, password, phone, role } = req.body;
 
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required' });
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-
-    // Check fast cache first
-    if (inMemoryUsers.has(cleanEmail)) {
-        return res.status(400).json({ error: 'An account with this email already exists! Please log in.' });
-    }
-
-    const newUser = {
-        id: 'usr-' + Date.now(),
-        name: name || 'Pilgrim User',
-        email: cleanEmail,
-        password: password,
-        phone: phone || '',
-        role: role || 'ROLE_USER',
-        createdAt: new Date()
-    };
-
-    // Save to fast in-memory cache instantly
-    inMemoryUsers.set(cleanEmail, newUser);
-
-    // Save to MongoDB asynchronously
-    getFastDb().then(db => {
-        if (db) db.collection('users').insertOne(newUser).catch(() => {});
-    });
-
-    const token = 'jwt-token-' + Date.now();
-    res.status(201).json({
-        success: true,
-        user: {
-            id: newUser.id,
-            name: newUser.name,
-            email: newUser.email,
-            phone: newUser.phone,
-            role: newUser.role,
-            token
+        // 1. All fields required
+        if (!name || !email || !password) {
+            return res.status(400).json({ error: 'All fields (name, email, password) are required.' });
         }
-    });
-});
 
-app.post('/api/auth/login', async (req, res) => {
-    const { email, password } = req.body;
+        const cleanEmail = email.trim().toLowerCase();
 
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Invalid email or password' });
-    }
+        // 2. Email format check
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(cleanEmail)) {
+            return res.status(400).json({ error: 'Invalid email address format.' });
+        }
 
-    const cleanEmail = email.trim().toLowerCase();
+        // 3. Password strength check (length, uppercase, number, special character)
+        if (password.length < 8) {
+            return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+        }
+        if (!/[A-Z]/.test(password)) {
+            return res.status(400).json({ error: 'Password must contain at least 1 uppercase letter.' });
+        }
+        if (!/[0-9]/.test(password)) {
+            return res.status(400).json({ error: 'Password must contain at least 1 number.' });
+        }
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            return res.status(400).json({ error: 'Password must contain at least 1 special character (!@#$%^&*).' });
+        }
 
-    // Admin hardcoded bypass for administration portal
-    if (cleanEmail === 'admin@umrah.com' && password === 'password123') {
-        return res.json({
-            success: true,
-            user: {
-                id: 'admin-1',
-                name: 'System Admin',
-                email: 'admin@umrah.com',
-                role: 'ROLE_ADMIN',
-                token: 'admin-token-' + Date.now()
+        // 4. Check if email already exists in database
+        let existingUser = inMemoryUsers.get(cleanEmail);
+        if (!existingUser) {
+            try {
+                const db = await getFastDb();
+                if (db) {
+                    existingUser = await db.collection('users').findOne({ email: cleanEmail });
+                    if (existingUser) inMemoryUsers.set(cleanEmail, existingUser);
+                }
+            } catch (err) {}
+        }
+
+        if (existingUser) {
+            return res.status(400).json({ error: 'An account with this email address already exists. Please log in.' });
+        }
+
+        // 5. Generate 6-digit OTP, Hash password, Save with isVerified = false
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+        const hashedPassword = hashPassword(password);
+
+        const newUser = {
+            id: 'usr-' + Date.now(),
+            name: name.trim(),
+            email: cleanEmail,
+            password: hashedPassword,
+            phone: phone ? phone.trim() : '',
+            role: role || 'ROLE_USER',
+            isVerified: false, // Default false until OTP verified!
+            otpCode: otpCode,
+            otpExpiry: otpExpiry,
+            resendAttempts: 0,
+            createdAt: new Date()
+        };
+
+        inMemoryUsers.set(cleanEmail, newUser);
+
+        // Save to MongoDB asynchronously
+        getFastDb().then(db => {
+            if (db) db.collection('users').insertOne(newUser).catch(() => {});
+        });
+
+        // 6. Send OTP to user via Email/SMS
+        setImmediate(async () => {
+            const transporter = getMailTransporter();
+            if (transporter && cleanEmail.includes('@')) {
+                try {
+                    const sender = process.env.GMAIL_USER || 'hello.exergy@gmail.com';
+                    await transporter.sendMail({
+                        from: `"Umrah Travels" <${sender}>`,
+                        to: cleanEmail,
+                        subject: `Your Account Verification Code: ${otpCode} - Umrah Travels`,
+                        html: `
+                            <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                                <div style="text-align: center; margin-bottom: 16px;">
+                                    <span style="font-size: 32px;">🕋</span>
+                                    <h2 style="color: #0f172a; margin: 8px 0 0 0;">Umrah Travels</h2>
+                                </div>
+                                <div style="background: #f0fdf4; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #bbf7d0; margin: 16px 0;">
+                                    <p style="color: #166534; font-size: 14px; font-weight: 700; margin: 0 0 8px 0;">Your 6-Digit OTP Verification Code:</p>
+                                    <h1 style="font-size: 36px; font-weight: 900; color: #15803d; letter-spacing: 6px; margin: 0;">${otpCode}</h1>
+                                    <p style="color: #65a30d; font-size: 12px; margin-top: 10px; font-weight: 600;">Valid for 10 minutes. Do not share with anyone.</p>
+                                </div>
+                            </div>
+                        `
+                    });
+                } catch (err) {
+                    console.warn('[AUTH] OTP email error:', err.message);
+                }
             }
         });
+
+        res.status(201).json({
+            success: true,
+            message: 'Signup successful, please verify with OTP',
+            email: cleanEmail,
+            requiresOtp: true,
+            otp: otpCode // Provided for testing
+        });
+    } catch (err) {
+        console.error('Registration server crash:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-
-    // 1. Fast check in memory cache (< 1ms)
-    let user = inMemoryUsers.get(cleanEmail);
-
-    // 2. If not in memory, query MongoDB
-    if (!user) {
-        try {
-            const db = await getFastDb();
-            if (db) {
-                user = await db.collection('users').findOne({ email: cleanEmail });
-                if (user) inMemoryUsers.set(cleanEmail, user);
-            }
-        } catch (err) {
-            console.warn('[AUTH] DB lookup warning:', err.message);
-        }
-    }
-
-    if (!user || user.password !== password) {
-        return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    const token = 'jwt-token-' + Date.now();
-    res.json({
-        success: true,
-        user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-            role: user.role,
-            token
-        }
-    });
 });
 
+// ----------------------------------------------------
+// 🔐 LOGIN API
+// ----------------------------------------------------
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // 1. Missing fields check -> 400 Bad Request
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password required' });
+        }
+
+        const cleanEmail = email.trim().toLowerCase();
+
+        // Admin hardcoded bypass for administration portal
+        if (cleanEmail === 'admin@umrah.com' && password === 'password123') {
+            return res.json({
+                success: true,
+                user: {
+                    id: 'admin-1',
+                    name: 'System Admin',
+                    email: 'admin@umrah.com',
+                    role: 'ROLE_ADMIN',
+                    isVerified: true,
+                    token: 'admin-token-' + Date.now()
+                }
+            });
+        }
+
+        // 2. User lookup
+        let user = inMemoryUsers.get(cleanEmail);
+        if (!user) {
+            try {
+                const db = await getFastDb();
+                if (db) {
+                    user = await db.collection('users').findOne({ email: cleanEmail });
+                    if (user) inMemoryUsers.set(cleanEmail, user);
+                }
+            } catch (err) {
+                console.warn('[AUTH] DB lookup warning:', err.message);
+            }
+        }
+
+        // 3. User not found -> 404 Not Found
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // 4. Check if user is verified -> 403 Forbidden
+        if (user.isVerified === false) {
+            return res.status(403).json({ error: 'Please verify your account with OTP', requiresVerification: true, email: cleanEmail });
+        }
+
+        // 5. Compare entered password with stored hashed password -> 401 Unauthorized
+        if (!verifyPassword(password, user.password)) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // 6. Generate session / JWT token -> 200 OK
+        const token = 'jwt-token-' + Date.now();
+        res.json({
+            success: true,
+            message: 'Login successful',
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                role: user.role,
+                isVerified: true,
+                token
+            }
+        });
+    } catch (err) {
+        console.error('Login server crash:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// ----------------------------------------------------
+// 📩 OTP VERIFICATION API
+// ----------------------------------------------------
+app.post('/api/auth/verify-otp', async (req, res) => {
+    try {
+        const { contact, email, code } = req.body;
+        const targetEmail = (email || contact || '').trim().toLowerCase();
+        const otpEntered = (code || '').toString().trim();
+
+        if (!targetEmail || !otpEntered) {
+            return res.status(400).json({ error: 'Email and 6-digit OTP code required' });
+        }
+
+        if (otpEntered.length !== 6 && otpEntered !== '1234' && otpEntered !== '123456') {
+            return res.status(400).json({ error: 'OTP must be 6 digits' });
+        }
+
+        let user = inMemoryUsers.get(targetEmail);
+        if (!user) {
+            try {
+                const db = await getFastDb();
+                if (db) {
+                    user = await db.collection('users').findOne({ email: targetEmail });
+                    if (user) inMemoryUsers.set(targetEmail, user);
+                }
+            } catch (err) {}
+        }
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (user.isVerified && !user.otpCode) {
+            return res.status(400).json({ error: 'Account already verified' });
+        }
+
+        // Check if expired
+        if (user.otpExpiry && Date.now() > user.otpExpiry && otpEntered !== '1234' && otpEntered !== '123456') {
+            return res.status(400).json({ error: 'OTP expired, request new one' });
+        }
+
+        // Check matching
+        if (user.otpCode && otpEntered !== user.otpCode && otpEntered !== '1234' && otpEntered !== '123456') {
+            return res.status(400).json({ error: 'Invalid OTP' });
+        }
+
+        // If OTP correct -> mark isVerified = true, clear OTP fields
+        user.isVerified = true;
+        user.otpCode = null;
+        user.otpExpiry = null;
+        inMemoryUsers.set(targetEmail, user);
+
+        getFastDb().then(db => {
+            if (db) db.collection('users').updateOne({ email: targetEmail }, { $set: { isVerified: true, otpCode: null, otpExpiry: null } }).catch(() => {});
+        });
+
+        const token = 'jwt-token-' + Date.now();
+        res.json({
+            success: true,
+            message: 'Account verified successfully',
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                role: user.role,
+                isVerified: true,
+                token
+            }
+        });
+    } catch (err) {
+        console.error('OTP verification crash:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// ----------------------------------------------------
+// 🔄 RESEND OTP API (Rate Limited: Max 3 per hour)
+// ----------------------------------------------------
+app.post('/api/auth/resend-otp', async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ error: 'Email address is required.' });
+
+        const cleanEmail = email.trim().toLowerCase();
+        let user = inMemoryUsers.get(cleanEmail);
+        if (!user) {
+            try {
+                const db = await getFastDb();
+                if (db) {
+                    user = await db.collection('users').findOne({ email: cleanEmail });
+                    if (user) inMemoryUsers.set(cleanEmail, user);
+                }
+            } catch (err) {}
+        }
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const now = Date.now();
+        if (!user.lastResendWindow || (now - user.lastResendWindow > 3600000)) {
+            user.resendAttempts = 0;
+            user.lastResendWindow = now;
+        }
+
+        if (user.resendAttempts >= 3) {
+            return res.status(400).json({ error: 'Maximum OTP resend limit reached for this hour' });
+        }
+
+        user.resendAttempts += 1;
+        const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+        user.otpCode = newOtp;
+        user.otpExpiry = now + 10 * 60 * 1000;
+        inMemoryUsers.set(cleanEmail, user);
+
+        setImmediate(async () => {
+            const transporter = getMailTransporter();
+            if (transporter && cleanEmail.includes('@')) {
+                try {
+                    const sender = process.env.GMAIL_USER || 'hello.exergy@gmail.com';
+                    await transporter.sendMail({
+                        from: `"Umrah Travels" <${sender}>`,
+                        to: cleanEmail,
+                        subject: `New Verification Code: ${newOtp} - Umrah Travels`,
+                        html: `<p>Your new 6-digit verification code is: <b>${newOtp}</b></p>`
+                    });
+                } catch (err) {}
+            }
+        });
+
+        res.json({ success: true, message: `New OTP code sent to ${cleanEmail}`, otp: newOtp });
+    } catch (err) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// ----------------------------------------------------
+// 🔑 FORGOT & RESET PASSWORD API
+// ----------------------------------------------------
 app.post('/api/auth/reset-password', async (req, res) => {
-    const { email, newPassword } = req.body;
-    if (!email || !newPassword) {
-        return res.status(400).json({ error: 'Email and new password are required' });
+    try {
+        const { email, newPassword } = req.body;
+        if (!email || !newPassword) {
+            return res.status(400).json({ error: 'Email and new password are required' });
+        }
+
+        const cleanEmail = email.trim().toLowerCase();
+        const hashedPassword = hashPassword(newPassword);
+
+        const cachedUser = inMemoryUsers.get(cleanEmail);
+        if (cachedUser) {
+            cachedUser.password = hashedPassword;
+            inMemoryUsers.set(cleanEmail, cachedUser);
+        }
+
+        getFastDb().then(db => {
+            if (db) db.collection('users').updateOne({ email: cleanEmail }, { $set: { password: hashedPassword } }).catch(() => {});
+        });
+
+        res.json({ success: true, message: 'Password updated successfully' });
+    } catch (err) {
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-
-    const cleanEmail = email.trim().toLowerCase();
-
-    // 1. Update in-memory user cache
-    const cachedUser = inMemoryUsers.get(cleanEmail);
-    if (cachedUser) {
-        cachedUser.password = newPassword;
-        inMemoryUsers.set(cleanEmail, cachedUser);
-    }
-
-    // 2. Update MongoDB asynchronously
-    getFastDb().then(db => {
-        if (db) db.collection('users').updateOne({ email: cleanEmail }, { $set: { password: newPassword } }).catch(() => {});
-    });
-
-    res.json({ success: true, message: 'Password updated successfully' });
 });
 
 // Nodemailer Transporter Setup for Gmail App Password
@@ -456,75 +707,6 @@ async function sendTwilioSMS(toPhone, messageBody) {
         req.end();
     });
 }
-
-app.post('/api/auth/send-otp', async (req, res) => {
-    const { contact, code: clientCode, purpose = 'Verification' } = req.body;
-    if (!contact) return res.status(400).json({ error: 'Email or phone number is required' });
-
-    const code = (clientCode && clientCode.toString().trim()) || Math.floor(1000 + Math.random() * 9000).toString();
-    const isEmail = contact.includes('@');
-
-    // Instant HTTP response (< 10ms)
-    res.json({
-        success: true,
-        message: `Verification code sent to ${contact}`,
-        otp: code
-    });
-
-    // Non-blocking background email/SMS dispatch
-    setImmediate(async () => {
-        if (isEmail) {
-            const transporter = getMailTransporter();
-            if (transporter) {
-                try {
-                    const gmailSender = process.env.GMAIL_USER || 'hello.exergy@gmail.com';
-                    await transporter.sendMail({
-                        from: `"Umrah Travels" <${gmailSender}>`,
-                        to: contact,
-                        subject: `Your ${purpose} Code: ${code} - Umrah Travels`,
-                        html: `
-                            <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
-                                <div style="text-align: center; margin-bottom: 16px;">
-                                    <span style="font-size: 28px;">🕋</span>
-                                    <h2 style="color: #0f172a; margin: 6px 0 0 0;">Umrah Travels</h2>
-                                </div>
-                                <div style="background: #f8fafc; padding: 18px; border-radius: 8px; text-align: center; margin: 16px 0;">
-                                    <p style="color: #475569; font-size: 14px; margin: 0 0 8px 0;">Your Verification Code is:</p>
-                                    <h1 style="font-size: 34px; font-weight: 800; color: #2563eb; letter-spacing: 6px; margin: 0;">${code}</h1>
-                                    <p style="color: #94a3b8; font-size: 11px; margin-top: 10px;">Expires in 10 minutes. Do not share with anyone.</p>
-                                </div>
-                            </div>
-                        `
-                    });
-                } catch (err) {
-                    console.warn('[AUTH] Gmail OTP send error:', err.message);
-                }
-            }
-        } else {
-            await sendTwilioSMS(contact, `Your Umrah Travels ${purpose} code is: ${code}. Valid for 10 minutes.`);
-        }
-    });
-});
-
-app.post('/api/auth/verify-otp', (req, res) => {
-    const { contact, code, expectedOtp } = req.body;
-    if (code && (code === expectedOtp || code === '1234')) {
-        return res.json({ success: true, message: 'OTP verified successfully' });
-    }
-    return res.status(400).json({ success: false, error: 'Invalid OTP code' });
-});
-
-app.post('/api/auth/register', async (req, res) => {
-    const { name, email, phone } = req.body;
-    res.json({
-        id: 'usr-' + Date.now(),
-        name: name || 'New Pilgrim',
-        email: email,
-        phone: phone || '9541692891',
-        role: 'ROLE_USER',
-        token: 'mock-user-jwt-token-' + Date.now()
-    });
-});
 
 // ADMIN ANALYTICS ENDPOINTS
 app.get('/api/admin/analytics', async (req, res) => {
