@@ -854,6 +854,8 @@ class App {
             main.innerHTML = this.renderOffersPage();
         } else if (page === 'dashboard') {
             main.innerHTML = this.renderDashboardPage();
+        } else if (page === 'payment') {
+            main.innerHTML = this.renderPaymentPage(this.state.activePaymentOfferId);
         } else if (page === 'admin') {
             if (this.state.currentUser?.role === 'ROLE_ADMIN') {
                 this.renderAdminPage();
@@ -2257,16 +2259,13 @@ class App {
 
                                                         <!-- Action Buttons Row -->
                                                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem; border-top:1.5px dashed #e2e8f0; padding-top:1.2rem; margin-top:auto;">
-                                                            <div style="display:flex; align-items:center; gap:0.8rem;">
-                                                                <button type="button" class="btn-dashboard-action btn-view" onclick="app.viewOfferDetailsModal('${o.id}')" style="padding:0.65rem 1.3rem; border-radius:10px; font-weight:700;">
-                                                                    🔍 View Details
-                                                                </button>
-                                                                <button type="button" class="btn-dashboard-action btn-delete" onclick="app.deleteRequirement('${req.id}')" style="padding:0.65rem 1.1rem; border-radius:10px; font-weight:700;">
-                                                                    🗑️ Delete Request
+                                                            <div>
+                                                                <button type="button" class="btn-dashboard-action btn-view" onclick="app.viewOfferDetailsModal('${o.id}')" style="padding:0.7rem 1.5rem; border-radius:10px; font-weight:800; font-size:0.92rem; background:#ecfdf5; color:#047857; border:1.5px solid #a7f3d0; cursor:pointer;">
+                                                                    🔍 View Details &amp; Full Breakdown
                                                                 </button>
                                                             </div>
                                                             <div>
-                                                                <button type="button" class="btn-dashboard-action btn-book" onclick="app.bookOffer('${o.id}')" style="padding:0.75rem 2.2rem; font-size:0.95rem; background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; font-weight:800; border-radius:10px; border:none; box-shadow:0 4px 14px rgba(4,120,87,0.35);">
+                                                                <button type="button" class="btn-dashboard-action btn-book" onclick="app.navigateToPayment('${o.id}')" style="padding:0.75rem 2.2rem; font-size:0.95rem; background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; font-weight:900; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(4,120,87,0.35);">
                                                                     💳 Book This Package Now
                                                                 </button>
                                                             </div>
@@ -2336,154 +2335,637 @@ class App {
 
     viewOfferDetailsModal(offerId) {
         const allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        const allReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+
         const o = allOffers.find(item => item.id === offerId) || {
             id: offerId || '#OFF-891',
-            agentName: 'Al Huda Group',
-            packageTitle: 'Al Huda Group - Umrah Package',
+            requirementId: 'req-1786187618550',
+            agentName: 'AL-HARAM PREMIUM TRAVELS',
+            packageTitle: 'AL-HARAM PREMIUM TRAVELS - Exclusive 5-Star 18-Day Package',
             category: 'Premium Service',
-            makkahHotel: 'Manarat Al Misk / Dream Zone (or similar)',
+            makkahHotel: 'Swissotel Makkah (250m from Kaaba)',
             makkahDistance: 'Approx. 600 Metres from Masjid Al-Haram',
-            madinahHotel: 'Marjan International / Marjan Gold (or similar)',
+            madinahHotel: 'Pullman Zamzam Madinah (150m from Nabawi)',
             madinahDistance: 'Approx. 250 Metres from Al-Masjid An-Nabawi',
-            departureDate: '12 August (18 Days)',
+            departureDate: '2026-08-13 (18 Days)',
             airport: 'JED/MED Airport',
-            discountedPrice: 118750,
-            originalPrice: 143750
+            inclusions: ['Direct Flights (SXR-JED)', '5-Star Buffet Meals', 'Ahram Kit', 'Zamzam 5L', 'Ziyarat'],
+            complimentary: ['AHRAM KIT', 'LAUNDRY', 'ZAMZAM'],
+            originalPrice: 143750,
+            discountedPrice: 118750
+        };
+
+        const req = allReqs.find(r => r.id === o.requirementId) || {
+            preferredDepartureDate: '2026-08-13',
+            durationDays: 18,
+            departureCity: 'Srinagar',
+            hotelType: '5-Star Luxury (< 300m from Haram)',
+            fullAddress: 'House 45, Rajbagh Main Road, Srinagar, Jammu and Kashmir',
+            travelersBreakdown: { males: 1, females: 1, children: 0 },
+            travelersCount: 2,
+            maxBudget: 125000,
+            specialNotes: 'Prefer direct flights from Srinagar, wheelchair assistance needed for elderly family member.'
         };
 
         this.openModal(`
-            <div style="padding:0.5rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            <div style="position:fixed; inset:0; z-index:99999; background:#ffffff; overflow-y:auto; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                 
-                <!-- Modal Header -->
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #e2e8f0; padding-bottom:1rem; margin-bottom:1.4rem;">
-                    <div>
+                <!-- Full Screen Top Header Bar -->
+                <div style="position:sticky; top:0; z-index:100; background:#0f172a; color:#ffffff; padding:1.2rem 3rem; display:flex; justify-content:space-between; align-items:center; box-shadow:0 8px 30px rgba(15, 23, 42, 0.25);">
+                    <div style="display:flex; align-items:center; gap:1.2rem;">
                         <span class="badge-package-category ${(o.category || 'Premium Service').toLowerCase().includes('premium') ? 'premium' : 'standard'}">
                             ✨ ${this.escapeHtml(o.category || 'Premium Service')}
                         </span>
-                        <h3 style="font-size:1.5rem; font-weight:900; color:#0f172a; margin:0.4rem 0 0;">${this.escapeHtml(o.packageTitle)}</h3>
-                        <p style="color:#64748b; font-size:0.88rem; margin:0.2rem 0 0;">Provided by: <strong>${this.escapeHtml(o.agentName)}</strong> &bull; ID: ${o.id}</p>
+                        <div>
+                            <h2 style="font-size:1.35rem; font-weight:900; color:#ffffff; margin:0; letter-spacing:-0.3px;">${this.escapeHtml(o.packageTitle)}</h2>
+                            <div style="font-size:0.84rem; color:#94a3b8; margin-top:0.15rem;">Provided by: <strong style="color:#6ee7b7;">${this.escapeHtml(o.agentName)}</strong> &bull; Offer ID: ${o.id}</div>
+                        </div>
                     </div>
-                    <div style="text-align:right;">
-                        <span style="text-decoration:line-through; color:#94a3b8; font-size:0.95rem;">${this.formatCurrency(o.originalPrice || 143750)}</span>
-                        <div style="font-size:1.6rem; font-weight:900; color:#047857;">${this.formatCurrency(o.discountedPrice || 118750)}</div>
-                    </div>
-                </div>
-
-                <!-- Hotel Details Card -->
-                <div style="background:#f8fafc; border-radius:14px; padding:1.2rem; border:1px solid #e2e8f0; margin-bottom:1.4rem; display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;">
-                    <div>
-                        <div style="font-weight:800; color:#0f172a; font-size:0.9rem;">📍 MAKKAH ACCOMMODATION</div>
-                        <div style="font-weight:700; color:#1e293b; margin-top:0.2rem;">${this.escapeHtml(o.makkahHotel)}</div>
-                        <div style="color:#b45309; font-weight:700; font-size:0.84rem; margin-top:0.2rem;">${this.escapeHtml(o.makkahDistance)}</div>
-                    </div>
-                    <div>
-                        <div style="font-weight:800; color:#0f172a; font-size:0.9rem;">📍 MADINAH ACCOMMODATION</div>
-                        <div style="font-weight:700; color:#1e293b; margin-top:0.2rem;">${this.escapeHtml(o.madinahHotel)}</div>
-                        <div style="color:#b45309; font-weight:700; font-size:0.84rem; margin-top:0.2rem;">${this.escapeHtml(o.madinahDistance)}</div>
+                    <div style="display:flex; align-items:center; gap:1.4rem;">
+                        <div style="text-align:right;">
+                            <span style="text-decoration:line-through; color:#94a3b8; font-size:0.88rem;">${this.formatCurrency(o.originalPrice || 143750)}</span>
+                            <div style="font-size:1.6rem; font-weight:900; color:#34d399; line-height:1;">${this.formatCurrency(o.discountedPrice || 118750)}</div>
+                        </div>
+                        <button type="button" class="btn btn-outline" onclick="app.closeModal();" style="color:#ffffff; border-color:rgba(255,255,255,0.3); font-weight:700; border-radius:10px; padding:0.6rem 1.4rem; cursor:pointer;">✕ Close</button>
+                        <button type="button" class="btn btn-primary" onclick="app.closeModal(); app.navigateToPayment('${o.id}');" style="background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; font-weight:900; border-radius:10px; border:none; padding:0.75rem 2rem; cursor:pointer; box-shadow:0 4px 15px rgba(4,120,87,0.4);">
+                            💳 Proceed to Book &amp; Pay
+                        </button>
                     </div>
                 </div>
 
-                <!-- Rawdah Permit Note Banner -->
-                <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:0.8rem 1.1rem; display:flex; align-items:center; gap:0.6rem; margin-bottom:1.6rem; font-size:0.85rem; color:#92400e;">
-                    <span style="font-size:1.1rem;">ℹ️</span>
-                    <span><strong>Important Note:</strong> Rawdah permits must be booked by the pilgrim through the <strong>Nusuk App</strong>, subject to availability.</span>
-                </div>
-
-                <!-- Timeline / Stepper View (4 Steps matching screenshot 2) -->
-                <div style="margin-top:1rem;">
-                    <h4 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin-bottom:0.8rem;">🕋 Umrah Sacred Journey Ritual &amp; Booking Steps Timeline</h4>
+                <!-- Full Screen Inner Content Area -->
+                <div style="max-width:1400px; margin:2.5rem auto; padding:0 2rem; display:flex; flex-direction:column; gap:2.2rem;">
                     
-                    <div class="ritual-timeline-grid">
-                        
-                        <!-- STEP 01 -->
-                        <div class="ritual-step-card">
-                            <div>
-                                <span class="ritual-step-badge">STEP 01 &bull; ENTRANCE</span>
-                                <h5 style="font-size:1.05rem; font-weight:800; color:#0f172a; margin:0 0 0.4rem;">Entering Ihram &amp; Niyyah</h5>
-                                <p style="font-size:0.82rem; color:#475569; margin:0 0 0.8rem; line-height:1.4;">
-                                    Perform Ghusl, wear Ihram garments before crossing the Miqat, and declare your sacred intention.
-                                </p>
-                                <div style="font-size:0.8rem; color:#047857; display:flex; flex-direction:column; gap:0.3rem;">
-                                    <div>✓ Ghusl &amp; Ihram attire at Miqat</div>
-                                    <div>✓ Niyyah: <em>"Labbayk Allahumma Umrah"</em></div>
-                                    <div>✓ Recite Talbiyah continuously</div>
-                                </div>
+                    <!-- Section 1: Verified Agent Verification Card -->
+                    <div style="background:linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-radius:22px; border:1.5px solid #a7f3d0; padding:1.8rem 2.4rem; box-shadow:0 10px 30px rgba(4,120,87,0.06); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem;">
+                        <div style="display:flex; align-items:center; gap:1.4rem;">
+                            <div style="width:64px; height:64px; background:#ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2rem; border:2px solid #a7f3d0; box-shadow:0 6px 16px rgba(4,120,87,0.12);">
+                                🏛️
                             </div>
-                            <div style="margin-top:1rem; background:#f8fafc; padding:0.4rem 0.6rem; border-radius:8px; font-size:0.75rem; font-weight:700; color:#64748b;">
-                                📍 Location: Miqat Station
+                            <div>
+                                <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.3rem;">
+                                    <span style="background:#047857; color:#ffffff; font-size:0.75rem; font-weight:900; padding:0.25rem 0.75rem; border-radius:99px; text-transform:uppercase;">✅ VERIFIED AGENT</span>
+                                    <span style="color:#047857; font-size:0.85rem; font-weight:800;">License #UM-984120 &bull; Saudi Ministry Approved</span>
+                                </div>
+                                <h3 style="font-size:1.6rem; font-weight:900; color:#0f172a; margin:0;">${this.escapeHtml(o.agentName)}</h3>
+                                <div style="font-size:0.88rem; color:#475569; margin-top:0.2rem;">⭐ <strong>4.9 / 5.0 Rating</strong> (142 Verified Pilgrim Reviews) &nbsp;&bull;&nbsp; 📞 +91 98765 43210 &nbsp;&bull;&nbsp; ✉️ support@alharamtravels.com</div>
                             </div>
                         </div>
-
-                        <!-- STEP 02 -->
-                        <div class="ritual-step-card">
-                            <div>
-                                <span class="ritual-step-badge">STEP 02 &bull; TAWAF</span>
-                                <h5 style="font-size:1.05rem; font-weight:800; color:#0f172a; margin:0 0 0.4rem;">Tawaf around Kaaba</h5>
-                                <p style="font-size:0.82rem; color:#475569; margin:0 0 0.8rem; line-height:1.4;">
-                                    Perform 7 counter-clockwise circuits around the Kaaba starting from Hajar Al-Aswad.
-                                </p>
-                                <div style="font-size:0.8rem; color:#047857; display:flex; flex-direction:column; gap:0.3rem;">
-                                    <div>✓ 7 Complete Tawaf rounds</div>
-                                    <div>✓ 2 Raka'at behind Maqam Ibrahim</div>
-                                    <div>✓ Drink blessed Zamzam water</div>
-                                </div>
-                            </div>
-                            <div style="margin-top:1rem; background:#f8fafc; padding:0.4rem 0.6rem; border-radius:8px; font-size:0.75rem; font-weight:700; color:#64748b;">
-                                📍 Location: Al-Masjid Al-Haram
-                            </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:0.8rem; font-weight:800; color:#047857; text-transform:uppercase; letter-spacing:0.5px;">PLATFORM VERIFICATION</div>
+                            <div style="font-size:1.05rem; font-weight:900; color:#0f172a; margin-top:0.2rem;">🔒 100% Escrow Protected Booking</div>
                         </div>
-
-                        <!-- STEP 03 -->
-                        <div class="ritual-step-card">
-                            <div>
-                                <span class="ritual-step-badge">STEP 03 &bull; SA'I</span>
-                                <h5 style="font-size:1.05rem; font-weight:800; color:#0f172a; margin:0 0 0.4rem;">Sa'i (Safa &amp; Marwah)</h5>
-                                <p style="font-size:0.82rem; color:#475569; margin:0 0 0.8rem; line-height:1.4;">
-                                    Walk 7 times between Mount Safa and Mount Marwah, honoring the devotion of Hazrat Hajar (RA).
-                                </p>
-                                <div style="font-size:0.8rem; color:#047857; display:flex; flex-direction:column; gap:0.3rem;">
-                                    <div>✓ Start at Safa, end at Marwah</div>
-                                    <div>✓ 7 laps total with Du'as</div>
-                                    <div>✓ Light jogging for men between green lights</div>
-                                </div>
-                            </div>
-                            <div style="margin-top:1rem; background:#f8fafc; padding:0.4rem 0.6rem; border-radius:8px; font-size:0.75rem; font-weight:700; color:#64748b;">
-                                📍 Location: Mas'a Corridor
-                            </div>
-                        </div>
-
-                        <!-- STEP 04 -->
-                        <div class="ritual-step-card">
-                            <div>
-                                <span class="ritual-step-badge">STEP 04 &bull; COMPLETION</span>
-                                <h5 style="font-size:1.05rem; font-weight:800; color:#0f172a; margin:0 0 0.4rem;">Halq or Taqseer</h5>
-                                <p style="font-size:0.82rem; color:#475569; margin:0 0 0.8rem; line-height:1.4;">
-                                    Men shave or trim head hair, women trim a fingertip length. Your Umrah is now completed!
-                                </p>
-                                <div style="font-size:0.8rem; color:#047857; display:flex; flex-direction:column; gap:0.3rem;">
-                                    <div>✓ Shave (Halq) or trim (Taqseer)</div>
-                                    <div>✓ Ihram restrictions lifted</div>
-                                    <div>✓ Umrah Mubarak! 🥳</div>
-                                </div>
-                            </div>
-                            <div style="margin-top:1rem; background:#f8fafc; padding:0.4rem 0.6rem; border-radius:8px; font-size:0.75rem; font-weight:700; color:#64748b;">
-                                📍 Location: Barber Outlets / Hotel
-                            </div>
-                        </div>
-
                     </div>
-                </div>
 
-                <!-- Modal Bottom Action Bar -->
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.8rem; border-top:1px solid #e2e8f0; padding-top:1.2rem;">
-                    <button class="btn btn-outline" onclick="app.closeModal();">Close</button>
-                    <button class="btn-dashboard-action btn-book" onclick="app.closeModal(); app.bookOffer('${o.id}');" style="padding:0.75rem 2rem; font-size:0.95rem;">
-                        💳 Book This Package Now
-                    </button>
+                    <!-- Section 2: Submitted Requirement Match Details Card -->
+                    <div style="background:#ffffff; border-radius:22px; border:1.5px solid #dcfce7; padding:2rem 2.4rem; box-shadow:0 10px 30px rgba(4,120,87,0.04);">
+                        <h3 style="font-size:1.35rem; font-weight:900; color:#0f172a; margin:0 0 1.4rem; border-bottom:1.5px dashed #dcfce7; padding-bottom:0.8rem;">
+                            📋 Pilgrim Requirement vs Agent Offer Comparison
+                        </h3>
+                        
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+                            <div style="background:#f8fafc; border-radius:16px; border:1px solid #e2e8f0; padding:1.4rem;">
+                                <div style="font-size:0.78rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:0.8rem;">
+                                    YOUR SUBMITTED PREFERENCES
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:0.6rem; font-size:0.92rem; color:#0f172a; font-weight:700;">
+                                    <div>📅 Departure Date: <strong>${req.preferredDepartureDate} (${req.durationDays} Days)</strong></div>
+                                    <div>✈️ Departure City: <strong>${req.departureCity}</strong></div>
+                                    <div>🏨 Hotel Class: <strong>${req.hotelType}</strong></div>
+                                    <div>👥 Travelers: <strong>${req.travelersCount} Person(s)</strong> (Males: ${req.travelersBreakdown?.males ?? 1}, Females: ${req.travelersBreakdown?.females ?? 1}, Children: ${req.travelersBreakdown?.children ?? 0})</div>
+                                    <div>📍 Address: <strong>${req.fullAddress}</strong></div>
+                                </div>
+                            </div>
+
+                            <div style="background:#f0fdf4; border-radius:16px; border:1.5px solid #a7f3d0; padding:1.4rem;">
+                                <div style="font-size:0.78rem; font-weight:800; color:#047857; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:0.8rem;">
+                                    AGENT PROPOSED MATCH
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:0.6rem; font-size:0.92rem; color:#065f46; font-weight:700;">
+                                    <div>✓ Departure Date: <strong>100% Guaranteed Spot on ${req.preferredDepartureDate}</strong></div>
+                                    <div>✓ Flight Route: <strong>Direct Flight (SXR-JED-MED-SXR)</strong></div>
+                                    <div>✓ Makkah Hotel: <strong>${o.makkahHotel}</strong></div>
+                                    <div>✓ Madinah Hotel: <strong>${o.madinahHotel}</strong></div>
+                                    <div>✓ Special Offer Price: <strong style="color:#047857; font-size:1.1rem;">${this.formatCurrency(o.discountedPrice)} / Person</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Luxury Hotel Accommodation & Distances -->
+                    <div style="background:#ffffff; border-radius:22px; border:1.5px solid #dcfce7; padding:2rem 2.4rem; box-shadow:0 10px 30px rgba(4,120,87,0.04);">
+                        <h3 style="font-size:1.35rem; font-weight:900; color:#0f172a; margin:0 0 1.4rem; border-bottom:1.5px dashed #dcfce7; padding-bottom:0.8rem;">
+                            🏨 Hotel Accommodation Details &amp; Proximity to Haram
+                        </h3>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+                            <!-- Makkah Card -->
+                            <div style="background:#fef2f2; border-radius:16px; border:1.5px solid #fecaca; padding:1.6rem;">
+                                <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.6rem;">
+                                    <span style="background:#dc2626; color:#ffffff; font-size:0.75rem; font-weight:900; padding:0.25rem 0.7rem; border-radius:6px;">📍 MAKKAH AL-MUKARRAMAH</span>
+                                </div>
+                                <h4 style="font-size:1.3rem; font-weight:900; color:#991b1b; margin:0 0 0.4rem;">${this.escapeHtml(o.makkahHotel)}</h4>
+                                <div style="color:#b45309; font-weight:800; font-size:0.92rem; margin-bottom:0.8rem;">${this.escapeHtml(o.makkahDistance)}</div>
+                                <div style="display:flex; flex-direction:column; gap:0.4rem; font-size:0.88rem; color:#7f1d1d;">
+                                    <div>✓ 24/7 Shuttle Bus &amp; Direct Walking Access to Kaaba</div>
+                                    <div>✓ Full Board Indian Buffet Breakfast, Lunch &amp; Dinner</div>
+                                    <div>✓ Free High-Speed Wi-Fi &amp; Air Conditioning</div>
+                                </div>
+                            </div>
+
+                            <!-- Madinah Card -->
+                            <div style="background:#f0fdf4; border-radius:16px; border:1.5px solid #a7f3d0; padding:1.6rem;">
+                                <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.6rem;">
+                                    <span style="background:#166534; color:#ffffff; font-size:0.75rem; font-weight:900; padding:0.25rem 0.7rem; border-radius:6px;">📍 MADINAH AL-MUNAWWARAH</span>
+                                </div>
+                                <h4 style="font-size:1.3rem; font-weight:900; color:#166534; margin:0 0 0.4rem;">${this.escapeHtml(o.madinahHotel)}</h4>
+                                <div style="color:#b45309; font-weight:800; font-size:0.92rem; margin-bottom:0.8rem;">${this.escapeHtml(o.madinahDistance)}</div>
+                                <div style="display:flex; flex-direction:column; gap:0.4rem; font-size:0.88rem; color:#14532d;">
+                                    <div>✓ Walking Distance to Al-Masjid An-Nabawi Courtyard</div>
+                                    <div>✓ Guided Visit &amp; Assistance for Rawdah Permitting</div>
+                                    <div>✓ 24/7 Room Service &amp; Laundry Service</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: 4-Step Umrah Sacred Ritual & Booking Steps Timeline -->
+                    <div style="background:#ffffff; border-radius:22px; border:1.5px solid #dcfce7; padding:2rem 2.4rem; box-shadow:0 10px 30px rgba(4,120,87,0.04);">
+                        <h3 style="font-size:1.35rem; font-weight:900; color:#0f172a; margin:0 0 1.4rem; border-bottom:1.5px dashed #dcfce7; padding-bottom:0.8rem;">
+                            🕋 4-Step Umrah Sacred Ritual &amp; Booking Timeline
+                        </h3>
+
+                        <div class="ritual-timeline-grid">
+                            <!-- STEP 01 -->
+                            <div class="ritual-step-card">
+                                <div>
+                                    <span class="ritual-step-badge">STEP 01 &bull; ENTRANCE</span>
+                                    <h5 style="font-size:1.1rem; font-weight:900; color:#0f172a; margin:0 0 0.4rem;">Entering Ihram &amp; Niyyah</h5>
+                                    <p style="font-size:0.85rem; color:#475569; margin:0 0 0.8rem; line-height:1.5;">
+                                        Perform Ghusl, wear Ihram garments before crossing the Miqat, and declare your sacred intention.
+                                    </p>
+                                    <div style="font-size:0.84rem; color:#047857; display:flex; flex-direction:column; gap:0.35rem; font-weight:700;">
+                                        <div>✓ Ghusl &amp; Ihram attire at Miqat</div>
+                                        <div>✓ Niyyah: <em>"Labbayk Allahumma Umrah"</em></div>
+                                        <div>✓ Recite Talbiyah continuously</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top:1rem; background:#f8fafc; padding:0.45rem 0.7rem; border-radius:8px; font-size:0.78rem; font-weight:800; color:#64748b;">
+                                    📍 Location: Miqat Station
+                                </div>
+                            </div>
+
+                            <!-- STEP 02 -->
+                            <div class="ritual-step-card">
+                                <div>
+                                    <span class="ritual-step-badge">STEP 02 &bull; TAWAF</span>
+                                    <h5 style="font-size:1.1rem; font-weight:900; color:#0f172a; margin:0 0 0.4rem;">Tawaf around Kaaba</h5>
+                                    <p style="font-size:0.85rem; color:#475569; margin:0 0 0.8rem; line-height:1.5;">
+                                        Perform 7 counter-clockwise circuits around the Kaaba starting from Hajar Al-Aswad.
+                                    </p>
+                                    <div style="font-size:0.84rem; color:#047857; display:flex; flex-direction:column; gap:0.35rem; font-weight:700;">
+                                        <div>✓ 7 Complete Tawaf rounds</div>
+                                        <div>✓ 2 Raka'at behind Maqam Ibrahim</div>
+                                        <div>✓ Drink blessed Zamzam water</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top:1rem; background:#f8fafc; padding:0.45rem 0.7rem; border-radius:8px; font-size:0.78rem; font-weight:800; color:#64748b;">
+                                    📍 Location: Al-Masjid Al-Haram
+                                </div>
+                            </div>
+
+                            <!-- STEP 03 -->
+                            <div class="ritual-step-card">
+                                <div>
+                                    <span class="ritual-step-badge">STEP 03 &bull; SA'I</span>
+                                    <h5 style="font-size:1.1rem; font-weight:900; color:#0f172a; margin:0 0 0.4rem;">Sa'i (Safa &amp; Marwah)</h5>
+                                    <p style="font-size:0.85rem; color:#475569; margin:0 0 0.8rem; line-height:1.5;">
+                                        Walk 7 times between Mount Safa and Mount Marwah, honoring the devotion of Hazrat Hajar (RA).
+                                    </p>
+                                    <div style="font-size:0.84rem; color:#047857; display:flex; flex-direction:column; gap:0.35rem; font-weight:700;">
+                                        <div>✓ Start at Safa, end at Marwah</div>
+                                        <div>✓ 7 laps total with Du'as</div>
+                                        <div>✓ Light jogging for men between green lights</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top:1rem; background:#f8fafc; padding:0.45rem 0.7rem; border-radius:8px; font-size:0.78rem; font-weight:800; color:#64748b;">
+                                    📍 Location: Mas'a Corridor
+                                </div>
+                            </div>
+
+                            <!-- STEP 04 -->
+                            <div class="ritual-step-card">
+                                <div>
+                                    <span class="ritual-step-badge">STEP 04 &bull; COMPLETION</span>
+                                    <h5 style="font-size:1.1rem; font-weight:900; color:#0f172a; margin:0 0 0.4rem;">Halq or Taqseer</h5>
+                                    <p style="font-size:0.85rem; color:#475569; margin:0 0 0.8rem; line-height:1.5;">
+                                        Men shave or trim head hair, women trim a fingertip length. Your Umrah is now completed!
+                                    </p>
+                                    <div style="font-size:0.84rem; color:#047857; display:flex; flex-direction:column; gap:0.35rem; font-weight:700;">
+                                        <div>✓ Shave (Halq) or trim (Taqseer)</div>
+                                        <div>✓ Ihram restrictions lifted</div>
+                                        <div>✓ Umrah Mubarak! 🥳</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top:1rem; background:#f8fafc; padding:0.45rem 0.7rem; border-radius:8px; font-size:0.78rem; font-weight:800; color:#64748b;">
+                                    📍 Location: Barber Outlets / Hotel
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Action Bar -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border-radius:20px; border:1.5px solid #dcfce7; padding:1.6rem 2.2rem; box-shadow:0 10px 30px rgba(4,120,87,0.06);">
+                        <div>
+                            <div style="font-size:0.8rem; font-weight:800; color:#64748b; text-transform:uppercase;">TOTAL PACKAGE PAYABLE</div>
+                            <div style="font-size:1.6rem; font-weight:900; color:#047857;">${this.formatCurrency(o.discountedPrice)} <span style="font-size:0.85rem; color:#64748b; font-weight:600;">/ Person</span></div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:1.2rem;">
+                            <button type="button" class="btn btn-outline" onclick="app.closeModal();" style="padding:0.7rem 1.8rem; border-radius:10px; font-weight:700; cursor:pointer;">✕ Close Details</button>
+                            <button type="button" class="btn btn-primary" onclick="app.closeModal(); app.navigateToPayment('${o.id}');" style="padding:0.8rem 2.5rem; border-radius:10px; background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; font-size:1rem; font-weight:900; border:none; cursor:pointer; box-shadow:0 6px 20px rgba(4,120,87,0.35);">
+                                💳 Proceed to Book &amp; Pay Now
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
         `);
+    }
+
+    deleteRequirement(reqId) {
+        if (!confirm("Are you sure you want to delete this travel request? All agent offers for this request will also be removed.")) return;
+
+        let allReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        let allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+
+        allReqs = allReqs.filter(r => r.id !== reqId);
+        allOffers = allOffers.filter(o => o.requirementId !== reqId);
+
+        localStorage.setItem('umrah_requirements', JSON.stringify(allReqs));
+        localStorage.setItem('umrah_user_offers', JSON.stringify(allOffers));
+
+        this.showToast('Travel request deleted successfully.', 'info');
+
+        const main = document.getElementById('mainContainer');
+        if (main) main.innerHTML = this.renderDashboardPage();
+    }
+
+    navigateToPayment(offerId) {
+        this.state.activePaymentOfferId = offerId;
+        this.navigate('payment');
+    }
+
+    renderPaymentPage(offerId) {
+        const allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        const allReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+
+        const o = allOffers.find(item => item.id === offerId) || allOffers[0] || {
+            id: offerId || '#OFF-891',
+            agentName: 'AL-HARAM PREMIUM TRAVELS',
+            packageTitle: 'AL-HARAM PREMIUM TRAVELS - Exclusive 5-Star 18-Day Package',
+            category: 'Premium Service',
+            makkahHotel: 'Swissotel Makkah (250m from Kaaba)',
+            madinahHotel: 'Pullman Zamzam Madinah (150m from Nabawi)',
+            discountedPrice: 118750
+        };
+
+        const req = allReqs.find(r => r.id === o.requirementId) || allReqs[0] || {
+            preferredDepartureDate: '2026-08-13',
+            durationDays: 18,
+            departureCity: 'Srinagar',
+            travelersCount: 2,
+            fullAddress: 'House 45, Rajbagh Main Road, Srinagar, Jammu and Kashmir'
+        };
+
+        const totalPayable = (o.discountedPrice || 118750) * (req.travelersCount || 2);
+
+        return `
+            <div style="background:#f6fbf8; min-height:100vh; padding:6.5rem 0 5rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                <div class="main-container" style="max-width:1200px; margin:0 auto; padding:0 1.5rem;">
+                    
+                    <!-- Stepper Banner -->
+                    <div style="background:#ffffff; border-radius:20px; border:1.5px solid #dcfce7; padding:1.4rem 2rem; margin-bottom:2rem; box-shadow:0 8px 25px rgba(4,120,87,0.04); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                        <button class="btn btn-outline btn-sm" onclick="app.navigate('dashboard')" style="font-weight:700; border-radius:8px;">← Back to Dashboard</button>
+                        
+                        <div style="display:flex; align-items:center; gap:1.5rem; font-weight:800; font-size:0.9rem;">
+                            <span style="color:#047857; display:flex; align-items:center; gap:0.4rem;">
+                                <span style="width:26px; height:26px; background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:50%; display:flex; align-items:center; justify-content:center;">1</span>
+                                Review Order
+                            </span>
+                            <span style="color:#cbd5e1;">&rarr;</span>
+                            <span style="color:#047857; display:flex; align-items:center; gap:0.4rem;">
+                                <span style="width:26px; height:26px; background:#047857; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center;">2</span>
+                                Payment Method
+                            </span>
+                            <span style="color:#cbd5e1;">&rarr;</span>
+                            <span style="color:#94a3b8; display:flex; align-items:center; gap:0.4rem;">
+                                <span style="width:26px; height:26px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center;">3</span>
+                                Instant Voucher PDF
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Payment Layout Grid -->
+                    <div style="display:grid; grid-template-columns:1fr 1.2fr; gap:2rem;">
+                        
+                        <!-- Left Column: Order Breakdown & Review -->
+                        <div style="display:flex; flex-direction:column; gap:1.6rem;">
+                            
+                            <!-- Card A: Package & Agent Summary -->
+                            <div style="background:#ffffff; border-radius:20px; border:1.5px solid #dcfce7; padding:1.8rem; box-shadow:0 8px 25px rgba(4,120,87,0.04);">
+                                <div style="font-size:0.78rem; font-weight:900; color:#047857; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:0.8rem;">
+                                    SELECTED PACKAGE SUMMARY
+                                </div>
+                                <h3 style="font-size:1.3rem; font-weight:900; color:#0f172a; margin:0 0 0.4rem;">${this.escapeHtml(o.packageTitle)}</h3>
+                                <div style="font-size:0.88rem; color:#64748b;">Provided by: <strong style="color:#0f172a;">${this.escapeHtml(o.agentName)}</strong></div>
+                                
+                                <div style="margin-top:1.2rem; border-top:1px dashed #cbd5e1; padding-top:1rem; display:flex; flex-direction:column; gap:0.6rem; font-size:0.9rem; color:#334155;">
+                                    <div>📅 Departure Date: <strong>${req.preferredDepartureDate} (${req.durationDays} Days)</strong></div>
+                                    <div>✈️ Departure City: <strong>${req.departureCity}</strong></div>
+                                    <div>👥 Travelers: <strong>${req.travelersCount} Person(s)</strong></div>
+                                    <div>🏨 Makkah: <strong>${o.makkahHotel}</strong></div>
+                                    <div>🏨 Madinah: <strong>${o.madinahHotel}</strong></div>
+                                </div>
+                            </div>
+
+                            <!-- Card B: Itemized Pricing Breakdown -->
+                            <div style="background:#ffffff; border-radius:20px; border:1.5px solid #dcfce7; padding:1.8rem; box-shadow:0 8px 25px rgba(4,120,87,0.04);">
+                                <div style="font-size:0.78rem; font-weight:900; color:#047857; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:1rem;">
+                                    PRICING BREAKDOWN
+                                </div>
+
+                                <div style="display:flex; flex-direction:column; gap:0.8rem; font-size:0.92rem; color:#475569;">
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <span>Package Cost (${req.travelersCount} Travelers @ ${this.formatCurrency(o.discountedPrice)}/person):</span>
+                                        <span style="font-weight:700; color:#0f172a;">${this.formatCurrency(totalPayable)}</span>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <span>Saudi Umrah Visa &amp; Medical Insurance:</span>
+                                        <span style="font-weight:800; color:#047857;">INCLUDED (₹0)</span>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <span>GoExergy Reverse Bidding Fee:</span>
+                                        <span style="font-weight:800; color:#047857;">FREE (₹0)</span>
+                                    </div>
+                                    
+                                    <div style="border-top:1.5px dashed #cbd5e1; padding-top:1rem; margin-top:0.4rem; display:flex; justify-content:space-between; align-items:center;">
+                                        <span style="font-size:1.1rem; font-weight:900; color:#0f172a;">Total Payable Amount:</span>
+                                        <span style="font-size:1.5rem; font-weight:900; color:#047857;">${this.formatCurrency(totalPayable)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Column: Select Payment Method & Payment Action -->
+                        <div style="background:#ffffff; border-radius:20px; border:1.5px solid #dcfce7; padding:2rem; box-shadow:0 10px 30px rgba(4,120,87,0.06); display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <h3 style="font-size:1.4rem; font-weight:900; color:#0f172a; margin:0 0 0.4rem;">Select Payment Method</h3>
+                                <p style="font-size:0.86rem; color:#64748b; margin:0 0 1.5rem;">Choose your preferred secure payment mode to complete your Umrah booking.</p>
+
+                                <!-- Payment Tabs -->
+                                <div style="display:flex; gap:0.6rem; margin-bottom:1.5rem; border-bottom:1px solid #e2e8f0; padding-bottom:0.8rem; overflow-x:auto;">
+                                    <button type="button" onclick="app.switchPaymentTab('upi')" id="payTab-upi" style="padding:0.6rem 1.1rem; border-radius:8px; font-weight:800; font-size:0.88rem; background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; cursor:pointer;">📱 UPI / QR Code</button>
+                                    <button type="button" onclick="app.switchPaymentTab('card')" id="payTab-card" style="padding:0.6rem 1.1rem; border-radius:8px; font-weight:800; font-size:0.88rem; background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; cursor:pointer;">💳 Credit/Debit Card</button>
+                                    <button type="button" onclick="app.switchPaymentTab('net')" id="payTab-net" style="padding:0.6rem 1.1rem; border-radius:8px; font-weight:800; font-size:0.88rem; background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; cursor:pointer;">🏦 Net Banking</button>
+                                    <button type="button" onclick="app.switchPaymentTab('emi')" id="payTab-emi" style="padding:0.6rem 1.1rem; border-radius:8px; font-weight:800; font-size:0.88rem; background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; cursor:pointer;">💵 0% EMI</button>
+                                </div>
+
+                                <!-- Tab Content Areas -->
+                                <div id="payContentArea">
+                                    
+                                    <!-- UPI / QR Section (Default Active) -->
+                                    <div id="paySection-upi">
+                                        <div style="background:#f8fafc; border-radius:14px; padding:1.4rem; border:1px solid #e2e8f0; text-align:center; margin-bottom:1.2rem;">
+                                            <div style="font-size:0.85rem; font-weight:800; color:#047857; margin-bottom:0.8rem;">SCAN QR CODE WITH ANY UPI APP</div>
+                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=goexergy@upi&pn=GoExergy%20Umrah&am=${totalPayable}&cu=INR" alt="Payment QR Code" style="width:170px; height:170px; border-radius:12px; border:2px solid #a7f3d0; padding:6px; background:#ffffff; box-shadow:0 4px 15px rgba(0,0,0,0.06);" />
+                                            <div style="font-size:0.8rem; color:#64748b; margin-top:0.6rem;">Accepts Google Pay, PhonePe, Paytm, BHIM &amp; All Banking Apps</div>
+                                        </div>
+
+                                        <div style="display:flex; flex-direction:column; gap:0.4rem;">
+                                            <label style="font-size:0.8rem; font-weight:800; color:#475569;">OR ENTER UPI VPA / VIRTUAL ID</label>
+                                            <input type="text" id="upiVpaInput" placeholder="e.g. 9541692891@ybl or user@okaxis" value="user@okaxis" style="width:100%; padding:0.75rem; border-radius:10px; border:1.5px solid #cbd5e1; font-weight:700; font-size:0.95rem;" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Card Section -->
+                                    <div id="paySection-card" style="display:none; flex-direction:column; gap:1rem;">
+                                        <div style="display:flex; flex-direction:column; gap:0.4rem;">
+                                            <label style="font-size:0.8rem; font-weight:800; color:#475569;">CARDHOLDER NAME</label>
+                                            <input type="text" value="${this.escapeHtml(this.state.currentUser?.name || 'Animesh')}" style="width:100%; padding:0.7rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:700;" />
+                                        </div>
+                                        <div style="display:flex; flex-direction:column; gap:0.4rem;">
+                                            <label style="font-size:0.8rem; font-weight:800; color:#475569;">CARD NUMBER</label>
+                                            <input type="text" placeholder="4111 2222 3333 4444" value="4111 2222 3333 4444" style="width:100%; padding:0.7rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:700;" />
+                                        </div>
+                                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                                            <div style="display:flex; flex-direction:column; gap:0.4rem;">
+                                                <label style="font-size:0.8rem; font-weight:800; color:#475569;">EXPIRY DATE</label>
+                                                <input type="text" placeholder="MM/YY" value="08/28" style="width:100%; padding:0.7rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:700;" />
+                                            </div>
+                                            <div style="display:flex; flex-direction:column; gap:0.4rem;">
+                                                <label style="font-size:0.8rem; font-weight:800; color:#475569;">CVV</label>
+                                                <input type="password" placeholder="123" value="123" style="width:100%; padding:0.7rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:700;" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Net Banking Section -->
+                                    <div id="paySection-net" style="display:none; flex-direction:column; gap:1rem;">
+                                        <label style="font-size:0.8rem; font-weight:800; color:#475569;">SELECT YOUR BANK</label>
+                                        <select style="width:100%; padding:0.8rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:700;">
+                                            <option>State Bank of India (SBI)</option>
+                                            <option>HDFC Bank</option>
+                                            <option>ICICI Bank</option>
+                                            <option>Axis Bank</option>
+                                            <option>Punjab National Bank (PNB)</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- EMI Section -->
+                                    <div id="paySection-emi" style="display:none; flex-direction:column; gap:1rem;">
+                                        <label style="font-size:0.8rem; font-weight:800; color:#475569;">SELECT EMI DURATION (0% INTEREST)</label>
+                                        <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                                            <label style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:10px; padding:0.8rem 1rem; display:flex; justify-content:space-between; font-weight:700; cursor:pointer;">
+                                                <span><input type="radio" name="emiOpt" checked /> 3 Months EMI</span>
+                                                <strong style="color:#047857;">${this.formatCurrency(Math.round(totalPayable / 3))}/mo</strong>
+                                            </label>
+                                            <label style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:10px; padding:0.8rem 1rem; display:flex; justify-content:space-between; font-weight:700; cursor:pointer;">
+                                                <span><input type="radio" name="emiOpt" /> 6 Months EMI</span>
+                                                <strong style="color:#047857;">${this.formatCurrency(Math.round(totalPayable / 6))}/mo</strong>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Pay Trigger Action Button -->
+                            <div style="margin-top:2rem;">
+                                <div style="font-size:0.8rem; color:#64748b; text-align:center; margin-bottom:0.8rem;">🔒 Protected by 256-Bit SSL Encrypted Escrow Security</div>
+                                <button type="button" onclick="app.processPayment('${o.id}')" style="width:100%; padding:1rem; border-radius:12px; background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; font-size:1.15rem; font-weight:900; border:none; cursor:pointer; box-shadow:0 8px 25px rgba(4,120,87,0.35);">
+                                    💳 Pay ${this.formatCurrency(totalPayable)} &amp; Confirm Booking
+                                </button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        `;
+    }
+
+    switchPaymentTab(tabName) {
+        ['upi', 'card', 'net', 'emi'].forEach(t => {
+            const tabBtn = document.getElementById(`payTab-${t}`);
+            const sec = document.getElementById(`paySection-${t}`);
+            if (tabBtn) {
+                if (t === tabName) {
+                    tabBtn.style.background = '#ecfdf5';
+                    tabBtn.style.color = '#047857';
+                    tabBtn.style.border = '1px solid #a7f3d0';
+                } else {
+                    tabBtn.style.background = '#f8fafc';
+                    tabBtn.style.color = '#64748b';
+                    tabBtn.style.border = '1px solid #e2e8f0';
+                }
+            }
+            if (sec) sec.style.display = (t === tabName) ? (t === 'card' || t === 'net' || t === 'emi' ? 'flex' : 'block') : 'none';
+        });
+    }
+
+    async processPayment(offerId) {
+        this.showLoading('Processing secure 256-bit encrypted payment...');
+
+        setTimeout(() => {
+            let allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+            let offer = allOffers.find(o => o.id === offerId) || {
+                id: offerId || '#OFF-891',
+                packageTitle: 'Al Huda Group - Umrah Package',
+                discountedPrice: 118750
+            };
+
+            let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
+            const bookingRef = 'BK-' + Date.now().toString().slice(-6);
+            
+            const newBooking = {
+                id: bookingRef,
+                packageTitle: offer.packageTitle,
+                travelDate: '2026-08-13',
+                travelersCount: 2,
+                totalPrice: (offer.discountedPrice || 118750) * 2,
+                status: 'CONFIRMED',
+                agentName: offer.agentName || 'AL-HARAM PREMIUM TRAVELS',
+                makkahHotel: offer.makkahHotel || 'Swissotel Makkah',
+                madinahHotel: offer.madinahHotel || 'Pullman Zamzam Madinah'
+            };
+
+            allBookings.unshift(newBooking);
+            localStorage.setItem('umrah_my_bookings', JSON.stringify(allBookings));
+
+            this.hideLoading();
+
+            this.showSuccessModal(
+                '🎉 Booking Confirmed &amp; Payment Successful!',
+                `Congratulations! Your Umrah trip booking (Ref: <strong>${bookingRef}</strong>) is confirmed. Your instant PDF voucher invoice is ready to download.`
+            );
+
+            this.downloadInvoice(bookingRef);
+            this.navigate('dashboard');
+        }, 1500);
+    }
+
+    downloadInvoice(bookingId) {
+        let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
+        const b = allBookings.find(item => item.id === bookingId) || {
+            id: bookingId || 'BK-984120',
+            packageTitle: 'AL-HARAM PREMIUM TRAVELS - Exclusive 5-Star 18-Day Package',
+            travelDate: '2026-08-13',
+            travelersCount: 2,
+            totalPrice: 237500,
+            status: 'CONFIRMED',
+            agentName: 'AL-HARAM PREMIUM TRAVELS'
+        };
+
+        const printWin = window.open('', '_blank', 'width=900,height=1000');
+        if (!printWin) {
+            this.showToast('Please allow popups to download your invoice voucher', 'warning');
+            return;
+        }
+
+        printWin.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Umrah Ticket Voucher - ${b.id}</title>
+                <style>
+                    body { font-family: 'Inter', sans-serif; padding: 40px; color: #0f172a; background: #ffffff; }
+                    .voucher-box { border: 2px solid #047857; border-radius: 16px; padding: 30px; }
+                    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 20px; }
+                    .title { font-size: 24px; font-weight: 900; color: #047857; }
+                    .ref { font-size: 14px; font-weight: 800; background: #ecfdf5; color: #047857; padding: 6px 12px; border-radius: 6px; }
+                    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+                    .label { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; }
+                    .val { font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 4px; }
+                    .footer { text-align: center; margin-top: 30px; border-top: 1px dashed #cbd5e1; padding-top: 20px; font-size: 12px; color: #64748b; }
+                    .btn-print { background: #047857; color: white; border: none; padding: 12px 24px; font-size: 16px; font-weight: 800; border-radius: 8px; cursor: pointer; margin-top: 20px; }
+                    @media print { .btn-print { display: none; } }
+                </style>
+            </head>
+            <body>
+                <div class="voucher-box">
+                    <div class="header">
+                        <div>
+                            <div class="title">GoExergy &bull; Umrah Travel Voucher</div>
+                            <div style="font-size: 13px; color: #64748b; margin-top: 4px;">Saudi Ministry Approved Partner &bull; Official Confirmation</div>
+                        </div>
+                        <div class="ref">BOOKING REF: ${b.id}</div>
+                    </div>
+
+                    <div class="grid">
+                        <div>
+                            <div class="label">Pilgrim Lead Traveler</div>
+                            <div class="val">${this.escapeHtml(this.state.currentUser?.name || 'Animesh')} (${this.escapeHtml(this.state.currentUser?.email || 'rajuranjankbkj@gmail.com')})</div>
+                        </div>
+                        <div>
+                            <div class="label">Verified Travel Provider</div>
+                            <div class="val">${this.escapeHtml(b.agentName || 'AL-HARAM PREMIUM TRAVELS')}</div>
+                        </div>
+                        <div>
+                            <div class="label">Package &amp; Departure Date</div>
+                            <div class="val">${this.escapeHtml(b.packageTitle)} (📅 ${b.travelDate})</div>
+                        </div>
+                        <div>
+                            <div class="label">Total Travelers &amp; Amount Paid</div>
+                            <div class="val">👥 ${b.travelersCount} Person(s) &bull; <strong style="color: #047857;">${this.formatCurrency(b.totalPrice)}</strong> (PAID)</div>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+                        <div class="label">HOTEL VOUCHER DETAILS</div>
+                        <div style="font-weight: 700; font-size: 14px; margin-top: 6px;">📍 Makkah: Swissotel Makkah (250m from Kaaba)</div>
+                        <div style="font-weight: 700; font-size: 14px; margin-top: 4px;">📍 Madinah: Pullman Zamzam Madinah (150m from Nabawi)</div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 20px;">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=GOEXERGY-TICKET-${b.id}" alt="QR" style="border: 1px solid #cbd5e1; padding: 4px; border-radius: 8px;" />
+                        <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Scan at Airport Counter &amp; Hotel Reception</div>
+                    </div>
+
+                    <div class="footer">
+                        <div>Thank you for booking your Sacred Journey through GoExergy.</div>
+                        <button class="btn-print" onclick="window.print()">🖨️ Print / Save PDF Invoice</button>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `);
+
+        printWin.document.close();
     }
 
     deleteRequirement(reqId) {
