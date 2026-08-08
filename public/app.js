@@ -991,7 +991,7 @@ class App {
             </section>
 
             <!-- Live Request Submission Container -->
-            <div id="requestFormAnchor" style="max-width:950px; margin:3.5rem auto; padding:0 1.5rem;">
+            <div id="requestFormAnchor" style="max-width:1140px; margin:3.5rem auto; padding:0 1.5rem;">
                 ${!this.state.currentUser
                 ? `
                         <div class="sacred-journey-card-modern">
@@ -1244,7 +1244,7 @@ class App {
 
     renderCustomRequirementForm() {
         return `
-            <div style="max-width:820px; margin:2.5rem auto; padding:0 1rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            <div style="max-width:100%; margin:0 auto; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                 <!-- Single Unified Requirement Card -->
                 <div style="background:#ffffff; border-radius:24px; border:1.5px solid #e2e8f0; box-shadow:0 12px 35px rgba(0,0,0,0.04); padding:2.5rem 2.2rem;">
 
