@@ -10,9 +10,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from /public directory
+// Serve static files from /public and /client directories
 const publicDir = path.join(__dirname, '../public');
+const clientDir = path.join(__dirname, '../client');
 app.use(express.static(publicDir));
+app.use(express.static(clientDir));
 
 const MONGODB_URI = process.env.MONGODB_URI || process.env.SPRING_DATA_MONGODB_URI || 'mongodb+srv://rajuranjanxbkj_db_user:mSORiUdT4m8ey11k@cluster0.bwdhkat.mongodb.net/umrah_db?retryWrites=true&w=majority';
 
