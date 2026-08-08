@@ -2314,7 +2314,7 @@ class App {
                                                 <td><strong style="color:#047857; font-size:1.05rem;">${this.formatCurrency(b.totalPrice || 118750)}</strong></td>
                                                 <td><span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.78rem; font-weight:800; padding:0.3rem 0.75rem; border-radius:99px;">CONFIRMED &amp; PAID</span></td>
                                                 <td>
-                                                    <a href="${API_BASE}/invoice/${b.id}" target="_blank" class="btn btn-outline btn-sm" style="font-weight:700; border-radius:8px;">📄 Download Voucher</a>
+                                                    <button type="button" onclick="app.downloadInvoice('${b.id || 'BK-984120'}')" class="btn btn-outline btn-sm" style="font-weight:800; border-radius:8px; background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; cursor:pointer;">📄 Print / Save PDF Voucher</button>
                                                 </td>
                                             </tr>
                                         `).join('')}
@@ -2575,14 +2575,14 @@ class App {
                     </div>
 
                     <!-- Bottom Action Bar -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border-radius:20px; border:1.5px solid #dcfce7; padding:1.6rem 2.2rem; box-shadow:0 10px 30px rgba(4,120,87,0.06);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border-radius:20px; border:1.5px solid #dcfce7; padding:1.8rem 2.5rem; box-shadow:0 10px 30px rgba(4,120,87,0.06);">
                         <div>
-                            <div style="font-size:0.8rem; font-weight:800; color:#64748b; text-transform:uppercase;">TOTAL PACKAGE PAYABLE</div>
-                            <div style="font-size:1.6rem; font-weight:900; color:#047857;">${this.formatCurrency(o.discountedPrice)} <span style="font-size:0.85rem; color:#64748b; font-weight:600;">/ Person</span></div>
+                            <div style="font-size:0.85rem; font-weight:900; color:#64748b; text-transform:uppercase; letter-spacing:0.8px;">TOTAL PACKAGE PAYABLE</div>
+                            <div style="font-size:1.8rem; font-weight:900; color:#047857;">${this.formatCurrency(o.discountedPrice)} <span style="font-size:0.95rem; color:#64748b; font-weight:600;">/ Person</span></div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:1.2rem;">
-                            <button type="button" class="btn btn-outline" onclick="app.closeModal();" style="padding:0.7rem 1.8rem; border-radius:10px; font-weight:700; cursor:pointer;">✕ Close Details</button>
-                            <button type="button" class="btn btn-primary" onclick="app.closeModal(); app.navigateToPayment('${o.id}');" style="padding:0.8rem 2.5rem; border-radius:10px; background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; font-size:1rem; font-weight:900; border:none; cursor:pointer; box-shadow:0 6px 20px rgba(4,120,87,0.35);">
+                        <div style="display:flex; align-items:center; gap:1.4rem;">
+                            <button type="button" class="btn btn-outline" onclick="app.closeModal();" style="padding:0.85rem 2.2rem; border-radius:12px; font-weight:800; font-size:1rem; cursor:pointer;">✕ Close Details</button>
+                            <button type="button" class="btn btn-primary" onclick="app.closeModal(); app.navigateToPayment('${o.id}');" style="padding:0.95rem 2.8rem; border-radius:12px; background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; font-size:1.1rem; font-weight:900; border:none; cursor:pointer; box-shadow:0 6px 20px rgba(4,120,87,0.35);">
                                 💳 Proceed to Book &amp; Pay Now
                             </button>
                         </div>
@@ -2591,7 +2591,7 @@ class App {
                 </div>
 
             </div>
-        `);
+        `, true);
     }
 
     deleteRequirement(reqId) {
@@ -3973,12 +3973,25 @@ class App {
         if (modal) {
             if (isFullScreen) {
                 modal.classList.add('fullscreen');
+                modal.style.maxWidth = '98vw';
+                modal.style.width = '98vw';
+                modal.style.maxHeight = '95vh';
+                modal.style.height = '95vh';
+                modal.style.borderRadius = '24px';
+                modal.style.overflowY = 'auto';
+                modal.style.padding = '0';
             } else {
                 modal.classList.remove('fullscreen');
+                modal.removeAttribute('style');
             }
         }
+        const backdrop = document.getElementById('modalBackdrop');
+        if (backdrop) {
+            backdrop.style.zIndex = '99999';
+            backdrop.classList.add('active');
+        }
         document.getElementById('modalContent').innerHTML = contentHtml;
-        document.getElementById('modalBackdrop').classList.add('active');
+        document.body.style.overflow = isFullScreen ? 'hidden' : 'auto';
     }
 
     closeModal() {
@@ -3987,7 +4000,12 @@ class App {
             modal.removeAttribute('style');
             modal.classList.remove('fullscreen');
         }
-        document.getElementById('modalBackdrop').classList.remove('active');
+        const backdrop = document.getElementById('modalBackdrop');
+        if (backdrop) {
+            backdrop.classList.remove('active');
+            backdrop.removeAttribute('style');
+        }
+        document.body.style.overflow = 'auto';
     }
 
     openLoginModal() {
