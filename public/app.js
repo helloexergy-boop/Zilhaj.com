@@ -3440,16 +3440,16 @@ class App {
             alertBox.style.padding = '0.55rem 0.8rem';
             alertBox.style.borderRadius = '8px';
             alertBox.style.marginTop = '0.4rem';
-            alertBox.innerHTML = `📩 Verification code ready! Your 6-digit OTP code is: <b style="font-size: 1.05rem; letter-spacing: 2px; color: #15803d;">${otpCodeReceived}</b>`;
+            alertBox.innerHTML = `📩 Verification code sent! Please check your email inbox (<b>${target}</b>) for your 6-digit OTP code.`;
         }
 
         const otpInput = document.getElementById('authOtpCode');
         if (otpInput) {
-            otpInput.value = otpCodeReceived;
+            otpInput.value = '';
             otpInput.focus();
         }
 
-        this.showToast(`📩 Verification code sent: ${otpCodeReceived}`, 'success');
+        this.showToast(`📩 Verification code sent to ${target}`, 'success');
     }
 
     async verifySignupOtp() {

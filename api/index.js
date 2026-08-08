@@ -377,6 +377,7 @@ app.post('/api/auth/register', async (req, res) => {
                             </div>
                         `
                     });
+                    console.log(`[AUTH] OTP email sent successfully to ${cleanEmail}`);
                 } catch (err) {
                     console.warn('[AUTH] OTP email error:', err.message);
                 }
@@ -644,11 +645,21 @@ app.post('/api/auth/reset-password', async (req, res) => {
 // Nodemailer Transporter Setup for Gmail App Password
 function getMailTransporter() {
     const gmailUser = process.env.GMAIL_USER || process.env.SMTP_USER || 'hello.exergy@gmail.com';
-    const gmailPass = process.env.GMAIL_PASS || process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || 'gjok vyma ilqs etfl';
+    const rawPass = process.env.GMAIL_PASS || process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || 'gjok vyma ilqs etfl';
+    const gmailPass = rawPass ? rawPass.replace(/\s+/g, '') : '';
+
     if (gmailPass) {
         return nodemailer.createTransport({
-            service: 'gmail',
-            auth: { user: gmailUser, pass: gmailPass }
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false, // TLS STARTTLS on port 587
+            auth: {
+                user: gmailUser,
+                pass: gmailPass
+            },
+            tls: {
+                rejectUnauthorized: false
+            }
         });
     }
     return null;
