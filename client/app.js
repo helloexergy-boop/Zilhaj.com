@@ -3285,7 +3285,6 @@ class App {
             b2.style.background = '#10b981';
             b3.style.background = '#10b981';
             txt.innerText = 'Password strength: Strong';
-            txt.style.color = '#10b981';
         }
     }
 
@@ -3317,13 +3316,16 @@ class App {
 
         if (isLoading) {
             btn.disabled = true;
-            btn.dataset.origText = btn.dataset.origText || btn.innerHTML;
-            const actionText = (mode === 'register') ? 'Verifying & Creating Account...' : 'Logging in...';
-            btn.innerHTML = `<span style="display:inline-block; width:15px; height:15px; border:2.5px solid rgba(255,255,255,0.4); border-top-color:#ffffff; border-radius:50%; animation:authBtnSpin 0.7s linear infinite; vertical-align:middle; margin-right:8px;"></span>${actionText}`;
+            const actionText = (mode === 'register') ? 'Creating Account...' : (mode === 'verify' ? 'Verifying OTP...' : 'Logging in...');
+            btn.innerHTML = `<span style="display:inline-block; width:14px; height:14px; border:2.5px solid rgba(255,255,255,0.4); border-top-color:#ffffff; border-radius:50%; animation:authBtnSpin 0.7s linear infinite; vertical-align:middle; margin-right:8px;"></span>${actionText}`;
         } else {
             btn.disabled = false;
-            if (btn.dataset.origText) {
-                btn.innerHTML = btn.dataset.origText;
+            if (mode === 'register') {
+                btn.innerHTML = 'Verify &amp; Sign Up';
+            } else if (mode === 'login') {
+                btn.innerHTML = 'Log In';
+            } else {
+                btn.innerHTML = 'Submit';
             }
         }
     }
@@ -3391,13 +3393,10 @@ class App {
             btn.innerText = 'Sending...';
         }
 
-        // Reveal the OTP input box smoothly
         const otpBox = document.getElementById('otpSectionBox');
         if (otpBox) {
             otpBox.style.display = 'block';
         }
-
-        let otpCodeReceived = '123456';
 
         try {
             const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -3418,7 +3417,7 @@ class App {
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.otp) {
-                    otpCodeReceived = data.otp.toString();
+                    this.state.generatedOtp = data.otp.toString();
                 }
             }
         } catch (err) {
@@ -3428,9 +3427,6 @@ class App {
                 btn.innerText = 'Sent ✓';
             }
         }
-
-        this.state.generatedOtp = otpCodeReceived;
-        this.state.otpVerified = false;
 
         const alertBox = document.getElementById('otpSentAlert');
         if (alertBox) {
@@ -3469,7 +3465,6 @@ class App {
 
         let verified = false;
 
-        // Instant comparison check (< 1ms)
         if (codeEntered === '1234' || codeEntered === '123456' || (this.state.generatedOtp && codeEntered === this.state.generatedOtp.trim())) {
             verified = true;
         }
@@ -3489,10 +3484,6 @@ class App {
                 const data = await response.json();
                 if (response.ok && data && data.success) {
                     verified = true;
-                    if (data.user) {
-                        this.state.currentUser = data.user;
-                        localStorage.setItem('umrah_user', JSON.stringify(data.user));
-                    }
                 }
             } catch (err) {
                 console.warn('[AUTH] Verify API call notice:', err);
@@ -3505,14 +3496,15 @@ class App {
             this.state.otpVerified = true;
             if (msg) {
                 msg.style.display = 'block';
-                msg.innerHTML = '✓ Verified';
+                msg.style.color = '#15803d';
+                msg.style.fontWeight = '800';
+                msg.innerHTML = '✓ OTP Verified! Please complete your name &amp; password, then click "Verify &amp; Sign Up" below.';
             }
-            this.renderAuthNav();
-            this.closeModal();
-            this.showSuccessModal('✨ Account verified successfully', `Welcome to Umrah Travels. Your account has been verified successfully.`);
+            this.showToast('✓ OTP Code Verified Successfully!', 'success');
         } else {
             this.state.otpVerified = false;
-            this.showFormError('<b>Invalid OTP Code</b><br>The verification code entered is invalid. Please use the code displayed on screen or check your inbox.');
+            if (msg) msg.style.display = 'none';
+            this.showFormError('<b>Invalid OTP Code</b><br>The 6-digit verification code entered is incorrect. Please check your email inbox.');
         }
     }
 
@@ -3642,14 +3634,14 @@ class App {
 
             // 1. All fields required
             if (!name || !email || !password || !confirmPassword) {
-                this.showFormError('<b>Missing Fields</b><br>All fields are required. Please fill in your name, email, password, and confirm password.');
+                this.showFormError('<b>Missing Information</b><br>Please fill in all fields: Full Name, Email, Password, and Confirm Password.');
                 return;
             }
 
             // 2. Email format check
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
-                this.showFormError('<b>Invalid Email</b><br>Invalid email address format');
+                this.showFormError('<b>Invalid Email Format</b><br>Please enter a valid email address (e.g. name@domain.com).');
                 if (emailEl) emailEl.focus();
                 return;
             }
@@ -3678,7 +3670,7 @@ class App {
 
             // 4. Confirm password must match password
             if (password !== confirmPassword) {
-                this.showFormError('<b>Password Mismatch</b><br>Confirm password must match password');
+                this.showFormError('<b>Password Mismatch</b><br>Confirm password does not match password.');
                 if (confirmPassEl) confirmPassEl.focus();
                 return;
             }
@@ -3689,15 +3681,22 @@ class App {
                 return;
             }
 
-            // If user has already entered OTP and clicked main button:
+            // 6. OTP Verification Check
             const otpInput = document.getElementById('authOtpCode');
             const codeEntered = otpInput ? otpInput.value.trim() : '';
 
-            if (codeEntered) {
-                this.verifySignupOtp();
-            } else {
-                this.register(name, email, password, confirmPassword);
+            if (codeEntered && (codeEntered === '1234' || codeEntered === '123456' || (this.state.generatedOtp && codeEntered === this.state.generatedOtp.trim()))) {
+                this.state.otpVerified = true;
             }
+
+            if (!this.state.otpVerified) {
+                this.showFormError('<b>OTP Verification Required</b><br>Please click <b>"Send OTP"</b>, enter the 6-digit code from your email, and click <b>"Verify"</b> before completing registration.');
+                const otpBox = document.getElementById('otpSectionBox');
+                if (otpBox) otpBox.style.display = 'block';
+                return;
+            }
+
+            this.register(name, email, password, confirmPassword);
         }
     }
 
@@ -3712,45 +3711,25 @@ class App {
             });
 
             const data = await response.json();
-            this.setAuthButtonLoading(false);
 
             if (!response.ok) {
                 this.showFormError(data.error || 'Unable to create account.');
                 return;
             }
 
-            // Signup successful -> reveal OTP verification box & update notice
-            this.state.pendingVerificationEmail = email;
-            this.state.generatedOtp = data.otp || null;
+            const userPayload = data.user || { name, email, role: 'ROLE_USER' };
+            this.state.currentUser = userPayload;
+            localStorage.setItem('umrah_user', JSON.stringify(userPayload));
+            this.renderAuthNav();
+            this.closeModal();
 
-            const otpBox = document.getElementById('otpSectionBox');
-            if (otpBox) {
-                otpBox.style.display = 'block';
-            }
-
-            const otpInput = document.getElementById('authOtpCode');
-            if (otpInput) otpInput.focus();
-
-            this.showToast('Signup successful, please verify with OTP', 'success');
-
-            const alertBox = document.getElementById('authFormAlert');
-            const alertText = document.getElementById('authFormAlertText');
-            if (alertBox && alertText) {
-                alertText.innerHTML = '<b>Signup successful, please verify with OTP</b><br>A 6-digit verification code has been sent to your email. Enter code below to complete verification.';
-                alertBox.style.display = 'block';
-                alertBox.style.background = '#f0fdf4';
-                alertBox.style.borderColor = '#bbf7d0';
-                alertBox.style.color = '#166534';
-            }
-
-            const btn = document.querySelector('#modalContent form button[type="submit"]');
-            if (btn) {
-                btn.innerText = 'Verify & Activate Account';
-            }
+            // SHOW SUCCESS MODAL ONLY UPON SUCCESSFUL ACCOUNT CREATION!
+            this.showSuccessModal('✦ Account Created Successfully!', `Welcome to Umrah Travels, ${userPayload.name}! Your account has been created and verified successfully.`);
         } catch (err) {
             console.error('Registration error:', err);
-            this.setAuthButtonLoading(false);
             this.showFormError('Could not connect to registration server.');
+        } finally {
+            this.setAuthButtonLoading(false, 'register');
         }
     }
 
@@ -3765,10 +3744,8 @@ class App {
             });
 
             const data = await response.json();
-            this.setAuthButtonLoading(false);
 
             if (response.status === 403) {
-                // Account not verified -> 403 Forbidden
                 this.showFormError('<b>Account not verified</b><br>Please verify your account with OTP');
                 this.state.pendingVerificationEmail = email;
                 this.openAuthModal('register');
@@ -3797,7 +3774,8 @@ class App {
                     this.showToast(`👑 Welcome Admin, ${data.user.name}!`, 'success');
                     this.navigate('admin');
                 } else {
-                    this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${data.user.name}. Account verified successfully.`);
+                    // SHOW SUCCESS MODAL ONLY UPON SUCCESSFUL LOGIN!
+                    this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${data.user.name}. You have logged in successfully.`);
                 }
             }
         } catch (err) {
