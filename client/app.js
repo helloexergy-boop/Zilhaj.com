@@ -805,10 +805,12 @@ class App {
 
         const mediaList = [
             { type: 'image', url: 'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg' },
+            { type: 'video', url: 'hero-video-3.mp4', poster: 'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg' },
             { type: 'image', url: 'https://images.pexels.com/photos/38498727/pexels-photo-38498727.jpeg' },
+            { type: 'video', url: 'hero-video-2.mp4', poster: 'https://images.pexels.com/photos/38498727/pexels-photo-38498727.jpeg' },
             { type: 'image', url: 'https://images.pexels.com/photos/28209449/pexels-photo-28209449.jpeg' },
             { type: 'image', url: 'https://images.pexels.com/photos/26436662/pexels-photo-26436662.jpeg' },
-            { type: 'video', url: 'hero-bg.mp4', poster: 'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg' }
+            { type: 'video', url: 'hero-video-4.mp4', poster: 'https://images.pexels.com/photos/26436662/pexels-photo-26436662.jpeg' }
         ];
 
         let index = 0;
@@ -827,11 +829,15 @@ class App {
                 targetHidden.style.opacity = '0';
                 if (videoBg) videoBg.style.opacity = '0';
             } else if (current.type === 'video') {
-                targetActive.style.backgroundImage = `url('${current.poster}')`;
+                targetActive.style.backgroundImage = `url('${current.poster || ''}')`;
                 targetActive.style.opacity = '1';
                 targetHidden.style.opacity = '0';
                 if (videoBg) {
-                    videoBg.style.opacity = '0.55';
+                    if (videoBg.getAttribute('src') !== current.url) {
+                        videoBg.src = current.url;
+                        videoBg.load();
+                    }
+                    videoBg.style.opacity = '0.65';
                     videoBg.play().catch(() => {});
                 }
             }
