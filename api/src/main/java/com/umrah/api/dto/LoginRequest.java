@@ -8,9 +8,8 @@ import jakarta.validation.constraints.NotBlank;
  */
 public class LoginRequest {
 
-    // User email credential (must not be blank and must follow valid email format)
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    // User email or phone number credential
+    @NotBlank(message = "Email or phone number is required")
     private String email;
 
     // User raw password string (must not be blank)

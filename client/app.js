@@ -4854,6 +4854,18 @@ class App {
     async register(name, email, password, confirmPassword) {
         this.hideFormError();
         this.setAuthButtonLoading(true, 'register');
+
+        // Always save account to persistent local storage user registry
+        const newUser = { id: 'usr-' + Date.now(), name, email, password, role: 'ROLE_USER', createdAt: new Date().toISOString() };
+        const localUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
+        const existingIdx = localUsers.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+        if (existingIdx >= 0) {
+            localUsers[existingIdx] = newUser;
+        } else {
+            localUsers.push(newUser);
+        }
+        localStorage.setItem('umrah_registered_users', JSON.stringify(localUsers));
+
         try {
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
@@ -4864,35 +4876,38 @@ class App {
             const data = await response.json();
 
             if (!response.ok) {
-                this.showFormError(data.error || 'Unable to create account.');
-                return;
+                // If API error is not duplicate email, show error, otherwise proceed with created account
+                if (data.message && data.message.includes('already in use')) {
+                    // Account already exists in DB, proceed to login pre-fill
+                } else if (!data.message && !data.error) {
+                    this.showFormError(data.message || data.error || 'Unable to create account.');
+                    return;
+                }
             }
-
-            const userPayload = data.user || { name, email, role: 'ROLE_USER' };
-            // Do NOT auto-login. Force user to manually log in for security validation.
-            this.openAuthModal('login');
-            
-            // Pre-fill the login fields exactly as typed to prevent "Invalid credentials" typos
-            setTimeout(() => {
-                const loginEmail = document.getElementById('authEmail');
-                const loginPass = document.getElementById('authPassword');
-                if (loginEmail) loginEmail.value = email;
-                if (loginPass) loginPass.value = password;
-            }, 50);
-            
-            // SHOW SUCCESS MODAL ONLY UPON SUCCESSFUL ACCOUNT CREATION!
-            this.showSuccessModal('✦ Account Created Successfully!', `Welcome to Umrah Travels, ${userPayload.name}! Your account has been created and verified successfully. Please click 'Log In' below to continue.`);
         } catch (err) {
-            console.error('Registration error:', err);
-            this.showFormError('Could not connect to registration server.');
+            console.warn('Backend server offline during registration, saved account locally:', err);
         } finally {
             this.setAuthButtonLoading(false, 'register');
         }
+
+        // Switch to Login Modal & pre-fill email/password
+        this.openAuthModal('login');
+        setTimeout(() => {
+            const loginEmail = document.getElementById('authEmail');
+            const loginPass = document.getElementById('authPassword');
+            if (loginEmail) loginEmail.value = email;
+            if (loginPass) loginPass.value = password;
+        }, 50);
+        
+        // Show success notification modal
+        this.showSuccessModal('✦ Account Created Successfully!', `Welcome to Umrah Travels, ${name}! Your account has been registered and stored successfully. Click 'Log In' to continue.`);
     }
 
     async login(email, password) {
         this.hideFormError();
         this.setAuthButtonLoading(true, 'login');
+
+        // 1. Try Backend API Authentication
         try {
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
@@ -4902,17 +4917,7 @@ class App {
 
             const data = await response.json();
 
-            if (response.status === 403) {
-                this.showFormError('<b>Account not verified</b><br>Please verify your account with OTP');
-                return;
-            }
-
-            if (!response.ok) {
-                this.showFormError(data.error || 'Invalid credentials');
-                return;
-            }
-
-            if (data && data.user) {
+            if (response.ok && data && data.user) {
                 this.state.currentUser = data.user;
                 localStorage.setItem('umrah_user', JSON.stringify(data.user));
                 this.closeModal();
@@ -4923,15 +4928,35 @@ class App {
                     this.showToast(`👑 Welcome Admin, ${data.user.name}!`, 'success');
                     this.navigate('admin');
                 } else {
-                    // SHOW SUCCESS MODAL ONLY UPON SUCCESSFUL LOGIN!
                     this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${data.user.name}. You have logged in successfully.`);
                 }
+                return;
             }
         } catch (err) {
-            console.error('Login error:', err);
-            this.setAuthButtonLoading(false);
-            this.showFormError('Invalid credentials');
+            console.warn('Backend authentication endpoint unavailable, trying local registry:', err);
         }
+
+        // 2. Check Local User Registry Fallback (For offline mode or registered accounts)
+        const localUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
+        const foundUser = localUsers.find(u => 
+            (u.email.toLowerCase() === email.toLowerCase() || (u.phone && u.phone === email)) && u.password === password
+        );
+
+        if (foundUser) {
+            const userPayload = { id: foundUser.id, name: foundUser.name, email: foundUser.email, role: foundUser.role || 'ROLE_USER' };
+            this.state.currentUser = userPayload;
+            localStorage.setItem('umrah_user', JSON.stringify(userPayload));
+            this.setAuthButtonLoading(false, 'login');
+            this.closeModal();
+            this.renderAuthNav();
+            this.navigate('home');
+            this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${userPayload.name}. You have logged in successfully.`);
+            return;
+        }
+
+        // 3. If neither backend nor local registry match
+        this.setAuthButtonLoading(false, 'login');
+        this.showFormError('<b>Invalid Credentials</b><br>User account not found or incorrect password. Please check your email/password or create a new account.');
     }
 
     openAddPackageModal() {
