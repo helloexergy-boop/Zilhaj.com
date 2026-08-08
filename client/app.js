@@ -110,9 +110,17 @@ class App {
 
         document.addEventListener('click', (e) => {
             const box = document.getElementById('chatbotBox');
-            const toggleBtn = document.querySelector('.chatbot-circle-btn');
-            if (box && box.style.display === 'flex') {
-                if (!box.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
+            const wrapper = document.getElementById('chatbotWrapper');
+            const aiButtons = document.querySelectorAll('.btn-ai-trigger, [onclick*="toggleChatbot"], [onclick*="openChatbot"]');
+            
+            if (box && (box.style.display === 'flex' || window.getComputedStyle(box).display === 'flex')) {
+                let clickedInsideTrigger = false;
+                if (wrapper && wrapper.contains(e.target)) clickedInsideTrigger = true;
+                aiButtons.forEach(btn => {
+                    if (btn && btn.contains(e.target)) clickedInsideTrigger = true;
+                });
+
+                if (!box.contains(e.target) && !clickedInsideTrigger) {
                     box.style.display = 'none';
                 }
             }
@@ -4439,14 +4447,14 @@ class App {
                     </div>
                 `}
 
-                <!-- Bottom AI Helper Banner -->
-                <div style="margin-top: 3.5rem; background: linear-gradient(135deg, #022c22 0%, #064e3b 100%); border-radius: 20px; padding: 2.2rem 2.4rem; color: #ffffff !important; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; box-shadow: 0 12px 30px rgba(2, 44, 34, 0.25); border: 1px solid #059669;">
+                <!-- Bottom AI Helper Banner (Fade Green Gradient) -->
+                <div style="margin-top: 3.5rem; background: linear-gradient(135deg, #059669 0%, #10b981 50%, #047857 100%); border-radius: 20px; padding: 2.2rem 2.4rem; color: #ffffff !important; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; box-shadow: 0 12px 30px rgba(16, 185, 129, 0.28); border: 1px solid #34d399;">
                     <div style="max-width: 680px;">
-                        <div style="font-size: 0.85rem; font-weight: 800; color: #34d399 !important; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.4rem;">🤖 24/7 PILGRIMAGE AI ASSISTANT</div>
+                        <div style="font-size: 0.85rem; font-weight: 800; color: #a7f3d0 !important; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.4rem;">🤖 24/7 PILGRIMAGE AI ASSISTANT</div>
                         <h3 style="font-size: 1.45rem; font-weight: 800; color: #ffffff !important; margin-bottom: 0.5rem; letter-spacing: -0.01em;">Have Questions About Nusuk Permits or Rituals?</h3>
-                        <p style="font-size: 0.95rem; color: #f0fdf4 !important; margin: 0; line-height: 1.6; font-weight: 500;">Our instant AI assistant can guide you on Ihram rules, Miqat locations, Nusuk permit slots, and flight package deals.</p>
+                        <p style="font-size: 0.95rem; color: #ecfdf5 !important; margin: 0; line-height: 1.6; font-weight: 500;">Our instant AI assistant can guide you on Ihram rules, Miqat locations, Nusuk permit slots, and flight package deals.</p>
                     </div>
-                    <button class="btn" style="background: #fbbf24; color: #0f172a !important; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 1.8rem; border-radius: 12px; border: none; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 18px rgba(251, 191, 36, 0.4); transition: transform 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" onclick="app.toggleChatbot()">
+                    <button class="btn btn-ai-trigger" style="background: #fbbf24; color: #0f172a !important; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 1.8rem; border-radius: 12px; border: none; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 18px rgba(251, 191, 36, 0.4); transition: transform 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" onclick="app.openChatbot(event)">
                         💬 Ask AI Assistant Now
                     </button>
                 </div>
@@ -4697,7 +4705,17 @@ class App {
         if (menu) menu.classList.toggle('show-mobile');
     }
 
-    toggleChatbot() {
+    openChatbot(e) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        const box = document.getElementById('chatbotBox');
+        if (!box) return;
+        box.style.display = 'flex';
+        const input = document.getElementById('chatbotInput');
+        if (input) input.focus();
+    }
+
+    toggleChatbot(e) {
+        if (e && e.stopPropagation) e.stopPropagation();
         const box = document.getElementById('chatbotBox');
         if (!box) return;
         const currentDisplay = window.getComputedStyle(box).display;
