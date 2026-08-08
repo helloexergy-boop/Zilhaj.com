@@ -3008,220 +3008,248 @@ class App {
         this.state.otpVerified = false;
         this.state.generatedOtp = null;
 
-        const defaultEmail = '';
-        const defaultPass = '';
+        const modal = document.getElementById('modalCard');
+        if (modal) {
+            modal.style.maxWidth = '980px';
+            modal.style.padding = '0';
+            modal.style.borderRadius = '24px';
+            modal.style.overflow = 'hidden';
+            modal.style.boxShadow = '0 25px 60px rgba(0,0,0,0.25)';
+        }
 
         this.openModal(`
-            <div style="max-width: 440px; margin: 0 auto; background: #ffffff; padding: 2.2rem 2.4rem; border-radius: 20px; box-shadow: 0 16px 45px rgba(15, 23, 42, 0.15); border: 1.5px solid #e2e8f0; font-family: inherit; box-sizing: border-box;">
+            <div class="auth-split-modal" style="display: flex; min-height: 580px; width: 100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #ffffff; box-sizing: border-box; overflow: hidden;">
                 
-                <!-- BRAND HEADER -->
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem;">
-                    <div style="display: flex; align-items: center; gap: 0.6rem;">
-                        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #059669 0%, #047857 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(5,150,105,0.3);">
-                            🕋
+                <!-- LEFT PANEL: SACRED HERO IMAGE & PROOF -->
+                <div class="auth-left-panel" style="flex: 1.1; position: relative; background: #0b1f17 url('https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg') center center / cover no-repeat; padding: 2.5rem; display: flex; flex-direction: column; justify-content: space-between; color: #ffffff; min-height: 520px; box-sizing: border-box;">
+                    
+                    <!-- Dark Gradient Overlay -->
+                    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,31,23,0.55) 0%, rgba(11,31,23,0.25) 45%, rgba(11,31,23,0.85) 100%); z-index: 1;"></div>
+                    
+                    <!-- Brand Top Left -->
+                    <div style="position: relative; z-index: 2; display: flex; align-items: center; gap: 0.65rem;">
+                        <div style="width: 36px; height: 36px; background: #198754; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(25,135,84,0.4);">
+                            🏛️
                         </div>
-                        <span style="font-weight: 900; font-size: 1.2rem; color: #0f172a; letter-spacing: -0.3px;">Umrah Travels</span>
+                        <span style="font-weight: 800; font-size: 1.25rem; color: #ffffff; letter-spacing: -0.2px;">Umrah Travels</span>
                     </div>
-                    <span style="font-size: 0.72rem; font-weight: 800; color: #059669; background: #ecfdf5; padding: 0.25rem 0.65rem; border-radius: 99px; border: 1px solid #a7f3d0;">
-                        🔒 Secure SSL
-                    </span>
-                </div>
 
-                ${!isForgot ? `
-                    <!-- TAB SWITCHER (LOG IN / SIGN UP) -->
-                    <div style="display: flex; background: #f1f5f9; border-radius: 12px; padding: 4px; margin-bottom: 1.4rem; border: 1px solid #e2e8f0;">
-                        <button type="button" onclick="app.openAuthModal('login')" style="flex: 1; padding: 0.55rem 0; border: none; border-radius: 9px; font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; background: ${isLogin ? '#ffffff' : 'transparent'}; color: ${isLogin ? '#0f172a' : '#64748b'}; box-shadow: ${isLogin ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};">
-                            Log In
-                        </button>
-                        <button type="button" onclick="app.openAuthModal('register')" style="flex: 1; padding: 0.55rem 0; border: none; border-radius: 9px; font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; background: ${isRegister ? '#ffffff' : 'transparent'}; color: ${isRegister ? '#0f172a' : '#64748b'}; box-shadow: ${isRegister ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};">
-                            Sign Up
-                        </button>
-                    </div>
-                ` : ''}
-
-                <!-- TITLE & SUBTITLE -->
-                <div style="margin-bottom: 1.4rem;">
-                    <h2 style="font-size: 1.55rem; font-weight: 800; color: #0f172a; margin: 0 0 0.25rem 0; letter-spacing: -0.4px;">
-                        ${isLogin ? 'Welcome Back' : ''}
-                        ${isRegister ? 'Create Your Account' : ''}
-                        ${isForgot ? 'Reset Password' : ''}
-                    </h2>
-                    <p style="font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.45;">
-                        ${isLogin ? 'Enter your details below to log in to your account.' : ''}
-                        ${isRegister ? 'Enter your details to create a new account.' : ''}
-                        ${isForgot ? 'Enter your registered email address to receive a 4-digit reset code.' : ''}
-                    </p>
-                </div>
-
-                <!-- IN-FORM ERROR ALERT CONTAINER -->
-                <div id="authFormAlert" style="display: none; background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 0.75rem 0.9rem; margin-bottom: 1.1rem; color: #991b1b; font-size: 0.82rem; font-weight: 600; line-height: 1.45; transition: all 0.2s;">
-                    <div style="display: flex; align-items: flex-start; gap: 0.45rem;">
-                        <span style="font-size: 1rem; line-height: 1;">⚠️</span>
-                        <div id="authFormAlertText" style="flex: 1;"></div>
+                    <!-- Bottom Text & Stars -->
+                    <div style="position: relative; z-index: 2; margin-top: auto;">
+                        <h2 style="font-size: clamp(1.6rem, 2.5vw, 2.1rem); font-weight: 800; line-height: 1.25; color: #ffffff; margin: 0 0 0.8rem 0; letter-spacing: -0.02em;">
+                            Your sacred journey<br>begins with a single step.
+                        </h2>
+                        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.88); margin: 0 0 0.8rem 0; font-weight: 500;">
+                            Trusted by 200,000+ pilgrims worldwide
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.88rem; color: rgba(255,255,255,0.92);">
+                            <span style="color: #ffc107; font-size: 1rem; letter-spacing: 1px;">☆☆☆☆☆</span>
+                            <span style="font-weight: 700;">4.9 / 5 from 18,400 reviews</span>
+                        </div>
                     </div>
                 </div>
 
-                ${isForgot ? `
-                    <!-- FORGOT PASSWORD FORM -->
-                    <form onsubmit="event.preventDefault(); app.handleForgotPasswordSubmit();" style="display: flex; flex-direction: column;">
-                        <div class="auth-field-group" style="margin-bottom: 1rem;">
-                            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 0.35rem;">Registered Email</label>
-                            <input type="email" id="forgotEmail" required placeholder="name@domain.com" style="width: 100%; height: 44px; padding: 0 0.85rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; background: #ffffff; color: #0f172a; box-sizing: border-box;">
-                        </div>
-
-                        <div id="forgotOtpSection" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 0.75rem 0.85rem; margin-bottom: 1.1rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                                <span style="font-size: 0.76rem; font-weight: 800; color: #166534;">📩 Send Reset Code</span>
-                                <button type="button" id="btnForgotSendOtp" onclick="app.sendForgotPasswordOtp()" style="background: #059669; color: #ffffff; border: none; border-radius: 6px; padding: 0.3rem 0.75rem; font-size: 0.76rem; font-weight: 800; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
-                                    Send OTP
-                                </button>
-                            </div>
-                            <input type="text" id="forgotOtpCode" placeholder="Enter 4-digit code" maxlength="6" style="width: 100%; height: 40px; padding: 0 0.6rem; border: 1.5px solid #86efac; border-radius: 6px; font-size: 0.95rem; font-weight: 800; letter-spacing: 3px; text-align: center; background: #ffffff; color: #0f172a; box-sizing: border-box;">
-                        </div>
-
-                        <div class="auth-field-group" style="margin-bottom: 1.2rem;">
-                            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 0.35rem;">New Password</label>
-                            <input type="password" id="forgotNewPassword" required placeholder="Enter your new password" style="width: 100%; height: 44px; padding: 0 0.85rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; background: #ffffff; color: #0f172a; box-sizing: border-box;">
-                        </div>
-
-                        <button type="submit" class="auth-submit-btn" style="width: 100%; height: 46px; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 16px rgba(5,150,105,0.3); font-family: inherit;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
-                            Reset Password &amp; Log In
-                        </button>
-                    </form>
-                ` : `
-                    <!-- GOOGLE SIGN IN BUTTON -->
-                    <button type="button" onclick="app.loginWithGoogle()" style="width: 100%; height: 42px; border: 1.5px solid #e2e8f0; border-radius: 10px; background: #ffffff; display: flex; align-items: center; justify-content: center; gap: 0.65rem; cursor: pointer; transition: all 0.2s; font-weight: 700; font-size: 0.88rem; color: #1e293b;" onmouseover="this.style.borderColor='#cbd5e1'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#ffffff';">
-                        <svg width="18" height="18" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                        </svg>
-                        <span>Continue with Google</span>
-                    </button>
-
-                    <!-- DIVIDER -->
-                    <div style="display: flex; align-items: center; margin: 1.1rem 0; gap: 0.6rem;">
-                        <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-                        <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">or</span>
-                        <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+                <!-- RIGHT PANEL: AUTHENTICATION FORM -->
+                <div class="auth-right-panel" style="flex: 1; padding: 2.2rem 2.4rem; display: flex; flex-direction: column; justify-content: center; background: #ffffff; position: relative; box-sizing: border-box; max-height: 90vh; overflow-y: auto;">
+                    
+                    <!-- SSL Badge -->
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 0.8rem;">
+                        <span style="font-size: 0.72rem; font-weight: 800; color: #198754; background: #e8f5e9; padding: 0.28rem 0.7rem; border-radius: 99px; border: 1px solid #a5d6a7; display: inline-flex; align-items: center; gap: 0.35rem;">
+                            🔒 Secure SSL
+                        </span>
                     </div>
 
-                    <!-- LOGIN / REGISTER FORM -->
-                    <form onsubmit="event.preventDefault(); app.handleAuthSubmit('${mode}');" style="display: flex; flex-direction: column;">
-                        ${isRegister ? `
-                            <!-- FULL NAME FIELD -->
-                            <div class="auth-field-group">
-                                <label>Full Name</label>
-                                <input type="text" id="authName" required placeholder="e.g. John Doe">
-                                <span class="field-icon">
-                                    <svg width="17" height="17" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                </span>
+                    ${!isForgot ? `
+                        <!-- Mode Tabs Switcher -->
+                        <div style="display: flex; background: #f1f3f5; border-radius: 12px; padding: 4px; margin-bottom: 1.4rem; border: 1px solid #e9ecef;">
+                            <button type="button" onclick="app.openAuthModal('login')" style="flex: 1; padding: 0.6rem 0; border: none; border-radius: 9px; font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; background: ${isLogin ? '#ffffff' : 'transparent'}; color: ${isLogin ? '#212529' : '#6c757d'}; box-shadow: ${isLogin ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};">
+                                Log In
+                            </button>
+                            <button type="button" onclick="app.openAuthModal('register')" style="flex: 1; padding: 0.6rem 0; border: none; border-radius: 9px; font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; background: ${isRegister ? '#ffffff' : 'transparent'}; color: ${isRegister ? '#212529' : '#6c757d'}; box-shadow: ${isRegister ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};">
+                                Sign Up
+                            </button>
+                        </div>
+                    ` : ''}
+
+                    <!-- Title & Subtitle -->
+                    <div style="margin-bottom: 1.3rem;">
+                        <h2 style="font-size: 1.8rem; font-weight: 800; color: #111827; margin: 0 0 0.25rem 0; letter-spacing: -0.4px;">
+                            ${isLogin ? 'Welcome Back' : ''}
+                            ${isRegister ? 'Create Your Account' : ''}
+                            ${isForgot ? 'Reset Password' : ''}
+                        </h2>
+                        <p style="font-size: 0.85rem; color: #6b7280; margin: 0; line-height: 1.45;">
+                            ${isLogin ? 'Enter your details below to log in to your account.' : ''}
+                            ${isRegister ? 'Enter your details below to create a new account.' : ''}
+                            ${isForgot ? 'Enter your registered email address to receive a 4-digit reset code.' : ''}
+                        </p>
+                    </div>
+
+                    <!-- In-Form Error Alert Container -->
+                    <div id="authFormAlert" style="display: none; background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 0.75rem 0.9rem; margin-bottom: 1.1rem; color: #991b1b; font-size: 0.82rem; font-weight: 600; line-height: 1.45; transition: all 0.2s;">
+                        <div style="display: flex; align-items: flex-start; gap: 0.45rem;">
+                            <span style="font-size: 1rem; line-height: 1;">⚠️</span>
+                            <div id="authFormAlertText" style="flex: 1;"></div>
+                        </div>
+                    </div>
+
+                    ${isForgot ? `
+                        <!-- FORGOT PASSWORD FORM -->
+                        <form onsubmit="event.preventDefault(); app.handleForgotPasswordSubmit();" style="display: flex; flex-direction: column;">
+                            <div class="auth-input-wrapper">
+                                <label class="auth-input-label">Registered Email</label>
+                                <input type="email" id="forgotEmail" required placeholder="name@domain.com" class="auth-input-field">
+                                <span class="auth-input-icon">✉</span>
                             </div>
 
-                            <!-- EMAIL OR PHONE NUMBER WITH CLEAN SEND OTP BUTTON -->
-                            <div class="auth-field-group">
-                                <label>Email Address or Mobile Phone</label>
-                                <div style="display: flex; gap: 0.4rem; align-items: center;">
-                                    <input type="text" id="authEmail" required placeholder="name@domain.com or +91..." style="flex: 1; padding-right: 0.85rem;">
-                                    <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="height: 44px; padding: 0 0.95rem; background: #ecfdf5; color: #059669; border: 1.5px solid #059669; border-radius: 8px; font-size: 0.82rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='#059669'; this.style.color='#ffffff';" onmouseout="this.style.background='#ecfdf5'; this.style.color='#059669';">
+                            <div id="forgotOtpSection" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 0.75rem 0.85rem; margin-bottom: 1.1rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                    <span style="font-size: 0.76rem; font-weight: 800; color: #166534;">📩 Send Reset Code</span>
+                                    <button type="button" id="btnForgotSendOtp" onclick="app.sendForgotPasswordOtp()" style="background: #198754; color: #ffffff; border: none; border-radius: 8px; padding: 0.35rem 0.8rem; font-size: 0.76rem; font-weight: 800; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#146c43'" onmouseout="this.style.background='#198754'">
                                         Send OTP
                                     </button>
                                 </div>
+                                <input type="text" id="forgotOtpCode" placeholder="Enter 4-digit code" maxlength="6" style="width: 100%; height: 40px; padding: 0 0.6rem; border: 1.5px solid #86efac; border-radius: 8px; font-size: 0.95rem; font-weight: 800; letter-spacing: 3px; text-align: center; background: #ffffff; color: #111827; box-sizing: border-box;">
                             </div>
 
-                            <!-- DYNAMIC OTP VERIFICATION INPUT BOX (REVEALS ON SEND OTP) -->
-                            <div id="otpSectionBox" style="display: none; margin-bottom: 0.9rem;">
-                                <div class="auth-field-group" style="margin-bottom: 0;">
-                                    <label>Verification Code (Check Inbox)</label>
-                                    <div style="display: flex; gap: 0.4rem; align-items: center;">
-                                        <input type="text" id="authOtpCode" placeholder="4-digit OTP" maxlength="6" style="flex: 1; text-align: center; letter-spacing: 3px; font-weight: 800; padding-right: 0.85rem;">
-                                        <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="height: 44px; padding: 0 1.1rem; background: #059669; color: #ffffff; border: none; border-radius: 8px; font-size: 0.82rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
+                            <div class="auth-input-wrapper">
+                                <label class="auth-input-label">New Password</label>
+                                <input type="password" id="forgotNewPassword" required placeholder="Enter your new password" class="auth-input-field">
+                                <span class="auth-input-icon">🔒</span>
+                            </div>
+
+                            <button type="submit" class="auth-submit-btn" style="width: 100%; height: 48px; background: #198754; color: #ffffff; border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 16px rgba(25,135,84,0.3); font-family: inherit;" onmouseover="this.style.background='#146c43'" onmouseout="this.style.background='#198754'">
+                                Reset Password &amp; Log In
+                            </button>
+                        </form>
+                    ` : `
+                        <!-- GOOGLE SIGN IN BUTTON -->
+                        <button type="button" onclick="app.loginWithGoogle()" style="width: 100%; height: 44px; border: 1.5px solid #e5e7eb; border-radius: 12px; background: #ffffff; display: flex; align-items: center; justify-content: center; gap: 0.65rem; cursor: pointer; transition: all 0.2s; font-weight: 700; font-size: 0.88rem; color: #374151;" onmouseover="this.style.borderColor='#d1d5db'; this.style.background='#f9fafb';" onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='#ffffff';">
+                            <svg width="18" height="18" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                            </svg>
+                            <span>Continue with Google</span>
+                        </button>
+
+                        <!-- DIVIDER -->
+                        <div style="display: flex; align-items: center; margin: 1rem 0; gap: 0.6rem;">
+                            <div style="flex: 1; height: 1px; background: #e5e7eb;"></div>
+                            <span style="font-size: 0.72rem; color: #9ca3af; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">OR</span>
+                            <div style="flex: 1; height: 1px; background: #e5e7eb;"></div>
+                        </div>
+
+                        <!-- LOGIN / REGISTER FORM -->
+                        <form onsubmit="event.preventDefault(); app.handleAuthSubmit('${mode}');" style="display: flex; flex-direction: column;">
+                            ${isRegister ? `
+                                <!-- FULL NAME INPUT -->
+                                <div class="auth-input-wrapper">
+                                    <label class="auth-input-label">Full Name</label>
+                                    <input type="text" id="authName" required placeholder="e.g. John Doe" class="auth-input-field">
+                                    <span class="auth-input-icon">👤</span>
+                                </div>
+
+                                <!-- EMAIL OR PHONE INPUT WITH SEND OTP BUTTON -->
+                                <div style="display: flex; gap: 0.5rem; align-items: stretch; margin-bottom: 1rem;">
+                                    <div class="auth-input-wrapper" style="flex: 1; margin-bottom: 0;">
+                                        <label class="auth-input-label">Email Address or Mobile Phone</label>
+                                        <input type="text" id="authEmail" required placeholder="name@domain.com or +91..." class="auth-input-field">
+                                        <span class="auth-input-icon">✉</span>
+                                    </div>
+                                    <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="height: 100%; min-height: 52px; padding: 0 1.1rem; background: #198754; color: #ffffff; border: none; border-radius: 12px; font-size: 0.85rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='#146c43'" onmouseout="this.style.background='#198754'">
+                                        Send OTP
+                                    </button>
+                                </div>
+
+                                <!-- DYNAMIC OTP VERIFICATION INPUT BOX (REVEALS ON SEND OTP) -->
+                                <div id="otpSectionBox" style="display: none; margin-bottom: 1rem;">
+                                    <div style="display: flex; gap: 0.5rem; align-items: stretch;">
+                                        <div class="auth-input-wrapper" style="flex: 1; margin-bottom: 0;">
+                                            <label class="auth-input-label">Verification Code (Check Inbox)</label>
+                                            <input type="text" id="authOtpCode" placeholder="4-digit OTP" maxlength="6" class="auth-input-field" style="text-align: center; letter-spacing: 3px; font-weight: 800;">
+                                        </div>
+                                        <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="height: 100%; min-height: 52px; padding: 0 1.2rem; background: #198754; color: #ffffff; border: none; border-radius: 12px; font-size: 0.85rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='#146c43'" onmouseout="this.style.background='#198754'">
                                             Verify
                                         </button>
                                     </div>
+                                    <div id="otpSentAlert" style="display: none; font-size: 0.76rem; color: #198754; font-weight: 700; margin-top: 0.35rem;"></div>
+                                    <div id="otpStatusMsg" style="font-size: 0.78rem; color: #198754; font-weight: 800; margin-top: 0.35rem; display: none;">✓ Verified</div>
                                 </div>
-                                <div id="otpSentAlert" style="display: none; font-size: 0.76rem; color: #059669; font-weight: 700; margin-top: 0.35rem;"></div>
-                                <div id="otpStatusMsg" style="font-size: 0.78rem; color: #16a34a; font-weight: 800; margin-top: 0.35rem; display: none;">✓ Verified</div>
-                            </div>
 
-                            <!-- PASSWORDS ROW (PASSWORD & CONFIRM PASSWORD) -->
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.4rem;">
-                                <div class="auth-field-group" style="margin-bottom: 0;">
-                                    <label>Password</label>
-                                    <input type="password" id="authPassword" required placeholder="••••••••" onkeyup="app.checkPasswordStrength(this.value)">
+                                <!-- PASSWORD INPUT -->
+                                <div class="auth-input-wrapper">
+                                    <label class="auth-input-label">Password</label>
+                                    <input type="password" id="authPassword" required placeholder="••••••••" class="auth-input-field" onkeyup="app.checkPasswordStrength(this.value)">
+                                    <button type="button" onclick="app.togglePasswordVisibility()" class="auth-input-icon">🔒</button>
                                 </div>
-                                <div class="auth-field-group" style="margin-bottom: 0;">
-                                    <label>Confirm</label>
-                                    <input type="password" id="authPasswordConfirm" required placeholder="••••••••">
+
+                                <!-- CONFIRM PASSWORD INPUT -->
+                                <div class="auth-input-wrapper">
+                                    <label class="auth-input-label">Confirm Password</label>
+                                    <input type="password" id="authPasswordConfirm" required placeholder="••••••••" class="auth-input-field">
+                                    <span class="auth-input-icon">🔒</span>
                                 </div>
-                            </div>
 
-                            <!-- PASSWORD STRENGTH BAR -->
-                            <div style="margin-bottom: 0.9rem;">
-                                <div style="display: flex; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; gap: 3px; margin-bottom: 0.25rem;">
-                                    <div id="strBar1" style="flex: 1; background: #e2e8f0; transition: all 0.2s;"></div>
-                                    <div id="strBar2" style="flex: 1; background: #e2e8f0; transition: all 0.2s;"></div>
-                                    <div id="strBar3" style="flex: 1; background: #e2e8f0; transition: all 0.2s;"></div>
+                                <!-- PASSWORD STRENGTH TEXT -->
+                                <div style="margin-bottom: 0.9rem;">
+                                    <span id="strText" style="font-size: 0.76rem; color: #6b7280; font-weight: 600;">Password strength: Weak</span>
                                 </div>
-                                <span id="strText" style="font-size: 0.7rem; color: #94a3b8; font-weight: 600;">Password strength: Weak</span>
-                            </div>
 
-                            <!-- TERMS CHECKBOX -->
-                            <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 1.1rem; font-size: 0.78rem; color: #64748b;">
-                                <input type="checkbox" id="termsCheck" required style="width: 15px; height: 15px; accent-color: #059669; cursor: pointer;">
-                                <label for="termsCheck" style="margin: 0; cursor: pointer;">
-                                    I agree to the <a href="#" style="color: #059669; text-decoration: none; font-weight: 700;">Terms of Service</a> and <a href="#" style="color: #059669; text-decoration: none; font-weight: 700;">Privacy Policy</a>.
-                                </label>
-                            </div>
-                        ` : `
-                            <!-- LOGIN FIELDS (UNFILLED BY DEFAULT) -->
-                            <div class="auth-field-group">
-                                <label>Email Address or Phone</label>
-                                <input type="text" id="authEmail" required placeholder="Enter your email or phone number">
-                                <span class="field-icon">
-                                    <svg width="17" height="17" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                </span>
-                            </div>
+                                <!-- TERMS CHECKBOX -->
+                                <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 1.1rem; font-size: 0.78rem; color: #4b5563;">
+                                    <input type="checkbox" id="termsCheck" required style="width: 15px; height: 15px; accent-color: #198754; cursor: pointer;">
+                                    <label for="termsCheck" style="margin: 0; cursor: pointer;">
+                                        I agree to the <a href="#" style="color: #198754; text-decoration: none; font-weight: 700;">Terms of Service</a> and <a href="#" style="color: #198754; text-decoration: none; font-weight: 700;">Privacy Policy</a>.
+                                    </label>
+                                </div>
+                            ` : `
+                                <!-- LOGIN INPUTS -->
+                                <div class="auth-input-wrapper">
+                                    <label class="auth-input-label">Email Address or Phone</label>
+                                    <input type="text" id="authEmail" required placeholder="Enter your email or phone number" class="auth-input-field">
+                                    <span class="auth-input-icon">✉</span>
+                                </div>
 
-                            <div class="auth-field-group" style="margin-bottom: 0.6rem;">
-                                <label>Password</label>
-                                <input type="password" id="authPassword" required placeholder="Enter your password">
-                                <button type="button" class="field-icon" onclick="app.togglePasswordVisibility()" style="background: none; border: none; cursor: pointer; padding: 0;">
-                                    <svg width="17" height="17" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                </button>
-                            </div>
+                                <div class="auth-input-wrapper" style="margin-bottom: 0.6rem;">
+                                    <label class="auth-input-label">Password</label>
+                                    <input type="password" id="authPassword" required placeholder="Enter your password" class="auth-input-field">
+                                    <button type="button" onclick="app.togglePasswordVisibility()" class="auth-input-icon">🔒</button>
+                                </div>
 
-                            <!-- REMEMBER ME & FORGOT PASSWORD ROW -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; font-size: 0.8rem;">
-                                <label style="display: flex; align-items: center; gap: 0.35rem; color: #64748b; cursor: pointer; margin: 0;">
-                                    <input type="checkbox" style="width: 14px; height: 14px; accent-color: #059669;"> Remember me
-                                </label>
-                                <a href="#" onclick="event.preventDefault(); app.openForgotPasswordModal();" style="color: #059669; font-weight: 700; text-decoration: none;">
-                                    Forgot password?
-                                </a>
-                            </div>
-                        `}
+                                <!-- REMEMBER ME & FORGOT PASSWORD ROW -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.3rem; font-size: 0.8rem;">
+                                    <label style="display: flex; align-items: center; gap: 0.4rem; color: #4b5563; cursor: pointer; margin: 0;">
+                                        <input type="checkbox" style="width: 15px; height: 15px; accent-color: #198754;"> Remember me
+                                    </label>
+                                    <a href="#" onclick="event.preventDefault(); app.openForgotPasswordModal();" style="color: #198754; font-weight: 700; text-decoration: none;">
+                                        Forgot password?
+                                    </a>
+                                </div>
+                            `}
 
-                        <!-- PRIMARY ACTION BUTTON -->
-                        <button type="submit" class="auth-submit-btn" style="width: 100%; height: 46px; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 16px rgba(5,150,105,0.3); font-family: inherit;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
-                            ${isLogin ? 'Log in' : ''}
-                            ${isRegister ? 'Verify &amp; Sign Up' : ''}
-                        </button>
-                    </form>
-                `}
+                            <!-- PRIMARY ACTION BUTTON -->
+                            <button type="submit" class="auth-submit-btn" style="width: 100%; height: 48px; background: #198754; color: #ffffff; border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 16px rgba(25,135,84,0.3); font-family: inherit;" onmouseover="this.style.background='#146c43'" onmouseout="this.style.background='#198754'">
+                                ${isLogin ? 'Log In' : ''}
+                                ${isRegister ? 'Verify &amp; Sign Up' : ''}
+                            </button>
+                        </form>
+                    `}
 
-                <!-- FOOTER SWITCH LINK -->
-                <div style="margin-top: 1.2rem; font-size: 0.84rem; color: #64748b; text-align: center;">
-                    ${isLogin ? `
-                        Don't have an account? <a href="#" onclick="event.preventDefault(); app.openAuthModal('register');" style="color: #059669; font-weight: 800; text-decoration: none;">Sign up</a>
-                    ` : ''}
-                    ${isRegister ? `
-                        Already have an account? <a href="#" onclick="event.preventDefault(); app.openAuthModal('login');" style="color: #059669; font-weight: 800; text-decoration: none;">Log in</a>
-                    ` : ''}
-                    ${isForgot ? `
-                        Remembered your password? <a href="#" onclick="event.preventDefault(); app.openAuthModal('login');" style="color: #059669; font-weight: 800; text-decoration: none;">Back to Log in</a>
-                    ` : ''}
+                    <!-- FOOTER SWITCH LINK -->
+                    <div style="margin-top: 1.2rem; font-size: 0.84rem; color: #6b7280; text-align: center;">
+                        ${isLogin ? `
+                            Don't have an account? <a href="#" onclick="event.preventDefault(); app.openAuthModal('register');" style="color: #198754; font-weight: 800; text-decoration: none;">Sign up</a>
+                        ` : ''}
+                        ${isRegister ? `
+                            Already have an account? <a href="#" onclick="event.preventDefault(); app.openAuthModal('login');" style="color: #198754; font-weight: 800; text-decoration: none;">Log in</a>
+                        ` : ''}
+                        ${isForgot ? `
+                            Remembered your password? <a href="#" onclick="event.preventDefault(); app.openAuthModal('login');" style="color: #198754; font-weight: 800; text-decoration: none;">Back to Log in</a>
+                        ` : ''}
+                    </div>
+
                 </div>
 
             </div>
