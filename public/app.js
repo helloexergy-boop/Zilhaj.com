@@ -3272,7 +3272,25 @@ class App {
         }
     }
 
+    setAuthButtonLoading(isLoading, mode = 'login') {
+        const btn = document.querySelector('#modalContent form button[type="submit"]') || document.querySelector('.auth-submit-btn');
+        if (!btn) return;
+
+        if (isLoading) {
+            btn.disabled = true;
+            btn.dataset.origText = btn.dataset.origText || btn.innerHTML;
+            const actionText = (mode === 'register') ? 'Verifying & Creating Account...' : 'Logging in...';
+            btn.innerHTML = `<span style="display:inline-block; width:15px; height:15px; border:2.5px solid rgba(255,255,255,0.4); border-top-color:#ffffff; border-radius:50%; animation:authBtnSpin 0.7s linear infinite; vertical-align:middle; margin-right:8px;"></span>${actionText}`;
+        } else {
+            btn.disabled = false;
+            if (btn.dataset.origText) {
+                btn.innerHTML = btn.dataset.origText;
+            }
+        }
+    }
+
     showFormError(message) {
+        this.setAuthButtonLoading(false);
         const alertBox = document.getElementById('authFormAlert');
         const alertText = document.getElementById('authFormAlertText');
         if (alertBox && alertText) {
@@ -3289,6 +3307,32 @@ class App {
         if (alertBox) {
             alertBox.style.display = 'none';
         }
+    }
+
+    showSuccessModal(title = '✦ Logged In Successfully!', message = 'Welcome to Umrah Travels. Your account is verified.') {
+        this.openModal(`
+            <div style="text-align: center; padding: 2.2rem 1.6rem; background: #ffffff; border-radius: 20px;">
+                <!-- Premium Golden Glowing Badge -->
+                <div style="width: 84px; height: 84px; margin: 0 auto 1.4rem; background: linear-gradient(135deg, #F9E07A 0%, #E8B84B 50%, #C9953A 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 28px rgba(232, 184, 75, 0.45); border: 4px solid #FFF8E7;">
+                    <span style="font-size: 2.8rem; color: #0A1A12; line-height: 1;">✦</span>
+                </div>
+
+                <!-- Golden Title -->
+                <h3 style="font-size: 1.6rem; font-weight: 900; background: linear-gradient(90deg, #D4AF37 0%, #AA771C 50%, #D4AF37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.6rem; letter-spacing: -0.02em;">
+                    ${this.escapeHtml(title)}
+                </h3>
+
+                <!-- Subtitle Text -->
+                <p style="font-size: 0.96rem; color: #475569; margin: 0 auto 1.8rem; line-height: 1.6; max-width: 380px;">
+                    ${this.escapeHtml(message)}
+                </p>
+
+                <!-- Premium Gold Action Button -->
+                <button onclick="app.closeModal()" style="width: 100%; max-width: 280px; height: 46px; background: linear-gradient(135deg, #E8B84B 0%, #C9953A 100%); color: #0A1A12; font-weight: 800; font-size: 0.95rem; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 22px rgba(232, 184, 75, 0.45); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+                    ✨ Continue to Platform
+                </button>
+            </div>
+        `);
     }
 
     async sendSignupOtp() {
@@ -3464,6 +3508,7 @@ class App {
 
     async register(name, email, password, phone, role = 'ROLE_USER') {
         this.hideFormError();
+        this.setAuthButtonLoading(true, 'register');
         try {
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
@@ -3483,7 +3528,7 @@ class App {
                 localStorage.setItem('umrah_user', JSON.stringify(data.user));
                 this.renderAuthNav();
                 this.closeModal();
-                this.showSuccessModal('🎉 Account Created Successfully!', `Welcome to Umrah Travels, ${data.user.name}. Your account is now active.`);
+                this.showSuccessModal('✨ Account Verified & Created!', `Welcome to Umrah Travels, ${data.user.name}. Your account is now active.`);
             }
         } catch (err) {
             console.error('Registration error:', err);
@@ -3493,6 +3538,7 @@ class App {
 
     async login(email, password) {
         this.hideFormError();
+        this.setAuthButtonLoading(true, 'login');
         try {
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
@@ -3518,7 +3564,7 @@ class App {
                     this.showToast(`👑 Welcome Admin, ${data.user.name}!`, 'success');
                     this.navigate('admin');
                 } else {
-                    this.showSuccessModal('✓ Logged In Successfully!', `Welcome back, ${data.user.name}. Your account is verified.`);
+                    this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${data.user.name}. Your account is verified.`);
                 }
             }
         } catch (err) {
