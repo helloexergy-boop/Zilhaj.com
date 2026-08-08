@@ -355,9 +355,9 @@ app.post('/api/auth/register', async (req, res) => {
 
         // 6. Send OTP to user via Email/SMS
         setImmediate(async () => {
-            const transporter = getMailTransporter();
-            if (transporter && cleanEmail.includes('@')) {
-                try {
+            const sendWithTransporter = async (forceIpv6 = false) => {
+                const transporter = getMailTransporter(forceIpv6);
+                if (transporter && cleanEmail.includes('@')) {
                     const sender = process.env.GMAIL_USER || 'hello.exergy@gmail.com';
                     await transporter.sendMail({
                         from: `"Umrah Travels" <${sender}>`,
@@ -377,8 +377,22 @@ app.post('/api/auth/register', async (req, res) => {
                             </div>
                         `
                     });
-                    console.log(`[AUTH] OTP email sent successfully to ${cleanEmail}`);
-                } catch (err) {
+                }
+            };
+            
+            try {
+                await sendWithTransporter(false); // Default IPv4
+                console.log(`[AUTH] OTP email sent successfully to ${cleanEmail}`);
+            } catch (err) {
+                if (err.code === 'ETIMEDOUT' || (err.message && err.message.includes('ETIMEDOUT'))) {
+                    console.warn('[AUTH] IPv4 ETIMEDOUT detected. Falling back to IPv6 SMTP...');
+                    try {
+                        await sendWithTransporter(true); // Fallback IPv6
+                        console.log(`[AUTH] OTP email sent successfully to ${cleanEmail} via IPv6 fallback!`);
+                    } catch (fallbackErr) {
+                        console.warn('[AUTH] OTP email error (IPv6 Fallback failed):', fallbackErr.message);
+                    }
+                } else {
                     console.warn('[AUTH] OTP email error:', err.message);
                 }
             }
@@ -593,9 +607,9 @@ app.post('/api/auth/resend-otp', async (req, res) => {
         inMemoryUsers.set(cleanEmail, user);
 
         setImmediate(async () => {
-            const transporter = getMailTransporter();
-            if (transporter && cleanEmail.includes('@')) {
-                try {
+            const sendWithTransporter = async (forceIpv6 = false) => {
+                const transporter = getMailTransporter(forceIpv6);
+                if (transporter && cleanEmail.includes('@')) {
                     const sender = process.env.GMAIL_USER || 'hello.exergy@gmail.com';
                     await transporter.sendMail({
                         from: `"Umrah Travels" <${sender}>`,
@@ -603,7 +617,17 @@ app.post('/api/auth/resend-otp', async (req, res) => {
                         subject: `New Verification Code: ${newOtp} - Umrah Travels`,
                         html: `<p>Your new 6-digit verification code is: <b>${newOtp}</b></p>`
                     });
-                } catch (err) {}
+                }
+            };
+
+            try {
+                await sendWithTransporter(false);
+            } catch (err) {
+                if (err.code === 'ETIMEDOUT' || (err.message && err.message.includes('ETIMEDOUT'))) {
+                    try {
+                        await sendWithTransporter(true);
+                    } catch (fallbackErr) {}
+                }
             }
         });
 
@@ -643,13 +667,13 @@ app.post('/api/auth/reset-password', async (req, res) => {
 });
 
 // Nodemailer Transporter Setup for Gmail App Password
-function getMailTransporter() {
+function getMailTransporter(forceIpv6 = false) {
     const gmailUser = process.env.GMAIL_USER || process.env.SMTP_USER || 'hello.exergy@gmail.com';
     const rawPass = process.env.GMAIL_PASS || process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || 'gjok vyma ilqs etfl';
     const gmailPass = rawPass ? rawPass.replace(/\s+/g, '') : '';
 
     if (gmailPass) {
-        return nodemailer.createTransport({
+        const config = {
             host: 'smtp.gmail.com',
             port: 587,
             secure: false, // TLS STARTTLS on port 587
@@ -659,8 +683,13 @@ function getMailTransporter() {
             },
             tls: {
                 rejectUnauthorized: false
-            }
-        });
+            },
+            connectionTimeout: 5000 // 5 seconds fail-fast
+        };
+        if (forceIpv6) {
+            config.family = 6;
+        }
+        return nodemailer.createTransport(config);
     }
     return null;
 }
