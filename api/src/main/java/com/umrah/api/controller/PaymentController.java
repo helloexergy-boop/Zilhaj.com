@@ -1,11 +1,13 @@
 package com.umrah.api.controller;
 
+import com.razorpay.Order;
 import com.umrah.api.dto.MessageResponse;
 import com.umrah.api.model.Booking;
 import com.umrah.api.model.Payment;
 import com.umrah.api.repository.BookingRepository;
 import com.umrah.api.repository.PaymentRepository;
 import com.umrah.api.security.UserDetailsImpl;
+import com.umrah.api.service.RazorPayService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,11 +17,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 /**
- * PaymentController handles payment processing, checkout completion, and payment receipt retrieval.
+ * PaymentController handles payment processing, checkout completion, Razorpay order creation & signature verification,
+ * and payment receipt retrieval.
  * Endpoint base path: /api/payments
  */
 @RestController
@@ -33,6 +38,9 @@ public class PaymentController {
     @Autowired
     private BookingRepository bookingRepository;
 
+    @Autowired
+    private RazorPayService razorPayService;
+
     private UserDetailsImpl getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.getPrincipal() instanceof UserDetailsImpl) {
@@ -44,6 +52,111 @@ public class PaymentController {
     private boolean isAdmin(UserDetailsImpl user) {
         return user != null && user.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    /**
+     * POST /api/payments/razorpay/create-order
+     * Generates a Razorpay Order ID for standard checkout popup (UPI, Cards, NetBanking, Wallets).
+     */
+    @PostMapping("/razorpay/create-order")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> createRazorpayOrder(@RequestBody Map<String, Object> request) {
+        UserDetailsImpl currentUser = getCurrentUser();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Error: Unauthorized"));
+        }
+
+        String bookingId = (String) request.get("bookingId");
+        if (bookingId == null || bookingId.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Booking ID is required"));
+        }
+
+        Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
+        if (bookingOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Associated Booking ID not found"));
+        }
+
+        Booking booking = bookingOpt.get();
+        if (!booking.getUserId().equals(currentUser.getId()) && !isAdmin(currentUser)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponse("Error: Access denied to pay for this booking"));
+        }
+
+        try {
+            double amount = booking.getTotalPrice();
+            if (request.containsKey("amount") && request.get("amount") != null) {
+                amount = Double.parseDouble(request.get("amount").toString());
+            }
+
+            Order order = razorPayService.createOrder(amount, "INR", "rec_" + bookingId.substring(0, Math.min(bookingId.length(), 10)));
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("orderId", order.get("id"));
+            response.put("amount", order.get("amount"));
+            response.put("currency", order.get("currency"));
+            response.put("key", razorPayService.getApiKey());
+            response.put("bookingId", bookingId);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Error creating Razorpay order: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * POST /api/payments/razorpay/verify-payment
+     * Verifies the Razorpay payment HMAC-SHA256 signature, updates payment and booking status to CONFIRMED.
+     */
+    @PostMapping("/razorpay/verify-payment")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> verifyRazorpayPayment(@RequestBody Map<String, String> request) {
+        UserDetailsImpl currentUser = getCurrentUser();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Error: Unauthorized"));
+        }
+
+        String bookingId = request.get("bookingId");
+        String razorpayOrderId = request.get("razorpayOrderId");
+        String razorpayPaymentId = request.get("razorpayPaymentId");
+        String razorpaySignature = request.get("razorpaySignature");
+        String paymentMethod = request.getOrDefault("paymentMethod", "RAZORPAY");
+
+        if (bookingId == null || razorpayOrderId == null || razorpayPaymentId == null || razorpaySignature == null) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Missing payment verification parameters"));
+        }
+
+        Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
+        if (bookingOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Associated Booking ID not found"));
+        }
+
+        Booking booking = bookingOpt.get();
+        if (!booking.getUserId().equals(currentUser.getId()) && !isAdmin(currentUser)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponse("Error: Access denied"));
+        }
+
+        // Signature verification
+        boolean isValid = razorPayService.verifyPaymentSignature(razorpayOrderId, razorpayPaymentId, razorpaySignature);
+        if (!isValid) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid Razorpay payment signature verification failed"));
+        }
+
+        // Record successful payment
+        Payment payment = new Payment();
+        payment.setBookingId(bookingId);
+        payment.setUserId(currentUser.getId());
+        payment.setAmount(booking.getTotalPrice());
+        payment.setPaymentMethod(paymentMethod.toUpperCase());
+        payment.setTransactionId(razorpayPaymentId);
+        payment.setStatus("SUCCESS");
+
+        Payment savedPayment = paymentRepository.save(payment);
+
+        // Update booking status to CONFIRMED
+        booking.setStatus("CONFIRMED");
+        bookingRepository.save(booking);
+
+        return ResponseEntity.ok(savedPayment);
     }
 
     /**

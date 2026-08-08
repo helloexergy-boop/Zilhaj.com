@@ -2839,25 +2839,75 @@ class App {
     }
 
     async processPayment(offerId) {
+        let allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        let offer = allOffers.find(o => o.id === offerId) || {
+            id: offerId || '#OFF-891',
+            packageTitle: 'Al Huda Group - Umrah Package',
+            discountedPrice: 118750
+        };
+        const totalAmount = (offer.discountedPrice || 118750) * 2;
+        const bookingRef = 'BK-' + Date.now().toString().slice(-6);
+
+        if (typeof window.Razorpay !== 'undefined') {
+            const options = {
+                "key": "rzp_test_TNHXpbHGezYnSb",
+                "amount": Math.round(totalAmount * 100),
+                "currency": "INR",
+                "name": "GoExergy Umrah Travels",
+                "description": offer.packageTitle || "Umrah Package Payment",
+                "image": "https://img.icons8.com/color/96/000000/kaaba.png",
+                "handler": (response) => {
+                    let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
+                    const newBooking = {
+                        id: bookingRef,
+                        packageTitle: offer.packageTitle,
+                        travelDate: '2026-08-13',
+                        travelersCount: 2,
+                        totalPrice: totalAmount,
+                        status: 'CONFIRMED',
+                        paymentId: response.razorpay_payment_id,
+                        agentName: offer.agentName || 'AL-HARAM PREMIUM TRAVELS',
+                        makkahHotel: offer.makkahHotel || 'Swissotel Makkah',
+                        madinahHotel: offer.madinahHotel || 'Pullman Zamzam Madinah'
+                    };
+                    allBookings.unshift(newBooking);
+                    localStorage.setItem('umrah_my_bookings', JSON.stringify(allBookings));
+
+                    this.showSuccessModal(
+                        '🎉 Booking Confirmed & Payment Successful!',
+                        `Payment ID: <strong>${response.razorpay_payment_id}</strong><br>Congratulations! Your Umrah trip booking (Ref: <strong>${bookingRef}</strong>) is confirmed. Your instant PDF voucher invoice is ready to download.`
+                    );
+                    this.downloadInvoice(bookingRef);
+                    this.navigate('dashboard');
+                },
+                "prefill": {
+                    "name": this.state?.currentUser?.name || "Pilgrim",
+                    "email": this.state?.currentUser?.email || "pilgrim@umrah.com",
+                    "contact": "9876543210"
+                },
+                "theme": {
+                    "color": "#047857"
+                }
+            };
+            const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', (resp) => {
+                this.showToast('Payment failed: ' + (resp.error.description || 'Transaction declined'), 'error');
+            });
+            rzp.open();
+            return;
+        }
+
         this.showLoading('Processing secure 256-bit encrypted payment...');
 
         setTimeout(() => {
-            let allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-            let offer = allOffers.find(o => o.id === offerId) || {
-                id: offerId || '#OFF-891',
-                packageTitle: 'Al Huda Group - Umrah Package',
-                discountedPrice: 118750
-            };
-
             let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
-            const bookingRef = 'BK-' + Date.now().toString().slice(-6);
             
             const newBooking = {
                 id: bookingRef,
                 packageTitle: offer.packageTitle,
                 travelDate: '2026-08-13',
                 travelersCount: 2,
-                totalPrice: (offer.discountedPrice || 118750) * 2,
+                totalPrice: totalAmount,
                 status: 'CONFIRMED',
                 agentName: offer.agentName || 'AL-HARAM PREMIUM TRAVELS',
                 makkahHotel: offer.makkahHotel || 'Swissotel Makkah',
@@ -5449,8 +5499,92 @@ class App {
         `);
     }
 
+    async payWithRazorpay(bookingId, amount, paymentMethod = 'RAZORPAY') {
+        if (typeof window.Razorpay === 'undefined') {
+            this.showToast('Razorpay SDK loading... Please wait a second and try again.', 'warning');
+            return;
+        }
+
+        this.showLoading('Initializing Razorpay Secure Gateway...');
+        const orderData = await this.apiCall('/payments/razorpay/create-order', 'POST', {
+            bookingId: bookingId,
+            amount: amount
+        });
+        this.hideLoading();
+
+        if (!orderData || !orderData.orderId) {
+            this.showToast(orderData?.message || 'Failed to create Razorpay Order', 'error');
+            return;
+        }
+
+        const options = {
+            "key": orderData.key,
+            "amount": orderData.amount,
+            "currency": orderData.currency || "INR",
+            "name": "GoExergy Umrah Travels",
+            "description": "Umrah Package Payment",
+            "image": "https://img.icons8.com/color/96/000000/kaaba.png",
+            "order_id": orderData.orderId,
+            "handler": async (response) => {
+                this.showLoading('Verifying payment with Razorpay...');
+                const verifyRes = await this.apiCall('/payments/razorpay/verify-payment', 'POST', {
+                    bookingId: bookingId,
+                    razorpayOrderId: response.razorpay_order_id,
+                    razorpayPaymentId: response.razorpay_payment_id,
+                    razorpaySignature: response.razorpay_signature,
+                    paymentMethod: paymentMethod
+                });
+                this.hideLoading();
+
+                if (verifyRes && verifyRes.status === 'SUCCESS') {
+                    this.showToast('Payment Successful! Travel Ticket PDF ready.', 'success');
+                    if (typeof this.fetchUserData === 'function') await this.fetchUserData();
+                    this.openModal(`
+                        <div class="modal-header" style="text-align:center;">
+                            <span style="font-size:3rem;">🎉</span>
+                            <h2>Booking Confirmed!</h2>
+                            <p style="color:var(--primary); font-weight:700;">Transaction Ref: ${verifyRes.transactionId}</p>
+                        </div>
+                        <div class="modal-body" style="text-align:center;">
+                            <p style="margin-bottom:1.5rem;">May Allah accept your Umrah! Your official invoice and voucher has been generated.</p>
+                            <a href="${API_BASE}/invoice/${bookingId}" target="_blank" class="btn btn-primary" style="width:100%;">
+                                📄 View & Download Official PDF Ticket
+                            </a>
+                        </div>
+                    `);
+                } else {
+                    this.showToast(verifyRes?.message || 'Payment signature verification failed.', 'error');
+                }
+            },
+            "prefill": {
+                "name": this.state?.currentUser?.name || "Pilgrim",
+                "email": this.state?.currentUser?.email || "pilgrim@umrah.com",
+                "contact": "9876543210"
+            },
+            "theme": {
+                "color": "#047857"
+            }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', (response) => {
+            this.showToast('Payment failed: ' + (response.error.description || 'Transaction declined'), 'error');
+        });
+        rzp.open();
+    }
+
     async processPaymentCheckout(bookingId) {
-        const method = document.getElementById('payMethod').value;
+        const method = document.getElementById('payMethod')?.value || 'RAZORPAY';
+        
+        // Find booking total price
+        let booking = this.state?.myBookings?.find(b => b.id === bookingId);
+        let amount = booking ? booking.totalPrice : 118750;
+
+        if (method === 'RAZORPAY' || method === 'UPI' || method === 'CARD' || method === 'NETBANKING') {
+            await this.payWithRazorpay(bookingId, amount, method);
+            return;
+        }
+
         const res = await this.apiCall('/payments/checkout', 'POST', {
             bookingId,
             paymentMethod: method
