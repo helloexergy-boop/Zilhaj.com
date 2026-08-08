@@ -805,8 +805,9 @@ class App {
 
         const mediaList = [
             { type: 'image', url: 'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg' },
-            { type: 'image', url: 'https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=1920&q=80' },
-            { type: 'image', url: 'https://images.unsplash.com/photo-1565552645632-d725f8bfc19a?auto=format&fit=crop&w=1920&q=80' },
+            { type: 'image', url: 'https://images.pexels.com/photos/38498727/pexels-photo-38498727.jpeg' },
+            { type: 'image', url: 'https://images.pexels.com/photos/28209449/pexels-photo-28209449.jpeg' },
+            { type: 'image', url: 'https://images.pexels.com/photos/26436662/pexels-photo-26436662.jpeg' },
             { type: 'video', url: 'hero-bg.mp4', poster: 'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg' }
         ];
 
