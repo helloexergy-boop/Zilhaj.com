@@ -43,6 +43,23 @@ class App {
     }
 
     async init() {
+        // Handle Google OAuth callback URL parameters (Step 2 & 5)
+        if (window.location.hash && window.location.hash.includes('google_auth_success')) {
+            try {
+                const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+                const userParam = hashParams.get('user');
+                if (userParam) {
+                    const userObj = JSON.parse(decodeURIComponent(userParam));
+                    this.state.currentUser = userObj;
+                    localStorage.setItem('umrah_user', JSON.stringify(userObj));
+                    this.showToast(`🌐 Welcome, ${userObj.name}! Logged in via Google OAuth`, 'success');
+                    window.location.hash = '#home';
+                }
+            } catch (e) {
+                console.warn('Google OAuth hash parse notice:', e);
+            }
+        }
+
         this.renderAuthNav();
 
         // Populate initial packages immediately from localStorage or default
@@ -695,8 +712,33 @@ class App {
                         </button>
                     </div>
                 </details>
+
+                <!-- Step 2: Google OAuth Consent Screen Redirect Option -->
+                <div style="margin-top: 1.1rem; padding-top: 0.8rem; border-top: 1px solid #e5e7eb;">
+                    <button type="button" onclick="app.redirectToGoogleOAuth()" style="width: 100%; background: #ffffff; color: #374151; border: 1px solid #d1d5db; border-radius: 8px; padding: 0.55rem; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#ffffff'">
+                        <span>🔑 Redirect to Google Cloud OAuth 2.0 Consent Screen</span>
+                    </button>
+                </div>
             </div>
         `;
+    }
+
+    async redirectToGoogleOAuth() {
+        this.showToast('Redirecting to Google Cloud Consent Screen...', 'info');
+        try {
+            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                ? 'http://localhost:3000/api/auth/google/url'
+                : '/api/auth/google/url';
+
+            const res = await fetch(apiEndpoint);
+            const data = await res.json();
+            if (data && data.url) {
+                window.location.href = data.url;
+            }
+        } catch (e) {
+            console.error('Google OAuth URL error:', e);
+            this.showToast('Could not fetch Google OAuth URL', 'error');
+        }
     }
 
     async completeGoogleAuth(name, email) {
