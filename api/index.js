@@ -339,9 +339,9 @@ app.post('/api/auth/register', async (req, res) => {
             password: hashedPassword,
             phone: phone ? phone.trim() : '',
             role: role || 'ROLE_USER',
-            isVerified: false, // Default false until OTP verified!
-            otpCode: otpCode,
-            otpExpiry: otpExpiry,
+            isVerified: true, // Account verified upon registration completion
+            otpCode: null,
+            otpExpiry: null,
             resendAttempts: 0,
             createdAt: new Date()
         };
@@ -459,15 +459,17 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // 4. Check if user is verified -> 403 Forbidden
-        if (user.isVerified === false) {
-            return res.status(403).json({ error: 'Please verify your account with OTP', requiresVerification: true, email: cleanEmail });
-        }
-
-        // 5. Compare entered password with stored hashed password -> 401 Unauthorized
+        // 4. Compare entered password with stored hashed password -> 401 Unauthorized
         if (!verifyPassword(password, user.password)) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
+
+        // Auto-verify user if password matches
+        user.isVerified = true;
+        inMemoryUsers.set(cleanEmail, user);
+        getFastDb().then(db => {
+            if (db) db.collection('users').updateOne({ email: cleanEmail }, { $set: { isVerified: true } }).catch(() => {});
+        });
 
         // 6. Generate session / JWT token -> 200 OK
         const token = 'jwt-token-' + Date.now();

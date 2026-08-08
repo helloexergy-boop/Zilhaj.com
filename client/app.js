@@ -3753,14 +3753,6 @@ class App {
 
             if (response.status === 403) {
                 this.showFormError('<b>Account not verified</b><br>Please verify your account with OTP');
-                this.state.pendingVerificationEmail = email;
-                this.openAuthModal('register');
-                setTimeout(() => {
-                    const emailInput = document.getElementById('authEmail');
-                    const otpBox = document.getElementById('otpSectionBox');
-                    if (emailInput) emailInput.value = email;
-                    if (otpBox) otpBox.style.display = 'block';
-                }, 100);
                 return;
             }
 
