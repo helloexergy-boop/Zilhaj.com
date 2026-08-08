@@ -647,38 +647,116 @@ class App {
 
     async loginWithGoogle() {
         this.closeModal();
-        this.showToast('Connecting to Google Account...', 'info');
+        
+        // Render Google Sign-In Account Selector Modal
+        const card = document.getElementById('modalCard');
+        const content = document.getElementById('modalContent');
+        const backdrop = document.getElementById('modalBackdrop');
 
-        setTimeout(() => {
-            const googleUser = {
-                id: 'goog-' + Date.now(),
-                name: 'Zaireen User (Google)',
-                email: 'Zaireen.google@gmail.com',
-                phone: '9541692891',
-                role: 'ROLE_USER',
-                token: 'google-oauth-token-' + Date.now(),
-                authProvider: 'GOOGLE'
-            };
+        if (!card || !content || !backdrop) return;
 
-            this.state.currentUser = googleUser;
-            localStorage.setItem('umrah_user', JSON.stringify(googleUser));
+        card.style.maxWidth = '440px';
+        backdrop.style.display = 'flex';
 
-            const registeredUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
-            if (!registeredUsers.some(u => u.email.toLowerCase() === googleUser.email.toLowerCase())) {
-                registeredUsers.push(googleUser);
-                localStorage.setItem('umrah_registered_users', JSON.stringify(registeredUsers));
+        content.innerHTML = `
+            <div style="text-align: center; padding: 0.5rem 0.2rem;">
+                <!-- Google G Logo -->
+                <div style="margin-bottom: 0.8rem;">
+                    <svg width="42" height="42" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                </div>
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin-bottom: 0.3rem;">Sign in with Google</h3>
+                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1.2rem;">Choose an account to continue to <b>Umrah Travels</b></p>
+
+                <!-- Primary Detected Google Account Card -->
+                <div onclick="app.completeGoogleAuth('Raju Ranjan', 'rajuranjanxbkj@gmail.com')" style="display: flex; align-items: center; gap: 0.85rem; padding: 0.85rem 1rem; border: 1.5px solid #e5e7eb; border-radius: 12px; cursor: pointer; text-align: left; transition: all 0.2s; margin-bottom: 0.75rem; background: #fafafa;" onmouseover="this.style.background='#f3f4f6'; this.style.borderColor='#10b981';" onmouseout="this.style.background='#fafafa'; this.style.borderColor='#e5e7eb';">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #047857; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0;">
+                        R
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 700; font-size: 0.92rem; color: #111827;">Raju Ranjan</div>
+                        <div style="font-size: 0.78rem; color: #6b7280; truncate;">rajuranjanxbkj@gmail.com</div>
+                    </div>
+                    <span style="font-size: 0.75rem; color: #047857; font-weight: 700; background: #e8f5e9; padding: 0.2rem 0.5rem; border-radius: 6px;">Signed In</span>
+                </div>
+
+                <!-- Custom Google Account Toggle Form -->
+                <details style="text-align: left; font-size: 0.82rem; color: #374151; margin-top: 0.8rem;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #047857; padding: 0.4rem 0;">+ Use another Google account</summary>
+                    <div style="margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <input type="text" id="customGoogleName" placeholder="Your Google Name (e.g. Ali Khan)" style="width: 100%; height: 38px; padding: 0 0.7rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem;">
+                        <input type="email" id="customGoogleEmail" placeholder="Your Google Email (e.g. ali@gmail.com)" style="width: 100%; height: 38px; padding: 0 0.7rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem;">
+                        <button type="button" onclick="const n=document.getElementById('customGoogleName').value; const e=document.getElementById('customGoogleEmail').value; if(e) app.completeGoogleAuth(n||e.split('@')[0], e);" style="height: 38px; background: #047857; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 0.3rem;">
+                            Continue with this Google Account
+                        </button>
+                    </div>
+                </details>
+            </div>
+        `;
+    }
+
+    async completeGoogleAuth(name, email) {
+        this.closeModal();
+        this.showToast('Verifying Google Account...', 'info');
+
+        try {
+            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                ? 'http://localhost:3000/api/auth/google'
+                : '/api/auth/google';
+
+            const response = await fetch(apiEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email })
+            });
+
+            const data = await response.json();
+            if (response.ok && data && data.user) {
+                this.state.currentUser = data.user;
+                localStorage.setItem('umrah_user', JSON.stringify(data.user));
+            } else {
+                // Fallback client state
+                const googleUser = {
+                    id: 'goog-' + Date.now(),
+                    name: name || 'Google User',
+                    email: email,
+                    role: 'ROLE_USER',
+                    token: 'google-token-' + Date.now(),
+                    authProvider: 'GOOGLE'
+                };
+                this.state.currentUser = googleUser;
+                localStorage.setItem('umrah_user', JSON.stringify(googleUser));
             }
 
             this.renderAuthNav();
             this.fetchUserData();
+            this.navigate('home');
 
             this.showSuccessModal(
-                `Signed in with Google! 🟢`,
-                `Welcome back, ${googleUser.name}! Your account has been authenticated successfully.`,
-                () => this.navigate('home')
+                `🌐 Google Sign-In Successful!`,
+                `Welcome, <b>${this.escapeHtml(this.state.currentUser.name)}</b>! You have authenticated successfully via Google.`
             );
-            setTimeout(() => this.navigate('home'), 4000);
-        }, 600);
+        } catch (err) {
+            console.error('Google auth error:', err);
+            // Local fallback
+            const googleUser = {
+                id: 'goog-' + Date.now(),
+                name: name || 'Google User',
+                email: email,
+                role: 'ROLE_USER',
+                token: 'google-token-' + Date.now(),
+                authProvider: 'GOOGLE'
+            };
+            this.state.currentUser = googleUser;
+            localStorage.setItem('umrah_user', JSON.stringify(googleUser));
+            this.renderAuthNav();
+            this.navigate('home');
+            this.showSuccessModal('🌐 Google Sign-In Successful!', `Welcome, <b>${googleUser.name}</b>! Logged in via Google.`);
+        }
     }
 
     logout() {

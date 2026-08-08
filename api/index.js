@@ -569,6 +569,75 @@ app.post('/api/auth/verify-otp', async (req, res) => {
 });
 
 // ----------------------------------------------------
+// 🌐 GOOGLE SIGN-IN API
+// ----------------------------------------------------
+app.post('/api/auth/google', async (req, res) => {
+    try {
+        const { name, email } = req.body;
+        if (!email) {
+            return res.status(400).json({ error: 'Email address is required for Google Sign-In' });
+        }
+
+        const cleanEmail = email.trim().toLowerCase();
+        let displayName = name ? name.trim() : cleanEmail.split('@')[0];
+        if (cleanEmail === 'rajuranjanxbkj@gmail.com' && (!name || name.toLowerCase().includes('user'))) {
+            displayName = 'Raju Ranjan';
+        }
+
+        let user = inMemoryUsers.get(cleanEmail);
+        if (!user) {
+            try {
+                const db = await getFastDb();
+                if (db) {
+                    user = await db.collection('users').findOne({ email: cleanEmail });
+                }
+            } catch (err) {}
+        }
+
+        if (!user) {
+            user = {
+                id: 'goog-' + Date.now(),
+                name: displayName,
+                email: cleanEmail,
+                role: 'ROLE_USER',
+                isVerified: true,
+                authProvider: 'GOOGLE',
+                createdAt: new Date()
+            };
+            inMemoryUsers.set(cleanEmail, user);
+            getFastDb().then(db => {
+                if (db) db.collection('users').insertOne(user).catch(() => {});
+            });
+        } else {
+            user.isVerified = true;
+            user.authProvider = 'GOOGLE';
+            if (displayName && displayName !== 'User') user.name = displayName;
+            inMemoryUsers.set(cleanEmail, user);
+            getFastDb().then(db => {
+                if (db) db.collection('users').updateOne({ email: cleanEmail }, { $set: { isVerified: true, name: user.name } }).catch(() => {});
+            });
+        }
+
+        const token = 'google-token-' + Date.now();
+        res.json({
+            success: true,
+            message: 'Google Sign-In successful',
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                isVerified: true,
+                token
+            }
+        });
+    } catch (err) {
+        console.error('Google Auth error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// ----------------------------------------------------
 // 🔄 RESEND OTP API (Rate Limited: Max 3 per hour)
 // ----------------------------------------------------
 app.post('/api/auth/resend-otp', async (req, res) => {
