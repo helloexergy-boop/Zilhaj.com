@@ -366,6 +366,29 @@ app.post('/api/auth/login', async (req, res) => {
     });
 });
 
+app.post('/api/auth/reset-password', async (req, res) => {
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+        return res.status(400).json({ error: 'Email and new password are required' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // 1. Update in-memory user cache
+    const cachedUser = inMemoryUsers.get(cleanEmail);
+    if (cachedUser) {
+        cachedUser.password = newPassword;
+        inMemoryUsers.set(cleanEmail, cachedUser);
+    }
+
+    // 2. Update MongoDB asynchronously
+    getFastDb().then(db => {
+        if (db) db.collection('users').updateOne({ email: cleanEmail }, { $set: { password: newPassword } }).catch(() => {});
+    });
+
+    res.json({ success: true, message: 'Password updated successfully' });
+});
+
 // Nodemailer Transporter Setup for Gmail App Password
 function getMailTransporter() {
     const gmailUser = process.env.GMAIL_USER || process.env.SMTP_USER || 'hello.exergy@gmail.com';
