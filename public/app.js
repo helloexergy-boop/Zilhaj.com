@@ -3433,10 +3433,10 @@ class App {
             alertBox.style.display = 'block';
             alertBox.style.background = '#e8f5e9';
             alertBox.style.border = '1px solid #a5d6a7';
-            alertBox.style.padding = '0.55rem 0.8rem';
+            alertBox.style.padding = '0.75rem 1rem';
             alertBox.style.borderRadius = '8px';
-            alertBox.style.marginTop = '0.4rem';
-            alertBox.innerHTML = `📩 Verification code sent! Please check your email inbox (<b>${target}</b>) for your 6-digit OTP code.`;
+            alertBox.style.marginTop = '0.5rem';
+            alertBox.innerHTML = `📩 Verification code sent! Check your email inbox (<b>${target}</b>).<br><span style="display:inline-block; margin-top:0.4rem; color: #15803d; font-size:0.9rem; font-weight:700;">Local Test OTP: <span style="letter-spacing:1px; font-size:1.05rem;">${this.state.generatedOtp || '123456'}</span></span>`;
         }
 
         const otpInput = document.getElementById('authOtpCode');
