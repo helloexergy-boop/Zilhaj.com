@@ -3718,13 +3718,12 @@ class App {
             }
 
             const userPayload = data.user || { name, email, role: 'ROLE_USER' };
-            this.state.currentUser = userPayload;
-            localStorage.setItem('umrah_user', JSON.stringify(userPayload));
-            this.renderAuthNav();
-            this.closeModal();
-
+            
+            // Do NOT auto-login. Force user to manually log in for security validation.
+            this.openAuthModal('login');
+            
             // SHOW SUCCESS MODAL ONLY UPON SUCCESSFUL ACCOUNT CREATION!
-            this.showSuccessModal('✦ Account Created Successfully!', `Welcome to Umrah Travels, ${userPayload.name}! Your account has been created and verified successfully.`);
+            this.showSuccessModal('✦ Account Created Successfully!', `Welcome to Umrah Travels, ${userPayload.name}! Your account has been created and verified successfully. Please log in with your email and password to continue.`);
         } catch (err) {
             console.error('Registration error:', err);
             this.showFormError('Could not connect to registration server.');
