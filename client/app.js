@@ -4080,15 +4080,6 @@ class App {
         this.state.otpVerified = false;
         this.state.generatedOtp = null;
 
-        const modal = document.getElementById('modalCard');
-        if (modal) {
-            modal.style.maxWidth = '980px';
-            modal.style.padding = '0';
-            modal.style.borderRadius = '24px';
-            modal.style.overflow = 'hidden';
-            modal.style.boxShadow = '0 25px 60px rgba(0,0,0,0.25)';
-        }
-
         this.openModal(`
             <div class="auth-split-modal" style="display: flex; min-height: 580px; width: 100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #ffffff; box-sizing: border-box; overflow: hidden;">
                 
@@ -4134,10 +4125,10 @@ class App {
                     ${!isForgot ? `
                         <!-- Mode Tabs Switcher -->
                         <div style="display: flex; background: #f1f3f5; border-radius: 12px; padding: 4px; margin-bottom: 1.4rem; border: 1px solid #e9ecef;">
-                            <button type="button" onclick="app.openAuthModal('login')" style="flex: 1; padding: 0.6rem 0; border: none; border-radius: 9px; font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; background: ${isLogin ? '#ffffff' : 'transparent'}; color: ${isLogin ? '#212529' : '#6c757d'}; box-shadow: ${isLogin ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};">
+                            <button type="button" onclick="app.openAuthModal('login')" style="flex: 1; padding: 0.6rem 0; border: none; border-radius: 99px; font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; background: ${isLogin ? '#ffffff' : 'transparent'}; color: ${isLogin ? '#212529' : '#6c757d'}; box-shadow: ${isLogin ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};">
                                 Log In
                             </button>
-                            <button type="button" onclick="app.openAuthModal('register')" style="flex: 1; padding: 0.6rem 0; border: none; border-radius: 9px; font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; background: ${isRegister ? '#ffffff' : 'transparent'}; color: ${isRegister ? '#212529' : '#6c757d'}; box-shadow: ${isRegister ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};">
+                            <button type="button" onclick="app.openAuthModal('register')" style="flex: 1; padding: 0.6rem 0; border: none; border-radius: 99px; font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; background: ${isRegister ? '#ffffff' : 'transparent'}; color: ${isRegister ? '#212529' : '#6c757d'}; box-shadow: ${isRegister ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};">
                                 Sign Up
                             </button>
                         </div>
@@ -4158,11 +4149,6 @@ class App {
                     </div>
 
                     <!-- In-Form Error Alert Container -->
-                    <div id="authFormAlert" style="display: none; background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 0.75rem 0.9rem; margin-bottom: 1.1rem; color: #991b1b; font-size: 0.82rem; font-weight: 600; line-height: 1.45; transition: all 0.2s;">
-                        <div style="display: flex; align-items: flex-start; gap: 0.45rem;">
-                            <span style="font-size: 1rem; line-height: 1;">⚠️</span>
-                            <div id="authFormAlertText" style="flex: 1;"></div>
-                        </div>
                     </div>
 
                     ${isForgot ? `
@@ -4325,6 +4311,16 @@ class App {
 
             </div>
         `);
+
+        const modal = document.getElementById('modalCard');
+        if (modal) {
+            modal.style.maxWidth = '980px';
+            modal.style.width = '92vw';
+            modal.style.padding = '0';
+            modal.style.borderRadius = '24px';
+            modal.style.overflow = 'hidden';
+            modal.style.boxShadow = '0 25px 60px rgba(0,0,0,0.25)';
+        }
     }
 
     checkPasswordStrength(val) {
