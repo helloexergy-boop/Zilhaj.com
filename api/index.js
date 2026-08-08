@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const https = require('https');
+const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const { MongoClient } = require('mongodb');
 
