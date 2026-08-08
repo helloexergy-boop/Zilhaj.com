@@ -539,37 +539,7 @@ class App {
                     </div>
                 `;
             }
-    openModal(content) {
-        this.closeModal();
-        const modalDiv = document.createElement('div');
-        modalDiv.id = 'appGlobalModal';
-        modalDiv.style.position = 'fixed';
-        modalDiv.style.inset = '0';
-        modalDiv.style.zIndex = '99999';
-        modalDiv.style.background = 'rgba(15, 23, 42, 0.75)';
-        modalDiv.style.backdropFilter = 'blur(8px)';
-        modalDiv.style.overflowY = 'auto';
-        modalDiv.style.display = 'flex';
-        modalDiv.style.alignItems = 'center';
-        modalDiv.style.justifyContent = 'center';
-        modalDiv.style.padding = '1.5rem';
-
-        modalDiv.innerHTML = `
-            <div style="background:#ffffff; border-radius:24px; max-width:1400px; width:100%; max-height:92vh; overflow-y:auto; position:relative; box-shadow:0 25px 60px rgba(0,0,0,0.3); border:1.5px solid #dcfce7;">
-                ${content}
-            </div>
-        `;
-        document.body.appendChild(modalDiv);
-        document.body.style.overflow = 'hidden';
-    }
-
-    closeModal() {
-        const existing = document.getElementById('appGlobalModal');
-        if (existing) {
-            existing.remove();
         }
-        document.querySelectorAll('.auth-modal-overlay, .modal-overlay').forEach(el => el.remove());
-        document.body.style.overflow = 'auto';
     }
 
     async login(email, password) {
@@ -2344,7 +2314,7 @@ class App {
                                                 <td><strong style="color:#047857; font-size:1.05rem;">${this.formatCurrency(b.totalPrice || 118750)}</strong></td>
                                                 <td><span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.78rem; font-weight:800; padding:0.3rem 0.75rem; border-radius:99px;">CONFIRMED &amp; PAID</span></td>
                                                 <td>
-                                                    <button type="button" onclick="app.downloadInvoice('${b.id}')" class="btn btn-outline btn-sm" style="font-weight:800; border-radius:8px; cursor:pointer; background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;">📄 Download Voucher PDF</button>
+                                                    <a href="${API_BASE}/invoice/${b.id}" target="_blank" class="btn btn-outline btn-sm" style="font-weight:700; border-radius:8px;">📄 Download Voucher</a>
                                                 </td>
                                             </tr>
                                         `).join('')}
