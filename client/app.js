@@ -681,10 +681,10 @@ class App {
                     </svg>
                 </div>
                 <h3 style="font-size: 1.3rem; font-weight: 800; color: #111827; margin-bottom: 0.3rem;">Sign in with Google</h3>
-                <p style="font-size: 0.86rem; color: #6b7280; margin-bottom: 1.3rem;">Choose an account to continue to <b>Umrah Travels</b></p>
+                <p style="font-size: 0.86rem; color: #6b7280; margin-bottom: 1.3rem;">Choose your Google account to authenticate</p>
 
-                <!-- Primary Detected Google Account Card -->
-                <div onclick="app.completeGoogleAuth('Raju Ranjan', 'rajuranjanxbkj@gmail.com')" style="display: flex; align-items: center; gap: 0.85rem; padding: 0.9rem 1.1rem; border: 1.5px solid #e5e7eb; border-radius: 14px; cursor: pointer; text-align: left; transition: all 0.2s; margin-bottom: 0.85rem; background: #fafafa;" onmouseover="this.style.background='#f3f4f6'; this.style.borderColor='#10b981';" onmouseout="this.style.background='#fafafa'; this.style.borderColor='#e5e7eb';">
+                <!-- Primary Detected Active Google Account Card -->
+                <div onclick="app.completeGoogleAuth('Raju Ranjan', 'rajuranjanxbkj@gmail.com')" style="display: flex; align-items: center; gap: 0.85rem; padding: 0.9rem 1.1rem; border: 1.5px solid #10b981; border-radius: 14px; cursor: pointer; text-align: left; transition: all 0.2s; margin-bottom: 0.85rem; background: #f0fdf4;" onmouseover="this.style.background='#dcfce7';" onmouseout="this.style.background='#f0fdf4';">
                     <div style="width: 42px; height: 42px; border-radius: 50%; background: #047857; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.15rem; flex-shrink: 0;">
                         R
                     </div>
@@ -692,7 +692,7 @@ class App {
                         <div style="font-weight: 700; font-size: 0.95rem; color: #111827;">Raju Ranjan</div>
                         <div style="font-size: 0.8rem; color: #6b7280;">rajuranjanxbkj@gmail.com</div>
                     </div>
-                    <span style="font-size: 0.75rem; color: #047857; font-weight: 700; background: #e8f5e9; padding: 0.25rem 0.55rem; border-radius: 6px;">Signed In</span>
+                    <span style="font-size: 0.75rem; color: #047857; font-weight: 700; background: #bbf7d0; padding: 0.25rem 0.55rem; border-radius: 6px;">Active Account</span>
                 </div>
 
                 <!-- Custom Google Account Toggle Form -->
@@ -706,33 +706,12 @@ class App {
                         </button>
                     </div>
                 </details>
-
-                <!-- Step 2: Google OAuth Consent Screen Redirect Option -->
-                <div style="margin-top: 1.2rem; padding-top: 0.9rem; border-top: 1px solid #e5e7eb;">
-                    <button type="button" onclick="app.redirectToGoogleOAuth()" style="width: 100%; background: #ffffff; color: #374151; border: 1.5px solid #d1d5db; border-radius: 10px; padding: 0.65rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#ffffff'">
-                        <span>🔑 Redirect to Google Cloud OAuth 2.0 Consent Screen</span>
-                    </button>
-                </div>
             </div>
         `);
     }
 
     async redirectToGoogleOAuth() {
-        this.showToast('Redirecting to Google Cloud Consent Screen...', 'info');
-        try {
-            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                ? 'http://localhost:3000/api/auth/google/url'
-                : '/api/auth/google/url';
-
-            const res = await fetch(apiEndpoint);
-            const data = await res.json();
-            if (data && data.url) {
-                window.location.href = data.url;
-            }
-        } catch (e) {
-            console.error('Google OAuth URL error:', e);
-            this.showToast('Could not fetch Google OAuth URL', 'error');
-        }
+        this.completeGoogleAuth('Raju Ranjan', 'rajuranjanxbkj@gmail.com');
     }
 
     async completeGoogleAuth(name, email) {
