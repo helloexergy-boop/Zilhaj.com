@@ -2069,6 +2069,9 @@ class App {
                     <div style="display:flex; flex-direction:column; gap:2.2rem; margin-bottom:3rem;">
                         ${requirements.map(req => {
                             const reqOffers = offers.filter(o => o.requirementId === req.id || !o.requirementId);
+                            const malesCount = req.travelersBreakdown?.males ?? 1;
+                            const femalesCount = req.travelersBreakdown?.females ?? 1;
+                            const childrenCount = req.travelersBreakdown?.children ?? 0;
                             
                             return `
                                 <div style="background:#ffffff; border-radius:24px; border:1.5px solid #dcfce7; box-shadow:0 12px 35px rgba(4,120,87,0.06); padding:2rem; transition:all 0.2s ease;">
@@ -2077,21 +2080,59 @@ class App {
                                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-bottom:1.5px dashed #dcfce7; padding-bottom:1.2rem; margin-bottom:1.4rem;">
                                         <div>
                                             <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem;">
-                                                <span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.75rem; font-weight:800; padding:0.25rem 0.75rem; border-radius:99px; text-transform:uppercase; letter-spacing:0.5px;">Active Package</span>
+                                                <span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.75rem; font-weight:800; padding:0.25rem 0.75rem; border-radius:99px; text-transform:uppercase; letter-spacing:0.5px;">Active Travel Request</span>
                                                 <span style="color:#64748b; font-size:0.82rem; font-weight:700;">ID: ${req.id}</span>
                                             </div>
-                                            <h3 style="font-size:1.45rem; font-weight:900; color:#0f172a; margin:0;">Umrah Package - ${req.preferredDepartureDate || '2026-08-13'}</h3>
+                                            <h3 style="font-size:1.45rem; font-weight:900; color:#0f172a; margin:0;">Umrah Travel Request — ${req.preferredDepartureDate || '2026-08-13'}</h3>
                                         </div>
-                                        <div style="display:flex; align-items:center; gap:1.2rem; color:#475569; font-size:0.9rem; font-weight:700;">
-                                            <span style="display:flex; align-items:center; gap:0.4rem;">📅 ${req.preferredDepartureDate || '2026-08-13'} (${req.durationDays || 18} Days)</span>
-                                            <span style="display:flex; align-items:center; gap:0.4rem;">✈️ ${req.airportCode || 'JED/MED Airport'}</span>
+                                        <div style="display:flex; align-items:center; gap:0.8rem;">
+                                            <button type="button" class="btn-dashboard-action btn-delete" onclick="app.deleteRequirement('${req.id}')" style="font-size:0.85rem; padding:0.5rem 1.1rem;">
+                                                🗑️ Delete Request
+                                            </button>
                                         </div>
+                                    </div>
+
+                                    <!-- COMPLETE USER SUBMITTED REQUEST FORM DETAILS BOX -->
+                                    <div style="background:linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border:1.5px solid #dcfce7; border-radius:18px; padding:1.4rem 1.6rem; margin-bottom:1.8rem;">
+                                        <div style="font-size:0.82rem; font-weight:900; color:#047857; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+                                            📋 SUBMITTED TRAVEL REQUIREMENTS DETAILS
+                                        </div>
+
+                                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; font-size:0.9rem; color:#1e293b;">
+                                            
+                                            <!-- Left Column: Dates, Duration & Hotel Preference -->
+                                            <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                                                <div>📅 <strong>Preferred Departure Date:</strong> <span style="color:#047857; font-weight:800;">${req.preferredDepartureDate || '2026-08-13'}</span></div>
+                                                <div>✈️ <strong>Departure City:</strong> <span style="font-weight:700; color:#0f172a;">${this.escapeHtml(req.departureCity || 'Srinagar / Delhi / Mumbai')}</span></div>
+                                                <div>🏨 <strong>Hotel Star Category:</strong> <span style="font-weight:700; color:#0f172a;">${this.escapeHtml(req.hotelType || '5-Star Luxury')}</span></div>
+                                                <div>⏳ <strong>Package Duration:</strong> <span style="font-weight:700; color:#0f172a;">${req.durationDays || 18} Days Package</span></div>
+                                            </div>
+
+                                            <!-- Right Column: Address, Group Size Breakdown -->
+                                            <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                                                <div>📍 <strong>State &amp; District:</strong> <span style="font-weight:700; color:#0f172a;">${this.escapeHtml(req.state || 'Jammu and Kashmir')}${req.district ? ', ' + this.escapeHtml(req.district) : ''}</span></div>
+                                                <div>🏠 <strong>Full Street Address:</strong> <span style="font-weight:600; color:#475569;">${this.escapeHtml(req.fullAddress || 'House/Flat No., Street, Area...')}</span></div>
+                                                <div>👥 <strong>Group Travelers Breakdown:</strong> 
+                                                    <div style="margin-top:0.3rem; display:inline-flex; align-items:center; gap:0.4rem; background:#ffffff; border:1px solid #a7f3d0; color:#047857; padding:0.35rem 0.85rem; border-radius:10px; font-weight:800; font-size:0.85rem;">
+                                                        👨 ${malesCount} Male &bull; 👩 ${femalesCount} Female &bull; 👶 ${childrenCount} Child = 👥 ${req.travelersCount || 2} Total
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <!-- Additional Notes / Preferences Section -->
+                                        ${req.specialNotes ? `
+                                            <div style="margin-top:1rem; padding-top:0.8rem; border-top:1px dashed #a7f3d0; font-size:0.88rem; color:#334155;">
+                                                📝 <strong>Additional Preferences &amp; Requests:</strong> <span style="color:#475569; font-style:italic;">"${this.escapeHtml(req.specialNotes)}"</span>
+                                            </div>
+                                        ` : ''}
                                     </div>
 
                                     <!-- Available Agent Offers Header -->
                                     <div style="margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:center;">
-                                        <div style="font-size:0.78rem; font-weight:800; color:#047857; text-transform:uppercase; letter-spacing:0.8px;">
-                                            AVAILABLE AGENT OFFERS (${reqOffers.length})
+                                        <div style="font-size:0.82rem; font-weight:900; color:#047857; text-transform:uppercase; letter-spacing:0.8px; display:flex; align-items:center; gap:0.5rem;">
+                                            🏷️ AVAILABLE AGENT OFFERS (${reqOffers.length})
                                         </div>
                                         <div style="font-size:0.82rem; color:#64748b; font-weight:600;">
                                             👈 Scroll horizontally or click arrows to view all offers 👉
