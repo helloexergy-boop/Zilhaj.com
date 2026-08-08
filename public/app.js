@@ -663,64 +663,58 @@ class App {
     }
 
     async loginWithGoogle() {
-        this.closeModal();
-        
-        // Render Google Sign-In Account Selector Modal
-        const card = document.getElementById('modalCard');
-        const content = document.getElementById('modalContent');
-        const backdrop = document.getElementById('modalBackdrop');
+        const modal = document.getElementById('modalCard');
+        if (modal) {
+            modal.style.maxWidth = '440px';
+            modal.style.padding = '1.8rem 1.5rem';
+        }
 
-        if (!card || !content || !backdrop) return;
-
-        card.style.maxWidth = '440px';
-        backdrop.style.display = 'flex';
-
-        content.innerHTML = `
-            <div style="text-align: center; padding: 0.5rem 0.2rem;">
+        this.openModal(`
+            <div style="text-align: center; font-family: 'Inter', -apple-system, sans-serif;">
                 <!-- Google G Logo -->
                 <div style="margin-bottom: 0.8rem;">
-                    <svg width="42" height="42" viewBox="0 0 24 24">
+                    <svg width="48" height="48" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                         <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z"/>
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                     </svg>
                 </div>
-                <h3 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin-bottom: 0.3rem;">Sign in with Google</h3>
-                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1.2rem;">Choose an account to continue to <b>Umrah Travels</b></p>
+                <h3 style="font-size: 1.3rem; font-weight: 800; color: #111827; margin-bottom: 0.3rem;">Sign in with Google</h3>
+                <p style="font-size: 0.86rem; color: #6b7280; margin-bottom: 1.3rem;">Choose an account to continue to <b>Umrah Travels</b></p>
 
                 <!-- Primary Detected Google Account Card -->
-                <div onclick="app.completeGoogleAuth('Raju Ranjan', 'rajuranjanxbkj@gmail.com')" style="display: flex; align-items: center; gap: 0.85rem; padding: 0.85rem 1rem; border: 1.5px solid #e5e7eb; border-radius: 12px; cursor: pointer; text-align: left; transition: all 0.2s; margin-bottom: 0.75rem; background: #fafafa;" onmouseover="this.style.background='#f3f4f6'; this.style.borderColor='#10b981';" onmouseout="this.style.background='#fafafa'; this.style.borderColor='#e5e7eb';">
-                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #047857; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0;">
+                <div onclick="app.completeGoogleAuth('Raju Ranjan', 'rajuranjanxbkj@gmail.com')" style="display: flex; align-items: center; gap: 0.85rem; padding: 0.9rem 1.1rem; border: 1.5px solid #e5e7eb; border-radius: 14px; cursor: pointer; text-align: left; transition: all 0.2s; margin-bottom: 0.85rem; background: #fafafa;" onmouseover="this.style.background='#f3f4f6'; this.style.borderColor='#10b981';" onmouseout="this.style.background='#fafafa'; this.style.borderColor='#e5e7eb';">
+                    <div style="width: 42px; height: 42px; border-radius: 50%; background: #047857; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.15rem; flex-shrink: 0;">
                         R
                     </div>
                     <div style="flex: 1; min-width: 0;">
-                        <div style="font-weight: 700; font-size: 0.92rem; color: #111827;">Raju Ranjan</div>
-                        <div style="font-size: 0.78rem; color: #6b7280; truncate;">rajuranjanxbkj@gmail.com</div>
+                        <div style="font-weight: 700; font-size: 0.95rem; color: #111827;">Raju Ranjan</div>
+                        <div style="font-size: 0.8rem; color: #6b7280;">rajuranjanxbkj@gmail.com</div>
                     </div>
-                    <span style="font-size: 0.75rem; color: #047857; font-weight: 700; background: #e8f5e9; padding: 0.2rem 0.5rem; border-radius: 6px;">Signed In</span>
+                    <span style="font-size: 0.75rem; color: #047857; font-weight: 700; background: #e8f5e9; padding: 0.25rem 0.55rem; border-radius: 6px;">Signed In</span>
                 </div>
 
                 <!-- Custom Google Account Toggle Form -->
-                <details style="text-align: left; font-size: 0.82rem; color: #374151; margin-top: 0.8rem;">
+                <details style="text-align: left; font-size: 0.85rem; color: #374151; margin-top: 0.8rem;">
                     <summary style="cursor: pointer; font-weight: 700; color: #047857; padding: 0.4rem 0;">+ Use another Google account</summary>
-                    <div style="margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                        <input type="text" id="customGoogleName" placeholder="Your Google Name (e.g. Ali Khan)" style="width: 100%; height: 38px; padding: 0 0.7rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem;">
-                        <input type="email" id="customGoogleEmail" placeholder="Your Google Email (e.g. ali@gmail.com)" style="width: 100%; height: 38px; padding: 0 0.7rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem;">
-                        <button type="button" onclick="const n=document.getElementById('customGoogleName').value; const e=document.getElementById('customGoogleEmail').value; if(e) app.completeGoogleAuth(n||e.split('@')[0], e);" style="height: 38px; background: #047857; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 0.3rem;">
+                    <div style="margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.55rem;">
+                        <input type="text" id="customGoogleName" placeholder="Your Google Name (e.g. Ali Khan)" style="width: 100%; height: 40px; padding: 0 0.8rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box;">
+                        <input type="email" id="customGoogleEmail" placeholder="Your Google Email (e.g. ali@gmail.com)" style="width: 100%; height: 40px; padding: 0 0.8rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box;">
+                        <button type="button" onclick="const n=document.getElementById('customGoogleName').value; const e=document.getElementById('customGoogleEmail').value; if(e) app.completeGoogleAuth(n||e.split('@')[0], e);" style="height: 40px; background: #047857; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 0.3rem;">
                             Continue with this Google Account
                         </button>
                     </div>
                 </details>
 
                 <!-- Step 2: Google OAuth Consent Screen Redirect Option -->
-                <div style="margin-top: 1.1rem; padding-top: 0.8rem; border-top: 1px solid #e5e7eb;">
-                    <button type="button" onclick="app.redirectToGoogleOAuth()" style="width: 100%; background: #ffffff; color: #374151; border: 1px solid #d1d5db; border-radius: 8px; padding: 0.55rem; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#ffffff'">
+                <div style="margin-top: 1.2rem; padding-top: 0.9rem; border-top: 1px solid #e5e7eb;">
+                    <button type="button" onclick="app.redirectToGoogleOAuth()" style="width: 100%; background: #ffffff; color: #374151; border: 1.5px solid #d1d5db; border-radius: 10px; padding: 0.65rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#ffffff'">
                         <span>🔑 Redirect to Google Cloud OAuth 2.0 Consent Screen</span>
                     </button>
                 </div>
             </div>
-        `;
+        `);
     }
 
     async redirectToGoogleOAuth() {
