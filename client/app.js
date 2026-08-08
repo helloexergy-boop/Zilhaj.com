@@ -4149,7 +4149,7 @@ class App {
                     </div>
 
                     <!-- In-Form Error Alert Container -->
-                    </div>
+                    <div id="authAlertBox" style="display: none; margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.85rem; font-weight: 600; text-align: center;"></div>
 
                     ${isForgot ? `
                         <!-- FORGOT PASSWORD FORM -->
