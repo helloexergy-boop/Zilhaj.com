@@ -751,7 +751,10 @@ app.post('/api/auth/google', async (req, res) => {
 // ----------------------------------------------------
 // 🔄 RESEND OTP API (Rate Limited: Max 3 per hour)
 // ----------------------------------------------------
-app.post('/api/auth/resend-otp', async (req, res) => {
+// ----------------------------------------------------
+// 📩 SEND & RESEND OTP API (Works for New Signups & Existing Users)
+// ----------------------------------------------------
+app.post(['/api/auth/send-otp', '/api/auth/resend-otp'], async (req, res) => {
     try {
         const { email } = req.body;
         if (!email) return res.status(400).json({ error: 'Email address is required.' });
@@ -768,25 +771,22 @@ app.post('/api/auth/resend-otp', async (req, res) => {
             } catch (err) {}
         }
 
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
         const now = Date.now();
-        if (!user.lastResendWindow || (now - user.lastResendWindow > 3600000)) {
-            user.resendAttempts = 0;
-            user.lastResendWindow = now;
-        }
-
-        if (user.resendAttempts >= 3) {
-            return res.status(400).json({ error: 'Maximum OTP resend limit reached for this hour' });
-        }
-
-        user.resendAttempts += 1;
         const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
-        user.otpCode = newOtp;
-        user.otpExpiry = now + 10 * 60 * 1000;
-        inMemoryUsers.set(cleanEmail, user);
+
+        if (user) {
+            user.otpCode = newOtp;
+            user.otpExpiry = now + 10 * 60 * 1000;
+            inMemoryUsers.set(cleanEmail, user);
+        } else {
+            const transientUser = {
+                email: cleanEmail,
+                otpCode: newOtp,
+                otpExpiry: now + 10 * 60 * 1000,
+                createdAt: new Date()
+            };
+            inMemoryUsers.set(cleanEmail, transientUser);
+        }
 
         setImmediate(async () => {
             const sendWithTransporter = async (forceIpv6 = false) => {
@@ -796,25 +796,42 @@ app.post('/api/auth/resend-otp', async (req, res) => {
                     await transporter.sendMail({
                         from: `"Umrah Travels" <${sender}>`,
                         to: cleanEmail,
-                        subject: `New Verification Code: ${newOtp} - Umrah Travels`,
-                        html: `<p>Your new 6-digit verification code is: <b>${newOtp}</b></p>`
+                        subject: `Your Account Verification Code: ${newOtp} - Umrah Travels`,
+                        html: `
+                            <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background: #ffffff;">
+                                <div style="text-align: center; margin-bottom: 16px;">
+                                    <span style="font-size: 36px;">🕋</span>
+                                    <h2 style="color: #0f172a; margin: 8px 0 0 0; font-weight: 800;">Umrah Travels</h2>
+                                    <p style="color: #64748b; font-size: 13px; margin: 4px 0 0 0;">Official Pilgrim Account Verification</p>
+                                </div>
+                                <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; text-align: center; border: 1.5px solid #bbf7d0; margin: 18px 0;">
+                                    <p style="color: #166534; font-size: 13px; font-weight: 700; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px;">Your 6-Digit OTP Verification Code:</p>
+                                    <h1 style="font-size: 38px; font-weight: 900; color: #15803d; letter-spacing: 8px; margin: 0; font-family: monospace;">${newOtp}</h1>
+                                    <p style="color: #166534; font-size: 12px; margin-top: 10px; font-weight: 600;">Valid for 10 minutes. Do not share this code with anyone.</p>
+                                </div>
+                                <p style="color: #94a3b8; font-size: 11px; text-align: center; margin-top: 16px;">Sent securely by Umrah Travels Platform • support@goexergy.com</p>
+                            </div>
+                        `
                     });
+                    console.log(`[AUTH] OTP email sent successfully to ${cleanEmail}`);
                 }
             };
 
             try {
                 await sendWithTransporter(false);
             } catch (err) {
-                if (err.code === 'ETIMEDOUT' || (err.message && err.message.includes('ETIMEDOUT'))) {
-                    try {
-                        await sendWithTransporter(true);
-                    } catch (fallbackErr) {}
+                console.warn('[AUTH] IPv4 SMTP error, trying IPv6 fallback:', err.message);
+                try {
+                    await sendWithTransporter(true);
+                } catch (fallbackErr) {
+                    console.error('[AUTH] Nodemailer delivery error:', fallbackErr.message);
                 }
             }
         });
 
-        res.json({ success: true, message: `New OTP code sent to ${cleanEmail}`, otp: newOtp });
+        res.json({ success: true, message: `Verification code sent to ${cleanEmail}`, otp: newOtp });
     } catch (err) {
+        console.error('Send OTP API error:', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
