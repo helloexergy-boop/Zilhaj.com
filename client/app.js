@@ -4225,15 +4225,15 @@ class App {
         this.state.generatedOtp = null;
 
         this.openModal(`
-            <div style="display:flex; width:100%; height:100%; background:#ffffff; box-sizing:border-box; overflow:hidden; position:relative; font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;">
+            <div style="display:flex; width:100vw; height:100vh; background:#ffffff; box-sizing:border-box; overflow:hidden; position:relative; font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;">
                 
                 <!-- TOP RIGHT CLOSE BUTTON -->
-                <button type="button" onclick="app.closeModal()" title="Close" style="position:absolute; top:18px; right:18px; z-index:99; background:#ffffff; border:1px solid #cbd5e1; width:36px; height:36px; border-radius:50%; font-size:1rem; font-weight:800; color:#475569; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 12px rgba(0,0,0,0.15); transition:all 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform=''">
+                <button type="button" onclick="app.closeModal()" title="Close" style="position:absolute; top:24px; right:24px; z-index:9999; background:#ffffff; border:1px solid #cbd5e1; width:38px; height:38px; border-radius:50%; font-size:1.05rem; font-weight:800; color:#475569; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(0,0,0,0.18); transition:all 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform=''">
                     ✕
                 </button>
 
-                <!-- LEFT COLUMN: AUTHENTICATION FORM PANEL (MATCHING EXACT SCREENSHOTS) -->
-                <div style="flex:1.05; background:#ffffff; padding:2rem 3rem 1.6rem; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; overflow:hidden; height:100%;">
+                <!-- LEFT COLUMN: AUTHENTICATION FORM PANEL (COMPACT FULL SCREEN PAGE) -->
+                <div style="flex:1; height:100vh; background:#ffffff; padding:2.2rem 3.5rem 1.8rem; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; overflow-y:auto;">
                     
                     <!-- TOP HEADER ROW -->
                     <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-shrink:0;">
@@ -4247,7 +4247,7 @@ class App {
                         </div>
 
                         <!-- Right Switch Link / Outline Button -->
-                        <div style="margin-right:3rem;">
+                        <div style="margin-right:3.2rem;">
                             ${isRegister ? `
                                 <span style="font-size:0.82rem; color:#64748b; font-weight:500;">Already have an account?</span>
                                 <button type="button" onclick="app.openAuthModal('login')" style="border:1px solid #cbd5e1; border-radius:8px; padding:0.4rem 1.1rem; font-weight:700; background:#ffffff; color:#0f172a; font-size:0.82rem; cursor:pointer; margin-left:0.4rem; transition:all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#ffffff'">Login</button>
@@ -4259,34 +4259,34 @@ class App {
                         </div>
                     </div>
 
-                    <!-- CENTERED FORM CONTAINER -->
-                    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; max-width:400px; width:100%; margin:0 auto; box-sizing:border-box; overflow-y:auto; padding:0.5rem 0;">
+                    <!-- CENTERED FORM CONTAINER (COMPACT SO EVERYTHING ADJUSTS ON SAME PAGE) -->
+                    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; max-width:380px; width:100%; margin:0 auto; box-sizing:border-box; padding:0.3rem 0;">
                         
                         <!-- AVATAR BADGE TOP -->
-                        <div style="margin-bottom:0.6rem; text-align:center; flex-shrink:0;">
-                            <div style="width:48px; height:48px; border-radius:50%; background:#e0e7ff; display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:#4338ca; margin:0 auto;">
+                        <div style="margin-bottom:0.4rem; text-align:center; flex-shrink:0;">
+                            <div style="width:38px; height:38px; border-radius:50%; background:#e0e7ff; display:flex; align-items:center; justify-content:center; font-size:1.1rem; color:#4338ca; margin:0 auto;">
                                 👤
                             </div>
                         </div>
 
                         <!-- HEADING & SUBTITLE -->
                         ${isRegister ? `
-                            <h1 style="font-size:2.2rem; font-weight:900; color:#0f172a; text-align:center; margin:0 0 0.25rem 0; letter-spacing:-0.03em; line-height:1.1; flex-shrink:0;">Create your<br>account</h1>
-                            <p style="font-size:0.85rem; color:#64748b; text-align:center; margin:0 0 1rem 0; flex-shrink:0;">Get started with your spiritual journey in minutes.</p>
+                            <h1 style="font-size:1.55rem; font-weight:800; color:#0f172a; text-align:center; margin:0 0 0.15rem 0; letter-spacing:-0.02em; flex-shrink:0;">Create your account</h1>
+                            <p style="font-size:0.78rem; color:#64748b; text-align:center; margin:0 0 0.7rem 0; flex-shrink:0;">Get started with your spiritual journey in minutes.</p>
                         ` : ''}
                         ${isLogin ? `
-                            <h1 style="font-size:2.3rem; font-weight:900; color:#0f172a; text-align:center; margin:0 0 0.25rem 0; letter-spacing:-0.03em; line-height:1.1; flex-shrink:0;">Welcome<br>back!</h1>
-                            <p style="font-size:0.85rem; color:#64748b; text-align:center; margin:0 0 1rem 0; flex-shrink:0;">Sign in to continue where your left off.</p>
+                            <h1 style="font-size:1.65rem; font-weight:900; color:#0f172a; text-align:center; margin:0 0 0.15rem 0; letter-spacing:-0.02em; flex-shrink:0;">Welcome back!</h1>
+                            <p style="font-size:0.78rem; color:#64748b; text-align:center; margin:0 0 0.7rem 0; flex-shrink:0;">Sign in to continue where your left off.</p>
                         ` : ''}
 
                         <!-- IN-FORM ALERT CONTAINERS -->
-                        <div id="authFormAlert" style="display:none; margin-bottom:0.6rem; font-size:0.8rem;"></div>
-                        <div id="authAlertBox" style="display:none; margin-bottom:0.6rem; font-size:0.8rem;"></div>
+                        <div id="authFormAlert" style="display:none; margin-bottom:0.4rem; font-size:0.76rem;"></div>
+                        <div id="authAlertBox" style="display:none; margin-bottom:0.4rem; font-size:0.76rem;"></div>
 
                         ${!isForgot ? `
                             <!-- SOCIAL LOGIN BUTTONS -->
-                            <button type="button" onclick="app.loginWithGoogle()" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:10px; background:#ffffff; display:flex; align-items:center; justify-content:center; gap:0.6rem; cursor:pointer; font-weight:700; font-size:0.86rem; color:#0f172a; margin-bottom:0.5rem; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
-                                <svg width="18" height="18" viewBox="0 0 24 24">
+                            <button type="button" onclick="app.loginWithGoogle()" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; background:#ffffff; display:flex; align-items:center; justify-content:center; gap:0.5rem; cursor:pointer; font-weight:700; font-size:0.82rem; color:#0f172a; margin-bottom:0.35rem; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
+                                <svg width="16" height="16" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                                     <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z"/>
@@ -4295,15 +4295,15 @@ class App {
                                 <span>${isRegister ? 'Sign up with Google' : 'Login with Google'}</span>
                             </button>
 
-                            <button type="button" onclick="app.showToast('Apple Sign-In feature available soon', 'info')" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:10px; background:#ffffff; display:flex; align-items:center; justify-content:center; gap:0.6rem; cursor:pointer; font-weight:700; font-size:0.86rem; color:#0f172a; margin-bottom:0.7rem; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
-                                <span style="font-size:1.1rem; line-height:1;"></span>
+                            <button type="button" onclick="app.showToast('Apple Sign-In feature available soon', 'info')" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; background:#ffffff; display:flex; align-items:center; justify-content:center; gap:0.5rem; cursor:pointer; font-weight:700; font-size:0.82rem; color:#0f172a; margin-bottom:0.45rem; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
+                                <span style="font-size:0.95rem; line-height:1;"></span>
                                 <span>${isRegister ? 'Sign up with Apple' : 'Login with Apple'}</span>
                             </button>
 
                             <!-- DIVIDER -->
-                            <div style="display:flex; align-items:center; margin-bottom:0.7rem; gap:0.6rem; flex-shrink:0;">
+                            <div style="display:flex; align-items:center; margin-bottom:0.45rem; gap:0.45rem; flex-shrink:0;">
                                 <div style="flex:1; height:1px; background:#e2e8f0;"></div>
-                                <span style="font-size:0.68rem; color:#94a3b8; font-weight:700; text-transform:uppercase;">OR</span>
+                                <span style="font-size:0.64rem; color:#94a3b8; font-weight:700; text-transform:uppercase;">OR</span>
                                 <div style="flex:1; height:1px; background:#e2e8f0;"></div>
                             </div>
                         ` : ''}
@@ -4312,24 +4312,24 @@ class App {
                         <form onsubmit="event.preventDefault(); app.handleAuthSubmit('${mode}');" style="display:flex; flex-direction:column; flex-shrink:0;">
                             ${isRegister ? `
                                 <!-- FULL NAME -->
-                                <input type="text" id="authName" required placeholder="Full name" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:10px; padding:0 1rem; font-size:0.88rem; box-sizing:border-box; margin-bottom:0.55rem; background:#ffffff; color:#0f172a; font-weight:500;">
+                                <input type="text" id="authName" required placeholder="Full name" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; padding:0 0.85rem; font-size:0.82rem; box-sizing:border-box; margin-bottom:0.4rem; background:#ffffff; color:#0f172a; font-weight:500;">
 
                                 <!-- EMAIL ADDRESS WITH INLINE OTP BUTTON -->
-                                <div style="position:relative; margin-bottom:0.55rem;">
-                                    <input type="email" id="authEmail" required placeholder="Email address" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:10px; padding:0 5.6rem 0 1rem; font-size:0.88rem; box-sizing:border-box; background:#ffffff; color:#0f172a; font-weight:500;">
-                                    <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="position:absolute; right:4px; top:4px; height:34px; padding:0 0.85rem; background:#3d5245; color:#ffffff; border:none; border-radius:7px; font-size:0.76rem; font-weight:700; cursor:pointer;">
+                                <div style="position:relative; margin-bottom:0.4rem;">
+                                    <input type="email" id="authEmail" required placeholder="Email address" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; padding:0 5rem 0 0.85rem; font-size:0.82rem; box-sizing:border-box; background:#ffffff; color:#0f172a; font-weight:500;">
+                                    <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="position:absolute; right:3px; top:3px; height:30px; padding:0 0.7rem; background:#3d5245; color:#ffffff; border:none; border-radius:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">
                                         Send OTP
                                     </button>
                                 </div>
 
                                 <!-- VERIFICATION CODE BOX -->
-                                <div id="otpSectionBox" style="margin-bottom:0.55rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:0.4rem 0.75rem;">
+                                <div id="otpSectionBox" style="margin-bottom:0.4rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:0.3rem 0.6rem;">
                                     <div style="display:flex; justify-content:space-between; align-items:center;">
                                         <div>
-                                            <label style="font-size:0.68rem; color:#166534; font-weight:700; display:block;">Verification Code</label>
-                                            <input type="text" id="authOtpCode" placeholder="0 0 0 0" maxlength="6" style="width:100px; border:none; outline:none; font-size:0.9rem; font-weight:800; letter-spacing:3px; color:#0f172a; background:transparent;">
+                                            <label style="font-size:0.64rem; color:#166534; font-weight:700; display:block;">Verification Code</label>
+                                            <input type="text" id="authOtpCode" placeholder="0 0 0 0" maxlength="6" style="width:90px; border:none; outline:none; font-size:0.84rem; font-weight:800; letter-spacing:3px; color:#0f172a; background:transparent;">
                                         </div>
-                                        <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="height:30px; padding:0 0.9rem; background:#3d5245; color:#ffffff; border:none; border-radius:7px; font-size:0.72rem; font-weight:800; cursor:pointer;">
+                                        <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="height:26px; padding:0 0.75rem; background:#3d5245; color:#ffffff; border:none; border-radius:6px; font-size:0.68rem; font-weight:800; cursor:pointer;">
                                             VERIFY
                                         </button>
                                     </div>
@@ -4337,29 +4337,29 @@ class App {
                                 </div>
 
                                 <!-- CREATE PASSWORD -->
-                                <div style="position:relative; margin-bottom:0.75rem;">
-                                    <input type="password" id="authPassword" required placeholder="Create password" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:10px; padding:0 2.4rem 0 1rem; font-size:0.88rem; box-sizing:border-box; background:#ffffff; color:#0f172a;" onkeyup="app.checkPasswordStrength(this.value)">
-                                    <button type="button" id="eyeRegPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeRegPass')" style="position:absolute; right:0.85rem; top:11px; background:none; border:none; cursor:pointer; font-size:1rem; color:#64748b;">👁️</button>
+                                <div style="position:relative; margin-bottom:0.5rem;">
+                                    <input type="password" id="authPassword" required placeholder="Create password" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; padding:0 2rem 0 0.85rem; font-size:0.82rem; box-sizing:border-box; background:#ffffff; color:#0f172a;" onkeyup="app.checkPasswordStrength(this.value)">
+                                    <button type="button" id="eyeRegPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeRegPass')" style="position:absolute; right:0.75rem; top:8px; background:none; border:none; cursor:pointer; font-size:0.9rem; color:#64748b;">👁️</button>
                                 </div>
                             ` : `
                                 <!-- LOGIN EMAIL -->
-                                <input type="text" id="authEmail" required placeholder="Email address" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:10px; padding:0 1rem; font-size:0.88rem; box-sizing:border-box; margin-bottom:0.6rem; background:#ffffff; color:#0f172a; font-weight:500;">
+                                <input type="text" id="authEmail" required placeholder="Email address" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; padding:0 0.85rem; font-size:0.82rem; box-sizing:border-box; margin-bottom:0.45rem; background:#ffffff; color:#0f172a; font-weight:500;">
 
                                 <!-- LOGIN PASSWORD -->
-                                <div style="position:relative; margin-bottom:0.75rem;">
-                                    <input type="password" id="authPassword" required placeholder="Password" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:10px; padding:0 2.4rem 0 1rem; font-size:0.88rem; box-sizing:border-box; background:#ffffff; color:#0f172a;">
-                                    <button type="button" id="eyeLoginPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeLoginPass')" style="position:absolute; right:0.85rem; top:11px; background:none; border:none; cursor:pointer; font-size:1rem; color:#64748b;">👁️</button>
+                                <div style="position:relative; margin-bottom:0.5rem;">
+                                    <input type="password" id="authPassword" required placeholder="Password" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; padding:0 2rem 0 0.85rem; font-size:0.82rem; box-sizing:border-box; background:#ffffff; color:#0f172a;">
+                                    <button type="button" id="eyeLoginPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeLoginPass')" style="position:absolute; right:0.75rem; top:8px; background:none; border:none; cursor:pointer; font-size:0.9rem; color:#64748b;">👁️</button>
                                 </div>
                             `}
 
                             <!-- SUBMIT BUTTON -->
-                            <button type="submit" class="auth-submit-btn" style="width:100%; height:44px; background:#3d5245; color:#ffffff; border:none; border-radius:10px; font-weight:800; font-size:0.9rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#2b3c31'" onmouseout="this.style.background='#3d5245'">
+                            <button type="submit" class="auth-submit-btn" style="width:100%; height:38px; background:#3d5245; color:#ffffff; border:none; border-radius:8px; font-weight:800; font-size:0.85rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#2b3c31'" onmouseout="this.style.background='#3d5245'">
                                 ${isRegister ? 'Sign up with Email' : 'Login with Email'}
                             </button>
                         </form>
 
                         ${isLogin ? `
-                            <div style="font-size:0.75rem; color:#64748b; text-align:center; margin-top:0.55rem; flex-shrink:0;">
+                            <div style="font-size:0.72rem; color:#64748b; text-align:center; margin-top:0.45rem; flex-shrink:0;">
                                 By continuing, you acknowledge Zilhaj <a href="#" onclick="event.preventDefault(); app.openPrivacyPolicyModal();" style="color:#0f172a; text-decoration:underline;">Privacy Policy</a>.
                             </div>
                         ` : ''}
@@ -4367,45 +4367,45 @@ class App {
                     </div>
 
                     <!-- FIXED BOTTOM FOOTER METADATA -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; font-size:0.76rem; color:#64748b; padding-top:0.4rem; flex-shrink:0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; font-size:0.74rem; color:#64748b; padding-top:0.3rem; flex-shrink:0;">
                         <div>© 2024 Zilhaj Umrah and Hajj Travel.</div>
                         <div style="cursor:pointer; font-weight:600;">🌐 ENG ˅</div>
                     </div>
 
                 </div>
 
-                <!-- RIGHT COLUMN: SACRED HERO PHOTO TAKING FULL HEIGHT -->
-                <div style="flex:1; position:relative; overflow:hidden; height:100%;">
+                <!-- RIGHT COLUMN: SACRED HERO PHOTO TAKING FULL SCREEN HEIGHT -->
+                <div style="flex:1; height:100vh; position:relative; overflow:hidden;">
                     ${isRegister ? `
                         <!-- SCENIC HARAM MOUNTAIN HERO (SIGNUP) -->
-                        <div style="position:absolute; inset:0; background: url('https://images.pexels.com/photos/18996760/pexels-photo-18996760.jpeg') center center / cover no-repeat; padding:2.8rem; display:flex; flex-direction:column; justify-content:flex-end; color:#ffffff; box-sizing:border-box;">
+                        <div style="position:absolute; inset:0; background: url('https://images.pexels.com/photos/18996760/pexels-photo-18996760.jpeg') center center / cover no-repeat; padding:3rem; display:flex; flex-direction:column; justify-content:flex-end; color:#ffffff; box-sizing:border-box;">
                             <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.75) 100%);"></div>
-                            <div style="position:relative; z-index:2; max-width:440px;">
-                                <h2 style="font-size:clamp(1.8rem, 2.8vw, 2.3rem); font-weight:900; line-height:1.15; color:#ffffff; margin:0 0 0.75rem 0; letter-spacing:-0.02em;">
+                            <div style="position:relative; z-index:2; max-width:460px;">
+                                <h2 style="font-size:clamp(1.9rem, 3vw, 2.4rem); font-weight:900; line-height:1.15; color:#ffffff; margin:0 0 0.8rem 0; letter-spacing:-0.02em;">
                                     Begin your sacred journey with peace of mind.
                                 </h2>
-                                <p style="font-size:0.88rem; color:rgba(255,255,255,0.92); line-height:1.55; font-weight:400; margin:0;">
+                                <p style="font-size:0.9rem; color:rgba(255,255,255,0.92); line-height:1.55; font-weight:400; margin:0;">
                                     Join thousands of pilgrims who have trusted our premium services for a fulfilling and spiritually clear experience.
                                 </p>
                             </div>
                         </div>
                     ` : `
                         <!-- SACRED HOLY KAABA AT NIGHT HERO PHOTO (LOGIN) -->
-                        <div style="position:absolute; inset:0; background: url('https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg') center center / cover no-repeat; padding:2.8rem; display:flex; flex-direction:column; justify-content:flex-end; color:#ffffff; box-sizing:border-box;">
+                        <div style="position:absolute; inset:0; background: url('https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg') center center / cover no-repeat; padding:3rem; display:flex; flex-direction:column; justify-content:flex-end; color:#ffffff; box-sizing:border-box;">
                             <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(11,31,23,0.3) 0%, rgba(11,31,23,0.85) 100%);"></div>
                             
                             <!-- FLOATING GLASS CARD OVER SACRED KAABA PHOTO -->
-                            <div style="position:relative; z-index:2; background:rgba(15, 23, 42, 0.72); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-radius:18px; padding:1.8rem; border:1px solid rgba(255, 255, 255, 0.2); max-width:400px; box-shadow:0 12px 35px rgba(0,0,0,0.35);">
-                                <h2 style="font-size:1.8rem; font-weight:900; color:#F9E07A; line-height:1.2; margin:0 0 0.5rem 0; letter-spacing:-0.02em;">
+                            <div style="position:relative; z-index:2; background:rgba(15, 23, 42, 0.72); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-radius:18px; padding:1.8rem; border:1px solid rgba(255, 255, 255, 0.2); max-width:420px; box-shadow:0 12px 35px rgba(0,0,0,0.35);">
+                                <h2 style="font-size:1.85rem; font-weight:900; color:#F9E07A; line-height:1.2; margin:0 0 0.5rem 0; letter-spacing:-0.02em;">
                                     Begin Your<br>Spiritual Journey
                                 </h2>
-                                <p style="font-size:0.86rem; color:rgba(255,255,255,0.92); line-height:1.55; font-weight:400; margin:0;">
+                                <p style="font-size:0.88rem; color:rgba(255,255,255,0.92); line-height:1.55; font-weight:400; margin:0;">
                                     Experience peace of mind with our meticulously planned, premium pilgrimage services designed for your spiritual clarity and comfort.
                                 </p>
                             </div>
 
                             <!-- FLOATING AIRPLANE BADGE BOTTOM RIGHT -->
-                            <div style="position:absolute; bottom:2rem; right:2rem; z-index:2; width:46px; height:46px; background:#ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#334155; box-shadow:0 10px 25px rgba(0,0,0,0.25);">
+                            <div style="position:absolute; bottom:2.5rem; right:2.5rem; z-index:2; width:48px; height:48px; background:#ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.25rem; color:#334155; box-shadow:0 10px 25px rgba(0,0,0,0.25);">
                                 ✈️
                             </div>
                         </div>
@@ -4414,13 +4414,13 @@ class App {
 
             </div>
         `, false, {
-            width: '96vw',
-            maxWidth: '1200px',
-            height: '780px',
-            maxHeight: '94vh',
-            borderRadius: '28px',
+            width: '100vw',
+            maxWidth: '100vw',
+            height: '100vh',
+            maxHeight: '100vh',
+            borderRadius: '0px',
             overflowY: 'hidden',
-            boxShadow: '0 30px 80px rgba(0,0,0,0.45)'
+            boxShadow: 'none'
         });
 
         const modal = document.getElementById('modalCard');
