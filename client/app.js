@@ -60,6 +60,10 @@ class App {
             }
         }
 
+        // Initialize theme
+        const savedTheme = localStorage.getItem('umrah_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
         this.renderAuthNav();
 
         // Populate initial packages immediately from localStorage or default
@@ -829,6 +833,15 @@ class App {
         if (toggleBtn) toggleBtn.classList.toggle('active');
     }
 
+    toggleTheme() {
+        const html = document.documentElement;
+        const current = html.getAttribute('data-theme') || 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('umrah_theme', next);
+        this.showToast(next === 'dark' ? '🌙 Dark mode enabled' : '☀️ Light mode enabled', 'success');
+    }
+
     navigate(page) {
         this.state.currentPage = page;
         const main = document.getElementById('mainContainer');
@@ -879,19 +892,19 @@ class App {
     }
 
     initHeroVideoPlaylist() {
+        this.initHeroSlideshow();
+    }
+
+    initHeroSlideshow() {
         const slideA = document.getElementById('heroSlideLayerA');
         const slideB = document.getElementById('heroSlideLayerB');
-        const videoBg = document.getElementById('heroBgVideo');
         if (!slideA || !slideB) return;
 
         const mediaList = [
-            { type: 'image', url: 'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg' },
-            { type: 'video', url: 'hero-video-3.mp4' },
-            { type: 'image', url: 'https://images.pexels.com/photos/38498727/pexels-photo-38498727.jpeg' },
-            { type: 'video', url: 'hero-video-2.mp4' },
-            { type: 'image', url: 'https://images.pexels.com/photos/28209449/pexels-photo-28209449.jpeg' },
-            { type: 'image', url: 'https://images.pexels.com/photos/26436662/pexels-photo-26436662.jpeg' },
-            { type: 'video', url: 'hero-video-4.mp4' }
+            'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg',
+            'https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=1600&q=80',
+            'https://images.pexels.com/photos/38498727/pexels-photo-38498727.jpeg',
+            'https://images.pexels.com/photos/28209449/pexels-photo-28209449.jpeg'
         ];
 
         let index = 0;
@@ -899,44 +912,26 @@ class App {
 
         this.heroMediaInterval = setInterval(() => {
             index = (index + 1) % mediaList.length;
-            const current = mediaList[index];
+            const currentUrl = mediaList[index];
 
             const targetActive = (index % 2 === 0) ? slideA : slideB;
             const targetHidden = (index % 2 === 0) ? slideB : slideA;
 
-            if (current.type === 'image') {
-                targetActive.style.backgroundImage = `url('${current.url}')`;
-                targetActive.style.opacity = '1';
-                targetHidden.style.opacity = '0';
-                if (videoBg) {
-                    videoBg.style.opacity = '0';
-                }
-            } else if (current.type === 'video') {
-                targetActive.style.opacity = '0';
-                targetHidden.style.opacity = '0';
-                if (videoBg) {
-                    if (videoBg.getAttribute('src') !== current.url) {
-                        videoBg.src = current.url;
-                        videoBg.load();
-                    }
-                    videoBg.style.opacity = '1';
-                    videoBg.currentTime = 0;
-                    videoBg.play().catch(() => {});
-                }
-            }
-        }, 5000);
+            targetActive.style.backgroundImage = `url('${currentUrl}')`;
+            targetActive.style.opacity = '1';
+            targetHidden.style.opacity = '0';
+        }, 4000);
     }
 
     renderHomePage() {
         return `
-            <!-- Full Screen (100vh) Photo & Video Slideshow Hero Banner -->
+            <!-- Full Screen (100vh) Instant Image Slideshow Hero Banner -->
             <section class="hero-green-banner fullscreen-hero" style="background: #0f172a url('https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg') center center / cover no-repeat;">
 
-                <!-- Photo & Video Slideshow Background Container -->
+                <!-- Photo Slideshow Background Container -->
                 <div id="heroBgSlideContainer" style="position:absolute; inset:0; z-index:1; overflow:hidden;">
                     <div id="heroSlideLayerA" style="position:absolute; inset:0; background: url('https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg') center center / cover no-repeat; transition: opacity 1.2s ease-in-out; opacity:1; z-index:1;"></div>
-                    <div id="heroSlideLayerB" style="position:absolute; inset:0; background: url('https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat; transition: opacity 1.2s ease-in-out; opacity:0; z-index:2;"></div>
-                    <video class="hero-bg-video" id="heroBgVideo" autoplay muted playsinline loop preload="auto" poster="https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg" src="hero-video-3.mp4" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition: opacity 1.2s ease-in-out; z-index:3;"></video>
+                    <div id="heroSlideLayerB" style="position:absolute; inset:0; background: url('https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=1600&q=80') center center / cover no-repeat; transition: opacity 1.2s ease-in-out; opacity:0; z-index:2;"></div>
                 </div>
 
                 <!-- Cinematic Gradient Overlay -->
@@ -1942,6 +1937,23 @@ class App {
         localStorage.setItem('umrah_user_offers', JSON.stringify(localOffers));
     }
 
+    scrollOffersCarousel(direction) {
+        const container = document.getElementById('offersCarouselContainer');
+        if (!container) return;
+        const scrollAmount = direction === 'left' ? -380 : 380;
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+
+    filterDashboardTab(tabName) {
+        if (tabName === 'active') {
+            document.getElementById('dashRequirementsSection')?.scrollIntoView({ behavior: 'smooth' });
+        } else if (tabName === 'offers') {
+            document.getElementById('dashOffersSection')?.scrollIntoView({ behavior: 'smooth' });
+        } else if (tabName === 'bookings') {
+            document.getElementById('dashBookingsSection')?.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
     renderDashboardPage() {
         const user = this.state.currentUser || {
             name: 'Animesh',
@@ -1950,7 +1962,7 @@ class App {
             role: 'ROLE_USER'
         };
 
-        // Initialize default mock requirement & multiple offers matching user design if local storage is empty
+        // Initialize default mock requirement & 3 distinct agent offers matching sketch
         let allReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
         let allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
         let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
@@ -1978,29 +1990,21 @@ class App {
             localStorage.setItem('umrah_requirements', JSON.stringify(allReqs));
         }
 
-        if (allOffers.length === 0 && allReqs.length > 0) {
+        if (allOffers.length < 3 && allReqs.length > 0) {
             const offer1 = {
                 id: '#OFF-891',
                 requirementId: allReqs[0].id,
                 userId: user.id || 'user-default',
                 agentName: 'AL-HARAM PREMIUM TRAVELS',
-                packageTitle: 'AL-HARAM PREMIUM TRAVELS - Exclusive 5-Star 18-Day Package for Animesh',
+                packageTitle: 'Offer 1: Exclusive 5-Star 18-Day Package',
                 category: 'Premium Service',
-                makkahHotel: 'Swissotel Makkah (250m from Kaaba)',
-                makkahDistance: 'Approx. 600 Metres from Masjid Al-Haram',
-                madinahHotel: 'Pullman Zamzam Madinah (150m from Nabawi)',
-                madinahDistance: 'Approx. 250 Metres from Al-Masjid An-Nabawi',
+                makkahHotel: 'Swissotel Makkah (250m Kaaba)',
+                makkahDistance: '250 Metres from Masjid Al-Haram',
+                madinahHotel: 'Pullman Zamzam Madinah (150m Nabawi)',
+                madinahDistance: '150 Metres from Al-Masjid An-Nabawi',
                 departureDate: '2026-08-13 (18 Days)',
                 airport: 'JED/MED Airport',
-                inclusions: [
-                    'Direct Flights (SXR-JED)',
-                    '5-Star Buffet Meals',
-                    'Ahram Kit',
-                    'Zamzam 5L',
-                    'Ziyarat'
-                ],
-                complimentary: ['AHRAM KIT', 'LAUNDRY', 'ZAMZAM'],
-                rawdahNote: 'Rawdah permits must be booked by the pilgrim through the Nusuk App, subject to availability.',
+                inclusions: ['Direct Flights (SXR-JED)', '5-Star Buffet Meals', 'Ahram Kit', 'Zamzam 5L', 'Ziyarat'],
                 originalPrice: 143750,
                 discountedPrice: 118750
             };
@@ -2010,28 +2014,38 @@ class App {
                 requirementId: allReqs[0].id,
                 userId: user.id || 'user-default',
                 agentName: 'GOEXERGY DELUXE TOURS',
-                packageTitle: 'GOEXERGY DELUXE TOURS - Deluxe Comfort 18-Day Package',
-                category: 'Premium Service',
-                makkahHotel: 'Manarat Al Misk (500m from Kaaba)',
-                makkahDistance: 'Approx. 600 Metres from Masjid Al-Haram',
-                madinahHotel: 'Marjan International (200m from Nabawi)',
-                madinahDistance: 'Approx. 250 Metres from Al-Masjid An-Nabawi',
+                packageTitle: 'Offer 2: Deluxe Comfort 18-Day Package',
+                category: 'Deluxe Service',
+                makkahHotel: 'Manarat Al Misk (500m Kaaba)',
+                makkahDistance: '500 Metres from Masjid Al-Haram',
+                madinahHotel: 'Marjan International (200m Nabawi)',
+                madinahDistance: '200 Metres from Al-Masjid An-Nabawi',
                 departureDate: '2026-08-13 (18 Days)',
                 airport: 'JED/MED Airport',
-                inclusions: [
-                    'Return Air Ticket (SXR-JED-MED-SXR)',
-                    '4/5 Sharing Accommodation',
-                    '03 Times Daily Indian Buffet Meals',
-                    'Guided Ziyarat in Makkah & Madinah',
-                    'Airport & Intercity Transfers'
-                ],
-                complimentary: ['AHRAM KIT', 'LAUNDRY', 'ZAMZAM'],
-                rawdahNote: 'Rawdah permits must be booked by the pilgrim through the Nusuk App, subject to availability.',
+                inclusions: ['Return Air Ticket', '4/5 Sharing Accommodation', '3x Daily Indian Buffet', 'Guided Ziyarat', 'Transfers'],
                 originalPrice: 135000,
                 discountedPrice: 109900
             };
 
-            allOffers.push(offer1, offer2);
+            const offer3 = {
+                id: '#OFF-893',
+                requirementId: allReqs[0].id,
+                userId: user.id || 'user-default',
+                agentName: 'AL-SAFAR VIP UMRAH',
+                packageTitle: 'Offer 3: Executive VIP 18-Day Package',
+                category: 'VIP Luxury',
+                makkahHotel: 'Dar Al Tawhid (50m Kaaba)',
+                makkahDistance: '50 Metres from Kaaba',
+                madinahHotel: 'Dar Al Taqwa (100m Nabawi)',
+                madinahDistance: '100 Metres from Al-Masjid An-Nabawi',
+                departureDate: '2026-08-13 (18 Days)',
+                airport: 'JED/MED Airport',
+                inclusions: ['Business Class Flights', 'Private GMC Transport', 'VIP Buffet Meals', 'VIP Ziyarat', 'Laundry'],
+                originalPrice: 149000,
+                discountedPrice: 122500
+            };
+
+            allOffers = [offer1, offer2, offer3];
             localStorage.setItem('umrah_user_offers', JSON.stringify(allOffers));
         }
 
@@ -2041,175 +2055,218 @@ class App {
         const bookings = allBookings.filter(b => !b.userId || b.userId === user.id || b.userEmail === user.email);
 
         return `
-            <div style="background:#f4f9f5; min-height:100vh; padding:5rem 0 4rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                <div class="main-container" style="max-width:1440px; width:95%; margin:0 auto; padding:0 1.5rem;">
+            <div style="background:#f8fafc; min-height:100vh; padding:4.5rem 0 4rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                <div class="main-container" style="max-width:1380px; width:95%; margin:0 auto; padding:0 1rem;">
                     
-                    <!-- 1. WELCOME BANNER (PASTEL MINT) -->
-                    <div style="background:#e8f5e9; border:1px solid #c8e6c9; border-radius:20px; padding:1.8rem 2.4rem; margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem; box-shadow:0 4px 15px rgba(27,94,32,0.04);">
+                    <!-- 1. TOP HEADER PROFILE BANNER (SKETCH: Profile Icon, Profile Name, Email, Details & Top Right Submit New Request Button) -->
+                    <div class="dash-profile-header" style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:22px; padding:1.6rem 2.2rem; margin-bottom:1.8rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem; box-shadow:0 6px 25px rgba(0,0,0,0.02);">
                         <div style="display:flex; align-items:center; gap:1.2rem;">
-                            <div style="width:54px; height:54px; background:#ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.6rem; border:1.5px solid #a5d6a7; box-shadow:0 4px 12px rgba(0,0,0,0.04);">
-                                🕋
+                            <!-- Circle Avatar -->
+                            <div style="width:64px; height:64px; background:linear-gradient(135deg, #10b981 0%, #047857 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:1.8rem; font-weight:900; box-shadow:0 6px 18px rgba(16,185,129,0.25); flex-shrink:0;">
+                                ${this.escapeHtml((user.name || 'A').charAt(0).toUpperCase())}
                             </div>
                             <div>
-                                <h1 style="font-size:1.6rem; font-weight:900; color:#1b5e20; margin:0 0 0.2rem; letter-spacing:-0.3px;">
-                                    Salam, ${this.escapeHtml(user.name)}! 👋
+                                <h1 style="font-size:1.65rem; font-weight:900; color:#0f172a; margin:0 0 0.2rem; letter-spacing:-0.4px;">
+                                    ${this.escapeHtml(user.name)}
                                 </h1>
-                                <div style="font-size:0.88rem; color:#388e3c; font-weight:600;">
-                                    Welcome to your Umrah Travel Control Panel &bull; Account: <strong>${this.escapeHtml(user.email || user.phone)}</strong>
+                                <div style="font-size:0.88rem; color:#64748b; font-weight:600; display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+                                    <span>✉️ ${this.escapeHtml(user.email || 'rajuranjankbkj@gmail.com')}</span>
+                                    <span>&bull;</span>
+                                    <span>📞 ${this.escapeHtml(user.phone || '+91 9541692891')}</span>
+                                    <span>&bull;</span>
+                                    <span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; padding:0.15rem 0.6rem; border-radius:99px; font-size:0.75rem; font-weight:800;">VERIFIED PILGRIM</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div style="display:flex; align-items:center; gap:1rem;">
-                            <button type="button" onclick="app.navigate('create-request')" style="background:#2e7d32; color:#ffffff; font-weight:900; border-radius:12px; border:none; padding:0.75rem 1.8rem; font-size:0.9rem; cursor:pointer; box-shadow:0 4px 14px rgba(46,125,50,0.25); transition:all 0.2s;" onmouseover="this.style.background='#1b5e20'" onmouseout="this.style.background='#2e7d32'">
-                                ➕ Create New Requirement
-                            </button>
+                        <!-- Top Right Action Button: Submit New Request -->
+                        <button type="button" class="btn-submit-req" onclick="app.scrollToRequirementForm()" style="background:#2e7d32; color:#ffffff; font-weight:900; border-radius:12px; border:none; padding:0.85rem 1.8rem; font-size:0.92rem; cursor:pointer; box-shadow:0 4px 16px rgba(46,125,50,0.25); display:inline-flex; align-items:center; gap:0.5rem; transition:all 0.2s;" onmouseover="this.style.background='#1b5e20';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#2e7d32';this.style.transform=''">
+                            <span>➕</span>
+                            <span>Submit New Request</span>
+                        </button>
+                    </div>
+
+                    <!-- 2. INTERACTIVE TAB / FILTER ROW (SKETCH: Active Request, Received Agent Offer, Conf Booking, Escrow) -->
+                    <div class="stat-counters-row" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1.2rem; margin-bottom:2rem;">
+                        <div onclick="app.filterDashboardTab('active')" style="background:#ffffff; border-radius:16px; padding:1.3rem 1.5rem; border:1.5px solid #e2e8f0; border-left:4px solid #2e7d32; box-shadow:0 4px 15px rgba(0,0,0,0.02); cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:all 0.2s;" onmouseover="this.style.borderColor='#a5d6a7'" onmouseout="this.style.borderColor='#e2e8f0'">
+                            <div>
+                                <div style="font-size:0.74rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">ACTIVE REQUEST</div>
+                                <div style="font-size:1.8rem; font-weight:900; color:#0f172a; margin-top:0.15rem;">${requirements.length || 1} Active</div>
+                            </div>
+                            <div style="width:42px; height:42px; background:#e8f5e9; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:#2e7d32;">📋</div>
+                        </div>
+
+                        <div onclick="app.filterDashboardTab('offers')" style="background:#ffffff; border-radius:16px; padding:1.3rem 1.5rem; border:1.5px solid #e2e8f0; border-left:4px solid #d97706; box-shadow:0 4px 15px rgba(0,0,0,0.02); cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:all 0.2s;" onmouseover="this.style.borderColor='#fde68a'" onmouseout="this.style.borderColor='#e2e8f0'">
+                            <div>
+                                <div style="font-size:0.74rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">RECEIVED AGENT OFFERS</div>
+                                <div style="font-size:1.8rem; font-weight:900; color:#d97706; margin-top:0.15rem;">${offers.length} Offers</div>
+                            </div>
+                            <div style="width:42px; height:42px; background:#fef3c7; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">⚡</div>
+                        </div>
+
+                        <div onclick="app.filterDashboardTab('bookings')" style="background:#ffffff; border-radius:16px; padding:1.3rem 1.5rem; border:1.5px solid #e2e8f0; border-left:4px solid #10b981; box-shadow:0 4px 15px rgba(0,0,0,0.02); cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:all 0.2s;" onmouseover="this.style.borderColor='#a7f3d0'" onmouseout="this.style.borderColor='#e2e8f0'">
+                            <div>
+                                <div style="font-size:0.74rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">CONF BOOKING</div>
+                                <div style="font-size:1.8rem; font-weight:900; color:#2e7d32; margin-top:0.15rem;">${bookings.length || 1} Confirmed</div>
+                            </div>
+                            <div style="width:42px; height:42px; background:#e8f5e9; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">✅</div>
+                        </div>
+
+                        <div style="background:#ffffff; border-radius:16px; padding:1.3rem 1.5rem; border:1.5px solid #e2e8f0; border-left:4px solid #0284c7; box-shadow:0 4px 15px rgba(0,0,0,0.02); display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:0.74rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">ESCROW GUARANTEE</div>
+                                <div style="font-size:1.05rem; font-weight:900; color:#0369a1; margin-top:0.25rem;">🔒 100% Secured</div>
+                            </div>
+                            <div style="width:42px; height:42px; background:#e0f2fe; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">🛡️</div>
                         </div>
                     </div>
 
-                    <!-- 2. STAT COUNTERS GRID -->
-                    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1.4rem; margin-bottom:2.2rem;">
-                        <div style="background:#ffffff; border-radius:16px; padding:1.5rem 1.8rem; border:1px solid #e2e8f0; border-left:4px solid #2e7d32; box-shadow:0 4px 15px rgba(0,0,0,0.02); display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <div style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">ACTIVE REQUESTS</div>
-                                <div style="font-size:2rem; font-weight:900; color:#0f172a; margin-top:0.2rem;">${requirements.length || 1}</div>
-                            </div>
-                            <div style="width:44px; height:44px; background:#e8f5e9; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">📋</div>
-                        </div>
-
-                        <div style="background:#ffffff; border-radius:16px; padding:1.5rem 1.8rem; border:1px solid #e2e8f0; border-left:4px solid #d97706; box-shadow:0 4px 15px rgba(0,0,0,0.02); display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <div style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">RECEIVED AGENT BIDS</div>
-                                <div style="font-size:2rem; font-weight:900; color:#d97706; margin-top:0.2rem;">${offers.length || 2}</div>
-                            </div>
-                            <div style="width:44px; height:44px; background:#fef3c7; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">⚡</div>
-                        </div>
-
-                        <div style="background:#ffffff; border-radius:16px; padding:1.5rem 1.8rem; border:1px solid #e2e8f0; border-left:4px solid #10b981; box-shadow:0 4px 15px rgba(0,0,0,0.02); display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <div style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">CONFIRMED BOOKINGS</div>
-                                <div style="font-size:2rem; font-weight:900; color:#2e7d32; margin-top:0.2rem;">${bookings.length || 1}</div>
-                            </div>
-                            <div style="width:44px; height:44px; background:#e8f5e9; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">✅</div>
-                        </div>
-
-                        <div style="background:#ffffff; border-radius:16px; padding:1.5rem 1.8rem; border:1px solid #e2e8f0; border-left:4px solid #0284c7; box-shadow:0 4px 15px rgba(0,0,0,0.02); display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <div style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">ESCROW PROTECTION</div>
-                                <div style="font-size:1.05rem; font-weight:900; color:#0369a1; margin-top:0.3rem;">🔒 100% Secured</div>
-                            </div>
-                            <div style="width:44px; height:44px; background:#e0f2fe; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">🛡️</div>
-                        </div>
-                    </div>
-
-                    <!-- 3. MAIN CONTENT: TRAVEL REQUESTS & PROPOSALS -->
-                    <div style="display:flex; flex-direction:column; gap:2.4rem; margin-bottom:3rem;">
-                        ${requirements.map(req => {
-                            const reqOffers = offers.filter(o => o.requirementId === req.id || !o.requirementId);
-                            
-                            return `
-                                <div style="background:#ffffff; border-radius:20px; border:1px solid #e2e8f0; box-shadow:0 8px 30px rgba(0,0,0,0.03); padding:2rem; overflow:hidden;">
-                                    
-                                    <!-- Request Header Strip -->
-                                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; padding-bottom:1.4rem; border-bottom:1px solid #f1f5f9; margin-bottom:1.6rem;">
-                                        <div style="display:flex; align-items:center; gap:0.9rem;">
-                                            <span style="background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; font-size:0.76rem; font-weight:900; padding:0.35rem 0.85rem; border-radius:99px; text-transform:uppercase; letter-spacing:0.5px;">🟢 ACTIVE REQUEST</span>
-                                            <div>
-                                                <h2 style="font-size:1.35rem; font-weight:900; color:#0f172a; margin:0;">Umrah Travel Request (${req.durationDays || 18} Days)</h2>
-                                                <div style="font-size:0.84rem; color:#64748b; font-weight:600; margin-top:0.15rem;">Request ID: <strong>${req.id}</strong> &bull; Submitted on: ${req.preferredDepartureDate || '2026-08-13'}</div>
-                                            </div>
+                    <!-- 3. MAIN USER REQUEST DETAILS CONTAINER (SKETCH: "request details what user ask for") -->
+                    <div id="dashRequirementsSection" style="margin-bottom:2.5rem;">
+                        ${requirements.map(req => `
+                            <div style="background:#ffffff; border-radius:20px; border:1.5px solid #e2e8f0; box-shadow:0 8px 30px rgba(0,0,0,0.03); padding:2rem; overflow:hidden;">
+                                
+                                <!-- Request Header Strip -->
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; padding-bottom:1.2rem; border-bottom:1.5px dashed #e2e8f0; margin-bottom:1.6rem;">
+                                    <div style="display:flex; align-items:center; gap:0.9rem;">
+                                        <span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.76rem; font-weight:900; padding:0.35rem 0.85rem; border-radius:99px; text-transform:uppercase; letter-spacing:0.5px;">🟢 ACTIVE REQUEST</span>
+                                        <div>
+                                            <h2 style="font-size:1.35rem; font-weight:900; color:#0f172a; margin:0;">Request Details (What User Asked For)</h2>
+                                            <div style="font-size:0.84rem; color:#64748b; font-weight:600; margin-top:0.15rem;">Request Ref: <strong>${req.id}</strong> &bull; Submitted on: ${req.preferredDepartureDate || '2026-08-13'}</div>
                                         </div>
+                                    </div>
 
+                                    <div style="display:flex; gap:0.6rem;">
                                         <button type="button" onclick="app.deleteRequirement('${req.id}')" style="background:#fef2f2; border:1px solid #fecaca; color:#dc2626; border-radius:10px; padding:0.5rem 1.1rem; font-size:0.84rem; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:0.4rem; transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
                                             🗑️ Delete Request
                                         </button>
                                     </div>
-
-                                    <!-- Requirement Specs Summary Bar -->
-                                    <div style="background:#f8fafc; border-radius:14px; border:1px solid #e2e8f0; padding:1.2rem 1.6rem; margin-bottom:1.8rem; display:grid; grid-template-columns:repeat(4, 1fr); gap:1.2rem;">
-                                        <div>
-                                            <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">DEPARTURE CITY &amp; DATE</div>
-                                            <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">✈️ ${this.escapeHtml(req.departureCity || 'Srinagar')} &bull; ${req.preferredDepartureDate}</div>
-                                        </div>
-                                        <div>
-                                            <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">HOTEL PREFERENCE</div>
-                                            <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">🏨 ${this.escapeHtml(req.hotelType || '5-Star Luxury (< 300m)')}</div>
-                                        </div>
-                                        <div>
-                                            <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">TRAVELERS BREAKDOWN</div>
-                                            <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">👥 ${req.travelersCount || 2} Person(s) (${req.travelersBreakdown?.males ?? 1}M / ${req.travelersBreakdown?.females ?? 1}F)</div>
-                                        </div>
-                                        <div>
-                                            <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">MAX BUDGET LIMIT</div>
-                                            <div style="font-size:0.95rem; font-weight:900; color:#2e7d32; margin-top:0.2rem;">${this.formatCurrency(req.maxBudget || 125000)} / person</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Received Proposals Cards Grid -->
-                                    <div>
-                                        <div style="font-size:0.9rem; font-weight:900; color:#0f172a; margin-bottom:1.1rem; display:flex; align-items:center; gap:0.5rem;">
-                                            <span>✨ Verified Agent Proposals Received</span>
-                                            <span style="background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; padding:0.15rem 0.6rem; border-radius:99px; font-size:0.78rem;">${reqOffers.length} Bids</span>
-                                        </div>
-
-                                        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:1.6rem;">
-                                            ${reqOffers.map(o => `
-                                                <div style="background:#ffffff; border-radius:16px; border:1.5px solid #e2e8f0; padding:1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.03); display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s;" onmouseover="this.style.borderColor='#a5d6a7'" onmouseout="this.style.borderColor='#e2e8f0'">
-                                                    <div>
-                                                        <!-- Offer Title & Agent Info -->
-                                                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.8rem; margin-bottom:1rem;">
-                                                            <div>
-                                                                <span style="font-size:0.74rem; font-weight:900; color:#2e7d32; text-transform:uppercase; letter-spacing:0.5px; background:#f0fdf4; padding:0.25rem 0.65rem; border-radius:6px; border:1px solid #bbf7d0;">
-                                                                    ✅ ${this.escapeHtml(o.agentName || 'VERIFIED TRAVEL OPERATOR')}
-                                                                </span>
-                                                                <h4 style="font-size:1.15rem; font-weight:900; color:#0f172a; margin:0.5rem 0 0.2rem;">${this.escapeHtml(o.packageTitle || 'Deluxe 18-Day Package')}</h4>
-                                                            </div>
-                                                            <div style="text-align:right;">
-                                                                <span style="font-size:0.75rem; color:#94a3b8; text-decoration:line-through;">${this.formatCurrency(o.originalPrice || 143750)}</span>
-                                                                <div style="font-size:1.35rem; font-weight:900; color:#2e7d32; line-height:1;">${this.formatCurrency(o.discountedPrice || 118750)}</div>
-                                                                <div style="font-size:0.72rem; color:#64748b; font-weight:600; margin-top:0.15rem;">per person</div>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Hotel Proximity Summary -->
-                                                        <div style="background:#f8fafc; border-radius:12px; padding:0.9rem; margin-bottom:1.2rem; display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; border:1px solid #f1f5f9;">
-                                                            <div>
-                                                                <div style="font-size:0.7rem; font-weight:800; color:#2e7d32;">📍 MAKKAH HOTEL</div>
-                                                                <div style="font-size:0.86rem; font-weight:800; color:#0f172a; margin-top:0.1rem;">${this.escapeHtml(o.makkahHotel || 'Swissotel Makkah')}</div>
-                                                                <span style="font-size:0.72rem; font-weight:800; color:#b45309; background:#fef3c7; padding:0.1rem 0.4rem; border-radius:4px;">250m Kaaba</span>
-                                                            </div>
-                                                            <div>
-                                                                <div style="font-size:0.7rem; font-weight:800; color:#2e7d32;">📍 MADINAH HOTEL</div>
-                                                                <div style="font-size:0.86rem; font-weight:800; color:#0f172a; margin-top:0.1rem;">${this.escapeHtml(o.madinahHotel || 'Pullman Zamzam')}</div>
-                                                                <span style="font-size:0.72rem; font-weight:800; color:#b45309; background:#fef3c7; padding:0.1rem 0.4rem; border-radius:4px;">150m Nabawi</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Proposal Action Buttons -->
-                                                    <div style="display:flex; gap:0.8rem; border-top:1px solid #f1f5f9; padding-top:1rem; margin-top:0.4rem;">
-                                                        <button type="button" onclick="app.viewOfferDetailsModal('${o.id}')" style="flex:1; padding:0.65rem; border-radius:10px; font-weight:800; font-size:0.84rem; background:#ffffff; color:#334155; border:1.5px solid #cbd5e1; cursor:pointer; text-align:center;">
-                                                            📄 View Details
-                                                        </button>
-                                                        <button type="button" onclick="app.navigateToPayment('${o.id}')" style="flex:1.2; padding:0.65rem; border-radius:10px; font-weight:900; font-size:0.86rem; background:#2e7d32; color:#ffffff; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(46,125,50,0.2); text-align:center;">
-                                                            💳 Book &amp; Pay Now &rarr;
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                    </div>
-
                                 </div>
-                            `;
-                        }).join('')}
+
+                                <!-- Requirement Specs Summary Grid -->
+                                <div class="req-specs-grid" style="background:#f8fafc; border-radius:16px; border:1.5px solid #e2e8f0; padding:1.4rem 1.8rem; margin-bottom:1.8rem; display:grid; grid-template-columns:repeat(4, 1fr); gap:1.4rem;">
+                                    <div>
+                                        <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">TOTAL PERSONS</div>
+                                        <div style="font-size:0.95rem; font-weight:900; color:#0f172a; margin-top:0.2rem;">👥 ${req.travelersCount || 2} Person(s) (${req.travelersBreakdown?.males ?? 1}M / ${req.travelersBreakdown?.females ?? 1}F)</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">DATE &amp; DURATION</div>
+                                        <div style="font-size:0.95rem; font-weight:900; color:#0f172a; margin-top:0.2rem;">📅 ${req.preferredDepartureDate} (${req.durationDays || 18} Days)</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">HOTEL PREFERENCE</div>
+                                        <div style="font-size:0.95rem; font-weight:900; color:#0f172a; margin-top:0.2rem;">🏨 ${this.escapeHtml(req.hotelType || '5-Star Luxury (< 300m)')}</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">MAXIMUM BUDGET</div>
+                                        <div style="font-size:1.05rem; font-weight:900; color:#2e7d32; margin-top:0.2rem;">${this.formatCurrency(req.maxBudget || 125000)} / person</div>
+                                    </div>
+                                </div>
+
+                                <!-- Special Request Notes -->
+                                <div style="background:#ecfdf5; border-radius:12px; border:1px solid #a7f3d0; padding:1rem 1.4rem; font-size:0.88rem; color:#047857;">
+                                    <strong>📝 Offer &amp; Special Details Requested:</strong> ${this.escapeHtml(req.specialNotes || 'Direct flights preferred from departure city, wheelchair assistance required.')}
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
 
-                    <!-- 4. CONFIRMED BOOKINGS TABLE -->
-                    <div style="background:#ffffff; border-radius:20px; border:1px solid #e2e8f0; padding:2rem; box-shadow:0 8px 30px rgba(0,0,0,0.03);">
-                        <h3 style="font-size:1.35rem; font-weight:900; color:#0f172a; margin-bottom:1.2rem;">🎟️ My Confirmed Bookings (${bookings.length})</h3>
+                    <!-- 4. UPGRADED VIEW OFFERS SECTION (SKETCH: Offer 1, Offer 2, Offer 3 Horizontal Carousel with < > Arrow Buttons and View Offer Button) -->
+                    <div id="dashOffersSection" style="margin-bottom:3rem;">
+                        <!-- Section Heading + Carousel Controls -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.3rem;">
+                            <div>
+                                <h2 style="font-size:1.4rem; font-weight:900; color:#0f172a; margin:0; display:flex; align-items:center; gap:0.6rem;">
+                                    <span>⚡ Verified Agent Bids &amp; Offers</span>
+                                    <span style="background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; padding:0.2rem 0.75rem; border-radius:99px; font-size:0.8rem; font-weight:900;">${offers.length} Bids Available</span>
+                                </h2>
+                                <p style="font-size:0.86rem; color:#64748b; margin:0.2rem 0 0;">Compare tailored package proposals sent directly by verified Umrah operators.</p>
+                            </div>
+
+                            <!-- Left & Right Arrow Navigation Controls (Sketch: < and > arrows) -->
+                            <div style="display:flex; align-items:center; gap:0.6rem;">
+                                <button type="button" class="carousel-arrow-btn" onclick="app.scrollOffersCarousel('left')" aria-label="Previous Offer">&larr;</button>
+                                <button type="button" class="carousel-arrow-btn" onclick="app.scrollOffersCarousel('right')" aria-label="Next Offer">&rarr;</button>
+                            </div>
+                        </div>
+
+                        <!-- Horizontal Carousel Container -->
+                        <div class="offers-carousel-wrapper">
+                            <div class="offers-carousel-container" id="offersCarouselContainer">
+                                ${offers.map((o, idx) => `
+                                    <div class="offer-card-item">
+                                        <div>
+                                            <!-- Offer Badge Header (Offer 1, Offer 2, Offer 3) -->
+                                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                                                <span style="background:#2e7d32; color:#ffffff; font-size:0.75rem; font-weight:900; padding:0.3rem 0.75rem; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px;">
+                                                    Offer ${idx + 1}
+                                                </span>
+                                                <span style="font-size:0.74rem; font-weight:800; color:#047857; background:#ecfdf5; padding:0.25rem 0.65rem; border-radius:6px; border:1px solid #a7f3d0;">
+                                                    ✅ VERIFIED
+                                                </span>
+                                            </div>
+
+                                            <h3 style="font-size:1.1rem; font-weight:900; color:#0f172a; margin:0 0 0.4rem; line-height:1.3;">
+                                                ${this.escapeHtml(o.agentName)}
+                                            </h3>
+                                            <div style="font-size:0.84rem; color:#64748b; font-weight:600; margin-bottom:1rem;">
+                                                ${this.escapeHtml(o.packageTitle)}
+                                            </div>
+
+                                            <!-- Pricing Banner -->
+                                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:0.85rem 1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+                                                <div>
+                                                    <div style="font-size:0.7rem; font-weight:800; color:#64748b; text-transform:uppercase;">BID PRICE</div>
+                                                    <div style="font-size:1.3rem; font-weight:900; color:#2e7d32; line-height:1; margin-top:0.15rem;">
+                                                        ${this.formatCurrency(o.discountedPrice || 118750)}
+                                                    </div>
+                                                </div>
+                                                <div style="text-align:right;">
+                                                    <span style="font-size:0.75rem; color:#94a3b8; text-decoration:line-through;">${this.formatCurrency(o.originalPrice || 143750)}</span>
+                                                    <div style="font-size:0.7rem; color:#047857; font-weight:800;">Per Pilgrim</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Hotel Distance Details -->
+                                            <div style="display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1.1rem; font-size:0.82rem; color:#334155;">
+                                                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:0.5rem 0.75rem; display:flex; justify-content:space-between; align-items:center;">
+                                                    <span>📍 Makkah Hotel:</span>
+                                                    <strong style="color:#0f172a;">${this.escapeHtml(o.makkahHotel)}</strong>
+                                                </div>
+                                                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:0.5rem 0.75rem; display:flex; justify-content:space-between; align-items:center;">
+                                                    <span>📍 Madinah Hotel:</span>
+                                                    <strong style="color:#0f172a;">${this.escapeHtml(o.madinahHotel)}</strong>
+                                                </div>
+                                            </div>
+
+                                            <!-- Inclusions Tags -->
+                                            <div style="display:flex; flex-wrap:wrap; gap:0.35rem; margin-bottom:1.2rem;">
+                                                ${(o.inclusions || ['Flights', '5-Star Meals', 'Ziyarat', 'Zamzam']).map(inc => `
+                                                    <span style="background:#f1f5f9; color:#475569; font-size:0.72rem; font-weight:700; padding:0.2rem 0.55rem; border-radius:6px;">✓ ${this.escapeHtml(inc)}</span>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+
+                                        <!-- Bottom Button: View Offer (Sketch: bottom button on each card) -->
+                                        <div style="border-top:1px solid #f1f5f9; padding-top:1rem; margin-top:0.4rem; display:flex; gap:0.6rem;">
+                                            <button type="button" onclick="app.viewOfferDetailsModal('${o.id}')" style="flex:1; padding:0.7rem; border-radius:10px; font-weight:800; font-size:0.85rem; background:#ffffff; color:#2e7d32; border:1.5px solid #2e7d32; cursor:pointer; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='#e8f5e9'" onmouseout="this.style.background='#ffffff'">
+                                                📄 View Offer
+                                            </button>
+                                            <button type="button" onclick="app.navigateToPayment('${o.id}')" style="flex:1.2; padding:0.7rem; border-radius:10px; font-weight:900; font-size:0.85rem; background:#2e7d32; color:#ffffff; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(46,125,50,0.2); text-align:center; transition:all 0.2s;" onmouseover="this.style.background='#1b5e20'" onmouseout="this.style.background='#2e7d32'">
+                                                💳 Book Now &rarr;
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. BOTTOM CONTINUATION BOX (SKETCH: Continue / Confirmed Bookings Table) -->
+                    <div id="dashBookingsSection" style="background:#ffffff; border-radius:20px; border:1.5px solid #e2e8f0; padding:2rem; box-shadow:0 8px 30px rgba(0,0,0,0.03);">
+                        <h3 style="font-size:1.3rem; font-weight:900; color:#0f172a; margin-bottom:1.2rem;">🎟️ My Confirmed Bookings (${bookings.length})</h3>
                         ${bookings.length > 0 ? `
-                            <div class="data-table-wrap">
+                            <div class="data-table-wrap" style="overflow-x:auto;">
                                 <table class="data-table">
                                     <thead>
                                         <tr>
@@ -2230,7 +2287,7 @@ class App {
                                                 <td>📅 ${b.travelDate || '2026-08-13'}</td>
                                                 <td>👥 ${b.travelersCount || 2} Person(s)</td>
                                                 <td><strong style="color:#2e7d32; font-size:1.05rem;">${this.formatCurrency(b.totalPrice || 118750)}</strong></td>
-                                                <td><span style="background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; font-size:0.78rem; font-weight:800; padding:0.3rem 0.75rem; border-radius:99px;">CONFIRMED &amp; PAID</span></td>
+                                                <td><span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.78rem; font-weight:800; padding:0.3rem 0.75rem; border-radius:99px;">CONFIRMED &amp; PAID</span></td>
                                                 <td>
                                                     <button type="button" onclick="app.downloadInvoice('${b.id || 'BK-984120'}')" class="btn btn-outline btn-sm" style="font-weight:800; border-radius:8px; background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; cursor:pointer;">📄 Print / Save PDF Voucher</button>
                                                 </td>

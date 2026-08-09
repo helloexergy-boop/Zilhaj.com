@@ -7,15 +7,16 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Spring Data Mongo Repository for Agent entity operations.
- */
 @Repository
 public interface AgentRepository extends MongoRepository<Agent, String> {
 
-    // Finds an agent record linked to a specific user account ID
-    Optional<Agent> findByUserId(String userId);
+    Optional<Agent> findByEmail(String email);
 
-    // Retrieves all agents by their verification status (e.g. PENDING for admin review)
-    List<Agent> findByVerificationStatus(String verificationStatus);
+    List<Agent> findByVerifiedTrueAndActiveTrue();
+
+    List<Agent> findByVerifiedTrueAndActiveTrueAndSpecializationsContaining(String specialization);
+
+    List<Agent> findByServiceAreasContaining(String area);
+
+    Optional<Agent> findByCompanyLicenseNumber(String licenseNumber);
 }
