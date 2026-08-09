@@ -4233,6 +4233,11 @@ class App {
         }
 
         if (backdrop) {
+            backdrop.onclick = (e) => {
+                if (e.target === backdrop || e.target.id === 'modalBackdrop') {
+                    this.closeModal();
+                }
+            };
             backdrop.style.zIndex = '99999';
             backdrop.style.display = 'flex';
             backdrop.style.alignItems = 'center';
@@ -4254,6 +4259,7 @@ class App {
         }
         const backdrop = document.getElementById('modalBackdrop');
         if (backdrop) {
+            backdrop.onclick = null;
             backdrop.classList.remove('active');
             backdrop.removeAttribute('style');
             backdrop.style.display = 'none';
@@ -4286,8 +4292,13 @@ class App {
         this.state.generatedOtp = null;
 
         this.openModal(`
-            <div class="auth-split-modal" style="display: flex; min-height: 580px; width: 100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #ffffff; box-sizing: border-box; overflow: hidden;">
+            <div class="auth-split-modal" style="display: flex; min-height: 580px; width: 100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #ffffff; box-sizing: border-box; overflow: hidden; position: relative; border-radius:24px;">
                 
+                <!-- TOP RIGHT CLOSE X BUTTON PER PROMPT REQUIREMENT -->
+                <button type="button" onclick="app.closeModal()" title="Close Login/Signup" style="position: absolute; top: 16px; right: 16px; z-index: 99; background: #ffffff; border: 1.5px solid #cbd5e1; width: 36px; height: 36px; border-radius: 50%; font-size: 1.1rem; font-weight: 800; color: #0f172a; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.12); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)';this.style.background='#f8fafc'" onmouseout="this.style.transform='';this.style.background='#ffffff'">
+                    ✕
+                </button>
+
                 <!-- LEFT PANEL: SACRED HERO IMAGE & PROOF -->
                 <div class="auth-left-panel" style="flex: 1.1; position: relative; background: #0b1f17 url('https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg') center center / cover no-repeat; padding: 2.5rem; display: flex; flex-direction: column; justify-content: space-between; color: #ffffff; min-height: 520px; box-sizing: border-box;">
                     
@@ -4321,7 +4332,7 @@ class App {
                 <div class="auth-right-panel" style="flex: 1; padding: 2.2rem 2.4rem; display: flex; flex-direction: column; justify-content: center; background: #ffffff; position: relative; box-sizing: border-box; max-height: 90vh; overflow-y: auto;">
                     
                     <!-- SSL Badge -->
-                    <div style="display: flex; justify-content: flex-end; margin-bottom: 0.8rem;">
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 0.8rem; padding-right:2rem;">
                         <span style="font-size: 0.72rem; font-weight: 800; color: #198754; background: #e8f5e9; padding: 0.28rem 0.7rem; border-radius: 99px; border: 1px solid #a5d6a7; display: inline-flex; align-items: center; gap: 0.35rem;">
                             🔒 Secure SSL
                         </span>
@@ -4353,8 +4364,9 @@ class App {
                         </p>
                     </div>
 
-                    <!-- In-Form Error Alert Container -->
-                    <div id="authAlertBox" style="display: none; margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.85rem; font-weight: 600; text-align: center;"></div>
+                    <!-- In-Form Error Alert Container (ALWAYS FRONT & VISIBLE) -->
+                    <div id="authFormAlert" style="display: none; margin-bottom: 1rem;"></div>
+                    <div id="authAlertBox" style="display: none; margin-bottom: 1rem;"></div>
 
                     ${isForgot ? `
                         <!-- FORGOT PASSWORD FORM -->
@@ -4604,21 +4616,31 @@ class App {
     }
 
     showFormError(message) {
-        this.setAuthButtonLoading(false);
-        const alertBox = document.getElementById('authFormAlert');
-        const alertText = document.getElementById('authFormAlertText');
-        if (alertBox && alertText) {
-            alertText.innerHTML = message;
+        this.setAuthButtonLoading(false, 'login');
+        this.setAuthButtonLoading(false, 'register');
+        
+        // 1. Update In-Modal Error Box (right inside login/signup card)
+        const alertBox = document.getElementById('authFormAlert') || document.getElementById('authAlertBox');
+        if (alertBox) {
+            alertBox.innerHTML = `
+                <div style="display:flex; align-items:flex-start; gap:0.6rem; background:#fef2f2; border:1.5px solid #fecaca; color:#991b1b; padding:0.85rem 1.1rem; border-radius:12px; font-size:0.88rem; font-weight:700; box-shadow:0 4px 14px rgba(220,38,38,0.12); margin-bottom:1.1rem; text-align:left;">
+                    <span style="font-size:1.2rem; line-height:1;">⚠️</span>
+                    <div style="flex:1; line-height:1.4;">${message}</div>
+                </div>
+            `;
             alertBox.style.display = 'block';
             alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        } else {
-            this.showToast(message, 'error');
         }
+
+        // 2. Also trigger front toast notification (elevated z-index 99999999)
+        const cleanMsg = message.replace(/<[^>]*>?/gm, '');
+        this.showToast('⚠️ ' + cleanMsg, 'error');
     }
 
     hideFormError() {
-        const alertBox = document.getElementById('authFormAlert');
+        const alertBox = document.getElementById('authFormAlert') || document.getElementById('authAlertBox');
         if (alertBox) {
+            alertBox.innerHTML = '';
             alertBox.style.display = 'none';
         }
     }
