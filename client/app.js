@@ -4174,48 +4174,77 @@ class App {
         this.state.generatedOtp = null;
 
         this.openModal(`
-            <div class="auth-split-modal" style="display: flex; min-height: 540px; width: 100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #ffffff; box-sizing: border-box; overflow: hidden; position: relative; border-radius: 20px;">
+            <div class="auth-split-modal" style="display: flex; min-height: 540px; width: 100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #ffffff; box-sizing: border-box; overflow: hidden; position: relative; border-radius: 24px;">
                 
                 <!-- TOP RIGHT CLOSE X BUTTON -->
-                <button type="button" onclick="app.closeModal()" title="Close" style="position: absolute; top: 18px; right: 18px; z-index: 99; background: #f1f5f9; border: none; width: 34px; height: 34px; border-radius: 50%; font-size: 1rem; font-weight: 700; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                <button type="button" onclick="app.closeModal()" title="Close" style="position: absolute; top: 18px; right: 18px; z-index: 99; background: ${isRegister ? '#f1f5f9' : '#ffffff'}; border: ${isRegister ? 'none' : '1.5px solid #cbd5e1'}; width: 36px; height: 36px; border-radius: 50%; font-size: 1rem; font-weight: 800; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: ${isRegister ? 'none' : '0 2px 8px rgba(0,0,0,0.12)'}; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
                     ✕
                 </button>
 
-                <!-- LEFT PANEL: LIGHT BLUE TINT HERO matching reference screenshot -->
-                <div class="auth-left-panel" style="flex: 1; background: #f8fafc; padding: 3rem 2.5rem; display: flex; flex-direction: column; justify-content: space-between; color: #0f172a; min-height: 500px; box-sizing: border-box; border-right: 1px solid #f1f5f9;">
-                    
-                    <div>
-                        <!-- Title & Subtitle -->
-                        <h2 style="font-size: 2.2rem; font-weight: 800; line-height: 1.15; color: #0f172a; margin: 0 0 0.8rem 0; letter-spacing: -0.03em;">
-                            Create Your<br>Account
-                        </h2>
-                        <p style="font-size: 0.9rem; color: #64748b; margin: 0 0 2.2rem 0; line-height: 1.5; font-weight: 400;">
-                            Enter your details below to create a new account<br>and start your serene journey.
-                        </p>
+                ${isRegister ? `
+                    <!-- LEFT PANEL: LIGHT BLUE TINT HERO (SIGNUP ONLY - MATCHES REFERENCE SCREENSHOT 100%) -->
+                    <div class="auth-left-panel" style="flex: 1; background: #f8fafc; padding: 3rem 2.5rem; display: flex; flex-direction: column; justify-content: space-between; color: #0f172a; min-height: 500px; box-sizing: border-box; border-right: 1px solid #f1f5f9;">
+                        <div>
+                            <!-- Title & Subtitle -->
+                            <h2 style="font-size: 2.2rem; font-weight: 800; line-height: 1.15; color: #0f172a; margin: 0 0 0.8rem 0; letter-spacing: -0.03em;">
+                                Create Your<br>Account
+                            </h2>
+                            <p style="font-size: 0.9rem; color: #64748b; margin: 0 0 2.2rem 0; line-height: 1.5; font-weight: 400;">
+                                Enter your details below to create a new account<br>and start your serene journey.
+                            </p>
 
-                        <!-- Feature List -->
-                        <div style="display: flex; flex-direction: column; gap: 1.2rem;">
-                            <div style="display: flex; align-items: center; gap: 0.9rem;">
-                                <div style="width: 34px; height: 34px; border-radius: 50%; background: #e6f4ea; display: flex; align-items: center; justify-content: center; color: #2b5e48; font-size: 0.95rem; flex-shrink: 0; font-weight: bold;">
-                                    🛡️
+                            <!-- Feature List -->
+                            <div style="display: flex; flex-direction: column; gap: 1.2rem;">
+                                <div style="display: flex; align-items: center; gap: 0.9rem;">
+                                    <div style="width: 34px; height: 34px; border-radius: 50%; background: #e6f4ea; display: flex; align-items: center; justify-content: center; color: #2b5e48; font-size: 0.95rem; flex-shrink: 0; font-weight: bold;">
+                                        🛡️
+                                    </div>
+                                    <span style="font-size: 0.86rem; color: #475569; font-weight: 500;">Secure and encrypted registration process.</span>
                                 </div>
-                                <span style="font-size: 0.86rem; color: #475569; font-weight: 500;">Secure and encrypted registration process.</span>
+
+                                <div style="display: flex; align-items: center; gap: 0.9rem;">
+                                    <div style="width: 34px; height: 34px; border-radius: 50%; background: #e6f4ea; display: flex; align-items: center; justify-content: center; color: #2b5e48; font-size: 0.95rem; flex-shrink: 0; font-weight: bold;">
+                                        🎧
+                                    </div>
+                                    <span style="font-size: 0.86rem; color: #475569; font-weight: 500;">24/7 support for your travel arrangements.</span>
+                                </div>
                             </div>
+                        </div>
 
-                            <div style="display: flex; align-items: center; gap: 0.9rem;">
-                                <div style="width: 34px; height: 34px; border-radius: 50%; background: #e6f4ea; display: flex; align-items: center; justify-content: center; color: #2b5e48; font-size: 0.95rem; flex-shrink: 0; font-weight: bold;">
-                                    🎧
-                                </div>
-                                <span style="font-size: 0.86rem; color: #475569; font-weight: 500;">24/7 support for your travel arrangements.</span>
+                        <!-- Bottom Copyright -->
+                        <div style="margin-top: auto; font-size: 0.8rem; color: #94a3b8; font-weight: 500;">
+                            © 2024 Umrah Travels. All rights reserved.
+                        </div>
+                    </div>
+                ` : `
+                    <!-- LEFT PANEL: UNTOUCHED SACRED HERO IMAGE & PROOF (LOGIN ONLY) -->
+                    <div class="auth-left-panel" style="flex: 1.1; position: relative; background: #0b1f17 url('https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg') center center / cover no-repeat; padding: 2.5rem; display: flex; flex-direction: column; justify-content: space-between; color: #ffffff; min-height: 520px; box-sizing: border-box;">
+                        <!-- Dark Gradient Overlay -->
+                        <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,31,23,0.6) 0%, rgba(11,31,23,0.3) 45%, rgba(11,31,23,0.85) 100%); z-index: 1;"></div>
+                        
+                        <!-- Brand Top Left -->
+                        <div style="position: relative; z-index: 2; display: flex; align-items: center; gap: 0.65rem;">
+                            <div style="width: 36px; height: 36px; background: #235d47; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(35,93,71,0.4);">
+                                🏛️
+                            </div>
+                            <span style="font-weight: 800; font-size: 1.25rem; color: #ffffff; letter-spacing: -0.2px;">Umrah Travels</span>
+                        </div>
+
+                        <!-- Bottom Text & Stars -->
+                        <div style="position: relative; z-index: 2; margin-top: auto;">
+                            <h2 style="font-size: clamp(1.6rem, 2.5vw, 2.1rem); font-weight: 800; line-height: 1.25; color: #ffffff; margin: 0 0 0.8rem 0; letter-spacing: -0.02em;">
+                                Your sacred journey<br>begins with a single step.
+                            </h2>
+                            <p style="font-size: 0.9rem; color: rgba(255,255,255,0.88); margin: 0 0 0.8rem 0; font-weight: 500;">
+                                Trusted by 200,000+ pilgrims worldwide
+                            </p>
+                            <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.88rem; color: rgba(255,255,255,0.92);">
+                                <span style="color: #ffc107; font-size: 1rem; letter-spacing: 1px;">★★★★★</span>
+                                <span style="font-weight: 700;">4.9 / 5 from 18,400 reviews</span>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Bottom Copyright -->
-                    <div style="margin-top: auto; font-size: 0.8rem; color: #94a3b8; font-weight: 500;">
-                        © 2024 Umrah Travels. All rights reserved.
-                    </div>
-                </div>
+                `}
 
                 <!-- RIGHT PANEL: AUTHENTICATION FORM -->
                 <div class="auth-right-panel" style="flex: 1.15; padding: 2.5rem; display: flex; flex-direction: column; justify-content: center; background: #ffffff; position: relative; box-sizing: border-box; max-height: 90vh; overflow-y: auto;">
@@ -4265,8 +4294,20 @@ class App {
                             </button>
                         </form>
                     ` : `
-                        <!-- GOOGLE SIGN IN BUTTON (PILL SHAPE WITH SVG LOGO) -->
-                        <button type="button" onclick="app.loginWithGoogle()" style="width: 100%; height: 44px; border: 1px solid #e2e8f0; border-radius: 99px; background: #ffffff; display: flex; align-items: center; justify-content: center; gap: 0.75rem; cursor: pointer; transition: all 0.2s; font-weight: 600; font-size: 0.88rem; color: #334155; margin-bottom: 1.2rem;" onmouseover="this.style.borderColor='#cbd5e1'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#ffffff';">
+                        ${isLogin ? `
+                            <!-- UNTOUCHED ORIGINAL LOGIN PAGE HEADER -->
+                            <div style="margin-bottom: 1.3rem;">
+                                <h2 style="font-size: 1.8rem; font-weight: 800; color: #111827; margin: 0 0 0.25rem 0; letter-spacing: -0.4px;">
+                                    Welcome Back
+                                </h2>
+                                <p style="font-size: 0.85rem; color: #6b7280; margin: 0; line-height: 1.45;">
+                                    Enter your details below to log in to your account.
+                                </p>
+                            </div>
+                        ` : ''}
+
+                        <!-- GOOGLE SIGN IN BUTTON -->
+                        <button type="button" onclick="app.loginWithGoogle()" style="width: 100%; height: 44px; border: 1px solid #e2e8f0; border-radius: ${isRegister ? '99px' : '12px'}; background: #ffffff; display: flex; align-items: center; justify-content: center; gap: 0.75rem; cursor: pointer; transition: all 0.2s; font-weight: 600; font-size: 0.88rem; color: #334155; margin-bottom: 1.2rem;" onmouseover="this.style.borderColor='#cbd5e1'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#ffffff';">
                             <svg width="18" height="18" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -4279,20 +4320,20 @@ class App {
                         <!-- DIVIDER -->
                         <div style="display: flex; align-items: center; margin-bottom: 1.2rem; gap: 0.6rem;">
                             <div style="flex: 1; height: 1px; background: #f1f5f9;"></div>
-                            <span style="font-size: 0.68rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">OR USE EMAIL</span>
+                            <span style="font-size: 0.68rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${isRegister ? 'OR USE EMAIL' : 'OR'}</span>
                             <div style="flex: 1; height: 1px; background: #f1f5f9;"></div>
                         </div>
 
                         <!-- LOGIN / REGISTER FORM -->
                         <form onsubmit="event.preventDefault(); app.handleAuthSubmit('${mode}');" style="display: flex; flex-direction: column;">
                             ${isRegister ? `
-                                <!-- FULL NAME CARD -->
+                                <!-- FULL NAME CARD (SIGNUP ONLY) -->
                                 <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.5rem 1rem; margin-bottom: 0.9rem; background: #ffffff;">
                                     <label style="display: block; font-size: 0.75rem; color: #475569; font-weight: 700; margin-bottom: 0.2rem;">Full Name</label>
                                     <input type="text" id="authName" required placeholder="Raju Ranjan" style="width: 100%; border: none; outline: none; font-size: 0.92rem; color: #0f172a; background: transparent; font-weight: 500;">
                                 </div>
 
-                                <!-- EMAIL ADDRESS CARD WITH INLINE SENT BUTTON -->
+                                <!-- EMAIL ADDRESS CARD WITH INLINE SENT BUTTON (SIGNUP ONLY) -->
                                 <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.5rem 1rem; margin-bottom: 0.9rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between;">
                                     <div style="flex: 1; min-width: 0;">
                                         <label style="display: block; font-size: 0.75rem; color: #475569; font-weight: 700; margin-bottom: 0.2rem;">Email Address</label>
@@ -4303,7 +4344,7 @@ class App {
                                     </button>
                                 </div>
 
-                                <!-- VERIFICATION CODE BOX (EXACT DESIGN MATCH) -->
+                                <!-- VERIFICATION CODE BOX (SIGNUP ONLY) -->
                                 <div id="otpSectionBox" style="margin-bottom: 1rem;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
                                         <div>
@@ -4318,7 +4359,7 @@ class App {
                                     <div id="otpSentAlert" style="display: none;"></div>
                                 </div>
 
-                                <!-- PASSWORDS ROW (2 EQUAL COLUMNS) -->
+                                <!-- PASSWORDS ROW (SIGNUP ONLY) -->
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 0.7rem;">
                                     <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.5rem 1rem; position: relative; background: #ffffff;">
                                         <label style="display: block; font-size: 0.75rem; color: #475569; font-weight: 700; margin-bottom: 0.2rem;">Password</label>
@@ -4332,7 +4373,7 @@ class App {
                                     </div>
                                 </div>
 
-                                <!-- TERMS & STRENGTH ROW -->
+                                <!-- TERMS & STRENGTH ROW (SIGNUP ONLY) -->
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.4rem; font-size: 0.78rem;">
                                     <label style="display: flex; align-items: center; gap: 0.4rem; color: #475569; cursor: pointer; margin: 0;">
                                         <input type="checkbox" id="termsCheck" required style="width: 16px; height: 16px; accent-color: #2b5e48; border-radius: 4px; cursor: pointer;">
@@ -4341,32 +4382,33 @@ class App {
                                     <div style="color: #64748b; font-weight: 600;">Strength: <span id="strText" style="color: #dc2626; font-weight: 700;">Weak</span></div>
                                 </div>
                             ` : `
-                                <!-- LOGIN INPUTS -->
-                                <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.5rem 1rem; margin-bottom: 0.9rem; background: #ffffff;">
-                                    <label style="display: block; font-size: 0.75rem; color: #475569; font-weight: 700; margin-bottom: 0.2rem;">Email Address or Phone</label>
-                                    <input type="text" id="authEmail" required placeholder="Enter your email or phone" style="width: 100%; border: none; outline: none; font-size: 0.92rem; color: #0f172a; background: transparent;">
+                                <!-- UNTOUCHED ORIGINAL LOGIN FORM INPUTS -->
+                                <div class="auth-input-wrapper" style="margin-bottom: 1rem;">
+                                    <label class="auth-input-label">Email Address or Phone</label>
+                                    <input type="text" id="authEmail" required placeholder="Enter your email or phone number" class="auth-input-field">
+                                    <span class="auth-input-icon">✉</span>
                                 </div>
 
-                                <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.5rem 1rem; margin-bottom: 0.8rem; position: relative; background: #ffffff;">
-                                    <label style="display: block; font-size: 0.75rem; color: #475569; font-weight: 700; margin-bottom: 0.2rem;">Password</label>
-                                    <input type="password" id="authPassword" required placeholder="Enter your password" style="width: 100%; border: none; outline: none; font-size: 0.92rem; color: #0f172a; padding-right: 1.8rem; background: transparent;">
-                                    <button type="button" id="eyeLoginPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeLoginPass')" style="position: absolute; right: 0.6rem; bottom: 0.6rem; background: none; border: none; cursor: pointer; font-size: 1rem;">👁️</button>
+                                <div class="auth-input-wrapper" style="margin-bottom: 0.8rem; position: relative;">
+                                    <label class="auth-input-label">Password</label>
+                                    <input type="password" id="authPassword" required placeholder="Enter your password" class="auth-input-field" style="padding-right: 2.4rem;">
+                                    <button type="button" id="eyeLoginPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeLoginPass')" style="position: absolute; right: 0.6rem; top: 32px; background: none; border: none; cursor: pointer; font-size: 1rem; color: #64748b;">👁️</button>
                                 </div>
 
                                 <!-- REMEMBER ME & FORGOT PASSWORD ROW -->
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.4rem; font-size: 0.8rem;">
                                     <label style="display: flex; align-items: center; gap: 0.4rem; color: #475569; cursor: pointer; margin: 0;">
-                                        <input type="checkbox" style="width: 15px; height: 15px; accent-color: #2b5e48;"> Remember me
+                                        <input type="checkbox" style="width: 15px; height: 15px; accent-color: #235d47;"> Remember me
                                     </label>
-                                    <a href="#" onclick="event.preventDefault(); app.openForgotPasswordModal();" style="color: #2b5e48; font-weight: 700; text-decoration: none;">
+                                    <a href="#" onclick="event.preventDefault(); app.openForgotPasswordModal();" style="color: #235d47; font-weight: 700; text-decoration: none;">
                                         Forgot password?
                                     </a>
                                 </div>
                             `}
 
-                            <!-- PRIMARY ACTION BUTTON (FULL WIDTH DARK GREEN PILL) -->
-                            <button type="submit" class="auth-submit-btn" style="width: 100%; height: 50px; background: #2b5e48; color: #ffffff; border: none; border-radius: 99px; font-weight: 800; font-size: 0.92rem; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(43,94,72,0.3); font-family: inherit;" onmouseover="this.style.background='#224b3a'" onmouseout="this.style.background='#2b5e48'">
-                                ${isLogin ? 'LOG IN' : ''}
+                            <!-- PRIMARY ACTION BUTTON -->
+                            <button type="submit" class="auth-submit-btn" style="width: 100%; height: 50px; background: #2b5e48; color: #ffffff; border: none; border-radius: ${isRegister ? '99px' : '12px'}; font-weight: 800; font-size: 0.92rem; letter-spacing: ${isRegister ? '1.5px' : '0px'}; text-transform: ${isRegister ? 'uppercase' : 'none'}; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(43,94,72,0.3); font-family: inherit;" onmouseover="this.style.background='#224b3a'" onmouseout="this.style.background='#2b5e48'">
+                                ${isLogin ? 'Log In' : ''}
                                 ${isRegister ? 'CREATE ACCOUNT' : ''}
                             </button>
                         </form>
