@@ -2894,14 +2894,14 @@ html { scroll-behavior: smooth; }
 .modal-card.auth-modal-fixed {
     transition: none !important;
     animation: none !important;
-    max-width: 1060px !important;
-    width: 94vw !important;
-    height: 710px !important;
+    max-width: 1200px !important;
+    width: 96vw !important;
+    height: 780px !important;
     max-height: 94vh !important;
-    border-radius: 24px !important;
+    border-radius: 28px !important;
     overflow: hidden !important;
     padding: 0 !important;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.35) !important;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45) !important;
 }
 
 .modal-card:has(.two-col-auth-modal),
