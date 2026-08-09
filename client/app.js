@@ -515,12 +515,26 @@ class App {
         }
 
         if (!this.state.currentUser) {
-            // Logged Out Navigation State
+            // Default User State
+            const defaultUser = {
+                name: 'Alex Mercer',
+                email: 'alex.mercer@corp.com'
+            };
             if (authContainer) {
                 authContainer.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:0.6rem;">
-                        <button class="btn btn-outline" onclick="app.openAuthModal('login')" style="border:1.5px solid #0f172a; color:#0f172a; font-weight:700; border-radius:8px; padding:0.45rem 1.1rem; font-size:0.88rem; background:transparent; cursor:pointer;">Login</button>
-                        <button class="btn btn-primary" onclick="app.openAuthModal('register')" style="background:#047857; color:white; font-weight:700; border-radius:8px; padding:0.45rem 1.1rem; border:none; font-size:0.88rem; cursor:pointer;">Sign Up</button>
+                    <div style="display:flex; align-items:center; gap:1.2rem;">
+                        <div style="display:flex; align-items:center; gap:0.6rem; cursor:pointer;" onclick="app.navigate('dashboard')">
+                            <div style="width:36px; height:36px; background:linear-gradient(135deg, #0f172a 0%, #334155 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#ffffff; font-weight:800; font-size:0.85rem; flex-shrink:0;">
+                                A
+                            </div>
+                            <div style="text-align:left; line-height:1.2;">
+                                <div style="font-size:0.84rem; font-weight:800; color:#0f172a;">${this.escapeHtml(defaultUser.name)}</div>
+                                <div style="font-size:0.73rem; color:#64748b; font-weight:500;">${this.escapeHtml(defaultUser.email)}</div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="app.scrollToRequirementForm()" style="background:#0f2b48; color:#ffffff; font-weight:800; font-size:0.84rem; padding:0.6rem 1.3rem; border-radius:8px; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(15,43,72,0.2); transition:all 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0f2b48'">
+                            Submit New Request
+                        </button>
                     </div>
                 `;
             }
@@ -535,11 +549,22 @@ class App {
                 `;
             }
         } else {
+            const userEmail = this.state.currentUser.email || 'alex.mercer@corp.com';
             if (authContainer) {
                 authContainer.innerHTML = `
-                    <div class="user-profile-nav" style="display:flex; align-items:center; gap:0.75rem;">
-                        <button class="btn btn-black-pill" onclick="app.navigate('dashboard')">👤 ${this.escapeHtml(displayName)}</button>
-                        <button class="nav-text-btn" onclick="app.logout()">Logout</button>
+                    <div style="display:flex; align-items:center; gap:1.2rem;">
+                        <div style="display:flex; align-items:center; gap:0.65rem; cursor:pointer;" onclick="app.navigate('dashboard')">
+                            <div style="width:36px; height:36px; background:linear-gradient(135deg, #0f172a 0%, #334155 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#ffffff; font-weight:800; font-size:0.85rem; flex-shrink:0;">
+                                ${this.escapeHtml(displayName.charAt(0).toUpperCase())}
+                            </div>
+                            <div style="text-align:left; line-height:1.2;">
+                                <div style="font-size:0.84rem; font-weight:800; color:#0f172a;">${this.escapeHtml(displayName)}</div>
+                                <div style="font-size:0.73rem; color:#64748b; font-weight:500;">${this.escapeHtml(userEmail)}</div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="app.scrollToRequirementForm()" style="background:#0f2b48; color:#ffffff; font-weight:800; font-size:0.84rem; padding:0.6rem 1.3rem; border-radius:8px; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(15,43,72,0.2); transition:all 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0f2b48'">
+                            Submit New Request
+                        </button>
                     </div>
                 `;
             }
@@ -1956,13 +1981,13 @@ class App {
 
     renderDashboardPage() {
         const user = this.state.currentUser || {
-            name: 'Animesh',
-            email: 'rajuranjankbkj@gmail.com',
+            name: 'Alex Mercer',
+            email: 'alex.mercer@corp.com',
             phone: '9541692891',
             role: 'ROLE_USER'
         };
 
-        // Initialize default mock requirement & 3 distinct agent offers matching sketch
+        // Initialize default mock requirement & offers matching the StayManager screenshot
         let allReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
         let allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
         let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
@@ -1972,19 +1997,16 @@ class App {
                 id: 'req-1786187618550',
                 userId: user.id || 'user-default',
                 userEmail: user.email,
-                preferredDepartureDate: '2026-08-13',
-                durationDays: 18,
-                departureCity: 'Srinagar',
-                state: 'Jammu and Kashmir',
-                district: 'Srinagar',
-                fullAddress: 'House 45, Rajbagh Main Road',
-                hotelType: '5-Star Luxury (< 300m from Haram)',
-                travelersBreakdown: { males: 1, females: 1, children: 0 },
-                travelersCount: 2,
-                maxBudget: 125000,
-                specialNotes: 'Prefer direct flights from Srinagar, wheelchair assistance needed for elderly family member.',
-                status: 'ACTIVE',
-                createdAt: '2026-08-13'
+                preferredDepartureDate: 'Oct 12 - Oct 16',
+                durationDays: 5,
+                departureCity: 'Srinagar / Delhi',
+                hotelType: '4-Star Preferred',
+                travelersBreakdown: { males: 2, females: 2, children: 0 },
+                travelersCount: 4,
+                roomsCount: '2 Double',
+                maxBudget: 1200,
+                specialNotes: 'Late check-in requested...',
+                status: 'ACTIVE'
             };
             allReqs.push(defaultReq);
             localStorage.setItem('umrah_requirements', JSON.stringify(allReqs));
@@ -1994,55 +2016,34 @@ class App {
             const offer1 = {
                 id: '#OFF-891',
                 requirementId: allReqs[0].id,
-                userId: user.id || 'user-default',
-                agentName: 'AL-HARAM PREMIUM TRAVELS',
-                packageTitle: 'Offer 1: Exclusive 5-Star 18-Day Package',
-                category: 'Premium Service',
-                makkahHotel: 'Swissotel Makkah (250m Kaaba)',
-                makkahDistance: '250 Metres from Masjid Al-Haram',
-                madinahHotel: 'Pullman Zamzam Madinah (150m Nabawi)',
-                madinahDistance: '150 Metres from Al-Masjid An-Nabawi',
-                departureDate: '2026-08-13 (18 Days)',
-                airport: 'JED/MED Airport',
-                inclusions: ['Direct Flights (SXR-JED)', '5-Star Buffet Meals', 'Ahram Kit', 'Zamzam 5L', 'Ziyarat'],
-                originalPrice: 143750,
-                discountedPrice: 118750
+                agentName: 'Grand Plaza Hotel',
+                packageTitle: '2 Double Beds • Free WiFi • Breakfast Included. Matches all your preferences.',
+                makkahHotel: 'Grand Plaza Hotel',
+                price: 950,
+                originalPrice: 1100,
+                imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'
             };
 
             const offer2 = {
                 id: '#OFF-892',
                 requirementId: allReqs[0].id,
-                userId: user.id || 'user-default',
-                agentName: 'GOEXERGY DELUXE TOURS',
-                packageTitle: 'Offer 2: Deluxe Comfort 18-Day Package',
-                category: 'Deluxe Service',
-                makkahHotel: 'Manarat Al Misk (500m Kaaba)',
-                makkahDistance: '500 Metres from Masjid Al-Haram',
-                madinahHotel: 'Marjan International (200m Nabawi)',
-                madinahDistance: '200 Metres from Al-Masjid An-Nabawi',
-                departureDate: '2026-08-13 (18 Days)',
-                airport: 'JED/MED Airport',
-                inclusions: ['Return Air Ticket', '4/5 Sharing Accommodation', '3x Daily Indian Buffet', 'Guided Ziyarat', 'Transfers'],
-                originalPrice: 135000,
-                discountedPrice: 109900
+                agentName: 'The Riverside Boutique',
+                packageTitle: '2 Queens • Spa Access • Late Check-out. Slightly closer to city center.',
+                makkahHotel: 'The Riverside Boutique',
+                price: 1100,
+                originalPrice: 1300,
+                imageUrl: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80'
             };
 
             const offer3 = {
                 id: '#OFF-893',
                 requirementId: allReqs[0].id,
-                userId: user.id || 'user-default',
-                agentName: 'AL-SAFAR VIP UMRAH',
-                packageTitle: 'Offer 3: Executive VIP 18-Day Package',
-                category: 'VIP Luxury',
-                makkahHotel: 'Dar Al Tawhid (50m Kaaba)',
-                makkahDistance: '50 Metres from Kaaba',
-                madinahHotel: 'Dar Al Taqwa (100m Nabawi)',
-                madinahDistance: '100 Metres from Al-Masjid An-Nabawi',
-                departureDate: '2026-08-13 (18 Days)',
-                airport: 'JED/MED Airport',
-                inclusions: ['Business Class Flights', 'Private GMC Transport', 'VIP Buffet Meals', 'VIP Ziyarat', 'Laundry'],
-                originalPrice: 149000,
-                discountedPrice: 122500
+                agentName: 'Metro City Inn',
+                packageTitle: 'Standard Doubles • Budget friendly option. 15 min commute.',
+                makkahHotel: 'Metro City Inn',
+                price: 820,
+                originalPrice: 990,
+                imageUrl: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80'
             };
 
             allOffers = [offer1, offer2, offer3];
@@ -2050,257 +2051,216 @@ class App {
         }
 
         const requirements = allReqs.filter(r => !r.userId || r.userId === user.id || r.userEmail === user.email);
-        const userReqIds = requirements.map(r => r.id);
-        const offers = allOffers.filter(o => !o.userId || o.userId === user.id || userReqIds.includes(o.requirementId));
-        const bookings = allBookings.filter(b => !b.userId || b.userId === user.id || b.userEmail === user.email);
+        const offers = allOffers;
+        const bookings = allBookings;
 
         return `
-            <div style="background:#f8fafc; min-height:100vh; padding:4.5rem 0 4rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                <div class="main-container" style="max-width:1380px; width:95%; margin:0 auto; padding:0 1rem;">
+            <div style="background:#f4f7fb; min-height:100vh; padding:2.2rem 0 4rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                <div class="staymanager-container" style="max-width:1440px; margin:0 auto; padding:0 1.5rem; display:grid; grid-template-columns: 240px 1fr; gap: 2rem;">
                     
-                    <!-- 1. TOP HEADER PROFILE BANNER (SKETCH: Profile Icon, Profile Name, Email, Details & Top Right Submit New Request Button) -->
-                    <div class="dash-profile-header" style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:22px; padding:1.6rem 2.2rem; margin-bottom:1.8rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem; box-shadow:0 6px 25px rgba(0,0,0,0.02);">
-                        <div style="display:flex; align-items:center; gap:1.2rem;">
-                            <!-- Circle Avatar -->
-                            <div style="width:64px; height:64px; background:linear-gradient(135deg, #10b981 0%, #047857 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:1.8rem; font-weight:900; box-shadow:0 6px 18px rgba(16,185,129,0.25); flex-shrink:0;">
-                                ${this.escapeHtml((user.name || 'A').charAt(0).toUpperCase())}
+                    <!-- LEFT SIDEBAR MENU -->
+                    <aside class="staymanager-sidebar" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:22px; padding:2rem 1.2rem; display:flex; flex-direction:column; justify-content:space-between; height:calc(100vh - 120px); position:sticky; top:90px; box-shadow:0 6px 25px rgba(0,0,0,0.02);">
+                        <div>
+                            <!-- User Profile Box -->
+                            <div style="text-align:center; padding-bottom:1.5rem; border-bottom:1px solid #f1f5f9; margin-bottom:1.5rem;">
+                                <div style="width:72px; height:72px; margin:0 auto 0.8rem; border-radius:50%; background:linear-gradient(135deg, #0f172a 0%, #334155 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:1.8rem; font-weight:800; overflow:hidden; border:2px solid #e2e8f0; box-shadow:0 4px 14px rgba(0,0,0,0.06);">
+                                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80" alt="Avatar" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
+                                </div>
+                                <h3 style="font-size:1.15rem; font-weight:800; color:#0f172a; margin:0 0 0.15rem;">Welcome back</h3>
+                                <p style="font-size:0.82rem; color:#64748b; margin:0; font-weight:500;">Manage your bookings</p>
                             </div>
-                            <div>
-                                <h1 style="font-size:1.65rem; font-weight:900; color:#0f172a; margin:0 0 0.2rem; letter-spacing:-0.4px;">
-                                    ${this.escapeHtml(user.name)}
-                                </h1>
-                                <div style="font-size:0.88rem; color:#64748b; font-weight:600; display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
-                                    <span>✉️ ${this.escapeHtml(user.email || 'rajuranjankbkj@gmail.com')}</span>
-                                    <span>&bull;</span>
-                                    <span>📞 ${this.escapeHtml(user.phone || '+91 9541692891')}</span>
-                                    <span>&bull;</span>
-                                    <span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; padding:0.15rem 0.6rem; border-radius:99px; font-size:0.75rem; font-weight:800;">VERIFIED PILGRIM</span>
+
+                            <!-- Nav Menu List -->
+                            <div style="display:flex; flex-direction:column; gap:0.45rem;">
+                                <a href="javascript:void(0)" onclick="app.navigate('dashboard')" style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-radius:12px; font-weight:800; font-size:0.9rem; background:#70e4d0; color:#0f172a; text-decoration:none; box-shadow:0 2px 8px rgba(112,228,208,0.25);">
+                                    <span style="font-size:1.1rem;">🎛️</span> Dashboard
+                                </a>
+                                <a href="javascript:void(0)" onclick="app.scrollToRequirementForm()" style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-radius:12px; font-weight:600; font-size:0.9rem; color:#475569; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                                    <span style="font-size:1.1rem;">📋</span> Requests
+                                </a>
+                                <a href="javascript:void(0)" onclick="app.filterDashboardTab('offers')" style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-radius:12px; font-weight:600; font-size:0.9rem; color:#475569; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                                    <span style="font-size:1.1rem;">🏷️</span> Offers
+                                </a>
+                                <a href="javascript:void(0)" onclick="app.filterDashboardTab('bookings')" style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-radius:12px; font-weight:600; font-size:0.9rem; color:#475569; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                                    <span style="font-size:1.1rem;">📅</span> Bookings
+                                </a>
+                                <a href="javascript:void(0)" style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-radius:12px; font-weight:600; font-size:0.9rem; color:#475569; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                                    <span style="font-size:1.1rem;">👤</span> Profile
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Sidebar Links -->
+                        <div style="display:flex; flex-direction:column; gap:0.4rem; border-top:1px solid #f1f5f9; padding-top:1rem;">
+                            <a href="javascript:void(0)" style="display:flex; align-items:center; gap:0.8rem; padding:0.6rem 1rem; font-weight:600; font-size:0.88rem; color:#64748b; text-decoration:none;">
+                                <span>❓</span> Help
+                            </a>
+                            <a href="javascript:void(0)" onclick="app.logout()" style="display:flex; align-items:center; gap:0.8rem; padding:0.6rem 1rem; font-weight:600; font-size:0.88rem; color:#dc2626; text-decoration:none;">
+                                <span>🚪</span> Logout
+                            </a>
+                        </div>
+                    </aside>
+
+                    <!-- MAIN DASHBOARD CONTENT -->
+                    <main class="staymanager-main-content" style="display:flex; flex-direction:column; gap:1.8rem;">
+                        
+                        <!-- 1. TOP 4 STAT CARDS -->
+                        <div class="staymanager-stats-row" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1.2rem;">
+                            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:18px; padding:1.4rem 1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.02);">
+                                <div style="font-size:0.78rem; font-weight:700; color:#64748b; margin-bottom:0.6rem;">Active Request</div>
+                                <div style="font-size:1.9rem; font-weight:900; color:#0f172a;">3</div>
+                            </div>
+
+                            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:18px; padding:1.4rem 1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.02);">
+                                <div style="font-size:0.78rem; font-weight:700; color:#64748b; margin-bottom:0.6rem;">Posted / Sent Offer</div>
+                                <div style="font-size:1.9rem; font-weight:900; color:#0f172a;">12</div>
+                            </div>
+
+                            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:18px; padding:1.4rem 1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.02);">
+                                <div style="font-size:0.78rem; font-weight:700; color:#64748b; margin-bottom:0.6rem;">Confirmed Booking</div>
+                                <div style="font-size:1.9rem; font-weight:900; color:#0f172a;">45</div>
+                            </div>
+
+                            <div onclick="app.scrollToRequirementForm()" style="background:#ffffff; border:1.5px dashed #cbd5e1; border-radius:18px; padding:1.4rem; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#94a3b8; font-size:1.6rem; transition:all 0.2s;" onmouseover="this.style.borderColor='#0f172a';this.style.color='#0f172a'" onmouseout="this.style.borderColor='#cbd5e1';this.style.color='#94a3b8'">
+                                ➕
+                            </div>
+                        </div>
+
+                        <!-- 2. REQUEST DETAILS CARD -->
+                        <div id="dashRequirementsSection" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:22px; padding:1.8rem 2.2rem; box-shadow:0 6px 25px rgba(0,0,0,0.02);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem;">
+                                <h2 style="font-size:1.35rem; font-weight:900; color:#0f172a; margin:0;">Request Details</h2>
+                                <span style="background:#d1fae5; color:#059669; font-weight:800; font-size:0.72rem; padding:0.35rem 0.85rem; border-radius:99px; text-transform:uppercase; letter-spacing:0.6px;">PENDING OFFERS</span>
+                            </div>
+
+                            <div class="staymanager-req-grid" style="display:grid; grid-template-columns: repeat(6, 1fr); gap:1rem;">
+                                <div>
+                                    <div style="font-size:0.75rem; font-weight:700; color:#64748b; margin-bottom:0.4rem;">Total persons</div>
+                                    <div style="font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
+                                        <span style="font-size:1.1rem; color:#475569;">👥</span> 4 Adults
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size:0.75rem; font-weight:700; color:#64748b; margin-bottom:0.4rem;">Date</div>
+                                    <div style="font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
+                                        <span style="font-size:1.1rem; color:#475569;">📅</span> Oct 12 - Oct 16
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size:0.75rem; font-weight:700; color:#64748b; margin-bottom:0.4rem;">Hotel</div>
+                                    <div style="font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
+                                        <span style="font-size:1.1rem; color:#475569;">🏨</span> 4-Star Preferred
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size:0.75rem; font-weight:700; color:#64748b; margin-bottom:0.4rem;">Rooms</div>
+                                    <div style="font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
+                                        <span style="font-size:1.1rem; color:#475569;">🛏️</span> 2 Double
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size:0.75rem; font-weight:700; color:#64748b; margin-bottom:0.4rem;">Maximum Budget</div>
+                                    <div style="font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
+                                        <span style="font-size:1.1rem; color:#475569;">💵</span> $1,200
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size:0.75rem; font-weight:700; color:#64748b; margin-bottom:0.4rem;">Other Details</div>
+                                    <div style="font-size:0.86rem; font-weight:600; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
+                                        <span style="font-size:1.1rem; color:#475569;">ℹ️</span> Late check-in...
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Top Right Action Button: Submit New Request -->
-                        <button type="button" class="btn-submit-req" onclick="app.scrollToRequirementForm()" style="background:#2e7d32; color:#ffffff; font-weight:900; border-radius:12px; border:none; padding:0.85rem 1.8rem; font-size:0.92rem; cursor:pointer; box-shadow:0 4px 16px rgba(46,125,50,0.25); display:inline-flex; align-items:center; gap:0.5rem; transition:all 0.2s;" onmouseover="this.style.background='#1b5e20';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#2e7d32';this.style.transform=''">
-                            <span>➕</span>
-                            <span>Submit New Request</span>
-                        </button>
-                    </div>
+                        <!-- 3. RECEIVED OFFERS GRID -->
+                        <div id="dashOffersSection">
+                            <h2 style="font-size:1.35rem; font-weight:900; color:#0f172a; margin:0 0 1.2rem;">Received Offers</h2>
 
-                    <!-- 2. INTERACTIVE TAB / FILTER ROW (SKETCH: Active Request, Received Agent Offer, Conf Booking, Escrow) -->
-                    <div class="stat-counters-row" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1.2rem; margin-bottom:2rem;">
-                        <div onclick="app.filterDashboardTab('active')" style="background:#ffffff; border-radius:16px; padding:1.3rem 1.5rem; border:1.5px solid #e2e8f0; border-left:4px solid #2e7d32; box-shadow:0 4px 15px rgba(0,0,0,0.02); cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:all 0.2s;" onmouseover="this.style.borderColor='#a5d6a7'" onmouseout="this.style.borderColor='#e2e8f0'">
-                            <div>
-                                <div style="font-size:0.74rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">ACTIVE REQUEST</div>
-                                <div style="font-size:1.8rem; font-weight:900; color:#0f172a; margin-top:0.15rem;">${requirements.length || 1} Active</div>
-                            </div>
-                            <div style="width:42px; height:42px; background:#e8f5e9; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:#2e7d32;">📋</div>
-                        </div>
-
-                        <div onclick="app.filterDashboardTab('offers')" style="background:#ffffff; border-radius:16px; padding:1.3rem 1.5rem; border:1.5px solid #e2e8f0; border-left:4px solid #d97706; box-shadow:0 4px 15px rgba(0,0,0,0.02); cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:all 0.2s;" onmouseover="this.style.borderColor='#fde68a'" onmouseout="this.style.borderColor='#e2e8f0'">
-                            <div>
-                                <div style="font-size:0.74rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">RECEIVED AGENT OFFERS</div>
-                                <div style="font-size:1.8rem; font-weight:900; color:#d97706; margin-top:0.15rem;">${offers.length} Offers</div>
-                            </div>
-                            <div style="width:42px; height:42px; background:#fef3c7; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">⚡</div>
-                        </div>
-
-                        <div onclick="app.filterDashboardTab('bookings')" style="background:#ffffff; border-radius:16px; padding:1.3rem 1.5rem; border:1.5px solid #e2e8f0; border-left:4px solid #10b981; box-shadow:0 4px 15px rgba(0,0,0,0.02); cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:all 0.2s;" onmouseover="this.style.borderColor='#a7f3d0'" onmouseout="this.style.borderColor='#e2e8f0'">
-                            <div>
-                                <div style="font-size:0.74rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">CONF BOOKING</div>
-                                <div style="font-size:1.8rem; font-weight:900; color:#2e7d32; margin-top:0.15rem;">${bookings.length || 1} Confirmed</div>
-                            </div>
-                            <div style="width:42px; height:42px; background:#e8f5e9; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">✅</div>
-                        </div>
-
-                        <div style="background:#ffffff; border-radius:16px; padding:1.3rem 1.5rem; border:1.5px solid #e2e8f0; border-left:4px solid #0284c7; box-shadow:0 4px 15px rgba(0,0,0,0.02); display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <div style="font-size:0.74rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">ESCROW GUARANTEE</div>
-                                <div style="font-size:1.05rem; font-weight:900; color:#0369a1; margin-top:0.25rem;">🔒 100% Secured</div>
-                            </div>
-                            <div style="width:42px; height:42px; background:#e0f2fe; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">🛡️</div>
-                        </div>
-                    </div>
-
-                    <!-- 3. MAIN USER REQUEST DETAILS CONTAINER (SKETCH: "request details what user ask for") -->
-                    <div id="dashRequirementsSection" style="margin-bottom:2.5rem;">
-                        ${requirements.map(req => `
-                            <div style="background:#ffffff; border-radius:20px; border:1.5px solid #e2e8f0; box-shadow:0 8px 30px rgba(0,0,0,0.03); padding:2rem; overflow:hidden;">
-                                
-                                <!-- Request Header Strip -->
-                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; padding-bottom:1.2rem; border-bottom:1.5px dashed #e2e8f0; margin-bottom:1.6rem;">
-                                    <div style="display:flex; align-items:center; gap:0.9rem;">
-                                        <span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.76rem; font-weight:900; padding:0.35rem 0.85rem; border-radius:99px; text-transform:uppercase; letter-spacing:0.5px;">🟢 ACTIVE REQUEST</span>
-                                        <div>
-                                            <h2 style="font-size:1.35rem; font-weight:900; color:#0f172a; margin:0;">Request Details (What User Asked For)</h2>
-                                            <div style="font-size:0.84rem; color:#64748b; font-weight:600; margin-top:0.15rem;">Request Ref: <strong>${req.id}</strong> &bull; Submitted on: ${req.preferredDepartureDate || '2026-08-13'}</div>
+                            <div class="staymanager-offers-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1.4rem;">
+                                <!-- Offer 1 -->
+                                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:space-between; transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.06)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.02)'">
+                                    <div>
+                                        <div style="position:relative; width:100%; height:190px; overflow:hidden;">
+                                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80" alt="Grand Plaza Hotel" style="width:100%; height:100%; object-fit:cover;">
+                                            <div style="position:absolute; top:12px; right:12px; background:#ffffff; border-radius:8px; padding:0.3rem 0.8rem; font-size:0.88rem; font-weight:900; color:#0f172a; box-shadow:0 4px 14px rgba(0,0,0,0.18);">
+                                                $950
+                                            </div>
+                                        </div>
+                                        <div style="padding:1.4rem 1.4rem 0.8rem;">
+                                            <h3 style="font-size:1.2rem; font-weight:800; color:#0f172a; margin:0 0 0.5rem;">Grand Plaza Hotel</h3>
+                                            <p style="font-size:0.86rem; color:#64748b; line-height:1.55; margin:0;">
+                                                2 Double Beds &bull; Free WiFi &bull; Breakfast Included. Matches all your preferences.
+                                            </p>
                                         </div>
                                     </div>
-
-                                    <div style="display:flex; gap:0.6rem;">
-                                        <button type="button" onclick="app.deleteRequirement('${req.id}')" style="background:#fef2f2; border:1px solid #fecaca; color:#dc2626; border-radius:10px; padding:0.5rem 1.1rem; font-size:0.84rem; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:0.4rem; transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
-                                            🗑️ Delete Request
+                                    <div style="padding:1rem 1.4rem 1.4rem;">
+                                        <button type="button" onclick="app.viewOfferDetailsModal('#OFF-891')" style="width:100%; padding:0.7rem; border-radius:10px; font-weight:700; font-size:0.86rem; background:#ffffff; color:#0f172a; border:1.5px solid #cbd5e1; cursor:pointer; text-align:center; transition:all 0.2s;" onmouseover="this.style.borderColor='#0f172a';this.style.background='#f8fafc'" onmouseout="this.style.borderColor='#cbd5e1';this.style.background='#ffffff'">
+                                            View Offer
                                         </button>
                                     </div>
                                 </div>
 
-                                <!-- Requirement Specs Summary Grid -->
-                                <div class="req-specs-grid" style="background:#f8fafc; border-radius:16px; border:1.5px solid #e2e8f0; padding:1.4rem 1.8rem; margin-bottom:1.8rem; display:grid; grid-template-columns:repeat(4, 1fr); gap:1.4rem;">
+                                <!-- Offer 2 -->
+                                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:space-between; transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.06)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.02)'">
                                     <div>
-                                        <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">TOTAL PERSONS</div>
-                                        <div style="font-size:0.95rem; font-weight:900; color:#0f172a; margin-top:0.2rem;">👥 ${req.travelersCount || 2} Person(s) (${req.travelersBreakdown?.males ?? 1}M / ${req.travelersBreakdown?.females ?? 1}F)</div>
+                                        <div style="position:relative; width:100%; height:190px; overflow:hidden;">
+                                            <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80" alt="The Riverside Boutique" style="width:100%; height:100%; object-fit:cover;">
+                                            <div style="position:absolute; top:12px; right:12px; background:#ffffff; border-radius:8px; padding:0.3rem 0.8rem; font-size:0.88rem; font-weight:900; color:#0f172a; box-shadow:0 4px 14px rgba(0,0,0,0.18);">
+                                                $1,100
+                                            </div>
+                                        </div>
+                                        <div style="padding:1.4rem 1.4rem 0.8rem;">
+                                            <h3 style="font-size:1.2rem; font-weight:800; color:#0f172a; margin:0 0 0.5rem;">The Riverside Boutique</h3>
+                                            <p style="font-size:0.86rem; color:#64748b; line-height:1.55; margin:0;">
+                                                2 Queens &bull; Spa Access &bull; Late Check-out. Slightly closer to city center.
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">DATE &amp; DURATION</div>
-                                        <div style="font-size:0.95rem; font-weight:900; color:#0f172a; margin-top:0.2rem;">📅 ${req.preferredDepartureDate} (${req.durationDays || 18} Days)</div>
-                                    </div>
-                                    <div>
-                                        <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">HOTEL PREFERENCE</div>
-                                        <div style="font-size:0.95rem; font-weight:900; color:#0f172a; margin-top:0.2rem;">🏨 ${this.escapeHtml(req.hotelType || '5-Star Luxury (< 300m)')}</div>
-                                    </div>
-                                    <div>
-                                        <div style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">MAXIMUM BUDGET</div>
-                                        <div style="font-size:1.05rem; font-weight:900; color:#2e7d32; margin-top:0.2rem;">${this.formatCurrency(req.maxBudget || 125000)} / person</div>
+                                    <div style="padding:1rem 1.4rem 1.4rem;">
+                                        <button type="button" onclick="app.viewOfferDetailsModal('#OFF-892')" style="width:100%; padding:0.7rem; border-radius:10px; font-weight:700; font-size:0.86rem; background:#ffffff; color:#0f172a; border:1.5px solid #cbd5e1; cursor:pointer; text-align:center; transition:all 0.2s;" onmouseover="this.style.borderColor='#0f172a';this.style.background='#f8fafc'" onmouseout="this.style.borderColor='#cbd5e1';this.style.background='#ffffff'">
+                                            View Offer
+                                        </button>
                                     </div>
                                 </div>
 
-                                <!-- Special Request Notes -->
-                                <div style="background:#ecfdf5; border-radius:12px; border:1px solid #a7f3d0; padding:1rem 1.4rem; font-size:0.88rem; color:#047857;">
-                                    <strong>📝 Offer &amp; Special Details Requested:</strong> ${this.escapeHtml(req.specialNotes || 'Direct flights preferred from departure city, wheelchair assistance required.')}
+                                <!-- Offer 3 -->
+                                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:space-between; transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.06)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.02)'">
+                                    <div>
+                                        <div style="position:relative; width:100%; height:190px; overflow:hidden;">
+                                            <img src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80" alt="Metro City Inn" style="width:100%; height:100%; object-fit:cover;">
+                                            <div style="position:absolute; top:12px; right:12px; background:#ffffff; border-radius:8px; padding:0.3rem 0.8rem; font-size:0.88rem; font-weight:900; color:#0f172a; box-shadow:0 4px 14px rgba(0,0,0,0.18);">
+                                                $820
+                                            </div>
+                                        </div>
+                                        <div style="padding:1.4rem 1.4rem 0.8rem;">
+                                            <h3 style="font-size:1.2rem; font-weight:800; color:#0f172a; margin:0 0 0.5rem;">Metro City Inn</h3>
+                                            <p style="font-size:0.86rem; color:#64748b; line-height:1.55; margin:0;">
+                                                Standard Doubles &bull; Budget friendly option. 15 min commute.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style="padding:1rem 1.4rem 1.4rem;">
+                                        <button type="button" onclick="app.viewOfferDetailsModal('#OFF-893')" style="width:100%; padding:0.7rem; border-radius:10px; font-weight:700; font-size:0.86rem; background:#ffffff; color:#0f172a; border:1.5px solid #cbd5e1; cursor:pointer; text-align:center; transition:all 0.2s;" onmouseover="this.style.borderColor='#0f172a';this.style.background='#f8fafc'" onmouseout="this.style.borderColor='#cbd5e1';this.style.background='#ffffff'">
+                                            View Offer
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        `).join('')}
-                    </div>
+                        </div>
 
-                    <!-- 4. UPGRADED VIEW OFFERS SECTION (SKETCH: Offer 1, Offer 2, Offer 3 Horizontal Carousel with < > Arrow Buttons and View Offer Button) -->
-                    <div id="dashOffersSection" style="margin-bottom:3rem;">
-                        <!-- Section Heading + Carousel Controls -->
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.3rem;">
+                        <!-- 4. BOTTOM PROCEED BANNER -->
+                        <div style="background:#e0f2fe; border-radius:22px; padding:1.8rem 2.4rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem; margin-top:0.4rem;">
                             <div>
-                                <h2 style="font-size:1.4rem; font-weight:900; color:#0f172a; margin:0; display:flex; align-items:center; gap:0.6rem;">
-                                    <span>⚡ Verified Agent Bids &amp; Offers</span>
-                                    <span style="background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; padding:0.2rem 0.75rem; border-radius:99px; font-size:0.8rem; font-weight:900;">${offers.length} Bids Available</span>
-                                </h2>
-                                <p style="font-size:0.86rem; color:#64748b; margin:0.2rem 0 0;">Compare tailored package proposals sent directly by verified Umrah operators.</p>
+                                <h3 style="font-size:1.3rem; font-weight:900; color:#0f172a; margin:0 0 0.25rem;">Ready to proceed?</h3>
+                                <p style="font-size:0.9rem; color:#475569; margin:0;">Review the offers above or adjust your request parameters.</p>
                             </div>
-
-                            <!-- Left & Right Arrow Navigation Controls (Sketch: < and > arrows) -->
-                            <div style="display:flex; align-items:center; gap:0.6rem;">
-                                <button type="button" class="carousel-arrow-btn" onclick="app.scrollOffersCarousel('left')" aria-label="Previous Offer">&larr;</button>
-                                <button type="button" class="carousel-arrow-btn" onclick="app.scrollOffersCarousel('right')" aria-label="Next Offer">&rarr;</button>
-                            </div>
+                            <button type="button" onclick="app.scrollToRequirementForm()" style="background:#0f2b48; color:#ffffff; font-weight:800; font-size:0.92rem; padding:0.85rem 2.2rem; border-radius:12px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:0.6rem; box-shadow:0 4px 16px rgba(15,43,72,0.25); transition:all 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0f2b48'">
+                                <span>Continue</span> &rarr;
+                            </button>
                         </div>
 
-                        <!-- Horizontal Carousel Container -->
-                        <div class="offers-carousel-wrapper">
-                            <div class="offers-carousel-container" id="offersCarouselContainer">
-                                ${offers.map((o, idx) => `
-                                    <div class="offer-card-item">
-                                        <div>
-                                            <!-- Offer Badge Header (Offer 1, Offer 2, Offer 3) -->
-                                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
-                                                <span style="background:#2e7d32; color:#ffffff; font-size:0.75rem; font-weight:900; padding:0.3rem 0.75rem; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px;">
-                                                    Offer ${idx + 1}
-                                                </span>
-                                                <span style="font-size:0.74rem; font-weight:800; color:#047857; background:#ecfdf5; padding:0.25rem 0.65rem; border-radius:6px; border:1px solid #a7f3d0;">
-                                                    ✅ VERIFIED
-                                                </span>
-                                            </div>
-
-                                            <h3 style="font-size:1.1rem; font-weight:900; color:#0f172a; margin:0 0 0.4rem; line-height:1.3;">
-                                                ${this.escapeHtml(o.agentName)}
-                                            </h3>
-                                            <div style="font-size:0.84rem; color:#64748b; font-weight:600; margin-bottom:1rem;">
-                                                ${this.escapeHtml(o.packageTitle)}
-                                            </div>
-
-                                            <!-- Pricing Banner -->
-                                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:0.85rem 1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
-                                                <div>
-                                                    <div style="font-size:0.7rem; font-weight:800; color:#64748b; text-transform:uppercase;">BID PRICE</div>
-                                                    <div style="font-size:1.3rem; font-weight:900; color:#2e7d32; line-height:1; margin-top:0.15rem;">
-                                                        ${this.formatCurrency(o.discountedPrice || 118750)}
-                                                    </div>
-                                                </div>
-                                                <div style="text-align:right;">
-                                                    <span style="font-size:0.75rem; color:#94a3b8; text-decoration:line-through;">${this.formatCurrency(o.originalPrice || 143750)}</span>
-                                                    <div style="font-size:0.7rem; color:#047857; font-weight:800;">Per Pilgrim</div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Hotel Distance Details -->
-                                            <div style="display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1.1rem; font-size:0.82rem; color:#334155;">
-                                                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:0.5rem 0.75rem; display:flex; justify-content:space-between; align-items:center;">
-                                                    <span>📍 Makkah Hotel:</span>
-                                                    <strong style="color:#0f172a;">${this.escapeHtml(o.makkahHotel)}</strong>
-                                                </div>
-                                                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:0.5rem 0.75rem; display:flex; justify-content:space-between; align-items:center;">
-                                                    <span>📍 Madinah Hotel:</span>
-                                                    <strong style="color:#0f172a;">${this.escapeHtml(o.madinahHotel)}</strong>
-                                                </div>
-                                            </div>
-
-                                            <!-- Inclusions Tags -->
-                                            <div style="display:flex; flex-wrap:wrap; gap:0.35rem; margin-bottom:1.2rem;">
-                                                ${(o.inclusions || ['Flights', '5-Star Meals', 'Ziyarat', 'Zamzam']).map(inc => `
-                                                    <span style="background:#f1f5f9; color:#475569; font-size:0.72rem; font-weight:700; padding:0.2rem 0.55rem; border-radius:6px;">✓ ${this.escapeHtml(inc)}</span>
-                                                `).join('')}
-                                            </div>
-                                        </div>
-
-                                        <!-- Bottom Button: View Offer (Sketch: bottom button on each card) -->
-                                        <div style="border-top:1px solid #f1f5f9; padding-top:1rem; margin-top:0.4rem; display:flex; gap:0.6rem;">
-                                            <button type="button" onclick="app.viewOfferDetailsModal('${o.id}')" style="flex:1; padding:0.7rem; border-radius:10px; font-weight:800; font-size:0.85rem; background:#ffffff; color:#2e7d32; border:1.5px solid #2e7d32; cursor:pointer; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='#e8f5e9'" onmouseout="this.style.background='#ffffff'">
-                                                📄 View Offer
-                                            </button>
-                                            <button type="button" onclick="app.navigateToPayment('${o.id}')" style="flex:1.2; padding:0.7rem; border-radius:10px; font-weight:900; font-size:0.85rem; background:#2e7d32; color:#ffffff; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(46,125,50,0.2); text-align:center; transition:all 0.2s;" onmouseover="this.style.background='#1b5e20'" onmouseout="this.style.background='#2e7d32'">
-                                                💳 Book Now &rarr;
-                                            </button>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 5. BOTTOM CONTINUATION BOX (SKETCH: Continue / Confirmed Bookings Table) -->
-                    <div id="dashBookingsSection" style="background:#ffffff; border-radius:20px; border:1.5px solid #e2e8f0; padding:2rem; box-shadow:0 8px 30px rgba(0,0,0,0.03);">
-                        <h3 style="font-size:1.3rem; font-weight:900; color:#0f172a; margin-bottom:1.2rem;">🎟️ My Confirmed Bookings (${bookings.length})</h3>
-                        ${bookings.length > 0 ? `
-                            <div class="data-table-wrap" style="overflow-x:auto;">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Booking Ref</th>
-                                            <th>Package Title</th>
-                                            <th>Travel Date</th>
-                                            <th>Travelers</th>
-                                            <th>Total Paid</th>
-                                            <th>Status</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${bookings.map(b => `
-                                            <tr>
-                                                <td><strong>${b.id || 'BK-' + Date.now()}</strong></td>
-                                                <td>${this.escapeHtml(b.packageTitle || 'Umrah Package')}</td>
-                                                <td>📅 ${b.travelDate || '2026-08-13'}</td>
-                                                <td>👥 ${b.travelersCount || 2} Person(s)</td>
-                                                <td><strong style="color:#2e7d32; font-size:1.05rem;">${this.formatCurrency(b.totalPrice || 118750)}</strong></td>
-                                                <td><span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.78rem; font-weight:800; padding:0.3rem 0.75rem; border-radius:99px;">CONFIRMED &amp; PAID</span></td>
-                                                <td>
-                                                    <button type="button" onclick="app.downloadInvoice('${b.id || 'BK-984120'}')" class="btn btn-outline btn-sm" style="font-weight:800; border-radius:8px; background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; cursor:pointer;">📄 Print / Save PDF Voucher</button>
-                                                </td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        ` : `
-                            <div style="text-align:center; padding:2rem; color:#64748b; font-size:0.9rem;">No confirmed bookings yet. Compare received offers above to book your package.</div>
-                        `}
-                    </div>
-
+                    </main>
                 </div>
             </div>
         `;

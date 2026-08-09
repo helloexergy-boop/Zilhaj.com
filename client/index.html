@@ -32,29 +32,23 @@
     <div id="app"> <!-- Floating Pill Navbar -->
         <div class="navbar-wrapper" id="navbarWrapper">
             <header class="navbar" id="navbar">
-                <div class="nav-container">
+                <div class="nav-container" style="max-width: 1440px; margin: 0 auto; width: 100%; display: flex; justify-content: space-between; align-items: center;">
                     <!-- Logo Left -->
-                    <div class="nav-brand" onclick="app.navigate('home')">
-                        <div class="logo-icon-box">
-                            <span class="logo-symbol">🕋</span>
-                        </div>
-                        <div class="logo-text-group">
-                            <span class="brand-name">UMRAH TRAVELS</span>
-                        </div>
+                    <div class="nav-brand" onclick="app.navigate('home')" style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.4rem;">🕋</span>
+                        <span class="brand-name" style="font-size: 1.25rem; font-weight: 900; color: #0f172a; letter-spacing: -0.3px;">UMRAH TRAVELS</span>
                     </div>
 
-                    <!-- Nav Links Middle -->
+                    <!-- Nav Links Middle (StayManager style with active bottom indicator line) -->
                     <nav class="nav-menu" id="navMenu">
-                        <a href="javascript:void(0)" class="nav-item active" id="navHome"
-                            onclick="app.navigate('home')">Home</a>
-                        <a href="javascript:void(0)" class="nav-item" id="navGuide"
-                            onclick="app.navigate('guides')">Hajj &amp; Umrah Guides</a>
-                        <a href="javascript:void(0)" class="nav-item" id="navAbout"
-                            onclick="app.navigate('about')">About Us</a>
+                        <a href="javascript:void(0)" class="nav-item active" id="navDashboard" onclick="app.navigate('dashboard')">Dashboard</a>
+                        <a href="javascript:void(0)" class="nav-item" id="navRequests" onclick="app.navigate('dashboard')">My Requests</a>
+                        <a href="javascript:void(0)" class="nav-item" id="navGuide" onclick="app.navigate('guides')">Hajj &amp; Umrah Guides</a>
+                        <a href="javascript:void(0)" class="nav-item" id="navAbout" onclick="app.navigate('about')">About Us</a>
                     </nav>
 
                     <!-- Right Controls Group -->
-                    <div class="nav-right-group">
+                    <div class="nav-right-group" style="display: flex; align-items: center; gap: 1rem;">
                         <div class="nav-actions" id="navAuthActions">
                             <a href="/api/download-zip" download="GoExergy_Project_Source.zip" class="nav-btn" style="background:#0284c7; color:#ffffff; font-size:0.75rem; font-weight:800; padding:0.4rem 0.75rem; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:0.35rem; transition:all 0.2s;" onmouseover="this.style.background='#0369a1'" onmouseout="this.style.background='#0284c7'">
                                 <span>📦</span>

@@ -5270,11 +5270,36 @@ p, body {
     }
 }
 
-@media (max-width: 480px) {
-    .stat-counters-row {
+@media (max-width: 1024px) {
+    .staymanager-container {
+        grid-template-columns: 1fr !important;
+    }
+    .staymanager-sidebar {
+        display: none !important;
+    }
+    .staymanager-stats-row {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .staymanager-req-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+    .staymanager-offers-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .staymanager-stats-row {
+        grid-template-columns: 1fr !important;
+    }
+    .staymanager-req-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .staymanager-offers-grid {
         grid-template-columns: 1fr !important;
     }
 }
+
 
 
 
