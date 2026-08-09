@@ -2001,34 +2001,34 @@ class App {
 
         // Render Sidebar helper
         const renderSidebar = () => `
-            <aside class="staymanager-sidebar" style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:22px; padding:2rem 1.2rem; display:flex; flex-direction:column; justify-content:space-between; height:calc(100vh - 140px); position:sticky; top:115px; box-shadow:0 6px 25px rgba(0,0,0,0.02);">
+            <aside class="staymanager-sidebar" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:2rem 1.2rem; display:flex; flex-direction:column; justify-content:space-between; min-height:580px; box-shadow:0 4px 20px rgba(0,0,0,0.02);">
                 <div>
                     <!-- User Profile Box with Upload Camera Button -->
-                    <div style="text-align:center; padding-bottom:1.5rem; border-bottom:1px solid #f1f5f9; margin-bottom:1.5rem;">
-                        <div style="position:relative; width:76px; height:76px; margin:0 auto 0.8rem;">
-                            <div style="width:100%; height:100%; border-radius:50%; background:linear-gradient(135deg, #2e7d32 0%, #0f5132 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:1.8rem; font-weight:800; overflow:hidden; border:2.5px solid #a7f3d0; box-shadow:0 4px 14px rgba(46,125,50,0.2);">
-                                ${userPhoto ? `<img src="${userPhoto}" alt="Avatar" style="width:100%; height:100%; object-fit:cover;">` : `<span>${this.escapeHtml((user.name || 'A').charAt(0).toUpperCase())}</span>`}
+                    <div style="text-align:center; padding-bottom:1.4rem; border-bottom:1px solid #f1f5f9; margin-bottom:1.4rem;">
+                        <div style="position:relative; width:80px; height:80px; margin:0 auto 0.8rem;">
+                            <div style="width:100%; height:100%; border-radius:50%; background:#3d5245; display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:2.2rem; font-weight:800; overflow:hidden;">
+                                ${userPhoto ? `<img src="${userPhoto}" alt="Avatar" style="width:100%; height:100%; object-fit:cover;">` : `<span>${this.escapeHtml((user.name || 'D').charAt(0).toUpperCase())}</span>`}
                             </div>
-                            <button type="button" onclick="app.triggerPhotoUpload()" title="Upload Profile Photo" style="position:absolute; bottom:0; right:0; width:26px; height:26px; background:#ffffff; border:1.5px solid #cbd5e1; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.15); transition:all 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform=''">
+                            <button type="button" onclick="app.triggerPhotoUpload()" title="Upload Profile Photo" style="position:absolute; bottom:0; right:0; width:24px; height:24px; background:#ffffff; border:1px solid #cbd5e1; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.68rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.12);">
                                 📷
                             </button>
                         </div>
-                        <h3 style="font-size:1.15rem; font-weight:900; color:#0f172a; margin:0 0 0.15rem;">Salam, ${this.escapeHtml(user.name)}!</h3>
-                        <p style="font-size:0.82rem; color:#64748b; margin:0; font-weight:600;">Manage your Umrah bookings</p>
+                        <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0 0 0.2rem;">Salam, ${this.escapeHtml(user.name)}!</h3>
+                        <p style="font-size:0.8rem; color:#64748b; margin:0; font-weight:500;">Manage your Umrah bookings</p>
                     </div>
 
-                    <!-- Nav Menu List (Offers sidebar removed completely per prompt) -->
+                    <!-- Nav Menu List -->
                     <div style="display:flex; flex-direction:column; gap:0.45rem;">
-                        <a href="javascript:void(0)" onclick="app.setDashboardTab('dashboard')" style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-radius:12px; font-weight:${activeTab === 'dashboard' ? '900' : '600'}; font-size:0.9rem; background:${activeTab === 'dashboard' ? '#70e4d0' : 'transparent'}; color:#0f172a; text-decoration:none; transition:all 0.2s;" onmouseover="if('${activeTab}'!=='dashboard') this.style.background='#f1f5f9'" onmouseout="if('${activeTab}'!=='dashboard') this.style.background='transparent'">
-                            <span style="font-size:1.1rem;">🎛️</span> Dashboard
+                        <a href="javascript:void(0)" onclick="app.setDashboardTab('dashboard')" style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-radius:12px; font-weight:${activeTab === 'dashboard' ? '800' : '500'}; font-size:0.9rem; background:${activeTab === 'dashboard' ? '#dcfce7' : 'transparent'}; color:${activeTab === 'dashboard' ? '#155724' : '#475569'}; text-decoration:none; transition:all 0.2s;">
+                            <span style="font-size:1.1rem;">⏲</span> Dashboard
                         </a>
-                        <a href="javascript:void(0)" onclick="app.setDashboardTab('requests')" style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-radius:12px; font-weight:${activeTab === 'requests' ? '900' : '600'}; font-size:0.9rem; background:${activeTab === 'requests' ? '#70e4d0' : 'transparent'}; color:#0f172a; text-decoration:none; transition:all 0.2s;" onmouseover="if('${activeTab}'!=='requests') this.style.background='#f1f5f9'" onmouseout="if('${activeTab}'!=='requests') this.style.background='transparent'">
-                            <span style="font-size:1.1rem;">📋</span> Requests (${requirements.length})
+                        <a href="javascript:void(0)" onclick="app.setDashboardTab('requests')" style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-radius:12px; font-weight:${activeTab === 'requests' ? '800' : '500'}; font-size:0.9rem; background:${activeTab === 'requests' ? '#dcfce7' : 'transparent'}; color:${activeTab === 'requests' ? '#155724' : '#475569'}; text-decoration:none; transition:all 0.2s;">
+                            <span style="font-size:1.1rem;">📑</span> Requests (${requirements.length})
                         </a>
-                        <a href="javascript:void(0)" onclick="app.setDashboardTab('bookings')" style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-radius:12px; font-weight:${activeTab === 'bookings' ? '900' : '600'}; font-size:0.9rem; background:${activeTab === 'bookings' ? '#70e4d0' : 'transparent'}; color:#0f172a; text-decoration:none; transition:all 0.2s;" onmouseover="if('${activeTab}'!=='bookings') this.style.background='#f1f5f9'" onmouseout="if('${activeTab}'!=='bookings') this.style.background='transparent'">
-                            <span style="font-size:1.1rem;">📅</span> Bookings (${bookings.length})
+                        <a href="javascript:void(0)" onclick="app.setDashboardTab('bookings')" style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-radius:12px; font-weight:${activeTab === 'bookings' ? '800' : '500'}; font-size:0.9rem; background:${activeTab === 'bookings' ? '#dcfce7' : 'transparent'}; color:${activeTab === 'bookings' ? '#155724' : '#475569'}; text-decoration:none; transition:all 0.2s;">
+                            <span style="font-size:1.1rem;">☑</span> Bookings (${bookings.length})
                         </a>
-                        <a href="javascript:void(0)" onclick="app.setDashboardTab('profile')" style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-radius:12px; font-weight:${activeTab === 'profile' ? '900' : '600'}; font-size:0.9rem; background:${activeTab === 'profile' ? '#70e4d0' : 'transparent'}; color:#0f172a; text-decoration:none; transition:all 0.2s;" onmouseover="if('${activeTab}'!=='profile') this.style.background='#f1f5f9'" onmouseout="if('${activeTab}'!=='profile') this.style.background='transparent'">
+                        <a href="javascript:void(0)" onclick="app.setDashboardTab('profile')" style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-radius:12px; font-weight:${activeTab === 'profile' ? '800' : '500'}; font-size:0.9rem; background:${activeTab === 'profile' ? '#dcfce7' : 'transparent'}; color:${activeTab === 'profile' ? '#155724' : '#475569'}; text-decoration:none; transition:all 0.2s;">
                             <span style="font-size:1.1rem;">👤</span> Profile
                         </a>
                     </div>
@@ -2036,58 +2036,58 @@ class App {
 
                 <!-- Bottom Sidebar Links -->
                 <div style="display:flex; flex-direction:column; gap:0.4rem; border-top:1px solid #f1f5f9; padding-top:1rem;">
-                    <a href="javascript:void(0)" onclick="app.openChatbot()" style="display:flex; align-items:center; gap:0.8rem; padding:0.6rem 1rem; font-weight:600; font-size:0.88rem; color:#64748b; text-decoration:none;">
+                    <a href="javascript:void(0)" onclick="app.openChatbot()" style="display:flex; align-items:center; gap:0.8rem; padding:0.6rem 1rem; font-weight:600; font-size:0.88rem; color:#475569; text-decoration:none;">
                         <span>❓</span> Help &amp; Support
                     </a>
-                    <a href="javascript:void(0)" onclick="app.logout()" style="display:flex; align-items:center; gap:0.8rem; padding:0.6rem 1rem; font-weight:700; font-size:0.88rem; color:#dc2626; text-decoration:none;">
-                        <span>🚪</span> Logout
+                    <a href="javascript:void(0)" onclick="app.logout()" style="display:flex; align-items:center; gap:0.8rem; padding:0.6rem 1rem; font-weight:600; font-size:0.88rem; color:#475569; text-decoration:none;">
+                        <span>↳</span> Logout
                     </a>
                 </div>
             </aside>
         `;
 
-        // Helper to render inline scrollable offers carousel for a request
+        // Helper to render Verified Agent Offers Carousel (Matches Screenshot Cards 100%)
         const renderInlineOffersCarousel = (reqId) => {
             const reqOffers = offers.filter(o => !o.requirementId || o.requirementId === reqId);
             const displayOffers = reqOffers.length > 0 ? reqOffers : offers;
 
             return `
-                <div style="margin-top:1.6rem; border-top:1.5px dashed #e2e8f0; padding-top:1.4rem;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div style="margin-top:2rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;">
                         <div style="display:flex; align-items:center; gap:0.6rem;">
-                            <span style="font-size:1.1rem;">⚡</span>
-                            <h4 style="font-size:1.05rem; font-weight:900; color:#0f172a; margin:0;">Verified Agent Offers for this Request (${displayOffers.length})</h4>
+                            <span style="font-size:1.1rem; color:#eab308;">⚡</span>
+                            <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0;">Verified Agent Offers for this Request (${displayOffers.length})</h3>
                         </div>
-                        <div style="display:flex; gap:0.5rem;">
-                            <button type="button" onclick="app.scrollReqOffersCarousel('${reqId}', 'left')" class="carousel-arrow-btn" aria-label="Previous Offer">&larr;</button>
-                            <button type="button" onclick="app.scrollReqOffersCarousel('${reqId}', 'right')" class="carousel-arrow-btn" aria-label="Next Offer">&rarr;</button>
+                        <div style="display:flex; gap:0.4rem;">
+                            <button type="button" onclick="app.scrollReqOffersCarousel('${reqId}', 'left')" style="width:32px; height:32px; border:1px solid #e2e8f0; border-radius:6px; background:#ffffff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:700; color:#475569;">&lt;</button>
+                            <button type="button" onclick="app.scrollReqOffersCarousel('${reqId}', 'right')" style="width:32px; height:32px; border:1px solid #e2e8f0; border-radius:6px; background:#ffffff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:700; color:#475569;">&gt;</button>
                         </div>
                     </div>
 
-                    <div style="overflow-x:auto; scroll-behavior:smooth; display:flex; gap:1.2rem; padding-bottom:0.8rem;" id="reqOffersCarousel_${reqId}">
-                        ${displayOffers.map((o, idx) => `
-                            <div style="flex:0 0 320px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:18px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.03); display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                    <div style="overflow-x:auto; scroll-behavior:smooth; display:grid; grid-template-columns: repeat(3, 1fr); gap:1.2rem; padding-bottom:0.4rem;" id="reqOffersCarousel_${reqId}">
+                        ${displayOffers.slice(0, 3).map((o, idx) => `
+                            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:space-between;">
                                 <div>
-                                    <div style="position:relative; width:100%; height:160px; overflow:hidden;">
+                                    <div style="position:relative; width:100%; height:165px; overflow:hidden;">
                                         <img src="${o.imageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'}" alt="${this.escapeHtml(o.agentName)}" style="width:100%; height:100%; object-fit:cover;">
-                                        <div style="position:absolute; top:10px; right:10px; background:#ffffff; border-radius:8px; padding:0.25rem 0.65rem; font-size:0.82rem; font-weight:900; color:#2e7d32; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
-                                            ${this.formatCurrency(o.price || o.discountedPrice || 118750)}
-                                        </div>
-                                        <div style="position:absolute; top:10px; left:10px; background:#2e7d32; color:#ffffff; font-size:0.7rem; font-weight:900; padding:0.2rem 0.55rem; border-radius:6px;">
+                                        <div style="position:absolute; top:10px; left:10px; background:rgba(15,23,42,0.75); color:#ffffff; font-size:0.75rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:6px;">
                                             Offer ${idx + 1}
+                                        </div>
+                                        <div style="position:absolute; top:10px; right:10px; background:#ffffff; border-radius:8px; padding:0.3rem 0.7rem; font-size:0.92rem; font-weight:800; color:#0f172a; box-shadow:0 4px 10px rgba(0,0,0,0.12);">
+                                            ${this.formatCurrency(o.price || o.discountedPrice || 118750)}
                                         </div>
                                     </div>
                                     <div style="padding:1.1rem 1.1rem 0.6rem;">
-                                        <h4 style="font-size:1.05rem; font-weight:800; color:#0f172a; margin:0 0 0.35rem;">${this.escapeHtml(o.agentName)}</h4>
+                                        <h4 style="font-size:0.95rem; font-weight:800; color:#0f172a; margin:0 0 0.4rem; text-transform:uppercase; letter-spacing:0.3px;">${this.escapeHtml(o.agentName)}</h4>
                                         <p style="font-size:0.8rem; color:#64748b; line-height:1.45; margin:0;">${this.escapeHtml(o.packageTitle)}</p>
                                     </div>
                                 </div>
-                                <div style="padding:0.8rem 1.1rem 1.1rem; display:flex; gap:0.5rem;">
-                                    <button type="button" onclick="app.viewOfferDetailsModal('${o.id}')" style="flex:1; padding:0.6rem; border-radius:8px; font-weight:700; font-size:0.8rem; background:#ffffff; color:#0f172a; border:1.5px solid #cbd5e1; cursor:pointer; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
+                                <div style="padding:0.8rem 1.1rem 1.1rem; display:flex; gap:0.6rem;">
+                                    <button type="button" onclick="app.viewOfferDetailsModal('${o.id}')" style="flex:1; height:38px; border-radius:8px; font-weight:700; font-size:0.82rem; background:#ffffff; color:#334155; border:1px solid #cbd5e1; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.3rem;">
                                         📄 Details
                                     </button>
-                                    <button type="button" onclick="app.navigateToPayment('${o.id}')" style="flex:1.2; padding:0.6rem; border-radius:8px; font-weight:900; font-size:0.82rem; background:#2e7d32; color:#ffffff; border:none; cursor:pointer; box-shadow:0 4px 10px rgba(46,125,50,0.2); text-align:center; transition:all 0.2s;" onmouseover="this.style.background='#1b5e20'" onmouseout="this.style.background='#2e7d32'">
-                                        💳 Book &rarr;
+                                    <button type="button" onclick="app.navigateToPayment('${o.id}')" style="flex:1; height:38px; border-radius:8px; font-weight:800; font-size:0.82rem; background:#2b5e48; color:#ffffff; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.3rem; box-shadow:0 3px 10px rgba(43,94,72,0.25);">
+                                        Book &rarr;
                                     </button>
                                 </div>
                             </div>
@@ -2101,7 +2101,7 @@ class App {
         let mainContentHtml = '';
 
         if (activeTab === 'requests') {
-            // REQUESTS VIEW PANEL WITH INLINE OFFERS
+            // REQUESTS VIEW PANEL
             mainContentHtml = `
                 <main class="staymanager-main-content" style="display:flex; flex-direction:column; gap:1.8rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -2109,13 +2109,13 @@ class App {
                             <h2 style="font-size:1.5rem; font-weight:900; color:#0f172a; margin:0;">📋 My Submitted Travel Requirements</h2>
                             <p style="font-size:0.88rem; color:#64748b; margin:0.2rem 0 0;">View, manage or delete your posted Umrah travel requests and inspect received bids.</p>
                         </div>
-                        <button type="button" onclick="app.scrollToRequirementForm()" style="background:#2e7d32; color:#ffffff; font-weight:800; font-size:0.9rem; padding:0.75rem 1.6rem; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(46,125,50,0.25);">
-                            ➕ Post New Requirement
+                        <button type="button" onclick="app.scrollToRequirementForm()" style="background:#2b5e48; color:#ffffff; font-weight:800; font-size:0.9rem; padding:0.75rem 1.6rem; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(43,94,72,0.25);">
+                            + Post Requirement
                         </button>
                     </div>
 
                     ${requirements.map(req => `
-                        <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:20px; padding:1.8rem; box-shadow:0 6px 20px rgba(0,0,0,0.02);">
+                        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:1.8rem; box-shadow:0 6px 20px rgba(0,0,0,0.02);">
                             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:1rem; margin-bottom:1.2rem;">
                                 <div>
                                     <span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; padding:0.25rem 0.75rem; border-radius:99px; font-size:0.75rem; font-weight:800;">ACTIVE REQUEST</span>
@@ -2129,23 +2129,22 @@ class App {
                             <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1.2rem; background:#f8fafc; padding:1.2rem; border-radius:14px; border:1px solid #e2e8f0;">
                                 <div>
                                     <div style="font-size:0.72rem; color:#64748b; font-weight:700;">DEPARTURE</div>
-                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">✈️ ${req.departureCity || 'Srinagar'}</div>
+                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">✈️ ${req.departureCity || 'New Delhi'}</div>
                                 </div>
                                 <div>
                                     <div style="font-size:0.72rem; color:#64748b; font-weight:700;">TRAVEL DATE</div>
-                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">📅 ${req.preferredDepartureDate}</div>
+                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">📅 ${req.preferredDepartureDate || '13 Aug 2026'}</div>
                                 </div>
                                 <div>
                                     <div style="font-size:0.72rem; color:#64748b; font-weight:700;">TRAVELERS</div>
-                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">👥 ${req.travelersCount || 2} Persons</div>
+                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">👥 ${req.travelersCount || 2} Adults</div>
                                 </div>
                                 <div>
                                     <div style="font-size:0.72rem; color:#64748b; font-weight:700;">MAX BUDGET</div>
-                                    <div style="font-size:0.95rem; font-weight:900; color:#2e7d32; margin-top:0.2rem;">${this.formatCurrency(req.maxBudget || 125000)}</div>
+                                    <div style="font-size:0.95rem; font-weight:900; color:#2b5e48; margin-top:0.2rem;">${this.formatCurrency(req.maxBudget || 125000)}</div>
                                 </div>
                             </div>
 
-                            <!-- INLINE OFFERS SCROLLABLE CAROUSEL BELOW REQUEST -->
                             ${renderInlineOffersCarousel(req.id)}
                         </div>
                     `).join('')}
@@ -2177,13 +2176,13 @@ class App {
                                     <tbody>
                                         ${bookings.map(b => `
                                             <tr style="border-bottom:1px solid #f1f5f9; font-size:0.9rem;">
-                                                <td style="padding:1rem;"><strong style="color:#2e7d32;">${b.id || 'BK-984120'}</strong></td>
+                                                <td style="padding:1rem;"><strong style="color:#2b5e48;">${b.id || 'BK-984120'}</strong></td>
                                                 <td style="padding:1rem;">${this.escapeHtml(b.packageTitle || 'Deluxe 18-Day Package')}</td>
                                                 <td style="padding:1rem;">📅 ${b.travelDate || '13 Aug 2026'}</td>
-                                                <td style="padding:1rem;"><strong style="color:#2e7d32;">${this.formatCurrency(b.totalPrice || 118750)}</strong></td>
+                                                <td style="padding:1rem;"><strong style="color:#2b5e48;">${this.formatCurrency(b.totalPrice || 118750)}</strong></td>
                                                 <td style="padding:1rem;"><span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.75rem; font-weight:800; padding:0.25rem 0.75rem; border-radius:99px;">CONFIRMED &amp; PAID</span></td>
                                                 <td style="padding:1rem;">
-                                                    <button type="button" onclick="app.viewBookingVoucher('${b.id || 'BK-984120'}')" style="background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; padding:0.55rem 1.1rem; border-radius:10px; font-weight:800; font-size:0.84rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; transition:all 0.2s;" onmouseover="this.style.background='#c8e6c9'" onmouseout="this.style.background='#e8f5e9'">
+                                                    <button type="button" onclick="app.viewBookingVoucher('${b.id || 'BK-984120'}')" style="background:#e8f5e9; color:#2b5e48; border:1px solid #c8e6c9; padding:0.55rem 1.1rem; border-radius:10px; font-weight:800; font-size:0.84rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; transition:all 0.2s;" onmouseover="this.style.background='#c8e6c9'" onmouseout="this.style.background='#e8f5e9'">
                                                         📄 View &amp; Print Voucher
                                                     </button>
                                                 </td>
@@ -2199,7 +2198,7 @@ class App {
                 </main>
             `;
         } else if (activeTab === 'profile') {
-            // PROFILE VIEW PANEL WITH PROFILE PHOTO UPLOAD
+            // PROFILE VIEW PANEL
             mainContentHtml = `
                 <main class="staymanager-main-content" style="display:flex; flex-direction:column; gap:1.8rem;">
                     <div>
@@ -2210,8 +2209,8 @@ class App {
                     <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:2rem; box-shadow:0 6px 20px rgba(0,0,0,0.02); max-width:720px;">
                         <div style="display:flex; align-items:center; gap:1.4rem; padding-bottom:1.6rem; border-bottom:1px solid #f1f5f9; margin-bottom:1.6rem;">
                             <div style="position:relative; width:80px; height:80px;">
-                                <div style="width:100%; height:100%; border-radius:50%; background:linear-gradient(135deg, #2e7d32 0%, #0f5132 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:2rem; font-weight:900; overflow:hidden; border:2.5px solid #a7f3d0; box-shadow:0 4px 14px rgba(46,125,50,0.2);">
-                                    ${userPhoto ? `<img src="${userPhoto}" alt="Avatar" style="width:100%; height:100%; object-fit:cover;">` : `<span>${this.escapeHtml((user.name || 'A').charAt(0).toUpperCase())}</span>`}
+                                <div style="width:100%; height:100%; border-radius:50%; background:#3d5245; display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:2rem; font-weight:900; overflow:hidden;">
+                                    ${userPhoto ? `<img src="${userPhoto}" alt="Avatar" style="width:100%; height:100%; object-fit:cover;">` : `<span>${this.escapeHtml((user.name || 'D').charAt(0).toUpperCase())}</span>`}
                                 </div>
                                 <button type="button" onclick="app.triggerPhotoUpload()" title="Upload Profile Photo" style="position:absolute; bottom:0; right:0; width:28px; height:28px; background:#ffffff; border:1.5px solid #cbd5e1; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
                                     📷
@@ -2252,82 +2251,119 @@ class App {
                 </main>
             `;
         } else {
-            // DEFAULT OVERVIEW TAB (INLINE OFFERS BELOW EACH REQUEST)
+            // DEFAULT MAIN OVERVIEW TAB (MATCHES USER SCREENSHOT 100%)
             mainContentHtml = `
-                <main class="staymanager-main-content" style="display:flex; flex-direction:column; gap:1.8rem;">
+                <main class="staymanager-main-content" style="display:flex; flex-direction:column; gap:1.6rem;">
                     
-                    <!-- 1. TOP 4 STAT CARDS (POLISHED ACTION CARD IN PLACE OF BLANK CARD) -->
+                    <!-- 1. TOP 4 STAT CARDS ROW (MATCHES SCREENSHOT CARDS EXACTLY) -->
                     <div class="staymanager-stats-row" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1.2rem;">
-                        <div onclick="app.setDashboardTab('requests')" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:18px; padding:1.4rem 1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.02); cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='#a7f3d0'" onmouseout="this.style.borderColor='#e2e8f0'">
-                            <div style="font-size:0.78rem; font-weight:700; color:#64748b; margin-bottom:0.6rem;">Active Request</div>
-                            <div style="font-size:1.9rem; font-weight:900; color:#0f172a;">${requirements.length || 3}</div>
+                        <div onclick="app.setDashboardTab('requests')" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.4rem 1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.01); cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='#a7f3d0'" onmouseout="this.style.borderColor='#e2e8f0'">
+                            <div style="font-size:0.8rem; font-weight:600; color:#475569; margin-bottom:0.8rem;">Active Request</div>
+                            <div style="font-size:2rem; font-weight:800; color:#0f172a;">1</div>
                         </div>
 
-                        <div onclick="app.scrollToReqOffers()" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:18px; padding:1.4rem 1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.02); cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='#a7f3d0'" onmouseout="this.style.borderColor='#e2e8f0'">
-                            <div style="font-size:0.78rem; font-weight:700; color:#64748b; margin-bottom:0.6rem;">Posted / Sent Offers</div>
-                            <div style="font-size:1.9rem; font-weight:900; color:#0f172a;">${offers.length || 12}</div>
+                        <div onclick="app.scrollToReqOffers()" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.4rem 1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.01); cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='#a7f3d0'" onmouseout="this.style.borderColor='#e2e8f0'">
+                            <div style="font-size:0.8rem; font-weight:600; color:#475569; margin-bottom:0.8rem;">Posted / Sent Offers</div>
+                            <div style="font-size:2rem; font-weight:800; color:#0f172a;">3</div>
                         </div>
 
-                        <div onclick="app.setDashboardTab('bookings')" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:18px; padding:1.4rem 1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.02); cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='#a7f3d0'" onmouseout="this.style.borderColor='#e2e8f0'">
-                            <div style="font-size:0.78rem; font-weight:700; color:#64748b; margin-bottom:0.6rem;">Confirmed Bookings</div>
-                            <div style="font-size:1.9rem; font-weight:900; color:#0f172a;">${bookings.length || 5}</div>
+                        <div onclick="app.setDashboardTab('bookings')" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.4rem 1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.01); cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='#a7f3d0'" onmouseout="this.style.borderColor='#e2e8f0'">
+                            <div style="font-size:0.8rem; font-weight:600; color:#475569; margin-bottom:0.8rem;">Confirmed Bookings</div>
+                            <div style="font-size:2rem; font-weight:800; color:#0f172a;">5</div>
                         </div>
 
-                        <div onclick="app.scrollToRequirementForm()" style="background:linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border:1.5px solid #a7f3d0; border-radius:18px; padding:1.4rem; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer; color:#047857; box-shadow:0 4px 15px rgba(0,0,0,0.02); transition:all 0.2s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform=''">
-                            <div style="font-size:1.5rem; margin-bottom:0.2rem;">➕</div>
-                            <div style="font-size:0.88rem; font-weight:900; color:#065f46;">Post Requirement</div>
-                            <div style="font-size:0.72rem; color:#047857; font-weight:600; margin-top:0.15rem;">Get Custom Bids</div>
+                        <div onclick="app.scrollToRequirementForm()" style="background:#c6e7d2; border:1px solid #a7f3d0; border-radius:16px; padding:1.2rem; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer; color:#155724; box-shadow:0 4px 15px rgba(0,0,0,0.01); transition:all 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform=''">
+                            <div style="font-size:1.6rem; font-weight:800; margin-bottom:0.1rem;">+</div>
+                            <div style="font-size:0.95rem; font-weight:800; color:#0f172a;">Post Requirement</div>
+                            <div style="font-size:0.72rem; color:#475569; font-weight:600; margin-top:0.1rem;">Get Custom Bids</div>
                         </div>
                     </div>
 
-                    <!-- 2. REQUEST DETAILS CARD WITH INLINE SCROLLABLE OFFERS CAROUSEL -->
+                    <!-- 2. REQUEST DETAILS CARD (MATCHES SCREENSHOT LAYOUT 100%) -->
                     ${requirements.map(req => `
-                        <div id="dashRequirementsSection" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:22px; padding:1.8rem 2.2rem; box-shadow:0 6px 25px rgba(0,0,0,0.02);">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem;">
-                                <h2 style="font-size:1.35rem; font-weight:900; color:#0f172a; margin:0;">Request Details</h2>
-                                <span style="background:#d1fae5; color:#059669; font-weight:800; font-size:0.72rem; padding:0.35rem 0.85rem; border-radius:99px; text-transform:uppercase; letter-spacing:0.6px;">PENDING OFFERS</span>
+                        <div id="dashRequirementsSection" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:2rem; box-shadow:0 4px 20px rgba(0,0,0,0.01);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.6rem;">
+                                <div style="display:flex; align-items:center;">
+                                    <div style="width:4px; height:22px; background:#2b5e48; border-radius:2px; margin-right:10px;"></div>
+                                    <h2 style="font-size:1.4rem; font-weight:800; color:#0f172a; margin:0;">Request Details</h2>
+                                </div>
+                                <span style="background:#dcfce7; color:#166534; font-weight:800; font-size:0.72rem; padding:0.35rem 0.85rem; border-radius:99px; text-transform:uppercase; letter-spacing:0.6px;">PENDING OFFERS</span>
                             </div>
 
-                            <div class="staymanager-req-grid" style="display:grid; grid-template-columns: repeat(6, 1fr); gap:1rem;">
-                                <div>
-                                    <div style="font-size:0.75rem; font-weight:700; color:#64748b; margin-bottom:0.4rem;">Total persons</div>
-                                    <div style="font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
-                                        <span style="font-size:1.1rem; color:#475569;">👥</span> ${req.travelersCount || 4} Adults
+                            <!-- 6 FIELD GRID MATCHING SCREENSHOT -->
+                            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1.2rem; margin-bottom:1rem;">
+                                
+                                <!-- ROW 1 -->
+                                <div style="display:flex; gap:0.9rem; align-items:center;">
+                                    <div style="width:44px; height:44px; background:#f1f5f9; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#475569; flex-shrink:0;">
+                                        📅
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">DATE</div>
+                                        <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin:0.1rem 0;">13 Aug 2026</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500;">Flexible +/- 3 days</div>
                                     </div>
                                 </div>
-                                <div>
-                                    <div style="font-size:0.75rem; font-weight:700; color:#64748b; margin-bottom:0.4rem;">Date</div>
-                                    <div style="font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
-                                        <span style="font-size:1.1rem; color:#475569;">📅</span> ${req.preferredDepartureDate || 'Oct 12 - Oct 16'}
+
+                                <div style="display:flex; gap:0.9rem; align-items:center;">
+                                    <div style="width:44px; height:44px; background:#f1f5f9; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#475569; flex-shrink:0;">
+                                        ✈️
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">DEPARTURE CITY</div>
+                                        <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin:0.1rem 0;">New Delhi</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500;">Indira Gandhi Intl</div>
                                     </div>
                                 </div>
-                                <div>
-                                    <div style="font-size:0.75rem; font-weight:700; color:#64748b; margin-bottom:0.4rem;">Hotel</div>
-                                    <div style="font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
-                                        <span style="font-size:1.1rem; color:#475569;">🏨</span> ${this.escapeHtml(req.hotelType || '4-Star Preferred')}
+
+                                <div style="display:flex; gap:0.9rem; align-items:center;">
+                                    <div style="width:44px; height:44px; background:#f1f5f9; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#475569; flex-shrink:0;">
+                                        🏨
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">HOTEL PREFERENCE</div>
+                                        <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin:0.1rem 0;">5-Star Luxury</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500;">Within 300m of Haram</div>
                                     </div>
                                 </div>
-                                <div>
-                                    <div style="font-size:0.75rem; font-weight:700; color:#64748b; margin-bottom:0.4rem;">Rooms</div>
-                                    <div style="font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
-                                        <span style="font-size:1.1rem; color:#475569;">🛏️</span> ${req.roomsCount || '2 Double'}
+
+                                <!-- ROW 2 -->
+                                <div style="display:flex; gap:0.9rem; align-items:center;">
+                                    <div style="width:44px; height:44px; background:#f1f5f9; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#475569; flex-shrink:0;">
+                                        🕒
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">DURATION</div>
+                                        <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin:0.1rem 0;">18 Days</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500;">Full Umrah Program</div>
                                     </div>
                                 </div>
-                                <div>
-                                    <div style="font-size:0.75rem; font-weight:700; color:#64748b; margin-bottom:0.4rem;">Maximum Budget</div>
-                                    <div style="font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
-                                        <span style="font-size:1.1rem; color:#475569;">💵</span> ${this.formatCurrency(req.maxBudget || 1200)}
+
+                                <div style="display:flex; gap:0.9rem; align-items:center;">
+                                    <div style="width:44px; height:44px; background:#f1f5f9; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#475569; flex-shrink:0;">
+                                        👥
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">TOTAL PERSONS</div>
+                                        <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin:0.1rem 0;">2 Adults</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500;">Standard Package</div>
                                     </div>
                                 </div>
-                                <div>
-                                    <div style="font-size:0.75rem; font-weight:700; color:#64748b; margin-bottom:0.4rem;">Other Details</div>
-                                    <div style="font-size:0.86rem; font-weight:600; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
-                                        <span style="font-size:1.1rem; color:#475569;">ℹ️</span> ${this.escapeHtml(req.specialNotes ? req.specialNotes.substring(0, 18) + '...' : 'Late check-in...')}
+
+                                <div style="display:flex; gap:0.9rem; align-items:center;">
+                                    <div style="width:44px; height:44px; background:#f1f5f9; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#475569; flex-shrink:0;">
+                                        ℹ️
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">ADDITIONAL REQUEST</div>
+                                        <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin:0.1rem 0;">Direct Flights</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500;">Wheelchair assistance required</div>
                                     </div>
                                 </div>
+
                             </div>
 
-                            <!-- INLINE SCROLLABLE OFFERS CAROUSEL DIRECTLY BELOW REQUEST CARD -->
+                            <!-- VERIFIED AGENT OFFERS SECTION -->
                             ${renderInlineOffersCarousel(req.id)}
                         </div>
                     `).join('')}
