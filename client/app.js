@@ -3957,6 +3957,8 @@ class App {
             content.innerHTML = contentHtml;
         }
 
+        const is100vw = customOptions.width === '100vw' || customOptions.maxWidth === '100vw';
+
         if (modal) {
             modal.style.maxWidth = customOptions.maxWidth || (isFullScreen ? '950px' : '880px');
             modal.style.width = customOptions.width || '95%';
@@ -3965,9 +3967,11 @@ class App {
             modal.style.borderRadius = customOptions.borderRadius || '24px';
             modal.style.overflowY = customOptions.overflowY || 'auto';
             modal.style.padding = '0';
-            modal.style.background = 'transparent';
+            modal.style.background = is100vw ? '#ffffff' : 'transparent';
             modal.style.boxShadow = customOptions.boxShadow || 'none';
             modal.style.border = 'none';
+            modal.style.margin = '0';
+            modal.style.transform = 'none';
             if (defaultCloseBtn) defaultCloseBtn.style.display = 'none';
         }
 
@@ -3981,8 +3985,9 @@ class App {
             backdrop.style.display = 'flex';
             backdrop.style.alignItems = 'center';
             backdrop.style.justifyContent = 'center';
-            backdrop.style.background = 'rgba(15, 23, 42, 0.78)';
-            backdrop.style.backdropFilter = 'blur(8px)';
+            backdrop.style.padding = is100vw ? '0px' : '1.5rem';
+            backdrop.style.background = is100vw ? '#ffffff' : 'rgba(15, 23, 42, 0.78)';
+            backdrop.style.backdropFilter = is100vw ? 'none' : 'blur(8px)';
             backdrop.classList.add('active');
         }
         document.body.style.overflow = 'hidden';
@@ -5667,7 +5672,7 @@ class App {
         // Update badge count in header
         const offerBadge = document.getElementById('userOfferBadge');
         if (offerBadge) {
-            offerBadge.innerText = localOffers.length;
+                        offerBadge.innerText = localOffers.length;
             const offersLink = document.getElementById('offersNavLink');
             if (offersLink) offersLink.style.display = 'inline-flex';
         }
@@ -5708,7 +5713,7 @@ class App {
 
     openViewOfferModal(pkg = {}) {
         const packageId = pkg.id || 'pkg-1';
-        const title = pkg.title || 'Umrah Package';
+        const title = pkg.title || '18 Days Umrah Package • Manarat Al Misk & Marjan International Hotels • Direct Flights';
         const price = pkg.price || 118750;
         const formattedPrice = '₹' + price.toLocaleString('en-IN');
         const travelDate = pkg.departureDate || '12 Aug 2026';
@@ -5720,7 +5725,7 @@ class App {
                 <!-- TOP STEPPER NAVIGATION HEADER -->
                 <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:1.1rem 2.5rem; border-bottom:1px solid #e2e8f0; position:sticky; top:0; z-index:100;">
                     <!-- Brand Logo -->
-                    <div style="font-weight:900; font-size:1.4rem; color:#166534; letter-spacing:-0.02em;">
+                    <div style="font-weight:900; font-size:1.45rem; color:#166534; letter-spacing:-0.02em;">
                         GoExergy
                     </div>
 
@@ -5747,12 +5752,12 @@ class App {
                 <div style="max-width:1120px; width:100%; margin:2rem auto; padding:0 1.5rem; box-sizing:border-box; display:flex; flex-direction:column; gap:1.8rem;">
                     
                     <!-- TOP HERO OVERVIEW CARD -->
-                    <div style="background:#f4fbf7; border:1px solid #e2e8f0; border-radius:16px; padding:1.8rem 2rem; display:flex; justify-content:space-between; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+                    <div style="background:#f3faf6; border:1px solid #e2e8f0; border-radius:20px; padding:1.8rem 2.2rem; display:flex; justify-content:space-between; align-items:center; gap:1.5rem; flex-wrap:wrap;">
                         <div>
                             <div style="display:inline-block; font-size:0.68rem; font-weight:800; color:#166534; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:0.4rem;">
                                 PREMIUM TRAVEL EXPERIENCE
                             </div>
-                            <h2 style="font-size:1.8rem; font-weight:900; color:#0f172a; margin:0 0 0.3rem 0; letter-spacing:-0.02em;">
+                            <h2 style="font-size:1.8rem; font-weight:900; color:#0f172a; margin:0 0 0.3rem 0; letter-spacing:-0.02em; line-height:1.35;">
                                 ${this.escapeHtml(title)}
                             </h2>
                             <p style="font-size:0.88rem; color:#64748b; margin:0;">
@@ -5763,7 +5768,7 @@ class App {
                         <!-- 2 INFO PILL CARDS -->
                         <div style="display:flex; gap:1rem;">
                             <!-- Departure -->
-                            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:0.8rem 1.4rem; display:flex; align-items:center; gap:0.8rem; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:0.8rem 1.4rem; display:flex; align-items:center; gap:0.8rem; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
                                 <span style="font-size:1.4rem; color:#166534;">📅</span>
                                 <div>
                                     <div style="font-size:0.62rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">DEPARTURE</div>
@@ -5771,7 +5776,7 @@ class App {
                                 </div>
                             </div>
                             <!-- Duration -->
-                            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:0.8rem 1.4rem; display:flex; align-items:center; gap:0.8rem; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:0.8rem 1.4rem; display:flex; align-items:center; gap:0.8rem; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
                                 <span style="font-size:1.4rem; color:#166534;">⏳</span>
                                 <div>
                                     <div style="font-size:0.62rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">DURATION</div>
@@ -5785,7 +5790,7 @@ class App {
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.6rem;">
                         
                         <!-- BOX 1: HOTELS ACCOMMODATION -->
-                        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.6rem; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:1.8rem; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
                             <div style="display:inline-block; border-bottom:2.5px solid #166534; padding-bottom:0.3rem; margin-bottom:1.4rem;">
                                 <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0; display:flex; align-items:center; gap:0.5rem;">
                                     <span>🏨</span> <span>Hotels Accommodation</span>
@@ -5800,7 +5805,7 @@ class App {
                                 <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin-bottom:0.35rem;">
                                     Manarat Al Misk / Dream Zone
                                 </div>
-                                <span style="display:inline-block; background:#eff6ff; color:#1e40af; border:1px solid #dbeafe; font-size:0.72rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:4px;">
+                                <span style="display:inline-block; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-size:0.72rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:6px;">
                                     Approx. 600 Metres from Masjid Al-Haram
                                 </span>
                             </div>
@@ -5815,14 +5820,14 @@ class App {
                                 <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin-bottom:0.35rem;">
                                     Marjan International / Marjan Gold
                                 </div>
-                                <span style="display:inline-block; background:#eff6ff; color:#1e40af; border:1px solid #dbeafe; font-size:0.72rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:4px;">
+                                <span style="display:inline-block; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-size:0.72rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:6px;">
                                     Approx. 250 Metres from Al-Masjid An-Nabawi
                                 </span>
                             </div>
                         </div>
 
                         <!-- BOX 2: PACKAGE INCLUDES -->
-                        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.6rem; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:1.8rem; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
                             <div style="display:inline-block; border-bottom:2.5px solid #166534; padding-bottom:0.3rem; margin-bottom:1.4rem;">
                                 <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0; display:flex; align-items:center; gap:0.5rem;">
                                     <span style="color:#166534;">✓</span> <span>Package Includes</span>
@@ -5858,7 +5863,7 @@ class App {
                         </div>
 
                         <!-- BOX 3: COMPLIMENTARY SERVICES -->
-                        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.6rem; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:1.8rem; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
                             <div style="display:inline-block; border-bottom:2.5px solid #166534; padding-bottom:0.3rem; margin-bottom:1.4rem;">
                                 <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0; display:flex; align-items:center; gap:0.5rem;">
                                     <span>🎁</span> <span>Complimentary Services</span>
@@ -5867,17 +5872,17 @@ class App {
 
                             <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.85rem;">
                                 <!-- Ahram Kit -->
-                                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.2rem 0.5rem; text-align:center;">
+                                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:1.2rem 0.5rem; text-align:center;">
                                     <div style="font-size:1.6rem; margin-bottom:0.4rem;">🥋</div>
                                     <div style="font-size:0.72rem; font-weight:800; color:#1e293b; text-transform:uppercase;">AHRAM KIT</div>
                                 </div>
                                 <!-- Laundry -->
-                                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.2rem 0.5rem; text-align:center;">
+                                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:1.2rem 0.5rem; text-align:center;">
                                     <div style="font-size:1.6rem; margin-bottom:0.4rem;">🧺</div>
                                     <div style="font-size:0.72rem; font-weight:800; color:#1e293b; text-transform:uppercase;">LAUNDRY SERVICE</div>
                                 </div>
                                 <!-- Zamzam -->
-                                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.2rem 0.5rem; text-align:center;">
+                                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:1.2rem 0.5rem; text-align:center;">
                                     <div style="font-size:1.6rem; margin-bottom:0.4rem;">💧</div>
                                     <div style="font-size:0.72rem; font-weight:800; color:#1e293b; text-transform:uppercase;">5 LITRES ZAMZAM</div>
                                 </div>
@@ -5885,7 +5890,7 @@ class App {
                         </div>
 
                         <!-- BOX 4: IMPORTANT NOTE -->
-                        <div style="background:#edf5ff; border:1px solid #cbd5e1; border-radius:16px; padding:1.6rem;">
+                        <div style="background:#e8f2ff; border:1px solid #c7d2fe; border-radius:20px; padding:1.8rem;">
                             <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.85rem;">
                                 <span style="font-size:1.2rem; color:#dc2626;">ℹ️</span>
                                 <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0;">Important Note</h3>
@@ -6024,7 +6029,7 @@ class App {
                     </div>
 
                     <!-- Brand Logo -->
-                    <div style="display:flex; align-items:center; gap:0.4rem; font-weight:900; font-size:1.35rem; color:#166534;">
+                    <div style="display:flex; align-items:center; gap:0.4rem; font-weight:900; font-size:1.45rem; color:#166534;">
                         <span>GoExergy</span>
                     </div>
                 </div>
@@ -6036,7 +6041,7 @@ class App {
                     <div style="display:flex; flex-direction:column; gap:1.5rem;">
                         
                         <!-- CARD 1: SELECTED PACKAGE SUMMARY -->
-                        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.03);">
+                        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.03);">
                             <div style="display:inline-block; background:#ecfdf5; color:#166534; border:1px solid #bbf7d0; font-size:0.65rem; font-weight:800; padding:0.25rem 0.6rem; border-radius:4px; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:0.8rem;">
                                 SELECTED PACKAGE SUMMARY
                             </div>
@@ -6074,7 +6079,7 @@ class App {
                         </div>
 
                         <!-- CARD 2: PRICING BREAKDOWN -->
-                        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.03);">
+                        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.03);">
                             <div style="display:inline-block; background:#ecfdf5; color:#166534; border:1px solid #bbf7d0; font-size:0.65rem; font-weight:800; padding:0.25rem 0.6rem; border-radius:4px; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:1rem;">
                                 PRICING BREAKDOWN
                             </div>
@@ -6107,7 +6112,7 @@ class App {
                     </div>
 
                     <!-- RIGHT COLUMN: PAYMENT METHODS PANEL -->
-                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:2rem; box-shadow:0 4px 20px rgba(0,0,0,0.04); display:flex; flex-direction:column; justify-content:space-between;">
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:2rem; box-shadow:0 4px 20px rgba(0,0,0,0.04); display:flex; flex-direction:column; justify-content:space-between;">
                         
                         <div>
                             <!-- Section Heading -->
@@ -6124,25 +6129,25 @@ class App {
                             <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.85rem; margin-bottom:1.8rem;">
                                 
                                 <!-- TAB 1: UPI / QR Code -->
-                                <button type="button" id="payTabUpi" onclick="app.switchPayTab('upi')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.4rem; padding:1.1rem 0.5rem; background:#f0fdf4; border:2px solid #166534; border-radius:10px; cursor:pointer; transition:all 0.2s;">
+                                <button type="button" id="payTabUpi" onclick="app.switchPayTab('upi')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.4rem; padding:1.1rem 0.5rem; background:#f0fdf4; border:2px solid #166534; border-radius:12px; cursor:pointer; transition:all 0.2s;">
                                     <span style="font-size:1.4rem;">📱</span>
                                     <span style="font-size:0.78rem; font-weight:800; color:#166534;">UPI / QR Code</span>
                                 </button>
 
                                 <!-- TAB 2: Credit / Debit Card -->
-                                <button type="button" id="payTabCard" onclick="app.switchPayTab('card')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.4rem; padding:1.1rem 0.5rem; background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; cursor:pointer; transition:all 0.2s;">
+                                <button type="button" id="payTabCard" onclick="app.switchPayTab('card')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.4rem; padding:1.1rem 0.5rem; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; cursor:pointer; transition:all 0.2s;">
                                     <span style="font-size:1.4rem;">💳</span>
                                     <span style="font-size:0.78rem; font-weight:700; color:#334155;">Credit/Debit Card</span>
                                 </button>
 
                                 <!-- TAB 3: Net Banking -->
-                                <button type="button" id="payTabNet" onclick="app.switchPayTab('net')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.4rem; padding:1.1rem 0.5rem; background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; cursor:pointer; transition:all 0.2s;">
+                                <button type="button" id="payTabNet" onclick="app.switchPayTab('net')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.4rem; padding:1.1rem 0.5rem; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; cursor:pointer; transition:all 0.2s;">
                                     <span style="font-size:1.4rem;">🏛️</span>
                                     <span style="font-size:0.78rem; font-weight:700; color:#334155;">Net Banking</span>
                                 </button>
 
                                 <!-- TAB 4: 0% EMI -->
-                                <button type="button" id="payTabEmi" onclick="app.switchPayTab('emi')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.4rem; padding:1.1rem 0.5rem; background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; cursor:pointer; transition:all 0.2s;">
+                                <button type="button" id="payTabEmi" onclick="app.switchPayTab('emi')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.4rem; padding:1.1rem 0.5rem; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; cursor:pointer; transition:all 0.2s;">
                                     <span style="font-size:1.4rem;">🗓️</span>
                                     <span style="font-size:0.78rem; font-weight:700; color:#334155;">0% EMI</span>
                                 </button>
@@ -6151,7 +6156,7 @@ class App {
                             <!-- TAB CONTENT AREA -->
                             
                             <!-- PANEL 1: UPI / QR CODE (ACTIVE BY DEFAULT) -->
-                            <div id="payContentUpi" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1.8rem; text-align:center;">
+                            <div id="payContentUpi" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:1.8rem; text-align:center;">
                                 <div style="font-size:0.74rem; font-weight:800; color:#166534; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:1rem;">
                                     SCAN QR CODE WITH ANY UPI APP
                                 </div>
@@ -6183,7 +6188,7 @@ class App {
                             </div>
 
                             <!-- PANEL 2: CREDIT / DEBIT CARD -->
-                            <div id="payContentCard" style="display:none; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1.6rem;">
+                            <div id="payContentCard" style="display:none; background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:1.6rem;">
                                 <div style="display:flex; flex-direction:column; gap:0.85rem; max-width:440px; margin:0 auto;">
                                     <div>
                                         <label style="font-size:0.75rem; font-weight:700; color:#475569; display:block; margin-bottom:0.3rem;">Card Number</label>
@@ -6207,7 +6212,7 @@ class App {
                             </div>
 
                             <!-- PANEL 3: NET BANKING -->
-                            <div id="payContentNet" style="display:none; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1.6rem;">
+                            <div id="payContentNet" style="display:none; background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:1.6rem;">
                                 <div style="font-size:0.78rem; font-weight:800; color:#475569; margin-bottom:0.85rem; text-transform:uppercase;">Select Bank</div>
                                 <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.75rem;">
                                     <label style="display:flex; align-items:center; gap:0.5rem; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; padding:0.6rem 0.8rem; font-size:0.8rem; font-weight:700; cursor:pointer;"><input type="radio" name="bank" checked> HDFC Bank</label>
@@ -6220,7 +6225,7 @@ class App {
                             </div>
 
                             <!-- PANEL 4: 0% EMI -->
-                            <div id="payContentEmi" style="display:none; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1.6rem;">
+                            <div id="payContentEmi" style="display:none; background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:1.6rem;">
                                 <div style="font-size:0.78rem; font-weight:800; color:#475569; margin-bottom:0.85rem; text-transform:uppercase;">No Cost EMI Plans</div>
                                 <div style="display:flex; flex-direction:column; gap:0.6rem;">
                                     <label style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; padding:0.75rem 1rem; font-size:0.84rem; cursor:pointer;"><div><input type="radio" name="emi" checked> <strong>3 Months No-Cost EMI</strong></div><strong style="color:#166534;">₹${Math.round(totalPrice/3).toLocaleString('en-IN')}/mo</strong></label>
