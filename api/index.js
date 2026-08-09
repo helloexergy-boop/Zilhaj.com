@@ -93,7 +93,7 @@ const inMemoryStore = {
 
 // HEALTH CHECK
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'UP', service: 'GoExergy Umrah Backend API', timestamp: new Date() });
+    res.json({ status: 'UP', service: 'Zilhaj.com Umrah Backend API', timestamp: new Date() });
 });
 
 // ZIP DOWNLOAD ENDPOINT
@@ -809,7 +809,7 @@ app.post(['/api/auth/send-otp', '/api/auth/resend-otp'], async (req, res) => {
                                     <h1 style="font-size: 38px; font-weight: 900; color: #15803d; letter-spacing: 8px; margin: 0; font-family: monospace;">${newOtp}</h1>
                                     <p style="color: #166534; font-size: 12px; margin-top: 10px; font-weight: 600;">Valid for 10 minutes. Do not share this code with anyone.</p>
                                 </div>
-                                <p style="color: #94a3b8; font-size: 11px; text-align: center; margin-top: 16px;">Sent securely by Umrah Travels Platform • support@goexergy.com</p>
+                                <p style="color: #94a3b8; font-size: 11px; text-align: center; margin-top: 16px;">Sent securely by Umrah Travels Platform • support@zilhaj.com</p>
                             </div>
                         `
                     });
@@ -1011,7 +1011,7 @@ app.get('*', (req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`GoExergy Umrah Server running on http://0.0.0.0:${PORT}`);
+    console.log(`Zilhaj.com Umrah Server running on http://0.0.0.0:${PORT}`);
 });
 
 module.exports = app;

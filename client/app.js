@@ -1820,7 +1820,7 @@ class App {
         const mock2 = {
             id: 'off-' + Date.now() + '-2',
             requirementId: req.id,
-            agentName: 'GOEXERGY DELUXE TOURS',
+            agentName: 'ZILHAJ.COM DELUXE TOURS',
             packageTitle: `Deluxe Comfort ${req.durationDays}-Day Package`,
             originalPrice: Math.round(req.maxBudget * 1.2),
             discountedPrice: Math.round(req.maxBudget * 0.88),
@@ -1953,7 +1953,7 @@ class App {
             const offer2 = {
                 id: '#OFF-892',
                 requirementId: allReqs[0].id,
-                agentName: 'GOEXERGY DELUXE TOURS',
+                agentName: 'ZILHAJ.COM DELUXE TOURS',
                 packageTitle: 'Swissotel Makkah (250m Kaaba) • Pullman Zamzam Madinah • 5-Star Buffet Meals',
                 makkahHotel: 'Swissotel Makkah (250m Kaaba)',
                 makkahDistance: 'Approx. 250 Metres from Masjid Al-Haram',
@@ -2465,7 +2465,7 @@ class App {
                                     <div style="display:flex; align-items:center; gap:0.9rem; margin-bottom:0.4rem;">
                                         <div style="font-size:2.4rem;">🕋</div>
                                         <div>
-                                            <h1 style="font-size:2.2rem; font-weight:900; color:#ffffff; margin:0; letter-spacing:-0.5px; line-height:1.1;">GOEXERGY UMRAH PLATFORM</h1>
+                                            <h1 style="font-size:2.2rem; font-weight:900; color:#ffffff; margin:0; letter-spacing:-0.5px; line-height:1.1;">ZILHAJ.COM UMRAH PLATFORM</h1>
                                             <div style="font-size:0.78rem; color:#d4af37; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; margin-top:0.4rem;">OFFICIAL TRAVEL BOOKING VOUCHER &amp; ESCROW RECEIPT</div>
                                         </div>
                                     </div>
@@ -2613,8 +2613,8 @@ class App {
                             <!-- OFFICIAL FOOTER CERTIFICATION -->
                             <div style="border-top:1.5px dashed #cbd5e1; padding-top:1.4rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-top:0.4rem;">
                                 <div>
-                                    <div style="font-size:0.85rem; font-weight:900; color:#0f172a;">GoExergy Umrah Services Support</div>
-                                    <div style="font-size:0.78rem; color:#64748b; margin-top:0.15rem;">Website: www.goexergy.com &bull; Email: support@goexergy.com</div>
+                                    <div style="font-size:0.85rem; font-weight:900; color:#0f172a;">Zilhaj.com Umrah Services Support</div>
+                                    <div style="font-size:0.78rem; color:#64748b; margin-top:0.15rem;">Website: www.zilhaj.com &bull; Email: support@zilhaj.com</div>
                                 </div>
                                 <div style="text-align:right;">
                                     <div style="display:inline-block; border:1.5px solid #166534; padding:0.45rem 1rem; border-radius:8px; font-size:0.78rem; font-weight:900; color:#166534; background:#f0fdf4; letter-spacing:0.5px;">
@@ -2750,7 +2750,7 @@ class App {
                                         <span style="font-weight:800; color:#2e7d32;">INCLUDED (₹0)</span>
                                     </div>
                                     <div style="display:flex; justify-content:space-between;">
-                                        <span>GoExergy Reverse Bidding Fee:</span>
+                                        <span>Zilhaj.com Reverse Bidding Fee:</span>
                                         <span style="font-weight:800; color:#2e7d32;">FREE (₹0)</span>
                                     </div>
                                     
@@ -2784,7 +2784,7 @@ class App {
                                     <div id="paySection-upi">
                                         <div style="background:#f8fafc; border-radius:14px; padding:1.2rem; border:1px solid #e2e8f0; text-align:center; margin-bottom:1.2rem;">
                                             <div style="font-size:0.82rem; font-weight:800; color:#2e7d32; margin-bottom:0.7rem;">SCAN QR CODE WITH ANY UPI APP</div>
-                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=goexergy@upi&pn=GoExergy%20Umrah&am=${totalPayable}&cu=INR" alt="Payment QR Code" style="width:160px; height:160px; border-radius:12px; border:2px solid #a5d6a7; padding:6px; background:#ffffff; box-shadow:0 4px 12px rgba(0,0,0,0.04);" />
+                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=zilhaj@upi&pn=Zilhaj.com%20Umrah&am=${totalPayable}&cu=INR" alt="Payment QR Code" style="width:160px; height:160px; border-radius:12px; border:2px solid #a5d6a7; padding:6px; background:#ffffff; box-shadow:0 4px 12px rgba(0,0,0,0.04);" />
                                             <div style="font-size:0.78rem; color:#64748b; margin-top:0.5rem;">Accepts Google Pay, PhonePe, Paytm, BHIM &amp; Banking Apps</div>
                                         </div>
 
@@ -3202,7 +3202,7 @@ class App {
                         <div style="display:flex; align-items:center; gap:0.6rem;">
                             <span style="font-size:1.5rem;">🕋</span>
                             <div>
-                                <div style="color:#ffffff; font-weight:800; font-size:1.15rem; letter-spacing:0.3px;">GoExergy Package Review</div>
+                                <div style="color:#ffffff; font-weight:800; font-size:1.15rem; letter-spacing:0.3px;">Zilhaj.com Package Review</div>
                                 <div style="color:#94a3b8; font-size:0.75rem;">Verified Travel Agent Special Offer</div>
                             </div>
                         </div>
@@ -3363,7 +3363,7 @@ class App {
                             <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
                                 <span style="font-size:1.6rem;">🛡️</span>
                                 <div>
-                                    <div style="font-weight:800; font-size:0.95rem;">GoExergy 100% Protection</div>
+                                    <div style="font-weight:800; font-size:0.95rem;">Zilhaj.com 100% Protection</div>
                                     <div style="font-size:0.75rem; color:#a7f3d0;">Verified Bidding Guarantee</div>
                                 </div>
                             </div>
@@ -3396,7 +3396,7 @@ class App {
             packageTitle: 'Custom Travel Package Offer',
             discountedPrice: 125000,
             originalPrice: 145000,
-            agentName: 'GoExergy Verified Agency',
+            agentName: 'Zilhaj.com Verified Agency',
             requirementId: ''
         };
 
@@ -3431,7 +3431,7 @@ class App {
                         <div style="display:flex; align-items:center; gap:0.6rem;">
                             <span style="font-size:1.5rem;">💳</span>
                             <div>
-                                <div style="color:#ffffff; font-weight:800; font-size:1.15rem; letter-spacing:0.3px;">GoExergy Secure Checkout</div>
+                                <div style="color:#ffffff; font-weight:800; font-size:1.15rem; letter-spacing:0.3px;">Zilhaj.com Secure Checkout</div>
                                 <div style="color:#94a3b8; font-size:0.75rem;">Step 2: Traveler Registration & Gateway Payment</div>
                             </div>
                         </div>
@@ -3518,7 +3518,7 @@ class App {
                             <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:12px; padding:1rem; display:flex; align-items:center; gap:0.8rem;">
                                 <span style="font-size:1.4rem;">🔒</span>
                                 <div style="font-size:0.82rem; color:#065f46; line-height:1.5;">
-                                    <strong>256-Bit Bank Level Encryption:</strong> Your transaction is encrypted and protected. GoExergy never stores your card or banking credentials.
+                                    <strong>256-Bit Bank Level Encryption:</strong> Your transaction is encrypted and protected. Zilhaj.com never stores your card or banking credentials.
                                 </div>
                             </div>
 
@@ -4431,7 +4431,7 @@ class App {
                     <div style="display:flex; align-items:center; gap:0.75rem;">
                         <span style="font-size:1.5rem;">🛡️</span>
                         <div>
-                            <h2 style="font-size:1.35rem; font-weight:900; margin:0; color:#F9E07A; letter-spacing:-0.02em;">ZILHAJ Privacy Policy</h2>
+                            <h2 style="font-size:1.35rem; font-weight:900; margin:0; color:#F9E07A; letter-spacing:-0.02em;">Zilhaj.com Privacy Policy</h2>
                             <p style="font-size:0.76rem; color:rgba(255,255,255,0.85); margin:0.1rem 0 0 0;">Official Data Protection &amp; Pilgrim Privacy Commitment</p>
                         </div>
                     </div>
@@ -4450,7 +4450,7 @@ class App {
 
                     <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">1. Introduction &amp; Scope</h3>
                     <p style="margin-bottom:0.9rem;">
-                        At <strong>ZILHAJ Umrah &amp; Hajj Travel Platform</strong> ("ZILHAJ", "we", "us", or "our"), accessible via <code>www.zilhaj-travel.com</code>, we hold the privacy, confidentiality, and trust of our sacred pilgrims (Zaireen) in the highest regard. This Privacy Policy outlines the types of personal data we collect, how it is processed, encrypted, stored, and shared, and your statutory rights regarding your personal records when utilizing our travel marketplace services, e-Visa assistance, Nusuk permit integration, and hotel booking comparison tools.
+                        At <strong>Zilhaj.com Umrah &amp; Hajj Travel Platform</strong> ("Zilhaj.com", "we", "us", or "our"), accessible via <code>www.zilhaj.com</code>, we hold the privacy, confidentiality, and trust of our sacred pilgrims (Zaireen) in the highest regard. This Privacy Policy outlines the types of personal data we collect, how it is processed, encrypted, stored, and shared, and your statutory rights regarding your personal records when utilizing our travel marketplace services, e-Visa assistance, Nusuk permit integration, and hotel booking comparison tools.
                     </p>
 
                     <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">2. Information We Collect</h3>
@@ -4458,7 +4458,7 @@ class App {
                     <ul style="padding-left:1.3rem; margin-bottom:1rem;">
                         <li style="margin-bottom:0.35rem;"><strong>Personal Identification Data:</strong> Full legal name (as printed on passport), email address, mobile phone number, passport number, nationality, date of birth, gender, and residential address.</li>
                         <li style="margin-bottom:0.35rem;"><strong>Pilgrimage &amp; Travel Preferences:</strong> Departure city, travel dates, group size (adults, children, infants), hotel proximity requirements in Makkah &amp; Madinah, meal preferences, flight class, and Nusuk permit requests.</li>
-                        <li style="margin-bottom:0.35rem;"><strong>Financial &amp; Payment Data:</strong> Payment transaction logs, Razorpay order IDs, and payment status verification. <em>(Note: Credit card numbers, CVVs, and banking credentials are processed directly via PCI-DSS certified payment gateways and are never stored on ZILHAJ servers).</em></li>
+                        <li style="margin-bottom:0.35rem;"><strong>Financial &amp; Payment Data:</strong> Payment transaction logs, Razorpay order IDs, and payment status verification. <em>(Note: Credit card numbers, CVVs, and banking credentials are processed directly via PCI-DSS certified payment gateways and are never stored on Zilhaj.com servers).</em></li>
                         <li style="margin-bottom:0.35rem;"><strong>Technical &amp; Log Data:</strong> IP address, device type, browser specifications, session cookies, operating system, and interaction timestamps.</li>
                     </ul>
 
@@ -4473,7 +4473,7 @@ class App {
                     </ul>
 
                     <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">4. Disclosure &amp; Sharing of Information</h3>
-                    <p style="margin-bottom:0.5rem;">ZILHAJ maintains a strict <strong>Zero Data Selling Policy</strong>. We do not sell, rent, or monetize your personal data to any third-party marketing companies. Data is disclosed strictly under the following operational circumstances:</p>
+                    <p style="margin-bottom:0.5rem;">Zilhaj.com maintains a strict <strong>Zero Data Selling Policy</strong>. We do not sell, rent, or monetize your personal data to any third-party marketing companies. Data is disclosed strictly under the following operational circumstances:</p>
                     <ul style="padding-left:1.3rem; margin-bottom:1rem;">
                         <li style="margin-bottom:0.35rem;"><strong>Verified Umrah Operators:</strong> Necessary travel details are shared with verified travel agents solely to provide accurate package pricing and service execution.</li>
                         <li style="margin-bottom:0.35rem;"><strong>Government Regulatory Authorities:</strong> Shared with the Saudi Ministry of Hajj &amp; Umrah, Ministry of Foreign Affairs (MOFA), and Saudi Border Control as required by KSA law.</li>
@@ -4502,8 +4502,8 @@ class App {
                     <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">8. Contact Our Data Protection Officer</h3>
                     <p style="margin-bottom:0.7rem;">For questions, privacy requests, or regulatory inquiries, contact our legal and data protection team:</p>
                     <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.1rem; font-size:0.84rem; color:#475569;">
-                        <strong>ZILHAJ Data Protection Office (DPO)</strong><br>
-                        📧 Email: <a href="mailto:privacy@zilhaj-travel.com" style="color:#2b5e48; font-weight:700;">privacy@zilhaj-travel.com</a> | <a href="mailto:info@zilhaj-travel.com" style="color:#2b5e48; font-weight:700;">info@zilhaj-travel.com</a><br>
+                        <strong>Zilhaj.com Data Protection Office (DPO)</strong><br>
+                        📧 Email: <a href="mailto:privacy@zilhaj.com" style="color:#2b5e48; font-weight:700;">privacy@zilhaj.com</a> | <a href="mailto:info@zilhaj.com" style="color:#2b5e48; font-weight:700;">info@zilhaj.com</a><br>
                         📞 Toll-Free KSA Support: <strong>+966 800 123 4567</strong> | Helpline: <strong>+91 95416 92891</strong><br>
                         📍 Head Office: Makkah al-Mukarramah, Kingdom of Saudi Arabia 24231
                     </div>
@@ -4512,7 +4512,7 @@ class App {
 
                 <!-- FOOTER STRIP -->
                 <div style="padding:1rem 2rem; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:0.78rem; color:#64748b;">© 2024 ZILHAJ Umrah &amp; Hajj Travel. All rights reserved.</span>
+                    <span style="font-size:0.78rem; color:#64748b;">© 2024 Zilhaj.com. All rights reserved.</span>
                     <button type="button" onclick="app.closeModal()" style="background:#2b5e48; color:#ffffff; font-weight:800; font-size:0.86rem; padding:0.55rem 1.5rem; border-radius:8px; border:none; cursor:pointer;">I Understand</button>
                 </div>
 
@@ -4538,7 +4538,7 @@ class App {
                     <div style="display:flex; align-items:center; gap:0.75rem;">
                         <span style="font-size:1.5rem;">📜</span>
                         <div>
-                            <h2 style="font-size:1.35rem; font-weight:900; margin:0; color:#F9E07A; letter-spacing:-0.02em;">ZILHAJ Terms of Service</h2>
+                            <h2 style="font-size:1.35rem; font-weight:900; margin:0; color:#F9E07A; letter-spacing:-0.02em;">Zilhaj.com Terms of Service</h2>
                             <p style="font-size:0.76rem; color:rgba(255,255,255,0.85); margin:0.1rem 0 0 0;">Official Pilgrimage Booking Terms &amp; Conditions</p>
                         </div>
                     </div>
@@ -4550,26 +4550,26 @@ class App {
                     
                     <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0 0 0.5rem 0;">1. Agreement to Terms</h3>
                     <p style="margin-bottom:0.9rem;">
-                        By accessing or using <strong>ZILHAJ Umrah &amp; Hajj Travel Platform</strong> (www.zilhaj-travel.com), submitting pilgrimage requests, or booking travel packages, you agree to be bound by these legal Terms of Service and all applicable Saudi Arabian travel, aviation, and immigration laws.
+                        By accessing or using <strong>Zilhaj.com Umrah &amp; Hajj Travel Platform</strong> (www.zilhaj.com), submitting pilgrimage requests, or booking travel packages, you agree to be bound by these legal Terms of Service and all applicable Saudi Arabian travel, aviation, and immigration laws.
                     </p>
 
                     <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">2. Platform Marketplace Role</h3>
                     <p style="margin-bottom:0.9rem;">
-                        ZILHAJ operates as a premier digital travel marketplace connecting pilgrims with verified, government-licensed Umrah travel agencies. All travel offers, flight schedules, and hotel allocations submitted by agents are subject to license verification and Ministry of Hajj &amp; Umrah regulations.
+                        Zilhaj.com operates as a premier digital travel marketplace connecting pilgrims with verified, government-licensed Umrah travel agencies. All travel offers, flight schedules, and hotel allocations submitted by agents are subject to license verification and Ministry of Hajj &amp; Umrah regulations.
                     </p>
 
                     <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">3. Payments &amp; Cancellations</h3>
                     <p style="margin-bottom:0.9rem;">
-                        All payments executed through ZILHAJ are secured via certified payment gateways (Razorpay). Cancellations and refunds are governed by the specific fare rules of the selected travel package and Saudi hospitality regulations.
+                        All payments executed through Zilhaj.com are secured via certified payment gateways (Razorpay). Cancellations and refunds are governed by the specific fare rules of the selected travel package and Saudi hospitality regulations.
                     </p>
 
                     <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">4. Contact Legal Support</h3>
-                    <p style="margin-bottom:0.5rem;">For questions regarding these Terms, contact <a href="mailto:info@zilhaj-travel.com" style="color:#2b5e48; font-weight:700;">info@zilhaj-travel.com</a> or call +966 800 123 4567.</p>
+                    <p style="margin-bottom:0.5rem;">For questions regarding these Terms, contact <a href="mailto:info@zilhaj.com" style="color:#2b5e48; font-weight:700;">info@zilhaj.com</a> or call +966 800 123 4567.</p>
                 </div>
 
                 <!-- FOOTER STRIP -->
                 <div style="padding:1rem 2rem; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:0.78rem; color:#64748b;">© 2024 ZILHAJ Umrah &amp; Hajj Travel. All rights reserved.</span>
+                    <span style="font-size:0.78rem; color:#64748b;">© 2024 Zilhaj.com. All rights reserved.</span>
                     <button type="button" onclick="app.closeModal()" style="background:#2b5e48; color:#ffffff; font-weight:800; font-size:0.86rem; padding:0.55rem 1.5rem; border-radius:8px; border:none; cursor:pointer;">Accept Terms</button>
                 </div>
 
@@ -4653,7 +4653,7 @@ class App {
         }
     }
 
-    showSuccessModal(title = '✦ Logged In Successfully!', message = 'Welcome to ZILHAJ Umrah & Hajj Travel. Your account is verified.') {
+    showSuccessModal(title = '✦ Logged In Successfully!', message = 'Welcome to Zilhaj.com. Your account is verified.') {
         this.openModal(`
             <div style="text-align: center; padding: 2.2rem 1.6rem; background: #ffffff; border-radius: 20px;">
                 <!-- Premium Golden Glowing Badge -->
@@ -5065,7 +5065,7 @@ class App {
         }, 50);
 
         // Show success notification modal
-        this.showSuccessModal('✦ Account Registered in MongoDB!', `Welcome to ZILHAJ Umrah & Hajj Travel, ${cleanName}! Your account has been created in MongoDB database. Please log in to continue.`);
+        this.showSuccessModal('✦ Account Registered in MongoDB!', `Welcome to Zilhaj.com, ${cleanName}! Your account has been created in MongoDB database. Please log in to continue.`);
     }
 
     async login(email, password) {
@@ -5756,7 +5756,7 @@ class App {
                 <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:1.1rem 2.5rem; border-bottom:1px solid #e2e8f0; position:sticky; top:0; z-index:100;">
                     <!-- Brand Logo -->
                     <div style="font-weight:900; font-size:1.45rem; color:#166534; letter-spacing:-0.02em;">
-                        GoExergy
+                        Zilhaj.com
                     </div>
 
                     <!-- Stepper Bar -->
@@ -5962,7 +5962,7 @@ class App {
 
                 <!-- FOOTER BAR -->
                 <div style="background:#ffffff; border-top:1px solid #f1f5f9; padding:0.85rem 2.5rem; display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:#64748b;">
-                    <div>© 2024 GoExergy Travel. Secure Checkout.</div>
+                    <div>© 2024 Zilhaj.com. Secure Checkout.</div>
                     <div style="display:flex; gap:1.2rem;">
                         <a href="#" onclick="app.openTermsModal(); return false;" style="color:#64748b; text-decoration:none;">Terms of Service</a>
                         <a href="#" onclick="app.openPrivacyPolicyModal(); return false;" style="color:#64748b; text-decoration:none;">Privacy Policy</a>
@@ -6026,7 +6026,7 @@ class App {
 
         // Real Scannable UPI QR Code URL using QRServer API
         const upiPa = '7987823528@okbizaxis';
-        const upiPn = 'GoExergy';
+        const upiPn = 'Zilhaj.com';
         const upiUrl = `upi://pay?pa=${upiPa}&pn=${encodeURIComponent(upiPn)}&am=${totalPrice}&cu=INR&tn=${encodeURIComponent('Umrah Booking ' + bookingId)}`;
         const qrCodeImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUrl)}`;
 
@@ -6060,7 +6060,7 @@ class App {
 
                     <!-- Brand Logo -->
                     <div style="display:flex; align-items:center; gap:0.4rem; font-weight:900; font-size:1.45rem; color:#166534;">
-                        <span>GoExergy</span>
+                        <span>Zilhaj.com</span>
                     </div>
                 </div>
 
@@ -6124,7 +6124,7 @@ class App {
                                     <strong style="color:#166534; font-size:0.78rem;">INCLUDED (₹0)</strong>
                                 </div>
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span>GoExergy Reverse Bidding Fee:</span>
+                                    <span>Zilhaj.com Reverse Bidding Fee:</span>
                                     <strong style="color:#166534; font-size:0.78rem;">FREE (₹0)</strong>
                                 </div>
                             </div>
@@ -6793,7 +6793,7 @@ class App {
                 <p style="font-size:0.9rem; color:#64748b; margin-bottom:1.5rem;">Have questions about travel dates, custom requirements, or agent offers? Reach out to us anytime.</p>
                 <div style="background:#ecfdf5; border-radius:10px; padding:1rem; margin-bottom:1.5rem; color:#047857; font-size:0.9rem;">
                     <div>📞 <strong>Helpline:</strong> +966 800 123 4567 / 9541692891</div>
-                    <div style="margin-top:0.3rem;">📧 <strong>Email:</strong> support@goexergy-umrah.com</div>
+                    <div style="margin-top:0.3rem;">📧 <strong>Email:</strong> support@zilhaj.com</div>
                     <div style="margin-top:0.3rem;">📍 <strong>Office:</strong> Makkah Al-Mukarramah, Kingdom of Saudi Arabia</div>
                 </div>
                 <form onsubmit="event.preventDefault(); app.submitContactMessage();">
@@ -6822,7 +6822,7 @@ class App {
                 <h3>⭐ Zaireen Feedback & Rating</h3>
             </div>
             <div class="modal-body">
-                <p style="font-size:0.9rem; color:#64748b; margin-bottom:1.2rem;">Share your experience with GoExergy Umrah reverse bidding platform.</p>
+                <p style="font-size:0.9rem; color:#64748b; margin-bottom:1.2rem;">Share your experience with Zilhaj.com Umrah reverse bidding platform.</p>
                 <form onsubmit="event.preventDefault(); app.submitFeedback();">
                     <div class="form-group" style="text-align:center;">
                         <label>Overall Rating</label>
@@ -7016,14 +7016,14 @@ class App {
     async callGeminiApi(userPrompt) {
         if (!CHATBOT_API_KEY) return null;
         try {
-            const systemContext = `You are the official AI Assistant for ZILHAJ Umrah & Hajj Travel platform.
+            const systemContext = `You are the official AI Assistant for Zilhaj.com Umrah & Hajj Travel platform.
 CRITICAL GUARDRAILS & RULES:
-1. ONLY answer queries directly related to Umrah, Hajj, Islamic pilgrimage travel, hotel accommodations in Makkah & Madinah, visa processing, flights, Nusuk permits, or GoExergy platform services.
+1. ONLY answer queries directly related to Umrah, Hajj, Islamic pilgrimage travel, hotel accommodations in Makkah & Madinah, visa processing, flights, Nusuk permits, or Zilhaj.com platform services.
 2. If the user query is about UNRELATED or PROHIBITED topics (e.g. coding, general sports, politics, entertainment, general math, illegal content, weather outside KSA), you MUST politely decline:
-   "⚠️ I am trained exclusively as the GoExergy Umrah & Hajj Travel Assistant. I cannot answer queries on unrelated or prohibited topics. Please ask me about Umrah travel requirements, Nusuk permits, packages, flights, or hotels!"
+   "⚠️ I am trained exclusively as the Zilhaj.com Umrah & Hajj Travel Assistant. I cannot answer queries on unrelated or prohibited topics. Please ask me about Umrah travel requirements, Nusuk permits, packages, flights, or hotels!"
 
 User Query: "${userPrompt}"
-Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) specifically relevant to GoExergy and Umrah travel.`;
+Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) specifically relevant to Zilhaj.com and Umrah travel.`;
 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CHATBOT_API_KEY}`;
             const response = await fetch(url, {
@@ -7049,7 +7049,7 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
 
         const offTopicKeywords = ['python', 'java', 'code', 'coding', 'script', 'football', 'cricket', 'movie', 'song', 'politics', 'election', 'game', 'anime', 'recipe', 'hack', 'password', 'porn', 'casino', 'gambling'];
         if (offTopicKeywords.some(k => lower.includes(k))) {
-            return '⚠️ I am trained exclusively as the GoExergy Umrah & Hajj Travel Assistant. I cannot answer queries on unrelated or prohibited topics. Please ask me about Umrah travel requirements, Nusuk permits, packages, flights, or hotels!';
+            return '⚠️ I am trained exclusively as the Zilhaj.com Umrah & Hajj Travel Assistant. I cannot answer queries on unrelated or prohibited topics. Please ask me about Umrah travel requirements, Nusuk permits, packages, flights, or hotels!';
         }
 
         if (lower.includes('issue') || lower.includes('not work') || lower.includes('button') || lower.includes('problem') || lower.includes('bug') || lower.includes('error')) {
@@ -7080,7 +7080,7 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
             return '🕌 Rawdah Permits: Free permits for visiting the Sacred Rawdah in Madinah are issued through the official Saudi Ministry Nusuk mobile app.';
         }
         if (lower.includes('verify') || lower.includes('verified') || lower.includes('agent') || lower.includes('trust') || lower.includes('safe')) {
-            return '🛡️ 100% Verified Agents: Every travel operator on GoExergy undergoes government license checks and background verification for your safety.';
+            return '🛡️ 100% Verified Agents: Every travel operator on Zilhaj.com undergoes government license checks and background verification for your safety.';
         }
         if (lower.includes('pay') || lower.includes('payment') || lower.includes('upi') || lower.includes('card') || lower.includes('bank')) {
             return '💳 Payment Methods: We support Instant UPI (Google Pay, PhonePe, Paytm), Credit & Debit Cards, Net Banking, or Direct Bank/Office deposit.';
@@ -7092,13 +7092,13 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
             return '👤 Account Sign In: Click the "Login" or "Sign Up" button in the top navigation bar to create or access your Zaireen account.';
         }
         if (lower.includes('contact') || lower.includes('support') || lower.includes('phone') || lower.includes('number') || lower.includes('help')) {
-            return '📞 24/7 Zaireen Support: Call us anytime at +966 800 123 4567 or 9541692891, or send an email to support@goexergy-umrah.com.';
+            return '📞 24/7 Zaireen Support: Call us anytime at +966 800 123 4567 or 9541692891, or send an email to support@zilhaj.com.';
         }
         if (lower.includes('why') || lower.includes('choose')) {
             return '🌟 Why Choose Us: 100% Verified Travel Agents, Transparent Pricing, Zero Hidden Fees, Best Price Guarantee, and 24/7 Zaireen Support!';
         }
 
-        return `Thank you for reaching out! GoExergy helps you get the best Umrah package offers from verified travel agents. You can submit a travel request, compare offers, and book securely. Feel free to ask about prices, hotels, flights, or guides!`;
+        return `Thank you for reaching out! Zilhaj.com helps you get the best Umrah package offers from verified travel agents. You can submit a travel request, compare offers, and book securely. Feel free to ask about prices, hotels, flights, or guides!`;
     }
 
     async sendChatMessage() {

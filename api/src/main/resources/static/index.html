@@ -4,15 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UMRAH TRAVELS – Journey of Faith, Comfort & Blessings</title>
+    <title>Zilhaj.com – Umrah &amp; Hajj Travel | Journey of Faith, Comfort &amp; Blessings</title>
     <meta name="description"
-        content="Umrah Travels - Journey of Faith, Comfort & Blessings. Book 100% verified Umrah packages with hotels near Haram, return air tickets, and guided ziyarat.">
+        content="Zilhaj.com Umrah &amp; Hajj Travel - Journey of Faith, Comfort &amp; Blessings. Book 100% verified Umrah packages with hotels near Haram, return air tickets, and guided ziyarat.">
     <!-- Google Fonts: Inter (Modern, clean, variable weight) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Preload Hero Slideshow Sacred Umrah Images -->
+    <link rel="preload" as="image" href="https://images.pexels.com/photos/18996760/pexels-photo-18996760.jpeg">
+    <link rel="preload" as="image" href="https://images.pexels.com/photos/32290181/pexels-photo-32290181.jpeg">
+    <link rel="preload" as="image" href="https://images.pexels.com/photos/18351141/pexels-photo-18351141.jpeg">
+    <link rel="preload" as="image" href="https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg">
+    <link rel="preload" as="image" href="https://images.pexels.com/photos/38498727/pexels-photo-38498727.jpeg">
+    <link rel="preload" as="image" href="https://images.pexels.com/photos/28209449/pexels-photo-28209449.jpeg">
     <!-- Custom CSS Design System -->
     <link rel="stylesheet" href="index.css?v=20260806_v32">
+    <!-- Razorpay Checkout SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         *, html, body, button, input, select, textarea {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
@@ -27,37 +36,42 @@
     <div id="app"> <!-- Floating Pill Navbar -->
         <div class="navbar-wrapper" id="navbarWrapper">
             <header class="navbar" id="navbar">
-                <div class="nav-container">
+                <div class="nav-container" style="max-width: 1440px; margin: 0 auto; width: 100%; display: flex; justify-content: space-between; align-items: center;">
                     <!-- Logo Left -->
-                    <div class="nav-brand" onclick="app.navigate('home')">
-                        <div class="logo-icon-box">
-                            <span class="logo-symbol">🕋</span>
-                        </div>
-                        <div class="logo-text-group">
-                            <span class="brand-name">UMRAH TRAVELS</span>
+                    <div class="nav-brand" onclick="app.navigate('home')" style="cursor: pointer; display: flex; align-items: center; gap: 0.6rem;">
+                        <span style="font-size: 1.5rem;">🕋</span>
+                        <div style="display: flex; flex-direction: column; line-height: 1.05;">
+                            <span class="brand-name" style="font-size: 1.25rem; font-weight: 900; color: #0f172a; letter-spacing: 0.5px;">Zilhaj.com</span>
+                            <span style="font-size: 0.55rem; font-weight: 800; color: #2b5e48; letter-spacing: 0.8px; margin-top: 2px; text-transform: uppercase;">UMRAH &amp; HAJJ TRAVEL</span>
                         </div>
                     </div>
 
-                    <!-- Nav Links Middle -->
+                    <!-- Nav Links Middle (StayManager style with active bottom indicator line) -->
                     <nav class="nav-menu" id="navMenu">
-                        <a href="javascript:void(0)" class="nav-item active" id="navHome"
-                            onclick="app.navigate('home')">Home</a>
-                        <a href="javascript:void(0)" class="nav-item" id="navGuide"
-                            onclick="app.navigate('guide')">Hajj &amp; Umrah Guides</a>
+                        <a href="javascript:void(0)" class="nav-item active" id="navDashboard" onclick="app.navigate('dashboard')">Dashboard</a>
+                        <a href="javascript:void(0)" class="nav-item" id="navRequests" onclick="app.navigate('dashboard')">My Requests</a>
+                        <a href="javascript:void(0)" class="nav-item" id="navGuide" onclick="app.navigate('guides')">Hajj &amp; Umrah Guides</a>
+                        <a href="javascript:void(0)" class="nav-item" id="navAbout" onclick="app.navigate('about')">About Us</a>
                     </nav>
 
-                    <!-- Auth Actions Right -->
-                    <div class="nav-actions" id="navAuthActions">
-                        <button class="nav-btn btn-login" onclick="app.openLoginModal()">Login</button>
-                        <button class="nav-btn btn-signup" onclick="app.openRegisterModal()">Sign Up</button>
-                    </div>
+                    <!-- Right Controls Group -->
+                    <div class="nav-right-group" style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="nav-actions" id="navAuthActions">
+                            <a href="/api/download-zip" download="Zilhaj_Project_Source.zip" class="nav-btn" style="background:#0284c7; color:#ffffff; font-size:0.75rem; font-weight:800; padding:0.4rem 0.75rem; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:0.35rem; transition:all 0.2s;" onmouseover="this.style.background='#0369a1'" onmouseout="this.style.background='#0284c7'">
+                                <span>📦</span>
+                                <span>Download ZIP</span>
+                            </a>
+                            <button class="nav-btn btn-login" onclick="app.openLoginModal()">Login</button>
+                            <button class="nav-btn btn-signup" onclick="app.openRegisterModal()">Sign Up</button>
+                        </div>
 
-                    <!-- Mobile Menu Hamburger -->
-                    <button class="mobile-toggle" onclick="app.toggleMobileMenu()" aria-label="Toggle Navigation">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </button>
+                        <!-- Mobile Menu Hamburger -->
+                        <button class="mobile-toggle" onclick="app.toggleMobileMenu()" aria-label="Toggle Navigation">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </button>
+                    </div>
                 </div>
             </header>
         </div>
@@ -130,7 +144,7 @@
             </section>
             <!-- Live Request Submission Container -->
             <div id="requestFormAnchor"
-                style="max-width:820px; margin:3.5rem auto; padding:0 1rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                style="max-width:1140px; margin:3.5rem auto; padding:0 1.5rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
 
                 <!-- Single Unified Requirement Card -->
                 <div style="background:#ffffff; border-radius:24px; border:1.5px solid #e2e8f0; box-shadow:0 12px 35px rgba(0,0,0,0.04); padding:2.5rem 2.2rem;">
@@ -200,9 +214,10 @@
                                 <label
                                     style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">⏳ PACKAGE DURATION *</label>
                                 <select id="reqDuration" class="form-control premium-input" required>
+                                    <option value="" disabled selected>Select Package Duration...</option>
                                     <option value="10">10 Days Short Tour</option>
                                     <option value="14">14 Days Standard Sacred Journey</option>
-                                    <option value="18" selected>18 Days Recommended Tour</option>
+                                    <option value="18">18 Days Recommended Tour</option>
                                     <option value="21">21 Days Extended Stay</option>
                                     <option value="25">25 Days Full Sacred Journey</option>
                                     <option value="28">28 Days Ramadan Special</option>
@@ -212,7 +227,7 @@
 
                             <div style="display:flex; justify-content:flex-end; margin-top:1.8rem;">
                                 <button type="button" onclick="app.nextFormStep(2)"
-                                    style="background:linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); color:#ffffff; font-weight:700; font-size:0.95rem; padding:0.8rem 2.2rem; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(79, 70, 229, 0.35); transition:all 0.2s ease;">Next Step →</button>
+                                    style="background:#4f46e5; color:#ffffff; font-weight:700; font-size:0.95rem; padding:0.75rem 1.8rem; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(79, 70, 229, 0.3); transition:all 0.2s ease;">Next Step →</button>
                             </div>
                         </div>
 
@@ -289,36 +304,36 @@
                             <div
                                 style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:1.6rem;">
                                 <div class="form-group"
-                                    style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                                    style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:14px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
                                     <label
                                         style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.88rem; display:block;">👨
                                         MALES *</label>
                                     <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
-                                        <button type="button" onclick="app.adjustCounter('reqMales', -1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer;">-</button>
-                                        <input type="number" id="reqMales" min="0" value="1" required readonly style="width:40px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
-                                        <button type="button" onclick="app.adjustCounter('reqMales', 1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer;">+</button>
+                                        <button type="button" onclick="app.adjustCounter('reqMales', -1)" style="width:36px; height:36px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">-</button>
+                                        <input type="number" id="reqMales" min="0" value="0" required readonly style="width:45px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
+                                        <button type="button" onclick="app.adjustCounter('reqMales', 1)" style="width:36px; height:36px; border-radius:8px; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
                                     </div>
                                 </div>
                                 <div class="form-group"
-                                    style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                                    style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:14px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
                                     <label
                                         style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.88rem; display:block;">👩
                                         FEMALES *</label>
                                     <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
-                                        <button type="button" onclick="app.adjustCounter('reqFemales', -1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer;">-</button>
-                                        <input type="number" id="reqFemales" min="0" value="1" required readonly style="width:40px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
-                                        <button type="button" onclick="app.adjustCounter('reqFemales', 1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer;">+</button>
+                                        <button type="button" onclick="app.adjustCounter('reqFemales', -1)" style="width:36px; height:36px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">-</button>
+                                        <input type="number" id="reqFemales" min="0" value="0" required readonly style="width:45px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
+                                        <button type="button" onclick="app.adjustCounter('reqFemales', 1)" style="width:36px; height:36px; border-radius:8px; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
                                     </div>
                                 </div>
                                 <div class="form-group"
-                                    style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                                    style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:14px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
                                     <label
-                                        style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.82rem; display:block;">👶
-                                        CHILDREN(&lt;5 YRS) *</label>
+                                        style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.85rem; display:block;">👶
+                                        CHILDREN (&lt; 5 YRS)</label>
                                     <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
-                                        <button type="button" onclick="app.adjustCounter('reqChildren', -1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer;">-</button>
-                                        <input type="number" id="reqChildren" min="0" value="0" required readonly style="width:40px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
-                                        <button type="button" onclick="app.adjustCounter('reqChildren', 1)" style="width:34px; height:34px; border-radius:50%; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer;">+</button>
+                                        <button type="button" onclick="app.adjustCounter('reqChildren', -1)" style="width:36px; height:36px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">-</button>
+                                        <input type="number" id="reqChildren" min="0" value="0" readonly style="width:45px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
+                                        <button type="button" onclick="app.adjustCounter('reqChildren', 1)" style="width:36px; height:36px; border-radius:8px; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
                                     </div>
                                 </div>
                             </div>
@@ -329,16 +344,16 @@
                                     <span style="font-size:1.4rem;">👥</span>
                                     <span style="font-weight:800; color:#065f46; font-size:0.95rem;">Total Group Size</span>
                                 </div>
-                                <input type="text" id="totalTravelersBadge" readonly value="2"
+                                <input type="text" id="totalTravelersBadge" readonly value="0"
                                     style="border:2px solid #047857; border-radius:10px; padding:0.4rem 1rem; font-size:1.1rem; font-weight:800; color:#047857; width:110px; text-align:center; background:#ffffff; box-sizing:border-box;">
                             </div>
 
-                            <div style="display:flex; gap:1rem; margin-top:1.8rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.8rem;">
                                 <button type="button"
-                                    style="background:#ffffff; color:#475569; border:1.5px solid #cbd5e1; border-radius:10px; font-weight:700; font-size:0.95rem; padding:0.8rem; cursor:pointer; width:30%; transition:all 0.2s ease;"
+                                    style="background:#ffffff; color:#475569; border:1.5px solid #cbd5e1; border-radius:10px; font-weight:700; font-size:0.92rem; padding:0.75rem 1.6rem; cursor:pointer; transition:all 0.2s ease;"
                                     onclick="app.prevFormStep(1)">← Back</button>
                                 <button type="button"
-                                    style="background:#0f172a; color:#ffffff; border-radius:10px; font-weight:700; font-size:0.95rem; padding:0.8rem; border:none; cursor:pointer; width:70%; box-shadow:0 4px 14px rgba(15,23,42,0.25); transition:all 0.2s ease;"
+                                    style="background:#4f46e5; color:#ffffff; border-radius:10px; font-weight:700; font-size:0.95rem; padding:0.75rem 1.8rem; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(79,70,229,0.3); transition:all 0.2s ease;"
                                     onclick="app.nextFormStep(3)">Next Step →</button>
                             </div>
                         </div>
@@ -353,16 +368,16 @@
                                     <h3 style="font-size:1.2rem; font-weight:800; color:#0f172a; margin:0;">3. Additional Preferences &amp; Requests</h3>
                                 </div>
                             </div>
-                            <textarea id="reqNotes" class="form-control premium-input" rows="4" required
+                            <textarea id="reqNotes" class="form-control premium-input" rows="4"
                                 placeholder="e.g. Prefer direct flights, wheelchair assistance needed, vegetarian meals..."
                                 style="resize:vertical;"></textarea>
 
-                            <div style="display:flex; gap:1rem; margin-top:1.8rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.8rem;">
                                 <button type="button"
-                                    style="background:#ffffff; color:#475569; border:1.5px solid #cbd5e1; border-radius:10px; font-weight:700; font-size:0.95rem; padding:0.8rem; cursor:pointer; width:30%; transition:all 0.2s ease;"
+                                    style="background:#ffffff; color:#475569; border:1.5px solid #cbd5e1; border-radius:10px; font-weight:700; font-size:0.92rem; padding:0.75rem 1.6rem; cursor:pointer; transition:all 0.2s ease;"
                                     onclick="app.prevFormStep(2)">← Back</button>
                                 <button type="submit"
-                                    style="background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; border-radius:10px; font-weight:800; font-size:0.95rem; padding:0.8rem; border:none; cursor:pointer; width:70%; box-shadow:0 4px 14px rgba(4,120,87,0.35); transition:all 0.2s ease;">🚀 SUBMIT REQUEST</button>
+                                    style="background:#047857; color:#ffffff; border-radius:10px; font-weight:800; font-size:0.95rem; padding:0.75rem 2.2rem; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(4, 120, 87, 0.3); transition:all 0.2s ease;">🚀 SUBMIT REQUEST</button>
                             </div>
                         </div>
                     </form>
@@ -467,40 +482,35 @@
         </main>
 
 
-        <!-- Circular Live AI Robot Assistant Chatbot Widget (Modern & Aesthetic Glassmorphic Design) -->
+        <!-- Circular Live Noor AI Assistant Chatbot Widget (Spiritual Umrah Style Design) -->
         <div class="chatbot-floating-wrapper" id="chatbotWrapper"
             style="position:fixed !important; bottom:25px !important; right:25px !important; z-index:99999 !important; display:flex !important; flex-direction:column !important; align-items:flex-end !important;">
 
             <!-- Live Floating Speech Bubble Tooltip -->
             <div class="robot-hello-badge" onclick="app.toggleChatbot()"
-                style="background:rgba(255, 255, 255, 0.95) !important; backdrop-filter:blur(10px) !important; color:#0f172a !important; font-weight:700 !important; font-size:0.82rem !important; padding:0.5rem 1rem !important; border-radius:20px !important; box-shadow:0 10px 25px rgba(0,0,0,0.12) !important; border:1.5px solid rgba(16,185,129,0.3) !important; margin-bottom:10px !important; display:flex !important; align-items:center !important; gap:0.5rem !important; cursor:pointer !important;">
-                <span style="font-size:0.95rem;">✨</span>
-                <span>AI Assistant</span>
-                <span
-                    style="width:8px; height:8px; background:#10b981; border-radius:50%; display:inline-block; box-shadow:0 0 0 3px rgba(16,185,129,0.35);"></span>
+                style="background:rgba(255, 255, 255, 0.96) !important; backdrop-filter:blur(10px) !important; color:#0f172a !important; font-weight:700 !important; font-size:0.82rem !important; padding:0.45rem 0.95rem !important; border-radius:20px !important; box-shadow:0 8px 22px rgba(0,0,0,0.12) !important; border:1.5px solid #a7f3d0 !important; margin-bottom:8px !important; display:flex !important; align-items:center !important; gap:0.45rem !important; cursor:pointer !important;">
+                <span style="font-size:0.92rem; color:#2b5e48;">✨</span>
+                <span style="font-weight:800; color:#166534;">Noor AI</span>
+                <span style="width:7px; height:7px; background:#10b981; border-radius:50%; display:inline-block; box-shadow:0 0 0 3px rgba(16,185,129,0.35);"></span>
             </div>
 
-            <!-- Modern Circular Robot Avatar Button with Dual Gradient & Glow -->
-            <button class="chatbot-circle-btn" onclick="app.toggleChatbot()"
-                style="width:64px !important; height:64px !important; border-radius:50% !important; background:linear-gradient(135deg, #10b981 0%, #047857 60%, #064e3b 100%) !important; color:#ffffff !important; border:2.5px solid rgba(255,255,255,0.9) !important; cursor:pointer !important; box-shadow:0 12px 30px rgba(4, 120, 87, 0.45), 0 0 18px rgba(16, 185, 129, 0.4) !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:2rem !important; position:relative !important; transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;">
-                <div style="transform:scale(1.05); filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🤖</div>
-                <span
-                    style="position:absolute; top:3px; right:3px; width:13px; height:13px; background:#10b981; border:2.5px solid white; border-radius:50%; box-shadow:0 0 6px rgba(16,185,129,0.8);"></span>
+            <!-- Modern Circular Spiritual Icon Avatar Button -->
+            <button class="chatbot-circle-btn" onclick="app.toggleChatbot()" title="Open Noor AI Spiritual Assistant"
+                style="width:62px !important; height:62px !important; border-radius:50% !important; background:linear-gradient(135deg, #2b5e48 0%, #154332 100%) !important; color:#ffffff !important; border:2.5px solid rgba(255,255,255,0.9) !important; cursor:pointer !important; box-shadow:0 12px 30px rgba(43, 94, 72, 0.45), 0 0 18px rgba(16, 185, 129, 0.4) !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; position:relative !important; transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;">
+                <div style="transform:scale(1.05); filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🕌</div>
+                <span style="position:absolute; top:3px; right:3px; width:12px; height:12px; background:#10b981; border:2px solid white; border-radius:50%; box-shadow:0 0 6px rgba(16,185,129,0.8);"></span>
             </button>
 
             <!-- Chat Window Box -->
             <div class="chatbot-box" id="chatbotBox"
                 style="display:none; position:absolute; bottom:78px; right:0; width:365px; height:490px; background:#ffffff; border-radius:20px; box-shadow:0 25px 60px rgba(0,0,0,0.22); border:1px solid #e2e8f0; flex-direction:column; overflow:hidden;">
                 <div class="chatbot-header"
-                    style="background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; padding:1.1rem 1.3rem; font-weight:700; font-size:0.95rem; display:flex; justify-content:space-between; align-items:center;">
+                    style="background:linear-gradient(135deg, #2b5e48 0%, #154332 100%); color:#ffffff; padding:1.1rem 1.3rem; font-weight:700; font-size:0.95rem; display:flex; justify-content:space-between; align-items:center;">
                     <div style="display:flex; align-items:center; gap:0.6rem;">
-                        <span
-                            style="font-size:1.3rem; background:rgba(255,255,255,0.2); padding:0.3rem; border-radius:50%; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;">🤖</span>
+                        <span style="font-size:1.3rem; background:rgba(255,255,255,0.2); padding:0.3rem; border-radius:50%; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;">🕌</span>
                         <div>
-                            <div style="font-weight:800; font-size:0.95rem; letter-spacing:0.3px;">GoExergy AI Guide
-                            </div>
-                            <div style="font-size:0.72rem; color:#a7f3d0; font-weight:500;">Powered by Gemini AI 🟢
-                                Online</div>
+                            <div style="font-weight:800; font-size:0.95rem; letter-spacing:0.3px;">Noor AI Spiritual Guide</div>
+                            <div style="font-size:0.72rem; color:#a7f3d0; font-weight:500;">Powered by Spiritual Umrah AI 🟢 Online</div>
                         </div>
                     </div>
                     <button onclick="app.toggleChatbot()"
@@ -510,8 +520,7 @@
                     style="flex:1; padding:1rem; overflow-y:auto; display:flex; flex-direction:column; gap:0.8rem; background:#f8fafc;">
                     <div class="chat-msg bot"
                         style="background:#ffffff; color:#0f172a; padding:0.8rem 1rem; border-radius:14px; font-size:0.86rem; border:1px solid #e2e8f0; line-height:1.5;">
-                        Assalamu Alaikum! I am your AI Travel Robot Assistant powered by Gemini. How can I assist your
-                        journey today? Type your question or click a topic below:</div>
+                        Assalamu Alaikum! I am <b>Noor AI</b>, your spiritual Umrah &amp; travel assistant. How can I assist your sacred journey today? Type your question or select a topic below:</div>
 
                     <!-- Quick Issue Option Chips -->
                     <div class="chat-issue-chips"
@@ -566,9 +575,11 @@
 
         <!-- Global Loading Animation Spinner Overlay -->
         <div id="loadingOverlay" class="loading-overlay" style="display:none;">
-            <div class="spinner-circle"></div>
-            <p id="loadingText" style="font-weight:700; font-size:1.05rem; letter-spacing:0.3px;">Processing your
-                request...</p>
+            <div style="background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 2.5rem 3rem; border-radius: 24px; border: 1.5px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 420px; width: 90%;">
+                <div class="spinner-circle" style="width: 58px; height: 58px; border-width: 4px; margin-bottom: 1.4rem;"></div>
+                <h3 id="loadingTitle" style="color: #ffffff; font-size: 1.25rem; font-weight: 800; margin: 0 0 0.4rem 0; letter-spacing: -0.3px;">Authenticating...</h3>
+                <p id="loadingText" style="color: #94a3b8; font-size: 0.88rem; font-weight: 500; margin: 0; line-height: 1.45;">Connecting to server. Please hold on a moment.</p>
+            </div>
         </div>
 
         <!-- Full-Width Modern Footer (Pastel Mint Background #D8F3DC) -->
@@ -602,37 +613,37 @@
                     <div style="width:75px; height:75px; border-radius:50%; background:#ffffff; display:flex; align-items:center; justify-content:center; font-size:2.2rem; box-shadow:0 6px 18px rgba(0,0,0,0.06); margin-bottom:1.2rem;">
                         🕋
                     </div>
-                    <h3 style="font-size:1.6rem; font-weight:800; color:#4f46e5; margin:0 0 0.2rem 0; letter-spacing:-0.4px;">GoExergy Umrah</h3>
-                    <div style="font-style:italic; color:#6366f1; font-size:0.92rem; font-weight:600; margin-bottom:1.5rem;">
-                        An Institute of National Importance
+                    <h3 style="font-size:1.6rem; font-weight:900; color:#0f172a; margin:0 0 0.1rem 0; letter-spacing:0.5px;">Zilhaj.com</h3>
+                    <div style="color:#2b5e48; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:1.5rem;">
+                        UMRAH &amp; HAJJ TRAVEL
                     </div>
                     <div style="font-size:0.9rem; line-height:1.6; color:#475569;">
                         <div style="font-weight:600; margin-bottom:0.3rem;">Makkah al-Mukarramah, KSA 24231</div>
-                        <div style="margin-bottom:0.3rem;">info@goexergy-umrah.com</div>
-                        <div style="font-weight:600;">www.goexergy-umrah.com</div>
+                        <div style="margin-bottom:0.3rem;">info@zilhaj.com</div>
+                        <div style="font-weight:600;">www.zilhaj.com</div>
                     </div>
                 </div>
 
                 <!-- Column 2: Official Portals Links -->
                 <div>
-                    <div style="font-size:0.82rem; font-weight:800; color:#6366f1; letter-spacing:1.2px; text-transform:uppercase; margin-bottom:1.4rem;">
+                    <div style="font-size:0.82rem; font-weight:800; color:#2b5e48; letter-spacing:1.2px; text-transform:uppercase; margin-bottom:1.4rem;">
                         OFFICIAL PORTALS
                     </div>
                     <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.85rem;">
-                        <li><a href="https://www.haj.gov.sa/" target="_blank" rel="noopener noreferrer" style="color:#334155; font-size:0.93rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.6rem; transition:color 0.2s ease;" onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#334155'"><span style="color:#94a3b8; font-size:0.8rem;">›</span> Ministry of Hajj & Umrah</a></li>
-                        <li><a href="https://www.nusuk.sa/" target="_blank" rel="noopener noreferrer" style="color:#334155; font-size:0.93rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.6rem; transition:color 0.2s ease;" onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#334155'"><span style="color:#94a3b8; font-size:0.8rem;">›</span> Nusuk Official Portal</a></li>
-                        <li><a href="https://www.vision2030.gov.sa/" target="_blank" rel="noopener noreferrer" style="color:#334155; font-size:0.93rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.6rem; transition:color 0.2s ease;" onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#334155'"><span style="color:#94a3b8; font-size:0.8rem;">›</span> Saudi Vision 2030</a></li>
-                        <li><a href="https://ksavisa.sa/" target="_blank" rel="noopener noreferrer" style="color:#334155; font-size:0.93rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.6rem; transition:color 0.2s ease;" onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#334155'"><span style="color:#94a3b8; font-size:0.8rem;">›</span> Saudi E-Visa Portal</a></li>
-                        <li><a href="https://sar.com.sa/" target="_blank" rel="noopener noreferrer" style="color:#334155; font-size:0.93rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.6rem; transition:color 0.2s ease;" onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#334155'"><span style="color:#94a3b8; font-size:0.8rem;">›</span> Haramain Railway (SAR)</a></li>
+                        <li><a href="https://www.haj.gov.sa/" target="_blank" rel="noopener noreferrer" style="color:#334155; font-size:0.93rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.6rem; transition:color 0.2s ease;" onmouseover="this.style.color='#2b5e48'" onmouseout="this.style.color='#334155'"><span style="color:#94a3b8; font-size:0.8rem;">›</span> Ministry of Hajj & Umrah</a></li>
+                        <li><a href="https://www.nusuk.sa/" target="_blank" rel="noopener noreferrer" style="color:#334155; font-size:0.93rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.6rem; transition:color 0.2s ease;" onmouseover="this.style.color='#2b5e48'" onmouseout="this.style.color='#334155'"><span style="color:#94a3b8; font-size:0.8rem;">›</span> Nusuk Official Portal</a></li>
+                        <li><a href="https://www.vision2030.gov.sa/" target="_blank" rel="noopener noreferrer" style="color:#334155; font-size:0.93rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.6rem; transition:color 0.2s ease;" onmouseover="this.style.color='#2b5e48'" onmouseout="this.style.color='#334155'"><span style="color:#94a3b8; font-size:0.8rem;">›</span> Saudi Vision 2030</a></li>
+                        <li><a href="https://ksavisa.sa/" target="_blank" rel="noopener noreferrer" style="color:#334155; font-size:0.93rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.6rem; transition:color 0.2s ease;" onmouseover="this.style.color='#2b5e48'" onmouseout="this.style.color='#334155'"><span style="color:#94a3b8; font-size:0.8rem;">›</span> Saudi E-Visa Portal</a></li>
+                        <li><a href="https://sar.com.sa/" target="_blank" rel="noopener noreferrer" style="color:#334155; font-size:0.93rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.6rem; transition:color 0.2s ease;" onmouseover="this.style.color='#2b5e48'" onmouseout="this.style.color='#334155'"><span style="color:#94a3b8; font-size:0.8rem;">›</span> Haramain Railway (SAR)</a></li>
                     </ul>
                 </div>
 
                 <!-- Column 3: Feedback -->
                 <div style="display:flex; flex-direction:column; align-items:flex-end; text-align:right;">
-                    <div style="font-size:0.82rem; font-weight:800; color:#6366f1; letter-spacing:1.2px; text-transform:uppercase; margin-bottom:1.2rem;">
+                    <div style="font-size:0.82rem; font-weight:800; color:#2b5e48; letter-spacing:1.2px; text-transform:uppercase; margin-bottom:1.2rem;">
                         FEEDBACK
                     </div>
-                    <button type="button" onclick="app.openFeedbackModal()" style="background:#e0e7ff; color:#3730a3; font-weight:700; font-size:0.9rem; padding:0.75rem 1.6rem; border-radius:99px; border:none; cursor:pointer; box-shadow:0 2px 8px rgba(79,70,229,0.08); transition:all 0.2s ease;" onmouseover="this.style.background='#c7d2fe';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#e0e7ff';this.style.transform=''">
+                    <button type="button" onclick="app.openFeedbackModal()" style="background:#e6f4ea; color:#166534; font-weight:800; font-size:0.9rem; padding:0.75rem 1.6rem; border-radius:99px; border:none; cursor:pointer; box-shadow:0 2px 8px rgba(43,94,72,0.08); transition:all 0.2s ease;" onmouseover="this.style.background='#c6e7d2';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#e6f4ea';this.style.transform=''">
                         Give feedback
                     </button>
                 </div>
@@ -643,19 +654,24 @@
             <div style="width:100%; border-top:1px solid rgba(0,0,0,0.08); background:rgba(0,0,0,0.02); padding:1.2rem 3rem;">
                 <div style="max-width:1280px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; font-weight:600; color:#475569; flex-wrap:wrap; gap:0.8rem;">
                     <div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;">
-                        <span>Copyrights © GoExergy Umrah</span>
+                        <span>Copyrights © Zilhaj.com Umrah &amp; Hajj Travel</span>
                         <span style="color:#cbd5e1;">|</span>
                         <span>All rights Reserved</span>
                         <span style="color:#cbd5e1;">|</span>
-                        <a href="#" onclick="event.preventDefault();" style="color:#475569; text-decoration:none;">Credits & Attributions</a>
+                        <a href="#" onclick="event.preventDefault(); app.openPrivacyPolicyModal();" style="color:#2b5e48; font-weight:700; text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#166534'" onmouseout="this.style.color='#2b5e48'">Privacy Policy</a>
+                        <span style="color:#cbd5e1;">|</span>
+                        <a href="#" onclick="event.preventDefault(); app.openTermsModal();" style="color:#2b5e48; font-weight:700; text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#166534'" onmouseout="this.style.color='#2b5e48'">Terms of Service</a>
                     </div>
                     <div>
-                        Developed and Maintained by WDC GoExergy
+                        Developed and Maintained by Zilhaj.com
                     </div>
                 </div>
             </div>
         </footer>
     </div>
+
+    <!-- Hidden File Input for Profile Photo Upload -->
+    <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;" onchange="app.handleProfilePhotoUpload(event)">
 
     <!-- Application Script Logic -->
     <script src="app.js?v=20260806_v32" defer></script>
