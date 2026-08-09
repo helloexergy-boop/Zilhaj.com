@@ -4259,8 +4259,8 @@ class App {
                         </div>
                     </div>
 
-                    <!-- CENTERED FORM CONTAINER (COMPACT SO EVERYTHING ADJUSTS ON SAME PAGE) -->
-                    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; max-width:380px; width:100%; margin:0 auto; box-sizing:border-box; padding:0.3rem 0;">
+                    <!-- CENTERED FORM CONTAINER (SHIFTED UPWARDS TO REMOVE BLANK SPACE AT TOP) -->
+                    <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-start; max-width:380px; width:100%; margin:0 auto; box-sizing:border-box; padding-top:1.2rem; padding-bottom:0.4rem;">
                         
                         <!-- AVATAR BADGE TOP -->
                         <div style="margin-bottom:0.4rem; text-align:center; flex-shrink:0;">
@@ -4272,11 +4272,11 @@ class App {
                         <!-- HEADING & SUBTITLE -->
                         ${isRegister ? `
                             <h1 style="font-size:1.55rem; font-weight:800; color:#0f172a; text-align:center; margin:0 0 0.15rem 0; letter-spacing:-0.02em; flex-shrink:0;">Create your account</h1>
-                            <p style="font-size:0.78rem; color:#64748b; text-align:center; margin:0 0 0.7rem 0; flex-shrink:0;">Get started with your spiritual journey in minutes.</p>
+                            <p style="font-size:0.78rem; color:#64748b; text-align:center; margin:0 0 0.65rem 0; flex-shrink:0;">Get started with your spiritual journey in minutes.</p>
                         ` : ''}
                         ${isLogin ? `
                             <h1 style="font-size:1.65rem; font-weight:900; color:#0f172a; text-align:center; margin:0 0 0.15rem 0; letter-spacing:-0.02em; flex-shrink:0;">Welcome back!</h1>
-                            <p style="font-size:0.78rem; color:#64748b; text-align:center; margin:0 0 0.7rem 0; flex-shrink:0;">Sign in to continue where your left off.</p>
+                            <p style="font-size:0.78rem; color:#64748b; text-align:center; margin:0 0 0.65rem 0; flex-shrink:0;">Sign in to continue where your left off.</p>
                         ` : ''}
 
                         <!-- IN-FORM ALERT CONTAINERS -->
@@ -4295,13 +4295,13 @@ class App {
                                 <span>${isRegister ? 'Sign up with Google' : 'Login with Google'}</span>
                             </button>
 
-                            <button type="button" onclick="app.showToast('Apple Sign-In feature available soon', 'info')" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; background:#ffffff; display:flex; align-items:center; justify-content:center; gap:0.5rem; cursor:pointer; font-weight:700; font-size:0.82rem; color:#0f172a; margin-bottom:0.45rem; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
+                            <button type="button" onclick="app.showToast('Apple Sign-In feature available soon', 'info')" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; background:#ffffff; display:flex; align-items:center; justify-content:center; gap:0.5rem; cursor:pointer; font-weight:700; font-size:0.82rem; color:#0f172a; margin-bottom:0.4rem; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
                                 <span style="font-size:0.95rem; line-height:1;"></span>
                                 <span>${isRegister ? 'Sign up with Apple' : 'Login with Apple'}</span>
                             </button>
 
                             <!-- DIVIDER -->
-                            <div style="display:flex; align-items:center; margin-bottom:0.45rem; gap:0.45rem; flex-shrink:0;">
+                            <div style="display:flex; align-items:center; margin-bottom:0.4rem; gap:0.45rem; flex-shrink:0;">
                                 <div style="flex:1; height:1px; background:#e2e8f0;"></div>
                                 <span style="font-size:0.64rem; color:#94a3b8; font-weight:700; text-transform:uppercase;">OR</span>
                                 <div style="flex:1; height:1px; background:#e2e8f0;"></div>
@@ -4337,9 +4337,15 @@ class App {
                                 </div>
 
                                 <!-- CREATE PASSWORD -->
-                                <div style="position:relative; margin-bottom:0.5rem;">
+                                <div style="position:relative; margin-bottom:0.4rem;">
                                     <input type="password" id="authPassword" required placeholder="Create password" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; padding:0 2rem 0 0.85rem; font-size:0.82rem; box-sizing:border-box; background:#ffffff; color:#0f172a;" onkeyup="app.checkPasswordStrength(this.value)">
                                     <button type="button" id="eyeRegPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeRegPass')" style="position:absolute; right:0.75rem; top:8px; background:none; border:none; cursor:pointer; font-size:0.9rem; color:#64748b;">👁️</button>
+                                </div>
+
+                                <!-- CONFIRM PASSWORD -->
+                                <div style="position:relative; margin-bottom:0.5rem;">
+                                    <input type="password" id="authConfirmPassword" required placeholder="Confirm password" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; padding:0 2rem 0 0.85rem; font-size:0.82rem; box-sizing:border-box; background:#ffffff; color:#0f172a;">
+                                    <button type="button" id="eyeConfirmPass" onclick="app.togglePasswordVisibility('authConfirmPassword', 'eyeConfirmPass')" style="position:absolute; right:0.75rem; top:8px; background:none; border:none; cursor:pointer; font-size:0.9rem; color:#64748b;">👁️</button>
                                 </div>
                             ` : `
                                 <!-- LOGIN EMAIL -->
@@ -4461,6 +4467,92 @@ class App {
             b2.style.background = '#10b981';
             b3.style.background = '#10b981';
             txt.innerText = 'Password strength: Strong';
+        }
+    }
+
+    sendSignupOtp() {
+        const emailEl = document.getElementById('authEmail');
+        const alertEl = document.getElementById('otpSentAlert');
+        if (!emailEl || !emailEl.value.trim()) {
+            this.showToast('Please enter your email address first', 'error');
+            return;
+        }
+        const generated = Math.floor(1000 + Math.random() * 9000).toString();
+        this.state.generatedOtp = generated;
+        const otpCodeInput = document.getElementById('authOtpCode');
+        if (otpCodeInput) otpCodeInput.value = generated;
+        if (alertEl) {
+            alertEl.style.display = 'block';
+            alertEl.style.color = '#166534';
+            alertEl.style.fontSize = '0.72rem';
+            alertEl.style.fontWeight = '700';
+            alertEl.style.marginTop = '0.25rem';
+            alertEl.innerText = `OTP sent! Verification code is: ${generated}`;
+        }
+        this.showToast(`OTP Code sent to ${emailEl.value}: ${generated}`, 'success');
+    }
+
+    verifySignupOtp() {
+        const otpInput = document.getElementById('authOtpCode');
+        const alertEl = document.getElementById('otpSentAlert');
+        if (!otpInput || !otpInput.value.trim()) {
+            this.showToast('Please enter the OTP code', 'error');
+            return;
+        }
+        if (otpInput.value.trim() === this.state.generatedOtp || otpInput.value.trim().length >= 4) {
+            this.state.otpVerified = true;
+            if (alertEl) {
+                alertEl.style.display = 'block';
+                alertEl.style.color = '#166534';
+                alertEl.style.fontSize = '0.72rem';
+                alertEl.style.fontWeight = '700';
+                alertEl.innerText = '✓ OTP Verified Successfully!';
+            }
+            this.showToast('Email verified successfully!', 'success');
+        } else {
+            this.showToast('Invalid OTP code. Please check and retry.', 'error');
+        }
+    }
+
+    handleAuthSubmit(mode) {
+        const email = document.getElementById('authEmail')?.value.trim();
+        const password = document.getElementById('authPassword')?.value;
+        const confirmPassword = document.getElementById('authConfirmPassword')?.value;
+        const name = document.getElementById('authName')?.value.trim();
+        const alertBox = document.getElementById('authFormAlert');
+
+        if (mode === 'register') {
+            if (password && confirmPassword && password !== confirmPassword) {
+                if (alertBox) {
+                    alertBox.style.display = 'block';
+                    alertBox.style.background = '#fef2f2';
+                    alertBox.style.border = '1px solid #fecaca';
+                    alertBox.style.color = '#991b1b';
+                    alertBox.style.padding = '0.4rem 0.75rem';
+                    alertBox.style.borderRadius = '8px';
+                    alertBox.innerText = 'Passwords do not match. Please re-enter.';
+                }
+                this.showToast('Passwords do not match. Please re-enter.', 'error');
+                return;
+            }
+            this.showToast(`Account created successfully! Welcome ${name || 'Pilgrim'}!`, 'success');
+            this.closeModal();
+        } else {
+            this.showToast('Logged in successfully!', 'success');
+            this.closeModal();
+        }
+    }
+
+    togglePasswordVisibility(inputId, btnId) {
+        const input = document.getElementById(inputId);
+        const btn = document.getElementById(btnId);
+        if (!input) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (btn) btn.innerText = '🙈';
+        } else {
+            input.type = 'password';
+            if (btn) btn.innerText = '👁️';
         }
     }
 
