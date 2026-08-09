@@ -6846,17 +6846,8 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
     }
 
     showToast(message, type = 'success') {
-        const container = document.getElementById('toastContainer');
-        if (!container) return;
-
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.innerHTML = message;
-
-        container.appendChild(toast);
-        setTimeout(() => {
-            toast.remove();
-        }, 3500);
+        // Completely disabled as requested: No floating toast bars (green, red, info) on top right
+        return;
     }
 
     showSuccessModal(title, subtitle, onClose = null) {

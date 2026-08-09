@@ -1386,32 +1386,14 @@ textarea.form-control {
 .status-confirmed { background: #d1fae5; color: #047857; }
 .status-cancelled { background: #fee2e2; color: #b91c1c; }
 
-/* Toast Notifications - ALWAYS IN FRONT OF ALL MODALS */
-.toast-container {
-    position: fixed;
-    top: 1.5rem; right: 1.5rem;
-    z-index: 99999999 !important;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    pointer-events: none;
-}
-
+/* Toast Notifications - PERMANENTLY DISABLED AS REQUESTED */
+.toast-container,
 .toast {
-    pointer-events: auto;
-    background: #0f172a;
-    color: white;
-    padding: 1rem 1.5rem;
-    border-radius: 14px;
-    box-shadow: 0 12px 35px rgba(0,0,0,0.4);
-    font-weight: 700;
-    font-size: 0.95rem;
-    border: 1.5px solid rgba(255,255,255,0.2);
-    animation: toastIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
-
-.toast-success { background: #2e7d32 !important; color: #ffffff !important; border: 1.5px solid #a7f3d0 !important; }
-.toast-error { background: #dc2626 !important; color: #ffffff !important; border: 2px solid #fecaca !important; box-shadow: 0 14px 40px rgba(220, 38, 38, 0.45) !important; }
 
 @keyframes toastIn {
     from { opacity: 0; transform: translateY(20px); }
