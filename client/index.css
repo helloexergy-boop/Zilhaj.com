@@ -5302,11 +5302,34 @@ p, body {
 
 /* Fix Navbar Content Overlap Padding across pages */
 #mainContainer {
-    padding-top: 85px !important;
+    padding-top: 115px !important;
+}
+
+.dashboard-page-wrapper {
+    padding-top: 115px !important;
 }
 
 .hero-green-banner {
-    padding-top: 110px !important;
+    padding-top: 125px !important;
+}
+
+/* Printable PDF Booking Voucher Styling */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #printableVoucher, #printableVoucher * {
+        visibility: visible;
+    }
+    #printableVoucher {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .no-print {
+        display: none !important;
+    }
 }
 
 
