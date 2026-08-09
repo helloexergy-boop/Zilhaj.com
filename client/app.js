@@ -2391,207 +2391,21 @@ class App {
 
     viewOfferDetailsModal(offerId) {
         const allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-        const allReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
-
         const o = allOffers.find(item => item.id === offerId) || {
             id: offerId || '#OFF-891',
-            requirementId: 'req-1786187618550',
-            agentName: 'ALHUDA GROUP (KHADIM AL MECCA)',
             packageTitle: '18 Days Umrah Package • Manarat Al Misk & Marjan International Hotels • Direct Flights',
-            makkahHotel: 'Manarat Al Misk / Dream Zone (or similar)',
-            makkahDistance: 'Approx. 600 Metres from Masjid Al-Haram.',
-            madinahHotel: 'Marjan International / Marjan Gold (or similar)',
-            madinahDistance: 'Approx. 250 Metres from Al-Masjid An-Nabawi.',
-            departureDate: '12 AUGUST 2026',
-            durationDays: 18,
-            price: 118750
+            price: 118750,
+            departureDate: '12 Aug 2026',
+            durationDays: 18
         };
 
-        this.openModal(`
-            <div style="max-width:850px; margin:0 auto; background:linear-gradient(180deg, #fffcf5 0%, #ffffff 100%); border-radius:24px; border:2px solid #d4af37; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.4); position:relative; font-family:'Inter', sans-serif;">
-                
-                <!-- CLOSE BUTTON TOP RIGHT -->
-                <button type="button" onclick="app.closeModal()" style="position:absolute; top:18px; right:20px; z-index:10; background:rgba(0,0,0,0.6); color:#ffffff; border:none; width:36px; height:36px; border-radius:50%; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.9)'" onmouseout="this.style.background='rgba(0,0,0,0.6)'">✕</button>
-
-                <!-- 1. POSTER GOLDEN ARC HEADER BANNER -->
-                <div style="background:linear-gradient(135deg, #0d3d2e 0%, #052016 100%); padding:2.5rem 2rem 2rem; text-align:center; position:relative; color:#ffffff; border-bottom:4px solid #d4af37;">
-                    <!-- Operator Branding -->
-                    <div style="display:flex; justify-content:center; align-items:center; gap:1.2rem; margin-bottom:1.2rem; flex-wrap:wrap;">
-                        <div style="font-size:1.6rem; font-weight:900; color:#f59e0b; letter-spacing:1px; display:flex; align-items:center; gap:0.5rem;">
-                            <span>🕊️</span>
-                            <span>alhuda group</span>
-                        </div>
-                        <span style="color:#d4af37; font-size:1.4rem;">|</span>
-                        <div style="text-align:left;">
-                            <div style="font-size:1.2rem; font-weight:900; color:#ffffff; letter-spacing:0.5px;">خادم المكة KHADIM AL MECCA</div>
-                            <div style="font-size:0.75rem; color:#d4af37; font-weight:700;">Tour &amp; Travels Pvt. Ltd.</div>
-                        </div>
-                    </div>
-
-                    <!-- Golden Arc Title Frame -->
-                    <div style="background:linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 100%); border:2px solid #d4af37; border-radius:20px; padding:1.2rem 2rem; max-width:540px; margin:0 auto 1.4rem; position:relative; box-shadow:0 8px 25px rgba(0,0,0,0.3);">
-                        <div style="font-size:2.4rem; font-weight:900; background:linear-gradient(90deg, #fef08a 0%, #eab308 50%, #fef08a 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-transform:uppercase; letter-spacing:2px; line-height:1.1;">
-                            UMRAH Package
-                        </div>
-                    </div>
-
-                    <!-- Key Info Badges Row -->
-                    <div style="display:flex; justify-content:center; gap:1.5rem; flex-wrap:wrap;">
-                        <div style="background:rgba(255,255,255,0.1); border:1px solid #d4af37; border-radius:12px; padding:0.6rem 1.4rem; display:flex; align-items:center; gap:0.7rem;">
-                            <span style="font-size:1.4rem;">📅</span>
-                            <div style="text-align:left;">
-                                <div style="font-size:0.68rem; color:#d4af37; font-weight:800; text-transform:uppercase;">DEPARTURE</div>
-                                <div style="font-size:1.05rem; font-weight:900; color:#ffffff;">${o.departureDate || '12 AUGUST 2026'}</div>
-                            </div>
-                        </div>
-
-                        <div style="background:rgba(255,255,255,0.1); border:1px solid #d4af37; border-radius:12px; padding:0.6rem 1.4rem; display:flex; align-items:center; gap:0.7rem;">
-                            <span style="font-size:1.4rem;">⏳</span>
-                            <div style="text-align:left;">
-                                <div style="font-size:0.68rem; color:#d4af37; font-weight:800; text-transform:uppercase;">DURATION</div>
-                                <div style="font-size:1.05rem; font-weight:900; color:#ffffff;">18 DAYS</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. MAIN POSTER CONTENT BODY -->
-                <div style="padding:2rem 2rem 2.5rem; display:flex; flex-direction:column; gap:1.6rem;">
-                    
-                    <!-- HOTELS & PACKAGE INCLUDES GRID -->
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.4rem;">
-                        
-                        <!-- LEFT BOX: HOTELS -->
-                        <div style="background:#fffcf2; border:1.5px solid #eab308; border-radius:18px; padding:1.4rem;">
-                            <div style="display:flex; align-items:center; gap:0.5rem; background:#854d0e; color:#ffffff; padding:0.4rem 0.9rem; border-radius:10px; font-weight:900; font-size:0.85rem; width:fit-content; margin-bottom:1.2rem;">
-                                <span>🕋</span> HOTELS ACCOMMODATION
-                            </div>
-
-                            <!-- Makkah Hotel -->
-                            <div style="margin-bottom:1.2rem; border-bottom:1px dashed #eab308; padding-bottom:1rem;">
-                                <div style="display:flex; align-items:center; gap:0.4rem; font-weight:900; color:#854d0e; font-size:0.95rem;">
-                                    📍 MAKKAH
-                                </div>
-                                <div style="font-size:1.05rem; font-weight:900; color:#0f172a; margin:0.2rem 0;">${this.escapeHtml(o.makkahHotel || 'Manarat Al Misk / Dream Zone (or similar)')}</div>
-                                <div style="font-size:0.82rem; color:#713f12; font-weight:700; background:#fef9c3; padding:0.2rem 0.6rem; border-radius:6px; width:fit-content; border:1px solid #fde047;">
-                                    ${this.escapeHtml(o.makkahDistance || 'Approx. 600 Metres from Masjid Al-Haram.')}
-                                </div>
-                            </div>
-
-                            <!-- Madinah Hotel -->
-                            <div>
-                                <div style="display:flex; align-items:center; gap:0.4rem; font-weight:900; color:#854d0e; font-size:0.95rem;">
-                                    📍 MADINAH
-                                </div>
-                                <div style="font-size:1.05rem; font-weight:900; color:#0f172a; margin:0.2rem 0;">${this.escapeHtml(o.madinahHotel || 'Marjan International / Marjan Gold (or similar)')}</div>
-                                <div style="font-size:0.82rem; color:#713f12; font-weight:700; background:#fef9c3; padding:0.2rem 0.6rem; border-radius:6px; width:fit-content; border:1px solid #fde047;">
-                                    ${this.escapeHtml(o.madinahDistance || 'Approx. 250 Metres from Al-Masjid An-Nabawi.')}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- RIGHT BOX: PACKAGE INCLUDES -->
-                        <div style="background:#fffcf2; border:1.5px solid #eab308; border-radius:18px; padding:1.4rem;">
-                            <div style="display:flex; align-items:center; gap:0.5rem; background:#854d0e; color:#ffffff; padding:0.4rem 0.9rem; border-radius:10px; font-weight:900; font-size:0.85rem; width:fit-content; margin-bottom:1.2rem;">
-                                <span>📦</span> PACKAGE INCLUDES
-                            </div>
-
-                            <div style="display:flex; flex-direction:column; gap:0.65rem; font-size:0.88rem; color:#0f172a; font-weight:700;">
-                                <div style="display:flex; align-items:flex-start; gap:0.5rem;">
-                                    <span style="color:#854d0e; font-weight:900;">✔</span>
-                                    <span>Return Air Ticket (SXR–JED–MED–SXR)</span>
-                                </div>
-                                <div style="display:flex; align-items:flex-start; gap:0.5rem;">
-                                    <span style="color:#854d0e; font-weight:900;">✔</span>
-                                    <span>4/5 Sharing Accommodation</span>
-                                </div>
-                                <div style="display:flex; align-items:flex-start; gap:0.5rem;">
-                                    <span style="color:#854d0e; font-weight:900;">✔</span>
-                                    <span>03 Times Daily Indian Buffet Meals</span>
-                                </div>
-                                <div style="display:flex; align-items:flex-start; gap:0.5rem;">
-                                    <span style="color:#854d0e; font-weight:900;">✔</span>
-                                    <span>Half-Day Guided Ziyarat in Makkah</span>
-                                </div>
-                                <div style="display:flex; align-items:flex-start; gap:0.5rem;">
-                                    <span style="color:#854d0e; font-weight:900;">✔</span>
-                                    <span>Half-Day Guided Ziyarat in Madinah</span>
-                                </div>
-                                <div style="display:flex; align-items:flex-start; gap:0.5rem;">
-                                    <span style="color:#854d0e; font-weight:900;">✔</span>
-                                    <span>Airport &amp; Intercity Transfers</span>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <!-- COMPLIMENTARY SERVICES & IMPORTANT NOTE GRID -->
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.4rem;">
-                        
-                        <!-- COMPLIMENTARY SERVICES -->
-                        <div style="background:#fffcf2; border:1.5px solid #eab308; border-radius:18px; padding:1.4rem;">
-                            <div style="display:flex; align-items:center; gap:0.5rem; background:#854d0e; color:#ffffff; padding:0.4rem 0.9rem; border-radius:10px; font-weight:900; font-size:0.85rem; width:fit-content; margin-bottom:1.2rem;">
-                                <span>🎁</span> COMPLIMENTARY SERVICES
-                            </div>
-
-                            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.8rem; text-align:center;">
-                                <div style="background:#ffffff; border:1px solid #fde047; border-radius:12px; padding:0.8rem 0.4rem; display:flex; flex-direction:column; align-items:center;">
-                                    <span style="font-size:1.8rem; margin-bottom:0.3rem;">🥋</span>
-                                    <span style="font-size:0.75rem; font-weight:900; color:#854d0e;">AHRAM KIT</span>
-                                </div>
-
-                                <div style="background:#ffffff; border:1px solid #fde047; border-radius:12px; padding:0.8rem 0.4rem; display:flex; flex-direction:column; align-items:center;">
-                                    <span style="font-size:1.8rem; margin-bottom:0.3rem;">🧺</span>
-                                    <span style="font-size:0.75rem; font-weight:900; color:#854d0e;">LAUNDRY SERVICE</span>
-                                </div>
-
-                                <div style="background:#ffffff; border:1px solid #fde047; border-radius:12px; padding:0.8rem 0.4rem; display:flex; flex-direction:column; align-items:center;">
-                                    <span style="font-size:1.8rem; margin-bottom:0.3rem;">🧴</span>
-                                    <span style="font-size:0.75rem; font-weight:900; color:#854d0e;">5 LITRES ZAMZAM WATER</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- IMPORTANT NOTE -->
-                        <div style="background:#fffcf2; border:1.5px solid #eab308; border-radius:18px; padding:1.4rem;">
-                            <div style="display:flex; align-items:center; gap:0.5rem; background:#854d0e; color:#ffffff; padding:0.4rem 0.9rem; border-radius:10px; font-weight:900; font-size:0.85rem; width:fit-content; margin-bottom:0.8rem;">
-                                <span>📢</span> IMPORTANT NOTE
-                            </div>
-
-                            <p style="font-size:0.84rem; color:#713f12; line-height:1.55; margin:0; font-weight:600;">
-                                Rawdah permits must be booked by the pilgrim through the <strong style="color:#b91c1c;">Nusuk App</strong>, subject to availability. The company is not responsible for the booking, availability, approval, or non-issuance of the Rawdah permit.
-                            </p>
-                        </div>
-
-                    </div>
-
-                    <!-- FOR BOOKINGS & ENQUIRIES FOOTER BANNER -->
-                    <div style="background:linear-gradient(135deg, #0d3d2e 0%, #052016 100%); border-radius:18px; border:2px solid #d4af37; padding:1.4rem 2rem; color:#ffffff; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
-                        <div>
-                            <div style="font-size:0.75rem; font-weight:800; color:#d4af37; letter-spacing:0.8px; text-transform:uppercase;">FOR BOOKINGS &amp; ENQUIRIES</div>
-                            <div style="font-size:1.4rem; font-weight:900; color:#ffffff; letter-spacing:0.5px; margin-top:0.15rem;">
-                                📞 6006553803 | 9107333333
-                            </div>
-                        </div>
-
-                        <div style="display:flex; align-items:center; gap:1.2rem;">
-                            <div style="text-align:right;">
-                                <div style="font-size:0.7rem; font-weight:800; color:#d4af37; text-transform:uppercase;">SPECIAL OFFER PRICE</div>
-                                <div style="font-size:1.6rem; font-weight:900; color:#fef08a; line-height:1;">
-                                    ${this.formatCurrency(o.price || o.discountedPrice || 118750)}
-                                </div>
-                            </div>
-
-                            <button type="button" onclick="app.closeModal(); app.navigateToPayment('${o.id}');" style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:#ffffff; font-weight:900; font-size:1rem; padding:0.85rem 2rem; border-radius:12px; border:none; cursor:pointer; box-shadow:0 6px 20px rgba(245,158,11,0.4); transition:all 0.2s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform=''">
-                                💳 Book &amp; Confirm Package
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        `, true);
+        this.openViewOfferModal({
+            id: o.id,
+            title: o.packageTitle || o.title || 'Umrah Package',
+            price: o.price || o.discountedPrice || 118750,
+            departureDate: o.departureDate || '12 Aug 2026',
+            duration: o.durationDays ? `${o.durationDays} Days` : '18 Days'
+        });
     }
 
     scrollToReqOffers() {
