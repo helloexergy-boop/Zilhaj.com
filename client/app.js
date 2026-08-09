@@ -4473,8 +4473,16 @@ class App {
     sendSignupOtp() {
         const emailEl = document.getElementById('authEmail');
         const alertEl = document.getElementById('otpSentAlert');
+        const alertBox = document.getElementById('authFormAlert');
         if (!emailEl || !emailEl.value.trim()) {
-            this.showToast('Please enter your email address first', 'error');
+            if (alertBox) {
+                alertBox.style.display = 'block';
+                alertBox.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:0.45rem; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:0.4rem 0.75rem; border-radius:6px; font-size:0.76rem; font-weight:700;">
+                        <span>⚠️</span> <div>Please enter your email address first</div>
+                    </div>
+                `;
+            }
             return;
         }
         const generated = Math.floor(1000 + Math.random() * 9000).toString();
@@ -4489,14 +4497,21 @@ class App {
             alertEl.style.marginTop = '0.25rem';
             alertEl.innerText = `OTP sent! Verification code is: ${generated}`;
         }
-        this.showToast(`OTP Code sent to ${emailEl.value}: ${generated}`, 'success');
     }
 
     verifySignupOtp() {
         const otpInput = document.getElementById('authOtpCode');
         const alertEl = document.getElementById('otpSentAlert');
+        const alertBox = document.getElementById('authFormAlert');
         if (!otpInput || !otpInput.value.trim()) {
-            this.showToast('Please enter the OTP code', 'error');
+            if (alertBox) {
+                alertBox.style.display = 'block';
+                alertBox.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:0.45rem; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:0.4rem 0.75rem; border-radius:6px; font-size:0.76rem; font-weight:700;">
+                        <span>⚠️</span> <div>Please enter your 6-digit verification code.</div>
+                    </div>
+                `;
+            }
             return;
         }
         if (otpInput.value.trim() === this.state.generatedOtp || otpInput.value.trim().length >= 4) {
@@ -4508,9 +4523,15 @@ class App {
                 alertEl.style.fontWeight = '700';
                 alertEl.innerText = '✓ OTP Verified Successfully!';
             }
-            this.showToast('Email verified successfully!', 'success');
         } else {
-            this.showToast('Invalid OTP code. Please check and retry.', 'error');
+            if (alertBox) {
+                alertBox.style.display = 'block';
+                alertBox.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:0.45rem; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:0.4rem 0.75rem; border-radius:6px; font-size:0.76rem; font-weight:700;">
+                        <span>⚠️</span> <div>Invalid OTP code. Please check and retry.</div>
+                    </div>
+                `;
+            }
         }
     }
 
@@ -4525,20 +4546,16 @@ class App {
             if (password && confirmPassword && password !== confirmPassword) {
                 if (alertBox) {
                     alertBox.style.display = 'block';
-                    alertBox.style.background = '#fef2f2';
-                    alertBox.style.border = '1px solid #fecaca';
-                    alertBox.style.color = '#991b1b';
-                    alertBox.style.padding = '0.4rem 0.75rem';
-                    alertBox.style.borderRadius = '8px';
-                    alertBox.innerText = 'Passwords do not match. Please re-enter.';
+                    alertBox.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:0.45rem; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:0.4rem 0.75rem; border-radius:6px; font-size:0.76rem; font-weight:700;">
+                            <span>⚠️</span> <div>Passwords do not match. Please re-enter.</div>
+                        </div>
+                    `;
                 }
-                this.showToast('Passwords do not match. Please re-enter.', 'error');
                 return;
             }
-            this.showToast(`Account created successfully! Welcome ${name || 'Pilgrim'}!`, 'success');
             this.closeModal();
         } else {
-            this.showToast('Logged in successfully!', 'success');
             this.closeModal();
         }
     }
@@ -4766,7 +4783,7 @@ class App {
         this.setAuthButtonLoading(false, 'login');
         this.setAuthButtonLoading(false, 'register');
 
-        // 1. Update In-Modal Error Box (right inside login/signup card)
+        // Update In-Modal Error Box ONLY (right inside login/signup card)
         const alertBox = document.getElementById('authFormAlert') || document.getElementById('authAlertBox');
         if (alertBox) {
             alertBox.innerHTML = `
@@ -4777,10 +4794,6 @@ class App {
             `;
             alertBox.style.display = 'block';
         }
-
-        // 2. Also trigger front toast notification (elevated z-index 99999999)
-        const cleanMsg = message.replace(/<[^>]*>?/gm, '');
-        this.showToast('⚠️ ' + cleanMsg, 'error');
     }
 
     hideFormError() {
