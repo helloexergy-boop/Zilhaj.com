@@ -5300,6 +5300,16 @@ p, body {
     }
 }
 
+/* Fix Navbar Content Overlap Padding across pages */
+#mainContainer {
+    padding-top: 85px !important;
+}
+
+.hero-green-banner {
+    padding-top: 110px !important;
+}
+
+
 
 
 
