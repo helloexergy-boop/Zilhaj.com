@@ -797,7 +797,9 @@ class App {
             'https://images.pexels.com/photos/18996760/pexels-photo-18996760.jpeg',
             'https://images.pexels.com/photos/32290181/pexels-photo-32290181.jpeg',
             'https://images.pexels.com/photos/18351141/pexels-photo-18351141.jpeg',
-            'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg'
+            'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg',
+            'https://images.pexels.com/photos/38498727/pexels-photo-38498727.jpeg',
+            'https://images.pexels.com/photos/28209449/pexels-photo-28209449.jpeg'
         ];
 
         let index = 0;
