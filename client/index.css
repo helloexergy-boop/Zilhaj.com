@@ -2894,10 +2894,10 @@ html { scroll-behavior: smooth; }
 .modal-card.auth-modal-fixed {
     transition: none !important;
     animation: none !important;
-    max-width: 1000px !important;
-    width: 92vw !important;
-    height: 570px !important;
-    max-height: 88vh !important;
+    max-width: 1060px !important;
+    width: 94vw !important;
+    height: 710px !important;
+    max-height: 94vh !important;
     border-radius: 24px !important;
     overflow: hidden !important;
     padding: 0 !important;
