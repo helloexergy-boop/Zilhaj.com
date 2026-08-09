@@ -557,125 +557,7 @@ class App {
         }
     }
 
-    async login(email, password) {
-        if (!email || !password) {
-            this.showToast('Please enter both email and password', 'error');
-            return;
-        }
 
-        let userObj = null;
-
-        // Check backend REST API first
-        const res = await this.apiCall('/auth/login', 'POST', { email, password });
-        if (res && res.token) {
-            userObj = res;
-        } else if (email.trim().toLowerCase() === 'admin@umrah.com') {
-            // Master Admin Login
-            userObj = {
-                id: 'admin-1',
-                name: 'System Administrator',
-                email: 'admin@umrah.com',
-                role: 'ROLE_ADMIN',
-                token: 'master-admin-token'
-            };
-        } else {
-            // Check registered local users list or default Zaireen user
-            const registeredUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
-            const foundUser = registeredUsers.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
-            if (foundUser) {
-                userObj = {
-                    id: foundUser.id || 'usr-' + Date.now(),
-                    name: foundUser.name,
-                    email: foundUser.email,
-                    phone: foundUser.phone || '9541692891',
-                    role: foundUser.role || 'ROLE_USER',
-                    token: 'user-local-token'
-                };
-            } else if (email.trim().toLowerCase() === 'user@Zaireen.com') {
-                userObj = {
-                    id: 'usr-1',
-                    name: 'Tariq Mahmood',
-                    email: 'user@Zaireen.com',
-                    phone: '9541692891',
-                    role: 'ROLE_USER',
-                    token: 'user-default-token'
-                };
-            } else if (email && password && password.length >= 2) {
-                userObj = {
-                    id: 'usr-' + Date.now(),
-                    name: email.split('@')[0],
-                    email: email,
-                    role: 'ROLE_USER',
-                    token: 'user-session-token'
-                };
-            }
-        }
-
-        if (userObj) {
-            this.state.currentUser = userObj;
-            localStorage.setItem('umrah_user', JSON.stringify(userObj));
-            this.renderAuthNav();
-            this.closeModal();
-            if (userObj.role === 'ROLE_ADMIN') {
-                await this.fetchUserData();
-                this.showSuccessModal(
-                    `Welcome, ${userObj.name}! 👑`,
-                    'You are now logged in as Admin. Redirecting to your panel.',
-                    () => this.navigate('admin')
-                );
-                setTimeout(() => this.navigate('admin'), 4000);
-            } else {
-                await this.fetchUserData();
-                this.showSuccessModal(
-                    `Welcome back, ${userObj.name}! 🌙`,
-                    'You have successfully logged in. Taking you to the home page.',
-                    () => this.navigate('home')
-                );
-                setTimeout(() => this.navigate('home'), 4000);
-            }
-        } else {
-            this.showToast(res?.message || 'Invalid email or password', 'error');
-        }
-    }
-
-    async register(name, email, password, phone, role = 'ROLE_USER', companyName = '') {
-        if (!name || !email || !password) {
-            this.showToast('Please fill in name, email, and password', 'error');
-            return;
-        }
-
-        const newUserObj = {
-            id: 'usr-' + Date.now(),
-            name: name.trim(),
-            email: email.trim().toLowerCase(),
-            password: password,
-            phone: phone.trim() || '9541692891',
-            role: 'ROLE_USER',
-            token: 'user-local-token-' + Date.now()
-        };
-
-        const registeredUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
-        if (!registeredUsers.some(u => u.email.toLowerCase() === email.trim().toLowerCase())) {
-            registeredUsers.push(newUserObj);
-            localStorage.setItem('umrah_registered_users', JSON.stringify(registeredUsers));
-        }
-
-        // Try API endpoint in background
-        this.apiCall('/auth/register', 'POST', { name, email, password, phone, role, companyName });
-
-        // Auto-login newly registered Zaireen!
-        this.state.currentUser = newUserObj;
-        localStorage.setItem('umrah_user', JSON.stringify(newUserObj));
-
-        this.renderAuthNav();
-        this.closeModal();
-        this.showSuccessModal(
-            `Account Created! Welcome, ${newUserObj.name}! 🎉`,
-            'Your account has been set up successfully. Taking you to the home page.',
-            () => this.navigate('home')
-        );
-        setTimeout(() => this.navigate('home'), 4000);
-    }
 
     async loginWithGoogle() {
         this.closeModal();
@@ -4997,16 +4879,45 @@ class App {
 
     async register(name, email, password, confirmPassword) {
         this.hideFormError();
-        this.showLoading('✦ Registering your account on the server... Please wait', 'Creating Account');
+        this.showLoading('✦ Registering account in MongoDB database... Please wait', 'Creating Account');
         this.setAuthButtonLoading(true, 'register');
 
+        const cleanName = name.trim();
         const cleanEmail = (email || '').trim().toLowerCase();
         const cleanPassword = (password || '').trim();
 
-        // Save account to persistent local storage user registry
+        let backendReached = false;
+        let backendErrorMsg = null;
+
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: cleanName, email: cleanEmail, password: cleanPassword, role: 'ROLE_USER' })
+            });
+
+            const data = await response.json();
+            backendReached = true;
+
+            if (!response.ok) {
+                backendErrorMsg = data.error || data.message || 'Unable to register account in MongoDB database.';
+            }
+        } catch (err) {
+            console.warn('Backend server offline during registration:', err);
+        }
+
+        // If MongoDB server responded with an error (e.g. duplicate email, weak password), DENY registration!
+        if (backendReached && backendErrorMsg) {
+            this.setAuthButtonLoading(false, 'register');
+            this.hideLoading();
+            this.showFormError(`<b>MongoDB Signup Failed</b><br>${backendErrorMsg}`);
+            return;
+        }
+
+        // Save account to local storage user registry
         const newUser = { 
             id: 'usr-' + Date.now(), 
-            name: name.trim(), 
+            name: cleanName, 
             email: cleanEmail, 
             password: cleanPassword, 
             phone: '9541692891',
@@ -5023,22 +4934,8 @@ class App {
         }
         localStorage.setItem('umrah_registered_users', JSON.stringify(localUsers));
 
-        try {
-            const response = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email: cleanEmail, password: cleanPassword })
-            });
-            const data = await response.json();
-            if (!response.ok && data.message && !data.message.includes('already in use')) {
-                console.warn('Backend register response warning:', data.message);
-            }
-        } catch (err) {
-            console.warn('Backend server offline during registration, saved account locally:', err);
-        } finally {
-            this.setAuthButtonLoading(false, 'register');
-            this.hideLoading();
-        }
+        this.setAuthButtonLoading(false, 'register');
+        this.hideLoading();
 
         // Switch to Login Modal & pre-fill email/password
         this.openAuthModal('login');
@@ -5050,12 +4947,12 @@ class App {
         }, 50);
         
         // Show success notification modal
-        this.showSuccessModal('✦ Account Created Successfully!', `Welcome to Umrah Travels, ${name}! Your account has been registered. Please log in with your email and password.`);
+        this.showSuccessModal('✦ Account Registered in MongoDB!', `Welcome to Umrah Travels, ${cleanName}! Your account has been created in MongoDB database. Please log in to continue.`);
     }
 
     async login(email, password) {
         this.hideFormError();
-        this.showLoading('🔒 Verifying account credentials with server...', 'Logging In');
+        this.showLoading('🔒 Verifying credentials with MongoDB database...', 'Logging In');
         this.setAuthButtonLoading(true, 'login');
 
         const cleanInput = (email || '').trim().toLowerCase();
@@ -5068,7 +4965,10 @@ class App {
             return;
         }
 
-        // 1. Try Backend API Authentication
+        let backendReached = false;
+        let backendErrorMsg = null;
+
+        // 1. Try Backend REST API Authentication (MongoDB)
         try {
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
@@ -5077,31 +4977,60 @@ class App {
             });
 
             const data = await response.json();
+            backendReached = true;
 
-            if (response.ok && data && data.user) {
-                this.state.currentUser = data.user;
-                localStorage.setItem('umrah_user', JSON.stringify(data.user));
+            if (response.ok && data && (data.user || data.token)) {
+                const userPayload = data.user || {
+                    id: data.id || 'usr-' + Date.now(),
+                    name: data.name || cleanInput.split('@')[0],
+                    email: cleanInput,
+                    role: data.role || 'ROLE_USER',
+                    token: data.token
+                };
+
+                this.state.currentUser = userPayload;
+                localStorage.setItem('umrah_user', JSON.stringify(userPayload));
+
+                // Sync local registered registry with MongoDB
+                let localUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
+                const idx = localUsers.findIndex(u => u.email && u.email.trim().toLowerCase() === cleanInput);
+                if (idx >= 0) {
+                    localUsers[idx].password = cleanPass;
+                } else {
+                    localUsers.push({ id: userPayload.id, name: userPayload.name, email: cleanInput, password: cleanPass, role: userPayload.role });
+                }
+                localStorage.setItem('umrah_registered_users', JSON.stringify(localUsers));
+
+                this.setAuthButtonLoading(false, 'login');
                 this.hideLoading();
                 this.closeModal();
                 this.renderAuthNav();
                 this.navigate('home');
 
-                if (data.user.role === 'ROLE_ADMIN') {
-                    this.showToast(`👑 Welcome Admin, ${data.user.name}!`, 'success');
+                if (userPayload.role === 'ROLE_ADMIN') {
+                    this.showToast(`👑 Welcome Admin, ${userPayload.name}!`, 'success');
                     this.navigate('admin');
                 } else {
-                    this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${data.user.name}. You have logged in successfully.`);
+                    this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${userPayload.name}. You have logged in successfully.`);
                 }
                 return;
+            } else {
+                backendErrorMsg = data.error || data.message || 'Invalid email or password.';
             }
         } catch (err) {
-            console.warn('Backend authentication endpoint unavailable, trying local registry:', err);
+            console.warn('Backend MongoDB authentication endpoint unreachable:', err);
         }
 
-        // 2. Check Local User Registry Fallback
+        // STRICT REQUIREMENT: If MongoDB server responded with an authentication rejection, DO NOT LOG IN!
+        if (backendReached) {
+            this.setAuthButtonLoading(false, 'login');
+            this.hideLoading();
+            this.showFormError(`<b>MongoDB Authentication Failed</b><br>${backendErrorMsg || 'The password you entered does not match the account in MongoDB database.'}`);
+            return;
+        }
+
+        // 2. Check Local User Registry Fallback ONLY IF BACKEND IS COMPLETELY UNREACHABLE (OFFLINE MODE)
         let localUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
-        
-        // Seed default fallback accounts if registry is empty
         if (localUsers.length === 0) {
             localUsers = [
                 { id: 'usr-1', name: 'CampusNotes', email: 'campusnotesnitsri@gmail.com', phone: '+91 9541692891', password: 'password123', role: 'ROLE_USER' },
@@ -5111,7 +5040,6 @@ class App {
             localStorage.setItem('umrah_registered_users', JSON.stringify(localUsers));
         }
 
-        // Check if account exists
         const foundAccount = localUsers.find(u => 
             (u.email && u.email.trim().toLowerCase() === cleanInput) || 
             (u.phone && u.phone.trim() === cleanInput)
@@ -5124,15 +5052,13 @@ class App {
             return;
         }
 
-        // STRICT PASSWORD CHECK PER PROMPT REQUIREMENT
         if (foundAccount.password && foundAccount.password.trim() !== cleanPass) {
             this.setAuthButtonLoading(false, 'login');
             this.hideLoading();
-            this.showFormError('<b>Incorrect Password</b><br>The password you entered is incorrect. Please enter the exact password you created during signup.');
+            this.showFormError('<b>Incorrect Password</b><br>The password you entered is incorrect. Please enter the exact password created during account signup.');
             return;
         }
 
-        // Grant login session if credentials match
         const userPayload = { 
             id: foundAccount.id || 'usr-' + Date.now(), 
             name: foundAccount.name || cleanInput.split('@')[0], 
@@ -6171,15 +6097,31 @@ class App {
 
     logout() {
         this.openModal(`
-            <div class="modal-header" style="text-align:center;">
-                <h3>🚪 Confirm Logout</h3>
-            </div>
-            <div class="modal-body" style="text-align:center; padding:1.5rem 1rem;">
-                <p style="font-size:1.05rem; color:#475569; margin-bottom:1.8rem;">Are you sure you want to log out of your account?</p>
-                <div style="display:flex; gap:1rem; justify-content:center;">
-                    <button class="btn btn-outline" onclick="app.closeModal()">Cancel</button>
-                    <button class="btn btn-danger" onclick="app.confirmLogout()">Confirm Logout</button>
+            <div style="background: #ffffff; border-radius: 24px; padding: 2.2rem; text-align: center; max-width: 440px; margin: 0 auto; box-shadow: 0 25px 50px rgba(0,0,0,0.25); position: relative; font-family: 'Inter', -apple-system, sans-serif;">
+                
+                <!-- Icon Circle Badge -->
+                <div style="width: 72px; height: 72px; background: #fef2f2; border: 2px solid #fecaca; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 1.2rem; box-shadow: 0 6px 16px rgba(220,38,38,0.15);">
+                    🚪
                 </div>
+
+                <!-- Title & Message -->
+                <h3 style="font-size: 1.4rem; font-weight: 900; color: #0f172a; margin: 0 0 0.5rem 0; letter-spacing: -0.3px;">
+                    Confirm Logout
+                </h3>
+                <p style="font-size: 0.92rem; color: #64748b; margin: 0 0 1.8rem 0; line-height: 1.5; font-weight: 500;">
+                    Are you sure you want to log out of your account? You will need to log back in to manage your Umrah bookings.
+                </p>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 0.9rem; justify-content: center;">
+                    <button type="button" onclick="app.closeModal()" style="flex: 1; padding: 0.75rem 1.4rem; border-radius: 12px; background: #ffffff; color: #334155; border: 1.5px solid #cbd5e1; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f8fafc';this.style.borderColor='#94a3b8'" onmouseout="this.style.background='#ffffff';this.style.borderColor='#cbd5e1'">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="app.confirmLogout()" style="flex: 1; padding: 0.75rem 1.4rem; border-radius: 12px; background: #dc2626; color: #ffffff; border: none; font-weight: 900; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 14px rgba(220,38,38,0.3); transition: all 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                        🚪 Log Out
+                    </button>
+                </div>
+
             </div>
         `);
     }
