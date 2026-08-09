@@ -4262,10 +4262,10 @@ class App {
                                 <input type="text" id="forgotOtpCode" placeholder="Enter 4-digit code" maxlength="6" style="width: 100%; height: 40px; padding: 0 0.6rem; border: 1.5px solid #86efac; border-radius: 8px; font-size: 0.95rem; font-weight: 800; letter-spacing: 3px; text-align: center; background: #ffffff; color: #111827; box-sizing: border-box;">
                             </div>
 
-                            <div class="auth-input-wrapper">
+                            <div class="auth-input-wrapper" style="position:relative;">
                                 <label class="auth-input-label">New Password</label>
-                                <input type="password" id="forgotNewPassword" required placeholder="Enter your new password" class="auth-input-field">
-                                <span class="auth-input-icon">🔒</span>
+                                <input type="password" id="forgotNewPassword" required placeholder="Enter your new password" class="auth-input-field" style="padding-right:2.4rem;">
+                                <button type="button" id="eyeForgotPass" onclick="app.togglePasswordVisibility('forgotNewPassword', 'eyeForgotPass')" title="Show/Hide Password" style="position:absolute; right:0.5rem; top:28px; background:none; border:none; cursor:pointer; font-size:1.05rem; z-index:10; padding:2px 4px;">👁️</button>
                             </div>
 
                             <button type="submit" class="auth-submit-btn" style="width: 100%; height: 48px; background: #235d47; color: #ffffff; border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 16px rgba(35,93,71,0.3); font-family: inherit;" onmouseover="this.style.background='#1b4937'" onmouseout="this.style.background='#235d47'">
@@ -4329,15 +4329,15 @@ class App {
 
                                 <!-- PASSWORDS ROW (2-COLUMN GRID FOR EXACT SYMMETRY) -->
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.8rem;">
-                                    <div class="auth-input-wrapper" style="margin-bottom: 0;">
+                                    <div class="auth-input-wrapper" style="margin-bottom: 0; position:relative;">
                                         <label class="auth-input-label">Password</label>
-                                        <input type="password" id="authPassword" required placeholder="••••••••" class="auth-input-field" onkeyup="app.checkPasswordStrength(this.value)">
-                                        <button type="button" onclick="app.togglePasswordVisibility()" class="auth-input-icon" style="right: 0.5rem;">🔒</button>
+                                        <input type="password" id="authPassword" required placeholder="••••••••" class="auth-input-field" style="padding-right:2.4rem;" onkeyup="app.checkPasswordStrength(this.value)">
+                                        <button type="button" id="eyeRegPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeRegPass')" title="Show/Hide Password" style="position:absolute; right:0.5rem; top:28px; background:none; border:none; cursor:pointer; font-size:1.05rem; z-index:10; padding:2px 4px;">👁️</button>
                                     </div>
-                                    <div class="auth-input-wrapper" style="margin-bottom: 0;">
+                                    <div class="auth-input-wrapper" style="margin-bottom: 0; position:relative;">
                                         <label class="auth-input-label">Confirm Password</label>
-                                        <input type="password" id="authPasswordConfirm" required placeholder="••••••••" class="auth-input-field">
-                                        <span class="auth-input-icon" style="right: 0.5rem;">🔒</span>
+                                        <input type="password" id="authPasswordConfirm" required placeholder="••••••••" class="auth-input-field" style="padding-right:2.4rem;">
+                                        <button type="button" id="eyeRegConf" onclick="app.togglePasswordVisibility('authPasswordConfirm', 'eyeRegConf')" title="Show/Hide Password" style="position:absolute; right:0.5rem; top:28px; background:none; border:none; cursor:pointer; font-size:1.05rem; z-index:10; padding:2px 4px;">👁️</button>
                                     </div>
                                 </div>
 
@@ -4361,10 +4361,10 @@ class App {
                                     <span class="auth-input-icon">✉</span>
                                 </div>
 
-                                <div class="auth-input-wrapper" style="margin-bottom: 0.6rem;">
+                                <div class="auth-input-wrapper" style="margin-bottom: 0.6rem; position:relative;">
                                     <label class="auth-input-label">Password</label>
-                                    <input type="password" id="authPassword" required placeholder="Enter your password" class="auth-input-field">
-                                    <button type="button" onclick="app.togglePasswordVisibility()" class="auth-input-icon">🔒</button>
+                                    <input type="password" id="authPassword" required placeholder="Enter your password" class="auth-input-field" style="padding-right:2.4rem;">
+                                    <button type="button" id="eyeLoginPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeLoginPass')" title="Show/Hide Password" style="position:absolute; right:0.5rem; top:28px; background:none; border:none; cursor:pointer; font-size:1.05rem; z-index:10; padding:2px 4px;">👁️</button>
                                 </div>
 
                                 <!-- REMEMBER ME & FORGOT PASSWORD ROW -->
@@ -4759,16 +4759,17 @@ class App {
         }
     }
 
-    togglePasswordVisibility() {
-        const input = document.getElementById('authPassword');
-        const eyeBtn = document.getElementById('eyeToggleBtn');
+    togglePasswordVisibility(inputId = 'authPassword', btnId = null) {
+        const input = document.getElementById(inputId) || document.getElementById('authPassword');
         if (!input) return;
-        if (input.type === 'password') {
-            input.type = 'text';
-            if (eyeBtn) eyeBtn.innerText = '🙈';
-        } else {
-            input.type = 'password';
-            if (eyeBtn) eyeBtn.innerText = '👁️';
+        const isPass = input.type === 'password';
+        input.type = isPass ? 'text' : 'password';
+
+        const eyeBtn = btnId ? document.getElementById(btnId) : null;
+        if (eyeBtn) {
+            eyeBtn.innerHTML = isPass ? '🙈' : '👁️';
+        } else if (window.event && window.event.currentTarget) {
+            window.event.currentTarget.innerHTML = isPass ? '🙈' : '👁️';
         }
     }
 
@@ -4952,7 +4953,7 @@ class App {
         let backendReached = false;
         let backendErrorMsg = null;
 
-        // 1. Try Backend REST API Authentication (MongoDB)
+        // 1. Try Backend REST API Authentication
         try {
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
@@ -4975,7 +4976,7 @@ class App {
                 this.state.currentUser = userPayload;
                 localStorage.setItem('umrah_user', JSON.stringify(userPayload));
 
-                // Sync local registered registry with MongoDB
+                // Sync local registered registry
                 let localUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
                 const idx = localUsers.findIndex(u => u.email && u.email.trim().toLowerCase() === cleanInput);
                 if (idx >= 0) {
@@ -5002,18 +5003,10 @@ class App {
                 backendErrorMsg = data.error || data.message || 'Invalid email or password.';
             }
         } catch (err) {
-            console.warn('Backend MongoDB authentication endpoint unreachable:', err);
+            console.warn('Backend authentication endpoint unreachable:', err);
         }
 
-        // STRICT REQUIREMENT: If MongoDB server responded with an authentication rejection, DO NOT LOG IN!
-        if (backendReached) {
-            this.setAuthButtonLoading(false, 'login');
-            this.hideLoading();
-            this.showFormError(`<b>MongoDB Authentication Failed</b><br>${backendErrorMsg || 'The password you entered does not match the account in MongoDB database.'}`);
-            return;
-        }
-
-        // 2. Check Local User Registry Fallback ONLY IF BACKEND IS COMPLETELY UNREACHABLE (OFFLINE MODE)
+        // 2. Check local user registry (accounts created on frontend/local session)
         let localUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
         if (localUsers.length === 0) {
             localUsers = [
@@ -5024,40 +5017,51 @@ class App {
             localStorage.setItem('umrah_registered_users', JSON.stringify(localUsers));
         }
 
-        const foundAccount = localUsers.find(u =>
-            (u.email && u.email.trim().toLowerCase() === cleanInput) ||
+        const foundAccount = localUsers.find(u => 
+            (u.email && u.email.trim().toLowerCase() === cleanInput) || 
             (u.phone && u.phone.trim() === cleanInput)
         );
 
-        if (!foundAccount) {
+        if (foundAccount) {
+            // Strictly verify password for local account
+            if (foundAccount.password && foundAccount.password.trim() !== cleanPass) {
+                this.setAuthButtonLoading(false, 'login');
+                this.hideLoading();
+                this.showFormError('<b>Incorrect Password</b><br>The password you entered is incorrect. Please enter the exact password created during account signup.');
+                return;
+            }
+
+            // Credentials match! Grant session!
+            const userPayload = { 
+                id: foundAccount.id || 'usr-' + Date.now(), 
+                name: foundAccount.name || cleanInput.split('@')[0], 
+                email: foundAccount.email || cleanInput, 
+                phone: foundAccount.phone || '9541692891',
+                role: foundAccount.role || 'ROLE_USER' 
+            };
+            this.state.currentUser = userPayload;
+            localStorage.setItem('umrah_user', JSON.stringify(userPayload));
             this.setAuthButtonLoading(false, 'login');
             this.hideLoading();
-            this.showFormError('<b>Account Not Found</b><br>No account is registered with this email address. Please click <b>"Sign Up"</b> to create an account first.');
+            this.closeModal();
+            this.renderAuthNav();
+            this.navigate('home');
+            this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${userPayload.name}. You have logged in successfully.`);
             return;
         }
 
-        if (foundAccount.password && foundAccount.password.trim() !== cleanPass) {
+        // If backend returned error AND account is not in local registry
+        if (backendReached && backendErrorMsg) {
             this.setAuthButtonLoading(false, 'login');
             this.hideLoading();
-            this.showFormError('<b>Incorrect Password</b><br>The password you entered is incorrect. Please enter the exact password created during account signup.');
+            this.showFormError(`<b>Authentication Failed</b><br>${backendErrorMsg}`);
             return;
         }
 
-        const userPayload = {
-            id: foundAccount.id || 'usr-' + Date.now(),
-            name: foundAccount.name || cleanInput.split('@')[0],
-            email: foundAccount.email || cleanInput,
-            phone: foundAccount.phone || '9541692891',
-            role: foundAccount.role || 'ROLE_USER'
-        };
-        this.state.currentUser = userPayload;
-        localStorage.setItem('umrah_user', JSON.stringify(userPayload));
+        // Account not found anywhere
         this.setAuthButtonLoading(false, 'login');
         this.hideLoading();
-        this.closeModal();
-        this.renderAuthNav();
-        this.navigate('home');
-        this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${userPayload.name}. You have logged in successfully.`);
+        this.showFormError('<b>Account Not Found</b><br>No account is registered with this email address. Please click <b>"Sign Up"</b> to create an account first.');
     }
 
     openAddPackageModal() {
