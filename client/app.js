@@ -794,10 +794,10 @@ class App {
         if (!slideA || !slideB) return;
 
         const mediaList = [
-            'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg',
-            'https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=1600&q=80',
-            'https://images.pexels.com/photos/38498727/pexels-photo-38498727.jpeg',
-            'https://images.pexels.com/photos/28209449/pexels-photo-28209449.jpeg'
+            'https://images.pexels.com/photos/18996760/pexels-photo-18996760.jpeg',
+            'https://images.pexels.com/photos/32290181/pexels-photo-32290181.jpeg',
+            'https://images.pexels.com/photos/18351141/pexels-photo-18351141.jpeg',
+            'https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg'
         ];
 
         let index = 0;
@@ -819,12 +819,12 @@ class App {
     renderHomePage() {
         return `
             <!-- Full Screen (100vh) Instant Image Slideshow Hero Banner -->
-            <section class="hero-green-banner fullscreen-hero" style="background: #0f172a url('https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg') center center / cover no-repeat;">
+            <section class="hero-green-banner fullscreen-hero" style="background: #0f172a url('https://images.pexels.com/photos/18996760/pexels-photo-18996760.jpeg') center center / cover no-repeat;">
 
                 <!-- Photo Slideshow Background Container -->
                 <div id="heroBgSlideContainer" style="position:absolute; inset:0; z-index:1; overflow:hidden;">
-                    <div id="heroSlideLayerA" style="position:absolute; inset:0; background: url('https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg') center center / cover no-repeat; transition: opacity 1.2s ease-in-out; opacity:1; z-index:1;"></div>
-                    <div id="heroSlideLayerB" style="position:absolute; inset:0; background: url('https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=1600&q=80') center center / cover no-repeat; transition: opacity 1.2s ease-in-out; opacity:0; z-index:2;"></div>
+                    <div id="heroSlideLayerA" style="position:absolute; inset:0; background: url('https://images.pexels.com/photos/18996760/pexels-photo-18996760.jpeg') center center / cover no-repeat; transition: opacity 1.2s ease-in-out; opacity:1; z-index:1;"></div>
+                    <div id="heroSlideLayerB" style="position:absolute; inset:0; background: url('https://images.pexels.com/photos/32290181/pexels-photo-32290181.jpeg') center center / cover no-repeat; transition: opacity 1.2s ease-in-out; opacity:0; z-index:2;"></div>
                 </div>
 
                 <!-- Cinematic Gradient Overlay -->
