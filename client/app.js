@@ -4360,7 +4360,7 @@ class App {
 
                         ${isLogin ? `
                             <div style="font-size:0.72rem; color:#64748b; text-align:center; margin-top:0.5rem;">
-                                By continuing, you acknowledge Zilhaj <a href="#" onclick="event.preventDefault();" style="color:#0f172a; text-decoration:underline;">Privacy Policy</a>.
+                                By continuing, you acknowledge Zilhaj <a href="#" onclick="event.preventDefault(); app.openPrivacyPolicyModal();" style="color:#0f172a; text-decoration:underline;">Privacy Policy</a>.
                             </div>
                         ` : ''}
 
@@ -4457,6 +4457,170 @@ class App {
             b2.style.background = '#10b981';
             b3.style.background = '#10b981';
             txt.innerText = 'Password strength: Strong';
+        }
+    }
+
+    openPrivacyPolicyModal() {
+        this.openModal(`
+            <div style="font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background:#ffffff; color:#0f172a; max-height:85vh; display:flex; flex-direction:column; border-radius:24px; overflow:hidden;">
+                
+                <!-- HEADER STRIP -->
+                <div style="padding:1.4rem 2rem; background:linear-gradient(135deg, #0b1f17 0%, #163e2e 100%); color:#ffffff; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e4d39;">
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <span style="font-size:1.5rem;">🛡️</span>
+                        <div>
+                            <h2 style="font-size:1.35rem; font-weight:900; margin:0; color:#F9E07A; letter-spacing:-0.02em;">ZILHAJ Privacy Policy</h2>
+                            <p style="font-size:0.76rem; color:rgba(255,255,255,0.85); margin:0.1rem 0 0 0;">Official Data Protection &amp; Pilgrim Privacy Commitment</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="app.closeModal()" style="background:rgba(255,255,255,0.15); border:none; color:#ffffff; width:34px; height:34px; border-radius:50%; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">✕</button>
+                </div>
+
+                <!-- LEGAL BODY CONTENT (SCROLLABLE, HIGH QUALITY REAL LEGAL TEXT) -->
+                <div style="padding:1.8rem 2.2rem; overflow-y:auto; font-size:0.88rem; line-height:1.75; color:#334155; max-height:calc(85vh - 130px);">
+                    
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:0.85rem 1.1rem; margin-bottom:1.5rem; font-size:0.82rem; color:#166534; display:flex; align-items:center; gap:0.75rem;">
+                        <span style="font-size:1.15rem;">📌</span>
+                        <div>
+                            <strong>Effective Date:</strong> August 10, 2026 &nbsp;|&nbsp; <strong>Governing Framework:</strong> Saudi Personal Data Protection Law (PDPL) &amp; Global Privacy Standards
+                        </div>
+                    </div>
+
+                    <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">1. Introduction &amp; Scope</h3>
+                    <p style="margin-bottom:0.9rem;">
+                        At <strong>ZILHAJ Umrah &amp; Hajj Travel Platform</strong> ("ZILHAJ", "we", "us", or "our"), accessible via <code>www.zilhaj-travel.com</code>, we hold the privacy, confidentiality, and trust of our sacred pilgrims (Zaireen) in the highest regard. This Privacy Policy outlines the types of personal data we collect, how it is processed, encrypted, stored, and shared, and your statutory rights regarding your personal records when utilizing our travel marketplace services, e-Visa assistance, Nusuk permit integration, and hotel booking comparison tools.
+                    </p>
+
+                    <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">2. Information We Collect</h3>
+                    <p style="margin-bottom:0.5rem;">To facilitate seamless pilgrimage arrangements, we collect the following categories of information:</p>
+                    <ul style="padding-left:1.3rem; margin-bottom:1rem;">
+                        <li style="margin-bottom:0.35rem;"><strong>Personal Identification Data:</strong> Full legal name (as printed on passport), email address, mobile phone number, passport number, nationality, date of birth, gender, and residential address.</li>
+                        <li style="margin-bottom:0.35rem;"><strong>Pilgrimage &amp; Travel Preferences:</strong> Departure city, travel dates, group size (adults, children, infants), hotel proximity requirements in Makkah &amp; Madinah, meal preferences, flight class, and Nusuk permit requests.</li>
+                        <li style="margin-bottom:0.35rem;"><strong>Financial &amp; Payment Data:</strong> Payment transaction logs, Razorpay order IDs, and payment status verification. <em>(Note: Credit card numbers, CVVs, and banking credentials are processed directly via PCI-DSS certified payment gateways and are never stored on ZILHAJ servers).</em></li>
+                        <li style="margin-bottom:0.35rem;"><strong>Technical &amp; Log Data:</strong> IP address, device type, browser specifications, session cookies, operating system, and interaction timestamps.</li>
+                    </ul>
+
+                    <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">3. How We Use Your Information</h3>
+                    <p style="margin-bottom:0.5rem;">Your data is processed strictly for legitimate travel operations, including:</p>
+                    <ul style="padding-left:1.3rem; margin-bottom:1rem;">
+                        <li style="margin-bottom:0.35rem;">Connecting your travel requests with government-licensed, background-verified Umrah travel operators to receive competitive package offers.</li>
+                        <li style="margin-bottom:0.35rem;">Processing Saudi e-Visa applications and coordinating with the Saudi Ministry of Hajj &amp; Umrah and Nusuk platforms.</li>
+                        <li style="margin-bottom:0.35rem;">Issuing official booking confirmation vouchers, invoices, and travel itineraries.</li>
+                        <li style="margin-bottom:0.35rem;">Providing 24/7 customer support via email, phone, and Noor AI Assistant.</li>
+                        <li style="margin-bottom:0.35rem;">Detecting and preventing fraudulent transactions, security breaches, and illegal activities.</li>
+                    </ul>
+
+                    <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">4. Disclosure &amp; Sharing of Information</h3>
+                    <p style="margin-bottom:0.5rem;">ZILHAJ maintains a strict <strong>Zero Data Selling Policy</strong>. We do not sell, rent, or monetize your personal data to any third-party marketing companies. Data is disclosed strictly under the following operational circumstances:</p>
+                    <ul style="padding-left:1.3rem; margin-bottom:1rem;">
+                        <li style="margin-bottom:0.35rem;"><strong>Verified Umrah Operators:</strong> Necessary travel details are shared with verified travel agents solely to provide accurate package pricing and service execution.</li>
+                        <li style="margin-bottom:0.35rem;"><strong>Government Regulatory Authorities:</strong> Shared with the Saudi Ministry of Hajj &amp; Umrah, Ministry of Foreign Affairs (MOFA), and Saudi Border Control as required by KSA law.</li>
+                        <li style="margin-bottom:0.35rem;"><strong>Authorized Service Providers:</strong> PCI-DSS certified payment gateways (Razorpay, Stripe), SMS/Email notification gateways, and cloud infrastructure partners under strict confidentiality agreements.</li>
+                    </ul>
+
+                    <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">5. Data Security &amp; Retention</h3>
+                    <p style="margin-bottom:0.9rem;">
+                        We implement advanced multi-layer security measures, including <strong>AES-256 bit encryption at rest</strong> and <strong>TLS 1.3 encryption in transit</strong>. Access to pilgrim databases is governed by strict Role-Based Access Controls (RBAC) and automated threat detection systems. Personal data is retained only for as long as necessary to fulfill travel obligations and legal tax audit requirements under Saudi Arabian law.
+                    </p>
+
+                    <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">6. Pilgrim Legal Rights</h3>
+                    <p style="margin-bottom:0.5rem;">Under applicable data protection legislation (including Saudi PDPL), you possess the right to:</p>
+                    <ul style="padding-left:1.3rem; margin-bottom:1rem;">
+                        <li style="margin-bottom:0.35rem;">Request access to a full export of your personal data maintained on our servers.</li>
+                        <li style="margin-bottom:0.35rem;">Request immediate rectification of inaccurate or outdated passport/contact records.</li>
+                        <li style="margin-bottom:0.35rem;">Request complete erasure of your account and personal records ("Right to be Forgotten"), subject to regulatory statutory requirements.</li>
+                        <li style="margin-bottom:0.35rem;">Withdraw consent for non-essential communications at any time.</li>
+                    </ul>
+
+                    <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">7. Cookies &amp; Tracking</h3>
+                    <p style="margin-bottom:0.9rem;">
+                        We utilize essential operational cookies to maintain your login session, store active currency/language preferences, and optimize web app response speeds. You may modify your web browser settings to decline non-essential cookies; however, some interactive features may experience reduced functionality.
+                    </p>
+
+                    <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">8. Contact Our Data Protection Officer</h3>
+                    <p style="margin-bottom:0.7rem;">For questions, privacy requests, or regulatory inquiries, contact our legal and data protection team:</p>
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.1rem; font-size:0.84rem; color:#475569;">
+                        <strong>ZILHAJ Data Protection Office (DPO)</strong><br>
+                        📧 Email: <a href="mailto:privacy@zilhaj-travel.com" style="color:#2b5e48; font-weight:700;">privacy@zilhaj-travel.com</a> | <a href="mailto:info@zilhaj-travel.com" style="color:#2b5e48; font-weight:700;">info@zilhaj-travel.com</a><br>
+                        📞 Toll-Free KSA Support: <strong>+966 800 123 4567</strong> | Helpline: <strong>+91 95416 92891</strong><br>
+                        📍 Head Office: Makkah al-Mukarramah, Kingdom of Saudi Arabia 24231
+                    </div>
+
+                </div>
+
+                <!-- FOOTER STRIP -->
+                <div style="padding:1rem 2rem; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.78rem; color:#64748b;">© 2024 ZILHAJ Umrah &amp; Hajj Travel. All rights reserved.</span>
+                    <button type="button" onclick="app.closeModal()" style="background:#2b5e48; color:#ffffff; font-weight:800; font-size:0.86rem; padding:0.55rem 1.5rem; border-radius:8px; border:none; cursor:pointer;">I Understand</button>
+                </div>
+
+            </div>
+        `);
+
+        const modal = document.getElementById('modalCard');
+        if (modal) {
+            modal.style.maxWidth = '880px';
+            modal.style.width = '90vw';
+            modal.style.padding = '0';
+            modal.style.borderRadius = '24px';
+            modal.style.overflow = 'hidden';
+        }
+    }
+
+    openTermsModal() {
+        this.openModal(`
+            <div style="font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background:#ffffff; color:#0f172a; max-height:85vh; display:flex; flex-direction:column; border-radius:24px; overflow:hidden;">
+                
+                <!-- HEADER STRIP -->
+                <div style="padding:1.4rem 2rem; background:linear-gradient(135deg, #0b1f17 0%, #163e2e 100%); color:#ffffff; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e4d39;">
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <span style="font-size:1.5rem;">📜</span>
+                        <div>
+                            <h2 style="font-size:1.35rem; font-weight:900; margin:0; color:#F9E07A; letter-spacing:-0.02em;">ZILHAJ Terms of Service</h2>
+                            <p style="font-size:0.76rem; color:rgba(255,255,255,0.85); margin:0.1rem 0 0 0;">Official Pilgrimage Booking Terms &amp; Conditions</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="app.closeModal()" style="background:rgba(255,255,255,0.15); border:none; color:#ffffff; width:34px; height:34px; border-radius:50%; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">✕</button>
+                </div>
+
+                <!-- TERMS BODY CONTENT -->
+                <div style="padding:1.8rem 2.2rem; overflow-y:auto; font-size:0.88rem; line-height:1.75; color:#334155; max-height:calc(85vh - 130px);">
+                    
+                    <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0 0 0.5rem 0;">1. Agreement to Terms</h3>
+                    <p style="margin-bottom:0.9rem;">
+                        By accessing or using <strong>ZILHAJ Umrah &amp; Hajj Travel Platform</strong> (www.zilhaj-travel.com), submitting pilgrimage requests, or booking travel packages, you agree to be bound by these legal Terms of Service and all applicable Saudi Arabian travel, aviation, and immigration laws.
+                    </p>
+
+                    <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">2. Platform Marketplace Role</h3>
+                    <p style="margin-bottom:0.9rem;">
+                        ZILHAJ operates as a premier digital travel marketplace connecting pilgrims with verified, government-licensed Umrah travel agencies. All travel offers, flight schedules, and hotel allocations submitted by agents are subject to license verification and Ministry of Hajj &amp; Umrah regulations.
+                    </p>
+
+                    <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">3. Payments &amp; Cancellations</h3>
+                    <p style="margin-bottom:0.9rem;">
+                        All payments executed through ZILHAJ are secured via certified payment gateways (Razorpay). Cancellations and refunds are governed by the specific fare rules of the selected travel package and Saudi hospitality regulations.
+                    </p>
+
+                    <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:1.2rem 0 0.5rem 0;">4. Contact Legal Support</h3>
+                    <p style="margin-bottom:0.5rem;">For questions regarding these Terms, contact <a href="mailto:info@zilhaj-travel.com" style="color:#2b5e48; font-weight:700;">info@zilhaj-travel.com</a> or call +966 800 123 4567.</p>
+                </div>
+
+                <!-- FOOTER STRIP -->
+                <div style="padding:1rem 2rem; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.78rem; color:#64748b;">© 2024 ZILHAJ Umrah &amp; Hajj Travel. All rights reserved.</span>
+                    <button type="button" onclick="app.closeModal()" style="background:#2b5e48; color:#ffffff; font-weight:800; font-size:0.86rem; padding:0.55rem 1.5rem; border-radius:8px; border:none; cursor:pointer;">Accept Terms</button>
+                </div>
+
+            </div>
+        `);
+
+        const modal = document.getElementById('modalCard');
+        if (modal) {
+            modal.style.maxWidth = '880px';
+            modal.style.width = '90vw';
+            modal.style.padding = '0';
+            modal.style.borderRadius = '24px';
+            modal.style.overflow = 'hidden';
         }
     }
 
