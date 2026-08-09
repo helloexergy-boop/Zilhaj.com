@@ -3046,7 +3046,7 @@ class App {
                 "key": "rzp_test_TNHXpbHGezYnSb",
                 "amount": Math.round(totalAmount * 100),
                 "currency": "INR",
-                "name": "GoExergy Umrah Travels",
+                "name": "ZILHAJ Umrah & Hajj Travel",
                 "description": offer.packageTitle || "Umrah Package Payment",
                 "image": "https://img.icons8.com/color/96/000000/kaaba.png",
                 "handler": (response) => {
@@ -4249,7 +4249,7 @@ class App {
 
                         <!-- Bottom Copyright -->
                         <div style="margin-top: auto; font-size: 0.8rem; color: #94a3b8; font-weight: 500;">
-                            © 2024 Umrah Travels. All rights reserved.
+                            © 2024 ZILHAJ Umrah &amp; Hajj Travel. All rights reserved.
                         </div>
                     </div>
                 ` : `
@@ -4263,7 +4263,10 @@ class App {
                             <div style="width: 36px; height: 36px; background: #235d47; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(35,93,71,0.4);">
                                 🏛️
                             </div>
-                            <span style="font-weight: 800; font-size: 1.25rem; color: #ffffff; letter-spacing: -0.2px;">Umrah Travels</span>
+                            <div style="display:flex; flex-direction:column; line-height:1.05;">
+                                <span style="font-weight: 900; font-size: 1.25rem; color: #ffffff; letter-spacing: 0.5px;">ZILHAJ</span>
+                                <span style="font-size: 0.55rem; font-weight: 800; color: #a7f3d0; letter-spacing: 0.8px; text-transform: uppercase;">UMRAH &amp; HAJJ TRAVEL</span>
+                            </div>
                         </div>
 
                         <!-- Bottom Text & Stars -->
@@ -4584,7 +4587,7 @@ class App {
         }
     }
 
-    showSuccessModal(title = '✦ Logged In Successfully!', message = 'Welcome to Umrah Travels. Your account is verified.') {
+    showSuccessModal(title = '✦ Logged In Successfully!', message = 'Welcome to ZILHAJ Umrah & Hajj Travel. Your account is verified.') {
         this.openModal(`
             <div style="text-align: center; padding: 2.2rem 1.6rem; background: #ffffff; border-radius: 20px;">
                 <!-- Premium Golden Glowing Badge -->
@@ -4996,7 +4999,7 @@ class App {
         }, 50);
 
         // Show success notification modal
-        this.showSuccessModal('✦ Account Registered in MongoDB!', `Welcome to Umrah Travels, ${cleanName}! Your account has been created in MongoDB database. Please log in to continue.`);
+        this.showSuccessModal('✦ Account Registered in MongoDB!', `Welcome to ZILHAJ Umrah & Hajj Travel, ${cleanName}! Your account has been created in MongoDB database. Please log in to continue.`);
     }
 
     async login(email, password) {
@@ -5409,7 +5412,7 @@ class App {
                                                             </div>
                                                         </div>
                                                         <div style="font-size:0.85rem; color:#475569; margin-top:0.5rem; line-height:1.5;">
-                                                            📅 Departure: <strong>${p.departureDateText || '12 AUG'}</strong> | ⏳ <strong>${p.durationDays || 18} Days</strong> | 🏢 ${this.escapeHtml(p.agentName || 'Umrah Travels')}<br>
+                                                            📅 Departure: <strong>${p.departureDateText || '12 AUG'}</strong> | ⏳ <strong>${p.durationDays || 18} Days</strong> | 🏢 ${this.escapeHtml(p.agentName || 'ZILHAJ Travel')}<br>
                                                             🕋 Makkah: <strong>${this.escapeHtml(p.makkahHotelName || 'Manarat Al Misk')}</strong> (${p.distanceToHaramMakkah || 600}m)<br>
                                                             🕌 Madinah: <strong>${this.escapeHtml(p.madinahHotelName || 'Marjan International')}</strong> (${p.distanceToHaramMadinah || 250}m)
                                                         </div>
@@ -5794,7 +5797,7 @@ class App {
             "key": orderData.key,
             "amount": orderData.amount,
             "currency": orderData.currency || "INR",
-            "name": "GoExergy Umrah Travels",
+            "name": "ZILHAJ Umrah & Hajj Travel",
             "description": "Umrah Package Payment",
             "image": "https://img.icons8.com/color/96/000000/kaaba.png",
             "order_id": orderData.orderId,
@@ -6430,7 +6433,7 @@ class App {
     async callGeminiApi(userPrompt) {
         if (!CHATBOT_API_KEY) return null;
         try {
-            const systemContext = `You are the official AI Assistant for GoExergy Umrah & Hajj travel platform.
+            const systemContext = `You are the official AI Assistant for ZILHAJ Umrah & Hajj Travel platform.
 CRITICAL GUARDRAILS & RULES:
 1. ONLY answer queries directly related to Umrah, Hajj, Islamic pilgrimage travel, hotel accommodations in Makkah & Madinah, visa processing, flights, Nusuk permits, or GoExergy platform services.
 2. If the user query is about UNRELATED or PROHIBITED topics (e.g. coding, general sports, politics, entertainment, general math, illegal content, weather outside KSA), you MUST politely decline:
