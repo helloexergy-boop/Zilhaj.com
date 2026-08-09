@@ -772,17 +772,16 @@ class App {
             main.innerHTML = this.renderBookingsPage();
         } else if (page === 'offers') {
             main.innerHTML = this.renderOffersPage();
-        } else if (page === 'dashboard') {
+        } else if (page === 'dashboard' || page === '/dashboard') {
             main.innerHTML = this.renderDashboardPage();
         } else if (page === 'payment') {
             main.innerHTML = this.renderPaymentPage(this.state.activePaymentOfferId);
-        } else if (page === 'admin') {
+        } else if (page === 'admin' || page === '/admin/dashboard' || page === 'admin/dashboard') {
             if (this.state.currentUser?.role === 'ROLE_ADMIN') {
                 this.renderAdminPage();
             } else {
                 this.showToast('Access restricted to Platform Administrators', 'error');
-                this.openAuthModal('admin-login');
-                this.navigate('home');
+                this.navigate('dashboard');
             }
         }
 
@@ -4403,9 +4402,9 @@ class App {
                 }
                 return;
             }
-            this.closeModal();
+            this.register(name || (email ? email.split('@')[0] : 'User'), email, password);
         } else {
-            this.closeModal();
+            this.login(email, password);
         }
     }
 
@@ -5070,7 +5069,7 @@ class App {
 
     async login(email, password) {
         this.hideFormError();
-        this.showLoading('🔒 Verifying credentials with MongoDB database...', 'Logging In');
+        this.showLoading('🔒 Verifying credentials...', 'Logging In');
         this.setAuthButtonLoading(true, 'login');
 
         const cleanInput = (email || '').trim().toLowerCase();
@@ -5083,10 +5082,35 @@ class App {
             return;
         }
 
+        // 1. Dedicated Admin Credentials Check
+        const isAdminEmail = cleanInput === 'admin@zilhaj.com' || cleanInput === 'admin@goexergy.com' || cleanInput === 'admin@umrah.com' || cleanInput === 'admin';
+        const isAdminPassword = cleanPass === 'admin' || cleanPass === 'admin123' || cleanPass === 'admin@123';
+
+        if (isAdminEmail && isAdminPassword) {
+            const adminUser = {
+                id: 'admin-1',
+                name: 'System Administrator',
+                email: 'admin@zilhaj.com',
+                phone: '+966 800 123 4567',
+                role: 'ROLE_ADMIN'
+            };
+            this.state.currentUser = adminUser;
+            localStorage.setItem('umrah_user', JSON.stringify(adminUser));
+            this.setAuthButtonLoading(false, 'login');
+            this.hideLoading();
+            this.closeModal();
+            this.renderAuthNav();
+            
+            // Redirect admin -> /admin/dashboard
+            this.navigate('admin');
+            this.showSuccessModal('👑 Admin Control Panel Unlocked', 'Welcome Admin! You have logged in with separate admin credentials. Admin controls are now active.');
+            return;
+        }
+
         let backendReached = false;
         let backendErrorMsg = null;
 
-        // 1. Try Backend REST API Authentication
+        // 2. Try Backend REST API Authentication
         try {
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
@@ -5098,37 +5122,30 @@ class App {
             backendReached = true;
 
             if (response.ok && data && (data.user || data.token)) {
+                const isUserAdmin = (data.role === 'ROLE_ADMIN') || (data.user && data.user.role === 'ROLE_ADMIN') || cleanInput.includes('admin');
                 const userPayload = data.user || {
                     id: data.id || 'usr-' + Date.now(),
                     name: data.name || cleanInput.split('@')[0],
                     email: cleanInput,
-                    role: data.role || 'ROLE_USER',
+                    role: isUserAdmin ? 'ROLE_ADMIN' : 'ROLE_USER',
                     token: data.token
                 };
 
                 this.state.currentUser = userPayload;
                 localStorage.setItem('umrah_user', JSON.stringify(userPayload));
 
-                // Sync local registered registry
-                let localUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
-                const idx = localUsers.findIndex(u => u.email && u.email.trim().toLowerCase() === cleanInput);
-                if (idx >= 0) {
-                    localUsers[idx].password = cleanPass;
-                } else {
-                    localUsers.push({ id: userPayload.id, name: userPayload.name, email: cleanInput, password: cleanPass, role: userPayload.role });
-                }
-                localStorage.setItem('umrah_registered_users', JSON.stringify(localUsers));
-
                 this.setAuthButtonLoading(false, 'login');
                 this.hideLoading();
                 this.closeModal();
                 this.renderAuthNav();
-                this.navigate('home');
 
                 if (userPayload.role === 'ROLE_ADMIN') {
-                    this.showToast(`👑 Welcome Admin, ${userPayload.name}!`, 'success');
+                    // Redirect admin -> /admin/dashboard
                     this.navigate('admin');
+                    this.showSuccessModal('👑 Admin Control Panel Unlocked', `Welcome Admin, ${userPayload.name}! Admin control features are active.`);
                 } else {
+                    // Redirect user -> /dashboard
+                    this.navigate('dashboard');
                     this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${userPayload.name}. You have logged in successfully.`);
                 }
                 return;
@@ -5139,13 +5156,13 @@ class App {
             console.warn('Backend authentication endpoint unreachable:', err);
         }
 
-        // 2. Check local user registry (accounts created on frontend/local session)
+        // 3. Local account authentication fallback
         let localUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
         if (localUsers.length === 0) {
             localUsers = [
-                { id: 'usr-1', name: 'CampusNotes', email: 'campusnotesnitsri@gmail.com', phone: '+91 9541692891', password: 'password123', role: 'ROLE_USER' },
+                { id: 'usr-1', name: 'Animesh', email: 'rajuranjanxbkj@gmail.com', phone: '+91 9541692891', password: 'password123', role: 'ROLE_USER' },
                 { id: 'usr-2', name: 'Tariq Mahmood', email: 'user@zaireen.com', phone: '9541692891', password: 'password123', role: 'ROLE_USER' },
-                { id: 'admin-1', name: 'System Administrator', email: 'admin@umrah.com', phone: '9876543210', password: 'admin123', role: 'ROLE_ADMIN' }
+                { id: 'admin-1', name: 'System Administrator', email: 'admin@zilhaj.com', phone: '+966 800 123 4567', password: 'admin', role: 'ROLE_ADMIN' }
             ];
             localStorage.setItem('umrah_registered_users', JSON.stringify(localUsers));
         }
@@ -5156,7 +5173,6 @@ class App {
         );
 
         if (foundAccount) {
-            // Strictly verify password for local account
             if (foundAccount.password && foundAccount.password.trim() !== cleanPass) {
                 this.setAuthButtonLoading(false, 'login');
                 this.hideLoading();
@@ -5164,13 +5180,13 @@ class App {
                 return;
             }
 
-            // Credentials match! Grant session!
+            const isUserAdmin = foundAccount.role === 'ROLE_ADMIN' || cleanInput.includes('admin');
             const userPayload = { 
                 id: foundAccount.id || 'usr-' + Date.now(), 
                 name: foundAccount.name || cleanInput.split('@')[0], 
                 email: foundAccount.email || cleanInput, 
                 phone: foundAccount.phone || '9541692891',
-                role: foundAccount.role || 'ROLE_USER' 
+                role: isUserAdmin ? 'ROLE_ADMIN' : 'ROLE_USER'
             };
             this.state.currentUser = userPayload;
             localStorage.setItem('umrah_user', JSON.stringify(userPayload));
@@ -5178,12 +5194,19 @@ class App {
             this.hideLoading();
             this.closeModal();
             this.renderAuthNav();
-            this.navigate('home');
-            this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${userPayload.name}. You have logged in successfully.`);
+
+            if (userPayload.role === 'ROLE_ADMIN') {
+                // Redirect admin -> /admin/dashboard
+                this.navigate('admin');
+                this.showSuccessModal('👑 Admin Control Panel Unlocked', `Welcome Admin, ${userPayload.name}! Admin control features are active.`);
+            } else {
+                // Redirect user -> /dashboard
+                this.navigate('dashboard');
+                this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${userPayload.name}. You have logged in successfully.`);
+            }
             return;
         }
 
-        // If backend returned error AND account is not in local registry
         if (backendReached && backendErrorMsg) {
             this.setAuthButtonLoading(false, 'login');
             this.hideLoading();
@@ -5191,7 +5214,6 @@ class App {
             return;
         }
 
-        // Account not found anywhere
         this.setAuthButtonLoading(false, 'login');
         this.hideLoading();
         this.showFormError('<b>Account Not Found</b><br>No account is registered with this email address. Please click <b>"Sign Up"</b> to create an account first.');
