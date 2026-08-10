@@ -43,6 +43,26 @@ class App {
     }
 
     async init() {
+        // Automatically sanitize and normalize any cached high-price objects in localStorage to testing fares (₹5)
+        ['umrah_user_offers', 'umrah_requirements', 'umrah_packages', 'umrah_my_bookings'].forEach(key => {
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) {
+                    let data = JSON.parse(raw);
+                    if (Array.isArray(data)) {
+                        data.forEach(item => {
+                            if (item.price > 100) item.price = 5;
+                            if (item.discountedPrice > 100) item.discountedPrice = 5;
+                            if (item.originalPrice > 100) item.originalPrice = 10;
+                            if (item.totalPrice > 100) item.totalPrice = 5;
+                            if (item.maxBudget > 100) item.maxBudget = 5;
+                        });
+                        localStorage.setItem(key, JSON.stringify(data));
+                    }
+                }
+            } catch (e) {}
+        });
+
         // Handle Google OAuth callback URL parameters (Step 2 & 5)
         if (window.location.hash && window.location.hash.includes('google_auth_success')) {
             try {
@@ -2684,8 +2704,12 @@ class App {
             category: 'Premium Service',
             makkahHotel: 'Swissotel Makkah (250m from Kaaba)',
             madinahHotel: 'Pullman Zamzam Madinah (150m from Nabawi)',
-            discountedPrice: 118750
+            discountedPrice: 5
         };
+
+        const rawOfferPrice = o.discountedPrice || o.price || 5;
+        const offerPrice = (rawOfferPrice > 0 && rawOfferPrice <= 100) ? rawOfferPrice : 5;
+        o.discountedPrice = offerPrice;
 
         const req = allReqs.find(r => r.id === o.requirementId) || allReqs[0] || {
             preferredDepartureDate: '2026-08-13',
@@ -2695,7 +2719,7 @@ class App {
             fullAddress: 'House 45, Rajbagh Main Road, Srinagar, Jammu and Kashmir'
         };
 
-        const totalPayable = (o.discountedPrice || 118750) * (req.travelersCount || 2);
+        const totalPayable = offerPrice;
 
         return `
             <div style="background:#f4f9f5; min-height:100vh; padding:6rem 0 5rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
