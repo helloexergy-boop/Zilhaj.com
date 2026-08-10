@@ -2504,7 +2504,9 @@ class App {
                             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1.5rem;">
                                 <div>
                                     <div style="display:flex; align-items:center; gap:0.9rem; margin-bottom:0.4rem;">
-                                        <div style="font-size:2.4rem;">🕋</div>
+                                        <div style="width:58px; height:58px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#FFB74D; border:2px solid #ffffff; box-shadow:0 4px 12px rgba(0,0,0,0.25); flex-shrink:0;">
+                                            <img src="/logo.png" alt="Zilhaj.com Logo" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
+                                        </div>
                                         <div>
                                             <h1 style="font-size:2.2rem; font-weight:900; color:#ffffff; margin:0; letter-spacing:-0.5px; line-height:1.1;">ZILHAJ.COM UMRAH PLATFORM</h1>
                                             <div style="font-size:0.78rem; color:#d4af37; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; margin-top:0.4rem;">OFFICIAL TRAVEL BOOKING VOUCHER &amp; ESCROW RECEIPT</div>
@@ -6167,7 +6169,10 @@ class App {
                     </div>
 
                     <!-- Brand Logo -->
-                    <div style="display:flex; align-items:center; gap:0.4rem; font-weight:900; font-size:1.45rem; color:#166534;">
+                    <div style="display:flex; align-items:center; gap:0.55rem; font-weight:900; font-size:1.45rem; color:#166534;">
+                        <div style="width:36px; height:36px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#FFB74D; border:1.5px solid #000000; flex-shrink:0;">
+                            <img src="/logo.png" alt="Zilhaj.com Logo" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
+                        </div>
                         <span>Zilhaj.com</span>
                     </div>
                 </div>

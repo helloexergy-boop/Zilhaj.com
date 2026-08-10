@@ -1291,8 +1291,10 @@ const handleGeneratePDFInvoice = async (req, res) => {
 
         <div class="hero-banner">
             <div>
-                <div style="display:flex; align-items:center; gap:0.6rem;">
-                    <span style="font-size:2rem;">🕋</span>
+                <div style="display:flex; align-items:center; gap:0.9rem;">
+                    <div style="width:52px; height:52px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#FFB74D; border:2px solid #ffffff; box-shadow:0 4px 12px rgba(0,0,0,0.25); flex-shrink:0;">
+                        <img src="/logo.png" alt="Zilhaj.com Logo" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
+                    </div>
                     <div>
                         <h1 style="font-size:1.8rem; font-weight:900; margin:0; letter-spacing:-0.5px; color:#ffffff;">ZILHAJ.COM UMRAH PLATFORM</h1>
                         <div style="font-size:0.75rem; color:#d4af37; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-top:0.2rem;">OFFICIAL TRAVEL BOOKING VOUCHER &amp; RECEIPT</div>
