@@ -75,9 +75,9 @@ class App {
                 {
                     id: 'pkg-1',
                     agentName: 'UMRAH TRAVELS',
-                    title: '18-Day Deluxe Umrah Package',
+                    title: '18-Day Deluxe Umrah Package (Test Fare: ₹5)',
                     description: 'Journey of Faith, Comfort & Blessings. Complete 18 days sacred journey featuring top 5-star hotels near Haram, return air tickets, Indian buffet meals, and guided ziyarat.',
-                    price: 125000,
+                    price: 5,
                     durationDays: 18,
                     distanceToHaramMakkah: 600,
                     distanceToHaramMadinah: 250,
@@ -1047,7 +1047,7 @@ class App {
             ? pkg.imageUrls[0]
             : 'https://images.unsplash.com/photo-1591604466107-ec97de577aff';
 
-        const originalPrice = pkg.price ? Math.round(pkg.price * 1.15) : 145000;
+        const originalPrice = pkg.price ? Math.round(pkg.price * 2) : 10;
 
         return `
             <div class="travel-card">
@@ -2796,13 +2796,16 @@ class App {
                                     <div id="paySection-upi">
                                         <div style="background:#f8fafc; border-radius:14px; padding:1.2rem; border:1px solid #e2e8f0; text-align:center; margin-bottom:1.2rem;">
                                             <div style="font-size:0.82rem; font-weight:800; color:#2e7d32; margin-bottom:0.7rem;">SCAN QR CODE WITH ANY UPI APP</div>
-                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=zilhaj@upi&pn=Zilhaj.com%20Umrah&am=${totalPayable}&cu=INR" alt="Payment QR Code" style="width:160px; height:160px; border-radius:12px; border:2px solid #a5d6a7; padding:6px; background:#ffffff; box-shadow:0 4px 12px rgba(0,0,0,0.04);" />
-                                            <div style="font-size:0.78rem; color:#64748b; margin-top:0.5rem;">Accepts Google Pay, PhonePe, Paytm, BHIM &amp; Banking Apps</div>
+                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi%3A%2F%2Fpay%3Fpa%3D9541692891%40ybl%26pn%3DZilhajTravels%26am%3D${totalPayable}.00%26cu%3DINR%26mc%3D4722" alt="Payment QR Code" style="width:170px; height:170px; border-radius:12px; border:2px solid #a5d6a7; padding:6px; background:#ffffff; box-shadow:0 4px 12px rgba(0,0,0,0.04);" />
+                                            <div style="font-size:0.78rem; color:#64748b; margin-top:0.5rem; font-weight:600;">Accepts Google Pay, PhonePe, Paytm, BHIM &amp; Banking Apps</div>
+                                            <button type="button" onclick="app.processPayment('${o.id}')" style="margin-top:0.8rem; background:#047857; color:#ffffff; font-weight:800; font-size:0.82rem; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; box-shadow:0 2px 8px rgba(4,120,87,0.25);">
+                                                ⚡ Instant QR Scan Test Pay (₹${totalPayable})
+                                            </button>
                                         </div>
 
                                         <div style="display:flex; flex-direction:column; gap:0.4rem;">
                                             <label style="font-size:0.78rem; font-weight:800; color:#475569;">OR ENTER UPI VPA / VIRTUAL ID</label>
-                                            <input type="text" id="upiVpaInput" placeholder="e.g. 9541692891@ybl or user@okaxis" value="user@okaxis" style="width:100%; padding:0.7rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:700; font-size:0.92rem;" />
+                                            <input type="text" id="upiVpaInput" placeholder="e.g. 9541692891@ybl or user@okaxis" value="9541692891@ybl" style="width:100%; padding:0.7rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:700; font-size:0.92rem;" />
                                         </div>
                                     </div>
 
@@ -2899,9 +2902,10 @@ class App {
         let offer = allOffers.find(o => o.id === offerId) || {
             id: offerId || '#OFF-891',
             packageTitle: 'Al Huda Group - Umrah Package',
-            discountedPrice: 118750
+            discountedPrice: 5
         };
-        const totalAmount = (offer.discountedPrice || 118750) * 2;
+        const rawPrice = offer.discountedPrice || offer.price || 5;
+        const totalAmount = (rawPrice > 0 && rawPrice <= 100) ? rawPrice : 5;
         const bookingRef = 'BK-' + Date.now().toString().slice(-6);
 
         if (typeof window.Razorpay !== 'undefined') {
@@ -2910,8 +2914,35 @@ class App {
                 "amount": Math.round(totalAmount * 100),
                 "currency": "INR",
                 "name": "ZILHAJ Umrah & Hajj Travel",
-                "description": offer.packageTitle || "Umrah Package Payment",
+                "description": offer.packageTitle || "Umrah Test Payment",
                 "image": "https://img.icons8.com/color/96/000000/kaaba.png",
+                "config": {
+                    "display": {
+                        "blocks": {
+                            "utib": {
+                                "name": "Pay via UPI / QR Code (Google Pay, PhonePe, Paytm)",
+                                "instruments": [
+                                    { "method": "upi" }
+                                ]
+                            },
+                            "other": {
+                                "name": "Other Payment Options (Cards / NetBanking)",
+                                "instruments": [
+                                    { "method": "card" },
+                                    { "method": "netbanking" }
+                                ]
+                            }
+                        },
+                        "sequence": ["block.utib", "block.other"],
+                        "preferences": { show_default_blocks: true }
+                    }
+                },
+                "method": {
+                    "upi": true,
+                    "card": true,
+                    "netbanking": true,
+                    "wallet": true
+                },
                 "handler": (response) => {
                     let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
                     const newBooking = {
@@ -2931,15 +2962,15 @@ class App {
 
                     this.showSuccessModal(
                         '🎉 Booking Confirmed & Payment Successful!',
-                        `Payment ID: <strong>${response.razorpay_payment_id}</strong><br>Congratulations! Your Umrah trip booking (Ref: <strong>${bookingRef}</strong>) is confirmed. Your instant PDF voucher invoice is ready to download.`
+                        `Payment ID: <strong>${response.razorpay_payment_id}</strong><br>Congratulations! Your Umrah trip booking (Ref: <strong>${bookingRef}</strong>) for ₹${totalAmount} is confirmed. Your instant PDF voucher invoice is ready to download.`
                     );
                     this.downloadInvoice(bookingRef);
                     this.navigate('dashboard');
                 },
                 "prefill": {
-                    "name": this.state?.currentUser?.name || "Pilgrim",
-                    "email": this.state?.currentUser?.email || "pilgrim@umrah.com",
-                    "contact": "9876543210"
+                    "name": this.state?.currentUser?.name || "Pilgrim User",
+                    "email": this.state?.currentUser?.email || "pilgrim@gmail.com",
+                    "contact": "9541692891"
                 },
                 "theme": {
                     "color": "#047857"
@@ -2947,7 +2978,7 @@ class App {
             };
             const rzp = new window.Razorpay(options);
             rzp.on('payment.failed', (resp) => {
-                this.showToast('Payment failed: ' + (resp.error.description || 'Transaction declined'), 'error');
+                this.showToast('Payment failed: ' + (resp?.error?.description || 'Transaction declined'), 'error');
             });
             rzp.open();
             return;
