@@ -41,8 +41,15 @@ public class JwtUtils {
     public String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
+        return generateTokenFromUsername(userPrincipal.getEmail());
+    }
+
+    /**
+     * Generates a signed JWT token string directly from username/email.
+     */
+    public String generateTokenFromUsername(String username) {
         return Jwts.builder()
-                .setSubject((userPrincipal.getEmail()))
+                .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

@@ -5336,6 +5336,20 @@ p, body {
     .no-print {
         display: none !important;
     }
+/* User Profile Avatar Image in Navbar */
+.nav-user-avatar-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #2e7d32;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nav-user-avatar-img:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
 }
 
 

@@ -33,8 +33,17 @@ public class User {
     // Role assigned to the user: ROLE_USER, ROLE_AGENT, or ROLE_ADMIN
     private String role;
 
+    // Google OAuth 2.0 unique subject/user ID (null for email/password users)
+    private String googleId;
+
+    // Permanent profile picture URL stored in database
+    private String profilePictureUrl;
+
     // Timestamp when user registered on the platform
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    // Timestamp when user profile was last updated
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     // Default no-argument constructor required by Spring Data MongoDB deserialization
     public User() {}
@@ -47,6 +56,18 @@ public class User {
         this.phone = phone;
         this.role = role;
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // Constructor for Google OAuth 2.0 User Creation
+    public User(String googleId, String name, String email, String profilePictureUrl, String role) {
+        this.googleId = googleId;
+        this.name = name;
+        this.email = email;
+        this.profilePictureUrl = profilePictureUrl;
+        this.role = role;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     // Getters and Setters for all fields
@@ -68,6 +89,15 @@ public class User {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
+    public String getGoogleId() { return googleId; }
+    public void setGoogleId(String googleId) { this.googleId = googleId; }
+
+    public String getProfilePictureUrl() { return profilePictureUrl; }
+    public void setProfilePictureUrl(String profilePictureUrl) { this.profilePictureUrl = profilePictureUrl; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

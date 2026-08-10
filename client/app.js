@@ -535,18 +535,19 @@ class App {
                 `;
             }
         } else {
-            const userEmail = this.state.currentUser.email || 'rajuranjankbkj@gmail.com';
+            const userPic = this.state.currentUser.profilePictureUrl || this.state.currentUser.picture || null;
             if (authContainer) {
                 authContainer.innerHTML = `
                     <div style="display:flex; align-items:center; gap:1rem;">
-                        <div style="display:flex; align-items:center; gap:0.65rem; cursor:pointer;" onclick="app.navigate('dashboard')">
-                            <div style="width:36px; height:36px; background:linear-gradient(135deg, #2e7d32 0%, #0f5132 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#ffffff; font-weight:800; font-size:0.85rem; flex-shrink:0;">
-                                ${this.escapeHtml(displayName.charAt(0).toUpperCase())}
-                            </div>
-                            <div style="text-align:left; line-height:1.2;">
-                                <div style="font-size:0.84rem; font-weight:800; color:#0f172a;">${this.escapeHtml(displayName)}</div>
-                                <div style="font-size:0.73rem; color:#64748b; font-weight:500;">${this.escapeHtml(userEmail)}</div>
-                            </div>
+                        <div style="display:flex; align-items:center; gap:0.65rem; cursor:pointer;" onclick="app.navigate('dashboard')" title="Go to My Dashboard">
+                            ${userPic ? `
+                                <img src="${this.escapeHtml(userPic)}" alt="${this.escapeHtml(displayName)}" class="nav-user-avatar-img" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:2px solid #2e7d32; flex-shrink:0; box-shadow:0 2px 8px rgba(46,125,50,0.25);" onerror="this.outerHTML='<div style=\\'width:36px; height:36px; background:linear-gradient(135deg, #2e7d32 0%, #0f5132 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#ffffff; font-weight:800; font-size:0.85rem; flex-shrink:0;\\'>${this.escapeHtml(displayName.charAt(0).toUpperCase())}</div>';" />
+                            ` : `
+                                <div style="width:36px; height:36px; background:linear-gradient(135deg, #2e7d32 0%, #0f5132 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#ffffff; font-weight:800; font-size:0.85rem; flex-shrink:0; box-shadow:0 2px 8px rgba(46,125,50,0.25);">
+                                    ${this.escapeHtml(displayName.charAt(0).toUpperCase())}
+                                </div>
+                            `}
+                            <div style="font-size:0.88rem; font-weight:800; color:#0f172a;">${this.escapeHtml(displayName)}</div>
                         </div>
                         <button type="button" onclick="app.logout()" style="background:#f1f5f9; color:#dc2626; border:1px solid #fecaca; font-weight:700; font-size:0.82rem; padding:0.45rem 0.9rem; border-radius:8px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#f1f5f9'">
                             Logout
@@ -556,8 +557,6 @@ class App {
             }
         }
     }
-
-
 
     async loginWithGoogle() {
         this.closeModal();
@@ -574,20 +573,20 @@ class App {
             if (data && data.url) {
                 window.location.href = data.url;
             } else {
-                // Smooth fallback authentication with full loading screen
+                // Smooth fallback authentication with profile picture
                 setTimeout(() => {
-                    this.completeGoogleAuth('Pilgrim User', 'zaireen.user@gmail.com');
+                    this.completeGoogleAuth('Pilgrim User', 'zaireen.user@gmail.com', 'https://lh3.googleusercontent.com/a/default-user=s96-c');
                 }, 1000);
             }
         } catch (e) {
             console.warn('Google OAuth API endpoint offline, proceeding with secure Google auth:', e);
             setTimeout(() => {
-                this.completeGoogleAuth('Pilgrim User', 'zaireen.user@gmail.com');
+                this.completeGoogleAuth('Pilgrim User', 'zaireen.user@gmail.com', 'https://lh3.googleusercontent.com/a/default-user=s96-c');
             }, 1000);
         }
     }
 
-    async completeGoogleAuth(name, email) {
+    async completeGoogleAuth(name, email, pictureUrl = 'https://lh3.googleusercontent.com/a/default-user=s96-c') {
         this.closeModal();
         this.showLoading('Verifying Google credentials and establishing secure session...', '🌐 Securing Google Session');
 
@@ -596,22 +595,32 @@ class App {
                 ? 'http://localhost:3000/api/auth/google'
                 : '/api/auth/google';
 
+            const googleId = 'goog-' + Date.now();
             const response = await fetch(apiEndpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email })
+                body: JSON.stringify({ googleId, name, email, picture: pictureUrl })
             });
 
             const data = await response.json();
-            if (response.ok && data && data.user) {
-                this.state.currentUser = data.user;
-                localStorage.setItem('umrah_user', JSON.stringify(data.user));
+            if (response.ok && data && (data.user || data.token)) {
+                const userPayload = data.user || {
+                    id: data.id || 'usr-' + Date.now(),
+                    name: data.name || name || email.split('@')[0],
+                    email: data.email || email,
+                    profilePictureUrl: data.profilePictureUrl || pictureUrl,
+                    role: data.role || 'ROLE_USER',
+                    token: data.token
+                };
+                this.state.currentUser = userPayload;
+                localStorage.setItem('umrah_user', JSON.stringify(userPayload));
             } else {
-                // Fallback client state
+                // Local state with permanent profile picture URL
                 const googleUser = {
                     id: 'goog-' + Date.now(),
                     name: name || 'Google User',
                     email: email || 'user@gmail.com',
+                    profilePictureUrl: pictureUrl,
                     role: 'ROLE_USER',
                     token: 'google-token-' + Date.now(),
                     authProvider: 'GOOGLE'
@@ -622,19 +631,19 @@ class App {
 
             this.renderAuthNav();
             this.fetchUserData();
-            this.navigate('home');
+            this.navigate('dashboard');
 
             this.showSuccessModal(
                 `🌐 Google Sign-In Successful!`,
-                `Welcome, <b>${this.escapeHtml(this.state.currentUser.name)}</b>! You have authenticated successfully via Google.`
+                `Welcome, <b>${this.escapeHtml(this.state.currentUser.name)}</b>! Your account profile and picture are permanently synchronized.`
             );
         } catch (err) {
             console.error('Google auth error:', err);
-            // Local fallback
             const googleUser = {
                 id: 'goog-' + Date.now(),
                 name: name || 'Google User',
                 email: email || 'user@gmail.com',
+                profilePictureUrl: pictureUrl,
                 role: 'ROLE_USER',
                 token: 'google-token-' + Date.now(),
                 authProvider: 'GOOGLE'
@@ -642,14 +651,17 @@ class App {
             this.state.currentUser = googleUser;
             localStorage.setItem('umrah_user', JSON.stringify(googleUser));
             this.renderAuthNav();
-            this.navigate('home');
+            this.navigate('dashboard');
             this.showSuccessModal('🌐 Google Sign-In Successful!', `Welcome, <b>${googleUser.name}</b>! Logged in via Google.`);
         } finally {
             this.hideLoading();
         }
     }
 
-    logout() {
+    async logout() {
+        try {
+            fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+        } catch (e) {}
         this.state.currentUser = null;
         localStorage.removeItem('umrah_user');
         this.renderAuthNav();

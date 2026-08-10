@@ -111,14 +111,67 @@ public class AuthController {
             String role = userDetails.getAuthorities().stream()
                     .findFirst().map(item -> item.getAuthority()).orElse("ROLE_USER");
 
+            User dbUser = userRepository.findById(userDetails.getId()).orElse(null);
+            String picUrl = dbUser != null ? dbUser.getProfilePictureUrl() : null;
+
             return ResponseEntity.ok(new JwtResponse(jwt,
                     userDetails.getId(),
                     userDetails.getName(),
                     userDetails.getEmail(),
-                    role));
+                    role,
+                    picUrl));
         } catch (Exception e) {
             return ResponseEntity.status(401).body(new MessageResponse("Invalid credentials or user not found"));
         }
+    }
+
+    /**
+     * POST /api/auth/google
+     * Handles Google OAuth 2.0 authentication. Creates or updates user record with permanent google_id, email, name, and profile_picture_url.
+     */
+    @PostMapping("/google")
+    public ResponseEntity<?> googleAuthenticate(@RequestBody java.util.Map<String, String> payload) {
+        String googleId = payload.get("googleId");
+        String email = payload.get("email");
+        String name = payload.get("name");
+        String picture = payload.get("picture");
+
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Email is required for Google OAuth"));
+        }
+
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            user = new User(googleId, name != null ? name : email.split("@")[0], email, picture, "ROLE_USER");
+        } else {
+            if (googleId != null && !googleId.isBlank()) user.setGoogleId(googleId);
+            if (name != null && !name.isBlank()) user.setName(name);
+            if (picture != null && !picture.isBlank()) user.setProfilePictureUrl(picture);
+            user.setUpdatedAt(java.time.LocalDateTime.now());
+        }
+
+        User savedUser = userRepository.save(user);
+
+        String token = jwtUtils.generateTokenFromUsername(savedUser.getEmail());
+
+        return ResponseEntity.ok(new JwtResponse(
+                token,
+                savedUser.getId(),
+                savedUser.getName(),
+                savedUser.getEmail(),
+                savedUser.getRole(),
+                savedUser.getProfilePictureUrl()
+        ));
+    }
+
+    /**
+     * POST /api/auth/logout
+     * Revokes session on client logout.
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser() {
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok(new MessageResponse("Logged out successfully"));
     }
 
     /**
