@@ -1293,7 +1293,7 @@ const handleGeneratePDFInvoice = async (req, res) => {
             <div>
                 <div style="display:flex; align-items:center; gap:0.9rem;">
                     <div style="width:52px; height:52px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#FFB74D; border:2px solid #ffffff; box-shadow:0 4px 12px rgba(0,0,0,0.25); flex-shrink:0;">
-                        <img src="/logo.png" alt="Zilhaj.com Logo" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
+                        <img src="logo.png" onerror="this.onerror=null;this.src='images/logo.png';" alt="Zilhaj.com Logo" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
                     </div>
                     <div>
                         <h1 style="font-size:1.8rem; font-weight:900; margin:0; letter-spacing:-0.5px; color:#ffffff;">ZILHAJ.COM UMRAH PLATFORM</h1>

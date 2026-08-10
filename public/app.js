@@ -2505,7 +2505,7 @@ class App {
                                 <div>
                                     <div style="display:flex; align-items:center; gap:0.9rem; margin-bottom:0.4rem;">
                                         <div style="width:58px; height:58px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#FFB74D; border:2px solid #ffffff; box-shadow:0 4px 12px rgba(0,0,0,0.25); flex-shrink:0;">
-                                            <img src="/logo.png" alt="Zilhaj.com Logo" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
+                                            <img src="logo.png" onerror="this.onerror=null;this.src='images/logo.png';" alt="Zilhaj.com Logo" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
                                         </div>
                                         <div>
                                             <h1 style="font-size:2.2rem; font-weight:900; color:#ffffff; margin:0; letter-spacing:-0.5px; line-height:1.1;">ZILHAJ.COM UMRAH PLATFORM</h1>
@@ -6171,7 +6171,7 @@ class App {
                     <!-- Brand Logo -->
                     <div style="display:flex; align-items:center; gap:0.55rem; font-weight:900; font-size:1.45rem; color:#166534;">
                         <div style="width:36px; height:36px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#FFB74D; border:1.5px solid #000000; flex-shrink:0;">
-                            <img src="/logo.png" alt="Zilhaj.com Logo" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
+                            <img src="logo.png" onerror="this.onerror=null;this.src='images/logo.png';" alt="Zilhaj.com Logo" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
                         </div>
                         <span>Zilhaj.com</span>
                     </div>
