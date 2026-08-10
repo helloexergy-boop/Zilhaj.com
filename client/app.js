@@ -2449,6 +2449,12 @@ class App {
         }
     }
 
+    downloadInvoice(bookingId) {
+        const id = bookingId || 'BK-048846';
+        const targetUrl = (typeof API_BASE !== 'undefined' ? API_BASE : '/api') + '/invoice/' + id + '?format=pdf';
+        window.open(targetUrl, '_blank');
+    }
+
     viewBookingVoucher(bookingId) {
         let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
         let b = allBookings.find(item => item.id === bookingId) || {
@@ -2477,8 +2483,11 @@ class App {
                         <span>OFFICIAL SAUDI MINISTRY REGISTERED E-VOUCHER</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:0.8rem;">
+                        <a href="${typeof API_BASE !== 'undefined' ? API_BASE : '/api'}/invoice/${b.id || 'BK-048846'}?format=pdf" target="_blank" style="background:#047857; color:#ffffff; font-weight:800; border:none; padding:0.6rem 1.4rem; border-radius:10px; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem; text-decoration:none; box-shadow:0 4px 14px rgba(4,120,87,0.25);">
+                            <span>📥</span> <span>Download Raw PDF</span>
+                        </a>
                         <button type="button" onclick="window.print()" style="background:#166534; color:#ffffff; font-weight:800; border:none; padding:0.6rem 1.4rem; border-radius:10px; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem; box-shadow:0 4px 14px rgba(22,101,52,0.25); transition:all 0.2s;" onmouseover="this.style.background='#14532d'" onmouseout="this.style.background='#166534'">
-                            <span>🖨️</span> <span>Print / Save as PDF</span>
+                            <span>🖨️</span> <span>Print / Save PDF</span>
                         </button>
                         <button type="button" onclick="app.closeModal()" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-weight:700; padding:0.6rem 1.2rem; border-radius:10px; font-size:0.88rem; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
                             ✕ Close
