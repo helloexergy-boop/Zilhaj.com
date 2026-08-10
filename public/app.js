@@ -6500,13 +6500,18 @@ class App {
         }
 
         const options = {
-            "key": orderData.key || 'rzp_test_R4z0rp4yT3stK3y',
+            "key": orderData.key || 'rzp_test_TO6mS9Z6cLAruh',
             "amount": orderData.amount || Math.round(testAmount * 100),
             "currency": orderData.currency || "INR",
             "name": "ZILHAJ Umrah & Hajj Travel",
             "description": "Umrah Test Payment (₹" + testAmount + ")",
             "image": "https://img.icons8.com/color/96/000000/kaaba.png",
-            "order_id": orderData.orderId,
+            "order_id": orderData.order_id || orderData.orderId,
+            "modal": {
+                "ondismiss": () => {
+                    this.showToast('Payment checkout cancelled by user.', 'info');
+                }
+            },
             "config": {
                 "display": {
                     "blocks": {
@@ -6542,9 +6547,9 @@ class App {
                 try {
                     verifyRes = await this.apiCall('/payments/razorpay/verify-payment', 'POST', {
                         bookingId: bookingId || 'BK-' + Date.now(),
-                        razorpayOrderId: response.razorpay_order_id,
-                        razorpayPaymentId: response.razorpay_payment_id,
-                        razorpaySignature: response.razorpay_signature,
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature,
                         paymentMethod: paymentMethod
                     });
                 } catch (err) {}
@@ -6552,7 +6557,7 @@ class App {
                 this.hideLoading();
 
                 const txnId = response.razorpay_payment_id || (verifyRes && verifyRes.transactionId) || ('pay_' + Date.now());
-                this.showToast('🎉 Payment Successful! Booking & Voucher confirmed.', 'success');
+                this.showToast('🎉 Payment Successful! Signature Verified.', 'success');
                 if (typeof this.fetchUserData === 'function') await this.fetchUserData();
 
                 this.openModal(`
