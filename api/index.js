@@ -106,6 +106,17 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'UP', service: 'Zilhaj.com Umrah Backend API', timestamp: new Date() });
 });
 
+// SITEMAP & ROBOTS.TXT ENDPOINTS
+app.get('/sitemap.xml', (req, res) => {
+    res.setHeader('Content-Type', 'application/xml');
+    res.sendFile(path.join(__dirname, '../public/sitemap.xml'));
+});
+
+app.get('/robots.txt', (req, res) => {
+    res.setHeader('Content-Type', 'text/plain');
+    res.sendFile(path.join(__dirname, '../public/robots.txt'));
+});
+
 // ZIP DOWNLOAD ENDPOINT
 app.get('/api/download-zip', (req, res) => {
     const zipPath = path.join(__dirname, '../public/goexergy_app.zip');

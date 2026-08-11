@@ -767,6 +767,55 @@ class App {
         this.showToast(next === 'dark' ? '🌙 Dark mode enabled' : '☀️ Light mode enabled', 'success');
     }
 
+    updatePageSEO(page) {
+        const seoMap = {
+            'home': {
+                title: 'Zilhaj.com – Umrah & Hajj Travel | Mecca Medina Tours, Umra & Zil Haj Packages',
+                desc: 'Zilhaj.com Umrah & Hajj Travel Platform. Book 100% verified Umrah packages, Ramadan deals, VIP Hajj packages, Mecca Medina tours, Ziaraat, and custom pilgrimage bids. Hotels near Haram with 5-star comfort.',
+                url: 'https://zilhaj.com/'
+            },
+            'packages': {
+                title: 'Umrah Packages & Hajj Deals 2026 | Zilhaj.com (Umra & Zil Haj Travel)',
+                desc: 'Compare 14-day and 18-day Umrah packages, Ramadan specials, and Hajj pilgrimage deals from verified Saudi-licensed tour operators with hotels near Haram.',
+                url: 'https://zilhaj.com/umrah-packages'
+            },
+            'guides': {
+                title: 'Hajj & Umrah Travel Guides & FAQs | Zilhaj.com (Haj & Umra Advice)',
+                desc: 'Complete step-by-step guides for Umrah, Hajj rituals, Nusuk Rawdah permits, Miqat locations, and Ziaraat advice for Mecca Medina tours.',
+                url: 'https://zilhaj.com/guides'
+            },
+            'about': {
+                title: 'About Us – Zilhaj.com Umrah & Hajj Travel Platform',
+                desc: 'Discover Zilhaj.com, connecting pilgrims with verified Saudi-licensed tour operators for escrow-backed Umrah and Hajj travels.',
+                url: 'https://zilhaj.com/about'
+            },
+            'trust': {
+                title: '100% Escrow Protection & Verification | Zilhaj.com',
+                desc: 'Your Umrah and Hajj funds are 100% protected in escrow safety until your travel voucher and Saudi visa are issued.',
+                url: 'https://zilhaj.com/trust'
+            },
+            'dashboard': {
+                title: 'Pilgrim Dashboard & Travel Requests | Zilhaj.com',
+                desc: 'Manage your custom Umrah travel requests, review operator bids, and view confirmed bookings.',
+                url: 'https://zilhaj.com/dashboard'
+            },
+            'bookings': {
+                title: 'My Verified Bookings & E-Vouchers | Zilhaj.com',
+                desc: 'View official Saudi Ministry approved e-vouchers, hotel details, and receipts for your Umrah journey.',
+                url: 'https://zilhaj.com/bookings'
+            }
+        };
+
+        const current = seoMap[page] || seoMap['home'];
+        document.title = current.title;
+
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) metaDesc.setAttribute('content', current.desc);
+
+        const canonical = document.querySelector('link[rel="canonical"]');
+        if (canonical) canonical.setAttribute('href', current.url);
+    }
+
     navigate(page) {
         if (page === 'login' || page === 'register') {
             this.openAuthModal(page);
@@ -774,6 +823,7 @@ class App {
         }
         this.closeAuthPage();
         this.state.currentPage = page;
+        this.updatePageSEO(page);
         const main = document.getElementById('mainContainer');
         window.scrollTo({ top: 0, behavior: 'smooth' });
 

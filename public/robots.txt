@@ -1,0 +1,19 @@
+# Zilhaj.com Robots.txt File
+# Allow all search engine crawlers (Googlebot, Bingbot, Slurp, DuckDuckBot, Yandex, etc.)
+
+User-agent: *
+Allow: /
+Allow: /umrah-packages
+Allow: /hajj-packages
+Allow: /pricing
+Allow: /guides
+Allow: /about
+Allow: /contact
+Allow: /login
+Allow: /signup
+
+# Disallow private internal admin endpoints
+Disallow: /api/admin/
+
+# Sitemap Location
+Sitemap: https://zilhaj.com/sitemap.xml
