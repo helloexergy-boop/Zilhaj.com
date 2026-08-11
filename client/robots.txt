@@ -23,4 +23,4 @@ Allow: /support
 Disallow: /api/admin/
 
 # Sitemap Location
-Sitemap: https://zilhaj.com/sitemap.xml
+Sitemap: https://onerequest.in/sitemap.xml
