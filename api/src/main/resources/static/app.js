@@ -1751,12 +1751,10 @@ class App {
         return `
             <div class="main-container" style="max-width:1140px; margin:7rem auto 3.5rem; padding:0 1.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem; flex-wrap:wrap; gap:1rem;">
-                    <button class="btn btn-sm" style="background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; font-weight:600;" onclick="app.navigate('home')">← Back to Home</button>
                     <div style="text-align:center; flex:1;">
                         <h2 style="font-size:2.4rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem;">Why Choose Us</h2>
                         <p style="color:#64748b; font-size:1rem;">Transparent competition between verified travel agencies ensuring you get the best price and quality</p>
                     </div>
-                    <div style="width:130px;"></div>
                 </div>
 
                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:1.5rem; margin-bottom:3rem;">
@@ -1876,7 +1874,6 @@ class App {
         return `
             <div class="main-container" style="max-width: 920px; margin: 6.8rem auto 4rem; padding: 0 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-                    <button class="btn btn-sm" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; font-weight: 700; border-radius: 99px; padding: 0.5rem 1.2rem; box-shadow: 0 2px 5px rgba(0,0,0,0.03);" onclick="app.navigate('home')">← Back to Home</button>
                     <div style="text-align: center; flex: 1;">
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
                             <span>❓</span> <span>PILGRIMAGE FAQS</span>
@@ -1884,7 +1881,6 @@ class App {
                         <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.02em;">Frequently Asked Questions</h2>
                         <p style="color: #64748b; font-size: 0.95rem; max-width: 680px; margin: 0 auto; line-height: 1.6;">Short, clear answers to the most common questions pilgrims ask about Umrah, Hajj, payments, and bookings.</p>
                     </div>
-                    <div style="width: 120px;" class="desktop-only"></div>
                 </div>
 
                 <div style="display:flex; flex-direction:column; gap:0.9rem;">
@@ -1967,7 +1963,6 @@ class App {
         return `
             <div class="main-container" style="max-width: 920px; margin: 6.8rem auto 4rem; padding: 0 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-                    <button class="btn btn-sm" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; font-weight: 700; border-radius: 99px; padding: 0.5rem 1.2rem; box-shadow: 0 2px 5px rgba(0,0,0,0.03);" onclick="app.navigate('home')">← Back to Home</button>
                     <div style="text-align: center; flex: 1;">
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
                             <span>📜</span> <span>LEGAL</span>
@@ -1975,7 +1970,6 @@ class App {
                         <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.02em;">Terms & Conditions</h2>
                         <p style="color: #64748b; font-size: 0.95rem; max-width: 680px; margin: 0 auto; line-height: 1.6;">Official Terms of Service for pilgrims and verified tour operators using the Zilhaj.com platform.</p>
                     </div>
-                    <div style="width: 120px;" class="desktop-only"></div>
                 </div>
 
                 <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:0.85rem 1.2rem; margin-bottom:1.5rem; font-size:0.86rem; color:#166534; display:flex; align-items:center; gap:0.75rem;">
@@ -1992,7 +1986,6 @@ class App {
                         <div style="color:#F9E07A; font-weight:800; font-size:1.05rem;">Questions about these terms?</div>
                         <div style="color:rgba(255,255,255,0.85); font-size:0.88rem; margin-top:0.25rem;">Email info@zilhaj.com or call +966 800 123 4567 | +91 95416 92891</div>
                     </div>
-                    <button onclick="app.navigate('home')" style="background:#f59e0b; color:#0f172a; font-weight:800; font-size:0.9rem; padding:0.7rem 1.5rem; border-radius:10px; border:none; cursor:pointer;">← Back to Home</button>
                 </div>
             </div>
         `;
@@ -2044,7 +2037,6 @@ class App {
         return `
             <div class="main-container" style="max-width: 920px; margin: 6.8rem auto 4rem; padding: 0 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-                    <button class="btn btn-sm" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; font-weight: 700; border-radius: 99px; padding: 0.5rem 1.2rem; box-shadow: 0 2px 5px rgba(0,0,0,0.03);" onclick="app.navigate('home')">← Back to Home</button>
                     <div style="text-align: center; flex: 1;">
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
                             <span>🛡️</span> <span>DATA PROTECTION</span>
@@ -2052,7 +2044,6 @@ class App {
                         <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.02em;">Privacy Policy</h2>
                         <p style="color: #64748b; font-size: 0.95rem; max-width: 680px; margin: 0 auto; line-height: 1.6;">Our commitment to protecting the personal data and trust of every pilgrim who uses Zilhaj.com.</p>
                     </div>
-                    <div style="width: 120px;" class="desktop-only"></div>
                 </div>
 
                 <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:0.85rem 1.2rem; margin-bottom:1.5rem; font-size:0.86rem; color:#166534; display:flex; align-items:center; gap:0.75rem;">
@@ -2069,7 +2060,6 @@ class App {
                         <div style="color:#F9E07A; font-weight:800; font-size:1.05rem;">Your privacy matters to us</div>
                         <div style="color:rgba(255,255,255,0.85); font-size:0.88rem; margin-top:0.25rem;">privacy@zilhaj.com | +966 800 123 4567 | +91 95416 92891</div>
                     </div>
-                    <button onclick="app.navigate('home')" style="background:#f59e0b; color:#0f172a; font-weight:800; font-size:0.9rem; padding:0.7rem 1.5rem; border-radius:10px; border:none; cursor:pointer;">← Back to Home</button>
                 </div>
             </div>
         `;
@@ -2081,7 +2071,6 @@ class App {
                 
                 <!-- Navigation Top Row -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-                    <button class="btn btn-sm" style="background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; font-weight:600;" onclick="app.navigate('home')">← Back to Home</button>
                     <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: #e6f4ea; color: #047857; padding: 0.35rem 1rem; border-radius: 99px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border: 1px solid #a7f3d0;">
                         <span>🕋</span> <span>About Us</span>
                     </div>
@@ -2197,7 +2186,7 @@ class App {
                     '<p style="font-size:1.2rem; font-weight:800; color:var(--primary); margin-top:0.4rem;">Total Paid: ' + this.formatCurrency(b.totalPrice) + '</p>' +
                     '</div>' +
                     '<div style="display:flex; gap:0.8rem;">' +
-                    '<a href="' + API_BASE + '/invoice/' + b.id + '" target="_blank" class="btn btn-outline btn-sm">📄 Download PDF</a>' +
+                    '<a href="javascript:void(0)" onclick="app.downloadInvoice(\'' + b.id + '\')" class="btn btn-outline btn-sm">📄 Download PDF</a>' +
                     cancelBtn +
                     '</div>' +
                     '</div>';
@@ -2220,7 +2209,6 @@ class App {
             '</div>' +
             '<div style="display:flex; gap:0.6rem;">' +
             '<button class="btn btn-outline btn-sm" onclick="app.navigate(\'dashboard\')">← Back to Dashboard</button>' +
-            '<button class="btn btn-sm" style="background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; font-weight:600;" onclick="app.navigate(\'home\')">← Back to Home</button>' +
             '</div>' +
             '</div>' +
             bookingRows +
@@ -2783,7 +2771,7 @@ class App {
                         <span>OFFICIAL SAUDI MINISTRY REGISTERED E-VOUCHER</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:0.8rem;">
-                        <a href="${typeof API_BASE !== 'undefined' ? API_BASE : '/api'}/invoice/${encodeURIComponent(b.id || '')}" target="_blank" style="background:#047857; color:#ffffff; font-weight:800; border:none; padding:0.6rem 1.4rem; border-radius:10px; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem; text-decoration:none; box-shadow:0 4px 14px rgba(4,120,87,0.25);">
+                        <a href="javascript:void(0)" onclick="app.downloadInvoice('${b.id || ''}')" style="background:#047857; color:#ffffff; font-weight:800; border:none; padding:0.6rem 1.4rem; border-radius:10px; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem; text-decoration:none; box-shadow:0 4px 14px rgba(4,120,87,0.25);">
                             <span>📄</span> <span>Download Invoice (Official Bill)</span>
                         </a>
                         <button type="button" onclick="window.print()" style="background:#166534; color:#ffffff; font-weight:800; border:none; padding:0.6rem 1.4rem; border-radius:10px; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem; box-shadow:0 4px 14px rgba(22,101,52,0.25); transition:all 0.2s;" onmouseover="this.style.background='#14532d'" onmouseout="this.style.background='#166534'">
@@ -3378,8 +3366,17 @@ class App {
         }, 1500);
     }
 
-    downloadInvoice(bookingId) {
+    async downloadInvoice(bookingId) {
         const id = bookingId || '';
+        const allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
+        const local = allBookings.find(item => item.id === id);
+        if (local) {
+            const serverBookings = await this.apiCall('/bookings');
+            const exists = Array.isArray(serverBookings) && serverBookings.some(x => x.id === id);
+            if (!exists) {
+                await this.apiCall('/bookings', 'POST', local);
+            }
+        }
         const targetUrl = (typeof API_BASE !== 'undefined' ? API_BASE : '/api') + '/invoice/' + encodeURIComponent(id);
         window.open(targetUrl, '_blank');
     }
@@ -3470,7 +3467,6 @@ class App {
                     </div>
                     <div style="display:flex; gap:0.6rem;">
                         <button class="btn btn-outline btn-sm" onclick="app.navigate('dashboard')">← Back to Dashboard</button>
-                        <button class="btn btn-sm" style="background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; font-weight:600;" onclick="app.navigate('home')">← Back to Home</button>
                     </div>
                 </div>
 
@@ -6800,7 +6796,7 @@ class App {
                         </div>
 
                         <div style="display:flex; flex-direction:column; gap:0.75rem;">
-                            <a href="${typeof API_BASE !== 'undefined' ? API_BASE : ''}/invoice/${bookingId || 'BK-048846'}" target="_blank" onclick="app.closeModal(); app.navigate('bookings');" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; height:46px; background:#166534; color:#ffffff; font-weight:800; font-size:0.92rem; border-radius:10px; text-decoration:none; box-shadow:0 4px 15px rgba(22,101,52,0.25);">
+                            <a href="javascript:void(0)" onclick="app.downloadInvoice('${bookingId || 'BK-048846'}'); app.closeModal(); app.navigate('bookings');" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; height:46px; background:#166534; color:#ffffff; font-weight:800; font-size:0.92rem; border-radius:10px; text-decoration:none; box-shadow:0 4px 15px rgba(22,101,52,0.25);">
                                 📄 View &amp; Download Invoice (Official Bill)
                             </a>
                             <button type="button" onclick="app.closeModal(); app.navigate('bookings');" style="width:100%; height:42px; background:#ffffff; border:1px solid #cbd5e1; color:#334155; font-weight:700; font-size:0.88rem; border-radius:10px; cursor:pointer;">
@@ -6888,7 +6884,7 @@ class App {
                 </div>
 
                 <div style="display:flex; flex-direction:column; gap:0.75rem;">
-                    <a href="${typeof API_BASE !== 'undefined' ? API_BASE : ''}/invoice/${bookingId}" target="_blank" onclick="app.closeModal(); app.navigate('bookings');" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; height:46px; background:#166534; color:#ffffff; font-weight:800; font-size:0.92rem; border-radius:10px; text-decoration:none; box-shadow:0 4px 15px rgba(22,101,52,0.25);">
+                    <a href="javascript:void(0)" onclick="app.downloadInvoice('${bookingId}'); app.closeModal(); app.navigate('bookings');" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; height:46px; background:#166534; color:#ffffff; font-weight:800; font-size:0.92rem; border-radius:10px; text-decoration:none; box-shadow:0 4px 15px rgba(22,101,52,0.25);">
                         📄 View &amp; Download Travel Ticket PDF
                     </a>
                     <button type="button" onclick="app.closeModal(); app.navigate('bookings');" style="width:100%; height:42px; background:#ffffff; border:1px solid #cbd5e1; color:#334155; font-weight:700; font-size:0.88rem; border-radius:10px; cursor:pointer;">
@@ -6916,7 +6912,6 @@ class App {
                 
                 <!-- Header Bar -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-                    <button class="btn btn-sm" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; font-weight: 700; border-radius: 99px; padding: 0.5rem 1.2rem; box-shadow: 0 2px 5px rgba(0,0,0,0.03);" onclick="app.navigate('home')">← Back to Home</button>
                     <div style="text-align: center; flex: 1;">
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
                             <span>🕋</span> <span>SACRED KNOWLEDGE HUB</span>
@@ -6924,7 +6919,6 @@ class App {
                         <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.02em;">Hajj & Umrah Pilgrimage Guides</h2>
                         <p style="color: #64748b; font-size: 0.95rem; max-width: 680px; margin: 0 auto; line-height: 1.6;">Essential step-by-step rituals, Miqat boundaries, Ihram rules, Nusuk permits, and spiritual advice for your sacred journey.</p>
                     </div>
-                    <div style="width: 120px;" class="desktop-only"></div>
                 </div>
 
                 <!-- Modern Segmented Pill Switcher -->

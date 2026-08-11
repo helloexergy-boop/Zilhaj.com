@@ -306,11 +306,20 @@ app.post('/api/bookings', async (req, res) => {
     const booking = { id: 'bk-' + Date.now(), status: 'CONFIRMED', createdAt: new Date(), ...req.body };
     try {
         const db = await connectToDatabase();
-        await db.collection('bookings').insertOne(booking);
+        await db.collection('bookings').updateOne(
+            { id: booking.id },
+            { $set: { ...booking, updatedAt: new Date() } },
+            { upsert: true }
+        );
     } catch (err) {
         console.warn('MongoDB offline, using in-memory store for booking');
     }
-    inMemoryStore.bookings.push(booking);
+    const existingIdx = inMemoryStore.bookings.findIndex(b => b.id === booking.id);
+    if (existingIdx !== -1) {
+        inMemoryStore.bookings[existingIdx] = { ...inMemoryStore.bookings[existingIdx], ...booking };
+    } else {
+        inMemoryStore.bookings.push(booking);
+    }
     res.status(201).json(booking);
 });
 
