@@ -3,37 +3,37 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <!-- 1. Root Domain -->
   <url>
-    <loc>https://zilhaj.com/</loc>
+    <loc>https://onerequest.in/</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://zilhaj.com/logo.png</image:loc>
+      <image:loc>https://onerequest.in/logo.png</image:loc>
       <image:title>Zilhaj.com Umrah &amp; Hajj Travel Logo</image:title>
     </image:image>
   </url>
 
   <!-- 2. Core Service Pages -->
   <url>
-    <loc>https://zilhaj.com/umrah-packages</loc>
+    <loc>https://onerequest.in/umrah-packages</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://zilhaj.com/hajj-packages</loc>
+    <loc>https://onerequest.in/hajj-packages</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://zilhaj.com/mecca-medina-guide</loc>
+    <loc>https://onerequest.in/mecca-medina-guide</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://zilhaj.com/pricing</loc>
+    <loc>https://onerequest.in/pricing</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -41,19 +41,19 @@
 
   <!-- 3. User Account Pages -->
   <url>
-    <loc>https://zilhaj.com/login</loc>
+    <loc>https://onerequest.in/login</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
-    <loc>https://zilhaj.com/signup</loc>
+    <loc>https://onerequest.in/signup</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
-    <loc>https://zilhaj.com/dashboard</loc>
+    <loc>https://onerequest.in/dashboard</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.65</priority>
@@ -61,19 +61,19 @@
 
   <!-- 4. Company Information Pages -->
   <url>
-    <loc>https://zilhaj.com/about</loc>
+    <loc>https://onerequest.in/about</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
-    <loc>https://zilhaj.com/contact</loc>
+    <loc>https://onerequest.in/contact</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
-    <loc>https://zilhaj.com/faqs</loc>
+    <loc>https://onerequest.in/faqs</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -81,25 +81,25 @@
 
   <!-- 5. Content Expansion (Blog & Subpages) -->
   <url>
-    <loc>https://zilhaj.com/blog</loc>
+    <loc>https://onerequest.in/blog</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://zilhaj.com/blog/umrah-preparation-tips</loc>
+    <loc>https://onerequest.in/blog/umrah-preparation-tips</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
-    <loc>https://zilhaj.com/blog/hajj-travel-guide</loc>
+    <loc>https://onerequest.in/blog/hajj-travel-guide</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
-    <loc>https://zilhaj.com/blog/zilhaj-experience</loc>
+    <loc>https://onerequest.in/blog/zilhaj-experience</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.80</priority>
@@ -107,19 +107,19 @@
 
   <!-- 6. Utility Pages -->
   <url>
-    <loc>https://zilhaj.com/terms</loc>
+    <loc>https://onerequest.in/terms</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.50</priority>
   </url>
   <url>
-    <loc>https://zilhaj.com/privacy</loc>
+    <loc>https://onerequest.in/privacy</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.50</priority>
   </url>
   <url>
-    <loc>https://zilhaj.com/support</loc>
+    <loc>https://onerequest.in/support</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.60</priority>
