@@ -15,6 +15,7 @@ public class Offer {
     @Id
     private String id;
     private String userId;
+    private String requirementId;
     private String packageId;
     private String packageTitle;
     private double originalPrice;
@@ -45,6 +46,9 @@ public class Offer {
 
     public String getPackageId() { return packageId; }
     public void setPackageId(String packageId) { this.packageId = packageId; }
+
+    public String getRequirementId() { return requirementId; }
+    public void setRequirementId(String requirementId) { this.requirementId = requirementId; }
 
     public String getPackageTitle() { return packageTitle; }
     public void setPackageTitle(String packageTitle) { this.packageTitle = packageTitle; }

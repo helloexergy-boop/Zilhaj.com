@@ -59,17 +59,6 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Constructor for Google OAuth 2.0 User Creation
-    public User(String googleId, String name, String email, String profilePictureUrl, String role) {
-        this.googleId = googleId;
-        this.name = name;
-        this.email = email;
-        this.profilePictureUrl = profilePictureUrl;
-        this.role = role;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
     // Getters and Setters for all fields
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }

@@ -232,6 +232,55 @@ app.post('/api/offers', async (req, res) => {
     res.status(201).json(offer);
 });
 
+// ADMIN ENDPOINTS – ZAIREEN REQUESTS & OFFERS MANAGEMENT
+app.get('/api/admin/requirements', async (req, res) => {
+    try {
+        const db = await connectToDatabase();
+        const reqs = await db.collection('requirements').find({}).sort({ createdAt: -1 }).toArray();
+        res.json(reqs);
+    } catch (err) {
+        res.json(inMemoryStore.requirements);
+    }
+});
+
+app.put('/api/admin/requirements/:id/status', async (req, res) => {
+    const status = (req.query.status || req.body.status || 'PENDING').toUpperCase();
+    try {
+        const db = await connectToDatabase();
+        await db.collection('requirements').updateOne(
+            { id: req.params.id },
+            { $set: { status: status } }
+        );
+    } catch (err) {
+        console.warn('MongoDB offline, updating in-memory store');
+    }
+    const idx = inMemoryStore.requirements.findIndex(r => r.id === req.params.id);
+    if (idx !== -1) inMemoryStore.requirements[idx].status = status;
+    res.json({ id: req.params.id, status: status });
+});
+
+app.get('/api/admin/offers', async (req, res) => {
+    try {
+        const db = await connectToDatabase();
+        const offers = await db.collection('offers').find({}).sort({ createdAt: -1 }).toArray();
+        res.json(offers);
+    } catch (err) {
+        res.json(inMemoryStore.offers);
+    }
+});
+
+app.post('/api/admin/offers', async (req, res) => {
+    const offer = { id: 'off-' + Date.now(), status: 'PENDING', createdAt: new Date(), ...req.body };
+    try {
+        const db = await connectToDatabase();
+        await db.collection('offers').insertOne(offer);
+    } catch (err) {
+        console.warn('MongoDB offline, using in-memory store for offer');
+    }
+    inMemoryStore.offers.push(offer);
+    res.status(201).json(offer);
+});
+
 // BOOKINGS ENDPOINTS
 app.get('/api/bookings', async (req, res) => {
     try {

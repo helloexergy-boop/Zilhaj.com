@@ -43,7 +43,8 @@ class App {
     }
 
     async init() {
-        // Automatically sanitize and normalize any cached high-price objects in localStorage to testing fares (₹5)
+        // Automatically sanitize and normalize any cached high-price objects in localStorage to testing fares (₹5),
+        // and purge stale mock offers that were never created through the admin panel (no userId/packageId).
         ['umrah_user_offers', 'umrah_requirements', 'umrah_packages', 'umrah_my_bookings'].forEach(key => {
             try {
                 const raw = localStorage.getItem(key);
@@ -62,6 +63,15 @@ class App {
                 }
             } catch (e) {}
         });
+
+        // Remove any pre-existing mock agent offers (generated without real userId/packageId) so
+        // users only see offers dispatched by the Admin through the control panel.
+        try {
+            const rawOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+            const realOffers = rawOffers.filter(o => (o.userId && o.userId !== 'usr-1') || o.packageId);
+            localStorage.setItem('umrah_user_offers', JSON.stringify(realOffers));
+            this.state.userOffers = realOffers;
+        } catch (e) {}
 
         // Handle Google OAuth callback URL parameters (Step 2 & 5)
         if (window.location.hash && window.location.hash.includes('google_auth_success')) {
@@ -1712,8 +1722,6 @@ class App {
             localStorage.setItem('umrah_requirements', JSON.stringify(localReqs));
             this.state.admin.requirements = localReqs;
 
-            // Generate 2 sample competitive agent offers automatically for demo
-            this.generateMockAgentOffers(newReq);
 
             this.hideLoading();
             this.showSuccessModal(
@@ -1943,45 +1951,6 @@ class App {
         if (overlay) overlay.style.display = 'none';
     }
 
-    generateMockAgentOffers(req) {
-        const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-
-        const mock1 = {
-            id: 'off-' + Date.now() + '-1',
-            requirementId: req.id,
-            agentName: 'AL-HARAM PREMIUM TRAVELS',
-            packageTitle: `Exclusive 5-Star ${req.durationDays}-Day Package for ${req.userName}`,
-            originalPrice: Math.round(req.maxBudget * 1.15),
-            discountedPrice: Math.round(req.maxBudget * 0.95),
-            discountPercentage: 15,
-            departureDate: req.preferredDepartureDate,
-            durationDays: req.durationDays,
-            makkahHotel: 'Swissotel Makkah (250m from Kaaba)',
-            madinahHotel: 'Pullman Zamzam Madinah (150m from Nabawi)',
-            inclusions: ['Direct Flights (SXR-JED)', '5-Star Buffet Meals', 'Ahram Kit', 'Zamzam 5L', 'Ziyarat'],
-            specialNote: 'Premium 5-Star accommodation near Haram matching your preferred travel dates!'
-        };
-
-        const mock2 = {
-            id: 'off-' + Date.now() + '-2',
-            requirementId: req.id,
-            agentName: 'ZILHAJ.COM DELUXE TOURS',
-            packageTitle: `Deluxe Comfort ${req.durationDays}-Day Package`,
-            originalPrice: Math.round(req.maxBudget * 1.2),
-            discountedPrice: Math.round(req.maxBudget * 0.88),
-            discountPercentage: 22,
-            departureDate: req.preferredDepartureDate,
-            durationDays: req.durationDays,
-            makkahHotel: 'Manarat Al Misk (500m from Kaaba)',
-            madinahHotel: 'Marjan International (200m from Nabawi)',
-            inclusions: ['Return Flights', 'Daily Indian Buffet', 'VIP Bus Transport', 'Ziyarat'],
-            specialNote: 'Best price value offer customized for your group size and budget.'
-        };
-
-        localOffers.unshift(mock1, mock2);
-        localStorage.setItem('umrah_user_offers', JSON.stringify(localOffers));
-    }
-
     triggerPhotoUpload() {
         const fileInput = document.getElementById('profilePhotoInput');
         if (fileInput) fileInput.click();
@@ -2044,109 +2013,15 @@ class App {
         const activeTab = this.state.activeDashboardTab || 'dashboard';
         const userPhoto = (this.state.currentUser && this.state.currentUser.profilePhoto) || localStorage.getItem('umrah_custom_photo');
 
-        // Initialize default mock requirement & offers matching site design system
-        let allReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
-        let allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-        let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
-
-        if (allReqs.length === 0) {
-            const defaultReq = {
-                id: 'req-1786187618550',
-                userId: user.id || 'user-default',
-                userName: user.name || 'User',
-                userEmail: user.email,
-                preferredDepartureDate: '13 Aug 2026',
-                durationDays: 18,
-                departureCity: 'Srinagar (SXR)',
-                hotelType: '5-Star Luxury (< 300m Haram)',
-                travelersBreakdown: { males: 1, females: 1, children: 0 },
-                travelersCount: 2,
-                roomsCount: '1 Double Suite',
-                maxBudget: 5,
-                specialNotes: 'Direct flights preferred from Srinagar, wheelchair assistance needed.',
-                status: 'ACTIVE'
-            };
-            allReqs.push(defaultReq);
-            localStorage.setItem('umrah_requirements', JSON.stringify(allReqs));
-        }
-
-        if (allOffers.length < 3 && allReqs.length > 0) {
-            const offer1 = {
-                id: '#OFF-891',
-                requirementId: allReqs[0].id,
-                agentName: 'ALHUDA GROUP (KHADIM AL MECCA)',
-                packageTitle: '18 Days Umrah Package • Manarat Al Misk & Marjan International Hotels • Direct Flights',
-                makkahHotel: 'Manarat Al Misk / Dream Zone',
-                makkahDistance: 'Approx. 600 Metres from Masjid Al-Haram',
-                madinahHotel: 'Marjan International / Marjan Gold',
-                madinahDistance: 'Approx. 250 Metres from Al-Masjid An-Nabawi',
-                departureDate: '12 AUGUST 2026',
-                durationDays: 18,
-                inclusions: [
-                    'Return Air Ticket (SXR–JED–MED–SXR)',
-                    '4/5 Sharing Accommodation',
-                    '03 Times Daily Indian Buffet Meals',
-                    'Half-Day Guided Ziyarat in Makkah',
-                    'Half-Day Guided Ziyarat in Madinah',
-                    'Airport & Intercity Transfers'
-                ],
-                complimentary: ['AHRAM KIT', 'LAUNDRY SERVICE', '5 LITRES ZAMZAM WATER'],
-                price: 5,
-                originalPrice: 10,
-                imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'
-            };
-
-            const offer2 = {
-                id: '#OFF-892',
-                requirementId: allReqs[0].id,
-                agentName: 'ZILHAJ.COM DELUXE TOURS',
-                packageTitle: 'Swissotel Makkah (250m Kaaba) • Pullman Zamzam Madinah • 5-Star Buffet Meals',
-                makkahHotel: 'Swissotel Makkah (250m Kaaba)',
-                makkahDistance: 'Approx. 250 Metres from Masjid Al-Haram',
-                madinahHotel: 'Pullman Zamzam Madinah (150m Nabawi)',
-                madinahDistance: 'Approx. 150 Metres from Al-Masjid An-Nabawi',
-                departureDate: '13 AUGUST 2026',
-                durationDays: 18,
-                inclusions: [
-                    'Return Air Ticket Included',
-                    '5-Star Luxury Accommodation',
-                    '3x Daily VIP Buffet Meals',
-                    'Full Guided Ziyarat',
-                    'Private GMC Airport Transfers'
-                ],
-                complimentary: ['AHRAM KIT', 'LAUNDRY SERVICE', '5 LITRES ZAMZAM WATER'],
-                price: 3,
-                originalPrice: 8,
-                imageUrl: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80'
-            };
-
-            const offer3 = {
-                id: '#OFF-893',
-                requirementId: allReqs[0].id,
-                agentName: 'AL-SAFAR VIP UMRAH',
-                packageTitle: 'Dar Al Tawhid (50m Kaaba) • Executive Business Flights • Unlimited Laundry',
-                makkahHotel: 'Dar Al Tawhid (50m Kaaba)',
-                makkahDistance: 'Approx. 50 Metres from Kaaba',
-                madinahHotel: 'Dar Al Taqwa (100m Nabawi)',
-                madinahDistance: 'Approx. 100 Metres from Al-Masjid An-Nabawi',
-                departureDate: '15 AUGUST 2026',
-                durationDays: 18,
-                inclusions: [
-                    'Business Class Return Flights',
-                    'Executive VIP Suite Accommodation',
-                    'Unlimited Laundry & Room Service',
-                    'Dedicated Mutawwif (Guide)',
-                    'Private Transport'
-                ],
-                complimentary: ['AHRAM KIT', 'LAUNDRY SERVICE', '5 LITRES ZAMZAM WATER'],
-                price: 2,
-                originalPrice: 5,
-                imageUrl: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80'
-            };
-
-            allOffers = [offer1, offer2, offer3];
-            localStorage.setItem('umrah_user_offers', JSON.stringify(allOffers));
-        }
+        // Merge API-sourced data (source of truth) with localStorage fallback
+        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        const localBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
+        const apiReqs = this.state.myRequirements || [];
+        const apiOffers = this.state.userOffers || [];
+        const allReqs = [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
+        const allOffers = [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
+        const allBookings = localBookings;
 
         const requirements = allReqs.filter(r => !r.userId || r.userId === user.id || r.userEmail === user.email);
         const offers = allOffers;
@@ -2199,17 +2074,32 @@ class App {
             </aside>
         `;
 
-        // Helper to render Verified Agent Offers Carousel (Matches Screenshot Cards 100%)
+        // Helper to render Verified Agent Offers Carousel (only shows real offers for this request)
         const renderInlineOffersCarousel = (reqId) => {
-            const reqOffers = offers.filter(o => !o.requirementId || o.requirementId === reqId);
-            const displayOffers = reqOffers.length > 0 ? reqOffers : offers;
+            const reqOffers = offers.filter(o => o.requirementId === reqId);
+
+            if (reqOffers.length === 0) {
+                return `
+                    <div style="margin-top:2rem;">
+                        <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:1.2rem;">
+                            <span style="font-size:1.1rem; color:#eab308;">⚡</span>
+                            <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0;">Verified Agent Offers for this Request (0)</h3>
+                        </div>
+                        <div style="background:#f8fafc; border:2px dashed #cbd5e1; border-radius:16px; padding:2.5rem; text-align:center;">
+                            <div style="font-size:2.5rem; margin-bottom:0.8rem;">📭</div>
+                            <h4 style="color:#0f172a; font-weight:800; font-size:1.05rem; margin:0 0 0.4rem;">No Offers Received Yet</h4>
+                            <p style="color:#64748b; font-size:0.88rem; margin:0; line-height:1.5;">Your request is being reviewed by our team. You will receive personalized offers from verified agents shortly.</p>
+                        </div>
+                    </div>
+                `;
+            }
 
             return `
                 <div style="margin-top:2rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;">
                         <div style="display:flex; align-items:center; gap:0.6rem;">
                             <span style="font-size:1.1rem; color:#eab308;">⚡</span>
-                            <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0;">Verified Agent Offers for this Request (${displayOffers.length})</h3>
+                            <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0;">Verified Agent Offers for this Request (${reqOffers.length})</h3>
                         </div>
                         <div style="display:flex; gap:0.4rem;">
                             <button type="button" onclick="app.scrollReqOffersCarousel('${reqId}', 'left')" style="width:32px; height:32px; border:1px solid #e2e8f0; border-radius:6px; background:#ffffff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:700; color:#475569;">&lt;</button>
@@ -2218,20 +2108,20 @@ class App {
                     </div>
 
                     <div style="overflow-x:auto; scroll-behavior:smooth; display:grid; grid-template-columns: repeat(3, 1fr); gap:1.2rem; padding-bottom:0.4rem;" id="reqOffersCarousel_${reqId}">
-                        ${displayOffers.slice(0, 3).map((o, idx) => `
+                        ${reqOffers.slice(0, 3).map((o, idx) => `
                             <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:space-between;">
                                 <div>
                                     <div style="position:relative; width:100%; height:165px; overflow:hidden;">
-                                        <img src="${o.imageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'}" alt="${this.escapeHtml(o.agentName)}" style="width:100%; height:100%; object-fit:cover;">
+                                        <img src="${o.imageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'}" alt="${this.escapeHtml(o.agentName || o.packageTitle)}" style="width:100%; height:100%; object-fit:cover;">
                                         <div style="position:absolute; top:10px; left:10px; background:rgba(15,23,42,0.75); color:#ffffff; font-size:0.75rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:6px;">
                                             Offer ${idx + 1}
                                         </div>
                                         <div style="position:absolute; top:10px; right:10px; background:#ffffff; border-radius:8px; padding:0.3rem 0.7rem; font-size:0.92rem; font-weight:800; color:#0f172a; box-shadow:0 4px 10px rgba(0,0,0,0.12);">
-                                            ${this.formatCurrency(o.price || o.discountedPrice || 118750)}
+                                            ${this.formatCurrency(o.price || o.discountedPrice || 0)}
                                         </div>
                                     </div>
                                     <div style="padding:1.1rem 1.1rem 0.6rem;">
-                                        <h4 style="font-size:0.95rem; font-weight:800; color:#0f172a; margin:0 0 0.4rem; text-transform:uppercase; letter-spacing:0.3px;">${this.escapeHtml(o.agentName)}</h4>
+                                        <h4 style="font-size:0.95rem; font-weight:800; color:#0f172a; margin:0 0 0.4rem; text-transform:uppercase; letter-spacing:0.3px;">${this.escapeHtml(o.agentName || 'Admin Offer')}</h4>
                                         <p style="font-size:0.8rem; color:#64748b; line-height:1.45; margin:0;">${this.escapeHtml(o.packageTitle)}</p>
                                     </div>
                                 </div>
@@ -2535,8 +2425,20 @@ class App {
         `;
     }
 
+    getAllOffers() {
+        const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        const apiOffers = this.state.userOffers || [];
+        return [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
+    }
+
+    getAllRequirements() {
+        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        const apiReqs = this.state.myRequirements || [];
+        return [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
+    }
+
     viewOfferDetailsModal(offerId) {
-        const allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        const allOffers = this.getAllOffers();
         const o = allOffers.find(item => item.id === offerId) || {
             id: offerId || '#OFF-891',
             packageTitle: '18 Days Umrah Package • Manarat Al Misk & Marjan International Hotels • Direct Flights',
@@ -3222,8 +3124,13 @@ class App {
             role: 'ROLE_USER'
         };
 
-        const allReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
-        const allOffersList = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        // Merge API-sourced data (source of truth) with localStorage fallback
+        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        const localOffersList = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        const apiReqs = this.state.myRequirements || [];
+        const apiOffersList = this.state.userOffers || [];
+        const allReqs = [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
+        const allOffersList = [...apiOffersList, ...localOffersList.filter(lo => !apiOffersList.some(o => o.id === lo.id))];
 
         const requirements = allReqs.filter(r => r.userId === user.id || r.userEmail === user.email);
         const userReqIds = requirements.map(r => r.id);
@@ -3297,7 +3204,7 @@ class App {
     }
 
     viewOffersForRequest(reqId) {
-        const allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        const allOffers = this.getAllOffers();
         const offers = allOffers.filter(o => o.requirementId === reqId);
 
         this.openModal(`
@@ -3346,7 +3253,7 @@ class App {
     }
 
     openOfferReviewModal(offerId) {
-        const allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        const allOffers = this.getAllOffers();
         const offer = allOffers.find(o => o.id === offerId) || {
             id: offerId,
             packageTitle: '18-Day Deluxe Umrah Package',
@@ -3582,7 +3489,7 @@ class App {
     }
 
     openOfferPaymentModal(offerId) {
-        const allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        const allOffers = this.getAllOffers();
         const offer = allOffers.find(o => o.id === offerId) || {
             id: offerId,
             packageTitle: 'Custom Travel Package Offer',
@@ -3788,6 +3695,7 @@ class App {
 
             // Update request status to CONFIRMED
             if (reqId) {
+                this.apiCall(`/admin/requirements/${reqId}/status?status=CONFIRMED`, 'PUT');
                 const reqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
                 const target = reqs.find(r => r.id === reqId);
                 if (target) {
@@ -3844,8 +3752,14 @@ class App {
         `;
 
         const analytics = await this.apiCall('/admin/analytics') || {};
-        const reqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
-        const offers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        let reqs = await this.apiCall('/admin/requirements');
+        if (!Array.isArray(reqs) || reqs.length === 0) {
+            reqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        }
+        let offers = await this.apiCall('/admin/offers');
+        if (!Array.isArray(offers) || offers.length === 0) {
+            offers = this.getAllOffers();
+        }
         const bookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
         const packages = this.state.packages || [];
 
@@ -5675,7 +5589,7 @@ class App {
                                 </label>
                                 <div style="display:flex; flex-direction:column; gap:0.9rem; max-height:420px; overflow-y:auto; padding-right:0.4rem;">
                                     ${(() => {
-                const allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+                const allOffers = this.getAllOffers();
                 const existingPackageIds = allOffers.filter(o => o.requirementId === reqId && o.packageId).map(o => o.packageId);
 
                 return this.state.packages.length > 0 ? this.state.packages.map((p, idx) => {
@@ -5822,22 +5736,18 @@ class App {
             const discountedPrice = Math.round(originalPrice * (1 - discountPercentage / 100));
 
             offerObj = {
-                id: 'off-' + Date.now(),
                 userId: userId || 'usr-1',
                 requirementId: reqId,
                 packageId: pkg.id,
                 packageTitle: pkg.title,
-                discountPercentage,
-                specialNote,
                 originalPrice,
                 discountedPrice,
+                discountPercentage,
+                specialNote,
                 departureDateText: pkg.departureDateText || '12 AUGUST',
                 durationDays: pkg.durationDays || 18,
                 makkahHotelName: pkg.makkahHotelName || 'Manarat Al Misk',
-                madinahHotelName: pkg.madinahHotelName || 'Marjan International',
-                distanceToHaramMakkah: pkg.distanceToHaramMakkah || 600,
-                distanceToHaramMadinah: pkg.distanceToHaramMadinah || 250,
-                createdAt: new Date().toLocaleDateString()
+                madinahHotelName: pkg.madinahHotelName || 'Marjan International'
             };
         } else {
             // CUSTOM PACKAGE OFFER MODE
@@ -5876,57 +5786,39 @@ class App {
             localStorage.setItem('umrah_packages', JSON.stringify(this.state.packages));
 
             offerObj = {
-                id: 'off-' + Date.now(),
                 userId: userId || 'usr-1',
                 requirementId: reqId,
                 packageId: newPkg.id,
                 packageTitle: title,
-                discountPercentage,
-                specialNote: note,
                 originalPrice: origPrice,
                 discountedPrice: price,
+                discountPercentage,
+                specialNote: note,
                 departureDateText: departure,
                 durationDays: duration,
                 makkahHotelName: makkahHotel,
-                madinahHotelName: madinahHotel,
-                createdAt: new Date().toLocaleDateString()
+                madinahHotelName: madinahHotel
             };
         }
 
-        // Try API call
-        await this.apiCall('/admin/offers', 'POST', offerObj);
-
-        // Save offer into localStorage and update userOffers state
-        const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-        localOffers.unshift(offerObj);
-        localStorage.setItem('umrah_user_offers', JSON.stringify(localOffers));
-        this.state.userOffers = localOffers;
-
-        // Update requirement status if exists
-        if (reqId) {
-            const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
-            const reqIndex = localReqs.findIndex(r => r.id === reqId);
-            if (reqIndex !== -1) {
-                localReqs[reqIndex].status = 'OFFERED';
-                localReqs[reqIndex].offeredPackageTitle = offerObj.packageTitle;
-                localStorage.setItem('umrah_requirements', JSON.stringify(localReqs));
-                this.state.admin.requirements = localReqs;
+        // Call API to create offer
+        const savedOffer = await this.apiCall('/admin/offers', 'POST', offerObj);
+        
+        if (savedOffer) {
+            // Update requirement status via API if reqId provided
+            if (reqId) {
+                await this.apiCall(`/admin/requirements/${reqId}/status?status=OFFERED`, 'PUT');
             }
-        }
-
-        // Update badge count in header
-        const offerBadge = document.getElementById('userOfferBadge');
-        if (offerBadge) {
-                        offerBadge.innerText = localOffers.length;
-            const offersLink = document.getElementById('offersNavLink');
-            if (offersLink) offersLink.style.display = 'inline-flex';
-        }
-
-        this.showToast(`Custom offer for "${offerObj.packageTitle}" sent to Zaireen! It is now live on the Available Offers tab.`, 'success');
-        this.closeModal();
-
-        if (this.state.currentPage === 'admin') {
-            this.renderAdminPage();
+            
+            this.showToast(`Custom offer for "${savedOffer.packageTitle || offerObj.packageTitle}" sent to Zaireen!`, 'success');
+            this.closeModal();
+            
+            // Refresh admin page if on admin
+            if (this.state.currentPage === 'admin') {
+                this.renderAdminPage();
+            }
+        } else {
+            this.showToast('Failed to send offer. Please try again.', 'error');
         }
     }
 

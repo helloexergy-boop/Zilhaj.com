@@ -12,6 +12,8 @@ public interface AgentRepository extends MongoRepository<Agent, String> {
 
     Optional<Agent> findByEmail(String email);
 
+    Optional<Agent> findByUserId(String userId);
+
     List<Agent> findByVerifiedTrueAndActiveTrue();
 
     List<Agent> findByVerifiedTrueAndActiveTrueAndSpecializationsContaining(String specialization);

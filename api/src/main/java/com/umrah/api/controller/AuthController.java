@@ -142,7 +142,9 @@ public class AuthController {
 
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
-            user = new User(googleId, name != null ? name : email.split("@")[0], email, picture, "ROLE_USER");
+            user = new User(name != null ? name : email.split("@")[0], email, null, null, "ROLE_USER");
+            if (googleId != null && !googleId.isBlank()) user.setGoogleId(googleId);
+            if (picture != null && !picture.isBlank()) user.setProfilePictureUrl(picture);
         } else {
             if (googleId != null && !googleId.isBlank()) user.setGoogleId(googleId);
             if (name != null && !name.isBlank()) user.setName(name);

@@ -13,6 +13,8 @@ public class Agent {
     @Id
     private String id;
 
+    private String userId;
+
     @Indexed(unique = true)
     private String email;
 
@@ -51,8 +53,21 @@ public class Agent {
 
     public Agent() {}
 
+    // Legacy constructor used when linking an Agent business record to a registered User account
+    public Agent(String userId, String companyName, String companyLicenseNumber) {
+        this.userId = userId;
+        this.companyName = companyName;
+        this.companyLicenseNumber = companyLicenseNumber;
+        this.verified = false;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
@@ -89,6 +104,16 @@ public class Agent {
 
     public boolean isVerified() { return verified; }
     public void setVerified(boolean verified) { this.verified = verified; }
+
+    // Legacy compatibility: maps string VERIFIED/REJECTED status to the verified boolean flag
+    public void setVerificationStatus(String status) {
+        this.verified = "VERIFIED".equalsIgnoreCase(status);
+    }
+
+    // Legacy compatibility: alias used by seeding and verification flows
+    public void setReviewCount(int reviewCount) {
+        this.totalReviews = reviewCount;
+    }
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
