@@ -129,8 +129,16 @@ class App {
             localStorage.setItem('umrah_packages', JSON.stringify(this.state.packages));
         }
 
+        // Browser back/forward support (hash history)
+        window.addEventListener('popstate', (e) => {
+            this.renderPage((e.state && e.state.page) || this.getHashPage());
+        });
+        window.addEventListener('hashchange', () => {
+            this.renderPage(this.getHashPage());
+        });
+
         // Render page IMMEDIATELY (0ms delay) so page is never blank!
-        this.navigate(this.state.currentPage);
+        this.navigate(this.getHashPage());
 
         // Fetch remote updates asynchronously without blocking page rendering
         this.fetchPackages().then(() => {
@@ -881,6 +889,12 @@ class App {
         if (canonical) canonical.setAttribute('href', current.url);
     }
 
+    getHashPage() {
+        const h = window.location.hash || '';
+        const page = h.replace(/^#\/?/, '').trim();
+        return page === '' ? 'home' : page;
+    }
+
     navigate(page) {
         if (page === 'login' || page === 'signup' || page === 'register') {
             this.openAuthModal(page === 'signup' || page === 'register' ? 'register' : 'login');
@@ -888,6 +902,17 @@ class App {
             return;
         }
 
+        const norm = String(page).replace(/^\//, '');
+        if (norm && norm !== this.getHashPage()) {
+            try {
+                history.pushState({ page: norm }, '', '#/' + norm);
+            } catch (e) {}
+        }
+
+        this.renderPage(page);
+    }
+
+    renderPage(page) {
         const rawPage = page;
         if (page === 'umrah-packages' || page === 'hajj-packages') page = 'packages';
         if (page === 'mecca-medina-guide' || page === 'blog' || (typeof page === 'string' && page.startsWith('blog/'))) page = 'guides';
