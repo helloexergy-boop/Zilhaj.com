@@ -5,12 +5,19 @@ User-agent: *
 Allow: /
 Allow: /umrah-packages
 Allow: /hajj-packages
+Allow: /mecca-medina-guide
 Allow: /pricing
-Allow: /guides
-Allow: /about
-Allow: /contact
 Allow: /login
 Allow: /signup
+Allow: /dashboard
+Allow: /about
+Allow: /contact
+Allow: /faqs
+Allow: /blog
+Allow: /blog/*
+Allow: /terms
+Allow: /privacy
+Allow: /support
 
 # Disallow private internal admin endpoints
 Disallow: /api/admin/

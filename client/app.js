@@ -770,39 +770,94 @@ class App {
     updatePageSEO(page) {
         const seoMap = {
             'home': {
-                title: 'Zilhaj.com – Umrah & Hajj Travel | Mecca Medina Tours, Umra & Zil Haj Packages',
+                title: 'Zilhaj.com – Umrah & Hajj Travel | Journey of Faith, Comfort & Blessings',
                 desc: 'Zilhaj.com Umrah & Hajj Travel Platform. Book 100% verified Umrah packages, Ramadan deals, VIP Hajj packages, Mecca Medina tours, Ziaraat, and custom pilgrimage bids. Hotels near Haram with 5-star comfort.',
                 url: 'https://zilhaj.com/'
             },
-            'packages': {
-                title: 'Umrah Packages & Hajj Deals 2026 | Zilhaj.com (Umra & Zil Haj Travel)',
-                desc: 'Compare 14-day and 18-day Umrah packages, Ramadan specials, and Hajj pilgrimage deals from verified Saudi-licensed tour operators with hotels near Haram.',
+            'umrah-packages': {
+                title: 'Umrah Packages 2026 | Zilhaj.com (Umra Travels & Deluxe Haram Hotels)',
+                desc: 'Book verified 14-day and 18-day Umrah packages with hotels under 300m from Masjid al-Haram, Saudi visa, direct flights, and guided Ziyarat.',
                 url: 'https://zilhaj.com/umrah-packages'
             },
-            'guides': {
-                title: 'Hajj & Umrah Travel Guides & FAQs | Zilhaj.com (Haj & Umra Advice)',
-                desc: 'Complete step-by-step guides for Umrah, Hajj rituals, Nusuk Rawdah permits, Miqat locations, and Ziaraat advice for Mecca Medina tours.',
-                url: 'https://zilhaj.com/guides'
+            'hajj-packages': {
+                title: 'Hajj Packages & Zil Haj Pilgrimage 2026 | Zilhaj.com (Haj Travel)',
+                desc: 'VIP Hajj packages with Mina tent encampment, Arafat Wuqoof support, Saudi licensed operators, and 100% Escrow payment safety.',
+                url: 'https://zilhaj.com/hajj-packages'
+            },
+            'mecca-medina-guide': {
+                title: 'Mecca & Medina Pilgrimage Guide | Zilhaj.com (Ziaraat & Holy Sites)',
+                desc: 'Complete travel guide to Masjid al-Haram, Al-Masjid an-Nabawi, Rawdah Nusuk permits, and sacred Ziyarat locations in Makkah & Madinah.',
+                url: 'https://zilhaj.com/mecca-medina-guide'
+            },
+            'pricing': {
+                title: 'Umrah & Hajj Package Pricing & Custom Bids | Zilhaj.com',
+                desc: 'Transparent Umrah package rates starting from ₹1 with custom bidding from verified Saudi tour operators.',
+                url: 'https://zilhaj.com/pricing'
+            },
+            'login': {
+                title: 'Pilgrim & Agent Login | Zilhaj.com Umrah Portal',
+                desc: 'Log in to your Zilhaj.com account to manage travel requests, review operator bids, and download verified e-vouchers.',
+                url: 'https://zilhaj.com/login'
+            },
+            'signup': {
+                title: 'Create Account | Zilhaj.com Umrah & Hajj Platform',
+                desc: 'Sign up for Zilhaj.com to submit custom pilgrimage requests and receive competitive bids from verified travel agents.',
+                url: 'https://zilhaj.com/signup'
+            },
+            'dashboard': {
+                title: 'Pilgrim Dashboard & Bidding Requests | Zilhaj.com',
+                desc: 'Manage your active Umrah travel requests, compare agent offers, and track your booking status.',
+                url: 'https://zilhaj.com/dashboard'
             },
             'about': {
                 title: 'About Us – Zilhaj.com Umrah & Hajj Travel Platform',
-                desc: 'Discover Zilhaj.com, connecting pilgrims with verified Saudi-licensed tour operators for escrow-backed Umrah and Hajj travels.',
+                desc: 'Discover Zilhaj.com, connecting pilgrims worldwide with verified Saudi-licensed tour operators for safe, escrow-backed Umrah and Hajj journeys.',
                 url: 'https://zilhaj.com/about'
             },
-            'trust': {
-                title: '100% Escrow Protection & Verification | Zilhaj.com',
-                desc: 'Your Umrah and Hajj funds are 100% protected in escrow safety until your travel voucher and Saudi visa are issued.',
-                url: 'https://zilhaj.com/trust'
+            'contact': {
+                title: 'Contact Us & 24/7 Pilgrim Support | Zilhaj.com',
+                desc: 'Get in touch with Zilhaj.com support team for assistance with Umrah bookings, Nusuk permits, and operator verification.',
+                url: 'https://zilhaj.com/contact'
             },
-            'dashboard': {
-                title: 'Pilgrim Dashboard & Travel Requests | Zilhaj.com',
-                desc: 'Manage your custom Umrah travel requests, review operator bids, and view confirmed bookings.',
-                url: 'https://zilhaj.com/dashboard'
+            'faqs': {
+                title: 'Pilgrimage FAQs – Umrah, Haj & Zilhajj Questions | Zilhaj.com',
+                desc: 'Frequently asked questions about Umra vs Umrah, Zil Haj packages, Nusuk app registration, and hotel distance guidelines.',
+                url: 'https://zilhaj.com/faqs'
             },
-            'bookings': {
-                title: 'My Verified Bookings & E-Vouchers | Zilhaj.com',
-                desc: 'View official Saudi Ministry approved e-vouchers, hotel details, and receipts for your Umrah journey.',
-                url: 'https://zilhaj.com/bookings'
+            'blog': {
+                title: 'Umrah & Hajj Travel Blog | Zilhaj.com Pilgrimage Insights',
+                desc: 'Read expert advice, preparation tips, flight advice, and spiritual guides for your sacred journey to Makkah & Madinah.',
+                url: 'https://zilhaj.com/blog'
+            },
+            'blog/umrah-preparation-tips': {
+                title: 'Essential Umrah Preparation Tips 2026 | Zilhaj.com Blog',
+                desc: 'Step-by-step preparation checklist for your Umrah journey including packing list, Ihram rules, and Nusuk permit timing.',
+                url: 'https://zilhaj.com/blog/umrah-preparation-tips'
+            },
+            'blog/hajj-travel-guide': {
+                title: 'Complete Hajj Pilgrimage Travel Guide | Zilhaj.com Blog',
+                desc: 'Detailed walkthrough of the 5 days of Hajj, Mina tents, Arafat, Muzdalifah, Jamarat, and Tawaf Ziyarah.',
+                url: 'https://zilhaj.com/blog/hajj-travel-guide'
+            },
+            'blog/zilhaj-experience': {
+                title: 'The Zilhaj Pilgrimage Experience & Testimonials | Zilhaj.com',
+                desc: 'Read real pilgrim stories and experiences booking through Zilhaj.com escrow-backed travel platform.',
+                url: 'https://zilhaj.com/blog/zilhaj-experience'
+            },
+            'terms': {
+                title: 'Terms & Conditions | Zilhaj.com Umrah Platform',
+                desc: 'Terms of service, escrow guarantee conditions, and booking policies for pilgrims and tour operators.',
+                url: 'https://zilhaj.com/terms'
+            },
+            'privacy': {
+                title: 'Privacy Policy | Zilhaj.com Security & Trust',
+                desc: 'How Zilhaj.com protects pilgrim personal data, payment information, and verification documents.',
+                url: 'https://zilhaj.com/privacy'
+            },
+            'support': {
+                title: 'Pilgrim Help & Technical Support | Zilhaj.com',
+                desc: 'Need help with your booking or payment? Reach 24/7 Zilhaj customer support team instantly.',
+                url: 'https://zilhaj.com/support'
             }
         };
 
@@ -817,13 +872,22 @@ class App {
     }
 
     navigate(page) {
-        if (page === 'login' || page === 'register') {
-            this.openAuthModal(page);
+        if (page === 'login' || page === 'signup' || page === 'register') {
+            this.openAuthModal(page === 'signup' || page === 'register' ? 'register' : 'login');
+            this.updatePageSEO(page);
             return;
         }
+
+        const rawPage = page;
+        if (page === 'umrah-packages' || page === 'hajj-packages') page = 'packages';
+        if (page === 'mecca-medina-guide' || page === 'faqs' || page === 'blog' || (typeof page === 'string' && page.startsWith('blog/'))) page = 'guides';
+        if (page === 'contact') page = 'about';
+        if (page === 'terms' || page === 'privacy' || page === 'support') page = 'trust';
+        if (page === 'pricing') page = 'home';
+
         this.closeAuthPage();
         this.state.currentPage = page;
-        this.updatePageSEO(page);
+        this.updatePageSEO(rawPage);
         const main = document.getElementById('mainContainer');
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
