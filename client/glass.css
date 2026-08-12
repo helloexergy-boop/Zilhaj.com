@@ -1,0 +1,275 @@
+/* ==========================================================================
+   Zilhaj.com — Liquid Glass (iOS-style) Theme Overlay
+   Frosted translucent surfaces + vibrant depth gradient background.
+   Loaded AFTER index.css; overrides surfaces without touching layout.
+   ========================================================================== */
+
+/* ── 1. iOS-style vibrant depth background ─────────────────────────────── */
+body {
+    background: linear-gradient(135deg, #05281e 0%, #0a5c42 28%, #0e8a63 52%, #0fa3a3 68%, #b5813f 86%, #5b3a7e 100%) !important;
+    background-attachment: fixed !important;
+    background-size: cover !important;
+}
+
+/* Floating light orbs for liquid depth (fixed, behind everything) */
+body::before {
+    content: '';
+    position: fixed;
+    top: -12%;
+    left: -8%;
+    width: 55vw;
+    height: 55vw;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 214, 140, 0.5), rgba(255, 214, 140, 0) 60%);
+    filter: blur(60px);
+    z-index: 0;
+    pointer-events: none;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    bottom: -15%;
+    right: -10%;
+    width: 60vw;
+    height: 60vw;
+    border-radius: 50%;
+    background: radial-gradient(circle at 60% 60%, rgba(120, 180, 255, 0.45), rgba(120, 180, 255, 0) 60%);
+    filter: blur(70px);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Push app content above orbs */
+#app, #navbarWrapper, footer, .modal-backdrop, .toast-container, #chatbotWrapper, .chatbot-floating-wrapper {
+    position: relative;
+    z-index: 1;
+}
+
+/* ── 2. Navbar — floating liquid glass pill ────────────────────────────── */
+.navbar {
+    background: rgba(255, 255, 255, 0.55) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 8px 32px rgba(5, 40, 30, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+.navbar.scrolled {
+    background: rgba(255, 255, 255, 0.62) !important;
+    backdrop-filter: blur(34px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(34px) saturate(190%) !important;
+    box-shadow: 0 12px 40px rgba(5, 40, 30, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.65) !important;
+}
+
+/* ── 3. Main page containers — frosted panels ──────────────────────────── */
+.main-container {
+    background: rgba(255, 255, 255, 0.55) !important;
+    backdrop-filter: blur(22px) saturate(170%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(170%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    border-radius: 28px !important;
+    box-shadow: 0 20px 60px rgba(5, 40, 30, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+/* White inline surfaces (SEO/page cards, info cards, auth panels, books,
+   offers, dashboard widgets) become layered liquid glass — translucent,
+   hairline borders, soft depth. No extra blur (they sit on the glass). */
+[style*="background:#ffffff"],
+[style*="background: #ffffff"],
+[style*="background: #fff"],
+[style*="background:#fff;"] {
+    background: rgba(255, 255, 255, 0.55) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 8px 32px rgba(5, 40, 30, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Near-white tinted panels (f8fafc / f0fdf4 cards, greek-glass surfaces) */
+[style*="background:#f8fafc"],
+[style*="background:#f0fdf4"],
+[style*="background:#ecfdf5"],
+[style*="background:#f1f5f9"],
+[style*="background:#f8fafc;"],
+[style*="background:#f0fdf4;"] {
+    background: rgba(255, 255, 255, 0.42) !important;
+    border-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* ── 4. Cards (package cards from index.css) ───────────────────────────── */
+.package-card {
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(16px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 12px 40px rgba(5, 40, 30, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+}
+
+.package-card:hover {
+    background: rgba(255, 255, 255, 0.72) !important;
+    box-shadow: 0 20px 55px rgba(5, 40, 30, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.65) !important;
+}
+
+/* ── 4b. Class-level white surfaces (cards/sections from index.css) ──── */
+.search-card, .floating-search-card, .travel-card, .requirement-card,
+.how-step-card, .modern-guide-card, .trust-strip, .trust-card-item,
+.sacred-journey-card-modern, .ritual-step-card, .offer-card-item,
+.dashboard-offer-card, .amazon-tracker-container,
+.auth-split-modal, .two-col-auth-modal, .modern-auth-modal, .premium-card {
+    background: rgba(255, 255, 255, 0.55) !important;
+    backdrop-filter: blur(18px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 0 12px 40px rgba(5, 40, 30, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+.nav-menu, .auth-dropdown-menu, .search-field-group .form-control:focus,
+.input-icon-box input:focus, .auth-field-group input, .ref-input-field,
+.premium-input:focus, .form-control:focus {
+    background: rgba(255, 255, 255, 0.6) !important;
+}
+
+.chat-msg.bot {
+    background: rgba(255, 255, 255, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.chatbot-input-row {
+    background: rgba(255, 255, 255, 0.55) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+}
+
+[data-theme="dark"] .search-card, [data-theme="dark"] .floating-search-card,
+[data-theme="dark"] .travel-card, [data-theme="dark"] .requirement-card,
+[data-theme="dark"] .how-step-card, [data-theme="dark"] .modern-guide-card,
+[data-theme="dark"] .trust-strip, [data-theme="dark"] .trust-card-item,
+[data-theme="dark"] .sacred-journey-card-modern, [data-theme="dark"] .ritual-step-card,
+[data-theme="dark"] .offer-card-item, [data-theme="dark"] .dashboard-offer-card,
+[data-theme="dark"] .amazon-tracker-container, [data-theme="dark"] .auth-split-modal,
+[data-theme="dark"] .two-col-auth-modal, [data-theme="dark"] .modern-auth-modal,
+[data-theme="dark"] .premium-card {
+    background: rgba(16, 38, 31, 0.55) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* ── 5. Modals — frosted sheet over tinted blur backdrop ───────────────── */
+.modal-backdrop {
+    background: rgba(10, 45, 34, 0.45) !important;
+    backdrop-filter: blur(18px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
+}
+
+.modal-card {
+    background: rgba(255, 255, 255, 0.78) !important;
+    backdrop-filter: blur(34px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(34px) saturate(190%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 30px 80px rgba(5, 25, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+}
+
+.modal-card.auth-modal-fixed {
+    background: rgba(255, 255, 255, 0.62) !important;
+}
+
+/* ── 6. Footer — glass band ────────────────────────────────────────────── */
+footer[style*="background:#D8F3DC"],
+footer[style*="background: #D8F3DC"],
+.custom-footer {
+    background: rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(26px) saturate(170%) !important;
+    -webkit-backdrop-filter: blur(26px) saturate(170%) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ── 7. Toasts — iOS-style dark lucid pill ─────────────────────────────── */
+.toast {
+    background: rgba(15, 30, 25, 0.85) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ── 8. Chatbot — floating glass bubble panel ──────────────────────────── */
+.chatbot-floating-wrapper {
+    background: transparent !important;
+}
+
+.chatbot-box {
+    background: rgba(255, 255, 255, 0.72) !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.55) !important;
+    box-shadow: 0 24px 70px rgba(5, 30, 22, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+/* ── 9. Form controls — lucid inputs ───────────────────────────────────── */
+input, select, textarea {
+    background: rgba(255, 255, 255, 0.66) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: rgba(4, 120, 87, 0.65) !important;
+    box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.18) !important;
+    outline: none !important;
+}
+
+/* ── 10. Buttons — keep brand colors, add lucid elevation ──────────────── */
+.btn, .btn-primary, .btn-outline, .auth-submit-btn, .btn-sacred-login, .btn-sacred-signup {
+    box-shadow: 0 6px 18px rgba(5, 40, 30, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+}
+
+/* ── 11. Text legibility on glass ──────────────────────────────────────── */
+.main-container h1, .main-container h2, .main-container h3,
+.modal-card h1, .modal-card h2, .modal-card h3,
+.navbar .brand-name {
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.45);
+}
+
+/* ── 12. Dark theme — dark liquid glass ────────────────────────────────── */
+[data-theme="dark"] body {
+    background: linear-gradient(135deg, #02140f 0%, #052b20 30%, #0a4536 55%, #0b5550 72%, #4a3316 88%, #1e1230 100%) !important;
+    background-attachment: fixed !important;
+}
+
+[data-theme="dark"] .navbar,
+[data-theme="dark"] .main-container {
+    background: rgba(13, 32, 26, 0.55) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] [style*="background:#ffffff"],
+[data-theme="dark"] [style*="background: #ffffff"],
+[data-theme="dark"] [style*="background:#f8fafc"],
+[data-theme="dark"] [style*="background:#f0fdf4"],
+[data-theme="dark"] [style*="background:#ecfdf5"],
+[data-theme="dark"] [style*="background:#f1f5f9"] {
+    background: rgba(20, 45, 37, 0.5) !important;
+}
+
+[data-theme="dark"] .package-card,
+[data-theme="dark"] .modal-card {
+    background: rgba(16, 38, 31, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+[data-theme="dark"] footer[style*="background:#D8F3DC"],
+[data-theme="dark"] .custom-footer {
+    background: rgba(10, 28, 22, 0.5) !important;
+}
+
+[data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea {
+    background: rgba(16, 38, 31, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    color: #e2e8f0 !important;
+}
+
+/* ── 13. Smooth theme transitions ──────────────────────────────────────── */
+body, .navbar, .main-container, .modal-card, .package-card, footer,
+input, select, textarea, .toast {
+    transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease !important;
+}
