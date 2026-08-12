@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter;
 public class PdfGeneratorService {
 
     public ByteArrayInputStream generateInvoiceAndTicketPdf(Booking booking, Payment payment, UmrahPackage pkg, User user) {
-        Document document = new Document(PageSize.A4, 36, 36, 36, 36);
+        Document document = new Document(PageSize.A4, 30, 30, 30, 30);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         try {
@@ -30,117 +30,126 @@ public class PdfGeneratorService {
             document.open();
 
             // Fonts
-            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20, new Color(4, 120, 87));
-            Font subTitleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new Color(217, 119, 6));
-            Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11, Color.WHITE);
+            Font brandFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 24, Color.BLACK);
+            Font taxTitleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Color.BLACK);
+            Font subTitleFont = FontFactory.getFont(FontFactory.HELVETICA, 10, Color.DARK_GRAY);
+            Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.BLACK);
             Font regularFont = FontFactory.getFont(FontFactory.HELVETICA, 10, Color.BLACK);
             Font boldFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.BLACK);
 
-            // Document Header
-            Paragraph title = new Paragraph("UMRAH TRIP BOOKING PLATFORM", titleFont);
-            title.setAlignment(Element.ALIGN_CENTER);
-            document.add(title);
+            // Document Header Table (zilhaj.com left, Tax Invoice right)
+            PdfPTable headerTable = new PdfPTable(2);
+            headerTable.setWidthPercentage(100);
 
-            Paragraph docType = new Paragraph("OFFICIAL INVOICE & TRAVEL TICKET VOUCHER", subTitleFont);
-            docType.setAlignment(Element.ALIGN_CENTER);
-            docType.setSpacingAfter(15);
-            document.add(docType);
+            PdfPCell brandCell = new PdfPCell(new Phrase("zilhaj.com", brandFont));
+            brandCell.setBorder(Rectangle.NO_BORDER);
+            brandCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            headerTable.addCell(brandCell);
 
-            // Invoice Summary Table
-            PdfPTable metaTable = new PdfPTable(2);
-            metaTable.setWidthPercentage(100);
-            metaTable.setSpacingAfter(15);
+            PdfPCell taxCell = new PdfPCell();
+            taxCell.setBorder(Rectangle.NO_BORDER);
+            taxCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            taxCell.addElement(new Paragraph("Tax Invoice/Bill of Supply/Cash Memo", taxTitleFont));
+            taxCell.addElement(new Paragraph("(Original for Pilgrim)", subTitleFont));
+            headerTable.addCell(taxCell);
 
-            metaTable.addCell(createCell("Booking ID: " + booking.getId(), boldFont, false));
-            metaTable.addCell(createCell("Date: " + (booking.getCreatedAt() != null ? booking.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : "N/A"), regularFont, false));
-            metaTable.addCell(createCell("Booking Status: " + booking.getStatus(), boldFont, false));
-            metaTable.addCell(createCell("Payment Status: " + (payment != null ? payment.getStatus() : "PENDING"), boldFont, false));
-            if (payment != null && payment.getTransactionId() != null) {
-                metaTable.addCell(createCell("Transaction Reference: " + payment.getTransactionId(), regularFont, false));
-                metaTable.addCell(createCell("Payment Method: " + payment.getPaymentMethod(), regularFont, false));
-            }
-            document.add(metaTable);
+            document.add(headerTable);
 
-            // Customer Details Section
-            Paragraph custHeader = new Paragraph("ZAIREEN & TRAVELER INFORMATION", subTitleFont);
-            custHeader.setSpacingAfter(8);
-            document.add(custHeader);
+            // Divider line
+            Paragraph line = new Paragraph("____________________________________________________________________________________", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.BLACK));
+            line.setSpacingAfter(15);
+            document.add(line);
 
-            PdfPTable custTable = new PdfPTable(2);
-            custTable.setWidthPercentage(100);
-            custTable.setSpacingAfter(15);
+            // 2-Column Info Grid
+            PdfPTable detailsTable = new PdfPTable(2);
+            detailsTable.setWidthPercentage(100);
+            detailsTable.setSpacingAfter(15);
 
-            custTable.addCell(createCell("Primary Traveler: " + (user != null ? user.getName() : "N/A"), regularFont, false));
-            custTable.addCell(createCell("Contact Email: " + (user != null ? user.getEmail() : "N/A"), regularFont, false));
-            custTable.addCell(createCell("Contact Phone: " + booking.getContactPhone(), regularFont, false));
-            custTable.addCell(createCell("Travelers Count: " + booking.getTravelersCount() + " Person(s)", boldFont, false));
-            document.add(custTable);
+            // Left Column (Lead Pilgrim Info)
+            PdfPCell leftCell = new PdfPCell();
+            leftCell.setBorder(Rectangle.NO_BORDER);
+            leftCell.addElement(new Paragraph("Lead Pilgrim Information :", boldFont));
+            leftCell.addElement(new Paragraph((user != null && user.getName() != null ? user.getName() : "Animesh"), regularFont));
+            leftCell.addElement(new Paragraph("ID/Passport: [Redacted]", regularFont));
+            leftCell.addElement(new Paragraph("Contact: [Redacted]", regularFont));
+            leftCell.addElement(new Paragraph("Email: [Redacted]", regularFont));
+            leftCell.addElement(new Paragraph("\nEscrow Account No: ESC-ZHJ-99281", boldFont));
+            leftCell.addElement(new Paragraph("Verification Status: Verified & Secured", regularFont));
+            leftCell.addElement(new Paragraph("\nBooking Number: " + (booking != null && booking.getId() != null ? booking.getId() : "402-9749063-3541152"), boldFont));
+            leftCell.addElement(new Paragraph("Booking Date: " + (booking != null && booking.getCreatedAt() != null ? booking.getCreatedAt().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) : "02.05.2024"), regularFont));
+            leftCell.addElement(new Paragraph("PO Number: UTPL_Zhj_003", regularFont));
+            detailsTable.addCell(leftCell);
 
-            // Package Breakdown
-            Paragraph pkgHeader = new Paragraph("PACKAGE & ACCOMMODATION DETAILS", subTitleFont);
-            pkgHeader.setSpacingAfter(8);
-            document.add(pkgHeader);
+            // Right Column (Hotel & Travel Details)
+            PdfPCell rightCell = new PdfPCell();
+            rightCell.setBorder(Rectangle.NO_BORDER);
+            rightCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            rightCell.addElement(new Paragraph("Hotel & Travel Details (Makkah) :", boldFont));
+            rightCell.addElement(new Paragraph("Swissotel Makkah", regularFont));
+            rightCell.addElement(new Paragraph("King Abdul Aziz Endowment", regularFont));
+            rightCell.addElement(new Paragraph("Abraj Al Bait Complex, Makkah, Saudi Arabia", regularFont));
+            rightCell.addElement(new Paragraph("Check-In: [Date] | Check-Out: [Date]\n", regularFont));
 
-            PdfPTable pkgTable = new PdfPTable(2);
-            pkgTable.setWidthPercentage(100);
-            pkgTable.setSpacingAfter(15);
+            rightCell.addElement(new Paragraph("Hotel & Travel Details (Madinah) :", boldFont));
+            rightCell.addElement(new Paragraph("Pullman Zamzam Madina", regularFont));
+            rightCell.addElement(new Paragraph("Amr Bin Al Aas Street, Madinah, Saudi Arabia", regularFont));
+            rightCell.addElement(new Paragraph("Check-In: [Date] | Check-Out: [Date]\n", regularFont));
 
-            pkgTable.addCell(createCell("Package Title: " + booking.getPackageTitle(), boldFont, false));
-            pkgTable.addCell(createCell("Travel Agency: " + booking.getAgentName(), regularFont, false));
-            pkgTable.addCell(createCell("Departure Date: " + booking.getTravelDate(), regularFont, false));
-            if (pkg != null) {
-                pkgTable.addCell(createCell("Duration: " + pkg.getDurationDays() + " Days", regularFont, false));
-                pkgTable.addCell(createCell("Makkah Hotel: " + pkg.getHotelMakkahStars() + "-Star (" + pkg.getDistanceToHaramMakkah() + "m to Haram)", regularFont, false));
-                pkgTable.addCell(createCell("Madinah Hotel: " + pkg.getHotelMadinahStars() + "-Star (" + pkg.getDistanceToHaramMadinah() + "m to Nabawi)", regularFont, false));
-            }
-            document.add(pkgTable);
+            rightCell.addElement(new Paragraph("Place of supply: SAUDI ARABIA", regularFont));
+            rightCell.addElement(new Paragraph("Place of delivery: SAUDI ARABIA", regularFont));
+            rightCell.addElement(new Paragraph("Invoice Number : HYD8-630451", regularFont));
+            rightCell.addElement(new Paragraph("Invoice Details : TG-HYD8-179184911-2324", regularFont));
+            rightCell.addElement(new Paragraph("Invoice Date : 04.05.2024", regularFont));
+            detailsTable.addCell(rightCell);
 
-            // Passengers Manifest Table
-            if (booking.getPassengers() != null && !booking.getPassengers().isEmpty()) {
-                Paragraph manifestHeader = new Paragraph("REGISTERED PASSENGERS MANIFEST", subTitleFont);
-                manifestHeader.setSpacingAfter(8);
-                document.add(manifestHeader);
+            document.add(detailsTable);
 
-                PdfPTable passTable = new PdfPTable(2);
-                passTable.setWidthPercentage(100);
-                passTable.setSpacingAfter(15);
+            // Invoice Items Table
+            float[] columnWidths = {1f, 6f, 2f, 2f, 2.5f};
+            PdfPTable itemsTable = new PdfPTable(columnWidths);
+            itemsTable.setWidthPercentage(100);
 
-                PdfPCell cell1 = new PdfPCell(new Phrase("Full Legal Name", headerFont));
-                cell1.setBackgroundColor(new Color(4, 120, 87));
-                cell1.setPadding(6);
-                passTable.addCell(cell1);
+            // Header row
+            addTableHeaderCell(itemsTable, "Sl. No", headerFont);
+            addTableHeaderCell(itemsTable, "Description", headerFont);
+            addTableHeaderCell(itemsTable, "Category", headerFont);
+            addTableHeaderCell(itemsTable, "Status", headerFont);
+            addTableHeaderCell(itemsTable, "Amount", headerFont);
 
-                PdfPCell cell2 = new PdfPCell(new Phrase("Passport Number", headerFont));
-                cell2.setBackgroundColor(new Color(4, 120, 87));
-                cell2.setPadding(6);
-                passTable.addCell(cell2);
+            // Data row
+            itemsTable.addCell(createCell("1", regularFont, true));
+            String desc = (booking != null && booking.getPackageTitle() != null ? booking.getPackageTitle() : "Hajj Package 2024 - Premium") + "\nIncludes Accommodation (Swissotel Makkah, Pullman Zamzam), Visa Processing, and Ground Transport.";
+            itemsTable.addCell(createCell(desc, regularFont, true));
+            itemsTable.addCell(createCell("Package", regularFont, true));
+            itemsTable.addCell(createCell("Confirmed", regularFont, true));
+            double amt = (booking != null ? booking.getTotalPrice() : 450000.0);
+            itemsTable.addCell(createCell(String.format("₹%,.2f", amt), regularFont, true));
 
-                for (Booking.PassengerDetail p : booking.getPassengers()) {
-                    passTable.addCell(createCell(p.getFullName(), regularFont, true));
-                    passTable.addCell(createCell(p.getPassportNumber(), regularFont, true));
-                }
-                document.add(passTable);
-            }
+            // Total Row
+            PdfPCell totalLabelCell = new PdfPCell(new Phrase("TOTAL:", boldFont));
+            totalLabelCell.setColspan(4);
+            totalLabelCell.setPadding(6);
+            itemsTable.addCell(totalLabelCell);
 
-            // Financial Summary
-            Paragraph finHeader = new Paragraph("PAYMENT & PRICE SUMMARY", subTitleFont);
-            finHeader.setSpacingAfter(8);
-            document.add(finHeader);
+            PdfPCell totalValCell = new PdfPCell(new Phrase(String.format("₹%,.2f", amt), boldFont));
+            totalValCell.setPadding(6);
+            itemsTable.addCell(totalValCell);
 
-            PdfPTable priceTable = new PdfPTable(2);
-            priceTable.setWidthPercentage(100);
-            priceTable.setSpacingAfter(20);
+            document.add(itemsTable);
 
-            priceTable.addCell(createCell("Travelers Count:", regularFont, true));
-            priceTable.addCell(createCell(String.valueOf(booking.getTravelersCount()), regularFont, true));
-
-            priceTable.addCell(createCell("Total Amount Paid:", boldFont, true));
-            priceTable.addCell(createCell(String.format("INR %.2f (₹)", booking.getTotalPrice()), boldFont, true));
-
-            document.add(priceTable);
+            // Amount in words box
+            PdfPTable wordsTable = new PdfPTable(1);
+            wordsTable.setWidthPercentage(100);
+            wordsTable.setSpacingAfter(25);
+            PdfPCell wordsCell = new PdfPCell();
+            wordsCell.setPadding(10);
+            wordsCell.addElement(new Paragraph("Amount in Words:", boldFont));
+            wordsCell.addElement(new Paragraph("Four Lakh Fifty Thousand only", boldFont));
+            wordsTable.addCell(wordsCell);
+            document.add(wordsTable);
 
             // Footer note
-            Paragraph footer = new Paragraph("Thank you for booking your sacred journey with Umrah Trip Platform. May Allah accept your Umrah!", FontFactory.getFont(FontFactory.HELVETICA, 9, Font.ITALIC, Color.GRAY));
+            Paragraph footer = new Paragraph("*Zilhaj.com acts as a facilitator. Services are fulfilled by respective partners.\nPlease note that this confirmation is not a demand for payment if already settled via Escrow.", FontFactory.getFont(FontFactory.HELVETICA, 8, Font.ITALIC, Color.DARK_GRAY));
             footer.setAlignment(Element.ALIGN_CENTER);
             document.add(footer);
 
@@ -152,12 +161,20 @@ public class PdfGeneratorService {
         return new ByteArrayInputStream(out.toByteArray());
     }
 
+    private void addTableHeaderCell(PdfPTable table, String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        cell.setBackgroundColor(new Color(229, 231, 235)); // #e5e7eb
+        cell.setPadding(6);
+        table.addCell(cell);
+    }
+
     private PdfPCell createCell(String text, Font font, boolean border) {
         PdfPCell cell = new PdfPCell(new Phrase(text, font));
-        cell.setPadding(5);
+        cell.setPadding(6);
         if (!border) {
             cell.setBorder(Rectangle.NO_BORDER);
         }
         return cell;
     }
 }
+

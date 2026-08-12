@@ -3391,19 +3391,330 @@ class App {
         }, 1500);
     }
 
+    downloadTicket(bookingId) {
+        return this.downloadInvoice(bookingId);
+    }
+
     async downloadInvoice(bookingId) {
-        const id = bookingId || '';
+        const id = bookingId || 'BK-048846';
         const allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
-        const local = allBookings.find(item => item.id === id);
-        if (local) {
-            const serverBookings = await this.apiCall('/bookings');
-            const exists = Array.isArray(serverBookings) && serverBookings.some(x => x.id === id);
-            if (!exists) {
-                await this.apiCall('/bookings', 'POST', local);
-            }
+        let b = allBookings.find(item => item.id === id);
+
+        if (!b) {
+            b = {
+                id: id,
+                packageTitle: 'Hajj Package 2024 - Premium',
+                travelDate: '02.05.2024',
+                travelersCount: 2,
+                totalPrice: 450000,
+                status: 'Confirmed',
+                agentName: 'AL-HARAM PREMIUM TRAVELS',
+                makkahHotel: 'Swissotel Makkah',
+                madinahHotel: 'Pullman Zamzam Madina',
+                userName: (this.state.currentUser && this.state.currentUser.name) ? this.state.currentUser.name : 'Animesh',
+                userEmail: (this.state.currentUser && this.state.currentUser.email) ? this.state.currentUser.email : '[Redacted]',
+                userPhone: (this.state.currentUser && this.state.currentUser.phone) ? this.state.currentUser.phone : '[Redacted]'
+            };
         }
-        const targetUrl = (typeof API_BASE !== 'undefined' ? API_BASE : '/api') + '/invoice/' + encodeURIComponent(id);
-        window.open(targetUrl, '_blank');
+
+        const user = this.state.currentUser || {};
+        const userName = b.userName || user.name || 'Animesh';
+        const userEmail = b.userEmail || user.email || '[Redacted]';
+        const userPhone = b.userPhone || user.phone || '[Redacted]';
+        const totalPrice = b.totalPrice || 450000;
+        const formattedAmount = (typeof totalPrice === 'number') ? totalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : totalPrice;
+
+        const numberToWordsINR = (num) => {
+            const n = Math.floor(Number(num) || 0);
+            if (n <= 0) return 'Zero only';
+            const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const t = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            const inW = (val) => {
+                if (val < 20) return a[val];
+                if (val < 100) return t[Math.floor(val / 10)] + (val % 10 ? ' ' + a[val % 10] : '');
+                if (val < 1000) return a[Math.floor(val / 100)] + ' Hundred' + (val % 100 ? ' ' + inW(val % 100) : '');
+                if (val < 100000) return inW(Math.floor(val / 1000)) + ' Thousand' + (val % 1000 ? ' ' + inW(val % 1000) : '');
+                if (val < 10000000) return inW(Math.floor(val / 100000)) + ' Lakh' + (val % 100000 ? ' ' + inW(val % 100000) : '');
+                return inW(Math.floor(val / 10000000)) + ' Crore' + (val % 10000000 ? ' ' + inW(val % 10000000) : '');
+            };
+            return inW(n) + ' only';
+        };
+
+        const amountWords = numberToWordsINR(totalPrice);
+        const makkahHotel = b.makkahHotel || 'Swissotel Makkah';
+        const madinahHotel = b.madinahHotel || 'Pullman Zamzam Madina';
+        const bookingDate = b.bookingDate || b.travelDate || '02.05.2024';
+        const invoiceNum = b.invoiceNum || 'HYD8-630451';
+        const invoiceDate = b.invoiceDate || '04.05.2024';
+        const bookingNo = b.id || '402-9749063-3541152';
+
+        const printWindow = window.open('', '_blank', 'width=900,height=1000');
+        if (!printWindow) {
+            this.showToast('Please allow popups to download your styled PDF ticket invoice.', 'warning');
+            return;
+        }
+
+        printWindow.document.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Invoice - ${bookingNo}</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    @page { size: A4; margin: 12mm 15mm; }
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+        color: #000000;
+        background: #ffffff;
+        margin: 0;
+        padding: 20px 30px;
+        font-size: 11.5px;
+        line-height: 1.45;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+    }
+    .brand-title {
+        font-size: 28px;
+        font-weight: 900;
+        color: #000000;
+        letter-spacing: -0.8px;
+        line-height: 1;
+    }
+    .header-right {
+        text-align: right;
+    }
+    .tax-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: #000000;
+        margin-bottom: 2px;
+    }
+    .tax-subtitle {
+        font-size: 11px;
+        color: #111111;
+    }
+    .divider {
+        border-top: 1px solid #000000;
+        margin: 8px 0 18px 0;
+    }
+    .details-grid {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+    .col-left {
+        width: 48%;
+    }
+    .col-right {
+        width: 48%;
+        text-align: right;
+    }
+    .sec-title {
+        font-size: 12.5px;
+        font-weight: 800;
+        color: #000000;
+        margin-bottom: 6px;
+    }
+    .info-item {
+        margin-bottom: 3px;
+        color: #000000;
+        font-size: 11px;
+    }
+    .qr-container {
+        margin-top: 12px;
+        border: 1px solid #000000;
+        display: inline-block;
+        padding: 4px;
+        background: #fff;
+    }
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        border: 1px solid #000000;
+    }
+    .invoice-table th {
+        background-color: #e5e7eb;
+        border: 1px solid #000000;
+        padding: 6px 8px;
+        font-size: 11px;
+        font-weight: 800;
+        color: #000000;
+    }
+    .invoice-table td {
+        border: 1px solid #000000;
+        padding: 8px;
+        font-size: 11px;
+        vertical-align: top;
+    }
+    .table-total-row td {
+        font-weight: 800;
+        border-top: 1.5px solid #000000;
+        font-size: 11.5px;
+    }
+    .amount-box {
+        border: 1px solid #000000;
+        border-top: none;
+        padding: 10px 12px;
+        min-height: 110px;
+        position: relative;
+    }
+    .amount-title {
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+    .amount-text {
+        font-weight: 800;
+        font-size: 12.5px;
+    }
+    .signatory-wrapper {
+        position: absolute;
+        right: 12px;
+        bottom: 8px;
+        text-align: center;
+    }
+    .stamp-placeholder {
+        width: 110px;
+        height: 40px;
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+        margin: 3px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        color: #6b7280;
+    }
+    .footer-note {
+        margin-top: 35px;
+        text-align: center;
+        font-size: 9.5px;
+        color: #4b5563;
+        font-style: italic;
+    }
+</style>
+</head>
+<body>
+    <div class="header-flex">
+        <div class="brand-title">zilhaj.com</div>
+        <div class="header-right">
+            <div class="tax-title">Tax Invoice/Bill of Supply/Cash Memo</div>
+            <div class="tax-subtitle">(Original for Pilgrim)</div>
+        </div>
+    </div>
+    <div class="divider"></div>
+
+    <div class="details-grid">
+        <div class="col-left">
+            <div class="sec-title">Lead Pilgrim Information :</div>
+            <div class="info-item"><strong>${this.escapeHtml(userName)}</strong></div>
+            <div class="info-item">ID/Passport: [Redacted]</div>
+            <div class="info-item">Contact: [Redacted]</div>
+            <div class="info-item">Email: [Redacted]</div>
+            <br>
+            <div class="info-item"><strong>Escrow Account No:</strong> ESC-ZHJ-99281</div>
+            <div class="info-item"><strong>Verification Status:</strong> Verified & Secured</div>
+            <br>
+            <div class="info-item"><strong>Booking Number:</strong> ${this.escapeHtml(bookingNo)}</div>
+            <div class="info-item"><strong>Booking Date:</strong> ${this.escapeHtml(bookingDate)}</div>
+            <div class="info-item"><strong>PO Number:</strong> UTPL_Zhj_003</div>
+            
+            <div class="qr-container">
+                <svg width="65" height="65" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="#ffffff"/>
+                    <path d="M0,0 h30 v30 h-30 z M10,10 h10 v10 h-10 z" fill="#000"/>
+                    <path d="M70,0 h30 v30 h-30 z M80,10 h10 v10 h-10 z" fill="#000"/>
+                    <path d="M0,70 h30 v30 h-30 z M10,80 h10 v10 h-10 z" fill="#000"/>
+                    <rect x="40" y="40" width="20" height="20" fill="#000"/>
+                    <rect x="70" y="70" width="15" height="15" fill="#000"/>
+                    <rect x="40" y="10" width="10" height="20" fill="#000"/>
+                    <rect x="10" y="40" width="20" height="10" fill="#000"/>
+                    <rect x="80" y="45" width="10" height="15" fill="#000"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="col-right">
+            <div class="sec-title">Hotel & Travel Details (Makkah) :</div>
+            <div class="info-item"><strong>${this.escapeHtml(makkahHotel)}</strong></div>
+            <div class="info-item">King Abdul Aziz Endowment</div>
+            <div class="info-item">Abraj Al Bait Complex, Makkah, Saudi Arabia</div>
+            <div class="info-item"><strong>Check-In:</strong> [Date] | <strong>Check-Out:</strong> [Date]</div>
+            <br>
+            <div class="sec-title">Hotel & Travel Details (Madinah) :</div>
+            <div class="info-item"><strong>${this.escapeHtml(madinahHotel)}</strong></div>
+            <div class="info-item">Amr Bin Al Aas Street, Madinah, Saudi Arabia</div>
+            <div class="info-item"><strong>Check-In:</strong> [Date] | <strong>Check-Out:</strong> [Date]</div>
+            <br>
+            <div class="info-item"><strong>Place of supply:</strong> SAUDI ARABIA</div>
+            <div class="info-item"><strong>Place of delivery:</strong> SAUDI ARABIA</div>
+            <div class="info-item"><strong>Invoice Number :</strong> ${this.escapeHtml(invoiceNum)}</div>
+            <div class="info-item"><strong>Invoice Details :</strong> TG-HYD8-179184911-2324</div>
+            <div class="info-item"><strong>Invoice Date :</strong> ${this.escapeHtml(invoiceDate)}</div>
+        </div>
+    </div>
+
+    <table class="invoice-table">
+        <thead>
+            <tr>
+                <th style="width:5%; text-align:center;">Sl. No</th>
+                <th style="width:55%; text-align:left;">Description</th>
+                <th style="width:13%; text-align:left;">Category</th>
+                <th style="width:12%; text-align:left;">Status</th>
+                <th style="width:15%; text-align:right;">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="text-align:center;">1</td>
+                <td>
+                    <strong>${this.escapeHtml(b.packageTitle || 'Hajj Package 2024 - Premium')}</strong><br>
+                    <span style="font-size:10px; color:#333333;">Includes Accommodation (${this.escapeHtml(makkahHotel)}, ${this.escapeHtml(madinahHotel)}), Visa Processing, and Ground Transport.</span>
+                </td>
+                <td>Package</td>
+                <td>Confirmed</td>
+                <td style="text-align:right;">₹${formattedAmount}</td>
+            </tr>
+            <tr class="table-total-row">
+                <td colspan="4" style="text-align:left;"><strong>TOTAL:</strong></td>
+                <td style="text-align:right;"><strong>₹${formattedAmount}</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="amount-box">
+        <div class="amount-title">Amount in Words:</div>
+        <div class="amount-text">${amountWords}</div>
+
+        <div class="signatory-wrapper">
+            <div style="font-weight:700; font-size:11px; margin-bottom:2px;">For Zilhaj.com:</div>
+            <div class="stamp-placeholder">[Seal/Stamp]</div>
+            <div style="font-weight:800; font-size:11px; margin-top:2px;">Authorized Signatory</div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        *Zilhaj.com acts as a facilitator. Services are fulfilled by respective partners.<br>
+        Please note that this confirmation is not a demand for payment if already settled via Escrow.
+    </div>
+
+    <script>
+        window.onload = function() {
+            setTimeout(function() {
+                window.print();
+            }, 300);
+        };
+    </script>
+</body>
+</html>`);
+        printWindow.document.close();
     }
 
     deleteRequirement(reqId) {
