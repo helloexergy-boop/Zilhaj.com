@@ -420,7 +420,11 @@ app.post('/api/auth/register', async (req, res) => {
         }
 
         if (existingUser) {
-            return res.status(400).json({ error: 'An account with this email address already exists. Please log in.' });
+            // Transient users created by send-otp (no password/name credentials yet) must NOT block registration
+            const isTransient = !existingUser.password && !existingUser.name;
+            if (!isTransient) {
+                return res.status(400).json({ error: 'An account with this email address already exists. Please log in.' });
+            }
         }
 
         // 5. Generate 6-digit OTP, Hash password, Save with isVerified = false
@@ -436,8 +440,8 @@ app.post('/api/auth/register', async (req, res) => {
             phone: phone ? phone.trim() : '',
             role: role || 'ROLE_USER',
             isVerified: true, // Account verified upon registration completion
-            otpCode: null,
-            otpExpiry: null,
+            otpCode: otpCode,
+            otpExpiry: otpExpiry,
             resendAttempts: 0,
             createdAt: new Date()
         };
@@ -446,7 +450,11 @@ app.post('/api/auth/register', async (req, res) => {
 
         // Save to MongoDB asynchronously
         getFastDb().then(db => {
-            if (db) db.collection('users').insertOne(newUser).catch(() => {});
+            if (db) db.collection('users').updateOne(
+                { email: cleanEmail },
+                { $setOnInsert: newUser },
+                { upsert: true }
+            ).catch(() => {});
         });
 
         // 6. Send OTP to user via Email/SMS

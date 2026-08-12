@@ -4547,7 +4547,7 @@ class App {
                 </button>
 
                 <!-- LEFT COLUMN: AUTHENTICATION FORM PANEL (COMPACT FULL SCREEN PAGE) -->
-                <div style="flex:1; height:100vh; background:#ffffff; padding:2.2rem 3.5rem 1.8rem; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; overflow-y:auto;">
+                <div style="flex:1; height:100vh; background:#ffffff; padding:1.2rem 2.8rem 1rem; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; overflow-y:auto;">
                     
                     <!-- TOP HEADER ROW -->
                     <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-shrink:0;">
@@ -4574,32 +4574,32 @@ class App {
                     </div>
 
                     <!-- CENTERED FORM CONTAINER (SHIFTED UPWARDS TO REMOVE BLANK SPACE AT TOP) -->
-                    <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-start; max-width:380px; width:100%; margin:0 auto; box-sizing:border-box; padding-top:1.2rem; padding-bottom:0.4rem;">
+                    <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-start; max-width:400px; width:100%; margin:0 auto; box-sizing:border-box; padding-top:0.3rem; padding-bottom:0;">
                         
                         <!-- AVATAR BADGE TOP -->
-                        <div style="margin-bottom:0.4rem; text-align:center; flex-shrink:0;">
-                            <div style="width:38px; height:38px; border-radius:50%; background:#e0e7ff; display:flex; align-items:center; justify-content:center; font-size:1.1rem; color:#4338ca; margin:0 auto;">
+                        <div style="margin-bottom:0.3rem; text-align:center; flex-shrink:0;">
+                            <div style="width:32px; height:32px; border-radius:50%; background:#e0e7ff; display:flex; align-items:center; justify-content:center; font-size:0.95rem; color:#4338ca; margin:0 auto;">
                                 👤
                             </div>
                         </div>
 
                         <!-- HEADING & SUBTITLE -->
                         ${isRegister ? `
-                            <h1 style="font-size:1.55rem; font-weight:800; color:#0f172a; text-align:center; margin:0 0 0.15rem 0; letter-spacing:-0.02em; flex-shrink:0;">Create your account</h1>
-                            <p style="font-size:0.78rem; color:#64748b; text-align:center; margin:0 0 0.65rem 0; flex-shrink:0;">Get started with your spiritual journey in minutes.</p>
+                            <h1 style="font-size:1.15rem; font-weight:800; color:#0f172a; text-align:center; margin:0 0 0.1rem 0; letter-spacing:-0.01em; flex-shrink:0;">Create your account</h1>
+                            <p style="font-size:0.8rem; color:#64748b; text-align:center; margin:0 0 0.6rem 0; flex-shrink:0;">Get started with your spiritual journey in minutes.</p>
                         ` : ''}
                         ${isLogin ? `
-                            <h1 style="font-size:1.65rem; font-weight:900; color:#0f172a; text-align:center; margin:0 0 0.15rem 0; letter-spacing:-0.02em; flex-shrink:0;">Welcome back!</h1>
-                            <p style="font-size:0.78rem; color:#64748b; text-align:center; margin:0 0 0.65rem 0; flex-shrink:0;">Sign in to continue where your left off.</p>
+                            <h1 style="font-size:1.2rem; font-weight:800; color:#0f172a; text-align:center; margin:0 0 0.1rem 0; letter-spacing:-0.01em; flex-shrink:0;">Welcome back!</h1>
+                            <p style="font-size:0.8rem; color:#64748b; text-align:center; margin:0 0 0.6rem 0; flex-shrink:0;">Sign in to continue where your left off.</p>
                         ` : ''}
 
                         <!-- IN-FORM ALERT CONTAINERS -->
-                        <div id="authFormAlert" style="display:none; margin-bottom:0.4rem; font-size:0.76rem;"></div>
-                        <div id="authAlertBox" style="display:none; margin-bottom:0.4rem; font-size:0.76rem;"></div>
+                        <div id="authFormAlert" style="display:none; margin-bottom:0.5rem; font-size:0.8rem;"></div>
+                        <div id="authAlertBox" style="display:none; margin-bottom:0.5rem; font-size:0.8rem;"></div>
 
                         ${!isForgot ? `
                             <!-- SOCIAL LOGIN BUTTONS -->
-                            <button type="button" onclick="app.loginWithGoogle()" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; background:#ffffff; display:flex; align-items:center; justify-content:center; gap:0.5rem; cursor:pointer; font-weight:700; font-size:0.82rem; color:#0f172a; margin-bottom:0.35rem; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
+                            <button type="button" onclick="app.loginWithGoogle()" style="width:100%; height:40px; border:1px solid #e2e8f0; border-radius:8px; background:#ffffff; display:flex; align-items:center; justify-content:center; gap:0.5rem; cursor:pointer; font-weight:700; font-size:0.85rem; color:#0f172a; margin-bottom:0.5rem; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
                                 <svg width="16" height="16" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -4609,13 +4609,13 @@ class App {
                                 <span>${isRegister ? 'Sign up with Google' : 'Login with Google'}</span>
                             </button>
 
-                            <button type="button" onclick="app.showToast('Apple Sign-In feature available soon', 'info')" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; background:#ffffff; display:flex; align-items:center; justify-content:center; gap:0.5rem; cursor:pointer; font-weight:700; font-size:0.82rem; color:#0f172a; margin-bottom:0.4rem; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
+                            <button type="button" onclick="app.showToast('Apple Sign-In feature available soon', 'info')" style="width:100%; height:40px; border:1px solid #e2e8f0; border-radius:8px; background:#ffffff; display:flex; align-items:center; justify-content:center; gap:0.5rem; cursor:pointer; font-weight:700; font-size:0.85rem; color:#0f172a; margin-bottom:0.5rem; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
                                 <span style="font-size:0.95rem; line-height:1;"></span>
                                 <span>${isRegister ? 'Sign up with Apple' : 'Login with Apple'}</span>
                             </button>
 
                             <!-- DIVIDER -->
-                            <div style="display:flex; align-items:center; margin-bottom:0.4rem; gap:0.45rem; flex-shrink:0;">
+                            <div style="display:flex; align-items:center; margin-bottom:0.5rem; gap:0.45rem; flex-shrink:0;">
                                 <div style="flex:1; height:1px; background:#e2e8f0;"></div>
                                 <span style="font-size:0.64rem; color:#94a3b8; font-weight:700; text-transform:uppercase;">OR</span>
                                 <div style="flex:1; height:1px; background:#e2e8f0;"></div>
@@ -4626,18 +4626,18 @@ class App {
                         <form onsubmit="event.preventDefault(); app.handleAuthSubmit('${mode}');" style="display:flex; flex-direction:column; flex-shrink:0;">
                             ${isRegister ? `
                                 <!-- FULL NAME -->
-                                <input type="text" id="authName" required placeholder="Full name" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; padding:0 0.85rem; font-size:0.82rem; box-sizing:border-box; margin-bottom:0.4rem; background:#ffffff; color:#0f172a; font-weight:500;">
+                                <input type="text" id="authName" required placeholder="Full name" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:8px; padding:0 0.9rem; font-size:0.9rem; box-sizing:border-box; margin-bottom:0.5rem; background:#ffffff; color:#0f172a; font-weight:500;">
 
                                 <!-- EMAIL ADDRESS WITH INLINE OTP BUTTON -->
-                                <div style="position:relative; margin-bottom:0.4rem;">
-                                    <input type="email" id="authEmail" required placeholder="Email address" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; padding:0 5rem 0 0.85rem; font-size:0.82rem; box-sizing:border-box; background:#ffffff; color:#0f172a; font-weight:500;">
-                                    <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="position:absolute; right:3px; top:3px; height:30px; padding:0 0.7rem; background:#3d5245; color:#ffffff; border:none; border-radius:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">
+                                <div style="position:relative; margin-bottom:0.5rem;">
+                                    <input type="email" id="authEmail" required placeholder="Email address" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:8px; padding:0 5.4rem 0 0.9rem; font-size:0.9rem; box-sizing:border-box; background:#ffffff; color:#0f172a; font-weight:500;">
+                                    <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="position:absolute; right:3px; top:4px; height:34px; padding:0 0.7rem; background:#3d5245; color:#ffffff; border:none; border-radius:6px; font-size:0.76rem; font-weight:700; cursor:pointer;">
                                         Send OTP
                                     </button>
                                 </div>
 
                                 <!-- VERIFICATION CODE BOX -->
-                                <div id="otpSectionBox" style="margin-bottom:0.4rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:0.3rem 0.6rem;">
+                                <div id="otpSectionBox" style="margin-bottom:0.5rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:0.4rem 0.7rem;">
                                     <div style="display:flex; justify-content:space-between; align-items:center;">
                                         <div>
                                             <label style="font-size:0.64rem; color:#166534; font-weight:700; display:block;">Verification Code</label>
@@ -4651,35 +4651,35 @@ class App {
                                 </div>
 
                                 <!-- CREATE PASSWORD -->
-                                <div style="position:relative; margin-bottom:0.4rem;">
-                                    <input type="password" id="authPassword" required placeholder="Create password" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; padding:0 2rem 0 0.85rem; font-size:0.82rem; box-sizing:border-box; background:#ffffff; color:#0f172a;" onkeyup="app.checkPasswordStrength(this.value)">
-                                    <button type="button" id="eyeRegPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeRegPass')" style="position:absolute; right:0.75rem; top:8px; background:none; border:none; cursor:pointer; font-size:0.9rem; color:#64748b;">👁️</button>
+                                <div style="position:relative; margin-bottom:0.5rem;">
+                                    <input type="password" id="authPassword" required placeholder="Create password" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:8px; padding:0 2.2rem 0 0.9rem; font-size:0.9rem; box-sizing:border-box; background:#ffffff; color:#0f172a;" onkeyup="app.checkPasswordStrength(this.value)">
+                                    <button type="button" id="eyeRegPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeRegPass')" style="position:absolute; right:0.8rem; top:10px; background:none; border:none; cursor:pointer; font-size:0.95rem; color:#64748b;">👁️</button>
                                 </div>
 
                                 <!-- CONFIRM PASSWORD -->
-                                <div style="position:relative; margin-bottom:0.5rem;">
-                                    <input type="password" id="authConfirmPassword" required placeholder="Confirm password" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; padding:0 2rem 0 0.85rem; font-size:0.82rem; box-sizing:border-box; background:#ffffff; color:#0f172a;">
-                                    <button type="button" id="eyeConfirmPass" onclick="app.togglePasswordVisibility('authConfirmPassword', 'eyeConfirmPass')" style="position:absolute; right:0.75rem; top:8px; background:none; border:none; cursor:pointer; font-size:0.9rem; color:#64748b;">👁️</button>
+                                <div style="position:relative; margin-bottom:0.55rem;">
+                                    <input type="password" id="authConfirmPassword" required placeholder="Confirm password" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:8px; padding:0 2.2rem 0 0.9rem; font-size:0.9rem; box-sizing:border-box; background:#ffffff; color:#0f172a;">
+                                    <button type="button" id="eyeConfirmPass" onclick="app.togglePasswordVisibility('authConfirmPassword', 'eyeConfirmPass')" style="position:absolute; right:0.8rem; top:10px; background:none; border:none; cursor:pointer; font-size:0.95rem; color:#64748b;">👁️</button>
                                 </div>
                             ` : `
                                 <!-- LOGIN EMAIL -->
-                                <input type="text" id="authEmail" required placeholder="Email address" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; padding:0 0.85rem; font-size:0.82rem; box-sizing:border-box; margin-bottom:0.45rem; background:#ffffff; color:#0f172a; font-weight:500;">
+                                <input type="text" id="authEmail" required placeholder="Email address" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:8px; padding:0 0.9rem; font-size:0.9rem; box-sizing:border-box; margin-bottom:0.55rem; background:#ffffff; color:#0f172a; font-weight:500;">
 
                                 <!-- LOGIN PASSWORD -->
-                                <div style="position:relative; margin-bottom:0.5rem;">
-                                    <input type="password" id="authPassword" required placeholder="Password" style="width:100%; height:36px; border:1px solid #e2e8f0; border-radius:8px; padding:0 2rem 0 0.85rem; font-size:0.82rem; box-sizing:border-box; background:#ffffff; color:#0f172a;">
-                                    <button type="button" id="eyeLoginPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeLoginPass')" style="position:absolute; right:0.75rem; top:8px; background:none; border:none; cursor:pointer; font-size:0.9rem; color:#64748b;">👁️</button>
+                                <div style="position:relative; margin-bottom:0.55rem;">
+                                    <input type="password" id="authPassword" required placeholder="Password" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:8px; padding:0 2.2rem 0 0.9rem; font-size:0.9rem; box-sizing:border-box; background:#ffffff; color:#0f172a;">
+                                    <button type="button" id="eyeLoginPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeLoginPass')" style="position:absolute; right:0.8rem; top:10px; background:none; border:none; cursor:pointer; font-size:0.95rem; color:#64748b;">👁️</button>
                                 </div>
                             `}
 
                             <!-- SUBMIT BUTTON -->
-                            <button type="submit" class="auth-submit-btn" style="width:100%; height:38px; background:#3d5245; color:#ffffff; border:none; border-radius:8px; font-weight:800; font-size:0.85rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#2b3c31'" onmouseout="this.style.background='#3d5245'">
+                            <button type="submit" class="auth-submit-btn" style="width:100%; height:44px; background:#3d5245; color:#ffffff; border:none; border-radius:8px; font-weight:800; font-size:0.92rem; cursor:pointer; transition:background 0.2s; margin-top:0.15rem;" onmouseover="this.style.background='#2b3c31'" onmouseout="this.style.background='#3d5245'">
                                 ${isRegister ? 'Sign up with Email' : 'Login with Email'}
                             </button>
                         </form>
 
                         ${isLogin ? `
-                            <div style="font-size:0.72rem; color:#64748b; text-align:center; margin-top:0.45rem; flex-shrink:0;">
+                            <div style="font-size:0.76rem; color:#64748b; text-align:center; margin-top:0.5rem; flex-shrink:0;">
                                 By continuing, you acknowledge Zilhaj <a href="#" onclick="event.preventDefault(); app.navigate('privacy');" style="color:#0f172a; text-decoration:underline;">Privacy Policy</a>.
                             </div>
                         ` : ''}
@@ -4687,7 +4687,7 @@ class App {
                     </div>
 
                     <!-- FIXED BOTTOM FOOTER METADATA -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; font-size:0.74rem; color:#64748b; padding-top:0.3rem; flex-shrink:0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; font-size:0.78rem; color:#64748b; padding-top:0.15rem; flex-shrink:0;">
                         <div>© 2024 Zilhaj Umrah and Hajj Travel.</div>
                         <div style="cursor:pointer; font-weight:600;">🌐 ENG ˅</div>
                     </div>
@@ -4850,28 +4850,83 @@ class App {
     }
 
     handleAuthSubmit(mode) {
-        const email = document.getElementById('authEmail')?.value.trim();
-        const password = document.getElementById('authPassword')?.value;
-        const confirmPassword = document.getElementById('authConfirmPassword')?.value;
-        const name = document.getElementById('authName')?.value.trim();
-        const alertBox = document.getElementById('authFormAlert');
+        this.hideFormError();
+        const emailEl = document.getElementById('authEmail');
+        const passwordEl = document.getElementById('authPassword');
+        const confirmPassEl = document.getElementById('authConfirmPassword') || document.getElementById('authPasswordConfirm');
+        const nameEl = document.getElementById('authName');
+        const termsEl = document.getElementById('termsCheck');
 
-        if (mode === 'register') {
-            if (password && confirmPassword && password !== confirmPassword) {
-                if (alertBox) {
-                    alertBox.style.display = 'block';
-                    alertBox.innerHTML = `
-                        <div style="display:flex; align-items:center; gap:0.45rem; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:0.4rem 0.75rem; border-radius:6px; font-size:0.76rem; font-weight:700;">
-                            <span>⚠️</span> <div>Passwords do not match. Please re-enter.</div>
-                        </div>
-                    `;
-                }
+        const email = emailEl ? emailEl.value.trim() : '';
+        const password = passwordEl ? passwordEl.value : '';
+
+        if (mode === 'login' || mode === 'admin-login') {
+            if (!email || !password) {
+                this.showFormError('<b>Missing Fields</b><br>Please enter both your email address and password.');
                 return;
             }
-            this.register(name || (email ? email.split('@')[0] : 'User'), email, password);
-        } else {
             this.login(email, password);
+            return;
         }
+
+        if (mode !== 'register') return;
+
+        const name = nameEl ? nameEl.value.trim() : '';
+        const confirmPassword = confirmPassEl ? confirmPassEl.value : '';
+
+        if (!name || !email || !password || !confirmPassword) {
+            this.showFormError('<b>Missing Information</b><br>Please fill in all fields: Full Name, Email, Password, and Confirm Password.');
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            this.showFormError('<b>Invalid Email Format</b><br>Please enter a valid email address (e.g. name@domain.com).');
+            if (emailEl) emailEl.focus();
+            return;
+        }
+
+        if (password.length < 8) {
+            this.showFormError('<b>Weak Password</b><br>Password must be at least 8 characters long.');
+            if (passwordEl) passwordEl.focus();
+            return;
+        }
+        if (!/[A-Z]/.test(password)) {
+            this.showFormError('<b>Weak Password</b><br>Password must contain at least 1 uppercase letter.');
+            if (passwordEl) passwordEl.focus();
+            return;
+        }
+        if (!/[0-9]/.test(password)) {
+            this.showFormError('<b>Weak Password</b><br>Password must contain at least 1 number.');
+            if (passwordEl) passwordEl.focus();
+            return;
+        }
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            this.showFormError('<b>Weak Password</b><br>Password must contain at least 1 special character (!@#$%^&*).');
+            if (passwordEl) passwordEl.focus();
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            this.showFormError('<b>Password Mismatch</b><br>Confirm password does not match password.');
+            if (confirmPassEl) confirmPassEl.focus();
+            return;
+        }
+
+        if (termsEl && !termsEl.checked) {
+            this.showFormError('<b>Terms Required</b><br>Please accept the Terms of Service and Privacy Policy.');
+            return;
+        }
+
+        this.state.otpVerified = this.state.otpVerified === true;
+        if (!this.state.otpVerified) {
+            this.showFormError('<b>OTP Verification Required</b><br>Please click <b>"Send OTP"</b>, enter the verification code shown, and click <b>"Verify"</b> before completing registration.');
+            const otpBox = document.getElementById('otpSectionBox');
+            if (otpBox) otpBox.style.display = 'block';
+            return;
+        }
+
+        this.register(name, email, password, confirmPassword);
     }
 
     togglePasswordVisibility(inputId, btnId) {
@@ -4921,9 +4976,9 @@ class App {
         } else {
             btn.disabled = false;
             if (mode === 'register') {
-                btn.innerHTML = 'Verify &amp; Sign Up';
-            } else if (mode === 'login') {
-                btn.innerHTML = 'Log In';
+                btn.innerHTML = 'Sign up with Email';
+            } else if (mode === 'login' || mode === 'admin-login') {
+                btn.innerHTML = 'Login with Email';
             } else {
                 btn.innerHTML = 'Submit';
             }
@@ -5050,7 +5105,7 @@ class App {
         const emailInput = document.getElementById('authEmail');
         const codeEntered = otpInput ? otpInput.value.trim() : '';
         const target = (emailInput ? emailInput.value.trim() : '') || this.state.pendingVerificationEmail || '';
-        const msg = document.getElementById('otpStatusMsg');
+        const msg = document.getElementById('otpStatusMsg') || document.getElementById('otpSentAlert');
 
         if (!codeEntered) {
             this.showFormError('Please enter your 6-digit verification code.');
@@ -5086,7 +5141,7 @@ class App {
             }
         }
 
-        this.setAuthButtonLoading(false);
+        this.setAuthButtonLoading(false, 'register');
 
         if (verified) {
             this.state.otpVerified = true;
@@ -5208,95 +5263,6 @@ class App {
         }
     }
 
-    handleAuthSubmit(mode) {
-        this.hideFormError();
-        const emailEl = document.getElementById('authEmail');
-        const passwordEl = document.getElementById('authPassword');
-        const confirmPassEl = document.getElementById('authPasswordConfirm');
-        const nameEl = document.getElementById('authName');
-        const termsEl = document.getElementById('termsCheck');
-
-        const email = emailEl ? emailEl.value.trim() : '';
-        const password = passwordEl ? passwordEl.value.trim() : '';
-
-        if (mode === 'login' || mode === 'admin-login') {
-            if (!email || !password) {
-                this.showFormError('<b>Missing Fields</b><br>Email and password required');
-                return;
-            }
-            this.login(email, password);
-        } else if (mode === 'register') {
-            const name = nameEl ? nameEl.value.trim() : '';
-            const confirmPassword = confirmPassEl ? confirmPassEl.value.trim() : '';
-
-            // 1. All fields required
-            if (!name || !email || !password || !confirmPassword) {
-                this.showFormError('<b>Missing Information</b><br>Please fill in all fields: Full Name, Email, Password, and Confirm Password.');
-                return;
-            }
-
-            // 2. Email format check
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                this.showFormError('<b>Invalid Email Format</b><br>Please enter a valid email address (e.g. name@domain.com).');
-                if (emailEl) emailEl.focus();
-                return;
-            }
-
-            // 3. Password strength check (length, uppercase, number, special character)
-            if (password.length < 8) {
-                this.showFormError('<b>Weak Password</b><br>Password must be at least 8 characters long.');
-                if (passwordEl) passwordEl.focus();
-                return;
-            }
-            if (!/[A-Z]/.test(password)) {
-                this.showFormError('<b>Weak Password</b><br>Password must contain at least 1 uppercase letter.');
-                if (passwordEl) passwordEl.focus();
-                return;
-            }
-            if (!/[0-9]/.test(password)) {
-                this.showFormError('<b>Weak Password</b><br>Password must contain at least 1 number.');
-                if (passwordEl) passwordEl.focus();
-                return;
-            }
-            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-                this.showFormError('<b>Weak Password</b><br>Password must contain at least 1 special character (!@#$%^&*).');
-                if (passwordEl) passwordEl.focus();
-                return;
-            }
-
-            // 4. Confirm password must match password
-            if (password !== confirmPassword) {
-                this.showFormError('<b>Password Mismatch</b><br>Confirm password does not match password.');
-                if (confirmPassEl) confirmPassEl.focus();
-                return;
-            }
-
-            // 5. Terms check
-            if (termsEl && !termsEl.checked) {
-                this.showFormError('<b>Terms Required</b><br>Please accept the Terms of Service and Privacy Policy.');
-                return;
-            }
-
-            // 6. OTP Verification Check
-            const otpInput = document.getElementById('authOtpCode');
-            const codeEntered = otpInput ? otpInput.value.trim() : '';
-
-            if (codeEntered && (codeEntered === '1234' || codeEntered === '123456' || (this.state.generatedOtp && codeEntered === this.state.generatedOtp.trim()))) {
-                this.state.otpVerified = true;
-            }
-
-            if (!this.state.otpVerified) {
-                this.showFormError('<b>OTP Verification Required</b><br>Please click <b>"Send OTP"</b>, enter the 6-digit code from your email, and click <b>"Verify"</b> before completing registration.');
-                const otpBox = document.getElementById('otpSectionBox');
-                if (otpBox) otpBox.style.display = 'block';
-                return;
-            }
-
-            this.register(name, email, password, confirmPassword);
-        }
-    }
-
     async register(name, email, password, confirmPassword) {
         this.hideFormError();
         this.showLoading('Please wait...', 'Creating Account');
@@ -5316,7 +5282,13 @@ class App {
                 body: JSON.stringify({ name: cleanName, email: cleanEmail, password: cleanPassword, role: 'ROLE_USER' })
             });
 
-            const data = await response.json();
+            const text = await response.text();
+            let data = {};
+            try {
+                data = text ? JSON.parse(text) : {};
+            } catch (parseErr) {
+                data = { error: text || 'Unable to register account.' };
+            }
             backendReached = true;
 
             if (!response.ok) {
@@ -5421,7 +5393,13 @@ class App {
                 body: JSON.stringify({ email: cleanInput, password: cleanPass })
             });
 
-            const data = await response.json();
+            const text = await response.text();
+            let data = {};
+            try {
+                data = text ? JSON.parse(text) : {};
+            } catch (parseErr) {
+                data = { error: text || 'Invalid email or password.' };
+            }
             backendReached = true;
 
             if (response.ok && data && (data.user || data.token)) {
