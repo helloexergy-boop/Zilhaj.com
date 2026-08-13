@@ -24,8 +24,23 @@ app.use(express.json());
 // Serve static files from /public and /client directories
 const publicDir = path.join(__dirname, '../public');
 const clientDir = path.join(__dirname, '../client');
-app.use(express.static(publicDir));
-app.use(express.static(clientDir));
+const staticOptions = {
+    setHeaders: (res, filePath) => {
+        const ext = path.extname(filePath).toLowerCase();
+        const basename = path.basename(filePath);
+        // Hashed build assets (e.g. index-DHYInrD2.js) are cache-safe forever
+        const isHashedAsset = /-[A-Za-z0-9_-]{8,}\.\w+$/.test(basename);
+        if (ext === '.html') {
+            res.setHeader('Cache-Control', 'no-cache');
+        } else if (isHashedAsset) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        } else if (['.js', '.css', '.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.mp4', '.webm'].includes(ext)) {
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+        }
+    }
+};
+app.use(express.static(publicDir, staticOptions));
+app.use(express.static(clientDir, staticOptions));
 
 const MONGODB_URI = process.env.MONGODB_URI || process.env.SPRING_DATA_MONGODB_URI || 'mongodb+srv://rajuranjanxbkj_db_user:mSORiUdT4m8ey11k@cluster0.bwdhkat.mongodb.net/umrah_db?retryWrites=true&w=majority';
 
