@@ -2400,12 +2400,193 @@ class App {
         container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
 
+    maskValue(value) {
+        const s = String(value || '');
+        if (s.length <= 4) return s.replace(/./g, '*');
+        return '********' + s.slice(-4);
+    }
+
+    maskEmail(email) {
+        const s = String(email || '');
+        const at = s.indexOf('@');
+        if (at <= 1) return '*****' + s.slice(at);
+        return s.slice(0, 1) + '*****' + s.slice(at);
+    }
+
     setDashboardTab(tabName) {
         this.state.activeDashboardTab = tabName || 'dashboard';
+        // Reset sub-states when navigating between tabs
+        if (tabName !== 'requests') delete this.state.selectedReqId;
+        if (tabName !== 'notifications') delete this.state.notifFilter;
+        if (tabName !== 'payments') delete this.state.paymentFilter;
+        if (tabName !== 'requests') delete this.state.reqDetailTab;
         const main = document.getElementById('mainContainer');
         if (main && this.state.currentPage === 'dashboard') {
             main.innerHTML = this.renderDashboardPage();
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    viewRequestDetail(reqId) {
+        this.state.selectedReqId = reqId;
+        this.state.activeDashboardTab = 'requests';
+        delete this.state.reqDetailTab;
+        const main = document.getElementById('mainContainer');
+        if (main) {
+            main.innerHTML = this.renderDashboardPage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    backToRequests() {
+        delete this.state.selectedReqId;
+        delete this.state.reqDetailTab;
+        const main = document.getElementById('mainContainer');
+        if (main) {
+            main.innerHTML = this.renderDashboardPage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    setReqDetailTab(tab) {
+        this.state.reqDetailTab = tab;
+        const main = document.getElementById('mainContainer');
+        if (main && this.state.currentPage === 'dashboard') {
+            main.innerHTML = this.renderDashboardPage();
+        }
+    }
+
+    setPaymentFilter(filter) {
+        this.state.paymentFilter = filter;
+        const main = document.getElementById('mainContainer');
+        if (main && this.state.activeDashboardTab === 'payments') {
+            main.innerHTML = this.renderDashboardPage();
+        }
+    }
+
+    selectPaymentRow(id) {
+        this.state.selectedTxnId = id;
+        const main = document.getElementById('mainContainer');
+        if (main && this.state.activeDashboardTab === 'payments') {
+            main.innerHTML = this.renderDashboardPage();
+        }
+    }
+
+    toggleFaq(id) {
+        this.state.faqOpenId = this.state.faqOpenId === id ? null : id;
+        const main = document.getElementById('mainContainer');
+        if (main && this.state.activeDashboardTab === 'help') {
+            main.innerHTML = this.renderDashboardPage();
+        }
+    }
+
+    getDashboardNotifications() {
+        const key = 'umrah_notifications';
+        const stored = localStorage.getItem(key);
+        if (stored) {
+            try { return JSON.parse(stored); } catch (e) {}
+        }
+        const user = this.state.currentUser || {};
+        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        const localBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
+        const apiReqs = this.state.myRequirements || [];
+        const apiOffers = this.state.userOffers || [];
+        const apiBookings = this.state.myBookings || [];
+        const requirements = [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
+        const offers = [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
+        const bookings = [...apiBookings, ...localBookings.filter(lb => !apiBookings.some(b => b.id === lb.id))];
+        const list = [];
+        offers.forEach((o, i) => {
+            const req = requirements.find(r => r.id === (o.requirementId || o.requestId));
+            list.push({
+                id: 'n-off-' + (o.id || i),
+                category: 'Offers',
+                title: 'New offer received',
+                message: (o.agentName || 'A verified operator') + ' submitted an offer' + (req ? ' for ' + req.id : ' for your request'),
+                time: 'Just now',
+                read: false
+            });
+        });
+        requirements.forEach((r, i) => {
+            const roffs = offers.filter(o => o.requirementId === r.id || o.requestId === r.id);
+            if (roffs.length === 0) {
+                list.push({
+                    id: 'n-req-' + (r.id || i),
+                    category: 'Requests',
+                    title: 'Request submitted',
+                    message: 'Your request ' + r.id + ' is live and being shared with verified operators.',
+                    time: 'Today',
+                    read: false
+                });
+            }
+        });
+        bookings.forEach((b, i) => {
+            list.push({
+                id: 'n-pay-' + (b.id || i),
+                category: 'Payments',
+                title: 'Payment successful',
+                message: (b.packageTitle || 'Your Umrah package') + ' was paid and your booking is confirmed.',
+                time: b.paidAt || 'Today',
+                read: false
+            });
+        });
+        list.push({
+            id: 'n-welcome',
+            category: 'System',
+            title: 'Welcome to Zilhaj' + (user.name ? ', ' + user.name : '') + '!',
+            message: 'Your account is verified. Explore verified offers and plan your Umrah journey safely.',
+            time: '1 day ago',
+            read: true
+        });
+        try {
+            localStorage.setItem(key, JSON.stringify(list));
+        } catch (e) {}
+        return list;
+    }
+
+    markAllNotifsRead() {
+        const key = 'umrah_notifications';
+        let list = [];
+        try {
+            list = JSON.parse(localStorage.getItem(key) || '[]');
+        } catch (e) {}
+        if (list.length === 0) list = this.getDashboardNotifications();
+        list.forEach(n => { n.read = true; });
+        try {
+            localStorage.setItem(key, JSON.stringify(list));
+        } catch (e) {}
+        const main = document.getElementById('mainContainer');
+        if (main && this.state.activeDashboardTab === 'notifications') {
+            main.innerHTML = this.renderDashboardPage();
+        }
+        this.showToast('All notifications marked as read', 'success');
+    }
+
+    markNotifRead(id) {
+        const key = 'umrah_notifications';
+        let list = [];
+        try {
+            list = JSON.parse(localStorage.getItem(key) || '[]');
+        } catch (e) {}
+        const n = list.find(x => x.id === id);
+        if (n && !n.read) {
+            n.read = true;
+            try {
+                localStorage.setItem(key, JSON.stringify(list));
+            } catch (e) {}
+        }
+        const main = document.getElementById('mainContainer');
+        if (main && this.state.activeDashboardTab === 'notifications') {
+            main.innerHTML = this.renderDashboardPage();
+        }
+    }
+
+    setNotifFilter(filter) {
+        this.state.notifFilter = filter;
+        const main = document.getElementById('mainContainer');
+        if (main && this.state.activeDashboardTab === 'notifications') {
+            main.innerHTML = this.renderDashboardPage();
         }
     }
 
@@ -2440,6 +2621,24 @@ class App {
             if (bookings.some(b => b.requirementId === req.id || b.offerId === req.id)) return 'Completed';
             return reqOffersFor(req.id).length > 0 ? 'Offers Available' : 'Waiting for Offers';
         };
+        const infoItemHelper = (iconName, label, value, sub) => `
+            <div class="zd-info-item">
+                <div class="zd-info-icon">${zdIcon(iconName, '')}</div>
+                <div>
+                    <div class="zd-info-label">${label}</div>
+                    <div class="zd-info-value">${value}</div>
+                    ${sub ? `<div class="zd-info-sub">${sub}</div>` : ''}
+                </div>
+            </div>
+        `;
+        const fmtDate = (d) => {
+            if (!d) return 'N/A';
+            try { return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); } catch (e) { return String(d); }
+        };
+        const fmtDateTime = (d) => {
+            if (!d) return 'N/A';
+            try { return new Date(d).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return String(d); }
+        };
         const payments = bookings.map((b) => ({
             id: 'PAY-' + (b.id || 'BK'),
             txnId: b.transactionId || b.paymentId || 'N/A',
@@ -2456,14 +2655,6 @@ class App {
         }));
         const notifications = this.getDashboardNotifications();
         const unreadCount = notifications.filter(n => !n.read).length;
-        const fmtDate = (d) => {
-            if (!d) return 'N/A';
-            try { return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); } catch (e) { return String(d); }
-        };
-        const fmtDateTime = (d) => {
-            if (!d) return 'N/A';
-            try { return new Date(d).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return String(d); }
-        };
         const zdIcon = (name, cls) => {
             const icons = {
                 grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
@@ -2680,7 +2871,7 @@ class App {
                                             ${infoItem('users', 'Passengers', (selectedReq.travelersCount || 2) + ' Adults', (selectedReq.children || 0) + ' Children')}
                                             ${infoItem('tag', 'Class Preference', this.escapeHtml(selectedReq.classPreference || 'Economy'))}
                                             ${infoItem('wallet', 'Package Type', this.escapeHtml(selectedReq.packageType || 'Standard'))}
-                                            ${infoItem('check', 'Meal Preference', this.escapeHtml(selectedReq.mealPreference || 'Veg &amp; Non-Veg'))}
+                                            ${infoItem('check', 'Meal Preference', this.escapeHtml(selectedReq.mealPreference || 'Veg & Non-Veg'))}
                                             ${infoItem('info', 'Special Requests', this.escapeHtml(selectedReq.specialRequests || 'None'))}
                                             ${infoItem('pin', 'Pickup City', this.escapeHtml(selectedReq.departureCity || 'N/A'))}
                                             ${infoItem('pin', 'Drop-off City', this.escapeHtml(selectedReq.dropoffCity || 'Jeddah (JED)'))}
