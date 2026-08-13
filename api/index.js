@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const { MongoClient } = require('mongodb');
 const Razorpay = require('razorpay');
+const emailService = require('./emailService');
 
 const razorpayKeyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_TO6mS9Z6cLAruh';
 const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET || 'hucccML7XwUohM5VB1J6by0D';
@@ -244,10 +245,28 @@ app.post('/api/offers', async (req, res) => {
         console.warn('MongoDB offline, using in-memory store for offer');
     }
     inMemoryStore.offers.push(offer);
+    notifyNewOfferEmail(offer);
     res.status(201).json(offer);
 });
 
-// ADMIN ENDPOINTS – ZAIREEN REQUESTS & OFFERS MANAGEMENT
+// Notify the requesting user by email when a new offer is posted (non-blocking)
+async function notifyNewOfferEmail(offer) {
+    const reqId = offer.requirementId || offer.requestId;
+    if (!reqId) return;
+    try {
+        let reqDoc = null;
+        const db = await connectToDatabase().catch(() => null);
+        if (db) reqDoc = await db.collection('requirements').findOne({ id: reqId }).catch(() => null);
+        if (!reqDoc) reqDoc = inMemoryStore.requirements.find(r => r.id === reqId) || null;
+        if (reqDoc) {
+            await emailService.sendNewOfferEmail(offer, reqDoc);
+        } else if (!offer.userEmail) {
+            console.warn('[EMAIL] No recipient found for offer notification:', reqId);
+        }
+    } catch (e) {
+        console.warn('[EMAIL] Offer notification error:', e.message);
+    }
+}
 app.get('/api/admin/requirements', async (req, res) => {
     try {
         const db = await connectToDatabase();
@@ -293,6 +312,7 @@ app.post('/api/admin/offers', async (req, res) => {
         console.warn('MongoDB offline, using in-memory store for offer');
     }
     inMemoryStore.offers.push(offer);
+    notifyNewOfferEmail(offer);
     res.status(201).json(offer);
 });
 
@@ -335,6 +355,10 @@ app.post('/api/bookings', async (req, res) => {
     } else {
         inMemoryStore.bookings.push(booking);
     }
+    // Send booking confirmation email with PDF invoice (non-blocking)
+    setImmediate(() => {
+        emailService.sendBookingConfirmationEmail(booking).catch((e) => console.warn('[EMAIL] Confirmation error:', e.message));
+    });
     res.status(201).json(booking);
 });
 
