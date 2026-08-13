@@ -1054,34 +1054,138 @@ class App {
                 </div>
             </section>
 
-            <!-- How It Works Section (Staggered Scroll & Icon Bounce) -->
-            <section class="how-it-works-section" style="padding:var(--padding-section-desktop) 1.5rem !important; background:var(--bg-main) !important; text-align:center !important; border-bottom:1px solid var(--border-color) !important;">
-                <div class="how-it-works-header scroll-reveal" style="max-width:650px !important; margin:0 auto 3rem !important;">
-                    <h2 class="how-it-works-title" style="margin-bottom:0.5rem !important;">How It Works</h2>
-                    <p class="how-it-works-subtitle" style="font-size:0.95rem !important; color:var(--neutral-body) !important;">Three simple steps to plan your Umrah with confidence</p>
+            <!-- How It Works Section – Pixel-perfect reference design -->
+            <section style="position:relative; overflow:hidden; padding:4.5rem 1.5rem 4rem; background:#f0faf5; text-align:center; border-bottom:1px solid #d8ede2;">
+
+                <!-- Faded mosque silhouette background -->
+                <div style="position:absolute;inset:0;pointer-events:none;user-select:none;overflow:hidden;">
+                    <svg style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:110%;min-width:900px;opacity:0.10;" viewBox="0 0 1200 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Left minaret -->
+                        <rect x="60" y="80" width="28" height="260" rx="4" fill="#1a6b3c"/>
+                        <path d="M60 80 Q74 30 88 80Z" fill="#1a6b3c"/>
+                        <rect x="68" y="100" width="12" height="20" rx="2" fill="#f0faf5"/>
+                        <rect x="68" y="130" width="12" height="20" rx="2" fill="#f0faf5"/>
+                        <rect x="68" y="160" width="12" height="20" rx="2" fill="#f0faf5"/>
+                        <!-- Main dome left -->
+                        <rect x="100" y="160" width="130" height="180" rx="6" fill="#1a6b3c"/>
+                        <path d="M100 160 Q165 60 230 160Z" fill="#1a6b3c"/>
+                        <path d="M140 160 Q165 100 190 160Z" fill="#2d8c55" opacity="0.5"/>
+                        <rect x="148" y="170" width="20" height="35" rx="3" fill="#f0faf5"/>
+                        <rect x="178" y="170" width="20" height="35" rx="3" fill="#f0faf5"/>
+                        <!-- Second minaret left -->
+                        <rect x="240" y="120" width="24" height="220" rx="4" fill="#1a6b3c"/>
+                        <path d="M240 120 Q252 75 264 120Z" fill="#1a6b3c"/>
+                        <rect x="246" y="140" width="12" height="16" rx="2" fill="#f0faf5"/>
+                        <rect x="246" y="165" width="12" height="16" rx="2" fill="#f0faf5"/>
+                        <!-- Center grand dome -->
+                        <rect x="420" y="140" width="360" height="200" rx="8" fill="#1a6b3c"/>
+                        <path d="M420 140 Q600 0 780 140Z" fill="#1a6b3c"/>
+                        <path d="M480 140 Q600 50 720 140Z" fill="#2d8c55" opacity="0.4"/>
+                        <rect x="490" y="150" width="30" height="50" rx="4" fill="#f0faf5"/>
+                        <rect x="540" y="150" width="30" height="50" rx="4" fill="#f0faf5"/>
+                        <rect x="630" y="150" width="30" height="50" rx="4" fill="#f0faf5"/>
+                        <rect x="680" y="150" width="30" height="50" rx="4" fill="#f0faf5"/>
+                        <circle cx="600" cy="140" r="18" fill="#2d8c55"/>
+                        <circle cx="600" cy="140" r="10" fill="#1a6b3c"/>
+                        <!-- Right second minaret -->
+                        <rect x="936" y="120" width="24" height="220" rx="4" fill="#1a6b3c"/>
+                        <path d="M936 120 Q948 75 960 120Z" fill="#1a6b3c"/>
+                        <rect x="942" y="140" width="12" height="16" rx="2" fill="#f0faf5"/>
+                        <rect x="942" y="165" width="12" height="16" rx="2" fill="#f0faf5"/>
+                        <!-- Main dome right -->
+                        <rect x="970" y="160" width="130" height="180" rx="6" fill="#1a6b3c"/>
+                        <path d="M970 160 Q1035 60 1100 160Z" fill="#1a6b3c"/>
+                        <path d="M1010 160 Q1035 100 1060 160Z" fill="#2d8c55" opacity="0.5"/>
+                        <rect x="1032" y="170" width="20" height="35" rx="3" fill="#f0faf5"/>
+                        <rect x="1062" y="170" width="20" height="35" rx="3" fill="#f0faf5"/>
+                        <!-- Right minaret -->
+                        <rect x="1112" y="80" width="28" height="260" rx="4" fill="#1a6b3c"/>
+                        <path d="M1112 80 Q1126 30 1140 80Z" fill="#1a6b3c"/>
+                        <rect x="1120" y="100" width="12" height="20" rx="2" fill="#f0faf5"/>
+                        <rect x="1120" y="130" width="12" height="20" rx="2" fill="#f0faf5"/>
+                        <rect x="1120" y="160" width="12" height="20" rx="2" fill="#f0faf5"/>
+                        <!-- Ground line -->
+                        <rect x="0" y="335" width="1200" height="5" fill="#1a6b3c"/>
+                    </svg>
                 </div>
-                <div class="how-it-works-grid" style="display:flex !important; align-items:center !important; justify-content:center !important; max-width:1140px !important; margin:0 auto !important; flex-wrap:wrap !important;">
-                    <div class="how-step-card scroll-reveal stagger-1" style="flex:1; min-width:260px; background:#ffffff !important; text-align:center !important;">
-                        <div class="how-step-icon" style="width:65px !important; height:65px !important; background:#E6F4EA !important; color:#0D3D2E !important; border-radius:16px !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; font-weight:800 !important; margin:0 auto 1.5rem !important;">➕</div>
-                        <h3 style="margin-bottom:0.6rem !important;">Step 1: Submit Request</h3>
-                        <p style="font-size:0.9rem !important; color:var(--neutral-body) !important; line-height:1.6 !important; margin:0 !important;">Tell us your travel dates, group size, budget, and preferences. Your details stay private and secure.</p>
+
+                <!-- Section header -->
+                <div style="position:relative;z-index:1;max-width:600px;margin:0 auto 2.5rem;">
+                    <h2 style="font-size:2rem;font-weight:900;color:#0f172a;margin:0 0 0.5rem;letter-spacing:-0.3px;">
+                        <span style="color:#1a6b3c;">✦</span> How It Works <span style="color:#1a6b3c;">✦</span>
+                    </h2>
+                    <p style="font-size:0.95rem;color:#6b7280;margin:0;">Three simple steps to plan your Umrah with confidence</p>
+                </div>
+
+                <!-- Dashed connector row with icon nodes -->
+                <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:0;max-width:680px;margin:0 auto 2.2rem;">
+                    <!-- Node 1: document icon (green circle) -->
+                    <div style="width:52px;height:52px;border-radius:50%;background:#ffffff;border:2px solid #2d8c55;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                        <svg width="22" height="22" fill="none" stroke="#2d8c55" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    </div>
+                    <!-- Dashed line + arrow -->
+                    <div style="flex:1;display:flex;align-items:center;position:relative;height:2px;margin:0 4px;">
+                        <svg width="100%" height="14" viewBox="0 0 200 14" preserveAspectRatio="none"><line x1="0" y1="7" x2="180" y2="7" stroke="#2d8c55" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="182,3 192,7 182,11" fill="#2d8c55"/></svg>
+                    </div>
+                    <!-- Node 2: envelope icon (gold filled circle — active) -->
+                    <div style="width:52px;height:52px;border-radius:50%;background:#f59e0b;border:2px solid #f59e0b;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 16px rgba(245,158,11,0.4);">
+                        <svg width="22" height="22" fill="none" stroke="#ffffff" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </div>
+                    <!-- Dashed line + arrow -->
+                    <div style="flex:1;display:flex;align-items:center;position:relative;height:2px;margin:0 4px;">
+                        <svg width="100%" height="14" viewBox="0 0 200 14" preserveAspectRatio="none"><line x1="0" y1="7" x2="180" y2="7" stroke="#2d8c55" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="182,3 192,7 182,11" fill="#2d8c55"/></svg>
+                    </div>
+                    <!-- Node 3: shield icon (green circle) -->
+                    <div style="width:52px;height:52px;border-radius:50%;background:#ffffff;border:2px solid #2d8c55;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                        <svg width="22" height="22" fill="none" stroke="#2d8c55" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                    </div>
+                </div>
+
+                <!-- 3 Cards (no step labels, no arrows between cards) -->
+                <div style="position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;max-width:1060px;margin:0 auto;">
+
+                    <!-- Card 1: Submit Request -->
+                    <div class="scroll-reveal stagger-1" style="background:#ffffff;border-radius:16px;padding:2.2rem 1.8rem 0;text-align:center;box-shadow:0 2px 16px rgba(0,0,0,0.07);border:1px solid #e2ede6;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;">
+                        <!-- Icon circle -->
+                        <div style="width:72px;height:72px;border-radius:50%;background:#e8f5ee;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;flex-shrink:0;">
+                            <svg width="32" height="32" fill="none" stroke="#2d8c55" stroke-width="1.7" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                        </div>
+                        <h3 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 0.7rem;">Submit Request</h3>
+                        <p style="font-size:0.88rem;color:#6b7280;line-height:1.65;margin:0 0 2rem;">Tell us your travel dates, group size, budget, and preferences. Your details stay private and secure.</p>
+                        <!-- Faded mosque bottom decoration -->
+                        <div style="width:100%;height:70px;overflow:hidden;flex-shrink:0;margin-top:auto;opacity:0.12;">
+                            <svg viewBox="0 0 300 70" width="100%" height="70" fill="#1a6b3c" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="20" width="15" height="50"/><path d="M20 20 Q27 2 35 20Z"/><rect x="55" y="10" width="60" height="60"/><path d="M55 10 Q85 -18 115 10Z"/><rect x="120" y="20" width="15" height="50"/><path d="M120 20 Q127 2 135 20Z"/><rect x="160" y="25" width="15" height="45"/><path d="M160 25 Q167 7 175 25Z"/><rect x="195" y="10" width="60" height="60"/><path d="M195 10 Q225 -18 255 10Z"/><rect x="265" y="20" width="15" height="50"/><path d="M265 20 Q272 2 280 20Z"/><rect x="0" y="65" width="300" height="5"/></svg>
+                        </div>
                     </div>
 
-                    <div class="step-arrow-divider flow-connector-line" style="font-size:2.2rem !important; color:var(--accent-gold) !important; font-weight:800 !important; padding:0 0.5rem !important;">➔</div>
-
-                    <div class="how-step-card scroll-reveal stagger-2" style="flex:1; min-width:260px; background:#ffffff !important; text-align:center !important;">
-                        <div class="how-step-icon" style="width:65px !important; height:65px !important; background:#FEF3C7 !important; color:#C9A15A !important; border-radius:16px !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; font-weight:800 !important; margin:0 auto 1.5rem !important;">↙️</div>
-                        <h3 style="margin-bottom:0.6rem !important;">Step 2: Receive Offers</h3>
-                        <p style="font-size:0.9rem !important; color:var(--neutral-body) !important; line-height:1.6 !important; margin:0 !important;">Verified travel agents review your request and send tailored offers that match your needs and budget.</p>
+                    <!-- Card 2: Receive Offers (highlighted amber/gold) -->
+                    <div class="scroll-reveal stagger-2" style="background:linear-gradient(180deg,#fffbeb 0%,#fef3c7 100%);border-radius:16px;padding:2.2rem 1.8rem 0;text-align:center;box-shadow:0 4px 24px rgba(245,158,11,0.2);border:1.5px solid #fcd34d;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;">
+                        <!-- Icon circle (gold bg) -->
+                        <div style="width:72px;height:72px;border-radius:50%;background:#fde68a;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;flex-shrink:0;box-shadow:0 4px 16px rgba(245,158,11,0.25);">
+                            <svg width="32" height="32" fill="none" stroke="#b45309" stroke-width="1.7" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </div>
+                        <h3 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 0.7rem;">Receive Offers</h3>
+                        <p style="font-size:0.88rem;color:#6b7280;line-height:1.65;margin:0 0 2rem;">Verified travel agents review your request and send tailored offers that match your needs and budget.</p>
+                        <!-- Faded mosque bottom decoration (amber tint) -->
+                        <div style="width:100%;height:70px;overflow:hidden;flex-shrink:0;margin-top:auto;opacity:0.13;">
+                            <svg viewBox="0 0 300 70" width="100%" height="70" fill="#b45309" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="20" width="15" height="50"/><path d="M20 20 Q27 2 35 20Z"/><rect x="55" y="10" width="60" height="60"/><path d="M55 10 Q85 -18 115 10Z"/><rect x="120" y="20" width="15" height="50"/><path d="M120 20 Q127 2 135 20Z"/><rect x="160" y="25" width="15" height="45"/><path d="M160 25 Q167 7 175 25Z"/><rect x="195" y="10" width="60" height="60"/><path d="M195 10 Q225 -18 255 10Z"/><rect x="265" y="20" width="15" height="50"/><path d="M265 20 Q272 2 280 20Z"/><rect x="0" y="65" width="300" height="5"/></svg>
+                        </div>
                     </div>
 
-                    <div class="step-arrow-divider flow-connector-line" style="font-size:2.2rem !important; color:var(--accent-gold) !important; font-weight:800 !important; padding:0 0.5rem !important;">➔</div>
-
-                    <div class="how-step-card scroll-reveal stagger-3" style="flex:1; min-width:260px; background:#ffffff !important; text-align:center !important;">
-                        <div class="how-step-icon" style="width:65px !important; height:65px !important; background:#E6F4EA !important; color:#16A34A !important; border-radius:16px !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; font-weight:800 !important; margin:0 auto 1.5rem !important;">🛡️</div>
-                        <h3 style="margin-bottom:0.6rem !important;">Step 3: Choose Package</h3>
-                        <p style="font-size:0.9rem !important; color:var(--neutral-body) !important; line-height:1.6 !important; margin:0 !important;">Compare offers, check details, and confidently select the option that fits your journey perfectly.</p>
+                    <!-- Card 3: Choose Package -->
+                    <div class="scroll-reveal stagger-3" style="background:#ffffff;border-radius:16px;padding:2.2rem 1.8rem 0;text-align:center;box-shadow:0 2px 16px rgba(0,0,0,0.07);border:1px solid #e2ede6;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;">
+                        <!-- Icon circle -->
+                        <div style="width:72px;height:72px;border-radius:50%;background:#1a3a2a;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;flex-shrink:0;">
+                            <svg width="32" height="32" fill="none" stroke="#ffffff" stroke-width="1.7" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                        </div>
+                        <h3 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 0.7rem;">Choose Package</h3>
+                        <p style="font-size:0.88rem;color:#6b7280;line-height:1.65;margin:0 0 2rem;">Compare offers, check details, and confidently select the option that fits your journey perfectly.</p>
+                        <!-- Faded mosque bottom decoration -->
+                        <div style="width:100%;height:70px;overflow:hidden;flex-shrink:0;margin-top:auto;opacity:0.12;">
+                            <svg viewBox="0 0 300 70" width="100%" height="70" fill="#1a6b3c" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="20" width="15" height="50"/><path d="M20 20 Q27 2 35 20Z"/><rect x="55" y="10" width="60" height="60"/><path d="M55 10 Q85 -18 115 10Z"/><rect x="120" y="20" width="15" height="50"/><path d="M120 20 Q127 2 135 20Z"/><rect x="160" y="25" width="15" height="45"/><path d="M160 25 Q167 7 175 25Z"/><rect x="195" y="10" width="60" height="60"/><path d="M195 10 Q225 -18 255 10Z"/><rect x="265" y="20" width="15" height="50"/><path d="M265 20 Q272 2 280 20Z"/><rect x="0" y="65" width="300" height="5"/></svg>
+                        </div>
                     </div>
+
                 </div>
             </section>
 
