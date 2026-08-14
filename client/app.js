@@ -2341,17 +2341,7 @@ class App {
 
     setDashboardTab(tabName) {
         this.state.activeDashboardTab = tabName || 'dashboard';
-        if (this.state.currentPage !== 'dashboard') {
-            this.navigate('dashboard');
-        } else {
-            const main = document.getElementById('mainContainer');
-            if (main) {
-                main.innerHTML = this.renderDashboardPage();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            } else {
-                this.renderPage('dashboard');
-            }
-        }
+        this.navigate('dashboard');
     }
 
     viewRequestDetail(requestId) {
@@ -3078,6 +3068,18 @@ class App {
                 ${panel}
             </div>
         </div>`;
+    }
+
+    openOfferReviewModal(offerId) {
+        this.closeModal();
+        this.state.activeOfferId = offerId;
+        this.setDashboardTab('packageDetails');
+    }
+
+    openOfferPaymentModal(offerId) {
+        this.closeModal();
+        this.state.activeOfferId = offerId;
+        this.setDashboardTab('paymentScreen');
     }
 
     toggleUpiQrCode() {
@@ -4896,13 +4898,7 @@ class App {
         `);
     }
 
-    openOfferReviewModal(offerId) {
-        this.closeModal();
-        this.state.activeOfferId = offerId;
-        this.state.currentPage = 'dashboard';
-        this.setDashboardTab('packageDetails');
-        return;
-    }
+
 
     openOfferReviewModal_old(offerId) {
         const offer = allOffers.find(o => o.id === offerId) || {
@@ -5281,13 +5277,7 @@ class App {
         `, true, { width: '100vw', maxWidth: '100vw', height: '100vh', maxHeight: '100vh', borderRadius: '0' });
     }
 
-    openOfferPaymentModal(offerId) {
-        this.closeModal();
-        this.state.activeOfferId = offerId;
-        this.state.currentPage = 'dashboard';
-        this.setDashboardTab('paymentScreen');
-        return;
-    }
+
 
     openOfferPaymentModal_old(offerId) {
         const offer = allOffers.find(o => o.id === offerId) || {
