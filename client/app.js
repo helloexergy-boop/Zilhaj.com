@@ -1381,7 +1381,20 @@ class App {
     }
 
     openPackageDetailModal(packageId) {
-        this.openOfferReviewModal(packageId);
+        const pkg = this.state.packages.find(p => p.id === packageId) || null;
+        if (!pkg) {
+            this.showToast('Package not found', 'error');
+            return;
+        }
+        this.openViewOfferModal({
+            id: pkg.id,
+            title: pkg.title,
+            price: pkg.price,
+            departureDate: pkg.departureDateText || pkg.departureDate,
+            duration: (pkg.durationDays ? pkg.durationDays + ' Days' : pkg.duration),
+            makkahHotel: pkg.makkahHotelName,
+            madinahHotel: pkg.madinahHotelName
+        });
     }
 
 
