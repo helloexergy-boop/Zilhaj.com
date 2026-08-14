@@ -203,6 +203,20 @@
 </head>
 
 <body>
+    <!-- ZILHAJ Boot Splash - covers old markup until the new UI renders -->
+    <div id="zilhajBootOverlay"
+        style="position:fixed; inset:0; z-index:1000000; background:linear-gradient(135deg,#0b3b2a 0%,#123f2e 40%,#2b5e48 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.1rem;">
+        <img src="logo.png" onerror="this.onerror=null;this.src='images/logo.png';" alt="Zilhaj" style="width:76px; height:76px; border-radius:50%; object-fit:cover; border:3px solid rgba(255,255,255,0.5); box-shadow:0 12px 34px rgba(0,0,0,0.35);">
+        <div style="color:#ffffff; font-weight:900; font-size:1.6rem; letter-spacing:2px; font-style:italic;">ZILHAJ</div>
+        <div style="color:rgba(255,255,255,0.78); font-weight:600; font-size:0.85rem; letter-spacing:1px; text-transform:uppercase;">One Request. Multiple Verified Offers.</div>
+        <div class="zilhaj-boot-spinner" style="width:38px; height:38px; margin-top:0.4rem; border-radius:50%; border:3px solid rgba(255,255,255,0.22); border-top-color:#ffffff; animation:zilhajBootSpin 0.8s linear infinite;"></div>
+    </div>
+    <style>
+        @keyframes zilhajBootSpin { to { transform: rotate(360deg); } }
+        #zilhajBootOverlay { animation: zilhajBootFallback 0.5s ease 4s forwards; }
+        @keyframes zilhajBootFallback { to { opacity: 0; visibility: hidden; } }
+    </style>
+
     <div id="app"> <!-- Floating Pill Navbar -->
         <div class="navbar-wrapper" id="navbarWrapper">
             <header class="navbar" id="navbar">
@@ -977,7 +991,7 @@
     <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;" onchange="app.handleProfilePhotoUpload(event)">
 
     <!-- Application Script Logic -->
-    <script src="app.js?v=20260813_v1" defer></script>
+    <script src="app.js?v=20260813_v2" defer></script>
 </body>
 
 </html>
