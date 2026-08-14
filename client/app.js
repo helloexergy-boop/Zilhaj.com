@@ -1,4 +1,4 @@
-﻿/**
+/**
  * RAJU TRAVELS – Single Page Web Application Engine
  * Journey of Faith, Comfort & Blessings
  */
@@ -2806,15 +2806,19 @@ class App {
                                 <span style="font-size:.72rem;color:#6b7280;">100% Price &amp; Cancellation Guarantee</span>
                             </div>
 
-                            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.85rem;">
-                                ${displayOffers.map((o,i)=>`<div style="border:1.5px solid ${i===0?'#d1fae5':'#e5e7eb'};border-radius:11px;padding:1rem;display:flex;flex-direction:column;justify-content:space-between;background:#fff;transition:all .2s ease;" onmouseover="this.style.borderColor='#1a6b3c';this.style.boxShadow='0 4px 14px rgba(26,107,60,0.08)';" onmouseout="this.style.borderColor='${i===0?'#d1fae5':'#e5e7eb'}';this.style.boxShadow='none';">
+                            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.85rem;">
+                                ${displayOffers.map((o,i)=>{
+                                    const travelers = r.travelersCount || o.travelersCount || 2;
+                                    const perPerson = o.discountedPrice || o.price || 49999;
+                                    const totalDiscounted = perPerson * travelers;
+                                    return `<div style="border:1.5px solid ${i===0?'#d1fae5':'#e5e7eb'};border-radius:11px;padding:1rem;display:flex;flex-direction:column;justify-content:space-between;background:#fff;transition:all .2s ease;" onmouseover="this.style.borderColor='#1a6b3c';this.style.boxShadow='0 4px 14px rgba(26,107,60,0.08)';" onmouseout="this.style.borderColor='${i===0?'#d1fae5':'#e5e7eb'}';this.style.boxShadow='none';">
                                     <div>
                                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem;">
                                             <span style="font-size:.66rem;font-weight:800;color:${i===0?'#059669':'#d97706'};background:${i===0?'#e8f5ee':'#fef3c7'};padding:.12rem .5rem;border-radius:99px;">${i===0?'🏆 Best Value Choice':'⭐ Popular Option'}</span>
                                             <span style="font-size:.67rem;color:#6b7280;">${o.durationDays||10} Days</span>
                                         </div>
-                                        <div style="font-size:1.15rem;font-weight:800;color:#0f172a;">${this.formatCurrency(o.discountedPrice || o.price || 49999)}</div>
-                                        <div style="font-size:.68rem;color:#6b7280;margin-bottom:.6rem;">per person &bull; inclusive of all taxes</div>
+                                        <div style="font-size:1.25rem;font-weight:800;color:#0f172a;">${this.formatCurrency(totalDiscounted)}</div>
+                                        <div style="font-size:.68rem;color:#1a6b3c;font-weight:700;margin-bottom:.6rem;">Total for ${travelers} Persons (${this.formatCurrency(perPerson)} / person)</div>
                                         
                                         <div style="font-size:.81rem;font-weight:700;color:#0f172a;margin-bottom:.25rem;line-height:1.3;">${this.escapeHtml(o.packageTitle || 'Umrah Package')}</div>
                                         <div style="font-size:.71rem;color:#1a6b3c;font-weight:600;margin-bottom:.55rem;">Provided by: ${this.escapeHtml(o.agencyName || 'Verified Partner')}</div>
@@ -2826,10 +2830,10 @@ class App {
                                         </div>
                                     </div>
                                     <div style="display:flex;flex-direction:column;gap:.4rem;">
-                                        <button onclick="app.viewOfferDetailsModal('${o.id}')" style="width:100%;border:1px solid #e5e7eb;background:#fff;color:#374151;border-radius:7px;padding:.4rem;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .18s;" onmouseover="this.style.borderColor='#1a6b3c';this.style.color='#1a6b3c';" onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#374151';">View Full Details</button>
-                                        <button onclick="app.navigateToPayment('${o.id}')" style="width:100%;border:none;background:#1a6b3c;color:#fff;border-radius:7px;padding:.45rem;font-size:.77rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.3rem;transition:all .18s;" onmouseover="this.style.background='#14522e';" onmouseout="this.style.background='#1a6b3c';">Book &amp; Pay Now →</button>
+                                        <button onclick="app.openOfferReviewModal('${o.id}')" style="width:100%;border:none;background:#1a6b3c;color:#fff;border-radius:8px;padding:.55rem .8rem;font-size:.8rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.35rem;transition:all .18s;" onmouseover="this.style.background='#14522e';" onmouseout="this.style.background='#1a6b3c';">🔍 View Details</button>
                                     </div>
-                                </div>`).join('')}
+                                </div>`;
+                                }).join('')}
                             </div>
                         </div>
                     </div>
@@ -3124,22 +3128,7 @@ class App {
 
 
     viewOfferDetailsModal(offerId) {
-        const allOffers = this.getAllOffers();
-        const o = allOffers.find(item => item.id === offerId) || {
-            id: offerId || '#OFF-891',
-            packageTitle: '18 Days Umrah Package • Manarat Al Misk & Marjan International Hotels • Direct Flights',
-            price: 5,
-            departureDate: '12 Aug 2026',
-            durationDays: 18
-        };
-
-        this.openViewOfferModal({
-            id: o.id,
-            title: o.packageTitle || o.title || 'Umrah Package',
-            price: o.price || o.discountedPrice || 5,
-            departureDate: o.departureDate || '12 Aug 2026',
-            duration: o.durationDays ? `${o.durationDays} Days` : '18 Days'
-        });
+        this.openOfferReviewModal(offerId);
     }
 
 
@@ -3425,10 +3414,7 @@ class App {
             discountedPrice: 5
         };
 
-        const rawOfferPrice = o.discountedPrice || o.price || 5;
-        const offerPrice = (rawOfferPrice > 0 && rawOfferPrice <= 100) ? rawOfferPrice : 5;
-        o.discountedPrice = offerPrice;
-
+        const perPerson = o.discountedPrice || o.price || 49999;
         const req = allReqs.find(r => r.id === o.requirementId) || allReqs[0] || {
             preferredDepartureDate: '2026-08-13',
             durationDays: 18,
@@ -3437,7 +3423,8 @@ class App {
             fullAddress: 'House 45, Rajbagh Main Road, Srinagar, Jammu and Kashmir'
         };
 
-        const totalPayable = offerPrice;
+        const travelersCount = o.travelersCount || req.travelersCount || 2;
+        const totalPayable = perPerson * travelersCount;
 
         return `
             <div style="background:#f4f9f5; min-height:100vh; padding:6rem 0 5rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
@@ -3482,7 +3469,7 @@ class App {
                                 <div style="margin-top:1.2rem; border-top:1px dashed #cbd5e1; padding-top:1rem; display:flex; flex-direction:column; gap:0.55rem; font-size:0.88rem; color:#334155;">
                                     <div>📅 Departure Date: <strong>${req.preferredDepartureDate} (${req.durationDays} Days)</strong></div>
                                     <div>✈️ Departure City: <strong>${req.departureCity}</strong></div>
-                                    <div>👥 Travelers: <strong>${req.travelersCount} Person(s)</strong></div>
+                                    <div>👥 Travelers: <strong>${travelersCount} Person(s)</strong></div>
                                     <div>🏨 Makkah: <strong>${o.makkahHotel}</strong></div>
                                     <div>🏨 Madinah: <strong>${o.madinahHotel}</strong></div>
                                 </div>
@@ -3496,7 +3483,7 @@ class App {
 
                                 <div style="display:flex; flex-direction:column; gap:0.75rem; font-size:0.9rem; color:#475569;">
                                     <div style="display:flex; justify-content:space-between;">
-                                        <span>Package Cost (${req.travelersCount} Travelers @ ${this.formatCurrency(o.discountedPrice)}/person):</span>
+                                        <span>Package Cost (${travelersCount} Travelers @ ${this.formatCurrency(perPerson)}/person):</span>
                                         <span style="font-weight:700; color:#0f172a;">${this.formatCurrency(totalPayable)}</span>
                                     </div>
                                     <div style="display:flex; justify-content:space-between;">
@@ -4179,7 +4166,13 @@ class App {
 
                                     <!-- Quick Preview of top 2 offers -->
                                     <div style="display:flex; flex-direction:column; gap:1rem;">
-                                        ${offersForReq.length > 0 ? offersForReq.map(o => `
+                                        ${offersForReq.length > 0 ? offersForReq.map(o => {
+                                            const travelers = req.travelersCount || o.travelersCount || 2;
+                                            const perPerson = o.discountedPrice || 49999;
+                                            const totalDiscounted = perPerson * travelers;
+                                            const origPerPerson = o.originalPrice || Math.round(perPerson * 1.25);
+                                            const totalOriginal = origPerPerson * travelers;
+                                            return `
                                             <div style="background:linear-gradient(135deg, #ffffff 0%, #fef3c7 100%); border-radius:12px; padding:1.4rem; border:1.5px solid #fde68a; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
                                                 <div>
                                                     <span style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; font-size:0.75rem; font-weight:800; padding:0.25rem 0.6rem; border-radius:99px;">
@@ -4189,16 +4182,20 @@ class App {
                                                     <p style="color:#78350f; font-size:0.88rem; margin-top:0.3rem;">
                                                         ${this.escapeHtml(o.packageTitle)} — ${this.escapeHtml(o.makkahHotel || 'Swissotel Makkah')}
                                                     </p>
-                                                    <div style="margin-top:0.5rem; display:flex; align-items:center; gap:0.8rem;">
-                                                        <span style="text-decoration:line-through; color:var(--text-muted); font-size:0.95rem;">${this.formatCurrency(o.originalPrice)}</span>
-                                                        <span style="font-size:1.35rem; font-weight:800; color:var(--primary);">${this.formatCurrency(o.discountedPrice)}</span>
+                                                    <div style="margin-top:0.5rem; display:flex; flex-direction:column; gap:0.2rem;">
+                                                        <div style="display:flex; align-items:center; gap:0.8rem;">
+                                                            <span style="text-decoration:line-through; color:var(--text-muted); font-size:0.95rem;">${this.formatCurrency(totalOriginal)}</span>
+                                                            <span style="font-size:1.35rem; font-weight:800; color:#047857;">${this.formatCurrency(totalDiscounted)}</span>
+                                                        </div>
+                                                        <span style="font-size:0.75rem; color:#047857; font-weight:700;">Total for ${travelers} Persons (${this.formatCurrency(perPerson)} / person)</span>
                                                     </div>
                                                 </div>
                                                 <button class="btn btn-gold" onclick="app.openOfferReviewModal('${o.id}')" style="font-weight:800; padding:0.75rem 1.4rem;">
-                                                    View Full Details &amp; Accept 📋
+                                                    🔍 View Details
                                                 </button>
                                             </div>
-                                        `).join('') : '<p style="color:#64748b; text-align:center; padding:1rem;">No agent offers received yet for this request.</p>'}
+                                        `;
+                                        }).join('') : '<p style="color:#64748b; text-align:center; padding:1rem;">No agent offers received yet for this request.</p>'}
                                     </div>
                                 </div>
                             `;
@@ -4269,8 +4266,8 @@ class App {
             id: offerId,
             packageTitle: '18-Day Deluxe Umrah Package',
             agentName: 'AL-HARAM PREMIUM TRAVELS',
-            discountedPrice: 118750,
-            originalPrice: 143750,
+            discountedPrice: 49999,
+            originalPrice: 59999,
             discountPercentage: 15,
             makkahHotel: 'Swissotel Makkah (250m from Kaaba)',
             madinahHotel: 'Pullman Zamzam Madinah (150m from Nabawi)',
@@ -4280,8 +4277,16 @@ class App {
             specialNote: 'Rawdah Al-Sharifa permits must be booked by each Zaireen individually through the official Nusuk Mobile App. Slot issuance is managed directly by Saudi Ministry authorities.'
         };
 
-        const savings = Math.max(0, (offer.originalPrice || 0) - (offer.discountedPrice || 0));
-        const savingsPct = offer.discountPercentage || 15;
+        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        const apiReqs = this.state.myRequirements || [];
+        const req = [...apiReqs, ...localReqs].find(r => r.id === offer.requirementId);
+        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 2;
+        const perPersonPrice = offer.discountedPrice || offer.price || 49999;
+        const origPerPerson = offer.originalPrice || Math.round(perPersonPrice * 1.25);
+        const totalDiscountedPrice = perPersonPrice * travelersCount;
+        const totalOriginalPrice = origPerPerson * travelersCount;
+        const savings = Math.max(0, totalOriginalPrice - totalDiscountedPrice);
+        const savingsPct = offer.discountPercentage || (origPerPerson > 0 ? Math.round(((origPerPerson - perPersonPrice) / origPerPerson) * 100) : 15);
         const inclusions = offer.inclusions || ['Return Air Tickets', 'Buffet Meals', 'Transfers', 'Ahram Kit', 'Zamzam Water', 'Ziyarat'];
 
         // Make modal 100% full screen
@@ -4312,15 +4317,15 @@ class App {
                         <div style="display:flex; align-items:center; gap:0.6rem;">
                             <span style="font-size:1.5rem;">🕋</span>
                             <div>
-                                <div style="color:#ffffff; font-weight:800; font-size:1.15rem; letter-spacing:0.3px;">Zilhaj.com Package Review</div>
+                                <div style="color:#ffffff; font-weight:800; font-size:1.15rem; letter-spacing:0.3px;">Zilhaj.com Offer Details</div>
                                 <div style="color:#94a3b8; font-size:0.75rem;">Verified Travel Agent Special Offer</div>
                             </div>
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; gap:1.2rem;">
                         <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.06); padding:0.4rem 1rem; border-radius:99px; border:1px solid rgba(255,255,255,0.12);">
-                            <span style="color:#10b981; font-weight:800; font-size:0.8rem;">● Step 1 of 2:</span>
-                            <span style="color:#ffffff; font-weight:700; font-size:0.8rem;">Review Package Inclusions</span>
+                            <span style="color:#10b981; font-weight:800; font-size:0.8rem;">● Step 1 of 3:</span>
+                            <span style="color:#ffffff; font-weight:700; font-size:0.8rem;">Package Details</span>
                         </div>
                         <button onclick="app.closeModal();" style="background:rgba(255,255,255,0.15); border:none; color:white; font-size:1.1rem; width:34px; height:34px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
                     </div>
@@ -4336,24 +4341,25 @@ class App {
                         <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap; font-size:0.85rem; color:#d1fae5;">
                             <span>🏢 Agent: <strong>${this.escapeHtml(offer.agentName)}</strong></span>
                             <span>•</span>
-                            <span>🛡️ <strong>100% Background Verified Agency</strong></span>
+                            <span>👥 <strong>For ${travelersCount} Persons</strong></span>
                         </div>
                     </div>
                     <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.2); border-radius:14px; padding:0.8rem 1.4rem; text-align:right;">
-                        <div style="font-size:0.72rem; color:#a7f3d0; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Package Net Total</div>
-                        <div style="font-size:2.1rem; font-weight:800; color:#ffffff; line-height:1.1;">${this.formatCurrency(offer.discountedPrice)}</div>
-                        <div style="font-size:0.82rem; color:#cbd5e1; text-decoration:line-through; margin-top:0.2rem;">${this.formatCurrency(offer.originalPrice)}</div>
+                        <div style="font-size:0.72rem; color:#a7f3d0; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Total Net Price (${travelersCount} Persons)</div>
+                        <div style="font-size:2.1rem; font-weight:800; color:#ffffff; line-height:1.1;">${this.formatCurrency(totalDiscountedPrice)}</div>
+                        <div style="font-size:0.82rem; color:#cbd5e1; text-decoration:line-through; margin-top:0.2rem;">${this.formatCurrency(totalOriginalPrice)}</div>
+                        <div style="font-size:0.72rem; color:#a7f3d0; margin-top:0.15rem;">(${this.formatCurrency(perPersonPrice)} / person)</div>
                     </div>
                 </div>
 
-                <!-- ══ DUAL-COLUMN AMAZON LAYOUT ══ -->
+                <!-- ══ DUAL-COLUMN LAYOUT ══ -->
                 <div style="display:grid; grid-template-columns:1fr 360px; gap:1.8rem; padding:1.8rem 2.2rem; flex:1; overflow-y:auto; background:#f8fafc;">
 
                     <!-- LEFT COLUMN — FULL PACKAGE DETAILS -->
                     <div style="display:flex; flex-direction:column; gap:1.4rem;">
 
                         <!-- Trip Specs Grid -->
-                        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.9rem;">
+                        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.9rem;">
                             <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:1.1rem; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
                                 <div style="font-size:1.8rem; margin-bottom:0.3rem;">📅</div>
                                 <div style="font-size:0.72rem; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Departure Date</div>
@@ -4362,7 +4368,12 @@ class App {
                             <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:1.1rem; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
                                 <div style="font-size:1.8rem; margin-bottom:0.3rem;">⏱️</div>
                                 <div style="font-size:0.72rem; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Trip Duration</div>
-                                <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">${offer.durationDays || 18} Days Package</div>
+                                <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">${offer.durationDays || 18} Days</div>
+                            </div>
+                            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:1.1rem; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                                <div style="font-size:1.8rem; margin-bottom:0.3rem;">👥</div>
+                                <div style="font-size:0.72rem; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Travelers</div>
+                                <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">${travelersCount} Persons</div>
                             </div>
                             <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:1.1rem; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
                                 <div style="font-size:1.8rem; margin-bottom:0.3rem;">✈️</div>
@@ -4434,36 +4445,40 @@ class App {
                         <!-- Order Summary Card -->
                         <div style="background:#ffffff; border:2px solid #047857; border-radius:16px; overflow:hidden; box-shadow:0 6px 24px rgba(4,120,87,0.12);">
                             <div style="background:#0f172a; padding:1rem 1.4rem; border-bottom:1px solid #1e293b;">
-                                <div style="color:#ffffff; font-weight:800; font-size:1.05rem;">📋 Order Price Summary</div>
-                                <div style="color:#94a3b8; font-size:0.75rem; margin-top:0.2rem;">Transparent price breakdown</div>
+                                <div style="color:#ffffff; font-weight:800; font-size:1.05rem;">📋 Total Price Breakdown</div>
+                                <div style="color:#94a3b8; font-size:0.75rem; margin-top:0.2rem;">For all ${travelersCount} Persons</div>
                             </div>
                             <div style="padding:1.4rem; display:flex; flex-direction:column; gap:0.85rem;">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span style="font-size:0.88rem; color:#64748b;">Original Package Price</span>
-                                    <span style="font-size:0.95rem; color:#94a3b8; text-decoration:line-through;">${this.formatCurrency(offer.originalPrice)}</span>
+                                    <span style="font-size:0.88rem; color:#64748b;">Rate Per Person</span>
+                                    <span style="font-size:0.95rem; color:#0f172a; font-weight:700;">${this.formatCurrency(perPersonPrice)}</span>
                                 </div>
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span style="font-size:0.88rem; color:#059669; font-weight:700;">Agent Special Discount (${savingsPct}%)</span>
+                                    <span style="font-size:0.88rem; color:#64748b;">Number of Travelers</span>
+                                    <span style="font-size:0.95rem; color:#0f172a; font-weight:700;">${travelersCount} Persons</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="font-size:0.88rem; color:#64748b;">Original Total Price</span>
+                                    <span style="font-size:0.95rem; color:#94a3b8; text-decoration:line-through;">${this.formatCurrency(totalOriginalPrice)}</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="font-size:0.88rem; color:#059669; font-weight:700;">Agent Discount (${savingsPct}%)</span>
                                     <span style="font-size:0.95rem; color:#059669; font-weight:800;">−${this.formatCurrency(savings)}</span>
                                 </div>
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span style="font-size:0.88rem; color:#64748b;">Visa & Booking Processing</span>
-                                    <span style="font-size:0.88rem; color:#059669; font-weight:700;">FREE (Included)</span>
-                                </div>
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span style="font-size:0.88rem; color:#64748b;">Platform Convenience Fee</span>
-                                    <span style="font-size:0.88rem; color:#059669; font-weight:700;">Waived (₹0)</span>
+                                    <span style="font-size:0.88rem; color:#64748b;">Visa & Processing</span>
+                                    <span style="font-size:0.88rem; color:#059669; font-weight:700;">FREE</span>
                                 </div>
                                 <div style="border-top:2px dashed #cbd5e1; margin:0.4rem 0;"></div>
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
                                     <div>
-                                        <div style="font-size:1.05rem; font-weight:800; color:#0f172a;">Total Payable</div>
-                                        <div style="font-size:0.72rem; color:#64748b;">All taxes & fees included</div>
+                                        <div style="font-size:1.05rem; font-weight:800; color:#0f172a;">Total Net Payable</div>
+                                        <div style="font-size:0.72rem; color:#64748b;">All taxes included</div>
                                     </div>
-                                    <div style="font-size:1.65rem; font-weight:800; color:#047857;">${this.formatCurrency(offer.discountedPrice)}</div>
+                                    <div style="font-size:1.65rem; font-weight:800; color:#047857;">${this.formatCurrency(totalDiscountedPrice)}</div>
                                 </div>
                                 <div style="background:#f0fdf4; border:1px dashed #86efac; border-radius:10px; padding:0.75rem; text-align:center;">
-                                    <span style="font-size:0.85rem; color:#047857; font-weight:800;">🎉 Direct Savings: ${this.formatCurrency(savings)}</span>
+                                    <span style="font-size:0.85rem; color:#047857; font-weight:800;">🎉 Total Direct Savings: ${this.formatCurrency(savings)}</span>
                                 </div>
                             </div>
                         </div>
@@ -4474,20 +4489,20 @@ class App {
                                 <span style="font-size:1.6rem;">🛡️</span>
                                 <div>
                                     <div style="font-weight:800; font-size:0.95rem;">Zilhaj.com 100% Protection</div>
-                                    <div style="font-size:0.75rem; color:#a7f3d0;">Verified Bidding Guarantee</div>
+                                    <div style="font-size:0.75rem; color:#a7f3d0;">Verified Escrow Booking</div>
                                 </div>
                             </div>
                             <div style="display:flex; flex-direction:column; gap:0.45rem; font-size:0.8rem; color:#d1fae5;">
-                                <div>✓ 100% Background-Checked Licensed Agency</div>
-                                <div>✓ Direct Agent Bidding Price — No Hidden Markup</div>
-                                <div>✓ 24/7 Dedicated Support (+966 800 123 4567)</div>
+                                <div>✓ 100% Background-Checked Agency</div>
+                                <div>✓ Total Price for all ${travelersCount} Travelers — No Hidden Fees</div>
+                                <div>✓ 24/7 Support Assistance</div>
                             </div>
                         </div>
 
                         <!-- Modern Action CTA Buttons -->
                         <button onclick="app.closeModal(); app.openOfferPaymentModal('${offer.id}');"
-                            style="width:100%; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:#0f172a; font-size:1.05rem; font-weight:800; padding:1.1rem 1.4rem; border-radius:14px; border:none; cursor:pointer; font-family:inherit; box-shadow:0 6px 20px rgba(245,158,11,0.45); letter-spacing:0.3px; transition:all 0.2s;">
-                            ✅ Proceed to Traveler Info &amp; Payment 💳
+                            style="width:100%; background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; font-size:1.05rem; font-weight:800; padding:1.1rem 1.4rem; border-radius:14px; border:none; cursor:pointer; font-family:inherit; box-shadow:0 6px 20px rgba(4,120,87,0.35); letter-spacing:0.3px; transition:all 0.2s;">
+                            Proceed to Payment → 💳
                         </button>
                         <button onclick="app.closeModal();"
                             style="width:100%; background:#ffffff; color:#64748b; font-size:0.9rem; font-weight:700; padding:0.8rem; border-radius:12px; border:1.5px solid #cbd5e1; cursor:pointer; font-family:inherit;">
@@ -4504,14 +4519,23 @@ class App {
         const offer = allOffers.find(o => o.id === offerId) || {
             id: offerId,
             packageTitle: 'Custom Travel Package Offer',
-            discountedPrice: 125000,
-            originalPrice: 145000,
+            discountedPrice: 49999,
+            originalPrice: 59999,
             agentName: 'Zilhaj.com Verified Agency',
             requirementId: ''
         };
 
-        const savings = Math.max(0, (offer.originalPrice || 0) - (offer.discountedPrice || 0));
-        const user = this.state.currentUser || { name: 'Lead Zaireen', phone: '9541692891', email: 'Zaireen@example.com' };
+        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        const apiReqs = this.state.myRequirements || [];
+        const req = [...apiReqs, ...localReqs].find(r => r.id === offer.requirementId);
+        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 2;
+        const perPersonPrice = offer.discountedPrice || offer.price || 49999;
+        const origPerPerson = offer.originalPrice || Math.round(perPersonPrice * 1.25);
+        const totalDiscountedPrice = perPersonPrice * travelersCount;
+        const totalOriginalPrice = origPerPerson * travelersCount;
+        const savings = Math.max(0, totalOriginalPrice - totalDiscountedPrice);
+
+        const user = this.state.currentUser || { name: 'Lead Zaireen', phone: '9541692891', email: 'zaireen@example.com' };
 
         // Make modal 100% full screen
         const modal = document.getElementById('modalCard');
@@ -4536,31 +4560,31 @@ class App {
                 <div class="glass-header" style="background:#0f172a; padding:1.2rem 2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-bottom:4px solid #047857; flex-shrink:0;">
                     <div style="display:flex; align-items:center; gap:1.2rem;">
                         <button onclick="app.closeModal(); app.openOfferReviewModal('${offer.id}');" style="background:rgba(255,255,255,0.12); color:#ffffff; border:1px solid rgba(255,255,255,0.25); border-radius:8px; padding:0.5rem 1.1rem; font-weight:700; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem; transition:all 0.2s;">
-                            ← Back to Order Review
+                            ← Back to Details
                         </button>
                         <div style="display:flex; align-items:center; gap:0.6rem;">
                             <span style="font-size:1.5rem;">💳</span>
                             <div>
                                 <div style="color:#ffffff; font-weight:800; font-size:1.15rem; letter-spacing:0.3px;">Zilhaj.com Secure Checkout</div>
-                                <div style="color:#94a3b8; font-size:0.75rem;">Step 2: Traveler Registration & Gateway Payment</div>
+                                <div style="color:#94a3b8; font-size:0.75rem;">Step 2 of 3: Traveler Details &amp; Gateway Payment</div>
                             </div>
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; gap:1.2rem;">
                         <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.06); padding:0.4rem 1rem; border-radius:999px; border:1px solid rgba(255,255,255,0.12);">
-                            <span style="color:#f59e0b; font-weight:800; font-size:0.8rem;">● Step 2 of 2:</span>
-                            <span style="color:#ffffff; font-weight:700; font-size:0.8rem;">Payment & Confirmation</span>
+                            <span style="color:#f59e0b; font-weight:800; font-size:0.8rem;">● Step 2 of 3:</span>
+                            <span style="color:#ffffff; font-weight:700; font-size:0.8rem;">Payment &amp; Registration</span>
                         </div>
                         <button onclick="app.closeModal();" style="background:rgba(255,255,255,0.15); border:none; color:white; font-size:1.1rem; width:34px; height:34px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
                     </div>
                 </div>
 
-                <!-- ══ DUAL COLUMN AMAZON CHECKOUT BODY ══ -->
+                <!-- ══ DUAL COLUMN CHECKOUT BODY ══ -->
                 <div style="display:grid; grid-template-columns:1fr 360px; gap:1.8rem; padding:1.8rem 2.2rem; flex:1; overflow-y:auto; background:#f8fafc;">
 
                     <!-- LEFT COLUMN — FORM & PAYMENT METHODS -->
                     <div>
-                        <form onsubmit="event.preventDefault(); app.processPaymentSubmit('${offer.id}', '${offer.requirementId || ''}', '${this.escapeHtml(offer.packageTitle)}', ${offer.discountedPrice});" style="display:flex; flex-direction:column; gap:1.4rem;">
+                        <form onsubmit="event.preventDefault(); app.processPaymentSubmit('${offer.id}', '${offer.requirementId || ''}', '${this.escapeHtml(offer.packageTitle)}', ${totalDiscountedPrice}, ${travelersCount});" style="display:flex; flex-direction:column; gap:1.4rem;">
 
                             <!-- Lead Traveler Card -->
                             <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:16px; padding:1.3rem; box-shadow:0 3px 12px rgba(0,0,0,0.03);">
@@ -4582,7 +4606,7 @@ class App {
                                     </div>
                                     <div>
                                         <label style="font-size:0.78rem; font-weight:700; color:#475569; display:block; margin-bottom:0.35rem;">Email Address *</label>
-                                        <input type="email" id="payEmail" class="form-control" required value="${this.escapeHtml(user.email || 'Zaireen@example.com')}" placeholder="e.g. Zaireen@example.com" style="border:1.5px solid #cbd5e1; border-radius:10px; padding:0.75rem 1rem; font-size:0.92rem; width:100%; outline:none;">
+                                        <input type="email" id="payEmail" class="form-control" required value="${this.escapeHtml(user.email || 'zaireen@example.com')}" placeholder="e.g. zaireen@example.com" style="border:1.5px solid #cbd5e1; border-radius:10px; padding:0.75rem 1rem; font-size:0.92rem; width:100%; outline:none;">
                                     </div>
                                 </div>
                             </div>
@@ -4628,13 +4652,13 @@ class App {
                             <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:12px; padding:1rem; display:flex; align-items:center; gap:0.8rem;">
                                 <span style="font-size:1.4rem;">🔒</span>
                                 <div style="font-size:0.82rem; color:#065f46; line-height:1.5;">
-                                    <strong>256-Bit Bank Level Encryption:</strong> Your transaction is encrypted and protected. Zilhaj.com never stores your card or banking credentials.
+                                    <strong>256-Bit Bank Level Encryption:</strong> Your transaction is encrypted and protected under Zilhaj Escrow.
                                 </div>
                             </div>
 
                             <!-- Submit Button -->
-                            <button type="submit" style="width:100%; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:#0f172a; font-size:1.1rem; font-weight:800; padding:1.1rem; border-radius:14px; border:none; cursor:pointer; font-family:inherit; box-shadow:0 6px 22px rgba(245,158,11,0.4);">
-                                🔒 Complete Booking &amp; Pay ${this.formatCurrency(offer.discountedPrice)}
+                            <button type="submit" style="width:100%; background:linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; font-size:1.1rem; font-weight:800; padding:1.1rem; border-radius:14px; border:none; cursor:pointer; font-family:inherit; box-shadow:0 6px 22px rgba(4,120,87,0.35);">
+                                🔒 Complete Booking &amp; Pay ${this.formatCurrency(totalDiscountedPrice)}
                             </button>
                         </form>
                     </div>
@@ -4646,7 +4670,7 @@ class App {
                         <div style="background:#ffffff; border:2px solid #047857; border-radius:16px; overflow:hidden; box-shadow:0 6px 24px rgba(4,120,87,0.12);">
                             <div style="background:#0f172a; padding:1rem 1.4rem; color:white;">
                                 <div style="font-weight:800; font-size:1rem;">🧾 Order Summary</div>
-                                <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.15rem;">Review package pricing</div>
+                                <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.15rem;">Total for ${travelersCount} Travelers</div>
                             </div>
                             <div style="padding:1.3rem; display:flex; flex-direction:column; gap:0.8rem;">
                                 <div>
@@ -4656,21 +4680,29 @@ class App {
                                 </div>
                                 <hr style="border:none; border-top:1px dashed #cbd5e1; margin:0.2rem 0;">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span style="font-size:0.85rem; color:#64748b;">Original Price</span>
-                                    <span style="font-size:0.9rem; color:#94a3b8; text-decoration:line-through;">${this.formatCurrency(offer.originalPrice)}</span>
+                                    <span style="font-size:0.85rem; color:#64748b;">Rate Per Person</span>
+                                    <span style="font-size:0.9rem; color:#0f172a; font-weight:700;">${this.formatCurrency(perPersonPrice)}</span>
                                 </div>
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span style="font-size:0.85rem; color:#059669; font-weight:700;">Reverse Bid Savings</span>
+                                    <span style="font-size:0.85rem; color:#64748b;">Travelers Count</span>
+                                    <span style="font-size:0.9rem; color:#0f172a; font-weight:700;">${travelersCount} Persons</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="font-size:0.85rem; color:#64748b;">Original Total Price</span>
+                                    <span style="font-size:0.9rem; color:#94a3b8; text-decoration:line-through;">${this.formatCurrency(totalOriginalPrice)}</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="font-size:0.85rem; color:#059669; font-weight:700;">Total Discount Savings</span>
                                     <span style="font-size:0.9rem; color:#059669; font-weight:800;">−${this.formatCurrency(savings)}</span>
                                 </div>
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span style="font-size:0.85rem; color:#64748b;">Service Taxes</span>
+                                    <span style="font-size:0.85rem; color:#64748b;">Service Taxes &amp; Visa</span>
                                     <span style="font-size:0.85rem; color:#059669; font-weight:700;">Included</span>
                                 </div>
                                 <hr style="border:none; border-top:2px dashed #cbd5e1; margin:0.3rem 0;">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span style="font-size:1.05rem; font-weight:800; color:#0f172a;">Amount Due</span>
-                                    <span style="font-size:1.6rem; font-weight:800; color:#047857;">${this.formatCurrency(offer.discountedPrice)}</span>
+                                    <span style="font-size:1.05rem; font-weight:800; color:#0f172a;">Total Net Payable</span>
+                                    <span style="font-size:1.6rem; font-weight:800; color:#047857;">${this.formatCurrency(totalDiscountedPrice)}</span>
                                 </div>
                             </div>
                         </div>
@@ -4678,7 +4710,7 @@ class App {
                         <!-- Navigation Back Button -->
                         <button onclick="app.closeModal(); app.openOfferReviewModal('${offer.id}');"
                             style="width:100%; background:#ffffff; color:#64748b; font-size:0.9rem; font-weight:700; padding:0.8rem; border-radius:12px; border:1.5px solid #cbd5e1; cursor:pointer; font-family:inherit;">
-                            ← Back to Package Review
+                            ← Back to Details
                         </button>
                     </div>
                 </div>
@@ -4686,7 +4718,98 @@ class App {
         `);
     }
 
-    async processPaymentSubmit(offerId, reqId, title, price) {
+    openOfferConfirmationModal(booking) {
+        const modal = document.getElementById('modalCard');
+        if (modal) {
+            modal.style.maxWidth = '100vw';
+            modal.style.width = '100vw';
+            modal.style.height = '100vh';
+            modal.style.maxHeight = '100vh';
+            modal.style.margin = '0';
+            modal.style.padding = '0';
+            modal.style.borderRadius = '0';
+            modal.style.border = 'none';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+        }
+
+        this.openModal(`
+            <div style="padding:0; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color:#0f172a; height:100vh; display:flex; flex-direction:column; background:#f1f5f9; overflow:hidden;">
+
+                <!-- Header -->
+                <div class="glass-header" style="background:#0f172a; padding:1.2rem 2rem; display:flex; justify-content:space-between; align-items:center; border-bottom:4px solid #047857; flex-shrink:0;">
+                    <div style="display:flex; align-items:center; gap:1.2rem;">
+                        <div style="display:flex; align-items:center; gap:0.6rem;">
+                            <span style="font-size:1.5rem;">🎉</span>
+                            <div>
+                                <div style="color:#ffffff; font-weight:800; font-size:1.15rem; letter-spacing:0.3px;">Zilhaj.com Booking Confirmation</div>
+                                <div style="color:#94a3b8; font-size:0.75rem;">Step 3 of 3: Booking Confirmed &amp; Payment Received</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:1.2rem;">
+                        <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(16,185,129,0.15); padding:0.4rem 1rem; border-radius:999px; border:1px solid #10b981;">
+                            <span style="color:#10b981; font-weight:800; font-size:0.8rem;">● Step 3 of 3:</span>
+                            <span style="color:#ffffff; font-weight:700; font-size:0.8rem;">Confirmed</span>
+                        </div>
+                        <button onclick="app.closeModal(); app.navigate('dashboard');" style="background:rgba(255,255,255,0.15); border:none; color:white; font-size:1.1rem; width:34px; height:34px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+                    </div>
+                </div>
+
+                <!-- Confirmation Content Area -->
+                <div style="flex:1; overflow-y:auto; padding:2rem 2.2rem; background:#f8fafc; display:flex; flex-direction:column; align-items:center;">
+                    <div style="max-width:760px; width:100%; display:flex; flex-direction:column; gap:1.6rem;">
+
+                        <!-- Success Hero Box -->
+                        <div style="background:linear-gradient(135deg, #064e3b 0%, #047857 100%); border-radius:20px; padding:2.2rem; text-align:center; color:white; box-shadow:0 10px 30px rgba(4,120,87,0.2);">
+                            <div style="width:72px; height:72px; background:#ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; font-size:2.2rem; box-shadow:0 4px 15px rgba(0,0,0,0.15);">
+                                ✅
+                            </div>
+                            <h2 style="font-size:1.8rem; font-weight:900; color:#ffffff; margin:0 0 0.4rem;">Booking Confirmed!</h2>
+                            <p style="font-size:0.95rem; color:#a7f3d0; margin:0 0 1.2rem;">Your payment has been received and verified under Zilhaj Escrow Guarantee.</p>
+
+                            <div style="display:inline-flex; align-items:center; gap:1.2rem; background:rgba(0,0,0,0.25); border:1.5px solid rgba(255,255,255,0.25); padding:0.8rem 1.6rem; border-radius:14px;">
+                                <div>
+                                    <div style="font-size:0.7rem; color:#d1fae5; text-transform:uppercase; font-weight:700;">Booking Ref / PNR</div>
+                                    <div style="font-size:1.4rem; font-weight:900; color:#fef08a; font-family:monospace; margin-top:0.1rem;">${booking.id}</div>
+                                </div>
+                                <div style="width:1px; height:32px; background:rgba(255,255,255,0.2);"></div>
+                                <div>
+                                    <div style="font-size:0.7rem; color:#d1fae5; text-transform:uppercase; font-weight:700;">Total Paid for ${booking.travelersCount || 2} Persons</div>
+                                    <div style="font-size:1.4rem; font-weight:900; color:#ffffff; margin-top:0.1rem;">${this.formatCurrency(booking.totalPrice)}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary Card in Dashboard Style -->
+                        <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:18px; padding:1.6rem; box-shadow:0 4px 16px rgba(0,0,0,0.03);">
+                            <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0 0 1rem; border-bottom:1px solid #f1f5f9; padding-bottom:0.7rem;">📋 Booking Summary</h3>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; font-size:0.9rem;">
+                                <div><span style="color:#64748b;">Package:</span> <strong style="color:#0f172a; font-weight:700; display:block;">${this.escapeHtml(booking.packageTitle)}</strong></div>
+                                <div><span style="color:#64748b;">Lead Pilgrim:</span> <strong style="color:#0f172a; font-weight:700; display:block;">${this.escapeHtml(booking.userName)}</strong></div>
+                                <div><span style="color:#64748b;">Travelers:</span> <strong style="color:#0f172a; font-weight:700; display:block;">${booking.travelersCount || 2} Persons</strong></div>
+                                <div><span style="color:#64748b;">Transaction ID:</span> <strong style="color:#047857; font-weight:700; display:block; font-family:monospace;">${booking.transactionId}</strong></div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                            <button onclick="app.closeModal(); app.viewBookingVoucher('${booking.id}');" style="flex:1; background:#047857; color:#ffffff; border:none; padding:1.1rem; border-radius:14px; font-weight:800; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(4,120,87,0.3);">
+                                📄 Download Invoice &amp; E-Voucher
+                            </button>
+                            <button onclick="app.closeModal(); app.navigate('dashboard');" style="flex:1; background:#ffffff; color:#334155; border:1.5px solid #cbd5e1; padding:1.1rem; border-radius:14px; font-weight:800; font-size:1rem; cursor:pointer; text-align:center;">
+                                Go to Dashboard 🏠
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        `);
+    }
+
+    async processPaymentSubmit(offerId, reqId, title, price, travelersCount = 2) {
         this.closeModal();
         this.showLoading('Processing secure gateway payment...');
 
@@ -4700,7 +4823,7 @@ class App {
                 offerId: offerId,
                 requirementId: reqId || '',
                 totalPrice: price,
-                travelersCount: 2,
+                travelersCount: travelersCount,
                 travelDate: '12 AUGUST 2026',
                 status: 'CONFIRMED',
                 paymentStatus: 'PAID',
@@ -4730,7 +4853,7 @@ class App {
 
             this.hideLoading();
             this.showToast('Payment successful! Trip booking confirmed.', 'success');
-            this.navigate('dashboard');
+            this.openOfferConfirmationModal(newBooking);
         }, 1400);
     }
 
