@@ -975,20 +975,7 @@ class App {
             }
         }
 
-        this.hideBootOverlay();
         setTimeout(() => this.initScrollReveal(), 50);
-    }
-
-    hideBootOverlay() {
-        const ov = document.getElementById('zilhajBootOverlay');
-        if (!ov || ov.dataset.hidden) return;
-        ov.dataset.hidden = '1';
-        ov.style.transition = 'opacity 0.4s ease, visibility 0.4s ease';
-        ov.style.opacity = '0';
-        ov.style.visibility = 'hidden';
-        setTimeout(() => {
-            if (ov.parentNode) ov.parentNode.removeChild(ov);
-        }, 500);
     }
 
     initHeroVideoPlaylist() {
