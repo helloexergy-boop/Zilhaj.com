@@ -1381,56 +1381,9 @@ class App {
     }
 
     openPackageDetailModal(packageId) {
-        const pkg = this.state.packages.find(p => p.id === packageId);
-        if (!pkg) return;
-
-        this.openModal(`
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                <button class="btn btn-outline btn-sm" onclick="app.closeModal();">← Back to Packages</button>
-            </div>
-            <div class="modal-header">
-                <h3>${this.escapeHtml(pkg.title)}</h3>
-                <p style="color:var(--text-muted); font-size:0.9rem;">By ${this.escapeHtml(pkg.agentName || 'UMRAH TRAVELS')} | Departure: ${this.escapeHtml(pkg.departureDateText || '12 AUGUST')} (${pkg.durationDays || 18} Days)</p>
-            </div>
-            <div class="modal-body" style="max-height:70vh; overflow-y:auto;">
-                <p style="line-height:1.6; margin-bottom:1.2rem; color:var(--text-main);">${this.escapeHtml(pkg.description)}</p>
-
-                <h4 style="color:var(--primary); margin-bottom:0.6rem;">🏨 Hotel Accommodations</h4>
-                <div style="background:#f8fafc; border-radius:10px; padding:1rem; margin-bottom:1.2rem; border:1px solid #e2e8f0;">
-                    <div style="margin-bottom:0.6rem;">
-                        <strong>📍 Makkah Hotel:</strong> ${this.escapeHtml(pkg.makkahHotelName || 'Manarat Al Misk / Dream Zone (or similar)')}<br>
-                        <small style="color:#92400e;">Distance: Approx. ${pkg.distanceToHaramMakkah || 600} meters from Masjid Al-Haram</small>
-                    </div>
-                    <div>
-                        <strong>📍 Madinah Hotel:</strong> ${this.escapeHtml(pkg.madinahHotelName || 'Marjan International / Marjan Gold (or similar)')}<br>
-                        <small style="color:#92400e;">Distance: Approx. ${pkg.distanceToHaramMadinah || 250} meters from Al-Masjid An-Nabawi</small>
-                    </div>
-                </div>
-
-                <h4 style="color:var(--primary); margin-bottom:0.6rem;">📦 Full Package Inclusions</h4>
-                <ul style="line-height:1.8; margin-left:1.2rem; margin-bottom:1.2rem; color:var(--text-main);">
-                    <li>✔ ${this.escapeHtml(pkg.flightRoute || 'Return Air Ticket (SXR-JED-MED-SXR)')}</li>
-                    <li>✔ ${this.escapeHtml(pkg.sharingType || '4/5 Sharing Accommodation')}</li>
-                    <li>✔ 03 Times Daily Indian Buffet Meals</li>
-                    <li>✔ Half-Day Guided Ziyarat in Makkah & Madinah</li>
-                    <li>✔ Airport & Intercity AC Transfers</li>
-                    <li>✔ Complimentary Gifts: Ahram Kit, Laundry Service, 5 Litres Zamzam Water</li>
-                </ul>
-
-                <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:10px; padding:0.9rem; font-size:0.85rem; color:#991b1b; margin-bottom:1.5rem;">
-                    <strong>📌 Important Note:</strong> ${this.escapeHtml(pkg.importantNote || 'Rawdah permits must be booked by the Zaireen through the Nusuk App, subject to availability. The company is not responsible for the booking, availability, approval, or non-issuance of the Rawdah permit.')}
-                </div>
-
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#ecfdf5; padding:1rem; border-radius:10px; border:1px solid #a7f3d0;">
-                    <div>
-                        <span style="font-size:0.8rem; text-transform:uppercase; color:#047857; font-weight:700;">Package Price</span>
-                        <div style="font-size:1.5rem; font-weight:800; color:#047857;">${this.formatCurrency(pkg.price)}</div>
-                    </div>
-                    <button class="btn btn-gold" onclick="app.closeModal(); app.startBooking('${pkg.id}')">Book This Package Now</button>
-                </div>
-            </div>
-        `);
+        this.openOfferReviewModal(packageId);
     }
+
 
     renderCustomRequirementForm() {
         return `
@@ -3120,20 +3073,6 @@ class App {
                 ${panel}
             </div>
         </div>`;
-    }
-
-    openOfferReviewModal(offerId) {
-        this.closeModal();
-        this.state.activeOfferId = offerId;
-        this.state.currentPage = 'dashboard';
-        this.setDashboardTab('packageDetails');
-    }
-
-    openOfferPaymentModal(offerId) {
-        this.closeModal();
-        this.state.activeOfferId = offerId;
-        this.state.currentPage = 'dashboard';
-        this.setDashboardTab('paymentScreen');
     }
 
     toggleUpiQrCode() {
@@ -4953,7 +4892,14 @@ class App {
     }
 
     openOfferReviewModal(offerId) {
-        const allOffers = this.getAllOffers();
+        this.closeModal();
+        this.state.activeOfferId = offerId;
+        this.state.currentPage = 'dashboard';
+        this.setDashboardTab('packageDetails');
+        return;
+    }
+
+    openOfferReviewModal_old(offerId) {
         const offer = allOffers.find(o => o.id === offerId) || {
             id: offerId,
             packageTitle: 'Umrah Package - Economy',
@@ -5331,7 +5277,14 @@ class App {
     }
 
     openOfferPaymentModal(offerId) {
-        const allOffers = this.getAllOffers();
+        this.closeModal();
+        this.state.activeOfferId = offerId;
+        this.state.currentPage = 'dashboard';
+        this.setDashboardTab('paymentScreen');
+        return;
+    }
+
+    openOfferPaymentModal_old(offerId) {
         const offer = allOffers.find(o => o.id === offerId) || {
             id: offerId,
             packageTitle: 'Umrah Package - Economy',
