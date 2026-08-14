@@ -294,6 +294,41 @@ app.post('/api/admin/offers', async (req, res) => {
     }
     inMemoryStore.offers.push(offer);
     res.status(201).json(offer);
+
+    // Notify the Zaireen (user) that a new offer arrived — honors their emailNotifs/smsAlerts toggles
+    if (offer.userId || offer.userEmail) {
+        const notifyPayload = {
+            category: 'offer',
+            subject: '🎁 New Umrah Offer Received',
+            heading: `New offer from ${offer.agentName || 'a verified operator'}`,
+            message: `A new offer for "${offer.packageTitle || 'your Umrah package'}" is available. Log in to review and accept it.`
+        };
+        if (offer.userEmail && offer.userEmail.includes('@')) {
+            const prefs = { emailNotifs: true, smsAlerts: true, offerNotifs: true, paymentAlerts: true, privacyMode: true, twoFactor: false };
+            try {
+                const db = await getFastDb();
+                let user = null;
+                if (db) user = await db.collection('users').findOne({ email: offer.userEmail }).catch(() => null);
+                if (user) prefs.emailNotifs = user.settings ? user.settings.emailNotifs !== false : true;
+                if (prefs.emailNotifs !== false) {
+                    const transporter = getMailTransporter(false);
+                    if (transporter) {
+                        try {
+                            await transporter.sendMail({
+                                from: `"Umrah Travels" <${process.env.GMAIL_USER || 'hello.exergy@gmail.com'}>`,
+                                to: offer.userEmail,
+                                subject: notifyPayload.subject,
+                                html: `<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;"><div style="text-align:center;margin-bottom:16px;"><span style="font-size:32px;">🕋</span><h2 style="color:#0f172a;margin:8px 0 0 0;">Umrah Travels</h2></div><div style="background:#f0fdf4;padding:20px;border-radius:10px;border:1px solid #bbf7d0;margin:16px 0;"><p style="color:#166534;font-size:15px;font-weight:700;margin:0 0 8px 0;">${notifyPayload.heading}</p><p style="color:#334155;font-size:14px;line-height:1.6;margin:0;">${notifyPayload.message}</p></div><p style="color:#94a3b8;font-size:11px;text-align:center;margin-top:16px;">Sent by Umrah Travels Platform • support@zilhaj.com</p></div>`
+                            });
+                            console.log('[NOTIFY] Offer notification email sent to', offer.userEmail);
+                        } catch (err) { console.warn('[NOTIFY] offer email error:', err.message); }
+                    }
+                }
+            } catch (err) { console.warn('[NOTIFY] offer prefs lookup error:', err.message); }
+        } else if (offer.userId) {
+            sendHonoringNotification(offer.userId, notifyPayload);
+        }
+    }
 });
 
 // BOOKINGS ENDPOINTS
@@ -336,6 +371,42 @@ app.post('/api/bookings', async (req, res) => {
         inMemoryStore.bookings.push(booking);
     }
     res.status(201).json(booking);
+
+    // Notify the user about the booking confirmation — honors paymentAlerts/emailNotifs toggles
+    const bookingUserId = booking.userId || req.body.userId;
+    if (bookingUserId) {
+        sendHonoringNotification(bookingUserId, {
+            category: 'payment',
+            subject: '🧾 Booking Confirmed — Payment Received',
+            heading: `Your booking ${booking.id} is confirmed`,
+            message: `Thank you! Your Umrah booking (${booking.packageTitle || 'package'}) has been confirmed and your payment secured in escrow.`
+        });
+    } else if (booking.userEmail && booking.userEmail.includes('@')) {
+        const prefs = { emailNotifs: true, paymentAlerts: true };
+        try {
+            const db = await getFastDb();
+            let user = null;
+            if (db) user = await db.collection('users').findOne({ email: booking.userEmail }).catch(() => null);
+            if (user && user.settings) {
+                prefs.emailNotifs = user.settings.emailNotifs !== false;
+                prefs.paymentAlerts = user.settings.paymentAlerts !== false;
+            }
+            if (prefs.emailNotifs !== false && prefs.paymentAlerts !== false) {
+                const transporter = getMailTransporter(false);
+                if (transporter) {
+                    try {
+                        await transporter.sendMail({
+                            from: `"Umrah Travels" <${process.env.GMAIL_USER || 'hello.exergy@gmail.com'}>`,
+                            to: booking.userEmail,
+                            subject: '🧾 Booking Confirmed — Payment Received',
+                            html: `<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;"><div style="text-align:center;margin-bottom:16px;"><span style="font-size:32px;">🕋</span><h2 style="color:#0f172a;margin:8px 0 0 0;">Umrah Travels</h2></div><div style="background:#f0fdf4;padding:20px;border-radius:10px;border:1px solid #bbf7d0;margin:16px 0;"><p style="color:#166534;font-size:15px;font-weight:700;margin:0 0 8px 0;">Your booking ${booking.id} is confirmed</p><p style="color:#334155;font-size:14px;line-height:1.6;margin:0;">Thank you! Your Umrah booking has been confirmed and your payment secured in escrow.</p></div><p style="color:#94a3b8;font-size:11px;text-align:center;margin-top:16px;">Sent by Umrah Travels Platform • support@zilhaj.com</p></div>`
+                        });
+                        console.log('[NOTIFY] Booking confirmation email sent to', booking.userEmail);
+                    } catch (err) { console.warn('[NOTIFY] booking email error:', err.message); }
+                }
+            }
+        } catch (err) { console.warn('[NOTIFY] booking prefs lookup error:', err.message); }
+    }
 });
 
 app.put('/api/bookings/:id', async (req, res) => {
@@ -1068,97 +1139,179 @@ async function sendTwilioSMS(toPhone, messageBody) {
 }
 
 // AUTHENTICATION & OAUTH 2.0 ENDPOINTS
-app.post('/api/auth/google', async (req, res) => {
+app.post('/api/auth/logout', (req, res) => {
+    res.json({ message: 'Logged out successfully' });
+});
+
+// ----------------------------------------------------
+// ⚙️ USER NOTIFICATION SETTINGS (persisted to MongoDB)
+// ----------------------------------------------------
+const DEFAULT_USER_SETTINGS = {
+    emailNotifs: true,
+    smsAlerts: true,
+    offerNotifs: true,
+    paymentAlerts: true,
+    privacyMode: true,
+    twoFactor: false
+};
+
+async function getUserByUserId(userId) {
+    if (!userId) return null;
+    const db = await getFastDb();
+    if (db) {
+        try {
+            return await db.collection('users').findOne({ $or: [{ id: userId }, { _id: userId }] });
+        } catch (e) {}
+    }
+    // In-memory fallback: users map is keyed by email, scan for matching id
+    for (const u of inMemoryUsers.values()) {
+        if (u.id === userId || u._id === userId) return u;
+    }
+    return null;
+}
+
+app.get('/api/users/:userId/settings', async (req, res) => {
     try {
-        const { googleId, email, name, picture } = req.body || {};
-        if (!email) {
-            return res.status(400).json({ message: 'Email is required for Google OAuth' });
-        }
-
-        const db = await connectToDatabase();
-        const usersCol = db.collection('users');
-
-        let user = await usersCol.findOne({ email });
-        const now = new Date().toISOString();
-
-        if (!user) {
-            user = {
-                id: 'usr-' + Date.now(),
-                googleId: googleId || null,
-                name: name || email.split('@')[0],
-                email,
-                profilePictureUrl: picture || null,
-                role: 'ROLE_USER',
-                createdAt: now,
-                updatedAt: now
-            };
-            await usersCol.insertOne(user);
-        } else {
-            const updateFields = { updatedAt: now };
-            if (googleId) updateFields.googleId = googleId;
-            if (name) updateFields.name = name;
-            if (picture) updateFields.profilePictureUrl = picture;
-            await usersCol.updateOne({ email }, { $set: updateFields });
-            user = await usersCol.findOne({ email });
-        }
-
-        const token = 'jwt-token-' + Date.now();
-        res.json({
-            token,
-            type: 'Bearer',
-            id: user.id || user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role || 'ROLE_USER',
-            profilePictureUrl: user.profilePictureUrl || picture || null
-        });
+        const userId = req.params.userId;
+        const user = await getUserByUserId(userId);
+        const settings = (user && user.settings) ? { ...DEFAULT_USER_SETTINGS, ...user.settings } : { ...DEFAULT_USER_SETTINGS };
+        res.json({ userId, settings });
     } catch (err) {
-        console.error('Google OAuth backend error:', err);
-        const { googleId, email, name, picture } = req.body || {};
-        res.json({
-            token: 'jwt-token-' + Date.now(),
-            type: 'Bearer',
-            id: 'usr-' + Date.now(),
-            name: name || (email ? email.split('@')[0] : 'User'),
-            email: email || 'user@domain.com',
-            role: 'ROLE_USER',
-            profilePictureUrl: picture || null
-        });
+        console.error('GET settings error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-app.post('/api/auth/login', async (req, res) => {
-    const { email, password } = req.body || {};
+app.put('/api/users/:userId/settings', async (req, res) => {
     try {
-        const db = await connectToDatabase();
-        const user = await db.collection('users').findOne({ email });
-        if (user) {
-            return res.json({
-                token: 'jwt-token-' + Date.now(),
-                type: 'Bearer',
-                id: user.id || user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role || (email.includes('admin') ? 'ROLE_ADMIN' : 'ROLE_USER'),
-                profilePictureUrl: user.profilePictureUrl || null
-            });
-        }
-    } catch (e) {}
+        const userId = req.params.userId;
+        const incoming = req.body && req.body.settings ? req.body.settings : (req.body || {});
+        const db = await getFastDb();
 
-    const isUserAdmin = email && email.includes('admin');
-    res.json({
-        token: 'jwt-token-' + Date.now(),
-        type: 'Bearer',
-        id: 'usr-' + Date.now(),
-        name: email ? email.split('@')[0] : 'User',
-        email: email,
-        role: isUserAdmin ? 'ROLE_ADMIN' : 'ROLE_USER',
-        profilePictureUrl: null
-    });
+        if (db) {
+            const user = await getUserByUserId(userId);
+            if (user) {
+                await db.collection('users').updateOne(
+                    { _id: user._id },
+                    { $set: { settings: { ...DEFAULT_USER_SETTINGS, ...(user.settings || {}), ...incoming } } }
+                ).catch(() => {});
+            } else {
+                await db.collection('users').updateOne(
+                    { $or: [{ id: userId }, { _id: userId }] },
+                    { $set: { settings: { ...DEFAULT_USER_SETTINGS, ...incoming } } },
+                    { upsert: true }
+                ).catch(() => {});
+            }
+        }
+
+        const settings = { ...DEFAULT_USER_SETTINGS, ...incoming };
+        // Update in-memory cache
+        for (const u of inMemoryUsers.values()) {
+            if (u.id === userId || u._id === userId) { u.settings = settings; break; }
+        }
+        res.json({ userId, settings });
+    } catch (err) {
+        console.error('PUT settings error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
-app.post('/api/auth/logout', (req, res) => {
-    res.json({ message: 'Logged out successfully' });
+// Resolve a user's notification prefs + email/phone so notification sends honor toggles
+async function getUserNotificationPrefs(userId) {
+    const user = await getUserByUserId(userId);
+    if (!user) return null;
+    const settings = { ...DEFAULT_USER_SETTINGS, ...(user.settings || {}) };
+    return {
+        email: (user.email || '').trim(),
+        phone: (user.phone || user.mobile || '').trim(),
+        settings
+    };
+}
+
+// Send a notification email/SMS honoring the user's toggles (emailNotifs / smsAlerts)
+async function sendHonoringNotification(userId, payload) {
+    if (!userId) return false;
+    const prefs = await getUserNotificationPrefs(userId);
+    if (!prefs) return false;
+
+    const { email, phone, settings } = prefs;
+    const category = payload.category || 'general'; // offer | payment | request | system
+    let allowEmail = settings.emailNotifs;
+    let allowSms = settings.smsAlerts;
+    if (category === 'offer') allowEmail = allowEmail && settings.offerNotifs;
+    if (category === 'payment') allowEmail = allowEmail && settings.paymentAlerts;
+
+    let sent = false;
+
+    if (allowEmail && email && email.includes('@')) {
+        const transporter = getMailTransporter(false);
+        if (transporter) {
+            try {
+                const sender = process.env.GMAIL_USER || 'hello.exergy@gmail.com';
+                await transporter.sendMail({
+                    from: `"Umrah Travels" <${sender}>`,
+                    to: email,
+                    subject: payload.subject || 'Update from Umrah Travels',
+                    html: `
+                        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                            <div style="text-align: center; margin-bottom: 16px;">
+                                <span style="font-size: 32px;">🕋</span>
+                                <h2 style="color: #0f172a; margin: 8px 0 0 0;">Umrah Travels</h2>
+                            </div>
+                            <div style="background: #f0fdf4; padding: 20px; border-radius: 10px; border: 1px solid #bbf7d0; margin: 16px 0;">
+                                <p style="color: #166534; font-size: 15px; font-weight: 700; margin: 0 0 8px 0;">${payload.heading || payload.subject || ''}</p>
+                                <p style="color: #334155; font-size: 14px; line-height: 1.6; margin: 0;">${payload.message || ''}</p>
+                            </div>
+                            <p style="color: #94a3b8; font-size: 11px; text-align: center; margin-top: 16px;">Sent by Umrah Travels Platform • support@zilhaj.com</p>
+                        </div>
+                    `
+                });
+                sent = true;
+            } catch (err) {
+                console.warn('[NOTIFY] email error:', err.message);
+            }
+        }
+    }
+
+    if (allowSms && phone && typeof sendTwilioSMS === 'function') {
+        try {
+            const smsBody = payload.subject + '. ' + (payload.message || '').replace(/<[^>]+>/g, ' ');
+            const ok = await sendTwilioSMS(phone, smsBody);
+            if (ok) sent = true;
+        } catch (err) {
+            console.warn('[NOTIFY] sms error:', err.message);
+        }
+    }
+
+    return sent;
+}
+
+// BOOKING CANCEL ENDPOINT
+app.put('/api/bookings/:id/cancel', async (req, res) => {
+    const updates = { status: 'CANCELLED', cancelledAt: new Date(), updatedAt: new Date() };
+    try {
+        const db = await connectToDatabase();
+        await db.collection('bookings').updateOne({ id: req.params.id }, { $set: updates });
+    } catch (err) {
+        console.warn('MongoDB offline, updating in-memory store for booking cancel');
+    }
+    const idx = inMemoryStore.bookings.findIndex(b => b.id === req.params.id);
+    if (idx !== -1) inMemoryStore.bookings[idx] = { ...inMemoryStore.bookings[idx], ...updates };
+    res.json({ id: req.params.id, status: 'CANCELLED' });
+});
+
+// DELETE REQUIREMENT (also removes linked offers)
+app.delete('/api/requirements/:id', async (req, res) => {
+    try {
+        const db = await connectToDatabase();
+        await db.collection('requirements').deleteOne({ id: req.params.id });
+        await db.collection('offers').deleteMany({ requirementId: req.params.id });
+    } catch (err) {
+        console.warn('MongoDB offline, updating in-memory store for requirement delete');
+    }
+    inMemoryStore.requirements = inMemoryStore.requirements.filter(r => r.id !== req.params.id);
+    inMemoryStore.offers = inMemoryStore.offers.filter(o => o.requirementId !== req.params.id);
+    res.json({ id: req.params.id, deleted: true });
 });
 
 // RAZORPAY & UPI PAYMENT ENDPOINTS

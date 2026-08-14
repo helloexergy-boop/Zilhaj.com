@@ -717,6 +717,12 @@ class App {
         if (Array.isArray(reqs)) {
             this.state.myRequirements = reqs;
         }
+
+        const settingsRes = await this.apiCall(`/users/${encodeURIComponent(this.state.currentUser.id)}/settings`);
+        if (settingsRes && settingsRes.settings) {
+            this.state.userSettings = settingsRes.settings;
+            localStorage.setItem('zilhaj_user_settings', JSON.stringify(settingsRes.settings));
+        }
     }
 
     async fetchPackages() {
@@ -2407,10 +2413,19 @@ class App {
         }
     }
 
-    toggleSetting(key) {
+    async toggleSetting(key) {
         const settings = JSON.parse(localStorage.getItem('zilhaj_user_settings') || '{"emailNotifs":true,"smsAlerts":true,"offerNotifs":true,"paymentAlerts":true,"privacyMode":true,"twoFactor":false}');
         settings[key] = !settings[key];
         localStorage.setItem('zilhaj_user_settings', JSON.stringify(settings));
+
+        // Persist to backend so toggles actually hold server-side (email/SMS sends honor them)
+        const user = this.state.currentUser;
+        if (user && user.id && typeof this.apiCall === 'function') {
+            try {
+                await this.apiCall(`/users/${encodeURIComponent(user.id)}/settings`, 'PUT', { settings });
+            } catch (e) {}
+        }
+
         const main = document.getElementById('mainContainer');
         if (main && this.state.currentPage === 'dashboard') {
             main.innerHTML = this.renderDashboardPage();
@@ -2432,9 +2447,11 @@ class App {
         const apiOffers = this.state.userOffers || [];
         const allReqs   = [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
         const allOffers = [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
+        const apiBookings = this.state.myBookings || [];
+        const allBookings = [...apiBookings, ...localBookings.filter(lb => !apiBookings.some(b => b.id === lb.id))];
         const requirements = allReqs.filter(r => !r.userId || r.userId === user.id || r.userEmail === user.email);
         const offers   = allOffers;
-        const bookings = localBookings;
+        const bookings = allBookings;
         const userSettings = JSON.parse(localStorage.getItem('zilhaj_user_settings') || '{"emailNotifs":true,"smsAlerts":true,"offerNotifs":true,"paymentAlerts":true,"privacyMode":true,"twoFactor":false}');
 
         // ── Support contact helpers ──────────────────────────────────────────────
@@ -2456,7 +2473,7 @@ class App {
         const offersAvailable = offersForUser.length;
         const inProgress = requirements.filter(r => !r.status || r.status === 'PENDING' || r.status === 'ACTIVE').length;
         const completed  = bookings.filter(b => b.status === 'CONFIRMED' || b.status === 'COMPLETED').length;
-        const notifCount = 6;
+        const notifCount = offersAvailable + inProgress + completed;
 
         // ── Nav item builder ─────────────────────────────────────────────────────
         const navItem = (tab, icon, label, badge = 0) => {
@@ -2843,14 +2860,41 @@ class App {
         // ════════════════════════════════════════════════════════════════════════
         } else if (activeTab === 'notifications') {
             const currentFilter = this.state.notifFilter || 'All';
-            const allNotifs = [
-                {id:1, category:'offers',   ic:'offer', bg:'#d1fae5', ic_c:'#059669', title:'New offers received for REQ-1024', desc:'We received 3 new offers for your Umrah package request.', time:'2 minutes ago', unread:true},
-                {id:2, category:'requests', ic:'clock', bg:'#fef3c7', ic_c:'#d97706', title:'Your request REQ-1019 is active', desc:'We are collecting competitive offers from verified agents.', time:'45 minutes ago', unread:true},
-                {id:3, category:'payments', ic:'pay',   bg:'#dbeafe', ic_c:'#2563eb', title:'Payment of ₹56,900 successful', desc:'Your payment for REQ-0998 has been received and confirmed.', time:'2 days ago', unread:false},
-                {id:4, category:'requests', ic:'check', bg:'#d1fae5', ic_c:'#059669', title:'Request REQ-0998 completed', desc:'Your Umrah package booking was completed successfully.', time:'3 days ago', unread:false},
-                {id:5, category:'system',   ic:'info',  bg:'#e0e7ff', ic_c:'#4f46e5', title:'Verify your email address', desc:'Please verify your email address to keep your account secure.', time:'5 days ago', unread:false},
-                {id:6, category:'system',   ic:'sys',   bg:'#f3f4f6', ic_c:'#6b7280', title:'Scheduled system maintenance', desc:'Platform maintenance on 18 May 2025, 1:00 AM – 3:00 AM IST.', time:'1 week ago', unread:false},
-            ];
+            // ── Real notifications derived from the user's live data ─────────────
+            const builtNotifs = [];
+            offersForUser.forEach((o, i) => {
+                const reqRef = (o.requirementId ? ' for ' + o.requirementId : '');
+                builtNotifs.push({
+                    id: 'n-off-' + i, category: 'offers', ic: 'offer', bg: '#d1fae5', ic_c: '#059669',
+                    title: `New offer received${reqRef}`, desc: `${o.agentName || 'A verified operator'} sent an offer for ${o.packageTitle || 'your Umrah package'} at ${this.formatCurrency(o.discountedPrice || o.price || 0)}.`,
+                    time: 'Just now', unread: true
+                });
+            });
+            requirements.forEach((r, i) => {
+                const stateDesc = (r.status === 'CONFIRMED' || r.status === 'OFFERED')
+                    ? `${r.status.charAt(0) + r.status.slice(1).toLowerCase()} — offers are ready for review.`
+                    : `We are collecting competitive offers from verified agents.`;
+                builtNotifs.push({
+                    id: 'n-req-' + i, category: 'requests', ic: 'clock', bg: '#fef3c7', ic_c: '#d97706',
+                    title: `Your request ${r.id || 'REQ'} is ${(r.status || 'active').toLowerCase()}`, desc: stateDesc,
+                    time: 'Active', unread: true
+                });
+            });
+            bookings.forEach((b, i) => {
+                builtNotifs.push({
+                    id: 'n-pay-' + i, category: 'payments', ic: 'pay', bg: '#dbeafe', ic_c: '#2563eb',
+                    title: `Payment of ${this.formatCurrency(b.totalPrice || 0)} successful`, desc: `Your payment for ${b.packageTitle || 'your booking'} (${b.id || ''}) has been received and confirmed.`,
+                    time: 'Paid', unread: false
+                });
+            });
+            if (builtNotifs.length === 0) {
+                builtNotifs.push({
+                    id: 'n-empty', category: 'system', ic: 'info', bg: '#e0e7ff', ic_c: '#4f46e5',
+                    title: 'No updates yet', desc: 'When you submit travel requests, receive offers, or make payments, they will appear here in real time.',
+                    time: '', unread: false
+                });
+            }
+            const allNotifs = builtNotifs;
 
             const filteredNotifs = currentFilter === 'All' 
                 ? allNotifs 
@@ -3102,7 +3146,9 @@ class App {
 
     viewBookingVoucher(bookingId) {
         let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
-        let b = allBookings.find(item => item.id === bookingId) || {
+        let b = allBookings.find(item => item.id === bookingId);
+        if (!b) b = (this.state.myBookings || []).find(item => item.id === bookingId);
+        b = b || {
             id: bookingId || 'BK-048846',
             packageTitle: '18 Days Umrah Package • Swissotel Makkah & Pullman Zamzam Madinah',
             travelDate: '13 AUGUST 2026',
@@ -3328,8 +3374,15 @@ class App {
         });
     }
 
-    deleteRequirement(reqId) {
+    async deleteRequirement(reqId) {
         if (!confirm("Are you sure you want to delete this travel request? All agent offers for this request will also be removed.")) return;
+
+        // Delete from backend (DB) so the removal is real and permanent
+        if (typeof this.apiCall === 'function') {
+            try {
+                await this.apiCall(`/requirements/${encodeURIComponent(reqId)}`, 'DELETE');
+            } catch (e) {}
+        }
 
         let allReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
         let allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
@@ -3339,6 +3392,9 @@ class App {
 
         localStorage.setItem('umrah_requirements', JSON.stringify(allReqs));
         localStorage.setItem('umrah_user_offers', JSON.stringify(allOffers));
+
+        this.state.myRequirements = (this.state.myRequirements || []).filter(r => r.id !== reqId);
+        this.state.userOffers = (this.state.userOffers || []).filter(o => o.requirementId !== reqId);
 
         this.showToast('Travel request deleted successfully.', 'info');
 
@@ -3352,8 +3408,12 @@ class App {
     }
 
     renderPaymentPage(offerId) {
-        const allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-        const allReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        const apiOffers = this.state.userOffers || [];
+        const allOffers = [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
+        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        const apiReqs = this.state.myRequirements || [];
+        const allReqs = [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
 
         const o = allOffers.find(item => item.id === offerId) || allOffers[0] || {
             id: offerId || '#OFF-891',
@@ -3729,6 +3789,7 @@ class App {
         const id = bookingId || 'BK-048846';
         const allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
         let b = allBookings.find(item => item.id === id);
+        if (!b) b = (this.state.myBookings || []).find(item => item.id === id);
 
         if (!b) {
             b = {
