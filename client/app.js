@@ -2400,26 +2400,8 @@ class App {
         container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
 
-    maskValue(value) {
-        const s = String(value || '');
-        if (s.length <= 4) return s.replace(/./g, '*');
-        return '********' + s.slice(-4);
-    }
-
-    maskEmail(email) {
-        const s = String(email || '');
-        const at = s.indexOf('@');
-        if (at <= 1) return '*****' + s.slice(at);
-        return s.slice(0, 1) + '*****' + s.slice(at);
-    }
-
     setDashboardTab(tabName) {
         this.state.activeDashboardTab = tabName || 'dashboard';
-        // Reset sub-states when navigating between tabs
-        if (tabName !== 'requests') delete this.state.selectedReqId;
-        if (tabName !== 'notifications') delete this.state.notifFilter;
-        if (tabName !== 'payments') delete this.state.paymentFilter;
-        if (tabName !== 'requests') delete this.state.reqDetailTab;
         const main = document.getElementById('mainContainer');
         if (main && this.state.currentPage === 'dashboard') {
             main.innerHTML = this.renderDashboardPage();
@@ -2427,1070 +2409,435 @@ class App {
         }
     }
 
-    viewRequestDetail(reqId) {
-        this.state.selectedReqId = reqId;
-        this.state.activeDashboardTab = 'requests';
-        delete this.state.reqDetailTab;
+    viewRequestDetail(requestId) {
+        this.state.selectedRequestId = requestId;
+        this.state.activeDashboardTab = 'requestDetail';
         const main = document.getElementById('mainContainer');
         if (main) {
             main.innerHTML = this.renderDashboardPage();
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    }
-
-    backToRequests() {
-        delete this.state.selectedReqId;
-        delete this.state.reqDetailTab;
-        const main = document.getElementById('mainContainer');
-        if (main) {
-            main.innerHTML = this.renderDashboardPage();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    }
-
-    setReqDetailTab(tab) {
-        this.state.reqDetailTab = tab;
-        const main = document.getElementById('mainContainer');
-        if (main && this.state.currentPage === 'dashboard') {
-            main.innerHTML = this.renderDashboardPage();
-        }
-    }
-
-    setPaymentFilter(filter) {
-        this.state.paymentFilter = filter;
-        const main = document.getElementById('mainContainer');
-        if (main && this.state.activeDashboardTab === 'payments') {
-            main.innerHTML = this.renderDashboardPage();
-        }
-    }
-
-    selectPaymentRow(id) {
-        this.state.selectedTxnId = id;
-        const main = document.getElementById('mainContainer');
-        if (main && this.state.activeDashboardTab === 'payments') {
-            main.innerHTML = this.renderDashboardPage();
-        }
-    }
-
-    toggleFaq(id) {
-        this.state.faqOpenId = this.state.faqOpenId === id ? null : id;
-        const main = document.getElementById('mainContainer');
-        if (main && this.state.activeDashboardTab === 'help') {
-            main.innerHTML = this.renderDashboardPage();
-        }
-    }
-
-    getDashboardNotifications() {
-        const key = 'umrah_notifications';
-        const stored = localStorage.getItem(key);
-        if (stored) {
-            try { return JSON.parse(stored); } catch (e) {}
-        }
-        const user = this.state.currentUser || {};
-        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
-        const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-        const localBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
-        const apiReqs = this.state.myRequirements || [];
-        const apiOffers = this.state.userOffers || [];
-        const apiBookings = this.state.myBookings || [];
-        const requirements = [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
-        const offers = [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
-        const bookings = [...apiBookings, ...localBookings.filter(lb => !apiBookings.some(b => b.id === lb.id))];
-        const list = [];
-        offers.forEach((o, i) => {
-            const req = requirements.find(r => r.id === (o.requirementId || o.requestId));
-            list.push({
-                id: 'n-off-' + (o.id || i),
-                category: 'Offers',
-                title: 'New offer received',
-                message: (o.agentName || 'A verified operator') + ' submitted an offer' + (req ? ' for ' + req.id : ' for your request'),
-                time: 'Just now',
-                read: false
-            });
-        });
-        requirements.forEach((r, i) => {
-            const roffs = offers.filter(o => o.requirementId === r.id || o.requestId === r.id);
-            if (roffs.length === 0) {
-                list.push({
-                    id: 'n-req-' + (r.id || i),
-                    category: 'Requests',
-                    title: 'Request submitted',
-                    message: 'Your request ' + r.id + ' is live and being shared with verified operators.',
-                    time: 'Today',
-                    read: false
-                });
-            }
-        });
-        bookings.forEach((b, i) => {
-            list.push({
-                id: 'n-pay-' + (b.id || i),
-                category: 'Payments',
-                title: 'Payment successful',
-                message: (b.packageTitle || 'Your Umrah package') + ' was paid and your booking is confirmed.',
-                time: b.paidAt || 'Today',
-                read: false
-            });
-        });
-        list.push({
-            id: 'n-welcome',
-            category: 'System',
-            title: 'Welcome to Zilhaj' + (user.name ? ', ' + user.name : '') + '!',
-            message: 'Your account is verified. Explore verified offers and plan your Umrah journey safely.',
-            time: '1 day ago',
-            read: true
-        });
-        try {
-            localStorage.setItem(key, JSON.stringify(list));
-        } catch (e) {}
-        return list;
-    }
-
-    markAllNotifsRead() {
-        const key = 'umrah_notifications';
-        let list = [];
-        try {
-            list = JSON.parse(localStorage.getItem(key) || '[]');
-        } catch (e) {}
-        if (list.length === 0) list = this.getDashboardNotifications();
-        list.forEach(n => { n.read = true; });
-        try {
-            localStorage.setItem(key, JSON.stringify(list));
-        } catch (e) {}
-        const main = document.getElementById('mainContainer');
-        if (main && this.state.activeDashboardTab === 'notifications') {
-            main.innerHTML = this.renderDashboardPage();
-        }
-        this.showToast('All notifications marked as read', 'success');
-    }
-
-    markNotifRead(id) {
-        const key = 'umrah_notifications';
-        let list = [];
-        try {
-            list = JSON.parse(localStorage.getItem(key) || '[]');
-        } catch (e) {}
-        const n = list.find(x => x.id === id);
-        if (n && !n.read) {
-            n.read = true;
-            try {
-                localStorage.setItem(key, JSON.stringify(list));
-            } catch (e) {}
-        }
-        const main = document.getElementById('mainContainer');
-        if (main && this.state.activeDashboardTab === 'notifications') {
-            main.innerHTML = this.renderDashboardPage();
-        }
-    }
-
-    setNotifFilter(filter) {
-        this.state.notifFilter = filter;
-        const main = document.getElementById('mainContainer');
-        if (main && this.state.activeDashboardTab === 'notifications') {
-            main.innerHTML = this.renderDashboardPage();
         }
     }
 
     renderDashboardPage() {
-        const user = this.state.currentUser || {
-            name: 'Animesh',
-            email: 'rajuranjankbkj@gmail.com',
-            phone: '9541692891',
-            role: 'ROLE_USER'
-        };
-
+        if (!this.state.currentUser) { this.navigate('home'); return '<div></div>'; }
+        const user = this.state.currentUser;
         const activeTab = this.state.activeDashboardTab || 'dashboard';
-        const userPhoto = (this.state.currentUser && this.state.currentUser.profilePhoto) || localStorage.getItem('umrah_custom_photo');
-
-        // Merge API-sourced data (source of truth) with localStorage fallback
-        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        const userPhoto = (user && user.profilePhoto) || localStorage.getItem('umrah_custom_photo');
+        const localReqs  = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
         const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
         const localBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
-        const apiReqs = this.state.myRequirements || [];
-        const apiOffers = this.state.userOffers || [];
-        const allReqs = [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
-        const allOffers = [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
-        const allBookings = localBookings;
-
+        const apiReqs    = this.state.myRequirements || [];
+        const apiOffers  = this.state.userOffers || [];
+        const allReqs    = [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
+        const allOffers  = [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
         const requirements = allReqs.filter(r => !r.userId || r.userId === user.id || r.userEmail === user.email);
-        const offers = allOffers;
-        const bookings = allBookings;
+        const offers   = allOffers;
+        const bookings = localBookings;
 
-        // ---------- ZILHAJ DESIGN SYSTEM HELPERS ----------
-        const reqOffersFor = (reqId) => offers.filter(o => o.requirementId === reqId || o.requestId === reqId);
-        const statusOf = (req) => {
-            if (bookings.some(b => b.requirementId === req.id || b.offerId === req.id)) return 'Completed';
-            return reqOffersFor(req.id).length > 0 ? 'Offers Available' : 'Waiting for Offers';
+        const ic = {
+            dashboard:`<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>`,
+            requests:`<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>`,
+            offers:`<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5" fill="currentColor" stroke="none"/></svg>`,
+            payments:`<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,
+            bookmarks:`<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
+            profile:`<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+            help:`<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-linecap="round" stroke-width="2"/></svg>`,
+            notifs:`<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
+            settings:`<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
         };
-        const infoItemHelper = (iconName, label, value, sub) => `
-            <div class="zd-info-item">
-                <div class="zd-info-icon">${zdIcon(iconName, '')}</div>
-                <div>
-                    <div class="zd-info-label">${label}</div>
-                    <div class="zd-info-value">${value}</div>
-                    ${sub ? `<div class="zd-info-sub">${sub}</div>` : ''}
-                </div>
+
+        const offersForUser = offers.filter(o => requirements.some(r => r.id === o.requirementId));
+        const offersAvailable = offersForUser.length;
+        const inProgress = requirements.filter(r => !r.status || r.status === 'PENDING' || r.status === 'ACTIVE').length;
+        const completed  = bookings.filter(b => b.status === 'CONFIRMED' || b.status === 'COMPLETED').length;
+        const notifCount = 6;
+
+        const navItem = (tab, icon, label, badge=0) => {
+            const isActive = activeTab === tab;
+            return `<a href="javascript:void(0)" onclick="app.setDashboardTab('${tab}')"
+                style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.65rem .9rem;border-radius:10px;text-decoration:none;cursor:pointer;transition:all .18s;background:${isActive?'#1a6b3c':'transparent'};color:${isActive?'#fff':'#374151'};"
+                onmouseover="if('${tab}'!=='${activeTab}'){this.style.background='#f0faf5';this.style.color='#1a6b3c';}"
+                onmouseout="if('${tab}'!=='${activeTab}'){this.style.background='transparent';this.style.color='#374151';}">
+                <span style="display:flex;align-items:center;gap:.7rem;font-size:.88rem;font-weight:${isActive?'700':'500'};">${icon} ${label}</span>
+                ${badge>0?`<span style="background:${isActive?'#fff':'#1a6b3c'};color:${isActive?'#1a6b3c':'#fff'};font-size:.68rem;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px;">${badge}</span>`:''}
+            </a>`;
+        };
+
+        const sidebar = `
+        <aside style="width:215px;flex-shrink:0;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:1.3rem .9rem;display:flex;flex-direction:column;min-height:calc(100vh - 140px);position:sticky;top:98px;align-self:flex-start;">
+            <div style="display:flex;align-items:center;gap:.5rem;padding:.2rem .4rem 1.1rem;border-bottom:1px solid #f0f0f0;margin-bottom:.9rem;">
+                <svg width="26" height="26" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="8" fill="#1a6b3c"/><text x="8" y="28" font-family="Georgia,serif" font-size="22" font-weight="900" font-style="italic" fill="white">Z</text></svg>
+                <div><div style="font-size:.95rem;font-weight:900;color:#0f172a;letter-spacing:.5px;font-style:italic;">ZILHAJ</div><div style="font-size:.58rem;color:#6b7280;line-height:1.25;">One Request. Multiple Verified Offers.</div></div>
             </div>
-        `;
+            <div style="display:flex;flex-direction:column;gap:.2rem;flex:1;">
+                ${navItem('dashboard',ic.dashboard,'Dashboard')}
+                ${navItem('requests',ic.requests,'My Requests')}
+                ${navItem('offers',ic.offers,'Offers',offersAvailable>0?offersAvailable:0)}
+                ${navItem('payments',ic.payments,'Payments')}
+                ${navItem('bookmarks',ic.bookmarks,'Bookmarks')}
+                ${navItem('profile',ic.profile,'My Profile')}
+                ${navItem('help',ic.help,'Help &amp; Support')}
+                ${navItem('notifications',ic.notifs,'Notifications',notifCount)}
+                ${navItem('settings',ic.settings,'Settings')}
+            </div>
+            <div style="margin-top:1.3rem;background:#f0faf5;border:1px solid #d1fae5;border-radius:10px;padding:.9rem;">
+                <div style="font-size:.8rem;font-weight:800;color:#0f172a;margin-bottom:.15rem;">Need Help?</div>
+                <div style="font-size:.72rem;color:#6b7280;margin-bottom:.65rem;">Our team is here to assist you</div>
+                <button onclick="app.setDashboardTab('help')" style="width:100%;background:#fff;border:1px solid #d1fae5;border-radius:7px;padding:.45rem;font-size:.75rem;font-weight:700;color:#1a6b3c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.35rem;">
+                    <svg width="13" height="13" fill="none" stroke="#1a6b3c" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.49a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                    Contact Support
+                </button>
+            </div>
+            <div style="margin-top:.75rem;display:flex;align-items:center;gap:.45rem;padding:.55rem .45rem;background:#f8fafc;border-radius:8px;border:1px solid #e5e7eb;">
+                <svg width="15" height="15" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <div><div style="font-size:.66rem;font-weight:800;color:#0f172a;">Your security is our priority.</div><div style="font-size:.61rem;color:#6b7280;">All payments are encrypted &amp; 100% secure.</div></div>
+            </div>
+            <div style="margin-top:.65rem;font-size:.61rem;color:#9ca3af;text-align:center;">© 2025 ZILHAJ<br>All rights reserved.</div>
+        </aside>`;
+
+        const statusBadge = (status) => {
+            const s=(status||'pending').toLowerCase();
+            if(s==='completed'||s==='confirmed') return `<span style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:.22rem .7rem;border-radius:99px;font-size:.72rem;font-weight:700;">Completed</span>`;
+            if(s==='active'||s.includes('offer')) return `<span style="background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;padding:.22rem .7rem;border-radius:99px;font-size:.72rem;font-weight:700;">Offers Available</span>`;
+            return `<span style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:.22rem .7rem;border-radius:99px;font-size:.72rem;font-weight:700;">Waiting for Offers</span>`;
+        };
+
         const fmtDate = (d) => {
-            if (!d) return 'N/A';
-            try { return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); } catch (e) { return String(d); }
-        };
-        const fmtDateTime = (d) => {
-            if (!d) return 'N/A';
-            try { return new Date(d).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return String(d); }
-        };
-        const payments = bookings.map((b) => ({
-            id: 'PAY-' + (b.id || 'BK'),
-            txnId: b.transactionId || b.paymentId || 'N/A',
-            requestId: b.requirementId || b.offerId || b.id,
-            serviceName: b.packageTitle || 'Umrah Package',
-            details: (b.travelersCount || 1) + ' Travelers',
-            amount: Number(b.totalPrice) || 0,
-            paymentMethod: 'Razorpay',
-            methodDetails: 'UPI / Card / NetBanking',
-            status: 'Successful',
-            date: b.paidAt ? fmtDate(b.paidAt) : fmtDate(b.createdAt || new Date()),
-            paidOn: b.paidAt ? fmtDateTime(b.paidAt) : fmtDateTime(b.createdAt || new Date()),
-            bookingId: b.id
-        }));
-        const notifications = this.getDashboardNotifications();
-        const unreadCount = notifications.filter(n => !n.read).length;
-        const zdIcon = (name, cls) => {
-            const icons = {
-                grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
-                file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
-                tag: '<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
-                card: '<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
-                bookmark: '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
-                user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
-                help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
-                settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
-                bell: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
-                clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
-                check: '<polyline points="20 6 9 17 4 12"/>',
-                shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
-                plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
-                arrow: '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
-                chevron: '<polyline points="6 9 12 15 18 9"/>',
-                mail: '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
-                phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
-                pin: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
-                users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
-                cal: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
-                building: '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><line x1="8" y1="6" x2="8.01" y2="6"/><line x1="12" y1="6" x2="12.01" y2="6"/><line x1="16" y1="6" x2="16.01" y2="6"/><line x1="8" y1="10" x2="8.01" y2="10"/><line x1="12" y1="10" x2="12.01" y2="10"/><line x1="16" y1="10" x2="16.01" y2="10"/>',
-                eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
-                download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
-                edit: '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',
-                trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
-                chat: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
-                search: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
-                wallet: '<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>',
-                lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
-                info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
-                doc: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
-                send: '<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
-                share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>'
-            };
-            return `<span class="${cls || 'zd-nav-icon'}"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icons[name] || icons.doc}</svg></span>`;
-        };
-        const renderPill = (status) => {
-            if (status === 'Offers Available') return '<span class="zd-pill green">Offers Available</span>';
-            if (status === 'Completed') return '<span class="zd-pill gray">Completed</span>';
-            if (status === 'Waiting for Offers') return '<span class="zd-pill amber">Waiting for Offers</span>';
-            return `<span class="zd-pill amber">${this.escapeHtml(status)}</span>`;
-        };
-        const navItem = (tab, iconName, label, badge, badgeCls) => `
-            <button type="button" class="zd-nav-item ${activeTab === tab ? 'active' : ''}" onclick="app.setDashboardTab('${tab}')">
-                ${zdIcon(iconName)}
-                <span>${label}</span>
-                ${badge ? `<span class="zd-nav-badge ${badgeCls || ''}">${badge}</span>` : ''}
-            </button>
-        `;
-
-        // ---------- SIDEBAR ----------
-        const renderSidebar = () => `
-            <aside class="zd-sidebar">
-                <div>
-                    <div class="zd-logo-area">
-                        <img src="logo.png" onerror="this.onerror=null;this.src='images/logo.png';" alt="Zilhaj Logo" class="zd-logo-img">
-                        <div>
-                            <div class="zd-logo-name">Zilhaj</div>
-                            <div class="zd-tagline">One Request. Multiple Verified Offers.</div>
-                        </div>
-                    </div>
-                    <nav class="zd-nav">
-                        ${navItem('dashboard', 'grid', 'Dashboard')}
-                        ${navItem('requests', 'file', 'My Requests', requirements.length)}
-                        ${navItem('offers', 'tag', 'Offers', offers.length, 'green')}
-                        ${navItem('payments', 'card', 'Payments', payments.length, 'green')}
-                        ${navItem('bookmarks', 'bookmark', 'Bookmarks')}
-                        ${navItem('profile', 'user', 'My Profile')}
-                        ${navItem('help', 'help', 'Help &amp; Support')}
-                        ${navItem('settings', 'settings', 'Settings')}
-                    </nav>
-                    <div class="zd-help-card">
-                        <p class="zd-help-card-title">Need help?</p>
-                        <p class="zd-help-card-text">Our support team is available 24/7 to assist you with requests, offers and payments.</p>
-                        <button type="button" class="zd-help-card-btn" onclick="app.openChatbot()">Chat with Us</button>
-                    </div>
-                </div>
-                <div class="zd-sidebar-footer">
-                    <p class="zd-privacy-note">Your personal details are never shared with any agent or provider until you accept an offer.</p>
-                    <button type="button" class="zd-logout-btn" onclick="app.logout()">${zdIcon('share')} <span>Logout</span></button>
-                </div>
-            </aside>
-        `;
-
-        // ---------- TOPBAR ----------
-        const renderTopbar = (title, sub) => `
-            <div class="zd-topbar">
-                <div>
-                    <h2 class="zd-topbar-title">${title}</h2>
-                    <p class="zd-topbar-sub">${sub}</p>
-                </div>
-                <div class="zd-topbar-right">
-                    <button type="button" class="zd-bell" onclick="app.setDashboardTab('notifications')" title="Notifications">
-                        ${zdIcon('bell')}
-                        ${unreadCount > 0 ? `<span class="zd-bell-badge">${unreadCount > 9 ? '9+' : unreadCount}</span>` : ''}
-                    </button>
-                    <button type="button" class="zd-avatar-pill" onclick="app.setDashboardTab('profile')">
-                        <div class="zd-avatar">
-                            ${userPhoto ? `<img src="${userPhoto}" alt="Avatar">` : `<span>${this.escapeHtml((user.name || 'D').charAt(0).toUpperCase())}</span>`}
-                        </div>
-                        <div>
-                            <div class="zd-avatar-pill-name">${this.escapeHtml(user.name || 'User')}</div>
-                            <div class="zd-avatar-pill-role">Customer</div>
-                        </div>
-                        ${zdIcon('chevron')}
-                    </button>
-                </div>
-            </div>
-        `;
-
-        // ---------- OFFER CARDS ----------
-        const renderOfferCards = (list, emptyMsg) => {
-            if (!list || list.length === 0) {
-                return `
-                    <div class="zd-coming-soon">
-                        <h3>No Offers Received Yet</h3>
-                        <p>${emptyMsg || 'Your request is being reviewed by our team. You will receive personalized offers from verified agents shortly.'}</p>
-                    </div>
-                `;
-            }
-            return `
-                <div class="zd-offers-grid">
-                    ${list.map((o, idx) => `
-                        <div class="zd-offer-card">
-                            <div class="zd-offer-img">
-                                <img src="${o.imageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'}" alt="${this.escapeHtml(o.agentName || 'Offer')}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80';">
-                                <span class="zd-offer-badge ${idx === 0 ? 'hot' : ''}">${idx === 0 ? 'Most Popular' : 'Offer ' + (idx + 1)}</span>
-                                <span class="zd-offer-price">${this.formatCurrency(o.discountedPrice || o.price || 0)}</span>
-                            </div>
-                            <div class="zd-offer-body">
-                                <h4 class="zd-offer-agency">${this.escapeHtml(o.agentName || 'Verified Operator')}</h4>
-                                <p class="zd-offer-title">${this.escapeHtml(o.packageTitle || 'Umrah Package')}</p>
-                                <div class="zd-offer-meta">
-                                    <span class="zd-offer-chip">${o.durationDays || 18} Days</span>
-                                    <span class="zd-offer-chip">${o.makkahHotel ? 'Near Haram' : 'Flight + Hotel'}</span>
-                                    <span class="zd-offer-chip">${o.travelersCount || 'Group'} Tour</span>
-                                </div>
-                                <div class="zd-offer-actions">
-                                    <button type="button" class="zd-btn-outline" style="flex:1; justify-content:center;" onclick="app.viewOfferDetailsModal('${o.id}')">${zdIcon('eye', '')} Details</button>
-                                    <button type="button" class="zd-btn-primary" style="flex:1; justify-content:center;" onclick="app.navigateToPayment('${o.id}')">Book ${zdIcon('arrow', '')}</button>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
+            if(!d) return '—';
+            try { return new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); } catch(e){ return String(d); }
         };
 
-        // Render main content panel depending on active tab
-        let mainContentHtml = '';
+        const reqId = (r) => {
+            if(r.id&&String(r.id).startsWith('REQ')) return r.id;
+            const n=String(r.id||'').replace(/\D/g,'').slice(-4).padStart(4,'0')||'0001';
+            return `REQ-${n}`;
+        };
 
-        if (activeTab === 'requests') {
-            // REQUESTS TAB — LIST + DETAIL SUB-STATE
-            const selectedReq = requirements.find(r => r.id === this.state.selectedReqId);
-            if (selectedReq) {
-                const reqOffers = reqOffersFor(selectedReq.id);
-                const reqStatus = statusOf(selectedReq);
-                const reqPayments = payments.filter(p => p.requestId === selectedReq.id);
-                const hasBooking = bookings.some(b => b.requirementId === selectedReq.id || b.offerId === selectedReq.id);
-                const detailTab = this.state.reqDetailTab || 'overview';
+        let panel = '';
 
-                const infoItem = (icon, label, value, sub) => `
-                    <div class="zd-info-item">
-                        <div class="zd-info-icon">${zdIcon(icon, '')}</div>
-                        <div>
-                            <div class="zd-info-label">${label}</div>
-                            <div class="zd-info-value">${value}</div>
-                            ${sub ? `<div class="zd-info-sub">${sub}</div>` : ''}
-                        </div>
-                    </div>
-                `;
+        // ── DASHBOARD MAIN ──────────────────────────────────────────────────────
+        if(activeTab==='dashboard'){
+            const firstName=(user.name||'Pilgrim').split(' ')[0];
+            const rows=requirements.slice(0,5).map(r=>{
+                const rid=reqId(r);
+                const ro=offers.filter(o=>o.requirementId===r.id);
+                return `<tr style="border-bottom:1px solid #f3f4f6;" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
+                    <td style="padding:.85rem 1rem;"><div style="font-weight:700;color:#0f172a;font-size:.87rem;">${rid}</div><div style="font-size:.72rem;color:#9ca3af;">${fmtDate(r.createdAt||r.preferredDepartureDate)} &bull; 10:30 AM</div></td>
+                    <td style="padding:.85rem 1rem;"><div style="display:flex;align-items:center;gap:.5rem;"><div style="width:30px;height:30px;border-radius:6px;background:#f0faf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 21h18M5 21V9l7-6 7 6v12M10 21v-5h4v5"/></svg></div><div><div style="font-size:.84rem;font-weight:600;color:#0f172a;">Umrah Package</div><div style="font-size:.71rem;color:#9ca3af;">${r.durationDays||10} Days</div></div></div></td>
+                    <td style="padding:.85rem 1rem;font-size:.84rem;color:#374151;">${fmtDate(r.preferredDepartureDate)}<br><span style="font-size:.71rem;color:#9ca3af;">(Approx.)</span></td>
+                    <td style="padding:.85rem 1rem;font-size:.84rem;color:#374151;">${r.travelersCount||r.adults||2} Adults<br><span style="font-size:.71rem;color:#9ca3af;">${r.children||0} Children</span></td>
+                    <td style="padding:.85rem 1rem;">${statusBadge(ro.length>0?'active':(r.status||'pending'))}</td>
+                    <td style="padding:.85rem 1rem;"><div style="font-size:.84rem;font-weight:700;color:#0f172a;">${ro.length} Offer${ro.length!==1?'s':''}</div><div style="font-size:.71rem;color:${ro.length>0?'#1a6b3c':'#9ca3af'};">${ro.length>0?'View now':'Pending'}</div></td>
+                    <td style="padding:.85rem 1rem;"><button onclick="app.viewRequestDetail('${r.id}')" style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:.38rem .9rem;font-size:.81rem;font-weight:600;color:#374151;cursor:pointer;display:flex;align-items:center;gap:.3rem;white-space:nowrap;" onmouseover="this.style.borderColor='#1a6b3c';this.style.color='#1a6b3c'" onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#374151'">View Details <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button></td>
+                </tr>`;
+            }).join('');
 
-                const timelineSteps = [
-                    { name: 'Submitted', desc: 'Request submitted', done: true, active: false },
-                    { name: 'Offers Collected', desc: reqOffers.length + ' offers received', done: reqOffers.length > 0, active: reqOffers.length === 0 },
-                    { name: 'Review Offers', desc: reqOffers.length + ' offers to compare', done: reqOffers.length > 0, active: false },
-                    { name: 'Offer Selected', desc: hasBooking ? 'Selected & confirmed' : 'Awaiting your selection', done: hasBooking, active: reqOffers.length > 0 && !hasBooking },
-                    { name: 'Payment & Booking', desc: hasBooking ? 'Booking confirmed' : 'Complete payment to confirm', done: hasBooking, active: false }
-                ];
-
-                mainContentHtml = `
-                    <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
-                        <button type="button" class="zd-btn-outline" onclick="app.backToRequests()">${zdIcon('arrow', '')} Back to Requests</button>
-                        <h2 style="font-size:1.35rem; font-weight:800; color:#0f172a; margin:0;">Request Details</h2>
-                        ${renderPill(reqStatus)}
-                        <span style="font-size:0.78rem; color:#64748b; margin-left:auto;">Requested on ${this.escapeHtml(selectedReq.createdAt ? fmtDate(selectedReq.createdAt) : 'N/A')}</span>
-                    </div>
-
-                    <div class="zd-pay-grid">
-                        <div class="zd-main" style="gap:1.2rem;">
-                            <div class="zd-card">
-                                <div class="zd-tabs">
-                                    <button type="button" class="zd-tab ${detailTab === 'overview' ? 'active' : ''}" onclick="app.setReqDetailTab('overview')">${zdIcon('eye', '')} Overview</button>
-                                    <button type="button" class="zd-tab ${detailTab === 'offers' ? 'active' : ''}" onclick="app.setReqDetailTab('offers')">${zdIcon('tag', '')} Offers (${reqOffers.length})</button>
-                                    <button type="button" class="zd-tab ${detailTab === 'payments' ? 'active' : ''}" onclick="app.setReqDetailTab('payments')">${zdIcon('card', '')} Payments (${reqPayments.length})</button>
-                                    <button type="button" class="zd-tab ${detailTab === 'documents' ? 'active' : ''}" onclick="app.setReqDetailTab('documents')">${zdIcon('doc', '')} Documents</button>
-                                    <button type="button" class="zd-tab ${detailTab === 'activity' ? 'active' : ''}" onclick="app.setReqDetailTab('activity')">${zdIcon('clock', '')} Activity</button>
-                                </div>
-                                <div class="zd-card-body">
-                                    ${detailTab === 'overview' ? `
-                                        <div style="display:flex; align-items:center; gap:0.9rem; margin-bottom:1.2rem;">
-                                            <div class="zd-stat-icon green" style="width:52px; height:52px;">${zdIcon('building', '')}</div>
-                                            <div>
-                                                <div style="font-weight:800; color:#0f172a; font-size:1rem;">${this.escapeHtml(selectedReq.serviceType || 'Umrah Package')}</div>
-                                                <div style="font-size:0.76rem; color:#64748b;">${selectedReq.durationDays || 18} Days &bull; ${this.escapeHtml(selectedReq.packageType || 'Standard')} Package</div>
-                                            </div>
-                                        </div>
-                                        <div class="zd-info-grid">
-                                            ${infoItem('file', 'Service Type', this.escapeHtml(selectedReq.serviceType || 'Umrah Package'))}
-                                            ${infoItem('cal', 'Travel Date', this.escapeHtml(selectedReq.preferredDepartureDate || 'N/A'), 'Approximate')}
-                                            ${infoItem('clock', 'Duration', (selectedReq.durationDays || 18) + ' Days', 'Full Umrah Program')}
-                                            ${infoItem('users', 'Passengers', (selectedReq.travelersCount || 2) + ' Adults', (selectedReq.children || 0) + ' Children')}
-                                            ${infoItem('tag', 'Class Preference', this.escapeHtml(selectedReq.classPreference || 'Economy'))}
-                                            ${infoItem('wallet', 'Package Type', this.escapeHtml(selectedReq.packageType || 'Standard'))}
-                                            ${infoItem('check', 'Meal Preference', this.escapeHtml(selectedReq.mealPreference || 'Veg & Non-Veg'))}
-                                            ${infoItem('info', 'Special Requests', this.escapeHtml(selectedReq.specialRequests || 'None'))}
-                                            ${infoItem('pin', 'Pickup City', this.escapeHtml(selectedReq.departureCity || 'N/A'))}
-                                            ${infoItem('pin', 'Drop-off City', this.escapeHtml(selectedReq.dropoffCity || 'Jeddah (JED)'))}
-                                            ${infoItem('phone', 'Phone (Masked)', this.escapeHtml(selectedReq.phoneHidden || this.maskValue((user.phone || '+91 9541692891'))))}
-                                            ${infoItem('mail', 'Email (Masked)', this.escapeHtml(selectedReq.emailHidden || this.maskEmail(user.email || '')))}
-                                        </div>
-                                        <div class="zd-privacy-banner" style="margin-top:1.2rem;">
-                                            <div class="zd-privacy-icon">${zdIcon('shield', '')}</div>
-                                            <div>
-                                                <h4 class="zd-privacy-title">Your privacy is our priority</h4>
-                                                <p class="zd-privacy-text">We never share your personal information with any agent or provider until you choose to accept an offer.</p>
-                                            </div>
-                                        </div>
-                                    ` : ''}
-                                    ${detailTab === 'offers' ? `
-                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                                            <h3 style="font-size:1rem; font-weight:800; color:#0f172a; margin:0;">Available Offers (${reqOffers.length})</h3>
-                                        </div>
-                                        ${renderOfferCards(reqOffers, 'We are collecting offers from verified operators. You will be notified as soon as offers arrive.')}
-                                    ` : ''}
-                                    ${detailTab === 'payments' ? `
-                                        <h3 style="font-size:1rem; font-weight:800; color:#0f172a; margin:0 0 1rem;">Payments for this Request (${reqPayments.length})</h3>
-                                        ${reqPayments.length === 0 ? '<div class="zd-coming-soon"><h3>No payments yet</h3><p>Payments made for this request will appear here.</p></div>' : `
-                                            <div class="zd-table-wrap">
-                                                <table class="zd-table">
-                                                    <thead><tr><th>Payment ID</th><th>Amount</th><th>Method</th><th>Status</th><th>Paid On</th><th>Action</th></tr></thead>
-                                                    <tbody>
-                                                        ${reqPayments.map(p => `
-                                                            <tr>
-                                                                <td class="zd-cell-bold">${this.escapeHtml(p.id)}</td>
-                                                                <td class="zd-cell-green">${this.formatCurrency(p.amount)}</td>
-                                                                <td>${this.escapeHtml(p.paymentMethod)}</td>
-                                                                <td><span class="zd-pill green">${this.escapeHtml(p.status)}</span></td>
-                                                                <td>${this.escapeHtml(p.paidOn)}</td>
-                                                                <td><button type="button" class="zd-btn-outline" onclick="app.viewBookingVoucher('${p.bookingId}')">${zdIcon('download', '')} Invoice</button></td>
-                                                            </tr>
-                                                        `).join('')}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        `}
-                                    ` : ''}
-                                    ${detailTab === 'documents' ? `
-                                        <h3 style="font-size:1rem; font-weight:800; color:#0f172a; margin:0 0 1rem;">My Documents (Passports &amp; Visas)</h3>
-                                        <div class="zd-coming-soon" style="padding:2rem;">
-                                            <h3>Passport Copy (Uploaded)</h3>
-                                            <p>A1234567 &bull; Expires 12 Dec 2030</p>
-                                        </div>
-                                    ` : ''}
-                                    ${detailTab === 'activity' ? `
-                                        <h3 style="font-size:1rem; font-weight:800; color:#0f172a; margin:0 0 1rem;">Request Activity</h3>
-                                        <div class="zd-timeline">
-                                            ${timelineSteps.map((s, i) => `
-                                                <div class="zd-timeline-step ${s.done ? 'done' : ''} ${s.active ? 'active' : ''}">
-                                                    <div class="zd-timeline-dot">${s.done ? zdIcon('check', '') : i + 1}</div>
-                                                    <div>
-                                                        <div class="zd-timeline-step-name">${s.name}</div>
-                                                        <div class="zd-timeline-step-desc">${s.desc}</div>
-                                                    </div>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="zd-main" style="gap:1.2rem;">
-                            <div class="zd-card">
-                                <div class="zd-card-head"><h3 class="zd-card-title">Request Status Timeline</h3></div>
-                                <div class="zd-card-body">
-                                    <div class="zd-timeline">
-                                        ${timelineSteps.map((s, i) => `
-                                            <div class="zd-timeline-step ${s.done ? 'done' : ''} ${s.active ? 'active' : ''}">
-                                                <div class="zd-timeline-dot">${s.done ? zdIcon('check', '') : i + 1}</div>
-                                                <div>
-                                                    <div class="zd-timeline-step-name">${s.name}</div>
-                                                    <div class="zd-timeline-step-desc">${s.desc}</div>
-                                                </div>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="zd-card">
-                                <div class="zd-card-head"><h3 class="zd-card-title">Quick Actions</h3></div>
-                                <div class="zd-card-body" style="display:flex; flex-direction:column; gap:0.6rem;">
-                                    <button type="button" class="zd-btn-outline" onclick="app.scrollToRequirementForm()">${zdIcon('edit', '')} Edit Request</button>
-                                    <button type="button" class="zd-btn-outline" onclick="${hasBooking ? `app.viewBookingVoucher('${bookings.find(b => b.requirementId === selectedReq.id || b.offerId === selectedReq.id).id}')` : "app.showToast('Voucher available after booking confirmation', 'info')"}">${zdIcon('download', '')} Download / Share</button>
-                                    <button type="button" class="zd-btn-outline" style="color:#dc2626; border-color:#fecaca;" onclick="app.deleteRequirement('${selectedReq.id}')">${zdIcon('trash', '')} Cancel Request</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                mainContentHtml = `
-                    <div class="zd-card">
-                        <div class="zd-card-head">
-                            <h3 class="zd-card-title">My Submitted Travel Requirements</h3>
-                            <button type="button" class="zd-btn-primary" onclick="app.scrollToRequirementForm()">${zdIcon('plus', '')} Post Requirement</button>
-                        </div>
-                        ${requirements.length === 0 ? `
-                            <div class="zd-coming-soon">
-                                <h3>No requests yet</h3>
-                                <p>Post your first Umrah requirement to start receiving offers from verified operators.</p>
-                            </div>
-                        ` : `
-                            <div class="zd-table-wrap">
-                                <table class="zd-table">
-                                    <thead>
-                                        <tr><th>Request ID</th><th>Service</th><th>Travel Date</th><th>Passengers</th><th>Status</th><th>Offers</th><th style="text-align:center;">Action</th></tr>
-                                    </thead>
-                                    <tbody>
-                                        ${requirements.map(req => {
-                                            const roffs = reqOffersFor(req.id);
-                                            const rstatus = statusOf(req);
-                                            return `
-                                                <tr>
-                                                    <td>
-                                                        <div class="zd-cell-bold">${this.escapeHtml(req.id)}</div>
-                                                        <div class="zd-cell-muted">${req.createdAt ? fmtDate(req.createdAt) : 'N/A'}</div>
-                                                    </td>
-                                                    <td>
-                                                        <div style="display:flex; align-items:center; gap:0.55rem;">
-                                                            <div class="zd-stat-icon green" style="width:32px; height:32px; border-radius:9px;">${zdIcon('building', '')}</div>
-                                                            <div>
-                                                                <div class="zd-cell-bold" style="font-size:0.82rem;">${this.escapeHtml(req.serviceType || 'Umrah Package')}</div>
-                                                                <div class="zd-cell-muted">${req.durationDays || 18} Days</div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>${this.escapeHtml(req.preferredDepartureDate || 'N/A')}</td>
-                                                    <td>${req.travelersCount || 2} Adults${req.children ? ' &bull; ' + req.children + ' Children' : ''}</td>
-                                                    <td>${renderPill(rstatus)}</td>
-                                                    <td>
-                                                        <div class="zd-cell-bold">${roffs.length} ${roffs.length === 1 ? 'Offer' : 'Offers'}</div>
-                                                        ${roffs.length > 0 ? `<div class="zd-cell-muted" style="color:#1a5c38; font-weight:700;">Ready to review</div>` : '<div class="zd-cell-muted">Pending</div>'}
-                                                    </td>
-                                                    <td style="text-align:center;">
-                                                        <button type="button" class="zd-btn-outline" onclick="app.viewRequestDetail('${req.id}')">View Details ${zdIcon('arrow', '')}</button>
-                                                    </td>
-                                                </tr>
-                                            `;
-                                        }).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        `}
-                    </div>
-                `;
-            }
-        } else if (activeTab === 'offers') {
-            // OFFERS TAB
-            mainContentHtml = `
-                <div class="zd-card">
-                    <div class="zd-card-head">
-                        <h3 class="zd-card-title">Offers from Verified Operators (${offers.length})</h3>
-                        <button type="button" class="zd-btn-outline" onclick="app.setDashboardTab('requests')">View My Requests</button>
-                    </div>
-                    <div class="zd-card-body">
-                        ${offers.length === 0 ? renderOfferCards([], 'You have no offers yet. Post a requirement to start receiving offers from verified operators.') : renderOfferCards(offers, '')}
-                    </div>
-                </div>
-            `;
-        } else if (activeTab === 'payments') {
-            // PAYMENTS TAB
-            const pFilter = this.state.paymentFilter || 'All';
-            const totalPaid = payments.reduce((acc, p) => acc + (p.status === 'Successful' ? p.amount : 0), 0);
-            const pendingAmount = payments.reduce((acc, p) => acc + (p.status === 'Pending' ? p.amount : 0), 0);
-            const successfulCount = payments.filter(p => p.status === 'Successful').length;
-            const filteredPayments = payments.filter(p => pFilter === 'All' || p.status === pFilter);
-            const selectedPay = payments.find(p => p.id === this.state.selectedTxnId) || payments[0] || null;
-
-            mainContentHtml = `
-                <div class="zd-stats-grid">
-                    <div class="zd-stat-card">
-                        <div class="zd-stat-icon green">${zdIcon('card', '')}</div>
-                        <div>
-                            <div class="zd-stat-num">${this.formatCurrency(totalPaid)}</div>
-                            <div class="zd-stat-label">Total Paid</div>
-                            <div class="zd-stat-sub">Across all bookings</div>
-                        </div>
-                    </div>
-                    <div class="zd-stat-card">
-                        <div class="zd-stat-icon amber">${zdIcon('clock', '')}</div>
-                        <div>
-                            <div class="zd-stat-num">${this.formatCurrency(pendingAmount)}</div>
-                            <div class="zd-stat-label">Pending Payments</div>
-                            <div class="zd-stat-sub">Awaiting processing</div>
-                        </div>
-                    </div>
-                    <div class="zd-stat-card">
-                        <div class="zd-stat-icon green">${zdIcon('check', '')}</div>
-                        <div>
-                            <div class="zd-stat-num">${successfulCount}</div>
-                            <div class="zd-stat-label">Successful Payments</div>
-                            <div class="zd-stat-sub">Completed transactions</div>
-                        </div>
-                    </div>
-                    <div class="zd-stat-card">
-                        <div class="zd-stat-icon blue">${zdIcon('wallet', '')}</div>
-                        <div>
-                            <div class="zd-stat-num">${payments.length}</div>
-                            <div class="zd-stat-label">Total Transactions</div>
-                            <div class="zd-stat-sub">Lifetime records</div>
+            panel=`<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.3rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;">
+                    <div><h1 style="font-size:1.55rem;font-weight:800;color:#0f172a;margin:0;">Assalamu Alaikum, ${this.escapeHtml(firstName)} 👋</h1><p style="font-size:.87rem;color:#6b7280;margin:.18rem 0 0;">Here's what's happening with your requests.</p></div>
+                    <div style="display:flex;align-items:center;gap:.8rem;">
+                        <button onclick="app.setDashboardTab('notifications')" style="position:relative;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;">${ic.notifs}<span style="position:absolute;top:-5px;right:-5px;background:#1a6b3c;color:#fff;font-size:.62rem;font-weight:800;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${notifCount}</span></button>
+                        <div onclick="app.setDashboardTab('profile')" style="display:flex;align-items:center;gap:.55rem;cursor:pointer;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:.35rem .75rem;">
+                            <div style="width:30px;height:30px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;font-weight:800;overflow:hidden;">${userPhoto?`<img src="${userPhoto}" style="width:100%;height:100%;object-fit:cover;">`:this.escapeHtml((user.name||'U').charAt(0).toUpperCase())}</div>
+                            <div><div style="font-size:.81rem;font-weight:700;color:#0f172a;">${this.escapeHtml(user.name)}</div><div style="font-size:.68rem;color:#6b7280;">Customer</div></div>
+                            <svg width="13" height="13" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                         </div>
                     </div>
                 </div>
-
-                <div class="zd-filter-bar">
-                    <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-                        ${['All', 'Successful', 'Pending', 'Refunds'].map(t => `
-                            <button type="button" class="zd-filter-tab ${pFilter === t ? 'active' : ''}" onclick="app.setPaymentFilter('${t}')">${t}</button>
-                        `).join('')}
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;">
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.1rem 1.2rem;display:flex;align-items:center;gap:.9rem;">
+                        <div style="width:46px;height:46px;border-radius:11px;background:#e8f5ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="21" height="21" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                        <div><div style="font-size:1.55rem;font-weight:800;color:#0f172a;line-height:1;">${requirements.length}</div><div style="font-size:.78rem;font-weight:600;color:#374151;margin-top:.18rem;">Total Requests</div><div style="font-size:.7rem;color:#9ca3af;">All your requests</div></div>
                     </div>
-                    <button type="button" class="zd-btn-outline" style="font-size:0.75rem;">All Time</button>
-                </div>
-
-                <div class="zd-pay-grid">
-                    <div class="zd-main" style="gap:1.2rem;">
-                        <div class="zd-card">
-                            <div class="zd-table-wrap">
-                                <table class="zd-table">
-                                    <thead>
-                                        <tr><th>Payment ID</th><th>Request ID</th><th>Service</th><th>Amount</th><th>Method</th><th>Status</th><th>Paid On</th><th style="text-align:center;">Invoice</th></tr>
-                                    </thead>
-                                    <tbody>
-                                        ${filteredPayments.map(p => `
-                                            <tr style="cursor:pointer;" onclick="app.selectPaymentRow('${p.id}')">
-                                                <td class="zd-cell-bold">${this.escapeHtml(p.id)}</td>
-                                                <td class="zd-cell-bold" style="font-weight:700; color:#475569;">${this.escapeHtml(p.requestId)}</td>
-                                                <td>
-                                                    <div class="zd-cell-bold" style="font-size:0.8rem;">${this.escapeHtml(p.serviceName)}</div>
-                                                    <div class="zd-cell-muted">${this.escapeHtml(p.details)}</div>
-                                                </td>
-                                                <td class="zd-cell-green">${this.formatCurrency(p.amount)}</td>
-                                                <td>
-                                                    <div style="font-weight:700; color:#334155; font-size:0.78rem;">${this.escapeHtml(p.paymentMethod)}</div>
-                                                    <div class="zd-cell-muted">${this.escapeHtml(p.methodDetails)}</div>
-                                                </td>
-                                                <td><span class="zd-pill green">${this.escapeHtml(p.status)}</span></td>
-                                                <td style="font-size:0.76rem;">${this.escapeHtml(p.paidOn)}</td>
-                                                <td style="text-align:center;">
-                                                    <button type="button" class="zd-btn-outline" onclick="event.stopPropagation(); app.viewBookingVoucher('${p.bookingId}')">${zdIcon('download', '')} Receipt</button>
-                                                </td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        ${selectedPay ? `
-                            <div class="zd-card">
-                                <div class="zd-card-head">
-                                    <h3 class="zd-card-title">Transaction Details (${this.escapeHtml(selectedPay.id)})</h3>
-                                    <button type="button" class="zd-btn-primary" onclick="app.viewBookingVoucher('${selectedPay.bookingId}')">${zdIcon('download', '')} Official Invoice</button>
-                                </div>
-                                <div class="zd-card-body">
-                                    <div class="zd-info-grid">
-                                        ${infoItemHelper('card', 'Amount Paid', this.formatCurrency(selectedPay.amount), 'Paid in full & verified')}
-                                        ${infoItemHelper('tag', 'Transaction ID', this.escapeHtml(selectedPay.txnId))}
-                                        ${infoItemHelper('lock', 'Payment Method', this.escapeHtml(selectedPay.paymentMethod) + ' (' + this.escapeHtml(selectedPay.methodDetails) + ')')}
-                                        ${infoItemHelper('cal', 'Paid On', this.escapeHtml(selectedPay.paidOn))}
-                                        ${infoItemHelper('file', 'Request ID', this.escapeHtml(selectedPay.requestId))}
-                                        ${infoItemHelper('building', 'Service', this.escapeHtml(selectedPay.serviceName) + ' &bull; ' + this.escapeHtml(selectedPay.details))}
-                                        ${infoItemHelper('shield', 'Payment Status', this.escapeHtml(selectedPay.status) + ' &bull; Verified')}
-                                        ${infoItemHelper('clock', 'Payment For', 'Umrah Package Booking')}
-                                    </div>
-                                    <div style="display:flex; align-items:center; gap:0.6rem; margin-top:1rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:0.8rem 1rem;">
-                                        ${zdIcon('lock', '')}
-                                        <span style="font-size:0.76rem; color:#166534; font-weight:700;">All payments are secured and verified via HMAC-SHA256 signature verification.</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ` : ''}
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.1rem 1.2rem;display:flex;align-items:center;gap:.9rem;">
+                        <div style="width:46px;height:46px;border-radius:11px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="21" height="21" fill="none" stroke="#d97706" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5" fill="#d97706" stroke="none"/></svg></div>
+                        <div><div style="font-size:1.55rem;font-weight:800;color:#0f172a;line-height:1;">${offersAvailable}</div><div style="font-size:.78rem;font-weight:600;color:#374151;margin-top:.18rem;">Offers Available</div><div style="font-size:.7rem;color:#9ca3af;">Ready to review</div></div>
                     </div>
-
-                    <div class="zd-main" style="gap:1.2rem;">
-                        <div class="zd-card">
-                            <div class="zd-card-head"><h3 class="zd-card-title">Payment Summary</h3></div>
-                            <div class="zd-card-body">
-                                <div class="zd-summary-row"><span class="zd-summary-k">Total Paid</span><span class="zd-summary-v">${this.formatCurrency(totalPaid)}</span></div>
-                                <div class="zd-summary-row"><span class="zd-summary-k">Successful</span><span class="zd-summary-v" style="color:#047857;">${this.formatCurrency(totalPaid)}</span></div>
-                                <div class="zd-summary-row"><span class="zd-summary-k">Pending</span><span class="zd-summary-v" style="color:#d97706;">${this.formatCurrency(pendingAmount)}</span></div>
-                                <div class="zd-summary-row"><span class="zd-summary-k">Refunded</span><span class="zd-summary-v" style="color:#94a3b8;">${this.formatCurrency(0)}</span></div>
-                            </div>
-                        </div>
-                        <div class="zd-card">
-                            <div class="zd-card-head"><h3 class="zd-card-title">Saved Payment Methods</h3></div>
-                            <div class="zd-card-body">
-                                <div style="display:flex; align-items:center; justify-content:space-between; border:1px solid #e8eef0; border-radius:12px; padding:0.7rem 0.9rem;">
-                                    <div style="display:flex; align-items:center; gap:0.6rem;">
-                                        <div class="zd-stat-icon green" style="width:34px; height:34px; border-radius:9px; font-weight:800; font-size:0.7rem;">UPI</div>
-                                        <div>
-                                            <div style="font-size:0.78rem; font-weight:800; color:#0f172a;">tawseef@okaxis</div>
-                                            <div style="font-size:0.68rem; color:#64748b;">Axis Bank UPI</div>
-                                        </div>
-                                    </div>
-                                    <span class="zd-pill green">Primary</span>
-                                </div>
-                                <button type="button" class="zd-btn-outline" style="width:100%; justify-content:center; margin-top:0.8rem; border-style:dashed;">${zdIcon('plus', '')} Add New Payment Method</button>
-                            </div>
-                        </div>
-                        <div class="zd-help-card" style="margin:0;">
-                            <p class="zd-help-card-title">Need help with payments?</p>
-                            <p class="zd-help-card-text">Our team can assist with refunds, failed transactions and invoice queries.</p>
-                            <button type="button" class="zd-help-card-btn" onclick="app.setDashboardTab('help')">Contact Support</button>
-                        </div>
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.1rem 1.2rem;display:flex;align-items:center;gap:.9rem;">
+                        <div style="width:46px;height:46px;border-radius:11px;background:#ede9fe;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="21" height="21" fill="none" stroke="#7c3aed" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                        <div><div style="font-size:1.55rem;font-weight:800;color:#0f172a;line-height:1;">${inProgress}</div><div style="font-size:.78rem;font-weight:600;color:#374151;margin-top:.18rem;">In Progress</div><div style="font-size:.7rem;color:#9ca3af;">Being processed</div></div>
+                    </div>
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.1rem 1.2rem;display:flex;align-items:center;gap:.9rem;">
+                        <div style="width:46px;height:46px;border-radius:11px;background:#d1fae5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="21" height="21" fill="none" stroke="#059669" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                        <div><div style="font-size:1.55rem;font-weight:800;color:#0f172a;line-height:1;">${completed}</div><div style="font-size:.78rem;font-weight:600;color:#374151;margin-top:.18rem;">Completed</div><div style="font-size:.7rem;color:#9ca3af;">Successfully done</div></div>
                     </div>
                 </div>
-            `;
-        } else if (activeTab === 'help') {
-            // HELP & SUPPORT TAB
-            const faqs = [
-                { q: 'How do I place an Umrah request?', a: 'You can place a new request from the dashboard by clicking "Post Requirement". Provide your preferred travel dates, duration, number of passengers, and package preferences. Once submitted, our system shares it with verified Umrah agents.' },
-                { q: 'How are offers collected and verified?', a: 'Our team collects offers from 100% verified agents registered with official Hajj & Umrah ministry credentials. We audit pricing, hotel distance to the Haram, transport quality, and visa inclusions to ensure you get transparent, high-value offers.' },
-                { q: 'Can I edit or cancel my request?', a: 'Yes, you can edit your travel preferences or cancel your request at any time before selecting and confirming an offer. Simply open Request Details and use the Quick Actions panel.' },
-                { q: 'How do payments work?', a: 'Payments are 100% secure and processed only after you review and select your preferred offer. We support Razorpay, UPI, Credit/Debit cards, Net Banking, and Wallets. Receipts are generated instantly.' },
-                { q: 'Is my personal information safe?', a: 'Yes, your privacy is our top priority. Your phone number, email address, and home location are hidden and protected from travel agents until a booking is explicitly confirmed.' }
+                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.3rem;border-bottom:1px solid #f3f4f6;">
+                        <h2 style="font-size:1rem;font-weight:800;color:#0f172a;margin:0;">Your Requests</h2>
+                        <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#1a6b3c;color:#fff;border:none;border-radius:8px;padding:.45rem 1rem;font-size:.81rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.3rem;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Request</button>
+                    </div>
+                    ${requirements.length>0?`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f9fafb;border-bottom:1px solid #f3f4f6;"><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;">Request ID</th><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;">Service</th><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;">Travel Date</th><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;">Passengers</th><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;">Status</th><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;">Offers</th><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;">Action</th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div style="text-align:center;padding:2.5rem 1rem;"><div style="width:52px;height:52px;background:#f0faf5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .9rem;">${ic.requests.replace(/currentColor/g,'#1a6b3c')}</div><h3 style="font-size:.95rem;font-weight:700;color:#0f172a;margin:0 0 .35rem;">No Requests Yet</h3><p style="font-size:.83rem;color:#6b7280;margin:0 0 1.1rem;">Post your first Umrah travel request and get verified offers.</p><button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#1a6b3c;color:#fff;border:none;border-radius:8px;padding:.55rem 1.3rem;font-weight:700;font-size:.86rem;cursor:pointer;">+ Post a Request</button></div>`}
+                </div>
+                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1rem 1.3rem;display:flex;align-items:center;gap:.9rem;position:relative;overflow:hidden;">
+                    <div style="width:42px;height:42px;background:#1a6b3c;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="19" height="19" fill="none" stroke="#fff" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+                    <div><div style="font-size:.87rem;font-weight:700;color:#0f172a;">Your privacy is our priority</div><div style="font-size:.77rem;color:#6b7280;">We never share your personal information with any agent or provider.</div></div>
+                    <div style="position:absolute;right:-8px;bottom:-8px;opacity:.07;pointer-events:none;"><svg width="120" height="80" viewBox="0 0 300 200" fill="#1a6b3c"><rect x="90" y="40" width="120" height="140" rx="4"/><path d="M90 40 Q150 -20 210 40Z"/><rect x="50" y="70" width="40" height="110" rx="4"/><rect x="210" y="70" width="40" height="110" rx="4"/><rect x="0" y="180" width="300" height="20"/></svg></div>
+                </div>
+            </main>`;
+
+        // ── MY REQUESTS ─────────────────────────────────────────────────────────
+        }else if(activeTab==='requests'){
+            const rows=requirements.map(r=>{
+                const rid=reqId(r);
+                const ro=offers.filter(o=>o.requirementId===r.id);
+                return `<tr style="border-bottom:1px solid #f3f4f6;" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
+                    <td style="padding:.9rem 1rem;"><div style="font-weight:700;color:#0f172a;font-size:.87rem;">${rid}</div><div style="font-size:.72rem;color:#9ca3af;">${fmtDate(r.createdAt||r.preferredDepartureDate)} &bull; 10:30 AM</div></td>
+                    <td style="padding:.9rem 1rem;"><div style="display:flex;align-items:center;gap:.5rem;"><div style="width:30px;height:30px;border-radius:6px;background:#f0faf5;display:flex;align-items:center;justify-content:center;"><svg width="14" height="14" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 21h18M5 21V9l7-6 7 6v12M10 21v-5h4v5"/></svg></div><div><div style="font-size:.84rem;font-weight:600;color:#0f172a;">Umrah Package</div><div style="font-size:.71rem;color:#9ca3af;">${r.durationDays||10} Days</div></div></div></td>
+                    <td style="padding:.9rem 1rem;font-size:.84rem;color:#374151;">${fmtDate(r.preferredDepartureDate)}<br><span style="font-size:.71rem;color:#9ca3af;">(Approx.)</span></td>
+                    <td style="padding:.9rem 1rem;font-size:.84rem;color:#374151;">${r.travelersCount||2} Adults<br><span style="font-size:.71rem;color:#9ca3af;">${r.children||0} Children</span></td>
+                    <td style="padding:.9rem 1rem;">${statusBadge(ro.length>0?'active':(r.status||'pending'))}</td>
+                    <td style="padding:.9rem 1rem;"><div style="font-size:.84rem;font-weight:700;color:#0f172a;">${ro.length} Offers</div><div style="font-size:.71rem;color:${ro.length>0?'#1a6b3c':'#9ca3af'};">${ro.length>0?'View now':'Pending'}</div></td>
+                    <td style="padding:.9rem 1rem;"><button onclick="app.viewRequestDetail('${r.id}')" style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:.38rem .9rem;font-size:.81rem;font-weight:600;color:#374151;cursor:pointer;display:flex;align-items:center;gap:.3rem;" onmouseover="this.style.borderColor='#1a6b3c';this.style.color='#1a6b3c'" onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#374151'">View Details <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button></td>
+                </tr>`;
+            }).join('');
+            panel=`<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.2rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.7rem;">
+                    <div><h1 style="font-size:1.35rem;font-weight:800;color:#0f172a;margin:0;">My Requests</h1><p style="font-size:.84rem;color:#6b7280;margin:.18rem 0 0;">Manage all your Umrah travel requests.</p></div>
+                    <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#1a6b3c;color:#fff;border:none;border-radius:8px;padding:.5rem 1.1rem;font-size:.84rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.3rem;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Request</button>
+                </div>
+                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
+                    ${requirements.length>0?`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f9fafb;border-bottom:1px solid #f3f4f6;"><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Request ID</th><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Service</th><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Travel Date</th><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Passengers</th><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Status</th><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Offers</th><th style="padding:.7rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Action</th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div style="text-align:center;padding:2.5rem;color:#6b7280;font-size:.9rem;">No requests yet.</div>`}
+                </div>
+            </main>`;
+
+        // ── REQUEST DETAIL ──────────────────────────────────────────────────────
+        }else if(activeTab==='requestDetail'){
+            const selId=this.state.selectedRequestId;
+            const r=requirements.find(x=>x.id===selId)||requirements[0]||{};
+            const rid=r?reqId(r):'REQ-0000';
+            const ro=r?offers.filter(o=>o.requirementId===r.id):[];
+            const steps=[
+                {label:'Request Submitted',desc:`${fmtDate(r.createdAt||r.preferredDepartureDate)}, 10:30 AM — Your request has been received successfully.`,done:true},
+                {label:'Offers Collected',desc:`${fmtDate(r.createdAt||r.preferredDepartureDate)}, 04:15 PM — We have collected offers from verified providers.`,done:ro.length>0},
+                {label:'Review Offers',desc:`${ro.length} offers are ready for you to review.`,active:ro.length>0&&!r.selectedOffer},
+                {label:'Offer Selected',desc:'You will select the best offer.',done:!!r.selectedOffer},
+                {label:'Payment &amp; Booking',desc:'Complete payment to confirm your booking.',done:false},
             ];
-            mainContentHtml = `
-                <div class="zd-help-hero">
-                    <h2>How can we help you today?</h2>
-                    <p>Search our help articles or contact our 24/7 support team for personalized assistance.</p>
-                    <div class="zd-help-search">
-                        <input type="text" placeholder="Search help topics, e.g. offers, payments, refunds...">
-                        <button type="button" class="zd-btn-primary" style="border-radius:9px;">Search</button>
-                    </div>
-                    <div class="zd-help-chips">
-                        <button type="button" class="zd-help-chip" onclick="app.showToast('Open the Requests tab to manage your requests', 'info')">Requests</button>
-                        <button type="button" class="zd-help-chip" onclick="app.setDashboardTab('payments')">Payments</button>
-                        <button type="button" class="zd-help-chip" onclick="app.setDashboardTab('bookings')">Bookings</button>
-                        <button type="button" class="zd-help-chip" onclick="app.setDashboardTab('profile')">Account</button>
-                    </div>
+            panel=`<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.1rem;">
+                <div>
+                    <button onclick="app.setDashboardTab('requests')" style="background:none;border:none;color:#1a6b3c;font-size:.84rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.3rem;padding:0;margin-bottom:.4rem;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back to My Requests</button>
+                    <h1 style="font-size:1.35rem;font-weight:800;color:#0f172a;margin:0;">Request Details</h1>
                 </div>
-
-                <div class="zd-pay-grid">
-                    <div class="zd-main" style="gap:1.2rem;">
-                        <div class="zd-card">
-                            <div class="zd-card-head"><h3 class="zd-card-title">Frequently Asked Questions</h3></div>
-                            <div class="zd-card-body">
-                                ${faqs.map((f, i) => `
-                                    <div class="zd-faq-item ${this.state.faqOpenId === 'faq-' + i ? 'open' : ''}">
-                                        <button type="button" class="zd-faq-q" onclick="app.toggleFaq('faq-${i}')">
-                                            <span>${f.q}</span>
-                                            <span class="zd-faq-chevron">${zdIcon('chevron', '')}</span>
-                                        </button>
-                                        <div class="zd-faq-a">${f.a}</div>
-                                    </div>
-                                `).join('')}
+                <div style="display:grid;grid-template-columns:1fr 248px;gap:1.1rem;align-items:start;">
+                    <div style="display:flex;flex-direction:column;gap:1.1rem;">
+                        <!-- Header card -->
+                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.2rem;display:flex;align-items:flex-start;gap:.9rem;flex-wrap:wrap;">
+                            <div style="width:85px;height:65px;border-radius:9px;overflow:hidden;background:#f0faf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="36" height="36" fill="#d1fae5" viewBox="0 0 100 100"><rect x="20" y="25" width="60" height="70" rx="3"/><path d="M20 25 Q50 -5 80 25Z"/><rect x="5" y="45" width="15" height="50" rx="2"/><rect x="80" y="45" width="15" height="50" rx="2"/><rect x="42" y="55" width="16" height="40" rx="2"/></svg></div>
+                            <div style="flex:1;">
+                                <div style="display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;margin-bottom:.55rem;"><span style="font-size:1rem;font-weight:800;color:#0f172a;">${rid}</span>${statusBadge(ro.length>0?'active':'pending')}</div>
+                                <div style="display:flex;gap:1.2rem;flex-wrap:wrap;">
+                                    <div style="font-size:.81rem;color:#374151;">📅 ${fmtDate(r.preferredDepartureDate)}<br><span style="font-size:.69rem;color:#9ca3af;">(Approx.)</span></div>
+                                    <div style="font-size:.81rem;color:#374151;">👥 ${r.travelersCount||2} Adults<br><span style="font-size:.69rem;color:#9ca3af;">${r.children||0} Children</span></div>
+                                    <div style="font-size:.81rem;color:#374151;">⏱ ${r.durationDays||10} Days<br><span style="font-size:.69rem;color:#9ca3af;">Duration</span></div>
+                                </div>
+                                <div style="font-size:.7rem;color:#9ca3af;margin-top:.4rem;">Requested on ${fmtDate(r.createdAt||r.preferredDepartureDate)} &bull; 10:30 AM</div>
+                            </div>
+                            ${ro.length>0?`<div style="background:#1a6b3c;color:#fff;border-radius:11px;padding:.8rem 1.1rem;text-align:center;flex-shrink:0;"><div style="font-size:.73rem;font-weight:700;opacity:.85;">${ro.length} Offers Available</div><div style="font-size:.69rem;opacity:.75;margin-top:.1rem;">Ready for you to review</div><button onclick="app.setDashboardTab('offers')" style="margin-top:.5rem;background:#fff;color:#1a6b3c;border:none;border-radius:7px;padding:.35rem .85rem;font-size:.76rem;font-weight:700;cursor:pointer;">View Offers →</button></div>`:''}
+                        </div>
+                        <!-- Tabs -->
+                        <div style="display:flex;gap:0;border-bottom:2px solid #e5e7eb;">
+                            ${['Request Overview',`Offers (${ro.length})`,'Payments','Documents','Activity'].map((t,i)=>`<button style="padding:.6rem 1rem;font-size:.84rem;font-weight:${i===0?'700':'500'};color:${i===0?'#1a6b3c':'#6b7280'};background:none;border:none;border-bottom:${i===0?'2.5px solid #1a6b3c':'2.5px solid transparent'};cursor:pointer;margin-bottom:-2px;">${t}</button>`).join('')}
+                        </div>
+                        <!-- Request info -->
+                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.2rem;">
+                            <div style="display:flex;align-items:center;gap:.45rem;margin-bottom:1rem;"><svg width="15" height="15" fill="none" stroke="#374151" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg><h3 style="font-size:.92rem;font-weight:700;color:#0f172a;margin:0;">Request Information</h3></div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem 1.8rem;">
+                                ${[['Service Type','Umrah Package'],['Pickup City',r.departureCity||'Srinagar (SXR)'],['Travel Date',fmtDate(r.preferredDepartureDate)+' (Approx.)'],['Drop-off City','Jeddah (JED)'],['Duration',(r.durationDays||10)+' Days'],['Phone (Hidden)','&#9679;&#9679;&#9679;&#9679;&#9679;4321'],['Passengers',(r.travelersCount||2)+' Adults, '+(r.children||0)+' Children'],['Email (Hidden)',(user.email||'').replace(/^(.{3}).*?(@.*)$/,'$1****$2')],['Class Preference',r.classPreference||'Economy'],['State','Jammu &amp; Kashmir'],['Package Type','Standard'],['Special Requests',r.specialRequests||'Near Haram, Ziyarat included']].map(([k,v])=>`<div><div style="font-size:.72rem;color:#9ca3af;margin-bottom:.15rem;">${k}</div><div style="font-size:.86rem;color:#0f172a;font-weight:600;">${v}</div></div>`).join('')}
+                            </div>
+                            <div style="margin-top:.9rem;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:.65rem .9rem;display:flex;align-items:center;gap:.45rem;">
+                                <svg width="14" height="14" fill="none" stroke="#d97706" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                <div style="font-size:.76rem;color:#92400e;"><strong>Your personal contact details are protected.</strong> They are never shared with any agent or provider.</div>
                             </div>
                         </div>
-                        <div class="zd-card">
-                            <div class="zd-card-head"><h3 class="zd-card-title">Still need help?</h3></div>
-                            <div class="zd-card-body">
-                                <div class="zd-support-grid">
-                                    <div class="zd-support-card">
-                                        <div class="zd-support-icon">${zdIcon('chat', '')}</div>
-                                        <h4 class="zd-support-title">WhatsApp</h4>
-                                        <p class="zd-support-desc">Chat instantly with our support team on WhatsApp.</p>
-                                        <button type="button" class="zd-btn-outline" onclick="app.openChatbot()">Open Chat</button>
-                                    </div>
-                                    <div class="zd-support-card">
-                                        <div class="zd-support-icon">${zdIcon('mail', '')}</div>
-                                        <h4 class="zd-support-title">Email Support</h4>
-                                        <p class="zd-support-desc">Write to us at support@zilhaj.com for detailed queries.</p>
-                                        <button type="button" class="zd-btn-outline" onclick="app.showToast('Email us at support@zilhaj.com', 'info')">Write Email</button>
-                                    </div>
-                                    <div class="zd-support-card">
-                                        <div class="zd-support-icon">${zdIcon('phone', '')}</div>
-                                        <h4 class="zd-support-title">Call Us</h4>
-                                        <p class="zd-support-desc">Talk to a human advisor 24/7 at +91 95416 92891.</p>
-                                        <button type="button" class="zd-btn-outline" onclick="app.showToast('Call +91 95416 92891', 'info')">Call Now</button>
-                                    </div>
+                        <!-- Offers -->
+                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.2rem;">
+                            <div style="display:flex;align-items:center;gap:.45rem;margin-bottom:1rem;"><h3 style="font-size:.92rem;font-weight:700;color:#0f172a;margin:0;">Available Offers</h3><span style="background:#f0faf5;color:#1a6b3c;font-size:.71rem;font-weight:700;padding:.12rem .55rem;border-radius:99px;">${ro.length} Offers</span></div>
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;">
+                                ${ro.slice(0,2).map((o,i)=>`<div style="border:1.5px solid ${i===0?'#d1fae5':'#fde68a'};border-radius:11px;padding:.9rem;">
+                                    <div style="font-size:.69rem;font-weight:800;color:${i===0?'#059669':'#d97706'};margin-bottom:.35rem;">${i===0?'🏆 Best Value':'⭐ Most Popular'}</div>
+                                    <div style="font-size:1.05rem;font-weight:800;color:#0f172a;">${this.formatCurrency(o.price||o.discountedPrice||0)}</div>
+                                    <div style="font-size:.71rem;color:#6b7280;margin-bottom:.5rem;">per person</div>
+                                    <div style="font-size:.81rem;font-weight:600;color:#0f172a;">${this.escapeHtml(o.packageTitle||'Economy Package')}</div>
+                                    <div style="font-size:.71rem;color:#6b7280;margin:.15rem 0 .55rem;">${r.durationDays||10} Days</div>
+                                    <div style="font-size:.7rem;color:#6b7280;">Flight + Hotel + Transport + Visa</div>
+                                    <button onclick="app.viewOfferDetailsModal('${o.id}')" style="width:100%;margin-top:.7rem;border:1.5px solid ${i===0?'#1a6b3c':'#d97706'};background:#fff;color:${i===0?'#1a6b3c':'#d97706'};border-radius:7px;padding:.4rem;font-size:.78rem;font-weight:700;cursor:pointer;">View Details</button>
+                                </div>`).join('')}
+                                <div style="border:1.5px dashed #e5e7eb;border-radius:11px;padding:.9rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:110px;">
+                                    <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                    <div style="font-size:.78rem;font-weight:600;color:#6b7280;margin-top:.35rem;">More offers coming soon</div>
+                                    <div style="font-size:.7rem;color:#9ca3af;margin-top:.15rem;">We are still collecting more offers for you.</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="zd-privacy-banner">
-                            <div class="zd-privacy-icon">${zdIcon('shield', '')}</div>
-                            <div>
-                                <h4 class="zd-privacy-title">Our commitment to you</h4>
-                                <p class="zd-privacy-text">Every operator on our platform is verified against official Saudi Ministry credentials. Your payments and personal data are always protected.</p>
-                            </div>
+                        <div style="background:#f0faf5;border:1px solid #d1fae5;border-radius:9px;padding:.65rem .9rem;display:flex;align-items:center;gap:.45rem;">
+                            <svg width="13" height="13" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <span style="font-size:.76rem;color:#065f46;">We are committed to providing you the best options with complete transparency and security.</span>
                         </div>
                     </div>
-                    <div class="zd-main" style="gap:1.2rem;">
-                        <div class="zd-card">
-                            <div class="zd-card-head"><h3 class="zd-card-title">Support Options</h3></div>
-                            <div class="zd-card-body" style="display:flex; flex-direction:column; gap:0.55rem;">
-                                <button type="button" class="zd-btn-outline" onclick="app.openChatbot()">${zdIcon('chat', '')} Chat with Us</button>
-                                <button type="button" class="zd-btn-outline" onclick="app.showToast('Ticket submitted. Our team will reach out shortly.', 'success')">${zdIcon('send', '')} Submit a Ticket</button>
-                                <button type="button" class="zd-btn-outline" onclick="app.showToast('Call +91 95416 92891', 'info')">${zdIcon('phone', '')} Call Support</button>
-                                <button type="button" class="zd-btn-outline" onclick="app.openChatbot()">${zdIcon('share', '')} WhatsApp</button>
+                    <!-- Right column -->
+                    <div style="display:flex;flex-direction:column;gap:.9rem;">
+                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.1rem;">
+                            <h3 style="font-size:.88rem;font-weight:800;color:#0f172a;margin:0 0 .9rem;">Request Status</h3>
+                            <div style="display:flex;flex-direction:column;gap:.8rem;">
+                                ${steps.map((s,i)=>`<div style="display:flex;gap:.65rem;align-items:flex-start;">
+                                    <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+                                        <div style="width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${s.done?'#1a6b3c':s.active?'#fef3c7':'#f3f4f6'};border:2px solid ${s.done?'#1a6b3c':s.active?'#d97706':'#e5e7eb'};">${s.done?'<svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':s.active?'<div style="width:7px;height:7px;border-radius:50%;background:#d97706;"></div>':''}</div>
+                                        ${i<steps.length-1?`<div style="width:2px;height:22px;background:${s.done?'#d1fae5':'#e5e7eb'};margin:2px 0;"></div>`:''}
+                                    </div>
+                                    <div style="padding-top:.05rem;"><div style="font-size:.81rem;font-weight:700;color:${s.done?'#0f172a':s.active?'#92400e':'#9ca3af'};">${s.label}</div><div style="font-size:.71rem;color:#9ca3af;line-height:1.4;margin-top:.1rem;">${s.desc}</div></div>
+                                </div>`).join('')}
                             </div>
                         </div>
-                        <div class="zd-card">
-                            <div class="zd-card-head"><h3 class="zd-card-title">Help Topics</h3></div>
-                            <div class="zd-card-body" style="display:flex; flex-direction:column; gap:0.55rem; font-size:0.82rem; font-weight:700; color:#334155;">
-                                <span style="cursor:pointer;" onclick="app.setDashboardTab('requests')">Creating a request</span>
-                                <span style="cursor:pointer;" onclick="app.setDashboardTab('offers')">Understanding offers</span>
-                                <span style="cursor:pointer;" onclick="app.setDashboardTab('payments')">Payments &amp; refunds</span>
-                                <span style="cursor:pointer;" onclick="app.setDashboardTab('profile')">Account &amp; privacy</span>
+                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.1rem;">
+                            <h3 style="font-size:.88rem;font-weight:800;color:#0f172a;margin:0 0 .7rem;">Quick Actions</h3>
+                            <div style="display:flex;flex-direction:column;gap:.35rem;">
+                                <button style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .75rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'"><span style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;font-weight:600;color:#0f172a;"><svg width="13" height="13" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit Request</span><svg width="11" height="11" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+                                <button style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .75rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'"><span style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;font-weight:600;color:#0f172a;"><svg width="13" height="13" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Download / Share Request</span><svg width="11" height="11" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+                                <button onclick="app.deleteRequirement('${r.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .75rem;border:1px solid #fecaca;border-radius:8px;background:#fff;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'"><span style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;font-weight:600;color:#dc2626;"><svg width="13" height="13" fill="none" stroke="#dc2626" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Cancel Request</span><svg width="11" height="11" fill="none" stroke="#dc2626" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
                             </div>
-                        </div>
-                        <div class="zd-help-card" style="margin:0;">
-                            <p class="zd-help-card-title">Need help planning?</p>
-                            <p class="zd-help-card-text">Talk to an Umrah expert who can guide you through packages, hotels and visa requirements.</p>
-                            <button type="button" class="zd-help-card-btn" onclick="app.openChatbot()">Talk to an Expert</button>
                         </div>
                     </div>
                 </div>
-            `;
-        } else if (activeTab === 'notifications') {
-            // NOTIFICATIONS TAB
-            const nFilter = this.state.notifFilter || 'All';
-            const filteredNotifs = notifications.filter(n => nFilter === 'All' || (nFilter === 'Unread' && !n.read) || n.category === nFilter);
-            const notifIcon = (n) => {
-                if (n.category === 'Offers') return 'tag';
-                if (n.category === 'Payments') return 'card';
-                if (n.category === 'Requests') return 'file';
-                return 'bell';
-            };
-            mainContentHtml = `
-                <div class="zd-card">
-                    <div class="zd-card-head">
-                        <h3 class="zd-card-title">Notifications (${unreadCount} unread)</h3>
-                        <button type="button" class="zd-btn-outline" onclick="app.markAllNotifsRead()">${zdIcon('check', '')} Mark all as read</button>
-                    </div>
-                    <div style="padding:0.9rem 1.2rem; border-bottom:1px solid #f1f5f9;">
-                        <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-                            ${['All', 'Unread', 'Offers', 'Payments', 'System'].map(t => `
-                                <button type="button" class="zd-filter-tab ${nFilter === t ? 'active' : ''}" onclick="app.setNotifFilter('${t}')">${t}</button>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <div class="zd-notif-list">
-                        ${filteredNotifs.length === 0 ? '<div class="zd-coming-soon" style="border:none;"><h3>No notifications</h3><p>You are all caught up.</p></div>' : filteredNotifs.map(n => `
-                            <div class="zd-notif-item ${n.read ? '' : 'unread'}" onclick="app.markNotifRead('${n.id}')">
-                                <div class="zd-notif-icon">${zdIcon(notifIcon(n), '')}</div>
-                                <div style="flex:1; min-width:0;">
-                                    <div class="zd-notif-title">${this.escapeHtml(n.title)}</div>
-                                    <p class="zd-notif-msg">${this.escapeHtml(n.message)}</p>
-                                    <div class="zd-notif-time">${this.escapeHtml(n.time)}</div>
-                                </div>
-                                ${n.read ? '' : '<div class="zd-unread-dot"></div>'}
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                <div class="zd-card">
-                    <div class="zd-card-head"><h3 class="zd-card-title">Notification Preferences</h3></div>
-                    <div class="zd-card-body" style="display:flex; flex-direction:column; gap:0.7rem;">
-                        <div class="zd-summary-row" style="cursor:pointer;"><span class="zd-summary-k">Request Updates</span><span class="zd-summary-v" style="font-size:0.74rem; color:#64748b;">Email, SMS</span></div>
-                        <div class="zd-summary-row" style="cursor:pointer;"><span class="zd-summary-k">Offers &amp; Deals</span><span class="zd-summary-v" style="font-size:0.74rem; color:#64748b;">Email, WhatsApp</span></div>
-                        <div class="zd-summary-row" style="cursor:pointer;"><span class="zd-summary-k">Payment Reminders</span><span class="zd-summary-v" style="font-size:0.74rem; color:#64748b;">SMS</span></div>
-                    </div>
-                </div>
-            `;
-        } else if (activeTab === 'bookmarks') {
-            // BOOKMARKS TAB (Coming soon)
-            mainContentHtml = `
-                <div class="zd-coming-soon">
-                    <h3>Bookmarks</h3>
-                    <p>Bookmarks are coming soon. You will be able to save offers and packages you love for quick access.</p>
-                </div>
-            `;
-        } else if (activeTab === 'profile' || activeTab === 'settings') {
-            // PROFILE / SETTINGS TAB
-            mainContentHtml = `
-                <div class="zd-card" style="max-width:760px;">
-                    <div class="zd-card-head"><h3 class="zd-card-title">${activeTab === 'settings' ? 'Account Settings' : 'Account Profile &amp; Preferences'}</h3></div>
-                    <div class="zd-card-body">
-                        <div style="display:flex; align-items:center; gap:1.2rem; padding-bottom:1.4rem; border-bottom:1px solid #f1f5f9; margin-bottom:1.4rem; flex-wrap:wrap;">
-                            <div style="position:relative;">
-                                <div class="zd-avatar" style="width:76px; height:76px; font-size:2rem;">
-                                    ${userPhoto ? `<img src="${userPhoto}" alt="Avatar">` : `<span>${this.escapeHtml((user.name || 'D').charAt(0).toUpperCase())}</span>`}
-                                </div>
-                                <button type="button" onclick="app.triggerPhotoUpload()" title="Upload Profile Photo" style="position:absolute; bottom:0; right:0; width:26px; height:26px; background:#ffffff; border:1.5px solid #cbd5e1; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.15);">📷</button>
-                            </div>
-                            <div>
-                                <h3 style="font-size:1.25rem; font-weight:900; color:#0f172a; margin:0 0 0.2rem;">${this.escapeHtml(user.name)}</h3>
-                                <div style="font-size:0.85rem; color:#64748b;">${this.escapeHtml(user.email)} &bull; Verified Pilgrim Account</div>
-                                <span class="zd-pill green" style="margin-top:0.4rem;">ACTIVE &amp; VERIFIED</span>
-                            </div>
-                        </div>
-                        <div class="zd-info-grid" style="grid-template-columns:1fr 1fr;">
-                            ${infoItemHelper('user', 'Full Name', this.escapeHtml(user.name))}
-                            ${infoItemHelper('mail', 'Email Address', this.escapeHtml(user.email))}
-                            ${infoItemHelper('phone', 'Phone Number', this.escapeHtml(user.phone || '+91 9541692891'))}
-                            ${infoItemHelper('shield', 'Account Status', 'Active &amp; Verified')}
-                            ${infoItemHelper('cal', 'Member Since', '15 Oct 2026')}
-                            ${infoItemHelper('card', 'Default Payment', 'UPI &bull; tawseef@okaxis')}
-                        </div>
-                        <div style="margin-top:1.5rem; display:flex; gap:0.8rem; flex-wrap:wrap;">
-                            <button type="button" class="zd-btn-primary" onclick="app.triggerPhotoUpload()">${zdIcon('edit', '')} Change Photo</button>
-                            <button type="button" class="zd-btn-outline" style="color:#dc2626; border-color:#fecaca;" onclick="app.logout()">${zdIcon('share', '')} Log Out</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        } else {
-            // DEFAULT DASHBOARD OVERVIEW TAB
-            const totalRequests = requirements.length;
-            const availableOffers = offers.length;
-            const inProgress = requirements.filter(r => statusOf(r) === 'Offers Available' || statusOf(r) === 'Waiting for Offers').length;
-            const completed = bookings.length;
+            </main>`;
 
-            mainContentHtml = `
-                <div class="zd-stats-grid">
-                    <div class="zd-stat-card" onclick="app.setDashboardTab('requests')">
-                        <div class="zd-stat-icon green">${zdIcon('file', '')}</div>
-                        <div>
-                            <div class="zd-stat-num">${totalRequests}</div>
-                            <div class="zd-stat-label">Total Requests</div>
-                            <div class="zd-stat-sub">All your requests</div>
-                        </div>
+        // ── NOTIFICATIONS ───────────────────────────────────────────────────────
+        }else if(activeTab==='notifications'){
+            const notifs=[
+                {ic:'offer',bg:'#d1fae5',ic_c:'#059669',title:'New offers received for REQ-1024',desc:'We have received 3 new offers for your Umrah package request.',time:'2 minutes ago',unread:true},
+                {ic:'clock',bg:'#fef3c7',ic_c:'#d97706',title:'Your request REQ-1019 is pending',desc:'We are collecting offers from our verified agents. You will be notified soon.',time:'45 minutes ago',unread:true},
+                {ic:'pay',bg:'#dbeafe',ic_c:'#2563eb',title:'Payment of ₹56,900 successful',desc:'Your payment for REQ-0998 has been received successfully.',time:'2 days ago',unread:false},
+                {ic:'check',bg:'#d1fae5',ic_c:'#059669',title:'Request REQ-0998 completed',desc:'You have successfully completed your Umrah package booking.',time:'3 days ago',unread:false},
+                {ic:'info',bg:'#e0e7ff',ic_c:'#4f46e5',title:'Important: Verify your email',desc:'Please verify your email address to keep your account secure.',time:'5 days ago',unread:false},
+                {ic:'promo',bg:'#fce7f3',ic_c:'#db2777',title:'Special offer for you!',desc:'Exclusive Umrah packages with up to 15% off. Check now!',time:'1 week ago',unread:false},
+                {ic:'sys',bg:'#f3f4f6',ic_c:'#6b7280',title:'Maintenance Update',desc:'Our platform will be under maintenance on 18 May 2025, 1:00 AM – 3:00 AM.',time:'1 week ago',unread:false},
+            ];
+            const ni=(type,bg,c)=>{const svgs={offer:`<svg width="17" height="17" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5" fill="${c}" stroke="none"/></svg>`,clock:`<svg width="17" height="17" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,pay:`<svg width="17" height="17" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,check:`<svg width="17" height="17" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,info:`<svg width="17" height="17" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-linecap="round" stroke-width="2"/></svg>`,promo:`<svg width="17" height="17" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg>`,sys:`<svg width="17" height="17" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33A1.65 1.65 0 0 0 14 21a2 2 0 1 1-4 0 1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3 9a1.65 1.65 0 0 0-1.51-1H2a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 3 4.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 7 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 13 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9 1.65 1.65 0 0 0 21 10h1a2 2 0 1 1 0 4h-.09A1.65 1.65 0 0 0 19.4 15z"/></svg>`};return`<div style="width:38px;height:38px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">${svgs[type]||svgs.info}</div>`;};
+            panel=`<main style="flex:1;min-width:0;display:grid;grid-template-columns:1fr 228px;gap:1.1rem;align-items:start;">
+                <div style="display:flex;flex-direction:column;gap:1.1rem;">
+                    <div><h1 style="font-size:1.35rem;font-weight:800;color:#0f172a;margin:0;">Notifications</h1><p style="font-size:.84rem;color:#6b7280;margin:.18rem 0 0;">Stay updated with the latest updates on your requests and offers.</p></div>
+                    <div style="display:flex;gap:.4rem;border-bottom:1px solid #e5e7eb;padding-bottom:0;">
+                        ${[['All',notifCount],['Requests',2],['Offers',2],['Payments',1],['System',1]].map(([l,c],i)=>`<button style="display:flex;align-items:center;gap:.3rem;padding:.5rem .85rem;border:none;border-bottom:${i===0?'2px solid #1a6b3c':'2px solid transparent'};background:none;font-size:.84rem;font-weight:${i===0?'700':'500'};color:${i===0?'#1a6b3c':'#6b7280'};cursor:pointer;margin-bottom:-1px;">${l}${c>0?`<span style="background:${i===0?'#1a6b3c':'#e5e7eb'};color:${i===0?'#fff':'#374151'};font-size:.66rem;font-weight:800;min-width:17px;height:17px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 3px;">${c}</span>`:''}</button>`).join('')}
                     </div>
-                    <div class="zd-stat-card" onclick="app.setDashboardTab('offers')">
-                        <div class="zd-stat-icon amber">${zdIcon('tag', '')}</div>
-                        <div>
-                            <div class="zd-stat-num">${availableOffers}</div>
-                            <div class="zd-stat-label">Offers Available</div>
-                            <div class="zd-stat-sub">Ready to review</div>
-                        </div>
-                    </div>
-                    <div class="zd-stat-card" onclick="app.setDashboardTab('requests')">
-                        <div class="zd-stat-icon blue">${zdIcon('clock', '')}</div>
-                        <div>
-                            <div class="zd-stat-num">${inProgress}</div>
-                            <div class="zd-stat-label">In Progress</div>
-                            <div class="zd-stat-sub">Being processed</div>
-                        </div>
-                    </div>
-                    <div class="zd-stat-card" onclick="app.setDashboardTab('payments')">
-                        <div class="zd-stat-icon green">${zdIcon('check', '')}</div>
-                        <div>
-                            <div class="zd-stat-num">${completed}</div>
-                            <div class="zd-stat-label">Completed</div>
-                            <div class="zd-stat-sub">Successfully done</div>
-                        </div>
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;overflow:hidden;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.1rem;border-bottom:1px solid #f3f4f6;"><span style="font-size:.87rem;font-weight:700;color:#0f172a;">All Notifications</span><button style="background:none;border:none;font-size:.78rem;color:#1a6b3c;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.25rem;">Mark all as read <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button></div>
+                        ${notifs.map(n=>`<div style="display:flex;align-items:flex-start;gap:.8rem;padding:.9rem 1.1rem;border-bottom:1px solid #f9fafb;${n.unread?'background:#fafffe;':''}" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='${n.unread?'#fafffe':'#fff'}'">
+                            ${ni(n.ic,n.bg,n.ic_c)}
+                            <div style="flex:1;min-width:0;"><div style="font-size:.86rem;font-weight:${n.unread?'700':'600'};color:#0f172a;">${n.title}</div><div style="font-size:.77rem;color:#6b7280;margin-top:.12rem;line-height:1.4;">${n.desc}</div></div>
+                            <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0;"><span style="font-size:.71rem;color:#9ca3af;white-space:nowrap;">${n.time}</span>${n.unread?'<div style="width:7px;height:7px;border-radius:50%;background:#1a6b3c;flex-shrink:0;"></div>':''}</div>
+                        </div>`).join('')}
+                        <div style="padding:.9rem;text-align:center;"><button style="background:none;border:none;font-size:.84rem;color:#374151;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.3rem;margin:0 auto;">Load More <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button></div>
                     </div>
                 </div>
+                <div style="display:flex;flex-direction:column;gap:.9rem;">
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.1rem;">
+                        <h3 style="font-size:.88rem;font-weight:800;color:#0f172a;margin:0 0 .25rem;">Notification Preferences</h3>
+                        <p style="font-size:.73rem;color:#6b7280;margin:0 0 .9rem;">Choose what you want to be notified about.</p>
+                        ${[['Requests Updates','#d1fae5','#059669','Updates about your requests'],['Offers Updates','#fef3c7','#d97706','New offers and offer updates'],['Payment Updates','#fce7f3','#db2777','Payment confirmations and receipts'],['System Notifications','#e0e7ff','#4f46e5','Important system and security alerts'],['Promotions &amp; Offers','#fef3c7','#d97706','Deals, discounts and promotions']].map(([l,bg,c,d])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 0;border-bottom:1px solid #f9fafb;"><div style="display:flex;align-items:center;gap:.55rem;"><div style="width:28px;height:28px;border-radius:7px;background:${bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="13" height="13" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div style="font-size:.79rem;font-weight:600;color:#0f172a;">${l}</div><div style="font-size:.68rem;color:#9ca3af;">${d}</div></div></div><div style="width:34px;height:19px;background:#1a6b3c;border-radius:99px;position:relative;cursor:pointer;flex-shrink:0;"><div style="position:absolute;right:2px;top:2px;width:15px;height:15px;background:#fff;border-radius:50%;"></div></div></div>`).join('')}
+                    </div>
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.1rem;">
+                        <div style="font-size:.88rem;font-weight:800;color:#0f172a;margin-bottom:.25rem;">Need Help?</div>
+                        <div style="font-size:.76rem;color:#6b7280;margin-bottom:.8rem;">Our support team is here to help you with any queries.</div>
+                        <button onclick="app.openChatbot()" style="display:flex;align-items:center;gap:.45rem;width:100%;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.55rem .85rem;font-size:.8rem;font-weight:700;color:#1a6b3c;cursor:pointer;margin-bottom:.4rem;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Chat with Us</button>
+                        <button style="display:flex;align-items:center;gap:.45rem;width:100%;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.55rem .85rem;font-size:.8rem;font-weight:700;color:#1a6b3c;cursor:pointer;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.49a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> Call Support</button>
+                    </div>
+                    <div style="text-align:center;opacity:.1;pointer-events:none;"><svg width="150" height="90" viewBox="0 0 300 200" fill="#1a6b3c"><rect x="90" y="40" width="120" height="140" rx="4"/><path d="M90 40 Q150 -20 210 40Z"/><rect x="50" y="70" width="40" height="110" rx="4"/><rect x="210" y="70" width="40" height="110" rx="4"/><rect x="0" y="180" width="300" height="20"/></svg></div>
+                </div>
+            </main>`;
 
-                <div class="zd-card">
-                    <div class="zd-card-head">
-                        <h3 class="zd-card-title">Your Requests</h3>
-                        <button type="button" class="zd-btn-primary" onclick="app.scrollToRequirementForm()">${zdIcon('plus', '')} New Request</button>
-                    </div>
-                    <div class="zd-table-wrap">
-                        <table class="zd-table">
-                            <thead>
-                                <tr><th>Request ID</th><th>Service</th><th>Travel Date</th><th>Passengers</th><th>Status</th><th>Offers</th><th style="text-align:center;">Action</th></tr>
-                            </thead>
-                            <tbody>
-                                ${requirements.length === 0 ? `
-                                    <tr><td colspan="7" style="text-align:center; padding:2.5rem; color:#64748b;">No requests yet. Click "New Request" to post your first Umrah requirement.</td></tr>
-                                ` : requirements.map(req => {
-                                    const roffs = reqOffersFor(req.id);
-                                    const rstatus = statusOf(req);
-                                    return `
-                                        <tr>
-                                            <td>
-                                                <div class="zd-cell-bold">${this.escapeHtml(req.id)}</div>
-                                                <div class="zd-cell-muted">${req.createdAt ? fmtDate(req.createdAt) : 'N/A'}</div>
-                                            </td>
-                                            <td>
-                                                <div style="display:flex; align-items:center; gap:0.55rem;">
-                                                    <div class="zd-stat-icon green" style="width:32px; height:32px; border-radius:9px;">${zdIcon('building', '')}</div>
-                                                    <div>
-                                                        <div class="zd-cell-bold" style="font-size:0.82rem;">${this.escapeHtml(req.serviceType || 'Umrah Package')}</div>
-                                                        <div class="zd-cell-muted">${req.durationDays || 18} Days</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div style="display:flex; align-items:center; gap:0.35rem; font-weight:600;">${zdIcon('cal', '')} ${this.escapeHtml(req.preferredDepartureDate || 'N/A')}</div>
-                                                <div class="zd-cell-muted" style="padding-left:1.4rem;">(Approx.)</div>
-                                            </td>
-                                            <td>
-                                                <div style="display:flex; align-items:center; gap:0.35rem; font-weight:600;">${zdIcon('users', '')} ${req.travelersCount || 2} Adults</div>
-                                                <div class="zd-cell-muted" style="padding-left:1.4rem;">${req.children || 0} Children</div>
-                                            </td>
-                                            <td>${renderPill(rstatus)}</td>
-                                            <td>
-                                                <div class="zd-cell-bold">${roffs.length} ${roffs.length === 1 ? 'Offer' : 'Offers'}</div>
-                                                ${roffs.length > 0 ? `<button type="button" class="zd-cell-muted" style="border:none; background:none; padding:0; cursor:pointer; color:#1a5c38; font-weight:700;" onclick="app.viewRequestDetail('${req.id}')">View now</button>` : '<div class="zd-cell-muted">Pending</div>'}
-                                            </td>
-                                            <td style="text-align:center;">
-                                                <button type="button" class="zd-btn-outline" onclick="app.viewRequestDetail('${req.id}')">View Details ${zdIcon('arrow', '')}</button>
-                                            </td>
-                                        </tr>
-                                    `;
-                                }).join('')}
-                            </tbody>
-                        </table>
-                    </div>
+        // ── HELP ────────────────────────────────────────────────────────────────
+        }else if(activeTab==='help'){
+            const faqs=[
+                {q:'How do I submit a travel request?',a:'Go to the homepage and click "Post Your Travel Requirement". Fill in your travel dates, budget, group size and preferences. Verified agents will send you tailored offers.'},
+                {q:'How long does it take to receive offers?',a:'Typically within 24–48 hours. You will receive a notification as soon as offers are available for your request.'},
+                {q:'Can I cancel my request?',a:'Yes, you can cancel any active request from "My Requests" → View Details → Cancel Request at any time before payment.'},
+                {q:'Is my contact information shared with agents?',a:'No. Your contact details are completely masked. Agents only see your travel preferences and can send you offers through our platform.'},
+                {q:'What payment methods are accepted?',a:'We accept UPI, Credit/Debit Cards, Net Banking, and popular wallets like PhonePe and Paytm via Razorpay.'},
+            ];
+            panel=`<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.2rem;">
+                <div><h1 style="font-size:1.35rem;font-weight:800;color:#0f172a;margin:0;">Help &amp; Support</h1><p style="font-size:.84rem;color:#6b7280;margin:.18rem 0 0;">Find answers and get help from our support team.</p></div>
+                <div style="position:relative;"><svg style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);pointer-events:none;" width="15" height="15" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search for answers..." style="width:100%;box-sizing:border-box;padding:.75rem 1rem .75rem 2.5rem;border:1px solid #e5e7eb;border-radius:10px;font-size:.88rem;color:#374151;background:#fff;outline:none;" onfocus="this.style.borderColor='#1a6b3c'" onblur="this.style.borderColor='#e5e7eb'"></div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;">
+                    ${[['Chat with Us','<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>','onclick="app.openChatbot()"'],['Call Support','<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.49a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>','href="tel:+919876543210"'],['WhatsApp','<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.49a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>','href="https://wa.me/919876543210" target=_blank']].map(([l,p,a])=>`<div ${a} style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem;text-align:center;cursor:pointer;" onmouseover="this.style.borderColor='#1a6b3c'" onmouseout="this.style.borderColor='#e5e7eb'"><div style="width:42px;height:42px;background:#f0faf5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .65rem;"><svg width="19" height="19" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24">${p}</svg></div><div style="font-size:.87rem;font-weight:700;color:#0f172a;">${l}</div></div>`).join('')}
                 </div>
+                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;overflow:hidden;">
+                    <div style="padding:1rem 1.2rem;border-bottom:1px solid #f3f4f6;"><h3 style="font-size:.92rem;font-weight:800;color:#0f172a;margin:0;">Frequently Asked Questions</h3></div>
+                    ${faqs.map(f=>`<details style="border-bottom:1px solid #f3f4f6;"><summary style="padding:.9rem 1.2rem;font-size:.87rem;font-weight:600;color:#0f172a;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">${f.q}<svg width="13" height="13" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><div style="padding:0 1.2rem .9rem;font-size:.84rem;color:#6b7280;line-height:1.6;">${f.a}</div></details>`).join('')}
+                </div>
+            </main>`;
 
-                <div class="zd-privacy-banner">
-                    <div class="zd-privacy-icon">${zdIcon('shield', '')}</div>
-                    <div>
-                        <h4 class="zd-privacy-title">Your privacy is our priority</h4>
-                        <p class="zd-privacy-text">We never share your personal information with any agent or provider until you choose to accept an offer.</p>
-                    </div>
+        // ── PAYMENTS ────────────────────────────────────────────────────────────
+        }else if(activeTab==='payments'){
+            const pmts=bookings.map((b,i)=>({...b,txn:'TXN'+String(i+1).padStart(6,'0'),method:'Razorpay'}));
+            panel=`<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.2rem;">
+                <div><h1 style="font-size:1.35rem;font-weight:800;color:#0f172a;margin:0;">Payments</h1><p style="font-size:.84rem;color:#6b7280;margin:.18rem 0 0;">Track all your payment history and transactions.</p></div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;">
+                    ${[['Total Paid',this.formatCurrency(pmts.reduce((s,p)=>s+(p.totalPrice||0),0)),'#1a6b3c'],['Successful',pmts.filter(p=>p.status==='CONFIRMED'||p.status==='COMPLETED').length,'#059669'],['Pending',pmts.filter(p=>p.status==='PENDING').length,'#d97706'],['Transactions',pmts.length,'#374151']].map(([l,v,c])=>`<div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.1rem;"><div style="font-size:.76rem;color:#6b7280;margin-bottom:.35rem;">${l}</div><div style="font-size:1.35rem;font-weight:800;color:${c};">${v}</div></div>`).join('')}
                 </div>
-            `;
+                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;overflow:hidden;">
+                    <div style="padding:.9rem 1.2rem;border-bottom:1px solid #f3f4f6;"><h3 style="font-size:.92rem;font-weight:800;color:#0f172a;margin:0;">Payment History</h3></div>
+                    ${pmts.length>0?`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f9fafb;border-bottom:1px solid #f3f4f6;"><th style="padding:.7rem 1rem;text-align:left;font-size:.71rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Transaction ID</th><th style="padding:.7rem 1rem;text-align:left;font-size:.71rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Service</th><th style="padding:.7rem 1rem;text-align:left;font-size:.71rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Amount</th><th style="padding:.7rem 1rem;text-align:left;font-size:.71rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Method</th><th style="padding:.7rem 1rem;text-align:left;font-size:.71rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Status</th><th style="padding:.7rem 1rem;text-align:left;font-size:.71rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Action</th></tr></thead><tbody>${pmts.map(p=>`<tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:.85rem 1rem;font-size:.82rem;font-weight:700;color:#1a6b3c;">${p.txn}</td><td style="padding:.85rem 1rem;font-size:.82rem;color:#374151;">${this.escapeHtml(p.packageTitle||'Umrah Package')}</td><td style="padding:.85rem 1rem;font-size:.87rem;font-weight:700;color:#0f172a;">${this.formatCurrency(p.totalPrice||0)}</td><td style="padding:.85rem 1rem;font-size:.82rem;color:#374151;">${p.method}</td><td style="padding:.85rem 1rem;">${statusBadge(p.status||'completed')}</td><td style="padding:.85rem 1rem;"><button onclick="app.viewBookingVoucher('${p.id}')" style="background:#f0faf5;border:1px solid #d1fae5;border-radius:7px;padding:.32rem .75rem;font-size:.76rem;font-weight:700;color:#1a6b3c;cursor:pointer;">View Receipt</button></td></tr>`).join('')}</tbody></table></div>`:`<div style="text-align:center;padding:2.5rem;color:#6b7280;font-size:.88rem;">No payment history yet.</div>`}
+                </div>
+            </main>`;
+
+        // ── OFFERS ──────────────────────────────────────────────────────────────
+        }else if(activeTab==='offers'){
+            const uo=offers.filter(o=>requirements.some(r=>r.id===o.requirementId));
+            panel=`<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.2rem;">
+                <div><h1 style="font-size:1.35rem;font-weight:800;color:#0f172a;margin:0;">Offers</h1><p style="font-size:.84rem;color:#6b7280;margin:.18rem 0 0;">Review offers from verified travel agents.</p></div>
+                ${uo.length>0?`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;">${uo.map(o=>`<div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;overflow:hidden;"><div style="height:120px;background:#f0faf5;display:flex;align-items:center;justify-content:center;"><svg width="44" height="44" fill="#d1fae5" viewBox="0 0 100 100"><rect x="20" y="25" width="60" height="70" rx="3"/><path d="M20 25 Q50 -5 80 25Z"/><rect x="5" y="45" width="15" height="50" rx="2"/><rect x="80" y="45" width="15" height="50" rx="2"/><rect x="42" y="55" width="16" height="40" rx="2"/></svg></div><div style="padding:.9rem;"><div style="font-size:.87rem;font-weight:700;color:#0f172a;margin-bottom:.2rem;">${this.escapeHtml(o.packageTitle||'Umrah Package')}</div><div style="font-size:1.05rem;font-weight:800;color:#1a6b3c;">${this.formatCurrency(o.price||o.discountedPrice||0)}</div><div style="font-size:.72rem;color:#9ca3af;margin-bottom:.7rem;">per person</div><button onclick="app.viewOfferDetailsModal('${o.id}')" style="width:100%;background:#1a6b3c;color:#fff;border:none;border-radius:8px;padding:.45rem;font-size:.81rem;font-weight:700;cursor:pointer;">View Details</button></div></div>`).join('')}</div>`:
+                `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;text-align:center;padding:2.5rem;"><p style="color:#6b7280;">No offers yet. Post a request to start receiving offers.</p></div>`}
+            </main>`;
+
+        // ── BOOKMARKS ───────────────────────────────────────────────────────────
+        }else if(activeTab==='bookmarks'){
+            panel=`<main style="flex:1;min-width:0;"><div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:2.5rem;text-align:center;"><div style="font-size:1.8rem;margin-bottom:.7rem;">🔖</div><h3 style="font-weight:700;color:#0f172a;margin:0 0 .35rem;">No Bookmarks Yet</h3><p style="color:#6b7280;font-size:.87rem;">Save interesting offers and packages here for quick access.</p></div></main>`;
+
+        // ── PROFILE ─────────────────────────────────────────────────────────────
+        }else if(activeTab==='profile'){
+            panel=`<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.2rem;">
+                <div><h1 style="font-size:1.35rem;font-weight:800;color:#0f172a;margin:0;">My Profile</h1><p style="font-size:.84rem;color:#6b7280;margin:.18rem 0 0;">Manage your account details and preferences.</p></div>
+                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.7rem;max-width:560px;">
+                    <div style="display:flex;align-items:center;gap:1.1rem;padding-bottom:1.3rem;border-bottom:1px solid #f3f4f6;margin-bottom:1.3rem;">
+                        <div style="position:relative;"><div style="width:68px;height:68px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.7rem;font-weight:800;overflow:hidden;">${userPhoto?`<img src="${userPhoto}" style="width:100%;height:100%;object-fit:cover;">`:this.escapeHtml((user.name||'U').charAt(0).toUpperCase())}</div><button onclick="app.triggerPhotoUpload()" style="position:absolute;bottom:0;right:0;width:21px;height:21px;background:#fff;border:1.5px solid #e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.62rem;">📷</button></div>
+                        <div><h3 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 .15rem;">${this.escapeHtml(user.name)}</h3><div style="font-size:.81rem;color:#6b7280;">${this.escapeHtml(user.email)}</div><span style="background:#d1fae5;color:#065f46;font-size:.68rem;font-weight:700;padding:.12rem .52rem;border-radius:99px;">Verified Account</span></div>
+                    </div>
+                    ${[['Full Name',user.name],['Email Address',user.email],['Phone Number',user.phone||'+91 9541692891'],['Account Status','Active &amp; Verified'],['Member Since','2025']].map(([k,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.65rem 0;border-bottom:1px dashed #f3f4f6;"><span style="font-size:.84rem;color:#6b7280;">${k}</span><strong style="font-size:.84rem;color:#0f172a;">${this.escapeHtml(String(v))}</strong></div>`).join('')}
+                    <div style="display:flex;gap:.75rem;margin-top:1.2rem;"><button onclick="app.logout()" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:.55rem 1.2rem;border-radius:8px;font-weight:700;font-size:.84rem;cursor:pointer;">🚪 Log Out</button><button onclick="app.triggerPhotoUpload()" style="background:#f0faf5;color:#1a6b3c;border:1px solid #d1fae5;padding:.55rem 1.2rem;border-radius:8px;font-weight:700;font-size:.84rem;cursor:pointer;">📷 Change Photo</button></div>
+                </div>
+            </main>`;
+
+        // ── SETTINGS ────────────────────────────────────────────────────────────
+        }else if(activeTab==='settings'){
+            panel=`<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.2rem;">
+                <div><h1 style="font-size:1.35rem;font-weight:800;color:#0f172a;margin:0;">Settings</h1></div>
+                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.4rem;max-width:520px;">
+                    ${[['Email Notifications','Receive updates and offers via email'],['SMS Alerts','Get SMS for important updates'],['Privacy Mode','Hide your profile from agents'],['Two-Factor Auth','Add extra security to your account']].map(([l,d])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 0;border-bottom:1px solid #f3f4f6;"><div><div style="font-size:.87rem;font-weight:600;color:#0f172a;">${l}</div><div style="font-size:.73rem;color:#9ca3af;">${d}</div></div><div style="width:38px;height:21px;background:#1a6b3c;border-radius:99px;position:relative;cursor:pointer;flex-shrink:0;"><div style="position:absolute;right:2px;top:3px;width:15px;height:15px;background:#fff;border-radius:50%;"></div></div></div>`).join('')}
+                    <button onclick="app.logout()" style="margin-top:1.1rem;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:.6rem 1.3rem;border-radius:8px;font-weight:700;font-size:.84rem;cursor:pointer;">🚪 Log Out</button>
+                </div>
+            </main>`;
+        }else{
+            panel=`<main style="flex:1;min-width:0;"><div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:2.5rem;text-align:center;"><p style="color:#6b7280;">Coming soon.</p></div></main>`;
         }
 
         return `
-            <div class="dashboard-page-wrapper" style="background:#f4f7fb; min-height:100vh; padding:115px 0 4rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                <div class="staymanager-container" style="max-width:1440px; margin:0 auto; padding:0 1.5rem; display:grid; grid-template-columns: 240px 1fr; gap: 2rem;">
-                    ${renderSidebar()}
-                    ${mainContentHtml}
+        <div style="background:#f8fafc;min-height:100vh;padding:98px 0 4rem;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+            <div style="max-width:1260px;margin:0 auto;padding:0 1.3rem;display:flex;gap:1.3rem;align-items:flex-start;">
+                ${sidebar}
+                ${panel}
+            </div>
+            <div style="max-width:1260px;margin:1.8rem auto 0;padding:0 1.3rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem;">
+                <span style="font-size:.76rem;color:#9ca3af;">© 2026 ZILHAJ. All rights reserved.</span>
+                <div style="display:flex;gap:.9rem;">
+                    <a href="/privacy" onclick="event.preventDefault();app.navigate('privacy')" style="font-size:.76rem;color:#9ca3af;text-decoration:none;">Privacy Policy</a>
+                    <a href="/terms" onclick="event.preventDefault();app.navigate('terms')" style="font-size:.76rem;color:#9ca3af;text-decoration:none;">Terms &amp; Conditions</a>
+                    <a href="/terms" onclick="event.preventDefault();app.navigate('terms')" style="font-size:.76rem;color:#9ca3af;text-decoration:none;">Refund Policy</a>
                 </div>
             </div>
-        `;
+        </div>`;
     }
+
 
     getAllOffers() {
         const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');

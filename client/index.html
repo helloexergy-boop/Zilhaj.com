@@ -189,7 +189,7 @@
     <link rel="preload" as="image" href="https://images.pexels.com/photos/38498727/pexels-photo-38498727.jpeg">
     <link rel="preload" as="image" href="https://images.pexels.com/photos/28209449/pexels-photo-28209449.jpeg">
     <!-- Custom CSS Design System -->
-    <link rel="stylesheet" href="index.css?v=20260813_v1">
+    <link rel="stylesheet" href="index.css?v=20260806_v32">
     <!-- Razorpay Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
@@ -198,14 +198,6 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
-        }
-        html, body {
-            background-color: #D8F3DC;
-            margin: 0;
-            padding: 0;
-        }
-        #mainContainer {
-            min-height: 62vh;
         }
     </style>
 </head>
@@ -258,8 +250,412 @@
 
         <!-- Main Content Root Container -->
         <main class="main-container" id="mainContainer">
-        <!-- Content rendered instantly by app.js -->
-    </main>
+            <!-- Full Width Dark Forest Green Hero Banner -->
+            <section class="hero-green-banner"
+                style="background:#0f5132 !important; padding:5rem 1.5rem !important; text-align:center !important; color:#ffffff !important; width:100% !important; box-sizing:border-box !important; margin:0 !important;">
+                <div class="hero-green-container" style="max-width:900px !important; margin:0 auto !important;">
+
+                    <!-- Official Front Page Slogan Badge -->
+                    <div
+                        style="display:inline-flex !important; align-items:center !important; gap:0.5rem !important; background:rgba(255, 255, 255, 0.15) !important; backdrop-filter:blur(10px) !important; border:1px solid rgba(255, 255, 255, 0.3) !important; color:#ffffff !important; padding:0.45rem 1.2rem !important; border-radius:99px !important; font-size:0.88rem !important; font-weight:700 !important; margin-bottom:1.4rem !important; box-shadow:0 4px 15px rgba(0,0,0,0.1) !important;">
+                        <span style="font-size:1.1rem;">ðŸ›¡ï¸</span>
+                        <span>VERIFIED TRAVEL AGENTS & BEST PRICE GUARANTEE</span>
+                    </div>
+
+                    <h1 class="hero-title-main"
+                        style="font-size:3.5rem !important; font-weight:800 !important; line-height:1.1 !important; color:#ffffff !important; letter-spacing:-1px !important; margin-bottom:0.8rem !important;">
+                        One Travel Request.
+                        <span class="hero-title-gold"
+                            style="color:#f59e0b !important; display:block !important; margin-top:0.2rem !important;">Get
+                            Best Package Offers.</span>
+                    </h1>
+                    <p class="hero-subtext-clean"
+                        style="font-size:1.08rem !important; color:rgba(255, 255, 255, 0.92) !important; max-width:720px !important; margin:1.2rem auto 2.2rem !important; line-height:1.65 !important; font-weight:400 !important;">
+                        Submit your travel preferences and let verified travel agencies send you direct package offers.
+                        Compare prices easily and book your Umrah trip with full confidence.
+                    </p>
+                    <div class="hero-action-buttons"
+                        style="display:flex !important; justify-content:center !important; align-items:center !important; gap:1.2rem !important; flex-wrap:wrap !important;">
+                        <button class="btn-start-journey" onclick="app.scrollToRequirementForm()"
+                            style="background:#f59e0b !important; color:#0f172a !important; font-weight:800 !important; font-size:0.95rem !important; padding:0.85rem 2.2rem !important; border-radius:8px !important; border:none !important; cursor:pointer !important; box-shadow:0 4px 14px rgba(245,158,11,0.35) !important;">Start
+                            Your Journey</button>
+                        <button class="btn-my-requests" onclick="app.navigate('dashboard')"
+                            style="background:transparent !important; border:1.5px solid rgba(255,255,255,0.75) !important; color:#ffffff !important; font-weight:700 !important; font-size:0.95rem !important; padding:0.85rem 2.2rem !important; border-radius:8px !important; cursor:pointer !important;">My
+                            Requests</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How It Works Section -->
+            <section class="how-it-works-section">
+                <div class="how-it-works-header">
+                    <h2 class="how-it-works-title">Your Journey Begins Here</h2>
+                    <p class="how-it-works-subtitle">Three simple steps to plan your Umrah with complete confidence and peace of mind.</p>
+                </div>
+                <div class="how-steps-row">
+                    <div class="how-step-item">
+                        <div class="how-step-icon-wrap how-step-icon-gray">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </div>
+                        <h4 class="how-step-title">Submit Request</h4>
+                        <p class="how-step-desc">Tell us your travel dates, group size, budget, and preferences. We'll capture everything needed to craft your ideal itinerary while keeping your details private and secure.</p>
+                    </div>
+                    <div class="how-step-connector"></div>
+                    <div class="how-step-item">
+                        <div class="how-step-icon-wrap how-step-icon-amber">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </div>
+                        <h4 class="how-step-title">Receive Offers</h4>
+                        <p class="how-step-desc">Verified travel agents review your request and send tailored offers. You'll receive comprehensive options that match your unique needs and budget perfectly.</p>
+                    </div>
+                    <div class="how-step-connector"></div>
+                    <div class="how-step-item">
+                        <div class="how-step-icon-wrap how-step-icon-blue">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#3b82f6" stroke="none"><circle cx="12" cy="12" r="10"/></svg>
+                        </div>
+                        <h4 class="how-step-title">Choose Package</h4>
+                        <p class="how-step-desc">Compare offers side-by-side, dive into the details, and confidently select the option that fits your spiritual journey. We make the final decision simple and clear.</p>
+                    </div>
+                </div>
+            </section>
+            <!-- Live Request Submission Container -->
+            <div id="requestFormAnchor"
+                style="max-width:1140px; margin:2rem auto 2.5rem; padding:0 1.5rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+
+                <!-- Single Unified Requirement Card -->
+                <div style="background:#ffffff; border-radius:24px; border:1.5px solid #e2e8f0; box-shadow:0 12px 35px rgba(0,0,0,0.04); padding:2.5rem 2.2rem;">
+
+                    <!-- Top Unified Header Section -->
+                    <div style="text-align:center; padding-bottom:1.8rem; border-bottom:1.5px dashed #e2e8f0; margin-bottom:2rem;">
+                        <div
+                            style="display:inline-flex; align-items:center; gap:0.5rem; background:#ecfdf5; color:#047857; padding:0.4rem 1.1rem; border-radius:99px; font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:0.8rem;">
+                            âœ¨ EASY UMRAH PACKAGES
+                        </div>
+                        <h2
+                            style="font-size:2.2rem; font-weight:900; color:#0f172a; margin:0 0 0.5rem; letter-spacing:-0.5px;">
+                            Post Your Travel Requirement</h2>
+                        <p style="font-size:0.95rem; color:#64748b; margin:0 auto; max-width:620px; line-height:1.6;">
+                            Enter your travel dates, group size, and preferences. Verified travel agents will send you their best price offers!
+                        </p>
+                    </div>
+
+                    <form onsubmit="event.preventDefault(); app.submitRequirementForm();"
+                        style="display:flex; flex-direction:column; gap:1.5rem;">
+
+                        <!-- STEP 1: Travel & Accommodation -->
+                        <div class="form-step active" id="step1">
+                            <div style="display:flex; align-items:center; gap:0.8rem; border-bottom:1.5px dashed #e2e8f0; padding-bottom:1rem; margin-bottom:1.5rem;">
+                                <div
+                                    style="width:42px; height:42px; background:#dcfce7; color:#047857; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800;">
+                                    ðŸ“…</div>
+                                <div>
+                                    <h3 style="font-size:1.2rem; font-weight:800; color:#0f172a; margin:0;">1. Travel & Hotel Preferences</h3>
+                                    <p style="font-size:0.82rem; color:#64748b; margin:0.15rem 0 0 0;">Specify when and how you prefer to travel</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:1.4rem;">
+                                <label
+                                    style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:0.4rem; margin-bottom:0.6rem; font-size:0.92rem;">
+                                    ðŸ“… PREFERRED DEPARTURE DATE *
+                                </label>
+                                <input type="date" id="reqDateRange" class="form-control premium-input" required>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.4rem;">
+                                <div class="form-group">
+                                    <label
+                                        style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:0.4rem; margin-bottom:0.6rem; font-size:0.92rem;">
+                                        âœˆï¸ DEPARTURE CITY *
+                                    </label>
+                                    <input type="text" id="reqDepartureCity" class="form-control premium-input"
+                                        placeholder="e.g. Srinagar / Delhi / Mumbai" required>
+                                </div>
+                                <div class="form-group">
+                                    <label
+                                        style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:0.4rem; margin-bottom:0.6rem; font-size:0.92rem;">
+                                        ðŸ¨ HOTEL STAR CATEGORY *
+                                    </label>
+                                    <select id="reqHotelType" class="form-control premium-input" required>
+                                        <option value="" disabled selected>Select Hotel Class...</option>
+                                        <option value="5-Star Luxury (< 300m from Haram)">ðŸŒŸ 5-Star Luxury (&lt; 300m from Haram)</option>
+                                        <option value="4-Star Deluxe (< 600m from Haram)">â­ 4-Star Deluxe (&lt; 600m from Haram)</option>
+                                        <option value="3-Star Standard (< 900m from Haram)">ðŸ¨ 3-Star Standard (&lt; 900m from Haram)</option>
+                                        <option value="Economy / Budget Accommodation">ðŸª™ Economy / Budget Accommodation</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label
+                                    style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">â³ PACKAGE DURATION *</label>
+                                <select id="reqDuration" class="form-control premium-input" required>
+                                    <option value="" disabled selected>Select Package Duration...</option>
+                                    <option value="10">10 Days Short Tour</option>
+                                    <option value="14">14 Days Standard Sacred Journey</option>
+                                    <option value="18">18 Days Recommended Tour</option>
+                                    <option value="21">21 Days Extended Stay</option>
+                                    <option value="25">25 Days Full Sacred Journey</option>
+                                    <option value="28">28 Days Ramadan Special</option>
+                                    <option value="30">30 Days Full Month</option>
+                                </select>
+                            </div>
+
+                            <div style="display:flex; justify-content:flex-end; margin-top:1.8rem;">
+                                <button type="button" onclick="app.nextFormStep(2)"
+                                    style="background:#4f46e5; color:#ffffff; font-weight:700; font-size:0.95rem; padding:0.75rem 1.8rem; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(79, 70, 229, 0.3); transition:all 0.2s ease;">Next Step â†’</button>
+                            </div>
+                        </div>
+
+                        <!-- STEP 2: Contact & Group Size -->
+                        <div class="form-step" id="step2">
+                            <div style="display:flex; align-items:center; gap:0.8rem; border-bottom:1.5px dashed #e2e8f0; padding-bottom:1rem; margin-bottom:1.5rem;">
+                                <div
+                                    style="width:42px; height:42px; background:#dbeafe; color:#1d4ed8; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800;">
+                                    ðŸ“</div>
+                                <div>
+                                    <h3 style="font-size:1.2rem; font-weight:800; color:#0f172a; margin:0;">2. Contact & Group Details</h3>
+                                </div>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.4rem;">
+                                <div class="form-group">
+                                    <label
+                                        style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">STATE *</label>
+                                    <select id="reqState" class="form-control premium-input" required>
+                                        <option value="" disabled selected>Select State...</option>
+                                        <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                        <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                        <option value="Assam">Assam</option>
+                                        <option value="Bihar">Bihar</option>
+                                        <option value="Chandigarh">Chandigarh</option>
+                                        <option value="Chhattisgarh">Chhattisgarh</option>
+                                        <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                                        <option value="Delhi">Delhi</option>
+                                        <option value="Goa">Goa</option>
+                                        <option value="Gujarat">Gujarat</option>
+                                        <option value="Haryana">Haryana</option>
+                                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                        <option value="Jharkhand">Jharkhand</option>
+                                        <option value="Karnataka">Karnataka</option>
+                                        <option value="Kerala">Kerala</option>
+                                        <option value="Ladakh">Ladakh</option>
+                                        <option value="Lakshadweep">Lakshadweep</option>
+                                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                        <option value="Maharashtra">Maharashtra</option>
+                                        <option value="Manipur">Manipur</option>
+                                        <option value="Meghalaya">Meghalaya</option>
+                                        <option value="Mizoram">Mizoram</option>
+                                        <option value="Nagaland">Nagaland</option>
+                                        <option value="Odisha">Odisha</option>
+                                        <option value="Puducherry">Puducherry</option>
+                                        <option value="Punjab">Punjab</option>
+                                        <option value="Rajasthan">Rajasthan</option>
+                                        <option value="Sikkim">Sikkim</option>
+                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                        <option value="Telangana">Telangana</option>
+                                        <option value="Tripura">Tripura</option>
+                                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                        <option value="Uttarakhand">Uttarakhand</option>
+                                        <option value="West Bengal">West Bengal</option>
+                                        <option value="Other International / NRI">Other International / NRI</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label
+                                        style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">DISTRICT *</label>
+                                    <input type="text" id="reqDistrict" class="form-control premium-input"
+                                        placeholder="e.g. Srinagar" required>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom:2rem;">
+                                <label
+                                    style="font-weight:700; color:#0f172a; margin-bottom:0.6rem; font-size:0.92rem; display:block;">FULL STREET ADDRESS *</label>
+                                <input type="text" id="reqAddress" class="form-control premium-input"
+                                    placeholder="House/Flat No., Street, Area..." required>
+                            </div>
+
+                            <div
+                                style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:1.6rem;">
+                                <div class="form-group"
+                                    style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:14px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                                    <label
+                                        style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.88rem; display:block;">ðŸ‘¨
+                                        MALES *</label>
+                                    <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                                        <button type="button" onclick="app.adjustCounter('reqMales', -1)" style="width:36px; height:36px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">-</button>
+                                        <input type="number" id="reqMales" min="0" value="0" required readonly style="width:45px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
+                                        <button type="button" onclick="app.adjustCounter('reqMales', 1)" style="width:36px; height:36px; border-radius:8px; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
+                                    </div>
+                                </div>
+                                <div class="form-group"
+                                    style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:14px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                                    <label
+                                        style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.88rem; display:block;">ðŸ‘©
+                                        FEMALES *</label>
+                                    <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                                        <button type="button" onclick="app.adjustCounter('reqFemales', -1)" style="width:36px; height:36px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">-</button>
+                                        <input type="number" id="reqFemales" min="0" value="0" required readonly style="width:45px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
+                                        <button type="button" onclick="app.adjustCounter('reqFemales', 1)" style="width:36px; height:36px; border-radius:8px; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
+                                    </div>
+                                </div>
+                                <div class="form-group"
+                                    style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:14px; padding:1rem 0.6rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                                    <label
+                                        style="font-weight:800; color:#0f172a; margin-bottom:0.6rem; font-size:0.85rem; display:block;">ðŸ‘¶
+                                        CHILDREN (&lt; 5 YRS)</label>
+                                    <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                                        <button type="button" onclick="app.adjustCounter('reqChildren', -1)" style="width:36px; height:36px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">-</button>
+                                        <input type="number" id="reqChildren" min="0" value="0" readonly style="width:45px; text-align:center; font-size:1.15rem; font-weight:800; border:none; background:transparent;">
+                                        <button type="button" onclick="app.adjustCounter('reqChildren', 1)" style="width:36px; height:36px; border-radius:8px; border:1px solid #047857; background:#ecfdf5; color:#047857; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                style="background:linear-gradient(135deg, #ecfdf5 0%, #dcfce7 100%); border:1.5px solid #86efac; border-radius:14px; padding:0.9rem 1.4rem; display:flex; align-items:center; justify-content:space-between;">
+                                <div style="display:flex; align-items:center; gap:0.6rem;">
+                                    <span style="font-size:1.4rem;">ðŸ‘¥</span>
+                                    <span style="font-weight:800; color:#065f46; font-size:0.95rem;">Total Group Size</span>
+                                </div>
+                                <input type="text" id="totalTravelersBadge" readonly value="0"
+                                    style="border:2px solid #047857; border-radius:10px; padding:0.4rem 1rem; font-size:1.1rem; font-weight:800; color:#047857; width:110px; text-align:center; background:#ffffff; box-sizing:border-box;">
+                            </div>
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.8rem;">
+                                <button type="button"
+                                    style="background:#ffffff; color:#475569; border:1.5px solid #cbd5e1; border-radius:10px; font-weight:700; font-size:0.92rem; padding:0.75rem 1.6rem; cursor:pointer; transition:all 0.2s ease;"
+                                    onclick="app.prevFormStep(1)">â† Back</button>
+                                <button type="button"
+                                    style="background:#4f46e5; color:#ffffff; border-radius:10px; font-weight:700; font-size:0.95rem; padding:0.75rem 1.8rem; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(79,70,229,0.3); transition:all 0.2s ease;"
+                                    onclick="app.nextFormStep(3)">Next Step â†’</button>
+                            </div>
+                        </div>
+
+                        <!-- STEP 3: Notes -->
+                        <div class="form-step" id="step3">
+                            <div style="display:flex; align-items:center; gap:0.8rem; border-bottom:1.5px dashed #e2e8f0; padding-bottom:1rem; margin-bottom:1.2rem;">
+                                <div
+                                    style="width:42px; height:42px; background:#f3e8ff; color:#7e22ce; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800;">
+                                    ðŸ“</div>
+                                <div>
+                                    <h3 style="font-size:1.2rem; font-weight:800; color:#0f172a; margin:0;">3. Additional Preferences &amp; Requests</h3>
+                                </div>
+                            </div>
+                            <textarea id="reqNotes" class="form-control premium-input" rows="4"
+                                placeholder="e.g. Prefer direct flights, wheelchair assistance needed, vegetarian meals..."
+                                style="resize:vertical;"></textarea>
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.8rem;">
+                                <button type="button"
+                                    style="background:#ffffff; color:#475569; border:1.5px solid #cbd5e1; border-radius:10px; font-weight:700; font-size:0.92rem; padding:0.75rem 1.6rem; cursor:pointer; transition:all 0.2s ease;"
+                                    onclick="app.prevFormStep(2)">â† Back</button>
+                                <button type="submit"
+                                    style="background:#047857; color:#ffffff; border-radius:10px; font-weight:800; font-size:0.95rem; padding:0.75rem 2.2rem; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(4, 120, 87, 0.3); transition:all 0.2s ease;">ðŸš€ SUBMIT REQUEST</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modern & Aesthetic Liquid Glass Feedback Slider Section -->
+            <section class="liquid-glass-wrapper" id="liquidFeedbackSection">
+                <!-- Ambient Liquid Blobs for Glass refraction effect -->
+                <div class="liquid-blob-container">
+                    <div class="liquid-blob liquid-blob-1"></div>
+                    <div class="liquid-blob liquid-blob-2"></div>
+                    <div class="liquid-blob liquid-blob-3"></div>
+                </div>
+
+                <!-- Main Liquid Glass Card -->
+                <div class="liquid-glass-card">
+                    <!-- Default Form View -->
+                    <div id="liquidFeedbackFormView">
+                        <div style="text-align: center;">
+                            <div class="glass-eyebrow">
+                                âœ¨ ZAIREEN FEEDBACK & EXPERIENCE
+                            </div>
+                            <h2 class="glass-title">How was your requirement posting experience?</h2>
+                            <p class="glass-subtitle">
+                                Your rating helps us connect you with top-rated verified travel agents and improve your reverse bidding journey!
+                            </p>
+                        </div>
+
+                        <!-- Animated Emoji & Score Display -->
+                        <div class="liquid-rating-display">
+                            <div class="liquid-emoji-badge" id="liquidEmojiBadge">ðŸ¤©</div>
+                            <div class="rating-score-text" id="liquidScoreText">5.0 / 5.0 â€” Outstanding!</div>
+                            <div class="rating-desc-text" id="liquidDescText">We're thrilled! Verified agents are actively reviewing your requirement.</div>
+                        </div>
+
+                        <!-- Interactive Range Slider -->
+                        <div class="liquid-slider-wrapper">
+                            <input type="range" min="1" max="5" step="1" value="5" id="glassFeedbackRange" class="liquid-range-input" oninput="app.onFeedbackSliderChange(this.value)">
+                            <div class="liquid-slider-ticks">
+                                <div class="slider-tick-item" onclick="app.setFeedbackSliderValue(1)">
+                                    <div class="tick-dot"></div>
+                                    <span class="tick-label">1 - Poor</span>
+                                </div>
+                                <div class="slider-tick-item" onclick="app.setFeedbackSliderValue(2)">
+                                    <div class="tick-dot"></div>
+                                    <span class="tick-label">2 - Fair</span>
+                                </div>
+                                <div class="slider-tick-item" onclick="app.setFeedbackSliderValue(3)">
+                                    <div class="tick-dot"></div>
+                                    <span class="tick-label">3 - Good</span>
+                                </div>
+                                <div class="slider-tick-item" onclick="app.setFeedbackSliderValue(4)">
+                                    <div class="tick-dot"></div>
+                                    <span class="tick-label">4 - Great</span>
+                                </div>
+                                <div class="slider-tick-item active" onclick="app.setFeedbackSliderValue(5)">
+                                    <div class="tick-dot"></div>
+                                    <span class="tick-label">5 - Loved It!</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Feature Aspect Chips -->
+                        <div class="liquid-chips-section">
+                            <div class="chips-title">
+                                <span>ðŸ’¡ What did you like the most?</span>
+                                <span style="font-size:0.78rem; color:#94a3b8; font-weight:500;">(Select all that apply)</span>
+                            </div>
+                            <div class="chips-grid">
+                                <div class="liquid-chip selected" onclick="app.toggleFeedbackChip(this)">âš¡ Instant Reverse Bidding</div>
+                                <div class="liquid-chip selected" onclick="app.toggleFeedbackChip(this)">ðŸ’Ž Best Price Guarantee</div>
+                                <div class="liquid-chip" onclick="app.toggleFeedbackChip(this)">ðŸŽ¨ Clean & Simple Form</div>
+                                <div class="liquid-chip" onclick="app.toggleFeedbackChip(this)">ðŸ•Œ Tailored Umrah Offers</div>
+                                <div class="liquid-chip" onclick="app.toggleFeedbackChip(this)">ðŸ¤ Verified Travel Agents</div>
+                            </div>
+                        </div>
+
+                        <!-- Optional Feedback Note -->
+                        <textarea id="liquidFeedbackNote" class="liquid-comment-box" rows="3" placeholder="Share additional thoughts or suggestions to help us improve..."></textarea>
+
+                        <!-- Submit Button -->
+                        <button type="button" class="btn-liquid-glass" onclick="app.submitLiquidGlassFeedback()">
+                            <span>âœ¨ Submit Liquid Glass Feedback</span>
+                            <span style="font-size:1.2rem;">ðŸš€</span>
+                        </button>
+                    </div>
+
+                    <!-- Submitted Success View -->
+                    <div id="liquidFeedbackSuccessView" class="liquid-success-card">
+                        <div style="font-size: 4rem; margin-bottom: 1rem; animation: floatLiquidBlob 3s ease-in-out infinite alternate;">ðŸŽ‰</div>
+                        <h3 style="font-size: 1.8rem; font-weight: 800; color: #047857; margin-bottom: 0.5rem;">JazakAllah Khair for your Feedback!</h3>
+                        <p style="font-size: 1rem; color: #475569; max-width: 500px; margin: 0 auto 1.8rem auto; line-height: 1.6;">
+                            Your rating and preferences have been safely registered. Verified agents will be competing to give you the best Umrah package prices!
+                        </p>
+                        <button type="button" class="btn-liquid-glass" style="max-width: 280px; margin: 0 auto;" onclick="app.resetLiquidGlassFeedbackForm()">
+                            <span>ðŸ”„ Edit Rating</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
 
 
         <!-- Circular Live Noor AI Assistant Chatbot Widget (Spiritual Umrah Style Design) -->
@@ -269,7 +665,7 @@
             <!-- Live Floating Speech Bubble Tooltip -->
             <div class="robot-hello-badge" onclick="app.toggleChatbot()"
                 style="background:rgba(255, 255, 255, 0.96) !important; backdrop-filter:blur(10px) !important; color:#0f172a !important; font-weight:700 !important; font-size:0.82rem !important; padding:0.45rem 0.95rem !important; border-radius:20px !important; box-shadow:0 8px 22px rgba(0,0,0,0.12) !important; border:1.5px solid #a7f3d0 !important; margin-bottom:8px !important; display:flex !important; align-items:center !important; gap:0.45rem !important; cursor:pointer !important;">
-                <span style="font-size:0.92rem; color:#2b5e48;">✨</span>
+                <span style="font-size:0.92rem; color:#2b5e48;">âœ¨</span>
                 <span style="font-weight:800; color:#166534;">Noor AI</span>
                 <span style="width:7px; height:7px; background:#10b981; border-radius:50%; display:inline-block; box-shadow:0 0 0 3px rgba(16,185,129,0.35);"></span>
             </div>
@@ -277,7 +673,7 @@
             <!-- Modern Circular Spiritual Icon Avatar Button -->
             <button class="chatbot-circle-btn" onclick="app.toggleChatbot()" title="Open Noor AI Spiritual Assistant"
                 style="width:62px !important; height:62px !important; border-radius:50% !important; background:linear-gradient(135deg, #2b5e48 0%, #154332 100%) !important; color:#ffffff !important; border:2.5px solid rgba(255,255,255,0.9) !important; cursor:pointer !important; box-shadow:0 12px 30px rgba(43, 94, 72, 0.45), 0 0 18px rgba(16, 185, 129, 0.4) !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.8rem !important; position:relative !important; transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;">
-                <div style="transform:scale(1.05); filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🕌</div>
+                <div style="transform:scale(1.05); filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">ðŸ•Œ</div>
                 <span style="position:absolute; top:3px; right:3px; width:12px; height:12px; background:#10b981; border:2px solid white; border-radius:50%; box-shadow:0 0 6px rgba(16,185,129,0.8);"></span>
             </button>
 
@@ -287,14 +683,14 @@
                 <div class="chatbot-header"
                     style="background:linear-gradient(135deg, #2b5e48 0%, #154332 100%); color:#ffffff; padding:1.1rem 1.3rem; font-weight:700; font-size:0.95rem; display:flex; justify-content:space-between; align-items:center;">
                     <div style="display:flex; align-items:center; gap:0.6rem;">
-                        <span style="font-size:1.3rem; background:rgba(255,255,255,0.2); padding:0.3rem; border-radius:50%; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;">🕌</span>
+                        <span style="font-size:1.3rem; background:rgba(255,255,255,0.2); padding:0.3rem; border-radius:50%; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;">ðŸ•Œ</span>
                         <div>
                             <div style="font-weight:800; font-size:0.95rem; letter-spacing:0.3px;">Noor AI Spiritual Guide</div>
-                            <div style="font-size:0.72rem; color:#a7f3d0; font-weight:500;">Powered by Spiritual Umrah AI 🟢 Online</div>
+                            <div style="font-size:0.72rem; color:#a7f3d0; font-weight:500;">Powered by Spiritual Umrah AI ðŸŸ¢ Online</div>
                         </div>
                     </div>
                     <button onclick="app.toggleChatbot()"
-                        style="background:rgba(255,255,255,0.2); border:none; color:white; cursor:pointer; font-size:1rem; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;">✕</button>
+                        style="background:rgba(255,255,255,0.2); border:none; color:white; cursor:pointer; font-size:1rem; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;">âœ•</button>
                 </div>
                 <div class="chatbot-messages" id="chatbotMessages"
                     style="flex:1; padding:1rem; overflow-y:auto; display:flex; flex-direction:column; gap:0.8rem; background:#f8fafc;">
@@ -307,27 +703,27 @@
                         style="display:flex; flex-direction:column; gap:0.45rem; margin-top:0.2rem;">
                         <button onclick="app.handleChatIssue('How to submit a travel request?')"
                             style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.55rem 0.85rem; border-radius:10px; font-size:0.81rem; font-weight:600; text-align:left; cursor:pointer;">
-                            📝 How to submit a travel request?
+                            ðŸ“ How to submit a travel request?
                         </button>
                         <button onclick="app.handleChatIssue('How do agent offers work?')"
                             style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.55rem 0.85rem; border-radius:10px; font-size:0.81rem; font-weight:600; text-align:left; cursor:pointer;">
-                            🎁 How do agent offers work?
+                            ðŸŽ How do agent offers work?
                         </button>
                         <button onclick="app.handleChatIssue('What are the rules for Umrah & Ihram?')"
                             style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.55rem 0.85rem; border-radius:10px; font-size:0.81rem; font-weight:600; text-align:left; cursor:pointer;">
-                            🕋 Umrah & Ihram rules guide
+                            ðŸ•‹ Umrah & Ihram rules guide
                         </button>
                         <button onclick="app.handleChatIssue('How to get Nusuk Rawdah permit?')"
                             style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.55rem 0.85rem; border-radius:10px; font-size:0.81rem; font-weight:600; text-align:left; cursor:pointer;">
-                            📜 How to get Nusuk Rawdah permit?
+                            ðŸ“œ How to get Nusuk Rawdah permit?
                         </button>
                         <button onclick="app.handleChatIssue('How to cancel my travel request?')"
                             style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.55rem 0.85rem; border-radius:10px; font-size:0.81rem; font-weight:600; text-align:left; cursor:pointer;">
-                            ❌ How to cancel my travel request?
+                            âŒ How to cancel my travel request?
                         </button>
                         <button onclick="app.handleChatIssue('How to contact 24/7 Support?')"
                             style="background:#f0fdf4; color:#047857; border:1px solid #bbf7d0; padding:0.55rem 0.85rem; border-radius:10px; font-size:0.81rem; font-weight:600; text-align:left; cursor:pointer;">
-                            📞 Contact 24/7 Customer Support
+                            ðŸ“ž Contact 24/7 Customer Support
                         </button>
                     </div>
                 </div>
@@ -345,7 +741,7 @@
         <!-- Dynamic Modal Backdrop Container -->
         <div class="modal-backdrop" id="modalBackdrop">
             <div class="modal-card" id="modalCard">
-                <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+                <button class="modal-close-btn" onclick="app.closeModal()">âœ•</button>
                 <div class="modal-content" id="modalContent"></div>
             </div>
         </div>
@@ -581,7 +977,7 @@
     <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;" onchange="app.handleProfilePhotoUpload(event)">
 
     <!-- Application Script Logic -->
-    <script src="app.js?v=20260813_v3" defer></script>
+    <script src="app.js?v=20260806_v32" defer></script>
 </body>
 
 </html>
