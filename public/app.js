@@ -3104,6 +3104,10 @@ class App {
                 </div>
             </main>`;
 
+        } else if (activeTab === 'packageDetails') {
+            panel = this.renderPackageDetailsTab(this.state.activeOfferId);
+        } else if (activeTab === 'paymentScreen') {
+            panel = this.renderPaymentScreenTab(this.state.activeOfferId);
         } else {
             panel = `<main style="flex:1;min-width:0;"><div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:2.2rem;text-align:center;"><p style="color:#6b7280;">This section is under maintenance.</p></div></main>`;
         }
@@ -3118,11 +3122,699 @@ class App {
         </div>`;
     }
 
+    openOfferReviewModal(offerId) {
+        this.closeModal();
+        this.state.activeOfferId = offerId;
+        this.state.currentPage = 'dashboard';
+        this.setDashboardTab('packageDetails');
+    }
 
-    getAllOffers() {
-        const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-        const apiOffers = this.state.userOffers || [];
-        return [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
+    openOfferPaymentModal(offerId) {
+        this.closeModal();
+        this.state.activeOfferId = offerId;
+        this.state.currentPage = 'dashboard';
+        this.setDashboardTab('paymentScreen');
+    }
+
+    toggleUpiQrCode() {
+        this.state.showUpiQrCode = !this.state.showUpiQrCode;
+        const main = document.getElementById('mainContainer');
+        if (main) main.innerHTML = this.renderDashboardPage();
+    }
+
+    switchPaymentMethodTab(method) {
+        this.state.selectedPaymentMethod = method;
+        if (method !== 'upi') {
+            this.state.showUpiQrCode = false;
+        }
+        const main = document.getElementById('mainContainer');
+        if (main) main.innerHTML = this.renderDashboardPage();
+    }
+
+    renderPackageDetailsTab(offerId) {
+        const allOffers = this.getAllOffers();
+        const offer = allOffers.find(o => o.id === offerId) || {
+            id: offerId || 'OFF-1024',
+            packageTitle: 'Umrah Package - Economy',
+            agentName: 'AL-HARAM PREMIUM TRAVELS',
+            discountedPrice: 78500,
+            originalPrice: 86900,
+            discountPercentage: 10,
+            makkahHotel: 'Anjum Hotel Makkah',
+            madinahHotel: 'Durrat Al Eiman Hotel',
+            departureDate: '15 Oct 2026',
+            returnDate: '24 Oct 2026',
+            departureCity: 'Lucknow (LKO)',
+            destinationCity: 'Jeddah (JED)',
+            durationDays: 10,
+            requirementId: '1024'
+        };
+
+        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        const apiReqs = this.state.myRequirements || [];
+        const req = [...apiReqs, ...localReqs].find(r => r.id === offer.requirementId);
+        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 2;
+        const perPersonPrice = offer.discountedPrice || offer.price || 78500;
+        const totalDiscountedPrice = perPersonPrice * travelersCount;
+
+        const user = this.state.currentUser || { name: 'Tawseef Ahmad', phone: '+91 98765 43210', email: 'tawseefahmad@gmail.com' };
+
+        return `
+        <main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.4rem;">
+            <!-- Header Bar matching Image 1 -->
+            <div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:1.1rem 1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                <div style="display:flex;align-items:center;gap:1.2rem;">
+                    <button onclick="app.setDashboardTab('dashboard')" style="background:#ffffff;color:#0f172a;border:1px solid #cbd5e1;border-radius:8px;padding:0.45rem 0.9rem;font-weight:700;font-size:0.84rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;">
+                        ← Back to Offers
+                    </button>
+                    <div>
+                        <h1 style="font-size:1.3rem;font-weight:800;color:#0f172a;margin:0;line-height:1.2;">Review Package Details</h1>
+                        <div style="font-size:0.8rem;color:#64748b;margin-top:0.15rem;">Please review all package details carefully before proceeding to payment.</div>
+                    </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:1.1rem;">
+                    <div style="width:36px;height:36px;background:#f1f5f9;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
+                        <span style="font-size:1rem;">🔔</span>
+                        <span style="position:absolute;top:-2px;right:-2px;background:#047857;color:#fff;font-size:0.65rem;font-weight:800;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;">2</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:0.6rem;background:#f8fafc;padding:0.35rem 0.8rem;border-radius:99px;border:1px solid #e2e8f0;">
+                        <div style="width:30px;height:30px;border-radius:50%;background:#047857;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">T</div>
+                        <div>
+                            <div style="font-size:0.82rem;font-weight:800;color:#0f172a;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                            <div style="font-size:0.68rem;color:#64748b;">Customer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2 Column Content Layout -->
+            <div style="display:grid;grid-template-columns:1fr 340px;gap:1.4rem;align-items:start;">
+                
+                <!-- Left Details Column -->
+                <div style="display:flex;flex-direction:column;gap:1.4rem;">
+
+                    <!-- Main Package Summary Banner Card -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);display:flex;justify-content:space-between;align-items:center;gap:1.2rem;flex-wrap:wrap;">
+                        <div style="display:flex;gap:1.2rem;align-items:center;">
+                            <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=180&q=80" alt="Kaaba" style="width:96px;height:96px;border-radius:12px;object-fit:cover;">
+                            <div>
+                                <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem;">
+                                    <h3 style="font-size:1.25rem;font-weight:800;color:#0f172a;margin:0;">${this.escapeHtml(offer.packageTitle)}</h3>
+                                    <span style="background:#ecfdf5;color:#047857;font-size:0.75rem;font-weight:800;padding:0.2rem 0.65rem;border-radius:99px;">${offer.durationDays || 10} Days</span>
+                                </div>
+                                <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.65rem;">REQ-${offer.requirementId || '1024'} • ${travelersCount} Adults, 0 Children</div>
+                                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                                    <span style="background:#f1f5f9;color:#047857;font-size:0.75rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;">✈ Flights Included</span>
+                                    <span style="background:#f1f5f9;color:#047857;font-size:0.75rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;">✓ Visa Included</span>
+                                    <span style="background:#f1f5f9;color:#047857;font-size:0.75rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;">🚍 Transport Included</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:0.72rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Total Package Price</div>
+                            <div style="font-size:1.8rem;font-weight:900;color:#0f172a;line-height:1.1;margin-top:0.2rem;">${this.formatCurrency(totalDiscountedPrice)}</div>
+                            <div style="font-size:0.78rem;color:#64748b;margin-top:0.2rem;">Per Person (${this.formatCurrency(perPersonPrice)})</div>
+                        </div>
+                    </div>
+
+                    <!-- Journey Overview -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h4 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 0.3rem;">Journey Overview</h4>
+                        <p style="font-size:0.82rem;color:#64748b;margin:0 0 1.1rem;">A comfortable and spiritual journey to the holy cities with carefully selected services.</p>
+                        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:1rem;">
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1rem;display:flex;align-items:center;gap:0.85rem;">
+                                <div style="font-size:1.4rem;background:#ffffff;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.04);">📅</div>
+                                <div>
+                                    <div style="font-size:0.68rem;color:#64748b;font-weight:800;text-transform:uppercase;">DEPARTURE</div>
+                                    <div style="font-size:0.92rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">15 Oct 2026</div>
+                                    <div style="font-size:0.75rem;color:#64748b;">Lucknow (LKO)</div>
+                                </div>
+                            </div>
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1rem;display:flex;align-items:center;gap:0.85rem;">
+                                <div style="font-size:1.4rem;background:#ffffff;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.04);">✈️</div>
+                                <div>
+                                    <div style="font-size:0.68rem;color:#64748b;font-weight:800;text-transform:uppercase;">RETURN</div>
+                                    <div style="font-size:0.92rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">24 Oct 2026</div>
+                                    <div style="font-size:0.75rem;color:#64748b;">Jeddah (JED)</div>
+                                </div>
+                            </div>
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1rem;display:flex;align-items:center;gap:0.85rem;">
+                                <div style="font-size:1.4rem;background:#ffffff;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.04);">⏱️</div>
+                                <div>
+                                    <div style="font-size:0.68rem;color:#64748b;font-weight:800;text-transform:uppercase;">DURATION</div>
+                                    <div style="font-size:0.92rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">10 Days / 9 Nights</div>
+                                    <div style="font-size:0.75rem;color:#64748b;">Total Trip Duration</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Package Inclusions -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h4 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 1rem;">Package Inclusions</h4>
+                        <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:1rem;font-size:0.82rem;color:#334155;">
+                            <div><strong style="color:#047857;">✓ Return Flights</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">Lucknow to Jeddah &amp; Return</div></div>
+                            <div><strong style="color:#047857;">✓ Visa</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">Umrah Visa Included</div></div>
+                            <div><strong style="color:#047857;">✓ Transport</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">All Local Transfers</div></div>
+                            <div><strong style="color:#047857;">✓ Accommodation</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">9 Nights Stay in Makkah &amp; Madinah</div></div>
+                            <div><strong style="color:#047857;">✓ Meals</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">Breakfast, Lunch &amp; Dinner</div></div>
+                            <div><strong style="color:#047857;">✓ Ziyarat</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">Makkah &amp; Madinah Ziyarat</div></div>
+                            <div><strong style="color:#047857;">✓ Travel Insurance</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">Coverage Included</div></div>
+                        </div>
+                    </div>
+
+                    <!-- Accommodation Details -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h4 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 1.1rem;">Accommodation Details</h4>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
+                            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:1rem;display:flex;gap:1rem;align-items:center;">
+                                <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=150&q=80" alt="Makkah Hotel" style="width:76px;height:76px;border-radius:10px;object-fit:cover;">
+                                <div>
+                                    <div style="font-size:0.72rem;color:#64748b;font-weight:700;">Makkah Hotel</div>
+                                    <div style="font-size:0.95rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">${this.escapeHtml(offer.makkahHotel || 'Anjum Hotel Makkah')}</div>
+                                    <div style="font-size:0.75rem;color:#047857;font-weight:700;margin-top:0.15rem;">4 ★ • 4 Nights</div>
+                                    <div style="font-size:0.72rem;color:#64748b;margin-top:0.2rem;">📍 Distance from Haram: 650m • Room Type: Standard Room</div>
+                                </div>
+                            </div>
+                            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:1rem;display:flex;gap:1rem;align-items:center;">
+                                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=150&q=80" alt="Madinah Hotel" style="width:76px;height:76px;border-radius:10px;object-fit:cover;">
+                                <div>
+                                    <div style="font-size:0.72rem;color:#64748b;font-weight:700;">Madinah Hotel</div>
+                                    <div style="font-size:0.95rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">${this.escapeHtml(offer.madinahHotel || 'Durrat Al Eiman Hotel')}</div>
+                                    <div style="font-size:0.75rem;color:#047857;font-weight:700;margin-top:0.15rem;">4 ★ • 5 Nights</div>
+                                    <div style="font-size:0.72rem;color:#64748b;margin-top:0.2rem;">📍 Distance from Haram: 300m • Room Type: Standard Room</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Itinerary Highlights Timeline -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h4 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 1.2rem;">Itinerary Highlights</h4>
+                        <div style="display:flex;justify-content:space-between;align-items:center;text-align:center;position:relative;">
+                            <div>
+                                <div style="width:42px;height:42px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.4rem;font-size:1.1rem;">✈️</div>
+                                <div style="font-size:0.72rem;color:#64748b;">15 Oct 2026</div>
+                                <div style="font-size:0.85rem;font-weight:800;color:#0f172a;">Departure</div>
+                                <div style="font-size:0.7rem;color:#64748b;">Lucknow (LKO)</div>
+                            </div>
+                            <div style="color:#cbd5e1;font-size:1.2rem;">→</div>
+                            <div>
+                                <div style="width:42px;height:42px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.4rem;font-size:1.1rem;">🛬</div>
+                                <div style="font-size:0.72rem;color:#64748b;">15 Oct 2026</div>
+                                <div style="font-size:0.85rem;font-weight:800;color:#0f172a;">Arrive Jeddah</div>
+                                <div style="font-size:0.7rem;color:#64748b;">Transfer to Makkah</div>
+                            </div>
+                            <div style="color:#cbd5e1;font-size:1.2rem;">→</div>
+                            <div>
+                                <div style="width:42px;height:42px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.4rem;font-size:1.1rem;">🕋</div>
+                                <div style="font-size:0.72rem;color:#64748b;">4 Nights</div>
+                                <div style="font-size:0.85rem;font-weight:800;color:#0f172a;">Stay in Makkah</div>
+                                <div style="font-size:0.7rem;color:#64748b;">Ziyarat &amp; Worship</div>
+                            </div>
+                            <div style="color:#cbd5e1;font-size:1.2rem;">→</div>
+                            <div>
+                                <div style="width:42px;height:42px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.4rem;font-size:1.1rem;">🕌</div>
+                                <div style="font-size:0.72rem;color:#64748b;">5 Nights</div>
+                                <div style="font-size:0.85rem;font-weight:800;color:#0f172a;">Stay in Madinah</div>
+                                <div style="font-size:0.7rem;color:#64748b;">Ziyarat &amp; Worship</div>
+                            </div>
+                            <div style="color:#cbd5e1;font-size:1.2rem;">→</div>
+                            <div>
+                                <div style="width:42px;height:42px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.4rem;font-size:1.1rem;">🛫</div>
+                                <div style="font-size:0.72rem;color:#64748b;">24 Oct 2026</div>
+                                <div style="font-size:0.85rem;font-weight:800;color:#0f172a;">Return Flight</div>
+                                <div style="font-size:0.7rem;color:#64748b;">Jeddah (JED)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Privacy Protection Banner -->
+                    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:0.85rem 1.1rem;display:flex;align-items:center;gap:0.8rem;">
+                        <span style="font-size:1.2rem;color:#047857;">🛡️</span>
+                        <div style="font-size:0.78rem;color:#166534;line-height:1.4;">
+                            Your personal contact details are protected. They will never be shared with any agent or provider.
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column Sidebar -->
+                <div style="display:flex;flex-direction:column;gap:1.2rem;position:sticky;top:98px;">
+                    <!-- Price Summary Box -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h4 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 1.1rem;">Price Summary</h4>
+                        <div style="display:flex;flex-direction:column;gap:0.75rem;font-size:0.88rem;color:#475569;">
+                            <div style="display:flex;justify-content:space-between;">
+                                <span>Package Price (Per Person)</span>
+                                <span style="font-weight:700;color:#0f172a;">${this.formatCurrency(perPersonPrice)}</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;">
+                                <span>Taxes &amp; Fees</span>
+                                <span style="font-weight:700;color:#0f172a;">₹3,200</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;">
+                                <span>Visa Charges</span>
+                                <span style="font-weight:700;color:#0f172a;">₹2,000</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;">
+                                <span>Travel Insurance</span>
+                                <span style="font-weight:700;color:#0f172a;">₹1,200</span>
+                            </div>
+                            <div style="border-top:1px dashed #cbd5e1;margin:0.3rem 0;"></div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:1.05rem;font-weight:800;color:#0f172a;">Total Amount</span>
+                                <span style="font-size:1.6rem;font-weight:900;color:#047857;">${this.formatCurrency(totalDiscountedPrice)}</span>
+                            </div>
+                            <div style="font-size:0.72rem;color:#64748b;text-align:right;">All amounts are in INR</div>
+                        </div>
+                    </div>
+
+                    <!-- Travel Details Box -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.2rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;">
+                            <h5 style="font-size:0.9rem;font-weight:800;color:#0f172a;margin:0;">Travel Details</h5>
+                            <a href="javascript:void(0)" style="font-size:0.75rem;font-weight:700;color:#047857;text-decoration:none;">View Details</a>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:0.7rem;font-size:0.8rem;color:#475569;">
+                            <div style="background:#f8fafc;padding:0.65rem 0.8rem;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
+                                <div>
+                                    <div style="font-size:0.68rem;color:#64748b;font-weight:700;text-transform:uppercase;">Departure</div>
+                                    <div style="font-size:0.84rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">15 Oct 2026, 04:55 AM</div>
+                                </div>
+                                <div style="font-size:0.75rem;font-weight:700;color:#64748b;">LKO → JED</div>
+                            </div>
+                            <div style="background:#f8fafc;padding:0.65rem 0.8rem;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
+                                <div>
+                                    <div style="font-size:0.68rem;color:#64748b;font-weight:700;text-transform:uppercase;">Return</div>
+                                    <div style="font-size:0.84rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">24 Oct 2026, 02:30 PM</div>
+                                </div>
+                                <div style="font-size:0.75rem;font-weight:700;color:#64748b;">JED → LKO</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Important Notes Box -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.2rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h5 style="font-size:0.9rem;font-weight:800;color:#0f172a;margin:0 0 0.8rem;">Important Notes</h5>
+                        <div style="display:flex;flex-direction:column;gap:0.55rem;font-size:0.78rem;color:#475569;">
+                            <div style="display:flex;align-items:center;gap:0.45rem;"><span style="color:#047857;">✓</span> <span>Passport must be valid for 6+ months</span></div>
+                            <div style="display:flex;align-items:center;gap:0.45rem;"><span style="color:#047857;">✓</span> <span>COVID-19 vaccination certificate required</span></div>
+                            <div style="display:flex;align-items:center;gap:0.45rem;"><span style="color:#047857;">✓</span> <span>Package is non-refundable after confirmation</span></div>
+                            <div style="display:flex;align-items:center;gap:0.45rem;"><span style="color:#047857;">✓</span> <span>Standard cancellation policies apply</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Terms & CTA -->
+                    <div style="display:flex;flex-direction:column;gap:0.9rem;">
+                        <label style="display:flex;align-items:center;gap:0.55rem;font-size:0.8rem;color:#475569;cursor:pointer;">
+                            <input type="checkbox" checked style="accent-color:#047857;width:15px;height:15px;">
+                            <span>I have read and agree to the <a href="javascript:void(0)" style="color:#047857;font-weight:700;">Terms &amp; Conditions</a></span>
+                        </label>
+
+                        <button onclick="app.state.activeOfferId='${offer.id}';app.setDashboardTab('paymentScreen');" style="width:100%;background:#047857;color:#ffffff;border:none;border-radius:10px;padding:0.95rem;font-size:1rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;box-shadow:0 4px 16px rgba(4,120,87,0.25);transition:all 0.2s;" onmouseover="this.style.background='#065f46';" onmouseout="this.style.background='#047857';">
+                            <span>🔒</span> <span>Proceed to Payment</span>
+                        </button>
+
+                        <div style="font-size:0.75rem;color:#64748b;text-align:center;display:flex;align-items:center;justify-content:center;gap:0.35rem;">
+                            <span>✓</span> 100% Secure &amp; Encrypted
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+        `;
+    }
+
+    renderPaymentScreenTab(offerId) {
+        const allOffers = this.getAllOffers();
+        const offer = allOffers.find(o => o.id === offerId) || {
+            id: offerId || 'OFF-1024',
+            packageTitle: 'Umrah Package - Economy',
+            discountedPrice: 78500,
+            originalPrice: 86900,
+            agentName: 'Zilhaj.com Verified Agency',
+            requirementId: '1024'
+        };
+
+        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        const apiReqs = this.state.myRequirements || [];
+        const req = [...apiReqs, ...localReqs].find(r => r.id === offer.requirementId);
+        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 2;
+        const perPersonPrice = offer.discountedPrice || offer.price || 78500;
+        const totalDiscountedPrice = perPersonPrice * travelersCount;
+
+        const user = this.state.currentUser || { name: 'Tawseef Ahmad', phone: '+91 98765 43210', email: 'tawseefahmad@gmail.com' };
+        const totalAmountFormatted = this.formatCurrency(totalDiscountedPrice);
+
+        const currentPaymentMethod = this.state.selectedPaymentMethod || 'upi';
+        const showQr = !!this.state.showUpiQrCode;
+
+        return `
+        <main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.4rem;">
+            
+            <!-- Header Bar matching Image 2 -->
+            <div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:1.1rem 1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                <div style="display:flex;align-items:center;gap:1.2rem;">
+                    <button onclick="app.setDashboardTab('packageDetails')" style="background:#ffffff;color:#0f172a;border:1px solid #cbd5e1;border-radius:8px;padding:0.45rem 0.9rem;font-weight:700;font-size:0.84rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;">
+                        ← Back to Review Package
+                    </button>
+                    <div>
+                        <div style="display:flex;align-items:center;gap:0.4rem;">
+                            <h1 style="font-size:1.3rem;font-weight:800;color:#0f172a;margin:0;line-height:1.2;">Secure Payment</h1>
+                            <span style="color:#047857;font-size:1.1rem;">🛡️</span>
+                        </div>
+                        <div style="font-size:0.8rem;color:#64748b;margin-top:0.15rem;">Your payment information is safe with us. Complete your payment to confirm your booking.</div>
+                    </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:1.1rem;">
+                    <div style="width:36px;height:36px;background:#f1f5f9;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
+                        <span style="font-size:1rem;">🔔</span>
+                        <span style="position:absolute;top:-2px;right:-2px;background:#047857;color:#fff;font-size:0.65rem;font-weight:800;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;">2</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:0.6rem;background:#f8fafc;padding:0.35rem 0.8rem;border-radius:99px;border:1px solid #e2e8f0;">
+                        <div style="width:30px;height:30px;border-radius:50%;background:#047857;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">T</div>
+                        <div>
+                            <div style="font-size:0.82rem;font-weight:800;color:#0f172a;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                            <div style="font-size:0.68rem;color:#64748b;">Customer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Security Banner -->
+            <div style="background:linear-gradient(135deg, #047857 0%, #065f46 100%);color:#ffffff;padding:0.85rem 1.4rem;border-radius:14px;display:flex;justify-content:space-between;align-items:center;font-size:0.88rem;font-weight:700;">
+                <div style="display:flex;align-items:center;gap:0.6rem;">
+                    <span style="font-size:1.1rem;">🛡️</span>
+                    <span>100% Secure Payment • All transactions are encrypted and protected</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.18);backdrop-filter:blur(8px);padding:0.25rem 0.8rem;border-radius:6px;font-size:0.75rem;">
+                    PCI DSS Compliant
+                </div>
+            </div>
+
+            <!-- Main Content 2 Column Grid -->
+            <div style="display:grid;grid-template-columns:1fr 340px;gap:1.4rem;align-items:start;">
+                
+                <!-- Left Form Column -->
+                <div style="display:flex;flex-direction:column;gap:1.4rem;">
+
+                    <!-- SECTION 1: CHOOSE PAYMENT METHOD -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1.2rem;">
+                            <div style="width:24px;height:24px;background:#047857;color:#fff;border-radius:50%;font-weight:800;font-size:0.8rem;display:flex;align-items:center;justify-content:center;">1</div>
+                            <h4 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0;">Choose Payment Method</h4>
+                        </div>
+
+                        <div style="display:grid;grid-template-columns:220px 1fr;gap:1.4rem;min-height:280px;">
+                            
+                            <!-- Left Vertical Tabs -->
+                            <div style="display:flex;flex-direction:column;gap:0.5rem;border-right:1px solid #f1f5f9;padding-right:1.1rem;">
+                                <button type="button" onclick="app.switchPaymentMethodTab('upi')" style="text-align:left;padding:0.8rem 0.9rem;border-radius:10px;border:${currentPaymentMethod==='upi'?'1.5px solid #047857':'1px solid #e2e8f0'};background:${currentPaymentMethod==='upi'?'#f0fdf4':'#ffffff'};cursor:pointer;transition:all 0.2s;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                                        <div style="font-size:0.88rem;font-weight:800;color:${currentPaymentMethod==='upi'?'#047857':'#0f172a'};">📱 UPI</div>
+                                        <span style="background:#047857;color:#fff;font-size:0.6rem;font-weight:800;padding:0.1rem 0.4rem;border-radius:4px;">Recommended</span>
+                                    </div>
+                                    <div style="font-size:0.7rem;color:#64748b;margin-top:0.2rem;">GPay, PhonePe, Paytm, QR</div>
+                                </button>
+
+                                <button type="button" onclick="app.switchPaymentMethodTab('card')" style="text-align:left;padding:0.8rem 0.9rem;border-radius:10px;border:${currentPaymentMethod==='card'?'1.5px solid #047857':'1px solid #e2e8f0'};background:${currentPaymentMethod==='card'?'#f0fdf4':'#ffffff'};cursor:pointer;transition:all 0.2s;">
+                                    <div style="font-size:0.88rem;font-weight:800;color:${currentPaymentMethod==='card'?'#047857':'#0f172a'};">💳 Debit / Credit Cards</div>
+                                    <div style="font-size:0.7rem;color:#64748b;margin-top:0.2rem;">Visa, MasterCard, RuPay</div>
+                                </button>
+
+                                <button type="button" onclick="app.switchPaymentMethodTab('net')" style="text-align:left;padding:0.8rem 0.9rem;border-radius:10px;border:${currentPaymentMethod==='net'?'1.5px solid #047857':'1px solid #e2e8f0'};background:${currentPaymentMethod==='net'?'#f0fdf4':'#ffffff'};cursor:pointer;transition:all 0.2s;">
+                                    <div style="font-size:0.88rem;font-weight:800;color:${currentPaymentMethod==='net'?'#047857':'#0f172a'};">🏦 Net Banking</div>
+                                    <div style="font-size:0.7rem;color:#64748b;margin-top:0.2rem;">All Major Indian Banks</div>
+                                </button>
+
+                                <button type="button" onclick="app.switchPaymentMethodTab('wallet')" style="text-align:left;padding:0.8rem 0.9rem;border-radius:10px;border:${currentPaymentMethod==='wallet'?'1.5px solid #047857':'1px solid #e2e8f0'};background:${currentPaymentMethod==='wallet'?'#f0fdf4':'#ffffff'};cursor:pointer;transition:all 0.2s;">
+                                    <div style="font-size:0.88rem;font-weight:800;color:${currentPaymentMethod==='wallet'?'#047857':'#0f172a'};">👛 Wallets</div>
+                                    <div style="font-size:0.7rem;color:#64748b;margin-top:0.2rem;">Paytm, PhonePe, Amazon Pay</div>
+                                </button>
+
+                                <button type="button" onclick="app.switchPaymentMethodTab('paylater')" style="text-align:left;padding:0.8rem 0.9rem;border-radius:10px;border:${currentPaymentMethod==='paylater'?'1.5px solid #047857':'1px solid #e2e8f0'};background:${currentPaymentMethod==='paylater'?'#f0fdf4':'#ffffff'};cursor:pointer;transition:all 0.2s;">
+                                    <div style="font-size:0.88rem;font-weight:800;color:${currentPaymentMethod==='paylater'?'#047857':'#0f172a'};">💵 Pay Later</div>
+                                    <div style="font-size:0.7rem;color:#64748b;margin-top:0.2rem;">Pay in easier installments</div>
+                                </button>
+                            </div>
+
+                            <!-- Right Dynamic Panel -->
+                            <div style="display:flex;flex-direction:column;justify-content:center;">
+                                ${currentPaymentMethod === 'upi' ? `
+                                    <div style="display:flex;flex-direction:column;gap:1rem;align-items:center;text-align:center;">
+                                        <div style="font-size:0.92rem;font-weight:800;color:#0f172a;">Pay using UPI</div>
+                                        <div style="font-size:0.78rem;color:#64748b;">Scan any QR code using your UPI app</div>
+
+                                        <!-- Supported UPI Apps Icons -->
+                                        <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;">
+                                            <span style="background:#f1f5f9;border:1px solid #cbd5e1;padding:0.3rem 0.65rem;border-radius:6px;font-size:0.76rem;font-weight:800;color:#4285f4;">GPay</span>
+                                            <span style="background:#f1f5f9;border:1px solid #cbd5e1;padding:0.3rem 0.65rem;border-radius:6px;font-size:0.76rem;font-weight:800;color:#5f259f;">PhonePe</span>
+                                            <span style="background:#f1f5f9;border:1px solid #cbd5e1;padding:0.3rem 0.65rem;border-radius:6px;font-size:0.76rem;font-weight:800;color:#00baf2;">Paytm</span>
+                                            <span style="background:#f1f5f9;border:1px solid #cbd5e1;padding:0.3rem 0.65rem;border-radius:6px;font-size:0.76rem;font-weight:800;color:#047857;">BHIM</span>
+                                            <span style="background:#f1f5f9;border:1px solid #cbd5e1;padding:0.3rem 0.65rem;border-radius:6px;font-size:0.76rem;font-weight:800;color:#ff9900;">Amazon Pay</span>
+                                            <span style="background:#f1f5f9;border:1px solid #cbd5e1;padding:0.3rem 0.65rem;border-radius:6px;font-size:0.76rem;font-weight:800;color:#475569;">Other UPI</span>
+                                        </div>
+
+                                        <div style="font-size:0.75rem;color:#94a3b8;margin:0.2rem 0;">── or scan this QR code ──</div>
+
+                                        ${showQr ? `
+                                            <!-- QR Code Shown -->
+                                            <div style="border:2px solid #047857;border-radius:14px;padding:0.8rem;background:#ffffff;display:inline-block;box-shadow:0 4px 14px rgba(4,120,87,0.12);">
+                                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=tawseef@okaxis%26pn=Zilhaj%26am=${totalDiscountedPrice}" alt="UPI QR Code" style="width:150px;height:150px;display:block;">
+                                            </div>
+                                            <div style="font-size:0.82rem;color:#475569;">
+                                                UPI ID: <strong style="color:#0f172a;">tawseef@okaxis</strong>
+                                            </div>
+                                            <button type="button" onclick="app.toggleUpiQrCode()" style="background:#f8fafc;color:#475569;border:1px solid #cbd5e1;border-radius:8px;padding:0.45rem 1rem;font-weight:700;font-size:0.8rem;cursor:pointer;">
+                                                Hide QR Code 📷
+                                            </button>
+                                        ` : `
+                                            <!-- Normal Option: Show QR Code Button -->
+                                            <button type="button" onclick="app.toggleUpiQrCode()" style="background:#047857;color:#ffffff;border:none;border-radius:8px;padding:0.6rem 1.4rem;font-weight:800;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;box-shadow:0 3px 10px rgba(4,120,87,0.2);">
+                                                <span>📷</span> <span>Show QR Code</span>
+                                            </button>
+                                        `}
+
+                                        <div style="font-size:0.75rem;color:#64748b;margin-top:0.3rem;">
+                                            ⓘ You will be able to review the payment on the next step.
+                                        </div>
+                                    </div>
+                                ` : currentPaymentMethod === 'card' ? `
+                                    <div style="display:flex;flex-direction:column;gap:0.9rem;">
+                                        <div style="font-size:0.9rem;font-weight:800;color:#0f172a;">Enter Card Details</div>
+                                        <div>
+                                            <label style="font-size:0.75rem;font-weight:700;color:#475569;display:block;margin-bottom:0.25rem;">Card Number</label>
+                                            <input type="text" placeholder="4532 •••• •••• 8921" style="width:100%;padding:0.6rem;border:1px solid #cbd5e1;border-radius:8px;font-size:0.88rem;">
+                                        </div>
+                                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+                                            <div>
+                                                <label style="font-size:0.75rem;font-weight:700;color:#475569;display:block;margin-bottom:0.25rem;">Expiry Date</label>
+                                                <input type="text" placeholder="MM/YY" style="width:100%;padding:0.6rem;border:1px solid #cbd5e1;border-radius:8px;font-size:0.88rem;">
+                                            </div>
+                                            <div>
+                                                <label style="font-size:0.75rem;font-weight:700;color:#475569;display:block;margin-bottom:0.25rem;">CVV</label>
+                                                <input type="password" placeholder="•••" maxLength="4" style="width:100%;padding:0.6rem;border:1px solid #cbd5e1;border-radius:8px;font-size:0.88rem;">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label style="font-size:0.75rem;font-weight:700;color:#475569;display:block;margin-bottom:0.25rem;">Cardholder Name</label>
+                                            <input type="text" value="${this.escapeHtml(user.name || 'Tawseef Ahmad')}" style="width:100%;padding:0.6rem;border:1px solid #cbd5e1;border-radius:8px;font-size:0.88rem;">
+                                        </div>
+                                    </div>
+                                ` : currentPaymentMethod === 'net' ? `
+                                    <div style="display:flex;flex-direction:column;gap:0.9rem;">
+                                        <div style="font-size:0.9rem;font-weight:800;color:#0f172a;">Select Net Banking Bank</div>
+                                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
+                                            <button type="button" style="border:1px solid #cbd5e1;background:#f8fafc;padding:0.6rem;border-radius:8px;font-weight:700;font-size:0.8rem;cursor:pointer;">HDFC Bank</button>
+                                            <button type="button" style="border:1px solid #cbd5e1;background:#f8fafc;padding:0.6rem;border-radius:8px;font-weight:700;font-size:0.8rem;cursor:pointer;">ICICI Bank</button>
+                                            <button type="button" style="border:1px solid #cbd5e1;background:#f8fafc;padding:0.6rem;border-radius:8px;font-weight:700;font-size:0.8rem;cursor:pointer;">State Bank of India</button>
+                                            <button type="button" style="border:1px solid #cbd5e1;background:#f8fafc;padding:0.6rem;border-radius:8px;font-weight:700;font-size:0.8rem;cursor:pointer;">Axis Bank</button>
+                                        </div>
+                                    </div>
+                                ` : currentPaymentMethod === 'wallet' ? `
+                                    <div style="display:flex;flex-direction:column;gap:0.9rem;">
+                                        <div style="font-size:0.9rem;font-weight:800;color:#0f172a;">Select Digital Wallet</div>
+                                        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                                            <label style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem;border:1px solid #cbd5e1;border-radius:8px;cursor:pointer;"><input type="radio" name="w" checked style="accent-color:#047857;"> Paytm Wallet</label>
+                                            <label style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem;border:1px solid #cbd5e1;border-radius:8px;cursor:pointer;"><input type="radio" name="w" style="accent-color:#047857;"> PhonePe Wallet</label>
+                                            <label style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem;border:1px solid #cbd5e1;border-radius:8px;cursor:pointer;"><input type="radio" name="w" style="accent-color:#047857;"> Amazon Pay Balance</label>
+                                        </div>
+                                    </div>
+                                ` : `
+                                    <div style="display:flex;flex-direction:column;gap:0.9rem;">
+                                        <div style="font-size:0.9rem;font-weight:800;color:#0f172a;">Pay Later Options</div>
+                                        <div style="font-size:0.8rem;color:#64748b;">Complete your booking now and pay in convenient installments.</div>
+                                        <div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:0.75rem;border-radius:8px;font-size:0.8rem;color:#166534;font-weight:700;">
+                                            ✓ 0% Interest EMI available for 3 months
+                                        </div>
+                                    </div>
+                                `}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: PASSENGER & CONTACT DETAILS FORM -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1.2rem;">
+                            <div style="width:24px;height:24px;background:#047857;color:#fff;border-radius:50%;font-weight:800;font-size:0.8rem;display:flex;align-items:center;justify-content:center;">2</div>
+                            <h4 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0;">Payment Details / Passenger Information</h4>
+                        </div>
+                        
+                        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:1.1rem;margin-bottom:1.2rem;">
+                            <div>
+                                <div style="font-size:0.68rem;color:#64748b;font-weight:700;text-transform:uppercase;">Booking For</div>
+                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;margin-top:0.15rem;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.68rem;color:#64748b;font-weight:700;text-transform:uppercase;">Mobile Number</div>
+                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;margin-top:0.15rem;">${this.escapeHtml(user.phone || '+91 98765 43210')}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.68rem;color:#64748b;font-weight:700;text-transform:uppercase;">Email Address</div>
+                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;margin-top:0.15rem;">${this.escapeHtml(user.email || 'tawseefahmad@gmail.com')}</div>
+                            </div>
+                        </div>
+
+                        <label style="display:flex;align-items:center;gap:0.55rem;font-size:0.8rem;color:#475569;cursor:pointer;margin-bottom:1rem;">
+                            <input type="checkbox" checked style="accent-color:#047857;width:15px;height:15px;">
+                            <span>I want to receive payment confirmation on WhatsApp 💬</span>
+                        </label>
+
+                        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:0.75rem 0.9rem;display:flex;align-items:center;gap:0.7rem;">
+                            <span style="font-size:1.1rem;">🛡️</span>
+                            <div style="font-size:0.76rem;color:#166534;line-height:1.4;">
+                                <strong>We are committed to complete transparency.</strong> All payments are processed securely and there are no hidden charges.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column Sidebar -->
+                <div style="display:flex;flex-direction:column;gap:1.2rem;position:sticky;top:98px;">
+
+                    <!-- Booking Summary Card -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h4 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 1rem;">Booking Summary</h4>
+                        
+                        <div style="display:flex;gap:0.85rem;align-items:center;margin-bottom:1rem;padding-bottom:0.9rem;border-bottom:1px solid #f1f5f9;">
+                            <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=180&q=80" alt="Package" style="width:62px;height:62px;border-radius:10px;object-fit:cover;">
+                            <div>
+                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">${this.escapeHtml(offer.packageTitle)}</div>
+                                <div style="font-size:0.75rem;color:#64748b;margin-top:0.1rem;">REQ-${offer.requirementId || '1024'} • ${travelersCount} Adults, 0 Children</div>
+                                <span style="background:#ecfdf5;color:#047857;font-size:0.68rem;font-weight:800;padding:0.1rem 0.45rem;border-radius:4px;margin-top:0.2rem;display:inline-block;">${offer.durationDays || 10} Days</span>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;flex-direction:column;gap:0.7rem;font-size:0.84rem;color:#475569;">
+                            <div style="display:flex;justify-content:space-between;">
+                                <span>Package Price (${travelersCount} × ${this.formatCurrency(perPersonPrice)})</span>
+                                <span style="font-weight:700;color:#0f172a;">${this.formatCurrency(perPersonPrice * travelersCount)}</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;">
+                                <span>Taxes &amp; Fees</span>
+                                <span style="font-weight:700;color:#0f172a;">₹6,400</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;">
+                                <span>Visa Charges</span>
+                                <span style="font-weight:700;color:#0f172a;">₹4,000</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;">
+                                <span>Travel Insurance</span>
+                                <span style="font-weight:700;color:#0f172a;">₹2,400</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;color:#047857;">
+                                <span style="font-weight:700;">Offer Discount</span>
+                                <span style="font-weight:800;">-₹1,000</span>
+                            </div>
+                            <div style="border-top:1px dashed #cbd5e1;margin:0.25rem 0;"></div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:1rem;font-weight:800;color:#0f172a;">Total Amount</span>
+                                <span style="font-size:1.5rem;font-weight:900;color:#047857;">${totalAmountFormatted}</span>
+                            </div>
+                            <div style="font-size:0.72rem;color:#64748b;text-align:right;">All amounts are in INR</div>
+                        </div>
+                    </div>
+
+                    <!-- What's Included Card -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.1rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h5 style="font-size:0.88rem;font-weight:800;color:#0f172a;margin:0 0 0.65rem;">What's Included</h5>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.45rem;font-size:0.74rem;color:#475569;">
+                            <div>✈️ Return Flights</div>
+                            <div>🏨 9 Nights Stay</div>
+                            <div>✓ Visa Included</div>
+                            <div>🍽 All Meals</div>
+                            <div>🚍 Local Transfers</div>
+                            <div>🕌 All Ziyarat</div>
+                        </div>
+                        <a href="javascript:void(0)" onclick="app.setDashboardTab('packageDetails')" style="font-size:0.74rem;font-weight:700;color:#047857;text-decoration:none;display:inline-block;margin-top:0.55rem;">View all inclusions →</a>
+                    </div>
+
+                    <!-- We Accept Payment Badges Card -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.1rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h5 style="font-size:0.84rem;font-weight:800;color:#0f172a;margin:0 0 0.65rem;">We Accept</h5>
+                        <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:0.4rem;text-align:center;">
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;padding:0.3rem;font-size:0.7rem;font-weight:800;color:#1a1f71;">VISA</div>
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;padding:0.3rem;font-size:0.7rem;font-weight:800;color:#eb001b;">MasterCard</div>
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;padding:0.3rem;font-size:0.7rem;font-weight:800;color:#005c9e;">RuPay</div>
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;padding:0.3rem;font-size:0.7rem;font-weight:800;color:#047857;">UPI</div>
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;padding:0.3rem;font-size:0.7rem;font-weight:800;color:#4285f4;">GPay</div>
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;padding:0.3rem;font-size:0.7rem;font-weight:800;color:#5f259f;">PhonePe</div>
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;padding:0.3rem;font-size:0.7rem;font-weight:800;color:#00baf2;">Paytm</div>
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;padding:0.3rem;font-size:0.7rem;font-weight:800;color:#ff9900;">Amazon</div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.35rem;font-size:0.66rem;color:#64748b;margin-top:0.75rem;">
+                            <div>✓ SSL Encrypted</div>
+                            <div>✓ PCI DSS Certified</div>
+                            <div>✓ 100% Money Safe</div>
+                            <div>✓ Instant Confirmation</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Dynamic Bottom CTA Sticky Bar -->
+            <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:1rem 1.6rem;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+                <div>
+                    <div style="font-size:0.72rem;color:#64748b;font-weight:700;">Total Amount</div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <span style="font-size:1.35rem;font-weight:900;color:#0f172a;">${totalAmountFormatted}</span>
+                        <a href="javascript:void(0)" style="font-size:0.72rem;color:#047857;font-weight:700;text-decoration:none;">View Price Details ^</a>
+                    </div>
+                </div>
+
+                <div>
+                    ${currentPaymentMethod === 'upi' ? `
+                        ${showQr ? `
+                            <button onclick="app.processPayment('${offer.id}')" style="background:#047857;color:#ffffff;border:none;border-radius:10px;padding:0.8rem 1.8rem;font-size:0.95rem;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;box-shadow:0 4px 14px rgba(4,120,87,0.25);">
+                                <span>Review Payment</span>
+                                <span style="font-size:0.68rem;font-weight:500;opacity:0.9;">You will be able to confirm on the next step</span>
+                            </button>
+                        ` : `
+                            <button onclick="app.toggleUpiQrCode()" style="background:#047857;color:#ffffff;border:none;border-radius:10px;padding:0.8rem 1.8rem;font-size:0.95rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:0.5rem;box-shadow:0 4px 14px rgba(4,120,87,0.25);">
+                                <span>📷</span> <span>Show QR Code</span>
+                            </button>
+                        `}
+                    ` : currentPaymentMethod === 'paylater' ? `
+                        <button onclick="app.processPayment('${offer.id}')" style="background:#047857;color:#ffffff;border:none;border-radius:10px;padding:0.85rem 1.8rem;font-size:0.95rem;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(4,120,87,0.25);">
+                            Continue to Pay Later
+                        </button>
+                    ` : `
+                        <button onclick="app.processPayment('${offer.id}')" style="background:#047857;color:#ffffff;border:none;border-radius:10px;padding:0.85rem 1.8rem;font-size:0.95rem;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(4,120,87,0.25);">
+                            Pay ${totalAmountFormatted} Securely
+                        </button>
+                    `}
+                </div>
+            </div>
+        </main>
+        `;
     }
 
 
