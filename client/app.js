@@ -261,17 +261,9 @@ class App {
         this.loadHeroVideo(this.currentVideoIndex);
     }
 
-    playPrevHeroVideo() {
-        if (!this.heroVideos || this.heroVideos.length === 0) return;
-        this.currentVideoIndex = (this.currentVideoIndex - 1 + this.heroVideos.length) % this.heroVideos.length;
-        this.loadHeroVideo(this.currentVideoIndex);
-    }
 
-    playHeroVideoIndex(index) {
-        if (!this.heroVideos || index >= this.heroVideos.length) return;
-        this.currentVideoIndex = index;
-        this.loadHeroVideo(index);
-    }
+
+
 
     loadHeroVideo(index) {
         const vidA = document.getElementById('heroBgVideoA');
@@ -776,14 +768,7 @@ class App {
         if (toggleBtn) toggleBtn.classList.toggle('active');
     }
 
-    toggleTheme() {
-        const html = document.documentElement;
-        const current = html.getAttribute('data-theme') || 'light';
-        const next = current === 'dark' ? 'light' : 'dark';
-        html.setAttribute('data-theme', next);
-        localStorage.setItem('umrah_theme', next);
-        this.showToast(next === 'dark' ? '🌙 Dark mode enabled' : '☀️ Light mode enabled', 'success');
-    }
+
 
     updatePageSEO(page) {
         const seoMap = {
@@ -2393,12 +2378,7 @@ class App {
         reader.readAsDataURL(file);
     }
 
-    scrollReqOffersCarousel(reqId, direction) {
-        const container = document.getElementById(`reqOffersCarousel_${reqId}`);
-        if (!container) return;
-        const scrollAmount = direction === 'left' ? -340 : 340;
-        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
+
 
     setDashboardTab(tabName) {
         this.state.activeDashboardTab = tabName || 'dashboard';
@@ -2845,11 +2825,7 @@ class App {
         return [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
     }
 
-    getAllRequirements() {
-        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
-        const apiReqs = this.state.myRequirements || [];
-        return [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
-    }
+
 
     viewOfferDetailsModal(offerId) {
         const allOffers = this.getAllOffers();
@@ -2870,14 +2846,7 @@ class App {
         });
     }
 
-    scrollToReqOffers() {
-        const elem = document.getElementById('dashRequirementsSection');
-        if (elem) {
-            elem.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-            this.setDashboardTab('dashboard');
-        }
-    }
+
 
     viewBookingVoucher(bookingId) {
         let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
@@ -3502,9 +3471,7 @@ class App {
         }, 1500);
     }
 
-    downloadTicket(bookingId) {
-        return this.downloadInvoice(bookingId);
-    }
+
 
     async downloadInvoice(bookingId) {
         const id = bookingId || 'BK-048846';
@@ -3846,44 +3813,7 @@ class App {
         if (main) main.innerHTML = this.renderDashboardPage();
     }
 
-    bookOffer(offerId) {
-        let allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-        let offer = allOffers.find(o => o.id === offerId) || {
-            id: offerId || '#OFF-891',
-            packageTitle: 'Al Huda Group - Umrah Package',
-            discountedPrice: 118750
-        };
 
-        let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
-        const user = this.state.currentUser || {};
-        const newBooking = {
-            id: 'BK-' + Date.now().toString().slice(-6),
-            packageTitle: offer.packageTitle,
-            offerId: offer.id,
-            requirementId: offer.requirementId || '',
-            travelDate: '12 August',
-            travelersCount: 2,
-            totalPrice: offer.discountedPrice || 118750,
-            status: 'CONFIRMED',
-            paymentStatus: 'PAID',
-            paymentMethod: 'ONLINE PAYMENT',
-            transactionId: 'TXN-' + Date.now(),
-            paidAt: new Date().toISOString(),
-            userName: user.name || 'Pilgrim User',
-            userEmail: user.email || 'pilgrim@gmail.com',
-            userPhone: user.phone || '9541692891',
-            userId: user.id || ''
-        };
-
-        allBookings.unshift(newBooking);
-        localStorage.setItem('umrah_my_bookings', JSON.stringify(allBookings));
-        this.apiCall('/bookings', 'POST', newBooking);
-
-        this.showToast('🎉 Package booked successfully! Voucher generated.', 'success');
-
-        const main = document.getElementById('mainContent');
-        if (main) main.innerHTML = this.renderDashboardPage();
-    }
 
     renderOffersPage() {
         const user = this.state.currentUser || {
@@ -4831,38 +4761,11 @@ class App {
         `;
     }
 
-    bindFilterEvents() {
-        const range = document.getElementById('filterPriceRange');
-        const text = document.getElementById('priceValueText');
-        const dist = document.getElementById('filterDistanceSelect');
 
-        if (range) {
-            range.addEventListener('input', (e) => {
-                text.innerText = this.formatCurrency(e.target.value);
-                this.state.filters.maxPrice = e.target.value;
-                this.fetchPackages().then(() => this.navigate('packages'));
-            });
-        }
-        if (dist) {
-            dist.addEventListener('change', (e) => {
-                this.state.filters.maxDistanceMakkah = e.target.value;
-                this.fetchPackages().then(() => this.navigate('packages'));
-            });
-        }
-    }
 
-    applyQuickSearch() {
-        const price = document.getElementById('quickMaxPrice').value;
-        const dist = document.getElementById('quickDistance').value;
-        this.state.filters.maxPrice = price || 250000;
-        this.state.filters.maxDistanceMakkah = dist || 1000;
-        this.fetchPackages().then(() => this.navigate('packages'));
-    }
 
-    resetFilters() {
-        this.state.filters = { maxPrice: 250000, maxDistanceMakkah: 1000, flightsOnly: false };
-        this.fetchPackages().then(() => this.navigate('packages'));
-    }
+
+
 
     openModal(contentHtml, isFullScreen = false, customOptions = {}) {
         const backdrop = document.getElementById('modalBackdrop');
@@ -4947,9 +4850,7 @@ class App {
         this.openAuthModal('register');
     }
 
-    openForgotPasswordModal() {
-        this.openAuthModal('forgot-password');
-    }
+
 
     openAuthModal(mode = 'login') {
         const isLogin = mode === 'login' || mode === 'admin-login';
@@ -5365,27 +5266,7 @@ class App {
     }
 
 
-    switchSignupTab(tab) {
-        this.state.signupTab = tab;
-        this.state.otpVerified = false;
-        const emailGrp = document.getElementById('signupEmailGroup');
-        const phoneGrp = document.getElementById('signupPhoneGroup');
-        const emailBtn = document.getElementById('tabEmailBtn');
-        const phoneBtn = document.getElementById('tabPhoneBtn');
-        const statusMsg = document.getElementById('otpStatusMsg');
-        const alertBox = document.getElementById('otpSentAlert');
 
-        if (statusMsg) statusMsg.style.display = 'none';
-        if (alertBox) alertBox.style.display = 'none';
-
-        if (tab === 'email') {
-            if (emailGrp) emailGrp.style.display = 'block';
-            if (phoneGrp) phoneGrp.style.display = 'none';
-        } else {
-            if (emailGrp) emailGrp.style.display = 'none';
-            if (phoneGrp) phoneGrp.style.display = 'block';
-        }
-    }
 
     setAuthButtonLoading(isLoading, mode = 'login') {
         const btn = document.querySelector('#modalContent form button[type="submit"]') || document.querySelector('.auth-submit-btn');
@@ -5581,95 +5462,9 @@ class App {
         }
     }
 
-    async sendForgotPasswordOtp() {
-        this.hideFormError();
-        const emailInput = document.getElementById('forgotEmail');
-        const target = emailInput ? emailInput.value.trim() : '';
 
-        if (!target) {
-            this.showFormError('<b>Missing Email</b><br>Please enter your registered email address above first.');
-            if (emailInput) emailInput.focus();
-            return;
-        }
 
-        const btn = document.getElementById('btnForgotSendOtp');
-        if (btn) {
-            btn.disabled = true;
-            btn.innerText = 'Sending...';
-        }
 
-        const code = Math.floor(1000 + Math.random() * 9000).toString();
-        this.state.forgotOtpCode = code;
-
-        try {
-            await fetch('/api/auth/send-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contact: target, code: code, purpose: 'Password Reset' })
-            });
-
-            this.showToast(`📩 Reset code sent to ${target}`, 'info');
-            if (btn) btn.innerText = 'Sent ✓';
-        } catch (err) {
-            console.warn('Forgot OTP send error:', err);
-            this.showToast('OTP code sent to email', 'info');
-            if (btn) btn.innerText = 'Sent ✓';
-        }
-    }
-
-    async handleForgotPasswordSubmit() {
-        this.hideFormError();
-        const emailInput = document.getElementById('forgotEmail');
-        const otpInput = document.getElementById('forgotOtpCode');
-        const passInput = document.getElementById('forgotNewPassword');
-
-        const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
-        const codeEntered = otpInput ? otpInput.value.trim() : '';
-        const newPassword = passInput ? passInput.value.trim() : '';
-
-        if (!email || !codeEntered || !newPassword) {
-            this.showFormError('<b>Incomplete Details</b><br>Please enter your email, the 4-digit OTP code sent to your inbox, and your new password.');
-            return;
-        }
-
-        let isOtpValid = false;
-        if (this.state.forgotOtpCode && codeEntered === this.state.forgotOtpCode.trim()) {
-            isOtpValid = true;
-        } else if (codeEntered === '1234') {
-            isOtpValid = true;
-        }
-
-        if (!isOtpValid) {
-            this.showFormError('<b>Invalid Reset Code</b><br>The verification code you entered is incorrect. Please check your email inbox.');
-            return;
-        }
-
-        this.setAuthButtonLoading(true, 'reset');
-
-        try {
-            const response = await fetch('/api/auth/reset-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, newPassword })
-            });
-
-            const data = await response.json();
-            this.setAuthButtonLoading(false);
-
-            if (!response.ok) {
-                this.showFormError(data.error || 'Unable to reset password. Please check your email.');
-                return;
-            }
-
-            this.closeModal();
-            this.showSuccessModal('✨ Password Reset Successfully!', 'Your new password has been saved. You can now log in with your updated credentials.');
-        } catch (err) {
-            console.error('Password reset error:', err);
-            this.setAuthButtonLoading(false);
-            this.closeModal();
-            this.showSuccessModal('✨ Password Reset Successfully!', 'Your password has been updated. Please log in.');
-        }
-    }
 
     togglePasswordVisibility(inputId = 'authPassword', btnId = null) {
         const input = document.getElementById(inputId) || document.getElementById('authPassword');
@@ -6418,13 +6213,7 @@ class App {
         }
     }
 
-    openDispatchOfferModal() {
-        if (this.state.admin.users.length === 0) {
-            this.showToast('No registered users found', 'error');
-            return;
-        }
-        this.openSuggestPackageModal(this.state.admin.users[0].id);
-    }
+
 
     async deletePackageByAdmin(packageId) {
         if (!confirm('Are you sure you want to delete this package listing?')) return;
@@ -6689,29 +6478,7 @@ class App {
         this.openViewOfferModal(pkg);
     }
 
-    async submitBookingForm(packageId) {
-        const date = document.getElementById('bookDate').value;
-        const count = parseInt(document.getElementById('bookCount').value);
-        const phone = document.getElementById('bookPhone').value;
-        const passName = document.getElementById('passName1').value;
-        const passNum = document.getElementById('passNum1').value;
 
-        const bookingPayload = {
-            packageId,
-            travelersCount: count,
-            travelDate: date,
-            contactPhone: phone,
-            passengers: [{ fullName: passName, passportNumber: passNum }]
-        };
-
-        const res = await this.apiCall('/bookings', 'POST', bookingPayload);
-        if (res && res.id) {
-            this.showToast('Booking created! Opening checkout...', 'success');
-            this.openPaymentModal(res);
-        } else {
-            this.showToast(res?.message || 'Booking creation failed', 'error');
-        }
-    }
 
     openPaymentModal(booking = {}) {
         if (!this.state.currentUser) {
@@ -7621,16 +7388,7 @@ class App {
         this.navigate('home');
     }
 
-    cancelRequirement(reqId) {
-        let localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
-        localReqs = localReqs.filter(r => r.id !== reqId);
-        localStorage.setItem('umrah_requirements', JSON.stringify(localReqs));
-        if (this.state.admin && this.state.admin.requirements) {
-            this.state.admin.requirements = this.state.admin.requirements.filter(r => r.id !== reqId);
-        }
-        this.showToast('Your travel request has been cancelled.', 'info');
-        this.navigate('dashboard');
-    }
+
 
     openContactModal() {
         this.openModal(`
@@ -7664,134 +7422,22 @@ class App {
         this.closeModal();
     }
 
-    openFeedbackModal() {
-        this.openModal(`
-            <div class="modal-header">
-                <h3>⭐ Zaireen Feedback & Rating</h3>
-            </div>
-            <div class="modal-body">
-                <p style="font-size:0.9rem; color:#64748b; margin-bottom:1.2rem;">Share your experience with Zilhaj.com Umrah reverse bidding platform.</p>
-                <form onsubmit="event.preventDefault(); app.submitFeedback();">
-                    <div class="form-group" style="text-align:center;">
-                        <label>Overall Rating</label>
-                        <div style="font-size:2rem; cursor:pointer; color:#f59e0b; margin:0.5rem 0;">⭐⭐⭐⭐⭐</div>
-                    </div>
-                    <div class="form-group">
-                        <label>Your Feedback Comments</label>
-                        <textarea id="feedbackText" class="form-control" rows="3" required placeholder="What did you like about getting competitive package offers?"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width:100%;">Submit Zaireen Rating ⭐</button>
-                </form>
-            </div>
-        `);
-    }
 
-    submitFeedback() {
-        this.showToast('Thank you for your valuable feedback!', 'success');
-        this.closeModal();
-    }
+
+
 
     /* ============================================================================
        LIQUID GLASS FEEDBACK SLIDER LOGIC
        ============================================================================ */
-    onFeedbackSliderChange(val) {
-        const rating = parseInt(val, 10);
-        const rangeInput = document.getElementById('glassFeedbackRange');
-        if (rangeInput) {
-            const percent = ((rating - 1) / 4) * 100;
-            rangeInput.style.setProperty('--slider-percent', `${percent}%`);
-        }
 
-        // Tick active state update
-        const tickItems = document.querySelectorAll('.slider-tick-item');
-        tickItems.forEach((tick, idx) => {
-            if (idx + 1 === rating) {
-                tick.classList.add('active');
-            } else {
-                tick.classList.remove('active');
-            }
-        });
 
-        // Config per rating tier
-        const ratingConfig = {
-            1: { emoji: '😞', scoreText: '1.0 / 5.0 — Needs Improvement', desc: 'We apologize if your experience was unsatisfactory. Please share how we can improve!', color: '#e11d48' },
-            2: { emoji: '😐', scoreText: '2.0 / 5.0 — Below Average', desc: 'We appreciate your honest rating and will work hard to address any concerns.', color: '#ea580c' },
-            3: { emoji: '🙂', scoreText: '3.0 / 5.0 — Good Experience', desc: 'Thank you! We aim to make your sacred journey booking process smooth and effortless.', color: '#d97706' },
-            4: { emoji: '😊', scoreText: '4.0 / 5.0 — Great Experience!', desc: 'Awesome! We are glad you found posting your travel requirement easy.', color: '#059669' },
-            5: { emoji: '🤩', scoreText: '5.0 / 5.0 — Outstanding Loved It!', desc: 'We\'re thrilled! Verified agents are actively reviewing your requirement.', color: '#047857' }
-        };
 
-        const current = ratingConfig[rating] || ratingConfig[5];
-        const emojiBadge = document.getElementById('liquidEmojiBadge');
-        const scoreText = document.getElementById('liquidScoreText');
-        const descText = document.getElementById('liquidDescText');
 
-        if (emojiBadge) {
-            emojiBadge.textContent = current.emoji;
-            emojiBadge.classList.remove('pop-anim');
-            void emojiBadge.offsetWidth; // Trigger reflow
-            emojiBadge.classList.add('pop-anim');
-        }
-        if (scoreText) {
-            scoreText.textContent = current.scoreText;
-            scoreText.style.color = current.color;
-        }
-        if (descText) {
-            descText.textContent = current.desc;
-        }
-    }
 
-    setFeedbackSliderValue(val) {
-        const rangeInput = document.getElementById('glassFeedbackRange');
-        if (rangeInput) {
-            rangeInput.value = val;
-            this.onFeedbackSliderChange(val);
-        }
-    }
 
-    toggleFeedbackChip(chip) {
-        if (chip) {
-            chip.classList.toggle('selected');
-        }
-    }
 
-    submitLiquidGlassFeedback() {
-        const rangeInput = document.getElementById('glassFeedbackRange');
-        const rating = rangeInput ? rangeInput.value : 5;
-        const selectedChips = Array.from(document.querySelectorAll('.liquid-chip.selected')).map(c => c.textContent.trim());
-        const note = document.getElementById('liquidFeedbackNote') ? document.getElementById('liquidFeedbackNote').value : '';
 
-        const feedbackData = {
-            rating: parseInt(rating, 10),
-            highlights: selectedChips,
-            comments: note,
-            timestamp: new Date().toISOString()
-        };
 
-        const existingList = JSON.parse(localStorage.getItem('umrah_liquid_feedback') || '[]');
-        existingList.push(feedbackData);
-        localStorage.setItem('umrah_liquid_feedback', JSON.stringify(existingList));
-
-        const formView = document.getElementById('liquidFeedbackFormView');
-        const successView = document.getElementById('liquidFeedbackSuccessView');
-
-        if (formView && successView) {
-            formView.style.display = 'none';
-            successView.style.display = 'block';
-        }
-
-        this.showToast('JazakAllah Khair! Your rating & feedback has been saved.', 'success');
-    }
-
-    resetLiquidGlassFeedbackForm() {
-        const formView = document.getElementById('liquidFeedbackFormView');
-        const successView = document.getElementById('liquidFeedbackSuccessView');
-
-        if (formView && successView) {
-            successView.style.display = 'none';
-            formView.style.display = 'block';
-        }
-    }
 
     slideReviewCarousel(direction) {
         const track = document.getElementById('ZaireenReviewTrack');
@@ -8032,18 +7678,7 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
         if (anchor) anchor.scrollIntoView({ behavior: 'smooth' });
     }
 
-    scrollToTrustSection() {
-        const section = document.getElementById('whyChooseUsSection');
-        if (section) {
-            section.scrollIntoView({ behavior: 'smooth' });
-        } else {
-            this.navigate('home');
-            setTimeout(() => {
-                const s = document.getElementById('whyChooseUsSection');
-                if (s) s.scrollIntoView({ behavior: 'smooth' });
-            }, 200);
-        }
-    }
+
 
     setGuideTab(tab) {
         this.state.guideTab = tab;
