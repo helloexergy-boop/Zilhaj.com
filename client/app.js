@@ -4635,7 +4635,7 @@ class App {
                     </div>
                 </div>
             </div>
-        `);
+        `, true, { width: '100vw', maxWidth: '100vw', height: '100vh', maxHeight: '100vh', borderRadius: '0' });
     }
 
     openOfferPaymentModal(offerId) {
@@ -4924,7 +4924,7 @@ class App {
                     </div>
                 </div>
             </div>
-        `);
+        `, true, { width: '100vw', maxWidth: '100vw', height: '100vh', maxHeight: '100vh', borderRadius: '0' });
 
         // Initialize default tab to UPI
         setTimeout(() => {
@@ -5655,22 +5655,59 @@ class App {
             content.innerHTML = contentHtml;
         }
 
-        const is100vw = customOptions.width === '100vw' || customOptions.maxWidth === '100vw';
+        const is100vw = isFullScreen || customOptions.width === '100vw' || customOptions.maxWidth === '100vw';
 
         if (modal) {
-            modal.style.maxWidth = customOptions.maxWidth || (isFullScreen ? '950px' : '880px');
-            modal.style.width = customOptions.width || '95%';
-            modal.style.maxHeight = customOptions.maxHeight || '92vh';
-            modal.style.height = customOptions.height || 'auto';
-            modal.style.borderRadius = customOptions.borderRadius || '24px';
-            modal.style.overflowY = customOptions.overflowY || 'auto';
-            modal.style.padding = '0';
-            modal.style.background = is100vw ? '#ffffff' : 'transparent';
-            modal.style.boxShadow = customOptions.boxShadow || 'none';
-            modal.style.border = 'none';
-            modal.style.margin = '0';
-            modal.style.transform = 'none';
+            if (is100vw) {
+                modal.style.maxWidth = '100vw';
+                modal.style.width = '100vw';
+                modal.style.maxHeight = '100vh';
+                modal.style.height = '100vh';
+                modal.style.borderRadius = '0';
+                modal.style.overflowY = 'hidden';
+                modal.style.padding = '0';
+                modal.style.background = '#f8fafc';
+                modal.style.boxShadow = 'none';
+                modal.style.border = 'none';
+                modal.style.margin = '0';
+                modal.style.transform = 'none';
+                modal.style.position = 'fixed';
+                modal.style.top = '0';
+                modal.style.left = '0';
+                modal.style.zIndex = '100000';
+            } else {
+                modal.style.maxWidth = customOptions.maxWidth || '880px';
+                modal.style.width = customOptions.width || '95%';
+                modal.style.maxHeight = customOptions.maxHeight || '92vh';
+                modal.style.height = customOptions.height || 'auto';
+                modal.style.borderRadius = customOptions.borderRadius || '24px';
+                modal.style.overflowY = customOptions.overflowY || 'auto';
+                modal.style.padding = '0';
+                modal.style.background = 'transparent';
+                modal.style.boxShadow = customOptions.boxShadow || 'none';
+                modal.style.border = 'none';
+                modal.style.margin = '0';
+                modal.style.transform = 'none';
+                modal.style.position = '';
+                modal.style.top = '';
+                modal.style.left = '';
+                modal.style.zIndex = '';
+            }
             if (defaultCloseBtn) defaultCloseBtn.style.display = 'none';
+        }
+
+        if (content) {
+            if (is100vw) {
+                content.style.width = '100vw';
+                content.style.height = '100vh';
+                content.style.padding = '0';
+                content.style.margin = '0';
+            } else {
+                content.style.width = '';
+                content.style.height = '';
+                content.style.padding = '';
+                content.style.margin = '';
+            }
         }
 
         if (backdrop) {
@@ -5684,7 +5721,7 @@ class App {
             backdrop.style.alignItems = 'center';
             backdrop.style.justifyContent = 'center';
             backdrop.style.padding = is100vw ? '0px' : '1.5rem';
-            backdrop.style.background = is100vw ? '#ffffff' : 'rgba(15, 23, 42, 0.78)';
+            backdrop.style.background = is100vw ? '#f8fafc' : 'rgba(15, 23, 42, 0.78)';
             backdrop.style.backdropFilter = is100vw ? 'none' : 'blur(8px)';
             backdrop.classList.add('active');
         }
