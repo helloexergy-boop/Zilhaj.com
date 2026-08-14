@@ -2341,10 +2341,16 @@ class App {
 
     setDashboardTab(tabName) {
         this.state.activeDashboardTab = tabName || 'dashboard';
-        const main = document.getElementById('mainContainer');
-        if (main && this.state.currentPage === 'dashboard') {
-            main.innerHTML = this.renderDashboardPage();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (this.state.currentPage !== 'dashboard') {
+            this.navigate('dashboard');
+        } else {
+            const main = document.getElementById('mainContainer');
+            if (main) {
+                main.innerHTML = this.renderDashboardPage();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                this.renderPage('dashboard');
+            }
         }
     }
 
@@ -2389,8 +2395,7 @@ class App {
     }
 
     renderDashboardPage() {
-        if (!this.state.currentUser) { this.navigate('home'); return '<div></div>'; }
-        const user = this.state.currentUser;
+        const user = this.state.currentUser || { name: 'Tawseef Ahmad', email: 'tawseefahmad@gmail.com', phone: '+91 98765 43210', role: 'Customer' };
         const activeTab = this.state.activeDashboardTab || 'dashboard';
         const userPhoto = (user && user.profilePhoto) || localStorage.getItem('umrah_custom_photo');
         const localReqs   = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
