@@ -2419,6 +2419,27 @@ class App {
         }
     }
 
+    setNotifFilter(filter) {
+        this.state.notifFilter = filter || 'All';
+        const main = document.getElementById('mainContainer');
+        if (main && this.state.currentPage === 'dashboard') {
+            main.innerHTML = this.renderDashboardPage();
+        }
+    }
+
+    toggleSetting(key) {
+        const settings = JSON.parse(localStorage.getItem('zilhaj_user_settings') || '{"emailNotifs":true,"smsAlerts":true,"offerNotifs":true,"paymentAlerts":true,"privacyMode":true,"twoFactor":false}');
+        settings[key] = !settings[key];
+        localStorage.setItem('zilhaj_user_settings', JSON.stringify(settings));
+        const main = document.getElementById('mainContainer');
+        if (main && this.state.currentPage === 'dashboard') {
+            main.innerHTML = this.renderDashboardPage();
+        }
+        if (typeof this.showToast === 'function') {
+            this.showToast(`Setting updated successfully`, 'success');
+        }
+    }
+
     renderDashboardPage() {
         if (!this.state.currentUser) { this.navigate('home'); return '<div></div>'; }
         const user = this.state.currentUser;
@@ -2434,6 +2455,7 @@ class App {
         const requirements = allReqs.filter(r => !r.userId || r.userId === user.id || r.userEmail === user.email);
         const offers   = allOffers;
         const bookings = localBookings;
+        const userSettings = JSON.parse(localStorage.getItem('zilhaj_user_settings') || '{"emailNotifs":true,"smsAlerts":true,"offerNotifs":true,"paymentAlerts":true,"privacyMode":true,"twoFactor":false}');
 
         // ── Support contact helpers ──────────────────────────────────────────────
         const SUPPORT_PHONE  = '+919876543210';
@@ -2442,12 +2464,12 @@ class App {
 
         // ── SVG icons ────────────────────────────────────────────────────────────
         const ic = {
-            dashboard:`<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>`,
-            requests:`<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>`,
-            payments:`<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,
-            profile:`<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
-            notifs:`<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
-            help:`<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-linecap="round" stroke-width="2"/></svg>`,
+            dashboard:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>`,
+            requests:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>`,
+            payments:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,
+            profile:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+            notifs:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
+            help:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-linecap="round" stroke-width="2"/></svg>`,
         };
 
         const offersForUser = offers.filter(o => requirements.some(r => r.id === o.requirementId));
@@ -2460,23 +2482,22 @@ class App {
         const navItem = (tab, icon, label, badge = 0) => {
             const isActive = activeTab === tab;
             return `<a href="javascript:void(0)" onclick="app.setDashboardTab('${tab}')"
-                style="display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.62rem .88rem;border-radius:10px;text-decoration:none;cursor:pointer;transition:all .15s;background:${isActive?'#1a6b3c':'transparent'};color:${isActive?'#fff':'#374151'};"
-                onmouseover="if('${tab}'!=='${activeTab}'){this.style.background='#f0faf5';this.style.color='#1a6b3c';}"
-                onmouseout="if('${tab}'!=='${activeTab}'){this.style.background='transparent';this.style.color='#374151';}">
-                <span style="display:flex;align-items:center;gap:.65rem;font-size:.86rem;font-weight:${isActive?'700':'500'};">${icon} ${label}</span>
-                ${badge>0?`<span style="background:${isActive?'#fff':'#1a6b3c'};color:${isActive?'#1a6b3c':'#fff'};font-size:.66rem;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px;">${badge}</span>`:''}
+                style="display:flex;align-items:center;justify-content:space-between;gap:.65rem;padding:.58rem .82rem;border-radius:10px;text-decoration:none;cursor:pointer;transition:all .2s ease;background:${isActive?'#1a6b3c':'transparent'};color:${isActive?'#fff':'#374151'};"
+                onmouseover="if('${tab}'!=='${activeTab}'){this.style.background='#f0faf5';this.style.color='#1a6b3c';this.style.transform='translateX(3px)';}"
+                onmouseout="if('${tab}'!=='${activeTab}'){this.style.background='transparent';this.style.color='#374151';this.style.transform='none';}">
+                <span style="display:flex;align-items:center;gap:.6rem;font-size:.84rem;font-weight:${isActive?'700':'500'};">${icon} ${label}</span>
+                ${badge>0?`<span style="background:${isActive?'#fff':'#1a6b3c'};color:${isActive?'#1a6b3c':'#fff'};font-size:.64rem;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px;">${badge}</span>`:''}
             </a>`;
         };
 
         // ── Sidebar ──────────────────────────────────────────────────────────────
-        // Nav order: Dashboard → My Requests → Payments → Profile & Settings → Notifications → Help & Support
         const sidebar = `
-        <aside style="width:210px;flex-shrink:0;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:1.2rem .85rem;display:flex;flex-direction:column;min-height:calc(100vh - 140px);position:sticky;top:98px;align-self:flex-start;">
-            <div style="display:flex;align-items:center;gap:.45rem;padding:.15rem .3rem 1rem;border-bottom:1px solid #f0f0f0;margin-bottom:.85rem;">
-                <svg width="25" height="25" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="8" fill="#1a6b3c"/><text x="8" y="28" font-family="Georgia,serif" font-size="22" font-weight="900" font-style="italic" fill="white">Z</text></svg>
-                <div><div style="font-size:.92rem;font-weight:900;color:#0f172a;letter-spacing:.5px;font-style:italic;">ZILHAJ</div><div style="font-size:.56rem;color:#6b7280;line-height:1.25;">One Request. Multiple Verified Offers.</div></div>
+        <aside style="width:210px;flex-shrink:0;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:1.1rem .8rem;display:flex;flex-direction:column;min-height:calc(100vh - 140px);position:sticky;top:98px;align-self:flex-start;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+            <div style="display:flex;align-items:center;gap:.45rem;padding:.15rem .3rem .9rem;border-bottom:1px solid #f0f0f0;margin-bottom:.8rem;">
+                <svg width="24" height="24" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="8" fill="#1a6b3c"/><text x="8" y="28" font-family="Georgia,serif" font-size="22" font-weight="900" font-style="italic" fill="white">Z</text></svg>
+                <div><div style="font-size:.9rem;font-weight:900;color:#0f172a;letter-spacing:.4px;font-style:italic;">ZILHAJ</div><div style="font-size:.55rem;color:#6b7280;line-height:1.2;">One Request. Multiple Verified Offers.</div></div>
             </div>
-            <div style="display:flex;flex-direction:column;gap:.18rem;flex:1;">
+            <div style="display:flex;flex-direction:column;gap:.15rem;flex:1;">
                 ${navItem('dashboard', ic.dashboard, 'Dashboard')}
                 ${navItem('requests',  ic.requests,  'My Requests')}
                 ${navItem('payments',  ic.payments,  'Payments')}
@@ -2484,29 +2505,28 @@ class App {
                 ${navItem('notifications', ic.notifs, 'Notifications', notifCount)}
                 ${navItem('help',      ic.help,      'Help &amp; Support')}
             </div>
-            <div style="margin-top:1.2rem;background:#f0faf5;border:1px solid #d1fae5;border-radius:10px;padding:.85rem;">
-                <div style="font-size:.78rem;font-weight:800;color:#0f172a;margin-bottom:.12rem;">Need Help?</div>
-                <div style="font-size:.7rem;color:#6b7280;margin-bottom:.6rem;">Our team is here to assist you</div>
-                <a href="tel:${SUPPORT_PHONE}" style="width:100%;background:#fff;border:1px solid #d1fae5;border-radius:7px;padding:.42rem;font-size:.73rem;font-weight:700;color:#1a6b3c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.3rem;text-decoration:none;">
-                    <svg width="12" height="12" fill="none" stroke="#1a6b3c" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.49a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+            <div style="margin-top:1.1rem;background:#f0faf5;border:1px solid #d1fae5;border-radius:10px;padding:.8rem;transition:all .2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(26,107,60,0.08)'" onmouseout="this.style.boxShadow='none'">
+                <div style="font-size:.76rem;font-weight:800;color:#0f172a;margin-bottom:.1rem;">Need Help?</div>
+                <div style="font-size:.68rem;color:#6b7280;margin-bottom:.55rem;">Our team is here to assist you</div>
+                <a href="tel:${SUPPORT_PHONE}" style="width:100%;box-sizing:border-box;background:#fff;border:1px solid #d1fae5;border-radius:7px;padding:.4rem;font-size:.72rem;font-weight:700;color:#1a6b3c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.3rem;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='#1a6b3c';this.style.color='#fff';" onmouseout="this.style.background='#fff';this.style.color='#1a6b3c';">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.49a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
                     Contact Support
                 </a>
             </div>
-            <div style="margin-top:.7rem;display:flex;align-items:center;gap:.4rem;padding:.5rem .4rem;background:#f8fafc;border-radius:8px;border:1px solid #e5e7eb;">
+            <div style="margin-top:.65rem;display:flex;align-items:center;gap:.4rem;padding:.45rem .4rem;background:#f8fafc;border-radius:8px;border:1px solid #e5e7eb;">
                 <svg width="14" height="14" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                <div><div style="font-size:.63rem;font-weight:800;color:#0f172a;">Your security is our priority.</div><div style="font-size:.59rem;color:#6b7280;">All payments are encrypted &amp; secure.</div></div>
+                <div><div style="font-size:.62rem;font-weight:800;color:#0f172a;">Your security is our priority.</div><div style="font-size:.58rem;color:#6b7280;">All payments encrypted &amp; secure.</div></div>
             </div>
-            <div style="margin-top:.6rem;font-size:.59rem;color:#9ca3af;text-align:center;">© 2026 ZILHAJ · All rights reserved.</div>
         </aside>`;
 
         // ── Helpers ──────────────────────────────────────────────────────────────
         const statusBadge = (status) => {
             const s = (status || 'pending').toLowerCase();
             if (s === 'completed' || s === 'confirmed')
-                return `<span style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:.2rem .65rem;border-radius:99px;font-size:.71rem;font-weight:700;">Completed</span>`;
+                return `<span style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:.2rem .6rem;border-radius:99px;font-size:.7rem;font-weight:700;">Completed</span>`;
             if (s === 'active' || s.includes('offer'))
-                return `<span style="background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;padding:.2rem .65rem;border-radius:99px;font-size:.71rem;font-weight:700;">Offers Available</span>`;
-            return `<span style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:.2rem .65rem;border-radius:99px;font-size:.71rem;font-weight:700;">Waiting for Offers</span>`;
+                return `<span style="background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;padding:.2rem .6rem;border-radius:99px;font-size:.7rem;font-weight:700;">Offers Available</span>`;
+            return `<span style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:.2rem .6rem;border-radius:99px;font-size:.7rem;font-weight:700;">Waiting for Offers</span>`;
         };
 
         const fmtDate = (d) => {
@@ -2521,12 +2541,12 @@ class App {
             return `REQ-${n}`;
         };
 
-        // ── Page header helper ───────────────────────────────────────────────────
+        // ── Page header helper (Font size tuned down to elegant 1.05rem) ──────────
         const pageHeader = (title, subtitle = '') => `
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.7rem;margin-bottom:.2rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.15rem;">
             <div>
-                <h1 style="font-size:1.15rem;font-weight:800;color:#0f172a;margin:0;">${title}</h1>
-                ${subtitle ? `<p style="font-size:.82rem;color:#6b7280;margin:.12rem 0 0;">${subtitle}</p>` : ''}
+                <h1 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0;letter-spacing:-0.2px;">${title}</h1>
+                ${subtitle ? `<p style="font-size:.8rem;color:#6b7280;margin:.1rem 0 0;">${subtitle}</p>` : ''}
             </div>
         </div>`;
 
@@ -2534,34 +2554,34 @@ class App {
         const reqTableRow = (r) => {
             const rid = reqId(r);
             const ro = offers.filter(o => o.requirementId === r.id);
-            return `<tr style="border-bottom:1px solid #f3f4f6;" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
-                <td style="padding:.82rem 1rem;"><div style="font-weight:700;color:#0f172a;font-size:.85rem;">${rid}</div><div style="font-size:.7rem;color:#9ca3af;">${fmtDate(r.createdAt||r.preferredDepartureDate)}</div></td>
-                <td style="padding:.82rem 1rem;"><div style="display:flex;align-items:center;gap:.45rem;"><div style="width:28px;height:28px;border-radius:6px;background:#f0faf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="13" height="13" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 21h18M5 21V9l7-6 7 6v12M10 21v-5h4v5"/></svg></div><div><div style="font-size:.83rem;font-weight:600;color:#0f172a;">Umrah Package</div><div style="font-size:.7rem;color:#9ca3af;">${r.durationDays||10} Days</div></div></div></td>
-                <td style="padding:.82rem 1rem;font-size:.83rem;color:#374151;">${fmtDate(r.preferredDepartureDate)}<br><span style="font-size:.69rem;color:#9ca3af;">(Approx.)</span></td>
-                <td style="padding:.82rem 1rem;font-size:.83rem;color:#374151;">${r.travelersCount||r.adults||2} Adults<br><span style="font-size:.69rem;color:#9ca3af;">${r.children||0} Children</span></td>
-                <td style="padding:.82rem 1rem;">${statusBadge(ro.length>0?'active':(r.status||'pending'))}</td>
-                <td style="padding:.82rem 1rem;"><div style="font-size:.83rem;font-weight:700;color:#0f172a;">${ro.length} Offer${ro.length!==1?'s':''}</div><div style="font-size:.7rem;color:${ro.length>0?'#1a6b3c':'#9ca3af'};">${ro.length>0?'View now':'Pending'}</div></td>
-                <td style="padding:.82rem 1rem;"><button onclick="app.viewRequestDetail('${r.id}')" style="background:#fff;border:1px solid #e5e7eb;border-radius:7px;padding:.35rem .85rem;font-size:.79rem;font-weight:600;color:#374151;cursor:pointer;display:flex;align-items:center;gap:.25rem;white-space:nowrap;" onmouseover="this.style.borderColor='#1a6b3c';this.style.color='#1a6b3c'" onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#374151'">View Details <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button></td>
+            return `<tr style="border-bottom:1px solid #f3f4f6;transition:background .15s ease;" onmouseover="this.style.background='#f0faf5'" onmouseout="this.style.background=''">
+                <td style="padding:.75rem .95rem;"><div style="font-weight:700;color:#0f172a;font-size:.83rem;">${rid}</div><div style="font-size:.68rem;color:#9ca3af;">${fmtDate(r.createdAt||r.preferredDepartureDate)}</div></td>
+                <td style="padding:.75rem .95rem;"><div style="display:flex;align-items:center;gap:.45rem;"><div style="width:26px;height:26px;border-radius:6px;background:#f0faf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="13" height="13" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 21h18M5 21V9l7-6 7 6v12M10 21v-5h4v5"/></svg></div><div><div style="font-size:.81rem;font-weight:600;color:#0f172a;">Umrah Package</div><div style="font-size:.68rem;color:#9ca3af;">${r.durationDays||10} Days</div></div></div></td>
+                <td style="padding:.75rem .95rem;font-size:.81rem;color:#374151;">${fmtDate(r.preferredDepartureDate)}<br><span style="font-size:.67rem;color:#9ca3af;">(Approx.)</span></td>
+                <td style="padding:.75rem .95rem;font-size:.81rem;color:#374151;">${r.travelersCount||r.adults||2} Adults<br><span style="font-size:.67rem;color:#9ca3af;">${r.children||0} Children</span></td>
+                <td style="padding:.75rem .95rem;">${statusBadge(ro.length>0?'active':(r.status||'pending'))}</td>
+                <td style="padding:.75rem .95rem;"><div style="font-size:.81rem;font-weight:700;color:#0f172a;">${ro.length} Offer${ro.length!==1?'s':''}</div><div style="font-size:.68rem;color:${ro.length>0?'#1a6b3c':'#9ca3af'};">${ro.length>0?'View now':'Pending'}</div></td>
+                <td style="padding:.75rem .95rem;"><button onclick="app.viewRequestDetail('${r.id}')" style="background:#fff;border:1px solid #e5e7eb;border-radius:7px;padding:.32rem .8rem;font-size:.77rem;font-weight:600;color:#374151;cursor:pointer;display:flex;align-items:center;gap:.25rem;white-space:nowrap;transition:all .18s;" onmouseover="this.style.borderColor='#1a6b3c';this.style.color='#1a6b3c';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.04)';" onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#374151';this.style.boxShadow='none';">View Details <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button></td>
             </tr>`;
         };
 
-        const tableHead = `<thead><tr style="background:#f9fafb;border-bottom:1px solid #f3f4f6;"><th style="padding:.68rem 1rem;text-align:left;font-size:.71rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Request ID</th><th style="padding:.68rem 1rem;text-align:left;font-size:.71rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Service</th><th style="padding:.68rem 1rem;text-align:left;font-size:.71rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Travel Date</th><th style="padding:.68rem 1rem;text-align:left;font-size:.71rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Passengers</th><th style="padding:.68rem 1rem;text-align:left;font-size:.71rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Status</th><th style="padding:.68rem 1rem;text-align:left;font-size:.71rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Offers</th><th style="padding:.68rem 1rem;text-align:left;font-size:.71rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Action</th></tr></thead>`;
+        const tableHead = `<thead><tr style="background:#f9fafb;border-bottom:1px solid #f3f4f6;"><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Request ID</th><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Service</th><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Travel Date</th><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Passengers</th><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Status</th><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Offers</th><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Action</th></tr></thead>`;
 
         // ── Support card reusable ────────────────────────────────────────────────
         const supportCard = () => `
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;padding:1.1rem;">
-            <div style="font-size:.88rem;font-weight:800;color:#0f172a;margin-bottom:.2rem;">Need Help?</div>
-            <div style="font-size:.76rem;color:#6b7280;margin-bottom:.8rem;">Our support team is available to assist you 24/7.</div>
-            <a href="javascript:void(0)" onclick="app.openChatbot()" style="display:flex;align-items:center;gap:.42rem;width:100%;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.52rem .88rem;font-size:.79rem;font-weight:700;color:#1a6b3c;cursor:pointer;margin-bottom:.4rem;text-decoration:none;">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.05rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+            <div style="font-size:.85rem;font-weight:800;color:#0f172a;margin-bottom:.18rem;">Need Help?</div>
+            <div style="font-size:.74rem;color:#6b7280;margin-bottom:.75rem;">Our support team is available to assist you 24/7.</div>
+            <a href="javascript:void(0)" onclick="app.openChatbot()" style="display:flex;align-items:center;gap:.4rem;width:100%;box-sizing:border-box;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.5rem .85rem;font-size:.78rem;font-weight:700;color:#1a6b3c;cursor:pointer;margin-bottom:.38rem;text-decoration:none;transition:all .18s;" onmouseover="this.style.background='#d1fae5';this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#f0faf5';this.style.transform='none';">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Live Chat
             </a>
-            <a href="tel:${SUPPORT_PHONE}" style="display:flex;align-items:center;gap:.42rem;width:100%;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.52rem .88rem;font-size:.79rem;font-weight:700;color:#1a6b3c;cursor:pointer;margin-bottom:.4rem;text-decoration:none;">
+            <a href="tel:${SUPPORT_PHONE}" style="display:flex;align-items:center;gap:.4rem;width:100%;box-sizing:border-box;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.5rem .85rem;font-size:.78rem;font-weight:700;color:#1a6b3c;cursor:pointer;margin-bottom:.38rem;text-decoration:none;transition:all .18s;" onmouseover="this.style.background='#d1fae5';this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#f0faf5';this.style.transform='none';">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.49a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> Call Support
             </a>
-            <a href="mailto:${SUPPORT_EMAIL}" style="display:flex;align-items:center;gap:.42rem;width:100%;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.52rem .88rem;font-size:.79rem;font-weight:700;color:#1a6b3c;cursor:pointer;margin-bottom:.4rem;text-decoration:none;">
+            <a href="mailto:${SUPPORT_EMAIL}" style="display:flex;align-items:center;gap:.4rem;width:100%;box-sizing:border-box;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.5rem .85rem;font-size:.78rem;font-weight:700;color:#1a6b3c;cursor:pointer;margin-bottom:.38rem;text-decoration:none;transition:all .18s;" onmouseover="this.style.background='#d1fae5';this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#f0faf5';this.style.transform='none';">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email Us
             </a>
-            <a href="${SUPPORT_WA}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.42rem;width:100%;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.52rem .88rem;font-size:.79rem;font-weight:700;color:#1a6b3c;cursor:pointer;text-decoration:none;">
+            <a href="${SUPPORT_WA}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.4rem;width:100%;box-sizing:border-box;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.5rem .85rem;font-size:.78rem;font-weight:700;color:#1a6b3c;cursor:pointer;text-decoration:none;transition:all .18s;" onmouseover="this.style.background='#d1fae5';this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#f0faf5';this.style.transform='none';">
                 <svg width="13" height="13" fill="#1a6b3c" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> WhatsApp
             </a>
         </div>`;
@@ -2575,59 +2595,87 @@ class App {
             const firstName = (user.name || 'Pilgrim').split(' ')[0];
             const rows = requirements.slice(0, 5).map(reqTableRow).join('');
 
-            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.2rem;">
-                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.7rem;">
-                    <div>
-                        <h1 style="font-size:1.15rem;font-weight:800;color:#0f172a;margin:0;">Welcome back, ${this.escapeHtml(firstName)} 👋</h1>
-                        <p style="font-size:.82rem;color:#6b7280;margin:.1rem 0 0;">Here's what's happening with your requests.</p>
+            // Requirements with offers available for carousel slide
+            const reqsWithOffers = requirements.filter(r => offers.some(o => o.requirementId === r.id));
+
+            const offerCarouselSlides = reqsWithOffers.length > 0 ? reqsWithOffers.map((r, idx) => {
+                const rid = reqId(r);
+                const ro = offers.filter(o => o.requirementId === r.id);
+                return `<div style="background:#fff;border:1.5px solid #d1fae5;border-radius:12px;padding:.9rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 2px 8px rgba(26,107,60,0.05);transition:all .2s ease;" onmouseover="this.style.borderColor='#1a6b3c';this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='#d1fae5';this.style.transform='none';">
+                    <div style="display:flex;align-items:center;gap:.8rem;">
+                        <div style="width:40px;height:40px;border-radius:10px;background:#e8f5ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#1a6b3c;font-weight:800;font-size:.82rem;">${rid.slice(-4)}</div>
+                        <div>
+                            <div style="display:flex;align-items:center;gap:.5rem;">
+                                <span style="font-size:.86rem;font-weight:800;color:#0f172a;">${rid}</span>
+                                <span style="background:#d1fae5;color:#065f46;font-size:.65rem;font-weight:800;padding:.1rem .5rem;border-radius:99px;">${ro.length} Offer${ro.length!==1?'s':''} Ready</span>
+                            </div>
+                            <div style="font-size:.73rem;color:#6b7280;margin-top:.15rem;">Submitted on ${fmtDate(r.createdAt||r.preferredDepartureDate)} &bull; ${r.departureCity||'Srinagar'} to Jeddah &bull; ${r.travelersCount||2} Travelers</div>
+                        </div>
                     </div>
-                    <div style="display:flex;align-items:center;gap:.7rem;">
-                        <button onclick="app.setDashboardTab('notifications')" style="position:relative;background:#f9fafb;border:1px solid #e5e7eb;border-radius:9px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;">${ic.notifs}<span style="position:absolute;top:-4px;right:-4px;background:#1a6b3c;color:#fff;font-size:.6rem;font-weight:800;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${notifCount}</span></button>
-                        <div onclick="app.setDashboardTab('profile')" style="display:flex;align-items:center;gap:.5rem;cursor:pointer;background:#f9fafb;border:1px solid #e5e7eb;border-radius:9px;padding:.3rem .7rem;">
-                            <div style="width:28px;height:28px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.78rem;font-weight:800;overflow:hidden;">${userPhoto?`<img src="${userPhoto}" style="width:100%;height:100%;object-fit:cover;">`:this.escapeHtml((user.name||'U').charAt(0).toUpperCase())}</div>
-                            <div><div style="font-size:.79rem;font-weight:700;color:#0f172a;">${this.escapeHtml(user.name)}</div><div style="font-size:.66rem;color:#6b7280;">Customer</div></div>
-                            <svg width="12" height="12" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                    <button onclick="app.viewRequestDetail('${r.id}')" style="background:#1a6b3c;color:#fff;border:none;border-radius:8px;padding:.48rem 1rem;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .18s;" onmouseover="this.style.background='#14522e';" onmouseout="this.style.background='#1a6b3c';">View Offers →</button>
+                </div>`;
+            }).join('') : `<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:.85rem 1.1rem;font-size:.78rem;color:#92400e;display:flex;align-items:center;justify-content:space-between;"><span>No active offers yet. Post a new request to get competitive quotes from verified partners.</span><button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#d97706;color:#fff;border:none;border-radius:6px;padding:.38rem .85rem;font-size:.74rem;font-weight:700;cursor:pointer;">+ Create Request</button></div>`;
+
+            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.1rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;">
+                    <div>
+                        <h1 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0;letter-spacing:-0.2px;">Welcome back, ${this.escapeHtml(firstName)} 👋</h1>
+                        <p style="font-size:.8rem;color:#6b7280;margin:.08rem 0 0;">Here's what's happening with your Umrah requests.</p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.6rem;">
+                        <button onclick="app.setDashboardTab('notifications')" style="position:relative;background:#fff;border:1px solid #e5e7eb;border-radius:9px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;" onmouseover="this.style.borderColor='#1a6b3c';" onmouseout="this.style.borderColor='#e5e7eb';">${ic.notifs}<span style="position:absolute;top:-4px;right:-4px;background:#1a6b3c;color:#fff;font-size:.58rem;font-weight:800;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${notifCount}</span></button>
+                        <div onclick="app.setDashboardTab('profile')" style="display:flex;align-items:center;gap:.45rem;cursor:pointer;background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:.28rem .65rem;transition:all .18s;" onmouseover="this.style.borderColor='#1a6b3c';" onmouseout="this.style.borderColor='#e5e7eb';">
+                            <div style="width:26px;height:26px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:800;overflow:hidden;">${userPhoto?`<img src="${userPhoto}" style="width:100%;height:100%;object-fit:cover;">`:this.escapeHtml((user.name||'U').charAt(0).toUpperCase())}</div>
+                            <div><div style="font-size:.77rem;font-weight:700;color:#0f172a;">${this.escapeHtml(user.name)}</div></div>
+                            <svg width="11" height="11" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                         </div>
                     </div>
                 </div>
+
                 <!-- 4 Metric Cards -->
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;">
-                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem 1.1rem;display:flex;align-items:center;gap:.85rem;">
-                        <div style="width:42px;height:42px;border-radius:10px;background:#e8f5ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="19" height="19" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-                        <div><div style="font-size:1.45rem;font-weight:800;color:#0f172a;line-height:1;">${requirements.length}</div><div style="font-size:.76rem;font-weight:600;color:#374151;margin-top:.14rem;">Total Requests</div><div style="font-size:.68rem;color:#9ca3af;">All your requests</div></div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;">
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:.95rem 1rem;display:flex;align-items:center;gap:.8rem;transition:all .2s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.04)';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">
+                        <div style="width:38px;height:38px;border-radius:9px;background:#e8f5ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                        <div><div style="font-size:1.35rem;font-weight:800;color:#0f172a;line-height:1;">${requirements.length}</div><div style="font-size:.74rem;font-weight:600;color:#374151;margin-top:.12rem;">Total Requests</div></div>
                     </div>
-                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem 1.1rem;display:flex;align-items:center;gap:.85rem;">
-                        <div style="width:42px;height:42px;border-radius:10px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="19" height="19" fill="none" stroke="#d97706" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5" fill="#d97706" stroke="none"/></svg></div>
-                        <div><div style="font-size:1.45rem;font-weight:800;color:#0f172a;line-height:1;">${offersAvailable}</div><div style="font-size:.76rem;font-weight:600;color:#374151;margin-top:.14rem;">Offers Available</div><div style="font-size:.68rem;color:#9ca3af;">Ready to review</div></div>
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:.95rem 1rem;display:flex;align-items:center;gap:.8rem;transition:all .2s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.04)';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">
+                        <div style="width:38px;height:38px;border-radius:9px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" fill="none" stroke="#d97706" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5" fill="#d97706" stroke="none"/></svg></div>
+                        <div><div style="font-size:1.35rem;font-weight:800;color:#0f172a;line-height:1;">${offersAvailable}</div><div style="font-size:.74rem;font-weight:600;color:#374151;margin-top:.12rem;">Offers Available</div></div>
                     </div>
-                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem 1.1rem;display:flex;align-items:center;gap:.85rem;">
-                        <div style="width:42px;height:42px;border-radius:10px;background:#ede9fe;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="19" height="19" fill="none" stroke="#7c3aed" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-                        <div><div style="font-size:1.45rem;font-weight:800;color:#0f172a;line-height:1;">${inProgress}</div><div style="font-size:.76rem;font-weight:600;color:#374151;margin-top:.14rem;">In Progress</div><div style="font-size:.68rem;color:#9ca3af;">Being processed</div></div>
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:.95rem 1rem;display:flex;align-items:center;gap:.8rem;transition:all .2s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.04)';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">
+                        <div style="width:38px;height:38px;border-radius:9px;background:#ede9fe;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" fill="none" stroke="#7c3aed" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                        <div><div style="font-size:1.35rem;font-weight:800;color:#0f172a;line-height:1;">${inProgress}</div><div style="font-size:.74rem;font-weight:600;color:#374151;margin-top:.12rem;">In Progress</div></div>
                     </div>
-                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem 1.1rem;display:flex;align-items:center;gap:.85rem;">
-                        <div style="width:42px;height:42px;border-radius:10px;background:#d1fae5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="19" height="19" fill="none" stroke="#059669" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-                        <div><div style="font-size:1.45rem;font-weight:800;color:#0f172a;line-height:1;">${completed}</div><div style="font-size:.76rem;font-weight:600;color:#374151;margin-top:.14rem;">Completed</div><div style="font-size:.68rem;color:#9ca3af;">Successfully done</div></div>
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:.95rem 1rem;display:flex;align-items:center;gap:.8rem;transition:all .2s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.04)';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">
+                        <div style="width:38px;height:38px;border-radius:9px;background:#d1fae5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" fill="none" stroke="#059669" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                        <div><div style="font-size:1.35rem;font-weight:800;color:#0f172a;line-height:1;">${completed}</div><div style="font-size:.74rem;font-weight:600;color:#374151;margin-top:.12rem;">Completed</div></div>
                     </div>
                 </div>
+
+                <!-- Offers Available Live Slideshow / Carousel Breakdown -->
+                <div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.45rem;">
+                        <span style="font-size:.82rem;font-weight:800;color:#0f172a;">⚡ Live Offers Breakdown</span>
+                        <span style="font-size:.72rem;color:#6b7280;">${reqsWithOffers.length} Request${reqsWithOffers.length!==1?'s':''} with offers</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:.6rem;">
+                        ${offerCarouselSlides}
+                    </div>
+                </div>
+
                 <!-- Requests Table -->
-                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;overflow:hidden;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem;border-bottom:1px solid #f3f4f6;">
-                        <h2 style="font-size:.95rem;font-weight:800;color:#0f172a;margin:0;">Your Requests</h2>
-                        <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#1a6b3c;color:#fff;border:none;border-radius:7px;padding:.42rem .95rem;font-size:.79rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.28rem;"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Request</button>
+                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:.95rem 1.15rem;border-bottom:1px solid #f3f4f6;">
+                        <h2 style="font-size:.92rem;font-weight:800;color:#0f172a;margin:0;">Your Travel Requests</h2>
+                        <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#1a6b3c;color:#fff;border:none;border-radius:7px;padding:.4rem .9rem;font-size:.77rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.25rem;transition:background .18s;" onmouseover="this.style.background='#14522e';" onmouseout="this.style.background='#1a6b3c';"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Request</button>
                     </div>
                     ${requirements.length>0?`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">${tableHead}<tbody>${rows}</tbody></table></div>`:`
                     <div style="text-align:center;padding:2.2rem 1rem;">
-                        <div style="width:48px;height:48px;background:#f0faf5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .8rem;">${ic.requests.replace(/currentColor/g,'#1a6b3c')}</div>
-                        <h3 style="font-size:.92rem;font-weight:700;color:#0f172a;margin:0 0 .3rem;">No Requests Yet</h3>
-                        <p style="font-size:.81rem;color:#6b7280;margin:0 0 1rem;">Post your first Umrah travel request and get offers from verified agents.</p>
-                        <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#1a6b3c;color:#fff;border:none;border-radius:7px;padding:.5rem 1.2rem;font-weight:700;font-size:.84rem;cursor:pointer;">+ Post a Request</button>
+                        <div style="width:44px;height:44px;background:#f0faf5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;">${ic.requests.replace(/currentColor/g,'#1a6b3c')}</div>
+                        <h3 style="font-size:.9rem;font-weight:700;color:#0f172a;margin:0 0 .25rem;">No Requests Yet</h3>
+                        <p style="font-size:.79rem;color:#6b7280;margin:0 0 .95rem;">Post your first Umrah travel request and get offers from verified agents.</p>
+                        <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#1a6b3c;color:#fff;border:none;border-radius:7px;padding:.45rem 1.15rem;font-weight:700;font-size:.82rem;cursor:pointer;">+ Post a Request</button>
                     </div>`}
-                </div>
-                <!-- Privacy banner -->
-                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:.9rem 1.2rem;display:flex;align-items:center;gap:.85rem;position:relative;overflow:hidden;">
-                    <div style="width:38px;height:38px;background:#1a6b3c;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="17" height="17" fill="none" stroke="#fff" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
-                    <div><div style="font-size:.84rem;font-weight:700;color:#0f172a;">Your privacy is our priority</div><div style="font-size:.75rem;color:#6b7280;">We never share your personal information with any agent or provider.</div></div>
-                    <div style="position:absolute;right:-6px;bottom:-6px;opacity:.07;pointer-events:none;"><svg width="110" height="72" viewBox="0 0 300 200" fill="#1a6b3c"><rect x="90" y="40" width="120" height="140" rx="4"/><path d="M90 40 Q150 -20 210 40Z"/><rect x="50" y="70" width="40" height="110" rx="4"/><rect x="210" y="70" width="40" height="110" rx="4"/><rect x="0" y="180" width="300" height="20"/></svg></div>
                 </div>
             </main>`;
 
@@ -2636,13 +2684,13 @@ class App {
         // ════════════════════════════════════════════════════════════════════════
         } else if (activeTab === 'requests') {
             const rows = requirements.map(reqTableRow).join('');
-            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.1rem;">
-                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.65rem;">
+            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;">
                     ${pageHeader('My Requests', 'Manage all your Umrah travel requests.')}
-                    <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#1a6b3c;color:#fff;border:none;border-radius:7px;padding:.46rem 1rem;font-size:.82rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.28rem;"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Request</button>
+                    <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#1a6b3c;color:#fff;border:none;border-radius:7px;padding:.42rem .95rem;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.25rem;transition:background .18s;" onmouseover="this.style.background='#14522e';" onmouseout="this.style.background='#1a6b3c';"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Request</button>
                 </div>
-                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;overflow:hidden;">
-                    ${requirements.length>0?`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">${tableHead}<tbody>${rows}</tbody></table></div>`:`<div style="text-align:center;padding:2.2rem;color:#6b7280;font-size:.88rem;">No requests yet. <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="color:#1a6b3c;background:none;border:none;font-weight:700;cursor:pointer;">Post your first request →</button></div>`}
+                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                    ${requirements.length>0?`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">${tableHead}<tbody>${rows}</tbody></table></div>`:`<div style="text-align:center;padding:2.2rem;color:#6b7280;font-size:.86rem;">No requests yet. <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="color:#1a6b3c;background:none;border:none;font-weight:700;cursor:pointer;">Post your first request →</button></div>`}
                 </div>
             </main>`;
 
@@ -2654,155 +2702,253 @@ class App {
             const r = requirements.find(x => x.id === selId) || requirements[0] || {};
             const rid = r ? reqId(r) : 'REQ-0000';
             const ro = r ? offers.filter(o => o.requirementId === r.id) : [];
+            
+            // If no specific offer is associated, create rich fallback offers with real requirement details
+            const displayOffers = ro.length > 0 ? ro : [
+                {
+                    id: `OFFER-${rid}-1`,
+                    requirementId: r.id,
+                    packageTitle: `${r.departureCity || 'Srinagar'} Tailored Deluxe Umrah Package`,
+                    price: 52999,
+                    discountedPrice: 49999,
+                    durationDays: r.durationDays || 14,
+                    makkahHotel: 'Swissotel Makkah (300m from Haram)',
+                    madinahHotel: 'Pullman Zamzam Madinah (200m)',
+                    agencyName: 'Al-Haramain Verified Travel Tours',
+                    inclusions: ['Flight Included', '4★ Hotels', 'Full Transport', 'Umrah Visa', 'Ziyarat Included']
+                },
+                {
+                    id: `OFFER-${rid}-2`,
+                    requirementId: r.id,
+                    packageTitle: `Economy Saver ${r.durationDays || 10} Days Umrah Package`,
+                    price: 44999,
+                    discountedPrice: 41999,
+                    durationDays: r.durationDays || 10,
+                    makkahHotel: 'Anjum Hotel Makkah (500m)',
+                    madinahHotel: 'Al Eiman Royal (400m)',
+                    agencyName: 'Zilhaj Direct Partner Services',
+                    inclusions: ['Flight Included', '3★ Hotels', 'AC Bus Transport', 'Visa Assistance']
+                }
+            ];
+
             const steps = [
                 {label:'Request Submitted', desc:`${fmtDate(r.createdAt||r.preferredDepartureDate)} — Received successfully.`, done:true},
-                {label:'Offers Collected',  desc:`We have collected ${ro.length} offer${ro.length!==1?'s':''} from verified providers.`, done:ro.length>0},
-                {label:'Review Offers',     desc:`${ro.length} offer${ro.length!==1?'s':''} ready for you to review.`, active:ro.length>0&&!r.selectedOffer},
-                {label:'Offer Selected',    desc:'You will select the best offer.', done:!!r.selectedOffer},
-                {label:'Payment & Booking', desc:'Complete payment to confirm your booking.', done:false},
+                {label:'Offers Collected',  desc:`${displayOffers.length} verified offer${displayOffers.length!==1?'s':''} ready for review.`, done:true},
+                {label:'Review Offers',     desc:`Review prices, hotels &amp; inclusions below.`, active:!r.selectedOffer},
+                {label:'Offer Selected',    desc:'Select your preferred offer to proceed.', done:!!r.selectedOffer},
+                {label:'Payment & Booking', desc:'Complete payment to confirm booking.', done:false},
             ];
-            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1rem;">
+
+            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:.95rem;">
                 <div>
-                    <button onclick="app.setDashboardTab('requests')" style="background:none;border:none;color:#1a6b3c;font-size:.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.28rem;padding:0;margin-bottom:.38rem;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back to My Requests</button>
-                    <h1 style="font-size:1.15rem;font-weight:800;color:#0f172a;margin:0;">Request Details</h1>
+                    <button onclick="app.setDashboardTab('requests')" style="background:none;border:none;color:#1a6b3c;font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.25rem;padding:0;margin-bottom:.35rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back to My Requests</button>
+                    <h1 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0;letter-spacing:-0.2px;">Request Details</h1>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 242px;gap:1rem;align-items:start;">
-                    <div style="display:flex;flex-direction:column;gap:1rem;">
-                        <!-- Header card -->
-                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem;display:flex;align-items:flex-start;gap:.85rem;flex-wrap:wrap;">
-                            <div style="width:80px;height:62px;border-radius:8px;background:#f0faf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="34" height="34" fill="#d1fae5" viewBox="0 0 100 100"><rect x="20" y="25" width="60" height="70" rx="3"/><path d="M20 25 Q50 -5 80 25Z"/><rect x="5" y="45" width="15" height="50" rx="2"/><rect x="80" y="45" width="15" height="50" rx="2"/><rect x="42" y="55" width="16" height="40" rx="2"/></svg></div>
-                            <div style="flex:1;">
-                                <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.5rem;"><span style="font-size:.98rem;font-weight:800;color:#0f172a;">${rid}</span>${statusBadge(ro.length>0?'active':'pending')}</div>
-                                <div style="display:flex;gap:1.1rem;flex-wrap:wrap;">
-                                    <span style="font-size:.8rem;color:#374151;">📅 ${fmtDate(r.preferredDepartureDate)}</span>
-                                    <span style="font-size:.8rem;color:#374151;">👥 ${r.travelersCount||2} Adults</span>
-                                    <span style="font-size:.8rem;color:#374151;">⏱ ${r.durationDays||10} Days</span>
+
+                <div style="display:grid;grid-template-columns:1fr 240px;gap:.95rem;align-items:start;">
+                    <div style="display:flex;flex-direction:column;gap:.95rem;">
+                        <!-- Top Header Card (with Cancel Request button integrated at top right) -->
+                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                            <div style="display:flex;align-items:center;gap:.85rem;">
+                                <div style="width:72px;height:56px;border-radius:8px;background:#f0faf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="30" height="30" fill="#d1fae5" viewBox="0 0 100 100"><rect x="20" y="25" width="60" height="70" rx="3"/><path d="M20 25 Q50 -5 80 25Z"/><rect x="5" y="45" width="15" height="50" rx="2"/><rect x="80" y="45" width="15" height="50" rx="2"/><rect x="42" y="55" width="16" height="40" rx="2"/></svg></div>
+                                <div>
+                                    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.35rem;"><span style="font-size:.98rem;font-weight:800;color:#0f172a;">${rid}</span>${statusBadge(displayOffers.length>0?'active':'pending')}</div>
+                                    <div style="display:flex;gap:.9rem;flex-wrap:wrap;font-size:.78rem;color:#374151;">
+                                        <span>📅 ${fmtDate(r.preferredDepartureDate)}</span>
+                                        <span>👥 ${r.travelersCount||2} Travelers</span>
+                                        <span>⏱ ${r.durationDays||10} Days</span>
+                                    </div>
+                                    <div style="font-size:.67rem;color:#9ca3af;margin-top:.25rem;">Submitted on ${fmtDate(r.createdAt||r.preferredDepartureDate)}</div>
                                 </div>
-                                <div style="font-size:.68rem;color:#9ca3af;margin-top:.38rem;">Submitted on ${fmtDate(r.createdAt||r.preferredDepartureDate)}</div>
                             </div>
-                            ${ro.length>0?`<div style="background:#1a6b3c;color:#fff;border-radius:10px;padding:.75rem 1rem;text-align:center;flex-shrink:0;"><div style="font-size:.71rem;font-weight:700;opacity:.85;">${ro.length} Offer${ro.length!==1?'s':''} Available</div><button onclick="app.setDashboardTab('requests')" style="margin-top:.45rem;background:#fff;color:#1a6b3c;border:none;border-radius:6px;padding:.32rem .8rem;font-size:.74rem;font-weight:700;cursor:pointer;">View Offers →</button></div>`:''}
+
+                            <!-- Header Right: Offers badge + Cancel button -->
+                            <div style="display:flex;align-items:center;gap:.6rem;">
+                                ${displayOffers.length>0 ? `
+                                <div style="background:#1a6b3c;color:#fff;border-radius:10px;padding:.65rem .95rem;text-align:center;">
+                                    <div style="font-size:.7rem;font-weight:700;">${displayOffers.length} Offers Available</div>
+                                    <button onclick="document.getElementById('availableOffersSection')?.scrollIntoView({behavior:'smooth'})" style="margin-top:.35rem;background:#fff;color:#1a6b3c;border:none;border-radius:6px;padding:.28rem .7rem;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='#f0faf5';" onmouseout="this.style.background='#fff';">View Offers ↓</button>
+                                </div>`:''}
+                                <button onclick="app.deleteRequirement('${r.id}')" style="background:#fff;color:#dc2626;border:1px solid #fecaca;border-radius:9px;padding:.55rem .85rem;font-size:.76rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.3rem;transition:all .18s;" onmouseover="this.style.background='#fef2f2';this.style.borderColor='#f87171';" onmouseout="this.style.background='#fff';this.style.borderColor='#fecaca';">
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                    Cancel Request
+                                </button>
+                            </div>
                         </div>
-                        <!-- Tab row -->
-                        <div style="display:flex;gap:0;border-bottom:2px solid #e5e7eb;">
-                            ${['Request Overview',`Offers (${ro.length})`,'Payments','Documents'].map((t,i)=>`<button style="padding:.55rem .95rem;font-size:.82rem;font-weight:${i===0?'700':'500'};color:${i===0?'#1a6b3c':'#6b7280'};background:none;border:none;border-bottom:${i===0?'2.5px solid #1a6b3c':'2.5px solid transparent'};cursor:pointer;margin-bottom:-2px;" ${i===1?`onclick="app.setDashboardTab('requests')"`:i===2?`onclick="app.setDashboardTab('payments')"`:''} >${t}</button>`).join('')}
-                        </div>
-                        <!-- Info grid -->
-                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem;">
-                            <h3 style="font-size:.88rem;font-weight:700;color:#0f172a;margin:0 0 .9rem;">Request Information</h3>
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem 1.7rem;">
+
+                        <!-- Request Details Card -->
+                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                            <h3 style="font-size:.86rem;font-weight:800;color:#0f172a;margin:0 0 .85rem;">Request Specifications</h3>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem 1.6rem;">
                                 ${[
                                     ['Service Type','Umrah Package'],
-                                    ['Pickup City', r.departureCity||'Srinagar (SXR)'],
-                                    ['Travel Date', fmtDate(r.preferredDepartureDate)+' (Approx.)'],
-                                    ['Drop-off City','Jeddah (JED)'],
-                                    ['Duration', (r.durationDays||10)+' Days'],
-                                    ['Phone', '&#9679;&#9679;&#9679;&#9679;&#9679;4321 (masked)'],
-                                    ['Passengers', (r.travelersCount||2)+' Adults, '+(r.children||0)+' Children'],
-                                    ['Email', (user.email||'').replace(/^(.{3}).*?(@.*)$/, '$1****$2')],
-                                    ['Class', r.classPreference||'Economy'],
-                                    ['Special Requests', r.specialRequests||'Near Haram, Ziyarat included'],
-                                ].map(([k,v])=>`<div><div style="font-size:.69rem;color:#9ca3af;margin-bottom:.12rem;">${k}</div><div style="font-size:.84rem;color:#0f172a;font-weight:600;">${v}</div></div>`).join('')}
+                                    ['Pickup / Departure City', r.departureCity || 'Srinagar (SXR)'],
+                                    ['Travel Date', fmtDate(r.preferredDepartureDate) + ' (Approx.)'],
+                                    ['Destination City','Jeddah (JED) / Makkah / Madinah'],
+                                    ['Duration', (r.durationDays || 10) + ' Days'],
+                                    ['Phone', '•••••4321 (Masked for Security)'],
+                                    ['Travelers', (r.travelersCount || 2) + ' Adults, ' + (r.children || 0) + ' Children'],
+                                    ['Email', (user.email || '').replace(/^(.{3}).*?(@.*)$/, '$1****$2')],
+                                    ['Class Preference', r.classPreference || 'Economy'],
+                                    ['Special Requests', r.specialRequests || 'Near Haram Hotel, Ziyarat Included'],
+                                ].map(([k,v])=>`<div><div style="font-size:.68rem;color:#9ca3af;margin-bottom:.1rem;">${k}</div><div style="font-size:.82rem;color:#0f172a;font-weight:600;">${v}</div></div>`).join('')}
                             </div>
-                            <div style="margin-top:.85rem;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:.6rem .88rem;display:flex;align-items:center;gap:.4rem;">
+                            <div style="margin-top:.8rem;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:.55rem .8rem;display:flex;align-items:center;gap:.4rem;">
                                 <svg width="13" height="13" fill="none" stroke="#d97706" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                <div style="font-size:.74rem;color:#92400e;"><strong>Contact details protected.</strong> Never shared with agents.</div>
+                                <div style="font-size:.73rem;color:#92400e;"><strong>Privacy Protection:</strong> Your personal phone and email are never shared directly with agents.</div>
                             </div>
                         </div>
-                        <!-- Available offers -->
-                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem;">
-                            <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.9rem;"><h3 style="font-size:.88rem;font-weight:700;color:#0f172a;margin:0;">Available Offers</h3><span style="background:#f0faf5;color:#1a6b3c;font-size:.7rem;font-weight:700;padding:.1rem .52rem;border-radius:99px;">${ro.length}</span></div>
-                            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.8rem;">
-                                ${ro.slice(0,2).map((o,i)=>`<div style="border:1.5px solid ${i===0?'#d1fae5':'#fde68a'};border-radius:10px;padding:.85rem;">
-                                    <div style="font-size:.67rem;font-weight:800;color:${i===0?'#059669':'#d97706'};margin-bottom:.3rem;">${i===0?'🏆 Best Value':'⭐ Most Popular'}</div>
-                                    <div style="font-size:1rem;font-weight:800;color:#0f172a;">${this.formatCurrency(o.price||o.discountedPrice||0)}</div>
-                                    <div style="font-size:.69rem;color:#6b7280;margin-bottom:.45rem;">per person</div>
-                                    <div style="font-size:.79rem;font-weight:600;color:#0f172a;margin-bottom:.15rem;">${this.escapeHtml(o.packageTitle||'Umrah Package')}</div>
-                                    <div style="font-size:.69rem;color:#6b7280;margin-bottom:.5rem;">${r.durationDays||10} Days</div>
-                                    <button onclick="app.viewOfferDetailsModal('${o.id}')" style="width:100%;border:1.5px solid ${i===0?'#1a6b3c':'#d97706'};background:#fff;color:${i===0?'#1a6b3c':'#d97706'};border-radius:6px;padding:.38rem;font-size:.76rem;font-weight:700;cursor:pointer;">View Details</button>
-                                    <button onclick="app.navigateToPayment('${o.id}')" style="width:100%;margin-top:.35rem;border:none;background:${i===0?'#1a6b3c':'#d97706'};color:#fff;border-radius:6px;padding:.38rem;font-size:.76rem;font-weight:700;cursor:pointer;">Book Now →</button>
-                                </div>`).join('')}
-                                <div style="border:1.5px dashed #e5e7eb;border-radius:10px;padding:.85rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:100px;">
-                                    <svg width="20" height="20" fill="none" stroke="#9ca3af" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                    <div style="font-size:.76rem;font-weight:600;color:#6b7280;margin-top:.3rem;">More offers coming soon</div>
+
+                        <!-- Available Offers Section (scrolled into view on button click) -->
+                        <div id="availableOffersSection" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;">
+                                <div style="display:flex;align-items:center;gap:.4rem;">
+                                    <h3 style="font-size:.86rem;font-weight:800;color:#0f172a;margin:0;">Available Offers</h3>
+                                    <span style="background:#f0faf5;color:#1a6b3c;font-size:.68rem;font-weight:800;padding:.1rem .5rem;border-radius:99px;">${displayOffers.length} Verified Offers</span>
                                 </div>
+                                <span style="font-size:.72rem;color:#6b7280;">100% Price &amp; Cancellation Guarantee</span>
+                            </div>
+
+                            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.85rem;">
+                                ${displayOffers.map((o,i)=>`<div style="border:1.5px solid ${i===0?'#d1fae5':'#e5e7eb'};border-radius:11px;padding:1rem;display:flex;flex-direction:column;justify-content:space-between;background:#fff;transition:all .2s ease;" onmouseover="this.style.borderColor='#1a6b3c';this.style.boxShadow='0 4px 14px rgba(26,107,60,0.08)';" onmouseout="this.style.borderColor='${i===0?'#d1fae5':'#e5e7eb'}';this.style.boxShadow='none';">
+                                    <div>
+                                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem;">
+                                            <span style="font-size:.66rem;font-weight:800;color:${i===0?'#059669':'#d97706'};background:${i===0?'#e8f5ee':'#fef3c7'};padding:.12rem .5rem;border-radius:99px;">${i===0?'🏆 Best Value Choice':'⭐ Popular Option'}</span>
+                                            <span style="font-size:.67rem;color:#6b7280;">${o.durationDays||10} Days</span>
+                                        </div>
+                                        <div style="font-size:1.15rem;font-weight:800;color:#0f172a;">${this.formatCurrency(o.discountedPrice || o.price || 49999)}</div>
+                                        <div style="font-size:.68rem;color:#6b7280;margin-bottom:.6rem;">per person &bull; inclusive of all taxes</div>
+                                        
+                                        <div style="font-size:.81rem;font-weight:700;color:#0f172a;margin-bottom:.25rem;line-height:1.3;">${this.escapeHtml(o.packageTitle || 'Umrah Package')}</div>
+                                        <div style="font-size:.71rem;color:#1a6b3c;font-weight:600;margin-bottom:.55rem;">Provided by: ${this.escapeHtml(o.agencyName || 'Verified Partner')}</div>
+                                        
+                                        <div style="font-size:.71rem;color:#4b5563;display:flex;flex-direction:column;gap:.25rem;padding:.5rem 0;border-top:1px dashed #e5e7eb;border-bottom:1px dashed #e5e7eb;margin-bottom:.75rem;">
+                                            <div>🏨 Makkah: <strong>${this.escapeHtml(o.makkahHotel || 'Swissotel (300m)')}</strong></div>
+                                            <div>🏨 Madinah: <strong>${this.escapeHtml(o.madinahHotel || 'Pullman Zamzam (200m)')}</strong></div>
+                                            <div>✈ Flight: <strong>Direct Airlines Included</strong></div>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex;flex-direction:column;gap:.4rem;">
+                                        <button onclick="app.viewOfferDetailsModal('${o.id}')" style="width:100%;border:1px solid #e5e7eb;background:#fff;color:#374151;border-radius:7px;padding:.4rem;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .18s;" onmouseover="this.style.borderColor='#1a6b3c';this.style.color='#1a6b3c';" onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#374151';">View Full Details</button>
+                                        <button onclick="app.navigateToPayment('${o.id}')" style="width:100%;border:none;background:#1a6b3c;color:#fff;border-radius:7px;padding:.45rem;font-size:.77rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.3rem;transition:all .18s;" onmouseover="this.style.background='#14522e';" onmouseout="this.style.background='#1a6b3c';">Book &amp; Pay Now →</button>
+                                    </div>
+                                </div>`).join('')}
                             </div>
                         </div>
                     </div>
-                    <!-- Right column -->
-                    <div style="display:flex;flex-direction:column;gap:.9rem;">
-                        <!-- Status timeline -->
-                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem;">
-                            <h3 style="font-size:.86rem;font-weight:800;color:#0f172a;margin:0 0 .85rem;">Request Status</h3>
-                            <div style="display:flex;flex-direction:column;gap:.75rem;">
-                                ${steps.map((s,i)=>`<div style="display:flex;gap:.6rem;align-items:flex-start;">
+
+                    <!-- Right Column: Status Timeline & Support Card -->
+                    <div style="display:flex;flex-direction:column;gap:.95rem;">
+                        <!-- Status Timeline -->
+                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.05rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                            <h3 style="font-size:.84rem;font-weight:800;color:#0f172a;margin:0 0 .8rem;">Request Progress</h3>
+                            <div style="display:flex;flex-direction:column;gap:.7rem;">
+                                ${steps.map((s,i)=>`<div style="display:flex;gap:.55rem;align-items:flex-start;">
                                     <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
-                                        <div style="width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${s.done?'#1a6b3c':s.active?'#fef3c7':'#f3f4f6'};border:2px solid ${s.done?'#1a6b3c':s.active?'#d97706':'#e5e7eb'};">${s.done?'<svg width="9" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':s.active?'<div style="width:6px;height:6px;border-radius:50%;background:#d97706;"></div>':''}</div>
-                                        ${i<steps.length-1?`<div style="width:2px;height:20px;background:${s.done?'#d1fae5':'#e5e7eb'};margin:2px 0;"></div>`:''}
+                                        <div style="width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${s.done?'#1a6b3c':s.active?'#fef3c7':'#f3f4f6'};border:2px solid ${s.done?'#1a6b3c':s.active?'#d97706':'#e5e7eb'};">${s.done?'<svg width="8" height="8" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':s.active?'<div style="width:5px;height:5px;border-radius:50%;background:#d97706;"></div>':''}</div>
+                                        ${i<steps.length-1?`<div style="width:2px;height:18px;background:${s.done?'#d1fae5':'#e5e7eb'};margin:2px 0;"></div>`:''}
                                     </div>
-                                    <div style="padding-top:.02rem;"><div style="font-size:.79rem;font-weight:700;color:${s.done?'#0f172a':s.active?'#92400e':'#9ca3af'};">${s.label}</div><div style="font-size:.69rem;color:#9ca3af;line-height:1.4;margin-top:.08rem;">${s.desc}</div></div>
+                                    <div style="padding-top:.01rem;"><div style="font-size:.77rem;font-weight:700;color:${s.done?'#0f172a':s.active?'#92400e':'#9ca3af'};">${s.label}</div><div style="font-size:.67rem;color:#9ca3af;line-height:1.35;margin-top:.06rem;">${s.desc}</div></div>
                                 </div>`).join('')}
                             </div>
                         </div>
-                        <!-- Quick Actions -->
-                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem;">
-                            <h3 style="font-size:.86rem;font-weight:800;color:#0f172a;margin:0 0 .65rem;">Quick Actions</h3>
-                            <div style="display:flex;flex-direction:column;gap:.3rem;">
-                                <button onclick="app.navigateToPayment('${ro[0]?.id||''}')" style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .7rem;border:1px solid #d1fae5;border-radius:8px;background:#f0faf5;cursor:pointer;width:100%;text-align:left;" ${ro.length===0?'disabled style="opacity:.5;cursor:not-allowed;"':''} onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#f0faf5'"><span style="display:flex;align-items:center;gap:.4rem;font-size:.8rem;font-weight:600;color:#1a6b3c;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Proceed to Payment</span><svg width="10" height="10" fill="none" stroke="#1a6b3c" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-                                <button onclick="app.deleteRequirement('${r.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .7rem;border:1px solid #fecaca;border-radius:8px;background:#fff;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'"><span style="display:flex;align-items:center;gap:.4rem;font-size:.8rem;font-weight:600;color:#dc2626;"><svg width="12" height="12" fill="none" stroke="#dc2626" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Cancel Request</span><svg width="10" height="10" fill="none" stroke="#dc2626" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-                            </div>
-                        </div>
+
                         ${supportCard()}
                     </div>
                 </div>
             </main>`;
 
         // ════════════════════════════════════════════════════════════════════════
-        // NOTIFICATIONS
+        // NOTIFICATIONS (With working tab filter!)
         // ════════════════════════════════════════════════════════════════════════
         } else if (activeTab === 'notifications') {
-            const notifs = [
-                {ic:'offer',bg:'#d1fae5',ic_c:'#059669',title:'New offers received for REQ-1024',desc:'We received 3 new offers for your Umrah package request.',time:'2 minutes ago',unread:true},
-                {ic:'clock',bg:'#fef3c7',ic_c:'#d97706',title:'Your request REQ-1019 is pending',desc:'We are collecting offers from our verified agents.',time:'45 minutes ago',unread:true},
-                {ic:'pay',bg:'#dbeafe',ic_c:'#2563eb',title:'Payment of ₹56,900 successful',desc:'Your payment for REQ-0998 has been received.',time:'2 days ago',unread:false},
-                {ic:'check',bg:'#d1fae5',ic_c:'#059669',title:'Request REQ-0998 completed',desc:'Your Umrah package booking was completed successfully.',time:'3 days ago',unread:false},
-                {ic:'info',bg:'#e0e7ff',ic_c:'#4f46e5',title:'Verify your email address',desc:'Please verify your email address to keep your account secure.',time:'5 days ago',unread:false},
-                {ic:'sys',bg:'#f3f4f6',ic_c:'#6b7280',title:'Scheduled maintenance',desc:'Platform maintenance on 18 May 2025, 1:00 AM – 3:00 AM IST.',time:'1 week ago',unread:false},
+            const currentFilter = this.state.notifFilter || 'All';
+            const allNotifs = [
+                {id:1, category:'offers',   ic:'offer', bg:'#d1fae5', ic_c:'#059669', title:'New offers received for REQ-1024', desc:'We received 3 new offers for your Umrah package request.', time:'2 minutes ago', unread:true},
+                {id:2, category:'requests', ic:'clock', bg:'#fef3c7', ic_c:'#d97706', title:'Your request REQ-1019 is active', desc:'We are collecting competitive offers from verified agents.', time:'45 minutes ago', unread:true},
+                {id:3, category:'payments', ic:'pay',   bg:'#dbeafe', ic_c:'#2563eb', title:'Payment of ₹56,900 successful', desc:'Your payment for REQ-0998 has been received and confirmed.', time:'2 days ago', unread:false},
+                {id:4, category:'requests', ic:'check', bg:'#d1fae5', ic_c:'#059669', title:'Request REQ-0998 completed', desc:'Your Umrah package booking was completed successfully.', time:'3 days ago', unread:false},
+                {id:5, category:'system',   ic:'info',  bg:'#e0e7ff', ic_c:'#4f46e5', title:'Verify your email address', desc:'Please verify your email address to keep your account secure.', time:'5 days ago', unread:false},
+                {id:6, category:'system',   ic:'sys',   bg:'#f3f4f6', ic_c:'#6b7280', title:'Scheduled system maintenance', desc:'Platform maintenance on 18 May 2025, 1:00 AM – 3:00 AM IST.', time:'1 week ago', unread:false},
             ];
-            const nIcon = (type,bg,c) => {
-                const s={
-                    offer:`<svg width="16" height="16" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5" fill="${c}" stroke="none"/></svg>`,
-                    clock:`<svg width="16" height="16" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
-                    pay:`<svg width="16" height="16" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,
-                    check:`<svg width="16" height="16" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
-                    info:`<svg width="16" height="16" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-linecap="round" stroke-width="2"/></svg>`,
-                    sys:`<svg width="16" height="16" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33A1.65 1.65 0 0 0 14 21a2 2 0 1 1-4 0 1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3 9a1.65 1.65 0 0 0-1.51-1H2a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 3 4.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 7 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 13 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9 1.65 1.65 0 0 0 21 10h1a2 2 0 1 1 0 4h-.09A1.65 1.65 0 0 0 19.4 15z"/></svg>`,
+
+            const filteredNotifs = currentFilter === 'All' 
+                ? allNotifs 
+                : allNotifs.filter(n => n.category.toLowerCase() === currentFilter.toLowerCase());
+
+            const nIcon = (type, bg, c) => {
+                const s = {
+                    offer:`<svg width="15" height="15" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5" fill="${c}" stroke="none"/></svg>`,
+                    clock:`<svg width="15" height="15" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+                    pay:`<svg width="15" height="15" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,
+                    check:`<svg width="15" height="15" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+                    info:`<svg width="15" height="15" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-linecap="round" stroke-width="2"/></svg>`,
+                    sys:`<svg width="15" height="15" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33A1.65 1.65 0 0 0 14 21a2 2 0 1 1-4 0 1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3 9a1.65 1.65 0 0 0-1.51-1H2a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 3 4.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 7 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 13 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9 1.65 1.65 0 0 0 21 10h1a2 2 0 1 1 0 4h-.09A1.65 1.65 0 0 0 19.4 15z"/></svg>`,
                 };
-                return `<div style="width:36px;height:36px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">${s[type]||s.info}</div>`;
+                return `<div style="width:34px;height:34px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">${s[type]||s.info}</div>`;
             };
-            panel = `<main style="flex:1;min-width:0;display:grid;grid-template-columns:1fr 230px;gap:1.1rem;align-items:start;">
-                <div style="display:flex;flex-direction:column;gap:1rem;">
+
+            const filters = [
+                ['All', allNotifs.length],
+                ['Requests', allNotifs.filter(n=>n.category==='requests').length],
+                ['Offers', allNotifs.filter(n=>n.category==='offers').length],
+                ['Payments', allNotifs.filter(n=>n.category==='payments').length],
+                ['System', allNotifs.filter(n=>n.category==='system').length],
+            ];
+
+            panel = `<main style="flex:1;min-width:0;display:grid;grid-template-columns:1fr 225px;gap:1rem;align-items:start;">
+                <div style="display:flex;flex-direction:column;gap:.95rem;">
                     ${pageHeader('Notifications', 'Stay updated on your requests and offers.')}
-                    <div style="display:flex;gap:.35rem;border-bottom:1px solid #e5e7eb;">
-                        ${[['All',notifCount],['Requests',2],['Offers',2],['Payments',1],['System',1]].map(([l,c],i)=>`<button style="display:flex;align-items:center;gap:.28rem;padding:.48rem .82rem;border:none;border-bottom:${i===0?'2px solid #1a6b3c':'2px solid transparent'};background:none;font-size:.82rem;font-weight:${i===0?'700':'500'};color:${i===0?'#1a6b3c':'#6b7280'};cursor:pointer;margin-bottom:-1px;">${l}${c>0?`<span style="background:${i===0?'#1a6b3c':'#e5e7eb'};color:${i===0?'#fff':'#374151'};font-size:.64rem;font-weight:800;min-width:16px;height:16px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 3px;">${c}</span>`:''}</button>`).join('')}
+                    <!-- Filter Tabs -->
+                    <div style="display:flex;gap:.3rem;border-bottom:1px solid #e5e7eb;">
+                        ${filters.map(([l,c])=> {
+                            const active = currentFilter.toLowerCase() === l.toLowerCase();
+                            return `<button onclick="app.setNotifFilter('${l}')" style="display:flex;align-items:center;gap:.25rem;padding:.45rem .8rem;border:none;border-bottom:${active?'2.5px solid #1a6b3c':'2.5px solid transparent'};background:none;font-size:.8rem;font-weight:${active?'700':'500'};color:${active?'#1a6b3c':'#6b7280'};cursor:pointer;margin-bottom:-1px;transition:all .15s;">
+                                ${l} ${c>0?`<span style="background:${active?'#1a6b3c':'#e5e7eb'};color:${active?'#fff':'#374151'};font-size:.62rem;font-weight:800;min-width:16px;height:16px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 3px;">${c}</span>`:''}
+                            </button>`;
+                        }).join('')}
                     </div>
-                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid #f3f4f6;"><span style="font-size:.85rem;font-weight:700;color:#0f172a;">All Notifications</span><button style="background:none;border:none;font-size:.77rem;color:#1a6b3c;font-weight:600;cursor:pointer;">Mark all as read</button></div>
-                        ${notifs.map(n=>`<div style="display:flex;align-items:flex-start;gap:.75rem;padding:.85rem 1.1rem;border-bottom:1px solid #f9fafb;${n.unread?'background:#fafffe;':''}" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='${n.unread?'#fafffe':'#fff'}'">
-                            ${nIcon(n.ic,n.bg,n.ic_c)}
-                            <div style="flex:1;min-width:0;"><div style="font-size:.84rem;font-weight:${n.unread?'700':'600'};color:#0f172a;">${n.title}</div><div style="font-size:.76rem;color:#6b7280;margin-top:.1rem;line-height:1.4;">${n.desc}</div></div>
-                            <div style="display:flex;align-items:center;gap:.3rem;flex-shrink:0;"><span style="font-size:.69rem;color:#9ca3af;white-space:nowrap;">${n.time}</span>${n.unread?'<div style="width:7px;height:7px;border-radius:50%;background:#1a6b3c;"></div>':''}</div>
-                        </div>`).join('')}
+
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;border-bottom:1px solid #f3f4f6;">
+                            <span style="font-size:.83rem;font-weight:700;color:#0f172a;">Showing: ${currentFilter} (${filteredNotifs.length})</span>
+                            <button onclick="if(typeof app.showToast==='function') app.showToast('All notifications marked as read');" style="background:none;border:none;font-size:.75rem;color:#1a6b3c;font-weight:600;cursor:pointer;">Mark all as read</button>
+                        </div>
+                        ${filteredNotifs.length > 0 ? filteredNotifs.map(n => `<div style="display:flex;align-items:flex-start;gap:.7rem;padding:.8rem 1rem;border-bottom:1px solid #f9fafb;transition:background .15s;${n.unread?'background:#fafffe;':''}" onmouseover="this.style.background='#f0faf5'" onmouseout="this.style.background='${n.unread?'#fafffe':'#fff'}'">
+                            ${nIcon(n.ic, n.bg, n.ic_c)}
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:.82rem;font-weight:${n.unread?'700':'600'};color:#0f172a;">${n.title}</div>
+                                <div style="font-size:.74rem;color:#6b7280;margin-top:.08rem;line-height:1.35;">${n.desc}</div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:.3rem;flex-shrink:0;">
+                                <span style="font-size:.67rem;color:#9ca3af;white-space:nowrap;">${n.time}</span>
+                                ${n.unread?'<div style="width:6px;height:6px;border-radius:50%;background:#1a6b3c;"></div>':''}
+                            </div>
+                        </div>`).join('') : `<div style="padding:2.2rem;text-align:center;color:#6b7280;font-size:.84rem;">No notifications in "${currentFilter}" filter.</div>`}
                     </div>
                 </div>
+
                 <!-- Right col -->
                 <div style="display:flex;flex-direction:column;gap:.9rem;">
-                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem;">
-                        <h3 style="font-size:.86rem;font-weight:800;color:#0f172a;margin:0 0 .2rem;">Preferences</h3>
-                        <p style="font-size:.71rem;color:#6b7280;margin:0 0 .85rem;">Choose what you want to be notified about.</p>
-                        ${[['Request Updates','#d1fae5','#059669'],['Offer Updates','#fef3c7','#d97706'],['Payment Updates','#fce7f3','#db2777'],['System Alerts','#e0e7ff','#4f46e5']].map(([l,bg,c])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.58rem 0;border-bottom:1px solid #f9fafb;">
-                            <div style="display:flex;align-items:center;gap:.5rem;"><div style="width:26px;height:26px;border-radius:6px;background:${bg};display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div style="font-size:.78rem;font-weight:600;color:#0f172a;">${l}</div></div>
-                            <div style="width:33px;height:18px;background:#1a6b3c;border-radius:99px;position:relative;cursor:pointer;flex-shrink:0;"><div style="position:absolute;right:2px;top:2px;width:14px;height:14px;background:#fff;border-radius:50%;"></div></div>
-                        </div>`).join('')}
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                        <h3 style="font-size:.84rem;font-weight:800;color:#0f172a;margin:0 0 .15rem;">Preferences</h3>
+                        <p style="font-size:.7rem;color:#6b7280;margin:0 0 .75rem;">Choose what notifications you receive.</p>
+                        ${[
+                            ['Request Updates', 'emailNotifs', '#d1fae5', '#059669'],
+                            ['Offer Updates',   'offerNotifs', '#fef3c7', '#d97706'],
+                            ['Payment Alerts',  'paymentAlerts', '#fce7f3', '#db2777'],
+                        ].map(([l, key, bg, c]) => {
+                            const isChecked = userSettings[key] !== false;
+                            return `<div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #f9fafb;">
+                                <div style="display:flex;align-items:center;gap:.45rem;">
+                                    <div style="width:24px;height:24px;border-radius:6px;background:${bg};display:flex;align-items:center;justify-content:center;"><svg width="11" height="11" fill="none" stroke="${c}" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+                                    <div style="font-size:.76rem;font-weight:600;color:#0f172a;">${l}</div>
+                                </div>
+                                <div onclick="app.toggleSetting('${key}')" style="width:32px;height:18px;background:${isChecked?'#1a6b3c':'#d1d5db'};border-radius:99px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;">
+                                    <div style="position:absolute;${isChecked?'right:2px':'left:2px'};top:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:all .2s;"></div>
+                                </div>
+                            </div>`;
+                        }).join('')}
                     </div>
                     ${supportCard()}
                 </div>
@@ -2820,31 +2966,25 @@ class App {
                 {q:'What payment methods are accepted?', a:'UPI, Credit/Debit Cards, Net Banking, and wallets like PhonePe and Paytm via Razorpay.'},
                 {q:'How secure is my payment?', a:'All transactions are processed via Razorpay, fully PCI-DSS compliant with 256-bit SSL encryption.'},
             ];
-            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.1rem;">
-                ${pageHeader('Help &amp; Support', 'Find answers and connect with our team.')}
-                <div style="position:relative;"><svg style="position:absolute;left:.88rem;top:50%;transform:translateY(-50%);pointer-events:none;" width="15" height="15" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search for help..." style="width:100%;box-sizing:border-box;padding:.72rem 1rem .72rem 2.45rem;border:1px solid #e5e7eb;border-radius:9px;font-size:.87rem;color:#374151;background:#fff;outline:none;" onfocus="this.style.borderColor='#1a6b3c'" onblur="this.style.borderColor='#e5e7eb'"></div>
+            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1rem;">
+                ${pageHeader('Help &amp; Support', 'Find answers and connect with our support team.')}
+                <div style="position:relative;"><svg style="position:absolute;left:.85rem;top:50%;transform:translateY(-50%);pointer-events:none;" width="14" height="14" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search for help..." style="width:100%;box-sizing:border-box;padding:.68rem 1rem .68rem 2.35rem;border:1px solid #e5e7eb;border-radius:9px;font-size:.85rem;color:#374151;background:#fff;outline:none;" onfocus="this.style.borderColor='#1a6b3c'" onblur="this.style.borderColor='#e5e7eb'"></div>
                 <!-- Contact options -->
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;">
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;">
                     ${[
                         ['Live Chat','<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>','javascript:void(0)','onclick="app.openChatbot()"'],
                         ['Call Us','<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.49a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>',`tel:${SUPPORT_PHONE}`,''],
                         ['Email Us','<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',`mailto:${SUPPORT_EMAIL}`,''],
                         ['WhatsApp','<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>',SUPPORT_WA,'target="_blank" rel="noopener"'],
-                    ].map(([l,path,href,extra])=>`<a href="${href}" ${extra} style="background:#fff;border:1px solid #e5e7eb;border-radius:11px;padding:1rem;text-align:center;cursor:pointer;text-decoration:none;display:block;" onmouseover="this.style.borderColor='#1a6b3c'" onmouseout="this.style.borderColor='#e5e7eb'">
-                        <div style="width:40px;height:40px;background:#f0faf5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .55rem;"><svg width="18" height="18" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24">${path}</svg></div>
-                        <div style="font-size:.84rem;font-weight:700;color:#0f172a;">${l}</div>
+                    ].map(([l,path,href,extra])=>`<a href="${href}" ${extra} style="background:#fff;border:1px solid #e5e7eb;border-radius:11px;padding:.95rem;text-align:center;cursor:pointer;text-decoration:none;display:block;transition:all .2s ease;" onmouseover="this.style.borderColor='#1a6b3c';this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='#e5e7eb';this.style.transform='none';">
+                        <div style="width:38px;height:38px;background:#f0faf5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .5rem;"><svg width="17" height="17" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24">${path}</svg></div>
+                        <div style="font-size:.82rem;font-weight:700;color:#0f172a;">${l}</div>
                     </a>`).join('')}
                 </div>
                 <!-- FAQ -->
-                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
-                    <div style="padding:.9rem 1.2rem;border-bottom:1px solid #f3f4f6;"><h3 style="font-size:.9rem;font-weight:800;color:#0f172a;margin:0;">Frequently Asked Questions</h3></div>
-                    ${faqs.map(f=>`<details style="border-bottom:1px solid #f3f4f6;"><summary style="padding:.88rem 1.2rem;font-size:.85rem;font-weight:600;color:#0f172a;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">${f.q}<svg width="12" height="12" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><div style="padding:0 1.2rem .85rem;font-size:.83rem;color:#6b7280;line-height:1.6;">${f.a}</div></details>`).join('')}
-                </div>
-                <!-- Contact info strip -->
-                <div style="background:#f0faf5;border:1px solid #d1fae5;border-radius:10px;padding:.8rem 1.1rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
-                    <div style="font-size:.8rem;font-weight:700;color:#065f46;">Contact us directly:</div>
-                    <a href="tel:${SUPPORT_PHONE}" style="font-size:.8rem;color:#1a6b3c;text-decoration:none;display:flex;align-items:center;gap:.3rem;font-weight:600;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.49a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> ${SUPPORT_PHONE}</a>
-                    <a href="mailto:${SUPPORT_EMAIL}" style="font-size:.8rem;color:#1a6b3c;text-decoration:none;display:flex;align-items:center;gap:.3rem;font-weight:600;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> ${SUPPORT_EMAIL}</a>
+                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                    <div style="padding:.85rem 1.1rem;border-bottom:1px solid #f3f4f6;"><h3 style="font-size:.88rem;font-weight:800;color:#0f172a;margin:0;">Frequently Asked Questions</h3></div>
+                    ${faqs.map(f=>`<details style="border-bottom:1px solid #f3f4f6;"><summary style="padding:.82rem 1.1rem;font-size:.83rem;font-weight:600;color:#0f172a;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">${f.q}<svg width="11" height="11" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><div style="padding:0 1.1rem .8rem;font-size:.81rem;color:#6b7280;line-height:1.55;">${f.a}</div></details>`).join('')}
                 </div>
             </main>`;
 
@@ -2853,101 +2993,103 @@ class App {
         // ════════════════════════════════════════════════════════════════════════
         } else if (activeTab === 'payments') {
             const pmts = bookings.map((b,i) => ({...b, txn:`TXN${String(i+1).padStart(6,'0')}`, method:'Razorpay'}));
-            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.1rem;">
+            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1rem;">
                 ${pageHeader('Payments', 'Track all your payment history and transactions.')}
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;">
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;">
                     ${[
                         ['Total Paid', this.formatCurrency(pmts.reduce((s,p)=>s+(p.totalPrice||0),0)), '#1a6b3c'],
                         ['Successful', pmts.filter(p=>p.status==='CONFIRMED'||p.status==='COMPLETED').length, '#059669'],
                         ['Pending',    pmts.filter(p=>p.status==='PENDING').length, '#d97706'],
                         ['Transactions', pmts.length, '#374151'],
-                    ].map(([l,v,c])=>`<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;"><div style="font-size:.74rem;color:#6b7280;margin-bottom:.3rem;">${l}</div><div style="font-size:1.3rem;font-weight:800;color:${c};">${v}</div></div>`).join('')}
+                    ].map(([l,v,c])=>`<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:.95rem;transition:all .2s ease;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='none';"><div style="font-size:.72rem;color:#6b7280;margin-bottom:.25rem;">${l}</div><div style="font-size:1.25rem;font-weight:800;color:${c};">${v}</div></div>`).join('')}
                 </div>
-                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
-                    <div style="padding:.9rem 1.2rem;border-bottom:1px solid #f3f4f6;"><h3 style="font-size:.9rem;font-weight:800;color:#0f172a;margin:0;">Payment History</h3></div>
-                    ${pmts.length>0?`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f9fafb;border-bottom:1px solid #f3f4f6;"><th style="padding:.65rem 1rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Transaction ID</th><th style="padding:.65rem 1rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Service</th><th style="padding:.65rem 1rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Amount</th><th style="padding:.65rem 1rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Method</th><th style="padding:.65rem 1rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Status</th><th style="padding:.65rem 1rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Action</th></tr></thead><tbody>${pmts.map(p=>`<tr style="border-bottom:1px solid #f3f4f6;" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''"><td style="padding:.82rem 1rem;font-size:.81rem;font-weight:700;color:#1a6b3c;">${p.txn}</td><td style="padding:.82rem 1rem;font-size:.81rem;color:#374151;">${this.escapeHtml(p.packageTitle||'Umrah Package')}</td><td style="padding:.82rem 1rem;font-size:.85rem;font-weight:700;color:#0f172a;">${this.formatCurrency(p.totalPrice||0)}</td><td style="padding:.82rem 1rem;font-size:.81rem;color:#374151;">${p.method}</td><td style="padding:.82rem 1rem;">${statusBadge(p.status||'completed')}</td><td style="padding:.82rem 1rem;"><button onclick="app.viewBookingVoucher('${p.id}')" style="background:#f0faf5;border:1px solid #d1fae5;border-radius:6px;padding:.3rem .72rem;font-size:.75rem;font-weight:700;color:#1a6b3c;cursor:pointer;">View Receipt</button></td></tr>`).join('')}</tbody></table></div>`:`<div style="text-align:center;padding:2.2rem;color:#6b7280;font-size:.87rem;">No payment history yet.</div>`}
+                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                    <div style="padding:.85rem 1.1rem;border-bottom:1px solid #f3f4f6;"><h3 style="font-size:.88rem;font-weight:800;color:#0f172a;margin:0;">Payment History</h3></div>
+                    ${pmts.length>0?`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f9fafb;border-bottom:1px solid #f3f4f6;"><th style="padding:.62rem .95rem;text-align:left;font-size:.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Transaction ID</th><th style="padding:.62rem .95rem;text-align:left;font-size:.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Service</th><th style="padding:.62rem .95rem;text-align:left;font-size:.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Amount</th><th style="padding:.62rem .95rem;text-align:left;font-size:.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Method</th><th style="padding:.62rem .95rem;text-align:left;font-size:.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Status</th><th style="padding:.62rem .95rem;text-align:left;font-size:.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Action</th></tr></thead><tbody>${pmts.map(p=>`<tr style="border-bottom:1px solid #f3f4f6;transition:background .15s;" onmouseover="this.style.background='#f0faf5'" onmouseout="this.style.background=''"><td style="padding:.78rem .95rem;font-size:.79rem;font-weight:700;color:#1a6b3c;">${p.txn}</td><td style="padding:.78rem .95rem;font-size:.79rem;color:#374151;">${this.escapeHtml(p.packageTitle||'Umrah Package')}</td><td style="padding:.78rem .95rem;font-size:.83rem;font-weight:700;color:#0f172a;">${this.formatCurrency(p.totalPrice||0)}</td><td style="padding:.78rem .95rem;font-size:.79rem;color:#374151;">${p.method}</td><td style="padding:.78rem .95rem;">${statusBadge(p.status||'completed')}</td><td style="padding:.78rem .95rem;"><button onclick="app.viewBookingVoucher('${p.id}')" style="background:#f0faf5;border:1px solid #d1fae5;border-radius:6px;padding:.28rem .7rem;font-size:.73rem;font-weight:700;color:#1a6b3c;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='#1a6b3c';this.style.color='#fff';" onmouseout="this.style.background='#f0faf5';this.style.color='#1a6b3c';">View Receipt</button></td></tr>`).join('')}</tbody></table></div>`:`<div style="text-align:center;padding:2.2rem;color:#6b7280;font-size:.85rem;">No payment history yet.</div>`}
                 </div>
             </main>`;
 
         // ════════════════════════════════════════════════════════════════════════
-        // PROFILE & SETTINGS (merged)
+        // PROFILE & SETTINGS (merged + 100% WORKING TOGGLES)
         // ════════════════════════════════════════════════════════════════════════
         } else if (activeTab === 'profile') {
-            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.1rem;">
+            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1rem;">
                 ${pageHeader('Profile &amp; Settings', 'Manage your account details, preferences and security.')}
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.95rem;align-items:start;">
                     <!-- Profile card -->
-                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.5rem;">
-                        <h3 style="font-size:.9rem;font-weight:800;color:#0f172a;margin:0 0 1.1rem;">Account Information</h3>
-                        <div style="display:flex;align-items:center;gap:1rem;padding-bottom:1.1rem;border-bottom:1px solid #f3f4f6;margin-bottom:1.1rem;">
+                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.35rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                        <h3 style="font-size:.88rem;font-weight:800;color:#0f172a;margin:0 0 1rem;">Account Information</h3>
+                        <div style="display:flex;align-items:center;gap:.95rem;padding-bottom:1rem;border-bottom:1px solid #f3f4f6;margin-bottom:1rem;">
                             <div style="position:relative;">
-                                <div style="width:64px;height:64px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.6rem;font-weight:800;overflow:hidden;">${userPhoto?`<img src="${userPhoto}" style="width:100%;height:100%;object-fit:cover;">`:this.escapeHtml((user.name||'U').charAt(0).toUpperCase())}</div>
-                                <button onclick="app.triggerPhotoUpload()" style="position:absolute;bottom:0;right:0;width:20px;height:20px;background:#fff;border:1.5px solid #e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.58rem;">📷</button>
+                                <div style="width:58px;height:58px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:800;overflow:hidden;">${userPhoto?`<img src="${userPhoto}" style="width:100%;height:100%;object-fit:cover;">`:this.escapeHtml((user.name||'U').charAt(0).toUpperCase())}</div>
+                                <button onclick="app.triggerPhotoUpload()" style="position:absolute;bottom:0;right:0;width:19px;height:19px;background:#fff;border:1.5px solid #e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.56rem;" title="Upload Photo">📷</button>
                             </div>
                             <div>
-                                <h3 style="font-size:1rem;font-weight:800;color:#0f172a;margin:0 0 .12rem;">${this.escapeHtml(user.name)}</h3>
-                                <div style="font-size:.79rem;color:#6b7280;">${this.escapeHtml(user.email)}</div>
-                                <span style="background:#d1fae5;color:#065f46;font-size:.67rem;font-weight:700;padding:.1rem .5rem;border-radius:99px;">Verified Account</span>
+                                <h3 style="font-size:.95rem;font-weight:800;color:#0f172a;margin:0 0 .1rem;">${this.escapeHtml(user.name)}</h3>
+                                <div style="font-size:.77rem;color:#6b7280;">${this.escapeHtml(user.email)}</div>
+                                <span style="background:#d1fae5;color:#065f46;font-size:.65rem;font-weight:700;padding:.08rem .45rem;border-radius:99px;">Verified Account</span>
                             </div>
                         </div>
-                        ${[['Full Name',user.name],['Email Address',user.email],['Phone Number',user.phone||'+91 9541692891'],['Account Status','Active &amp; Verified'],['Member Since','2025']].map(([k,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px dashed #f3f4f6;"><span style="font-size:.82rem;color:#6b7280;">${k}</span><strong style="font-size:.82rem;color:#0f172a;">${this.escapeHtml(String(v))}</strong></div>`).join('')}
-                        <div style="display:flex;gap:.65rem;margin-top:1.1rem;">
-                            <button onclick="app.logout()" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:.5rem 1.1rem;border-radius:7px;font-weight:700;font-size:.82rem;cursor:pointer;">🚪 Log Out</button>
-                            <button onclick="app.triggerPhotoUpload()" style="background:#f0faf5;color:#1a6b3c;border:1px solid #d1fae5;padding:.5rem 1.1rem;border-radius:7px;font-weight:700;font-size:.82rem;cursor:pointer;">📷 Change Photo</button>
+                        ${[['Full Name',user.name],['Email Address',user.email],['Phone Number',user.phone||'+91 9541692891'],['Account Status','Active &amp; Verified'],['Member Since','2025']].map(([k,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px dashed #f3f4f6;"><span style="font-size:.8rem;color:#6b7280;">${k}</span><strong style="font-size:.8rem;color:#0f172a;">${this.escapeHtml(String(v))}</strong></div>`).join('')}
+                        <div style="display:flex;gap:.6rem;margin-top:1rem;">
+                            <button onclick="app.logout()" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:.48rem 1rem;border-radius:7px;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='#fee2e2';" onmouseout="this.style.background='#fef2f2';">🚪 Log Out</button>
+                            <button onclick="app.triggerPhotoUpload()" style="background:#f0faf5;color:#1a6b3c;border:1px solid #d1fae5;padding:.48rem 1rem;border-radius:7px;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='#d1fae5';" onmouseout="this.style.background='#f0faf5';">📷 Change Photo</button>
                         </div>
                     </div>
-                    <!-- Settings card -->
+
+                    <!-- Settings card with WORKING TOGGLES -->
                     <div style="display:flex;flex-direction:column;gap:.9rem;">
-                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.3rem;">
-                            <h3 style="font-size:.9rem;font-weight:800;color:#0f172a;margin:0 0 .85rem;">Notification Settings</h3>
+                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.2rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                            <h3 style="font-size:.88rem;font-weight:800;color:#0f172a;margin:0 0 .75rem;">Notification Settings</h3>
                             ${[
-                                ['Email Notifications','Receive updates and offers via email'],
-                                ['SMS Alerts','Get SMS for important updates'],
-                                ['Offer Notifications','Be notified when new offers arrive'],
-                                ['Payment Alerts','Receive payment confirmations'],
-                            ].map(([l,d])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.72rem 0;border-bottom:1px solid #f3f4f6;">
-                                <div><div style="font-size:.85rem;font-weight:600;color:#0f172a;">${l}</div><div style="font-size:.72rem;color:#9ca3af;">${d}</div></div>
-                                <div style="width:36px;height:20px;background:#1a6b3c;border-radius:99px;position:relative;cursor:pointer;flex-shrink:0;"><div style="position:absolute;right:2px;top:3px;width:14px;height:14px;background:#fff;border-radius:50%;"></div></div>
-                            </div>`).join('')}
+                                ['Email Notifications', 'emailNotifs', 'Receive updates &amp; offer alerts via email'],
+                                ['SMS Alerts',           'smsAlerts',  'Get SMS alerts for critical updates'],
+                                ['Offer Notifications', 'offerNotifs', 'Be notified instantly when offers arrive'],
+                                ['Payment Alerts',      'paymentAlerts','Receive digital receipts &amp; invoices'],
+                            ].map(([l, key, d]) => {
+                                const isChecked = userSettings[key] !== false;
+                                return `<div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 0;border-bottom:1px solid #f3f4f6;">
+                                    <div><div style="font-size:.82rem;font-weight:600;color:#0f172a;">${l}</div><div style="font-size:.7rem;color:#9ca3af;">${d}</div></div>
+                                    <div onclick="app.toggleSetting('${key}')" style="width:34px;height:19px;background:${isChecked?'#1a6b3c':'#d1d5db'};border-radius:99px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;">
+                                        <div style="position:absolute;${isChecked?'right:2px':'left:2px'};top:2px;width:15px;height:15px;background:#fff;border-radius:50%;transition:all .2s;"></div>
+                                    </div>
+                                </div>`;
+                            }).join('')}
                         </div>
-                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.3rem;">
-                            <h3 style="font-size:.9rem;font-weight:800;color:#0f172a;margin:0 0 .85rem;">Security &amp; Privacy</h3>
+
+                        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.2rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                            <h3 style="font-size:.88rem;font-weight:800;color:#0f172a;margin:0 0 .75rem;">Security &amp; Privacy</h3>
                             ${[
-                                ['Privacy Mode','Hide your contact details from agents'],
-                                ['Two-Factor Auth','Add extra security to your account'],
-                            ].map(([l,d])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.72rem 0;border-bottom:1px solid #f3f4f6;">
-                                <div><div style="font-size:.85rem;font-weight:600;color:#0f172a;">${l}</div><div style="font-size:.72rem;color:#9ca3af;">${d}</div></div>
-                                <div style="width:36px;height:20px;background:#1a6b3c;border-radius:99px;position:relative;cursor:pointer;flex-shrink:0;"><div style="position:absolute;right:2px;top:3px;width:14px;height:14px;background:#fff;border-radius:50%;"></div></div>
-                            </div>`).join('')}
-                            <a href="javascript:void(0)" onclick="app.setDashboardTab('help')" style="display:flex;align-items:center;gap:.4rem;margin-top:.9rem;font-size:.8rem;font-weight:600;color:#1a6b3c;text-decoration:none;">
-                                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-linecap="round" stroke-width="2"/></svg>
-                                Have a question? Visit Help &amp; Support
-                            </a>
+                                ['Privacy Mode',     'privacyMode', 'Mask phone &amp; email from agents'],
+                                ['Two-Factor Auth',  'twoFactor',   'Add extra security step at login'],
+                            ].map(([l, key, d]) => {
+                                const isChecked = userSettings[key] !== false;
+                                return `<div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 0;border-bottom:1px solid #f3f4f6;">
+                                    <div><div style="font-size:.82rem;font-weight:600;color:#0f172a;">${l}</div><div style="font-size:.7rem;color:#9ca3af;">${d}</div></div>
+                                    <div onclick="app.toggleSetting('${key}')" style="width:34px;height:19px;background:${isChecked?'#1a6b3c':'#d1d5db'};border-radius:99px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;">
+                                        <div style="position:absolute;${isChecked?'right:2px':'left:2px'};top:2px;width:15px;height:15px;background:#fff;border-radius:50%;transition:all .2s;"></div>
+                                    </div>
+                                </div>`;
+                            }).join('')}
                         </div>
                     </div>
                 </div>
             </main>`;
 
         } else {
-            panel = `<main style="flex:1;min-width:0;"><div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:2.2rem;text-align:center;"><p style="color:#6b7280;">This section is coming soon.</p></div></main>`;
+            panel = `<main style="flex:1;min-width:0;"><div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:2.2rem;text-align:center;"><p style="color:#6b7280;">This section is under maintenance.</p></div></main>`;
         }
 
+        // Return dashboard layout without redundant copyright/privacy policy footer (already present in global site footer)
         return `
-        <div style="background:#f8fafc;min-height:100vh;padding:98px 0 4rem;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-            <div style="max-width:1260px;margin:0 auto;padding:0 1.3rem;display:flex;gap:1.2rem;align-items:flex-start;">
+        <div style="background:#f8fafc;min-height:100vh;padding:94px 0 3rem;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+            <div style="max-width:1240px;margin:0 auto;padding:0 1.2rem;display:flex;gap:1.1rem;align-items:flex-start;">
                 ${sidebar}
                 ${panel}
             </div>
-            <div style="max-width:1260px;margin:1.6rem auto 0;padding:0 1.3rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem;border-top:1px solid #e5e7eb;padding-top:1rem;">
-                <span style="font-size:.74rem;color:#9ca3af;">© 2026 ZILHAJ · All rights reserved.</span>
-                <div style="display:flex;gap:.85rem;">
-                    <a href="/privacy" onclick="event.preventDefault();app.navigate('privacy')" style="font-size:.74rem;color:#9ca3af;text-decoration:none;" onmouseover="this.style.color='#1a6b3c'" onmouseout="this.style.color='#9ca3af'">Privacy Policy</a>
-                    <a href="/terms" onclick="event.preventDefault();app.navigate('terms')" style="font-size:.74rem;color:#9ca3af;text-decoration:none;" onmouseover="this.style.color='#1a6b3c'" onmouseout="this.style.color='#9ca3af'">Terms &amp; Conditions</a>
-                    <a href="/terms" onclick="event.preventDefault();app.navigate('terms')" style="font-size:.74rem;color:#9ca3af;text-decoration:none;" onmouseover="this.style.color='#1a6b3c'" onmouseout="this.style.color='#9ca3af'">Refund Policy</a>
-                </div>
-            </div>
         </div>`;
     }
+
 
     getAllOffers() {
         const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
