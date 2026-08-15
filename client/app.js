@@ -955,8 +955,10 @@ class App {
             main.innerHTML = this.renderOffersPage();
         } else if (page === 'dashboard' || page === '/dashboard') {
             main.innerHTML = this.renderDashboardPage();
-        } else if (page === 'payment') {
-            main.innerHTML = this.renderPaymentPage(this.state.activePaymentOfferId);
+        } else if (page === 'package-details' || page === 'packageDetails' || page === 'review-package') {
+            main.innerHTML = this.renderPackageDetailsFullPage(this.state.activeOfferId);
+        } else if (page === 'payment' || page === 'paymentScreen' || page === 'secure-payment') {
+            main.innerHTML = this.renderPaymentPage(this.state.activeOfferId);
         } else if (page === 'admin' || page === '/admin/dashboard' || page === 'admin/dashboard') {
             if (this.state.currentUser?.role === 'ROLE_ADMIN') {
                 this.renderAdminPage();
@@ -3066,14 +3068,13 @@ class App {
             </main>`;
 
         } else if (activeTab === 'packageDetails') {
-            panel = this.renderPackageDetailsTab(this.state.activeOfferId);
+            panel = this.renderPackageDetailsFullPage(this.state.activeOfferId);
         } else if (activeTab === 'paymentScreen') {
-            panel = this.renderPaymentScreenTab(this.state.activeOfferId);
+            panel = this.renderPaymentPage(this.state.activeOfferId);
         } else {
             panel = `<main style="flex:1;min-width:0;"><div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:2.2rem;text-align:center;"><p style="color:#6b7280;">This section is under maintenance.</p></div></main>`;
         }
 
-        // Return dashboard layout without redundant copyright/privacy policy footer (already present in global site footer)
         return `
         <div style="background:#f8fafc;min-height:100vh;padding:94px 0 3rem;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
             <div style="max-width:1240px;margin:0 auto;padding:0 1.2rem;display:flex;gap:1.1rem;align-items:flex-start;">
@@ -3088,10 +3089,46 @@ class App {
         const id = offerId || 'OFF-1024';
         this.state.activeOfferId = id;
         this.state.activeDashboardTab = 'packageDetails';
+        this.navigate('package-details');
+    }
 
+    openOfferPaymentModal(offerId) {
+        this.closeModal();
+        const id = offerId || 'OFF-1024';
+        this.state.activeOfferId = id;
+        this.state.activeDashboardTab = 'paymentScreen';
+        this.navigate('payment');
+    }
+
+    toggleUpiQrCode() {
+        this.state.showUpiQrCode = !this.state.showUpiQrCode;
+        if (this.state.currentPage === 'payment' || this.state.currentPage === 'paymentScreen') {
+            const main = document.getElementById('mainContainer');
+            if (main) main.innerHTML = this.renderPaymentPage(this.state.activeOfferId);
+        } else {
+            const main = document.getElementById('mainContainer');
+            if (main) main.innerHTML = this.renderDashboardPage();
+        }
+    }
+
+    switchPaymentMethodTab(method) {
+        this.state.selectedPaymentMethod = method;
+        if (method !== 'upi') {
+            this.state.showUpiQrCode = false;
+        }
+        if (this.state.currentPage === 'payment' || this.state.currentPage === 'paymentScreen') {
+            const main = document.getElementById('mainContainer');
+            if (main) main.innerHTML = this.renderPaymentPage(this.state.activeOfferId);
+        } else {
+            const main = document.getElementById('mainContainer');
+            if (main) main.innerHTML = this.renderDashboardPage();
+        }
+    }
+
+    renderPackageDetailsFullPage(offerId) {
         const allOffers = this.getAllOffers();
-        const offer = allOffers.find(o => o.id === id) || {
-            id: id,
+        const offer = allOffers.find(o => o.id === offerId) || {
+            id: offerId || 'OFF-1024',
             packageTitle: 'Umrah Package - Economy',
             agentName: 'AL-HARAM PREMIUM TRAVELS',
             discountedPrice: 78500,
@@ -3116,293 +3153,301 @@ class App {
 
         const user = this.state.currentUser || { name: 'Tawseef Ahmad', phone: '+91 98765 43210', email: 'tawseefahmad@gmail.com' };
 
-        const modal = document.getElementById('modalCard');
-        if (modal) {
-            modal.style.maxWidth = '100vw';
-            modal.style.width = '100vw';
-            modal.style.height = '100vh';
-            modal.style.maxHeight = '100vh';
-            modal.style.margin = '0';
-            modal.style.padding = '0';
-            modal.style.borderRadius = '0';
-            modal.style.border = 'none';
-            modal.style.position = 'fixed';
-            modal.style.top = '0';
-            modal.style.left = '0';
-        }
-
-        const modalContent = `
-        <div style="padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0f172a;height:100vh;display:flex;flex-direction:column;background:#f8fafc;overflow:hidden;">
-            <!-- Image 1 Header Bar -->
-            <div style="background:#ffffff;padding:1.1rem 2.2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;flex-shrink:0;">
-                <div style="display:flex;align-items:center;gap:1.2rem;">
-                    <button onclick="app.closeModal(); app.navigate('dashboard');" style="background:#ffffff;color:#0f172a;border:1px solid #cbd5e1;border-radius:8px;padding:0.5rem 1rem;font-weight:700;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;">
-                        ← Back to Offers
-                    </button>
-                    <div>
-                        <h2 style="font-size:1.4rem;font-weight:800;color:#0f172a;margin:0;line-height:1.2;">Review Package Details</h2>
-                        <div style="font-size:0.8rem;color:#64748b;margin-top:0.15rem;">Please review all package details carefully before proceeding to payment.</div>
-                    </div>
+        const sidebar = `
+        <aside style="width:230px;flex-shrink:0;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);display:flex;flex-direction:column;gap:1.3rem;">
+            <div style="padding-bottom:.9rem;border-bottom:1px solid #f3f4f6;">
+                <div style="font-size:1.15rem;font-weight:900;color:#1a6b3c;display:flex;align-items:center;gap:.4rem;">
+                    <span style="font-size:1.25rem;">🕋</span> ZILHAJ
                 </div>
+                <div style="font-size:.67rem;color:#6b7280;margin-top:.15rem;font-weight:500;">One Request. Multiple Verified Offers.</div>
+            </div>
 
-                <div style="display:flex;align-items:center;gap:1.2rem;">
-                    <div style="width:38px;height:38px;background:#f1f5f9;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-                        <span style="font-size:1.1rem;">🔔</span>
+            <nav style="display:flex;flex-direction:column;gap:.35rem;">
+                <a href="javascript:void(0)" onclick="app.setDashboardTab('dashboard')" style="display:flex;align-items:center;gap:.6rem;padding:.58rem .82rem;border-radius:10px;text-decoration:none;font-size:.84rem;font-weight:500;color:#374151;transition:all .2s;" onmouseover="this.style.background='#f0faf5';this.style.color='#1a6b3c';" onmouseout="this.style.background='transparent';this.style.color='#374151';">⊞ Dashboard</a>
+                <a href="javascript:void(0)" onclick="app.setDashboardTab('requests')" style="display:flex;align-items:center;gap:.6rem;padding:.58rem .82rem;border-radius:10px;text-decoration:none;font-size:.84rem;font-weight:500;color:#374151;transition:all .2s;" onmouseover="this.style.background='#f0faf5';this.style.color='#1a6b3c';" onmouseout="this.style.background='transparent';this.style.color='#374151';">📄 My Requests</a>
+                <a href="javascript:void(0)" onclick="app.setDashboardTab('payments')" style="display:flex;align-items:center;gap:.6rem;padding:.58rem .82rem;border-radius:10px;text-decoration:none;font-size:.84rem;font-weight:500;color:#374151;transition:all .2s;" onmouseover="this.style.background='#f0faf5';this.style.color='#1a6b3c';" onmouseout="this.style.background='transparent';this.style.color='#374151';">💳 Payments</a>
+                <a href="javascript:void(0)" onclick="app.setDashboardTab('profile')" style="display:flex;align-items:center;gap:.6rem;padding:.58rem .82rem;border-radius:10px;text-decoration:none;font-size:.84rem;font-weight:500;color:#374151;transition:all .2s;" onmouseover="this.style.background='#f0faf5';this.style.color='#1a6b3c';" onmouseout="this.style.background='transparent';this.style.color='#374151';">👤 Profile &amp; Settings</a>
+                <a href="javascript:void(0)" onclick="app.setDashboardTab('notifications')" style="display:flex;align-items:center;justify-content:space-between;padding:.58rem .82rem;border-radius:10px;text-decoration:none;font-size:.84rem;font-weight:500;color:#374151;transition:all .2s;" onmouseover="this.style.background='#f0faf5';this.style.color='#1a6b3c';" onmouseout="this.style.background='transparent';this.style.color='#374151';">
+                    <span>🔔 Notifications</span>
+                    <span style="background:#1a6b3c;color:#fff;font-size:.64rem;font-weight:800;border-radius:99px;padding:0 6px;">2</span>
+                </a>
+                <a href="javascript:void(0)" onclick="app.setDashboardTab('help')" style="display:flex;align-items:center;gap:.6rem;padding:.58rem .82rem;border-radius:10px;text-decoration:none;font-size:.84rem;font-weight:500;color:#374151;transition:all .2s;" onmouseover="this.style.background='#f0faf5';this.style.color='#1a6b3c';" onmouseout="this.style.background='transparent';this.style.color='#374151';">🎧 Help &amp; Support</a>
+            </nav>
+
+            <div style="background:#f0faf5;border-radius:12px;padding:.85rem;border:1px solid #d1fae5;margin-top:auto;">
+                <div style="font-size:.78rem;font-weight:800;color:#1a6b3c;margin-bottom:.2rem;">Need Help?</div>
+                <div style="font-size:.71rem;color:#4b5563;margin-bottom:.6rem;">We're here to assist you</div>
+                <button onclick="app.toggleChatWidget()" style="width:100%;background:#1a6b3c;color:#fff;border:none;border-radius:7px;padding:.4rem;font-size:.74rem;font-weight:700;cursor:pointer;">💬 Chat with us</button>
+            </div>
+            <div style="background:#f8fafc;border-radius:10px;padding:.7rem;border:1px solid #e2e8f0;font-size:.68rem;color:#64748b;line-height:1.35;">
+                <strong style="color:#0f172a;">🛡️ Privacy Protected</strong><br>We never share personal info with agents.
+            </div>
+        </aside>`;
+
+        const mainContent = `
+        <main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.4rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:1.1rem 1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                <div style="display:flex;align-items:center;gap:1.1rem;">
+                    <div style="width:36px;height:36px;background:#f1f5f9;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
+                        <span style="font-size:1rem;">🔔</span>
                         <span style="position:absolute;top:-2px;right:-2px;background:#047857;color:#fff;font-size:0.65rem;font-weight:800;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;">2</span>
                     </div>
-                    <div style="display:flex;align-items:center;gap:0.6rem;background:#f8fafc;padding:0.4rem 0.8rem;border-radius:99px;border:1px solid #e2e8f0;">
-                        <div style="width:32px;height:32px;border-radius:50%;background:#047857;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">T</div>
+                    <div style="display:flex;align-items:center;gap:0.6rem;background:#f8fafc;padding:0.35rem 0.8rem;border-radius:99px;border:1px solid #e2e8f0;">
+                        <div style="width:30px;height:30px;border-radius:50%;background:#047857;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">T</div>
                         <div>
-                            <div style="font-size:0.85rem;font-weight:800;color:#0f172a;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
-                            <div style="font-size:0.7rem;color:#64748b;">Customer</div>
+                            <div style="font-size:0.82rem;font-weight:800;color:#0f172a;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                            <div style="font-size:0.68rem;color:#64748b;">Customer</div>
                         </div>
                     </div>
-                    <button onclick="app.closeModal()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#64748b;padding:0 0.4rem;">✕</button>
                 </div>
             </div>
 
-            <!-- Body Wrapper -->
-            <div style="flex:1;overflow-y:auto;padding:2rem 2.2rem;display:flex;justify-content:center;">
-                <div style="max-width:1280px;width:100%;display:grid;grid-template-columns:1fr 360px;gap:2rem;align-items:start;">
-                    
-                    <!-- Left Column Details -->
-                    <div style="display:flex;flex-direction:column;gap:1.6rem;">
-                        <!-- Main Package Summary Banner Card -->
-                        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:1.8rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.2rem;">
-                            <div style="display:flex;gap:1.4rem;align-items:center;">
-                                <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=180&q=80" alt="Kaaba" style="width:105px;height:105px;border-radius:14px;object-fit:cover;">
-                                <div>
-                                    <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.4rem;">
-                                        <h3 style="font-size:1.35rem;font-weight:800;color:#0f172a;margin:0;">${this.escapeHtml(offer.packageTitle)}</h3>
-                                        <span style="background:#ecfdf5;color:#047857;font-size:0.78rem;font-weight:800;padding:0.2rem 0.7rem;border-radius:99px;">${offer.durationDays || 10} Days</span>
-                                    </div>
-                                    <div style="font-size:0.85rem;color:#64748b;margin-bottom:0.7rem;">REQ-${offer.requirementId || '1024'} • ${travelersCount} Adults, 0 Children</div>
-                                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                                        <span style="background:#f1f5f9;color:#047857;font-size:0.78rem;font-weight:700;padding:0.25rem 0.7rem;border-radius:6px;">✈ Flights Included</span>
-                                        <span style="background:#f1f5f9;color:#047857;font-size:0.78rem;font-weight:700;padding:0.25rem 0.7rem;border-radius:6px;">✓ Visa Included</span>
-                                        <span style="background:#f1f5f9;color:#047857;font-size:0.78rem;font-weight:700;padding:0.25rem 0.7rem;border-radius:6px;">🚍 Transport Included</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div style="font-size:0.75rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">TOTAL PACKAGE PRICE</div>
-                                <div style="font-size:2rem;font-weight:900;color:#0f172a;line-height:1.1;margin-top:0.2rem;">${this.formatCurrency(totalDiscountedPrice)}</div>
-                                <div style="font-size:0.8rem;color:#64748b;margin-top:0.2rem;">Per Person (${this.formatCurrency(perPersonPrice)})</div>
-                            </div>
-                        </div>
+            <!-- 2 Column Content Layout matching Image 1 -->
+            <div style="display:grid;grid-template-columns:1fr 340px;gap:1.4rem;align-items:start;">
+                
+                <!-- Left Details Column -->
+                <div style="display:flex;flex-direction:column;gap:1.4rem;">
 
-                        <!-- Journey Overview Card -->
-                        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
-                            <h4 style="font-size:1.1rem;font-weight:800;color:#0f172a;margin:0 0 0.3rem;">Journey Overview</h4>
-                            <p style="font-size:0.85rem;color:#64748b;margin:0 0 1.2rem;">A comfortable and spiritual journey to the holy cities with carefully selected services.</p>
-                            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:1.2rem;">
-                                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:1.2rem;display:flex;align-items:center;gap:1rem;">
-                                    <div style="font-size:1.6rem;background:#ffffff;width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.04);">📅</div>
-                                    <div>
-                                        <div style="font-size:0.72rem;color:#64748b;font-weight:800;text-transform:uppercase;">DEPARTURE</div>
-                                        <div style="font-size:0.98rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">15 Oct 2026</div>
-                                        <div style="font-size:0.78rem;color:#64748b;">Lucknow (LKO)</div>
-                                    </div>
+                    <!-- Main Package Summary Banner Card -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);display:flex;justify-content:space-between;align-items:center;gap:1.2rem;flex-wrap:wrap;">
+                        <div style="display:flex;gap:1.2rem;align-items:center;">
+                            <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=180&q=80" alt="Kaaba" style="width:96px;height:96px;border-radius:12px;object-fit:cover;">
+                            <div>
+                                <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem;">
+                                    <h3 style="font-size:1.25rem;font-weight:800;color:#0f172a;margin:0;">${this.escapeHtml(offer.packageTitle)}</h3>
+                                    <span style="background:#ecfdf5;color:#047857;font-size:0.75rem;font-weight:800;padding:0.2rem 0.65rem;border-radius:99px;">${offer.durationDays || 10} Days</span>
                                 </div>
-                                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:1.2rem;display:flex;align-items:center;gap:1rem;">
-                                    <div style="font-size:1.6rem;background:#ffffff;width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.04);">✈️</div>
-                                    <div>
-                                        <div style="font-size:0.72rem;color:#64748b;font-weight:800;text-transform:uppercase;">RETURN</div>
-                                        <div style="font-size:0.98rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">24 Oct 2026</div>
-                                        <div style="font-size:0.78rem;color:#64748b;">Jeddah (JED)</div>
-                                    </div>
-                                </div>
-                                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:1.2rem;display:flex;align-items:center;gap:1rem;">
-                                    <div style="font-size:1.6rem;background:#ffffff;width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.04);">⏱️</div>
-                                    <div>
-                                        <div style="font-size:0.72rem;color:#64748b;font-weight:800;text-transform:uppercase;">DURATION</div>
-                                        <div style="font-size:0.98rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">10 Days / 9 Nights</div>
-                                        <div style="font-size:0.78rem;color:#64748b;">Total Trip Duration</div>
-                                    </div>
+                                <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.65rem;">REQ-${offer.requirementId || '1024'} • ${travelersCount} Adults, 0 Children</div>
+                                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                                    <span style="background:#f1f5f9;color:#047857;font-size:0.75rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;">✈ Flights Included</span>
+                                    <span style="background:#f1f5f9;color:#047857;font-size:0.75rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;">✓ Visa Included</span>
+                                    <span style="background:#f1f5f9;color:#047857;font-size:0.75rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;">🚍 Transport Included</span>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Package Inclusions Card -->
-                        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
-                            <h4 style="font-size:1.1rem;font-weight:800;color:#0f172a;margin:0 0 1.1rem;">Package Inclusions</h4>
-                            <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:1.2rem;font-size:0.85rem;color:#334155;">
-                                <div><strong style="color:#047857;">✓ Return Flights</strong><div style="font-size:0.75rem;color:#64748b;margin-top:0.2rem;">Lucknow to Jeddah &amp; Return</div></div>
-                                <div><strong style="color:#047857;">✓ Visa</strong><div style="font-size:0.75rem;color:#64748b;margin-top:0.2rem;">Umrah Visa Included</div></div>
-                                <div><strong style="color:#047857;">✓ Transport</strong><div style="font-size:0.75rem;color:#64748b;margin-top:0.2rem;">All Local Transfers</div></div>
-                                <div><strong style="color:#047857;">✓ Accommodation</strong><div style="font-size:0.75rem;color:#64748b;margin-top:0.2rem;">9 Nights Stay Makkah &amp; Madinah</div></div>
-                                <div><strong style="color:#047857;">✓ Meals</strong><div style="font-size:0.75rem;color:#64748b;margin-top:0.2rem;">Breakfast, Lunch &amp; Dinner</div></div>
-                                <div><strong style="color:#047857;">✓ Ziyarat</strong><div style="font-size:0.75rem;color:#64748b;margin-top:0.2rem;">Makkah &amp; Madinah Ziyarat</div></div>
-                                <div><strong style="color:#047857;">✓ Travel Insurance</strong><div style="font-size:0.75rem;color:#64748b;margin-top:0.2rem;">Coverage Included</div></div>
-                            </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:0.72rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Total Package Price</div>
+                            <div style="font-size:1.8rem;font-weight:900;color:#0f172a;line-height:1.1;margin-top:0.2rem;">${this.formatCurrency(totalDiscountedPrice)}</div>
+                            <div style="font-size:0.78rem;color:#64748b;margin-top:0.2rem;">Per Person (${this.formatCurrency(perPersonPrice)})</div>
                         </div>
-
-                        <!-- Accommodation Details Card -->
-                        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
-                            <h4 style="font-size:1.1rem;font-weight:800;color:#0f172a;margin:0 0 1.2rem;">Accommodation Details</h4>
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;">
-                                <div style="border:1px solid #e2e8f0;border-radius:14px;padding:1.2rem;display:flex;gap:1.1rem;align-items:center;">
-                                    <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=150&q=80" alt="Makkah Hotel" style="width:84px;height:84px;border-radius:12px;object-fit:cover;">
-                                    <div>
-                                        <div style="font-size:0.75rem;color:#64748b;font-weight:700;">Makkah Hotel</div>
-                                        <div style="font-size:1.02rem;font-weight:800;color:#0f172a;margin-top:0.15rem;">${this.escapeHtml(offer.makkahHotel || 'Anjum Hotel Makkah')}</div>
-                                        <div style="font-size:0.78rem;color:#047857;font-weight:700;margin-top:0.2rem;">4 ★ • 4 Nights</div>
-                                        <div style="font-size:0.75rem;color:#64748b;margin-top:0.25rem;">📍 Distance from Haram: 650m • Room: Standard</div>
-                                    </div>
-                                </div>
-                                <div style="border:1px solid #e2e8f0;border-radius:14px;padding:1.2rem;display:flex;gap:1.1rem;align-items:center;">
-                                    <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=150&q=80" alt="Madinah Hotel" style="width:84px;height:84px;border-radius:12px;object-fit:cover;">
-                                    <div>
-                                        <div style="font-size:0.75rem;color:#64748b;font-weight:700;">Madinah Hotel</div>
-                                        <div style="font-size:1.02rem;font-weight:800;color:#0f172a;margin-top:0.15rem;">${this.escapeHtml(offer.madinahHotel || 'Durrat Al Eiman Hotel')}</div>
-                                        <div style="font-size:0.78rem;color:#047857;font-weight:700;margin-top:0.2rem;">4 ★ • 5 Nights</div>
-                                        <div style="font-size:0.75rem;color:#64748b;margin-top:0.25rem;">📍 Distance from Haram: 300m • Room: Standard</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Itinerary Highlights Timeline -->
-                        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
-                            <h4 style="font-size:1.1rem;font-weight:800;color:#0f172a;margin:0 0 1.4rem;">Itinerary Highlights</h4>
-                            <div style="display:flex;justify-content:space-between;align-items:center;text-align:center;position:relative;">
-                                <div>
-                                    <div style="width:46px;height:46px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;font-size:1.2rem;">✈️</div>
-                                    <div style="font-size:0.75rem;color:#64748b;">15 Oct 2026</div>
-                                    <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">Departure</div>
-                                    <div style="font-size:0.72rem;color:#64748b;">Lucknow (LKO)</div>
-                                </div>
-                                <div style="color:#cbd5e1;font-size:1.3rem;">→</div>
-                                <div>
-                                    <div style="width:46px;height:46px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;font-size:1.2rem;">🛬</div>
-                                    <div style="font-size:0.75rem;color:#64748b;">15 Oct 2026</div>
-                                    <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">Arrive Jeddah</div>
-                                    <div style="font-size:0.72rem;color:#64748b;">Transfer to Makkah</div>
-                                </div>
-                                <div style="color:#cbd5e1;font-size:1.3rem;">→</div>
-                                <div>
-                                    <div style="width:46px;height:46px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;font-size:1.2rem;">🕋</div>
-                                    <div style="font-size:0.75rem;color:#64748b;">4 Nights</div>
-                                    <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">Stay in Makkah</div>
-                                    <div style="font-size:0.72rem;color:#64748b;">Ziyarat &amp; Worship</div>
-                                </div>
-                                <div style="color:#cbd5e1;font-size:1.3rem;">→</div>
-                                <div>
-                                    <div style="width:46px;height:46px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;font-size:1.2rem;">🕌</div>
-                                    <div style="font-size:0.75rem;color:#64748b;">5 Nights</div>
-                                    <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">Stay in Madinah</div>
-                                    <div style="font-size:0.72rem;color:#64748b;">Ziyarat &amp; Worship</div>
-                                </div>
-                                <div style="color:#cbd5e1;font-size:1.3rem;">→</div>
-                                <div>
-                                    <div style="width:46px;height:46px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;font-size:1.2rem;">🛫</div>
-                                    <div style="font-size:0.75rem;color:#64748b;">24 Oct 2026</div>
-                                    <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">Return Flight</div>
-                                    <div style="font-size:0.72rem;color:#64748b;">Jeddah (JED)</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Bottom Privacy Protection Banner -->
-                        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:1rem 1.2rem;display:flex;align-items:center;gap:0.9rem;">
-                            <span style="font-size:1.3rem;color:#047857;">🛡️</span>
-                            <div style="font-size:0.82rem;color:#166534;line-height:1.4;">
-                                Your personal contact details are protected. They will never be shared with any agent or provider.
-                            </div>
-                        </div>
-
                     </div>
 
-                    <!-- Right Column Sidebar -->
-                    <div style="display:flex;flex-direction:column;gap:1.4rem;position:sticky;top:0;">
-                        <!-- Price Summary Card -->
-                        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
-                            <h4 style="font-size:1.1rem;font-weight:800;color:#0f172a;margin:0 0 1.2rem;">Price Summary</h4>
-                            <div style="display:flex;flex-direction:column;gap:0.85rem;font-size:0.9rem;color:#475569;">
-                                <div style="display:flex;justify-content:space-between;">
-                                    <span>Package Price (Per Person)</span>
-                                    <span style="font-weight:700;color:#0f172a;">${this.formatCurrency(perPersonPrice)}</span>
+                    <!-- Journey Overview -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h4 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 0.3rem;">Journey Overview</h4>
+                        <p style="font-size:0.82rem;color:#64748b;margin:0 0 1.1rem;">A comfortable and spiritual journey to the holy cities with carefully selected services.</p>
+                        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:1rem;">
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1rem;display:flex;align-items:center;gap:0.85rem;">
+                                <div style="font-size:1.4rem;background:#ffffff;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.04);">📅</div>
+                                <div>
+                                    <div style="font-size:0.68rem;color:#64748b;font-weight:800;text-transform:uppercase;">DEPARTURE</div>
+                                    <div style="font-size:0.92rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">15 Oct 2026</div>
+                                    <div style="font-size:0.75rem;color:#64748b;">Lucknow (LKO)</div>
                                 </div>
-                                <div style="display:flex;justify-content:space-between;">
-                                    <span>Taxes &amp; Fees</span>
-                                    <span style="font-weight:700;color:#0f172a;">₹3,200</span>
-                                </div>
-                                <div style="display:flex;justify-content:space-between;">
-                                    <span>Visa Charges</span>
-                                    <span style="font-weight:700;color:#0f172a;">₹2,000</span>
-                                </div>
-                                <div style="display:flex;justify-content:space-between;">
-                                    <span>Travel Insurance</span>
-                                    <span style="font-weight:700;color:#0f172a;">₹1,200</span>
-                                </div>
-                                <div style="border-top:1px dashed #cbd5e1;margin:0.4rem 0;"></div>
-                                <div style="display:flex;justify-content:space-between;align-items:center;">
-                                    <span style="font-size:1.1rem;font-weight:800;color:#0f172a;">Total Amount</span>
-                                    <span style="font-size:1.7rem;font-weight:900;color:#047857;">${this.formatCurrency(totalDiscountedPrice)}</span>
-                                </div>
-                                <div style="font-size:0.75rem;color:#64748b;text-align:right;">All amounts are in INR</div>
                             </div>
-                        </div>
-
-                        <!-- Travel Details Box -->
-                        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
-                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.9rem;">
-                                <h5 style="font-size:0.95rem;font-weight:800;color:#0f172a;margin:0;">Travel Details</h5>
-                                <a href="javascript:void(0)" style="font-size:0.78rem;font-weight:700;color:#047857;text-decoration:none;">View Details</a>
-                            </div>
-                            <div style="display:flex;flex-direction:column;gap:0.8rem;font-size:0.82rem;color:#475569;">
-                                <div style="background:#f8fafc;padding:0.75rem;border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
-                                    <div>
-                                        <div style="font-size:0.72rem;color:#64748b;font-weight:700;text-transform:uppercase;">Departure</div>
-                                        <div style="font-size:0.88rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">15 Oct 2026, 04:55 AM</div>
-                                    </div>
-                                    <div style="font-size:0.8rem;font-weight:700;color:#64748b;">LKO → JED</div>
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1rem;display:flex;align-items:center;gap:0.85rem;">
+                                <div style="font-size:1.4rem;background:#ffffff;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.04);">✈️</div>
+                                <div>
+                                    <div style="font-size:0.68rem;color:#64748b;font-weight:800;text-transform:uppercase;">RETURN</div>
+                                    <div style="font-size:0.92rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">24 Oct 2026</div>
+                                    <div style="font-size:0.75rem;color:#64748b;">Jeddah (JED)</div>
                                 </div>
-                                <div style="background:#f8fafc;padding:0.75rem;border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
-                                    <div>
-                                        <div style="font-size:0.72rem;color:#64748b;font-weight:700;text-transform:uppercase;">Return</div>
-                                        <div style="font-size:0.88rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">24 Oct 2026, 02:30 PM</div>
-                                    </div>
-                                    <div style="font-size:0.8rem;font-weight:700;color:#64748b;">JED → LKO</div>
+                            </div>
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1rem;display:flex;align-items:center;gap:0.85rem;">
+                                <div style="font-size:1.4rem;background:#ffffff;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.04);">⏱️</div>
+                                <div>
+                                    <div style="font-size:0.68rem;color:#64748b;font-weight:800;text-transform:uppercase;">DURATION</div>
+                                    <div style="font-size:0.92rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">10 Days / 9 Nights</div>
+                                    <div style="font-size:0.75rem;color:#64748b;">Total Trip Duration</div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Important Notes Box -->
-                        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
-                            <h5 style="font-size:0.95rem;font-weight:800;color:#0f172a;margin:0 0 0.9rem;">Important Notes</h5>
-                            <div style="display:flex;flex-direction:column;gap:0.6rem;font-size:0.82rem;color:#475569;">
-                                <div style="display:flex;align-items:center;gap:0.5rem;"><span style="color:#047857;">✓</span> <span>Passport must be valid for 6+ months</span></div>
-                                <div style="display:flex;align-items:center;gap:0.5rem;"><span style="color:#047857;">✓</span> <span>COVID-19 vaccination certificate required</span></div>
-                                <div style="display:flex;align-items:center;gap:0.5rem;"><span style="color:#047857;">✓</span> <span>Package is non-refundable after confirmation</span></div>
-                                <div style="display:flex;align-items:center;gap:0.5rem;"><span style="color:#047857;">✓</span> <span>Standard cancellation policies apply</span></div>
+                    <!-- Package Inclusions -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h4 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 1rem;">Package Inclusions</h4>
+                        <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:1rem;font-size:0.82rem;color:#334155;">
+                            <div><strong style="color:#047857;">✓ Return Flights</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">Lucknow to Jeddah &amp; Return</div></div>
+                            <div><strong style="color:#047857;">✓ Visa</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">Umrah Visa Included</div></div>
+                            <div><strong style="color:#047857;">✓ Transport</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">All Local Transfers</div></div>
+                            <div><strong style="color:#047857;">✓ Accommodation</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">9 Nights Stay in Makkah &amp; Madinah</div></div>
+                            <div><strong style="color:#047857;">✓ Meals</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">Breakfast, Lunch &amp; Dinner</div></div>
+                            <div><strong style="color:#047857;">✓ Ziyarat</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">Makkah &amp; Madinah Ziyarat</div></div>
+                            <div><strong style="color:#047857;">✓ Travel Insurance</strong><div style="font-size:0.72rem;color:#64748b;margin-top:0.15rem;">Coverage Included</div></div>
+                        </div>
+                    </div>
+
+                    <!-- Accommodation Details -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h4 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 1.1rem;">Accommodation Details</h4>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
+                            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:1rem;display:flex;gap:1rem;align-items:center;">
+                                <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=150&q=80" alt="Makkah Hotel" style="width:76px;height:76px;border-radius:10px;object-fit:cover;">
+                                <div>
+                                    <div style="font-size:0.72rem;color:#64748b;font-weight:700;">Makkah Hotel</div>
+                                    <div style="font-size:0.95rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">${this.escapeHtml(offer.makkahHotel || 'Anjum Hotel Makkah')}</div>
+                                    <div style="font-size:0.75rem;color:#047857;font-weight:700;margin-top:0.15rem;">4 ★ • 4 Nights</div>
+                                    <div style="font-size:0.72rem;color:#64748b;margin-top:0.2rem;">📍 Distance from Haram: 650m • Room Type: Standard Room</div>
+                                </div>
+                            </div>
+                            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:1rem;display:flex;gap:1rem;align-items:center;">
+                                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=150&q=80" alt="Madinah Hotel" style="width:76px;height:76px;border-radius:10px;object-fit:cover;">
+                                <div>
+                                    <div style="font-size:0.72rem;color:#64748b;font-weight:700;">Madinah Hotel</div>
+                                    <div style="font-size:0.95rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">${this.escapeHtml(offer.madinahHotel || 'Durrat Al Eiman Hotel')}</div>
+                                    <div style="font-size:0.75rem;color:#047857;font-weight:700;margin-top:0.15rem;">4 ★ • 5 Nights</div>
+                                    <div style="font-size:0.72rem;color:#64748b;margin-top:0.2rem;">📍 Distance from Haram: 300m • Room Type: Standard Room</div>
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Terms & CTA Button Card -->
-                        <div style="display:flex;flex-direction:column;gap:1rem;">
-                            <label style="display:flex;align-items:center;gap:0.6rem;font-size:0.83rem;color:#475569;cursor:pointer;">
-                                <input type="checkbox" checked style="accent-color:#047857;width:16px;height:16px;">
-                                <span>I have read and agree to the <a href="javascript:void(0)" style="color:#047857;font-weight:700;">Terms &amp; Conditions</a></span>
-                            </label>
-
-                            <button onclick="app.closeModal(); app.openOfferPaymentModal('${offer.id}');" style="width:100%;background:#047857;color:#ffffff;border:none;border-radius:12px;padding:1.1rem;font-size:1.05rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.6rem;box-shadow:0 4px 18px rgba(4,120,87,0.3);transition:all 0.2s;" onmouseover="this.style.background='#065f46';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#047857';this.style.transform='none'">
-                                <span>🔒</span> <span>Proceed to Payment</span>
-                            </button>
-
-                            <div style="font-size:0.78rem;color:#64748b;text-align:center;display:flex;align-items:center;justify-content:center;gap:0.4rem;">
-                                <span>✓</span> 100% Secure &amp; Encrypted
+                    <!-- Itinerary Highlights Timeline -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h4 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 1.4rem;">Itinerary Highlights</h4>
+                        <div style="display:flex;justify-content:space-between;align-items:center;text-align:center;position:relative;">
+                            <div>
+                                <div style="width:46px;height:46px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;font-size:1.2rem;">✈️</div>
+                                <div style="font-size:0.75rem;color:#64748b;">15 Oct 2026</div>
+                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">Departure</div>
+                                <div style="font-size:0.72rem;color:#64748b;">Lucknow (LKO)</div>
+                            </div>
+                            <div style="color:#cbd5e1;font-size:1.3rem;">→</div>
+                            <div>
+                                <div style="width:46px;height:46px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;font-size:1.2rem;">🛬</div>
+                                <div style="font-size:0.75rem;color:#64748b;">15 Oct 2026</div>
+                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">Arrive Jeddah</div>
+                                <div style="font-size:0.72rem;color:#64748b;">Transfer to Makkah</div>
+                            </div>
+                            <div style="color:#cbd5e1;font-size:1.3rem;">→</div>
+                            <div>
+                                <div style="width:46px;height:46px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;font-size:1.2rem;">🕋</div>
+                                <div style="font-size:0.75rem;color:#64748b;">4 Nights</div>
+                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">Stay in Makkah</div>
+                                <div style="font-size:0.72rem;color:#64748b;">Ziyarat &amp; Worship</div>
+                            </div>
+                            <div style="color:#cbd5e1;font-size:1.3rem;">→</div>
+                            <div>
+                                <div style="width:46px;height:46px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;font-size:1.2rem;">🕌</div>
+                                <div style="font-size:0.75rem;color:#64748b;">5 Nights</div>
+                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">Stay in Madinah</div>
+                                <div style="font-size:0.72rem;color:#64748b;">Ziyarat &amp; Worship</div>
+                            </div>
+                            <div style="color:#cbd5e1;font-size:1.3rem;">→</div>
+                            <div>
+                                <div style="width:46px;height:46px;border-radius:50%;background:#ecfdf5;color:#047857;display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;font-size:1.2rem;">🛫</div>
+                                <div style="font-size:0.75rem;color:#64748b;">24 Oct 2026</div>
+                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">Return Flight</div>
+                                <div style="font-size:0.72rem;color:#64748b;">Jeddah (JED)</div>
                             </div>
                         </div>
+                    </div>
 
+                    <!-- Bottom Privacy Protection Banner -->
+                    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:1rem 1.2rem;display:flex;align-items:center;gap:0.9rem;">
+                        <span style="font-size:1.3rem;color:#047857;">🛡️</span>
+                        <div style="font-size:0.82rem;color:#166534;line-height:1.4;">
+                            Your personal contact details are protected. They will never be shared with any agent or provider.
+                        </div>
                     </div>
 
                 </div>
-            </div>
-        </div>
-        `;
 
-        this.openModal(modalContent, true, { width: '100vw', maxWidth: '100vw', height: '100vh', maxHeight: '100vh', borderRadius: '0' });
+                <!-- Right Column Sidebar -->
+                <div style="display:flex;flex-direction:column;gap:1.4rem;position:sticky;top:0;">
+                    <!-- Price Summary Card -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h4 style="font-size:1.1rem;font-weight:800;color:#0f172a;margin:0 0 1.2rem;">Price Summary</h4>
+                        <div style="display:flex;flex-direction:column;gap:0.85rem;font-size:0.9rem;color:#475569;">
+                            <div style="display:flex;justify-content:space-between;">
+                                <span>Package Price (Per Person)</span>
+                                <span style="font-weight:700;color:#0f172a;">${this.formatCurrency(perPersonPrice)}</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;">
+                                <span>Taxes &amp; Fees</span>
+                                <span style="font-weight:700;color:#0f172a;">₹3,200</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;">
+                                <span>Visa Charges</span>
+                                <span style="font-weight:700;color:#0f172a;">₹2,000</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;">
+                                <span>Travel Insurance</span>
+                                <span style="font-weight:700;color:#0f172a;">₹1,200</span>
+                            </div>
+                            <div style="border-top:1px dashed #cbd5e1;margin:0.4rem 0;"></div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:1.1rem;font-weight:800;color:#0f172a;">Total Amount</span>
+                                <span style="font-size:1.7rem;font-weight:900;color:#047857;">${this.formatCurrency(totalDiscountedPrice)}</span>
+                            </div>
+                            <div style="font-size:0.75rem;color:#64748b;text-align:right;">All amounts are in INR</div>
+                        </div>
+                    </div>
+
+                    <!-- Travel Details Box -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.9rem;">
+                            <h5 style="font-size:0.95rem;font-weight:800;color:#0f172a;margin:0;">Travel Details</h5>
+                            <a href="javascript:void(0)" style="font-size:0.78rem;font-weight:700;color:#047857;text-decoration:none;">View Details</a>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:0.8rem;font-size:0.82rem;color:#475569;">
+                            <div style="background:#f8fafc;padding:0.75rem;border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
+                                <div>
+                                    <div style="font-size:0.72rem;color:#64748b;font-weight:700;text-transform:uppercase;">Departure</div>
+                                    <div style="font-size:0.88rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">15 Oct 2026, 04:55 AM</div>
+                                </div>
+                                <div style="font-size:0.8rem;font-weight:700;color:#64748b;">LKO → JED</div>
+                            </div>
+                            <div style="background:#f8fafc;padding:0.75rem;border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
+                                <div>
+                                    <div style="font-size:0.72rem;color:#64748b;font-weight:700;text-transform:uppercase;">Return</div>
+                                    <div style="font-size:0.88rem;font-weight:800;color:#0f172a;margin-top:0.1rem;">24 Oct 2026, 02:30 PM</div>
+                                </div>
+                                <div style="font-size:0.8rem;font-weight:700;color:#64748b;">JED → LKO</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Important Notes Box -->
+                    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:1.4rem;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h5 style="font-size:0.95rem;font-weight:800;color:#0f172a;margin:0 0 0.9rem;">Important Notes</h5>
+                        <div style="display:flex;flex-direction:column;gap:0.6rem;font-size:0.82rem;color:#475569;">
+                            <div style="display:flex;align-items:center;gap:0.5rem;"><span style="color:#047857;">✓</span> <span>Passport must be valid for 6+ months</span></div>
+                            <div style="display:flex;align-items:center;gap:0.5rem;"><span style="color:#047857;">✓</span> <span>COVID-19 vaccination certificate required</span></div>
+                            <div style="display:flex;align-items:center;gap:0.5rem;"><span style="color:#047857;">✓</span> <span>Package is non-refundable after confirmation</span></div>
+                            <div style="display:flex;align-items:center;gap:0.5rem;"><span style="color:#047857;">✓</span> <span>Standard cancellation policies apply</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Terms & CTA Button Card -->
+                    <div style="display:flex;flex-direction:column;gap:1rem;">
+                        <label style="display:flex;align-items:center;gap:0.6rem;font-size:0.83rem;color:#475569;cursor:pointer;">
+                            <input type="checkbox" checked style="accent-color:#047857;width:16px;height:16px;">
+                            <span>I have read and agree to the <a href="javascript:void(0)" style="color:#047857;font-weight:700;">Terms &amp; Conditions</a></span>
+                        </label>
+
+                        <button onclick="app.openOfferPaymentModal('${offer.id}');" style="width:100%;background:#047857;color:#ffffff;border:none;border-radius:12px;padding:1.1rem;font-size:1.05rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.6rem;box-shadow:0 4px 18px rgba(4,120,87,0.3);transition:all 0.2s;" onmouseover="this.style.background='#065f46';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#047857';this.style.transform='none'">
+                            <span>🔒</span> <span>Proceed to Payment</span>
+                        </button>
+
+                        <div style="font-size:0.78rem;color:#64748b;text-align:center;display:flex;align-items:center;justify-content:center;gap:0.4rem;">
+                            <span>✓</span> 100% Secure &amp; Encrypted
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>`;
+
+        return `
+        <div style="background:#f8fafc;min-height:100vh;padding:94px 0 3rem;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+            <div style="max-width:1240px;margin:0 auto;padding:0 1.2rem;display:flex;gap:1.1rem;align-items:flex-start;">
+                ${sidebar}
+                ${mainContent}
+            </div>
+        </div>`;
     }
 
     openOfferPaymentModal(offerId) {
