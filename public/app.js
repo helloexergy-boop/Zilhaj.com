@@ -1791,18 +1791,15 @@ class App {
         const notes = document.getElementById('reqNotes')?.value || 'Custom trip request';
 
         const currentUser = this.state.currentUser || {
-            id: 'usr-guest-' + Date.now(),
-            name: 'Traveler User',
-            email: 'user@traveler.com',
-            phone: '9541692891'
+            id: 'usr-guest-' + Date.now()
         };
 
         const newReq = {
             id: 'req-' + Date.now(),
             userId: currentUser.id,
-            userName: currentUser.name,
-            userEmail: currentUser.email,
-            userPhone: currentUser.phone || '9541692891',
+            userName: currentUser.name || '',
+            userEmail: currentUser.email || '',
+            userPhone: currentUser.phone || '',
             preferredDepartureDate: dateRange,
             durationDays: duration,
             hotelType: hotelType,
@@ -2413,7 +2410,7 @@ class App {
     }
 
     renderDashboardPage() {
-        const user = this.state.currentUser || { name: 'Tawseef Ahmad', email: 'tawseefahmad@gmail.com', phone: '+91 98765 43210', role: 'Customer' };
+        const user = this.state.currentUser || {};
         const activeTab = this.state.activeDashboardTab || 'dashboard';
         const userPhoto = (user && user.profilePhoto) || localStorage.getItem('umrah_custom_photo');
         const localReqs   = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
@@ -2453,7 +2450,7 @@ class App {
 
         // ── Nav item builder ─────────────────────────────────────────────────────
         const navItem = (tab, icon, label, badge = 0) => {
-            const isActive = activeTab === tab;
+            const isActive = activeTab === tab || (tab === 'payments' && activeTab === 'paymentScreen');
             return `<a href="javascript:void(0)" onclick="app.setDashboardTab('${tab}')"
                 style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.58rem .65rem;border-radius:10px;text-decoration:none;cursor:pointer;transition:all .2s ease;background:${isActive?'#1a6b3c':'transparent'};color:${isActive?'#fff':'#374151'};"
                 onmouseover="if('${tab}'!=='${activeTab}'){this.style.background='#f0faf5';this.style.color='#1a6b3c';this.style.transform='translateX(3px)';}"
@@ -2993,29 +2990,10 @@ class App {
             </main>`;
 
         // ════════════════════════════════════════════════════════════════════════
-        // PAYMENTS
+        // PAYMENTS / PAYMENT SCREEN (MATCHING IMAGE 2)
         // ════════════════════════════════════════════════════════════════════════
-        } else if (activeTab === 'payments') {
-            const pmts = bookings.map((b,i) => ({...b, txn:`TXN${String(i+1).padStart(6,'0')}`, method:'Razorpay'}));
-            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1rem;">
-                ${pageHeader('Payments', 'Track all your payment history and transactions.')}
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;">
-                    ${[
-                        ['Total Paid', this.formatCurrency(pmts.reduce((s,p)=>s+(p.totalPrice||0),0)), '#1a6b3c'],
-                        ['Successful', pmts.filter(p=>p.status==='CONFIRMED'||p.status==='COMPLETED').length, '#059669'],
-                        ['Pending',    pmts.filter(p=>p.status==='PENDING').length, '#d97706'],
-                        ['Transactions', pmts.length, '#374151'],
-                    ].map(([l,v,c])=>`<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:.95rem;transition:all .2s ease;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='none';"><div style="font-size:.72rem;color:#6b7280;margin-bottom:.25rem;">${l}</div><div style="font-size:1.25rem;font-weight:800;color:${c};">${v}</div></div>`).join('')}
-                </div>
-                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
-                    <div style="padding:.85rem 1.1rem;border-bottom:1px solid #f3f4f6;"><h3 style="font-size:.88rem;font-weight:800;color:#0f172a;margin:0;">Payment History</h3></div>
-                    ${pmts.length>0?`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f9fafb;border-bottom:1px solid #f3f4f6;"><th style="padding:.62rem .95rem;text-align:left;font-size:.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Transaction ID</th><th style="padding:.62rem .95rem;text-align:left;font-size:.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Service</th><th style="padding:.62rem .95rem;text-align:left;font-size:.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Amount</th><th style="padding:.62rem .95rem;text-align:left;font-size:.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Method</th><th style="padding:.62rem .95rem;text-align:left;font-size:.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Status</th><th style="padding:.62rem .95rem;text-align:left;font-size:.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Action</th></tr></thead><tbody>${pmts.map(p=>`<tr style="border-bottom:1px solid #f3f4f6;transition:background .15s;" onmouseover="this.style.background='#f0faf5'" onmouseout="this.style.background=''"><td style="padding:.78rem .95rem;font-size:.79rem;font-weight:700;color:#1a6b3c;">${p.txn}</td><td style="padding:.78rem .95rem;font-size:.79rem;color:#374151;">${this.escapeHtml(p.packageTitle||'Umrah Package')}</td><td style="padding:.78rem .95rem;font-size:.83rem;font-weight:700;color:#0f172a;">${this.formatCurrency(p.totalPrice||0)}</td><td style="padding:.78rem .95rem;font-size:.79rem;color:#374151;">${p.method}</td><td style="padding:.78rem .95rem;">${statusBadge(p.status||'completed')}</td><td style="padding:.78rem .95rem;"><button onclick="app.viewBookingVoucher('${p.id}')" style="background:#f0faf5;border:1px solid #d1fae5;border-radius:6px;padding:.28rem .7rem;font-size:.73rem;font-weight:700;color:#1a6b3c;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='#1a6b3c';this.style.color='#fff';" onmouseout="this.style.background='#f0faf5';this.style.color='#1a6b3c';">View Receipt</button></td></tr>`).join('')}</tbody></table></div>`:`<div style="text-align:center;padding:2.2rem;color:#6b7280;font-size:.85rem;">No payment history yet.</div>`}
-                </div>
-            </main>`;
-
-        // ════════════════════════════════════════════════════════════════════════
-        // PROFILE & SETTINGS (merged + 100% WORKING TOGGLES)
-        // ════════════════════════════════════════════════════════════════════════
+        } else if (activeTab === 'payments' || activeTab === 'paymentScreen') {
+            panel = this.renderPaymentPage(this.state.activeOfferId);
         } else if (activeTab === 'profile') {
             panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1rem;">
                 ${pageHeader('Profile &amp; Settings', 'Manage your account details, preferences and security.')}
@@ -3034,7 +3012,7 @@ class App {
                                 <span style="background:#d1fae5;color:#065f46;font-size:.65rem;font-weight:700;padding:.08rem .45rem;border-radius:99px;">Verified Account</span>
                             </div>
                         </div>
-                        ${[['Full Name',user.name],['Email Address',user.email],['Phone Number',user.phone||'+91 9541692891'],['Account Status','Active &amp; Verified'],['Member Since','2025']].map(([k,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px dashed #f3f4f6;"><span style="font-size:.8rem;color:#6b7280;">${k}</span><strong style="font-size:.8rem;color:#0f172a;">${this.escapeHtml(String(v))}</strong></div>`).join('')}
+                        ${[['Full Name',user.name],['Email Address',user.email],['Phone Number',user.phone||'—'],['Account Status','Active &amp; Verified'],['Member Since','2025']].map(([k,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px dashed #f3f4f6;"><span style="font-size:.8rem;color:#6b7280;">${k}</span><strong style="font-size:.8rem;color:#0f172a;">${this.escapeHtml(String(v))}</strong></div>`).join('')}
                         <div style="display:flex;gap:.6rem;margin-top:1rem;">
                             <button onclick="app.logout()" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:.48rem 1rem;border-radius:7px;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='#fee2e2';" onmouseout="this.style.background='#fef2f2';">🚪 Log Out</button>
                             <button onclick="app.triggerPhotoUpload()" style="background:#f0faf5;color:#1a6b3c;border:1px solid #d1fae5;padding:.48rem 1rem;border-radius:7px;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='#d1fae5';" onmouseout="this.style.background='#f0faf5';">📷 Change Photo</button>
@@ -3140,31 +3118,28 @@ class App {
 
     renderPackageDetailsFullPage(offerId) {
         const allOffers = this.getAllOffers();
-        const offer = allOffers.find(o => o.id === offerId) || {
-            id: offerId || 'OFF-1024',
-            packageTitle: 'Umrah Package - Economy',
-            agentName: 'AL-HARAM PREMIUM TRAVELS',
-            discountedPrice: 78500,
-            originalPrice: 86900,
-            discountPercentage: 10,
-            makkahHotel: 'Anjum Hotel Makkah',
-            madinahHotel: 'Durrat Al Eiman Hotel',
-            departureDate: '15 Oct 2026',
-            returnDate: '24 Oct 2026',
-            departureCity: 'Lucknow (LKO)',
-            destinationCity: 'Jeddah (JED)',
-            durationDays: 10,
-            requirementId: '1024'
-        };
+        const offer = allOffers.find(o => o.id === offerId);
+
+        if (!offer) {
+            return `
+            <div style="min-height:80vh; background:#f8fafc; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; padding:2rem;">
+                <div style="text-align:center; max-width:440px; background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:2rem 1.6rem; box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+                    <div style="font-size:2.4rem; margin-bottom:0.6rem;">🗂️</div>
+                    <div style="font-weight:900; color:#0f172a; font-size:1.05rem; margin-bottom:0.4rem;">Offer Unavailable</div>
+                    <div style="color:#64748b; font-size:0.88rem; margin-bottom:1.2rem;">This package is no longer available. Please go back and choose another offer.</div>
+                    <button onclick="app.navigate('dashboard')" style="background:#047857; color:#fff; font-weight:800; border:none; border-radius:10px; padding:0.6rem 1.4rem; cursor:pointer;">← Back to Dashboard</button>
+                </div>
+            </div>`;
+        }
 
         const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
         const apiReqs = this.state.myRequirements || [];
         const req = [...apiReqs, ...localReqs].find(r => r.id === offer.requirementId);
-        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 2;
-        const perPersonPrice = offer.discountedPrice || offer.price || 78500;
+        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 1;
+        const perPersonPrice = offer.discountedPrice || offer.price || 0;
         const totalDiscountedPrice = perPersonPrice * travelersCount;
 
-        const user = this.state.currentUser || { name: 'Tawseef Ahmad', phone: '+91 98765 43210', email: 'tawseefahmad@gmail.com' };
+        const user = this.state.currentUser || {};
 
         const sidebar = `
         <aside style="width:230px;flex-shrink:0;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);display:flex;flex-direction:column;gap:1.3rem;">
@@ -4163,21 +4138,13 @@ class App {
         let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
         let b = allBookings.find(item => item.id === bookingId);
         if (!b) b = (this.state.myBookings || []).find(item => item.id === bookingId);
-        b = b || {
-            id: bookingId || 'BK-048846',
-            packageTitle: '18 Days Umrah Package • Swissotel Makkah & Pullman Zamzam Madinah',
-            travelDate: '13 AUGUST 2026',
-            travelersCount: 2,
-            totalPrice: 5,
-            status: 'CONFIRMED',
-            agentName: 'AL-HARAM PREMIUM TRAVELS'
-        };
 
-        const user = this.state.currentUser || {
-            name: 'Animesh',
-            email: 'rajuranjanxbkj@gmail.com',
-            phone: '+91 9541692891'
-        };
+        if (!b) {
+            this.showToast('Booking not found. Please refresh and try again.', 'warning');
+            return;
+        }
+
+        const user = this.state.currentUser || {};
 
         this.openModal(`
             <div id="printableVoucher" style="display:flex; flex-direction:column; width:100vw; height:100vh; background:#f8fafc; font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif; position:relative; overflow-y:auto; box-sizing:border-box;">
@@ -4252,19 +4219,19 @@ class App {
                                     <div style="display:flex; flex-direction:column; gap:0.65rem; font-size:0.88rem; color:#0f172a;">
                                         <div style="display:flex; justify-content:space-between; align-items:center;">
                                             <span style="color:#64748b; font-weight:600;">Full Name:</span>
-                                            <strong style="font-weight:800; color:#0f172a;">${this.escapeHtml(user.name || 'Animesh')}</strong>
+                                            <strong style="font-weight:800; color:#0f172a;">${this.escapeHtml(user.name || '')}</strong>
                                         </div>
                                         <div style="display:flex; justify-content:space-between; align-items:center;">
                                             <span style="color:#64748b; font-weight:600;">Email:</span>
-                                            <strong style="font-weight:800; color:#0f172a;">${this.escapeHtml(user.email || 'rajuranjanxbkj@gmail.com')}</strong>
+                                            <strong style="font-weight:800; color:#0f172a;">${this.escapeHtml(user.email || '')}</strong>
                                         </div>
                                         <div style="display:flex; justify-content:space-between; align-items:center;">
                                             <span style="color:#64748b; font-weight:600;">Phone:</span>
-                                            <strong style="font-weight:800; color:#0f172a;">${this.escapeHtml(user.phone || '+91 9541692891')}</strong>
+                                            <strong style="font-weight:800; color:#0f172a;">${this.escapeHtml(user.phone || '')}</strong>
                                         </div>
                                         <div style="display:flex; justify-content:space-between; align-items:center;">
                                             <span style="color:#64748b; font-weight:600;">Total Travelers:</span>
-                                            <strong style="font-weight:800; color:#0f172a;">${b.travelersCount || 2} Person(s)</strong>
+                                            <strong style="font-weight:800; color:#0f172a;">${b.travelersCount || 1} Person(s)</strong>
                                         </div>
                                     </div>
                                 </div>
@@ -4276,7 +4243,7 @@ class App {
                                     </div>
                                     <div style="display:flex; flex-direction:column; gap:0.6rem;">
                                         <div style="font-size:1.15rem; font-weight:900; color:#166534;">
-                                            ${this.escapeHtml(b.agentName || 'AL-HARAM PREMIUM TRAVELS')}
+                                            ${this.escapeHtml(b.agentName || '')}
                                         </div>
                                         <div style="font-size:0.82rem; color:#475569; font-weight:600;">
                                             Saudi Ministry License #UM-984120
@@ -4302,7 +4269,7 @@ class App {
                                         <div style="font-size:0.82rem; font-weight:900; color:#166534; margin-bottom:0.35rem; display:flex; align-items:center; gap:0.3rem;">
                                             <span>📍</span> <span>MAKKAH ACCOMMODATION</span>
                                         </div>
-                                        <div style="font-size:1.05rem; font-weight:900; color:#0f172a;">Swissotel Makkah / Manarat Al Misk</div>
+                                        <div style="font-size:1.05rem; font-weight:900; color:#0f172a;">${this.escapeHtml(b.makkahHotel || 'TBD')}</div>
                                         <div style="font-size:0.8rem; color:#64748b; margin-top:0.25rem; font-weight:600;">Approx. 250 Metres from Masjid Al-Haram</div>
                                         <div style="font-size:0.8rem; color:#047857; font-weight:800; margin-top:0.4rem; display:flex; align-items:center; gap:0.3rem;">
                                             <span>✓</span> <span>Full Board 3x Daily Indian Buffet Included</span>
@@ -4314,7 +4281,7 @@ class App {
                                         <div style="font-size:0.82rem; font-weight:900; color:#166534; margin-bottom:0.35rem; display:flex; align-items:center; gap:0.3rem;">
                                             <span>📍</span> <span>MADINAH ACCOMMODATION</span>
                                         </div>
-                                        <div style="font-size:1.05rem; font-weight:900; color:#0f172a;">Pullman Zamzam / Marjan International</div>
+                                        <div style="font-size:1.05rem; font-weight:900; color:#0f172a;">${this.escapeHtml(b.madinahHotel || 'TBD')}</div>
                                         <div style="font-size:0.8rem; color:#64748b; margin-top:0.25rem; font-weight:600;">Approx. 150 Metres from Al-Masjid An-Nabawi</div>
                                         <div style="font-size:0.8rem; color:#047857; font-weight:800; margin-top:0.4rem; display:flex; align-items:center; gap:0.3rem;">
                                             <span>✓</span> <span>Guided Visits &amp; Nusuk Permit Guidance</span>
@@ -4423,17 +4390,416 @@ class App {
     }
 
     renderPaymentPage(offerId) {
-        const targetOfferId = offerId || this.state.activePaymentOfferId || (this.getAllOffers()[0] || {}).id;
-        setTimeout(() => {
-            if (targetOfferId) {
-                this.openOfferPaymentModal(targetOfferId);
-            }
-        }, 50);
-        return `<div style="min-height:80vh; background:#f8fafc; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
-            <div style="text-align:center; color:#047857; font-weight:800;">
-                <div style="font-size:2.2rem; margin-bottom:0.5rem;">🛡️</div>
-                <div>Opening Secure Payment Page...</div>
-        </div>`;
+        const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        const apiOffers = this.state.userOffers || [];
+        const allOffers = [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
+        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        const apiReqs = this.state.myRequirements || [];
+        const allReqs = [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
+
+        const offer = allOffers.find(item => item.id === offerId) || allOffers[0] || {
+            id: offerId || 'OFF-1024',
+            packageTitle: 'Umrah Package - Economy',
+            agentName: 'AL-HARAM PREMIUM TRAVELS',
+            discountedPrice: 78500,
+            originalPrice: 86900,
+            durationDays: 10,
+            makkahHotel: 'Anjum Hotel Makkah',
+            madinahHotel: 'Durrat Al Eiman Hotel',
+            requirementId: '1024'
+        };
+
+        const req = allReqs.find(r => r.id === offer.requirementId) || allReqs[0] || {
+            travelersCount: 2,
+            adults: 2,
+            children: 0,
+            durationDays: 10
+        };
+
+        const travelersCount = offer.travelersCount || req.travelersCount || req.adults || 2;
+        const perPersonPrice = offer.discountedPrice || offer.price || 78500;
+        
+        const packagePriceTotal = perPersonPrice * travelersCount; // ₹1,57,000
+        const taxesAndFees = 6400;
+        const visaCharges = 4000;
+        const travelInsurance = 2400;
+        const offerDiscount = 1000;
+        const finalTotalAmount = packagePriceTotal + taxesAndFees + visaCharges + travelInsurance - offerDiscount; // ₹1,69,800
+
+        const user = this.state.currentUser || { name: 'Tawseef Ahmad', phone: '+91 98765 43210', email: 'tawseefahmad@gmail.com' };
+
+        return `
+        <main style="flex:1; min-width:0; display:flex; flex-direction:column; gap:1.2rem; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; color:#0f172a;">
+            
+            <!-- HEADER BAR MATCHING IMAGE 2 -->
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1rem 1.4rem; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <button onclick="app.setDashboardTab('packageDetails')" style="background:#ffffff; color:#0f172a; border:1px solid #cbd5e1; border-radius:8px; padding:0.45rem 0.85rem; font-weight:700; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem; transition:all 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
+                        ← Back to Review Package
+                    </button>
+                    <div>
+                        <div style="display:flex; align-items:center; gap:0.4rem;">
+                            <h2 style="font-size:1.25rem; font-weight:800; color:#0f172a; margin:0; line-height:1.2;">Secure Payment</h2>
+                            <span style="color:#047857; font-size:1.1rem;">🛡️</span>
+                        </div>
+                        <div style="font-size:0.78rem; color:#64748b; margin-top:0.15rem;">Your payment information is safe with us. Complete your payment to confirm your booking.</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <div style="width:34px; height:34px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer;" onclick="app.setDashboardTab('notifications')">
+                        <span style="font-size:0.95rem;">🔔</span>
+                        <span style="position:absolute; top:-2px; right:-2px; background:#047857; color:#ffffff; font-size:0.62rem; font-weight:800; width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center;">2</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.55rem; background:#f8fafc; padding:0.3rem 0.75rem; border-radius:99px; border:1px solid #e2e8f0; cursor:pointer;" onclick="app.setDashboardTab('profile')">
+                        <div style="width:28px; height:28px; border-radius:50%; background:#047857; color:#ffffff; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:0.8rem;">T</div>
+                        <div>
+                            <div style="font-size:0.8rem; font-weight:800; color:#0f172a;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                            <div style="font-size:0.65rem; color:#64748b;">Customer</div>
+                        </div>
+                        <span style="font-size:0.65rem; color:#64748b; margin-left:0.15rem;">▼</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2 COLUMN LAYOUT GRID (MATCHING IMAGE 2) -->
+            <div style="display:grid; grid-template-columns:1fr 340px; gap:1.2rem; align-items:start;">
+                
+                <!-- LEFT COLUMN: SECURITY BANNER, STEP 1 PAYMENT METHOD, STEP 2 DETAILS -->
+                <div style="display:flex; flex-direction:column; gap:1.2rem;">
+                    
+                    <!-- Security Banner -->
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:0.8rem 1.1rem; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                        <div style="display:flex; align-items:center; gap:0.55rem; color:#047857; font-size:0.82rem; font-weight:800;">
+                            <span style="font-size:1rem;">🛡️</span> 100% Secure Payment <span style="color:#64748b; font-weight:500;">• All transactions are encrypted and protected</span>
+                        </div>
+                        <span style="background:#f0fdf4; border:1px solid #bbf7d0; color:#047857; font-size:0.7rem; font-weight:800; padding:0.2rem 0.55rem; border-radius:6px;">PCI DSS Compliant</span>
+                    </div>
+
+                    <!-- SECTION 1: CHOOSE PAYMENT METHOD -->
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.2rem; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:1.1rem;">
+                            <div style="width:24px; height:24px; background:#047857; color:#ffffff; border-radius:50%; font-weight:800; font-size:0.8rem; display:flex; align-items:center; justify-content:center;">1</div>
+                            <h3 style="font-size:1rem; font-weight:800; color:#0f172a; margin:0;">Choose Payment Method</h3>
+                        </div>
+
+                        <!-- Vertical Tabs + Dynamic Content Grid -->
+                        <div style="display:grid; grid-template-columns:190px 1fr; gap:1.2rem; align-items:start;">
+                            
+                            <!-- Left Tabs Navigation -->
+                            <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                                
+                                <button type="button" onclick="app.switchPaymentTab('upi')" id="payTab-upi" style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 0.85rem; border-radius:10px; border:2px solid #047857; background:#f0fdf4; color:#0f172a; font-weight:800; font-size:0.82rem; cursor:pointer; text-align:left;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                                        <span style="font-size:1rem;">📱</span> <span>UPI</span>
+                                    </div>
+                                    <span style="background:#047857; color:#ffffff; font-size:0.6rem; font-weight:800; padding:0.12rem 0.4rem; border-radius:4px;">Recommended</span>
+                                </button>
+
+                                <button type="button" onclick="app.switchPaymentTab('card')" id="payTab-card" style="display:flex; flex-direction:column; padding:0.75rem 0.85rem; border-radius:10px; border:1px solid #e2e8f0; background:#ffffff; color:#0f172a; font-weight:700; font-size:0.82rem; cursor:pointer; text-align:left;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem; font-weight:800;">
+                                        <span style="font-size:1rem;">💳</span> <span>Debit / Credit Cards</span>
+                                    </div>
+                                    <span style="font-size:0.67rem; color:#64748b; margin-top:0.15rem; font-weight:500;">Visa, Mastercard, RuPay</span>
+                                </button>
+
+                                <button type="button" onclick="app.switchPaymentTab('net')" id="payTab-net" style="display:flex; flex-direction:column; padding:0.75rem 0.85rem; border-radius:10px; border:1px solid #e2e8f0; background:#ffffff; color:#0f172a; font-weight:700; font-size:0.82rem; cursor:pointer; text-align:left;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem; font-weight:800;">
+                                        <span style="font-size:1rem;">🏦</span> <span>Net Banking</span>
+                                    </div>
+                                    <span style="font-size:0.67rem; color:#64748b; margin-top:0.15rem; font-weight:500;">All major banks</span>
+                                </button>
+
+                                <button type="button" onclick="app.switchPaymentTab('emi')" id="payTab-emi" style="display:flex; flex-direction:column; padding:0.75rem 0.85rem; border-radius:10px; border:1px solid #e2e8f0; background:#ffffff; color:#0f172a; font-weight:700; font-size:0.82rem; cursor:pointer; text-align:left;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem; font-weight:800;">
+                                        <span style="font-size:1rem;">👛</span> <span>Wallets</span>
+                                    </div>
+                                    <span style="font-size:0.67rem; color:#64748b; margin-top:0.15rem; font-weight:500;">Paytm, PhonePe, Amazon Pay</span>
+                                </button>
+
+                                <button type="button" onclick="app.switchPaymentTab('emi')" id="payTab-paylater" style="display:flex; flex-direction:column; padding:0.75rem 0.85rem; border-radius:10px; border:1px solid #e2e8f0; background:#ffffff; color:#0f172a; font-weight:700; font-size:0.82rem; cursor:pointer; text-align:left;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem; font-weight:800;">
+                                        <span style="font-size:1rem;">💵</span> <span>Pay Later</span>
+                                    </div>
+                                    <span style="font-size:0.67rem; color:#64748b; margin-top:0.15rem; font-weight:500;">Pay in easier installments</span>
+                                </button>
+
+                            </div>
+
+                            <!-- Right Content Panels -->
+                            <div>
+                                <!-- UPI PANEL (MATCHING IMAGE 2 EXACTLY) -->
+                                <div id="paySection-upi">
+                                    <h4 style="font-size:0.98rem; font-weight:800; color:#0f172a; margin:0 0 0.15rem;">Pay using UPI</h4>
+                                    <div style="font-size:0.76rem; color:#64748b; margin-bottom:1rem;">Scan any QR code using your UPI app</div>
+
+                                    <!-- Row of UPI App Logos -->
+                                    <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:0.5rem; margin-bottom:1.2rem; text-align:center;">
+                                        <div style="border:1px solid #e2e8f0; border-radius:8px; padding:0.5rem 0.3rem; background:#ffffff; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                                            <div style="font-weight:900; font-size:0.74rem; color:#ea4335;"><span style="color:#4285f4;">G</span> Pay</div>
+                                            <div style="font-size:0.6rem; color:#64748b; margin-top:0.15rem;">Google Pay</div>
+                                        </div>
+                                        <div style="border:1px solid #e2e8f0; border-radius:8px; padding:0.5rem 0.3rem; background:#ffffff; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                                            <div style="width:20px; height:20px; background:#5f259f; color:#fff; border-radius:50%; font-weight:900; font-size:0.65rem; display:flex; align-items:center; justify-content:center; margin:0 auto;">पे</div>
+                                            <div style="font-size:0.6rem; color:#64748b; margin-top:0.15rem;">PhonePe</div>
+                                        </div>
+                                        <div style="border:1px solid #e2e8f0; border-radius:8px; padding:0.5rem 0.3rem; background:#ffffff; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                                            <div style="font-weight:900; font-size:0.74rem; color:#00baf2;">Paytm</div>
+                                            <div style="font-size:0.6rem; color:#64748b; margin-top:0.15rem;">Paytm</div>
+                                        </div>
+                                        <div style="border:1px solid #e2e8f0; border-radius:8px; padding:0.5rem 0.3rem; background:#ffffff; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                                            <div style="font-weight:900; font-size:0.74rem; color:#ff6600;">BHIM</div>
+                                            <div style="font-size:0.6rem; color:#64748b; margin-top:0.15rem;">BHIM</div>
+                                        </div>
+                                        <div style="border:1px solid #e2e8f0; border-radius:8px; padding:0.5rem 0.3rem; background:#ffffff; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                                            <div style="font-weight:900; font-size:0.7rem; color:#232f3e;"><span style="color:#ff9900;">a</span> pay</div>
+                                            <div style="font-size:0.6rem; color:#64748b; margin-top:0.15rem;">Amazon Pay</div>
+                                        </div>
+                                        <div style="border:1px solid #e2e8f0; border-radius:8px; padding:0.5rem 0.3rem; background:#ffffff; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                                            <div style="font-weight:900; font-size:0.7rem; color:#047857;">UPI▶</div>
+                                            <div style="font-size:0.6rem; color:#64748b; margin-top:0.15rem;">Other UPI</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Divider Line -->
+                                    <div style="display:flex; align-items:center; justify-content:center; gap:0.7rem; margin-bottom:1.1rem;">
+                                        <div style="flex:1; height:1px; background:#e2e8f0;"></div>
+                                        <span style="font-size:0.7rem; color:#64748b; font-weight:600;">or scan this QR code</span>
+                                        <div style="flex:1; height:1px; background:#e2e8f0;"></div>
+                                    </div>
+
+                                    <!-- QR Code Box with Central Logo Emblem Overlay -->
+                                    <div style="text-align:center; margin-bottom:0.9rem;">
+                                        <div style="position:relative; display:inline-block; padding:10px; background:#ffffff; border:2px solid #e2e8f0; border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,0.03);">
+                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi%3A%2F%2Fpay%3Fpa%3Dtawseef%40okaxis%26pn%3DZilhaj%26am%3D169800.00%26cu%3DINR" alt="UPI QR Code" style="width:170px; height:170px; display:block;" />
+                                            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:34px; height:34px; background:#047857; border:3px solid #ffffff; border-radius:8px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                                                <span style="color:#ffffff; font-weight:900; font-size:1rem; font-style:italic;">Z</span>
+                                            </div>
+                                        </div>
+
+                                        <div style="display:flex; align-items:center; justify-content:center; gap:0.35rem; margin-top:0.7rem; font-size:0.8rem; color:#0f172a; font-weight:700;">
+                                            <span>UPI ID: tawseef@okaxis</span>
+                                            <button type="button" onclick="navigator.clipboard.writeText('tawseef@okaxis'); app.showToast('UPI ID copied to clipboard!', 'success');" style="background:none; border:none; color:#047857; cursor:pointer; font-size:0.85rem;" title="Copy UPI ID">📋</button>
+                                        </div>
+                                    </div>
+
+                                    <div style="font-size:0.72rem; color:#64748b; text-align:center; display:flex; align-items:center; justify-content:center; gap:0.3rem;">
+                                        <span>ⓘ</span> You will be able to review the payment on the next step.
+                                    </div>
+                                </div>
+
+                                <!-- CARDS PANEL -->
+                                <div id="paySection-card" style="display:none;">
+                                    <h4 style="font-size:0.98rem; font-weight:800; color:#0f172a; margin:0 0 0.7rem;">Enter Card Details</h4>
+                                    <div style="display:flex; flex-direction:column; gap:0.8rem;">
+                                        <div>
+                                            <label style="font-size:0.72rem; font-weight:700; color:#475569; display:block; margin-bottom:0.25rem;">CARDHOLDER NAME</label>
+                                            <input type="text" value="${this.escapeHtml(user.name || 'Tawseef Ahmad')}" style="width:100%; box-sizing:border-box; padding:0.6rem; border-radius:7px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;" />
+                                        </div>
+                                        <div>
+                                            <label style="font-size:0.72rem; font-weight:700; color:#475569; display:block; margin-bottom:0.25rem;">CARD NUMBER</label>
+                                            <input type="text" placeholder="4111 2222 3333 4444" value="4111 2222 3333 4444" style="width:100%; box-sizing:border-box; padding:0.6rem; border-radius:7px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;" />
+                                        </div>
+                                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.7rem;">
+                                            <div>
+                                                <label style="font-size:0.72rem; font-weight:700; color:#475569; display:block; margin-bottom:0.25rem;">EXPIRY</label>
+                                                <input type="text" placeholder="MM/YY" value="08/28" style="width:100%; box-sizing:border-box; padding:0.6rem; border-radius:7px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;" />
+                                            </div>
+                                            <div>
+                                                <label style="font-size:0.72rem; font-weight:700; color:#475569; display:block; margin-bottom:0.25rem;">CVV</label>
+                                                <input type="password" placeholder="123" value="123" style="width:100%; box-sizing:border-box; padding:0.6rem; border-radius:7px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- NET BANKING PANEL -->
+                                <div id="paySection-net" style="display:none;">
+                                    <h4 style="font-size:0.98rem; font-weight:800; color:#0f172a; margin:0 0 0.7rem;">Select Your Bank</h4>
+                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.55rem;">
+                                        <button type="button" style="padding:0.65rem; border:1px solid #047857; background:#f0fdf4; border-radius:7px; font-weight:700; color:#047857; text-align:left; font-size:0.82rem;">HDFC Bank</button>
+                                        <button type="button" style="padding:0.65rem; border:1px solid #cbd5e1; background:#ffffff; border-radius:7px; font-weight:700; color:#334155; text-align:left; font-size:0.82rem;">ICICI Bank</button>
+                                        <button type="button" style="padding:0.65rem; border:1px solid #cbd5e1; background:#ffffff; border-radius:7px; font-weight:700; color:#334155; text-align:left; font-size:0.82rem;">State Bank of India</button>
+                                        <button type="button" style="padding:0.65rem; border:1px solid #cbd5e1; background:#ffffff; border-radius:7px; font-weight:700; color:#334155; text-align:left; font-size:0.82rem;">Axis Bank</button>
+                                    </div>
+                                </div>
+
+                                <!-- EMI / WALLET PANEL -->
+                                <div id="paySection-emi" style="display:none;">
+                                    <h4 style="font-size:0.98rem; font-weight:800; color:#0f172a; margin:0 0 0.7rem;">Select Wallet / EMI</h4>
+                                    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                                        <label style="display:flex; align-items:center; gap:0.5rem; padding:0.6rem; border:1px solid #cbd5e1; border-radius:7px; cursor:pointer; font-size:0.82rem;">
+                                            <input type="radio" name="walletOpt2" checked style="accent-color:#047857;" /> Paytm Wallet / PhonePe
+                                        </label>
+                                        <label style="display:flex; align-items:center; gap:0.5rem; padding:0.6rem; border:1px solid #cbd5e1; border-radius:7px; cursor:pointer; font-size:0.82rem;">
+                                            <input type="radio" name="walletOpt2" style="accent-color:#047857;" /> Simpl 3 No-Cost EMI
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: PAYMENT DETAILS (PASSENGER CONTACT FORM) -->
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.2rem; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:1.1rem;">
+                            <div style="width:24px; height:24px; background:#047857; color:#ffffff; border-radius:50%; font-weight:800; font-size:0.8rem; display:flex; align-items:center; justify-content:center;">2</div>
+                            <h3 style="font-size:1rem; font-weight:800; color:#0f172a; margin:0;">Payment Details</h3>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem; margin-bottom:1rem;">
+                            <div>
+                                <div style="font-size:0.68rem; color:#64748b; font-weight:600;">Booking For</div>
+                                <div style="font-size:0.88rem; font-weight:800; color:#0f172a; margin-top:0.15rem;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.68rem; color:#64748b; font-weight:600;">Mobile Number</div>
+                                <div style="font-size:0.88rem; font-weight:800; color:#0f172a; margin-top:0.15rem;">${this.escapeHtml(user.phone || '+91 98765 43210')}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.68rem; color:#64748b; font-weight:600;">Email Address</div>
+                                <div style="font-size:0.88rem; font-weight:800; color:#0f172a; margin-top:0.15rem;">${this.escapeHtml(user.email || 'tawseefahmad@gmail.com')}</div>
+                            </div>
+                        </div>
+
+                        <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; color:#334155; cursor:pointer; margin-bottom:1.1rem;">
+                            <input type="checkbox" checked style="accent-color:#047857; width:15px; height:15px;" />
+                            <span>I want to receive payment confirmation on WhatsApp <span style="color:#25d366; font-size:0.9rem;">💬</span></span>
+                        </label>
+
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:0.75rem 0.9rem; display:flex; align-items:center; gap:0.55rem; font-size:0.75rem; color:#475569;">
+                            <span style="color:#047857; font-size:1rem; flex-shrink:0;">🛡️</span>
+                            <div>
+                                <strong style="color:#0f172a;">We are committed to complete transparency.</strong> All payments are processed securely and there are no hidden charges.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN: BOOKING SUMMARY & INCLUSIONS CARDS -->
+                <div style="display:flex; flex-direction:column; gap:1.2rem;">
+                    
+                    <!-- Card 1: Booking Summary -->
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.2rem; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h3 style="font-size:1rem; font-weight:800; color:#0f172a; margin:0 0 0.9rem;">Booking Summary</h3>
+
+                        <div style="display:flex; gap:0.8rem; align-items:center; margin-bottom:1.1rem; padding-bottom:0.9rem; border-bottom:1px solid #f1f5f9;">
+                            <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=120&q=80" alt="Kaaba" style="width:62px; height:62px; border-radius:10px; object-fit:cover; flex-shrink:0;" />
+                            <div>
+                                <h4 style="font-size:0.88rem; font-weight:800; color:#0f172a; margin:0 0 0.15rem;">${this.escapeHtml(offer.packageTitle)}</h4>
+                                <div style="font-size:0.72rem; color:#64748b; margin-bottom:0.3rem;">REQ-${offer.requirementId || '1024'} • ${travelersCount} Adults, 0 Children</div>
+                                <span style="background:#ecfdf5; color:#047857; font-size:0.67rem; font-weight:800; padding:0.12rem 0.45rem; border-radius:99px;">${offer.durationDays || 10} Days</span>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:0.55rem; font-size:0.78rem; color:#475569;">
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>Package Price (${travelersCount} × ₹78,500)</span>
+                                <span style="font-weight:700; color:#0f172a;">${this.formatCurrency(packagePriceTotal)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>Taxes &amp; Fees</span>
+                                <span style="font-weight:700; color:#0f172a;">${this.formatCurrency(taxesAndFees)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>Visa Charges</span>
+                                <span style="font-weight:700; color:#0f172a;">${this.formatCurrency(visaCharges)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>Travel Insurance</span>
+                                <span style="font-weight:700; color:#0f172a;">${this.formatCurrency(travelInsurance)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; color:#047857; font-weight:700;">
+                                <span>Offer Discount</span>
+                                <span>- ${this.formatCurrency(offerDiscount)}</span>
+                            </div>
+
+                            <div style="border-top:1px solid #e2e8f0; padding-top:0.8rem; margin-top:0.3rem; display:flex; justify-content:space-between; align-items:baseline;">
+                                <div>
+                                    <div style="font-size:0.88rem; font-weight:800; color:#0f172a;">Total Amount</div>
+                                    <div style="font-size:0.65rem; color:#64748b;">All amounts are in INR</div>
+                                </div>
+                                <div style="font-size:1.45rem; font-weight:900; color:#047857;">${this.formatCurrency(finalTotalAmount)}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: What's Included -->
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.2rem; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h3 style="font-size:1rem; font-weight:800; color:#0f172a; margin:0 0 0.8rem;">What's Included</h3>
+                        
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.55rem; font-size:0.75rem; color:#334155; margin-bottom:0.9rem;">
+                            <div style="display:flex; align-items:center; gap:0.4rem;">
+                                <span style="color:#047857; font-weight:800;">✈️</span> <span>Return Flights</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.4rem;">
+                                <span style="color:#047857; font-weight:800;">🛡️</span> <span>9 Nights Accommodation</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.4rem;">
+                                <span style="color:#047857; font-weight:800;">🛂</span> <span>Visa Included</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.4rem;">
+                                <span style="color:#047857; font-weight:800;">🍽️</span> <span>Meals (Breakfast, Lunch &amp; Dinner)</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.4rem;">
+                                <span style="color:#047857; font-weight:800;">🚌</span> <span>All Local Transfers</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.4rem;">
+                                <span style="color:#047857; font-weight:800;">🕌</span> <span>Ziyarat &amp; Madinah Ziyarat</span>
+                            </div>
+                        </div>
+
+                        <a href="javascript:void(0)" onclick="app.setDashboardTab('packageDetails')" style="font-size:0.76rem; font-weight:700; color:#047857; text-decoration:none; display:inline-flex; align-items:center; gap:0.25rem;">
+                            View all inclusions →
+                        </a>
+                    </div>
+
+                    <!-- Card 3: We Accept -->
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.1rem; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                        <h4 style="font-size:0.82rem; font-weight:800; color:#0f172a; margin:0 0 0.7rem;">We Accept</h4>
+                        
+                        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.45rem; text-align:center;">
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:5px; padding:0.4rem 0.15rem; font-size:0.7rem; font-weight:900; color:#1a1f71;">VISA</div>
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:5px; padding:0.4rem 0.15rem; font-size:0.7rem; font-weight:900; color:#eb001b;">mastercard</div>
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:5px; padding:0.4rem 0.15rem; font-size:0.7rem; font-weight:900; color:#00529b;">RuPay</div>
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:5px; padding:0.4rem 0.15rem; font-size:0.7rem; font-weight:900; color:#047857;">UPI▶</div>
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:5px; padding:0.4rem 0.15rem; font-size:0.67rem; font-weight:900; color:#ea4335;"><span style="color:#4285f4;">G</span> Pay</div>
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:5px; padding:0.4rem 0.15rem; font-size:0.67rem; font-weight:900; color:#5f259f;">PhonePe</div>
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:5px; padding:0.4rem 0.15rem; font-size:0.67rem; font-weight:900; color:#00baf2;">Paytm</div>
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:5px; padding:0.4rem 0.15rem; font-size:0.67rem; font-weight:900; color:#232f3e;"><span style="color:#ff9900;">a</span> pay</div>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.35rem; font-size:0.65rem; color:#64748b; margin-top:0.8rem;">
+                            <div>✓ SSL Encrypted Transactions</div>
+                            <div>✓ PCI DSS Certified</div>
+                            <div>✓ 100% Money Safe Guarantee</div>
+                            <div>✓ Instant Payment Confirmation</div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- STICKY / BOTTOM CONFIRMATION REVIEW BAR -->
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:0.9rem 1.4rem; display:flex; justify-content:space-between; align-items:center; box-shadow:0 -4px 16px rgba(0,0,0,0.03); margin-top:0.6rem; position:sticky; bottom:1rem;">
+                <div>
+                    <div style="font-size:0.7rem; color:#64748b; font-weight:600;">Total Amount</div>
+                    <div style="display:flex; align-items:baseline; gap:0.55rem;">
+                        <div style="font-size:1.5rem; font-weight:900; color:#047857;">${this.formatCurrency(finalTotalAmount)}</div>
+                        <a href="javascript:void(0)" onclick="window.scrollTo({top: 400, behavior:'smooth'})" style="font-size:0.72rem; color:#047857; font-weight:700; text-decoration:none;">View Price Details ^</a>
+                    </div>
+                </div>
+
+                <button onclick="app.payWithRazorpay('${offer.id}', '${finalTotalAmount}', 'UPI')" style="background:#047857; color:#ffffff; border:none; border-radius:10px; padding:0.75rem 2rem; font-size:0.95rem; font-weight:800; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 16px rgba(4,120,87,0.25); transition:all 0.2s;" onmouseover="this.style.background='#065f46';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#047857';this.style.transform='none'">
+                    <span style="font-size:0.98rem;">Review Payment</span>
+                    <span style="font-size:0.68rem; opacity:0.9; font-weight:500;">You will be able to confirm on the next step</span>
+                </button>
+            </div>
+
+        </main>`;
     }
 
     switchPaymentTab(tabName) {
@@ -7312,35 +7678,10 @@ class App {
             return;
         }
 
-        // 1. Dedicated Admin Credentials Check
-        const isAdminEmail = cleanInput === 'admin@zilhaj.com' || cleanInput === 'admin@goexergy.com' || cleanInput === 'admin@umrah.com' || cleanInput === 'admin';
-        const isAdminPassword = cleanPass === 'admin' || cleanPass === 'admin123' || cleanPass === 'admin@123';
-
-        if (isAdminEmail && isAdminPassword) {
-            const adminUser = {
-                id: 'admin-1',
-                name: 'System Administrator',
-                email: 'admin@zilhaj.com',
-                phone: '+966 800 123 4567',
-                role: 'ROLE_ADMIN'
-            };
-            this.state.currentUser = adminUser;
-            localStorage.setItem('umrah_user', JSON.stringify(adminUser));
-            this.setAuthButtonLoading(false, 'login');
-            this.hideLoading();
-            this.closeModal();
-            this.renderAuthNav();
-            
-            // Redirect admin -> /admin/dashboard
-            this.navigate('admin');
-            this.showSuccessModal('👑 Admin Control Panel Unlocked', 'Welcome Admin! You have logged in with separate admin credentials. Admin controls are now active.');
-            return;
-        }
-
+        // 1. Try Backend REST API Authentication
         let backendReached = false;
         let backendErrorMsg = null;
 
-        // 2. Try Backend REST API Authentication
         try {
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
@@ -7358,7 +7699,7 @@ class App {
             backendReached = true;
 
             if (response.ok && data && (data.user || data.token)) {
-                const isUserAdmin = (data.role === 'ROLE_ADMIN') || (data.user && data.user.role === 'ROLE_ADMIN') || cleanInput.includes('admin');
+                const isUserAdmin = (data.role === 'ROLE_ADMIN') || (data.user && data.user.role === 'ROLE_ADMIN');
                 const userPayload = data.user || {
                     id: data.id || 'usr-' + Date.now(),
                     name: data.name || cleanInput.split('@')[0],
@@ -7393,15 +7734,7 @@ class App {
         }
 
         // 3. Local account authentication fallback
-        let localUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
-        if (localUsers.length === 0) {
-            localUsers = [
-                { id: 'usr-1', name: 'Animesh', email: 'rajuranjanxbkj@gmail.com', phone: '+91 9541692891', password: 'password123', role: 'ROLE_USER' },
-                { id: 'usr-2', name: 'Tariq Mahmood', email: 'user@zaireen.com', phone: '9541692891', password: 'password123', role: 'ROLE_USER' },
-                { id: 'admin-1', name: 'System Administrator', email: 'admin@zilhaj.com', phone: '+966 800 123 4567', password: 'admin', role: 'ROLE_ADMIN' }
-            ];
-            localStorage.setItem('umrah_registered_users', JSON.stringify(localUsers));
-        }
+        const localUsers = JSON.parse(localStorage.getItem('umrah_registered_users') || '[]');
 
         const foundAccount = localUsers.find(u => 
             (u.email && u.email.trim().toLowerCase() === cleanInput) || 
@@ -7416,12 +7749,12 @@ class App {
                 return;
             }
 
-            const isUserAdmin = foundAccount.role === 'ROLE_ADMIN' || cleanInput.includes('admin');
+            const isUserAdmin = foundAccount.role === 'ROLE_ADMIN';
             const userPayload = { 
                 id: foundAccount.id || 'usr-' + Date.now(), 
                 name: foundAccount.name || cleanInput.split('@')[0], 
                 email: foundAccount.email || cleanInput, 
-                phone: foundAccount.phone || '9541692891',
+                phone: foundAccount.phone || '',
                 role: isUserAdmin ? 'ROLE_ADMIN' : 'ROLE_USER'
             };
             this.state.currentUser = userPayload;
