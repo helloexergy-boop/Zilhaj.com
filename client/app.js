@@ -603,16 +603,13 @@ class App {
             if (data && data.url) {
                 window.location.href = data.url;
             } else {
-                // Smooth fallback authentication with profile picture
-                setTimeout(() => {
-                    this.completeGoogleAuth('Pilgrim User', 'zaireen.user@gmail.com', 'https://lh3.googleusercontent.com/a/default-user=s96-c');
-                }, 1000);
+                this.hideLoading();
+                this.showToast('Google Sign-In is temporarily unavailable. Please try again or use email/OTP.', 'error');
             }
         } catch (e) {
-            console.warn('Google OAuth API endpoint offline, proceeding with secure Google auth:', e);
-            setTimeout(() => {
-                this.completeGoogleAuth('Pilgrim User', 'zaireen.user@gmail.com', 'https://lh3.googleusercontent.com/a/default-user=s96-c');
-            }, 1000);
+            console.warn('Google OAuth API endpoint offline:', e);
+            this.hideLoading();
+            this.showToast('Google Sign-In is temporarily unavailable. Please try again or use email/OTP.', 'error');
         }
     }
 
@@ -644,19 +641,23 @@ class App {
                 };
                 this.state.currentUser = userPayload;
                 localStorage.setItem('umrah_user', JSON.stringify(userPayload));
-            } else {
-                // Local state with permanent profile picture URL
+            } else if (data && data.googleId) {
+                // Local state with the profile returned by the API (or passed-in params)
                 const googleUser = {
-                    id: 'goog-' + Date.now(),
-                    name: name || 'Google User',
-                    email: email || 'user@gmail.com',
-                    profilePictureUrl: pictureUrl,
-                    role: 'ROLE_USER',
-                    token: 'google-token-' + Date.now(),
+                    id: data.googleId || data.id || 'goog-' + Date.now(),
+                    name: data.name || name || (email ? email.split('@')[0] : ''),
+                    email: data.email || email || '',
+                    profilePictureUrl: data.profilePictureUrl || pictureUrl,
+                    role: data.role || 'ROLE_USER',
+                    token: data.token || 'google-token-' + Date.now(),
                     authProvider: 'GOOGLE'
                 };
                 this.state.currentUser = googleUser;
                 localStorage.setItem('umrah_user', JSON.stringify(googleUser));
+            } else {
+                this.hideLoading();
+                this.showToast('Google Sign-In could not be verified. Please try again.', 'error');
+                return;
             }
 
             this.renderAuthNav();
@@ -2454,17 +2455,17 @@ class App {
         const navItem = (tab, icon, label, badge = 0) => {
             const isActive = activeTab === tab;
             return `<a href="javascript:void(0)" onclick="app.setDashboardTab('${tab}')"
-                style="display:flex;align-items:center;justify-content:space-between;gap:.65rem;padding:.58rem .82rem;border-radius:10px;text-decoration:none;cursor:pointer;transition:all .2s ease;background:${isActive?'#1a6b3c':'transparent'};color:${isActive?'#fff':'#374151'};"
+                style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.58rem .65rem;border-radius:10px;text-decoration:none;cursor:pointer;transition:all .2s ease;background:${isActive?'#1a6b3c':'transparent'};color:${isActive?'#fff':'#374151'};"
                 onmouseover="if('${tab}'!=='${activeTab}'){this.style.background='#f0faf5';this.style.color='#1a6b3c';this.style.transform='translateX(3px)';}"
                 onmouseout="if('${tab}'!=='${activeTab}'){this.style.background='transparent';this.style.color='#374151';this.style.transform='none';}">
-                <span style="display:flex;align-items:center;gap:.6rem;font-size:.84rem;font-weight:${isActive?'700':'500'};">${icon} ${label}</span>
-                ${badge>0?`<span style="background:${isActive?'#fff':'#1a6b3c'};color:${isActive?'#1a6b3c':'#fff'};font-size:.64rem;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px;">${badge}</span>`:''}
+                <span style="display:flex;align-items:center;gap:.5rem;font-size:.84rem;white-space:nowrap;font-weight:${isActive?'700':'500'};">${icon} ${label}</span>
+                ${badge>0?`<span style="background:${isActive?'#fff':'#1a6b3c'};color:${isActive?'#1a6b3c':'#fff'};font-size:.64rem;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0;">${badge}</span>`:''}
             </a>`;
         };
 
         // ── Sidebar ──────────────────────────────────────────────────────────────
         const sidebar = `
-        <aside style="width:210px;flex-shrink:0;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:1.1rem .8rem;display:flex;flex-direction:column;min-height:calc(100vh - 140px);position:sticky;top:98px;align-self:flex-start;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+        <aside style="width:235px;flex-shrink:0;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:1.1rem .8rem;display:flex;flex-direction:column;min-height:calc(100vh - 140px);position:sticky;top:98px;align-self:flex-start;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
             <div style="display:flex;align-items:center;gap:.45rem;padding:.15rem .3rem .9rem;border-bottom:1px solid #f0f0f0;margin-bottom:.8rem;">
                 <svg width="24" height="24" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="8" fill="#1a6b3c"/><text x="8" y="28" font-family="Georgia,serif" font-size="22" font-weight="900" font-style="italic" fill="white">Z</text></svg>
                 <div><div style="font-size:.9rem;font-weight:900;color:#0f172a;letter-spacing:.4px;font-style:italic;">ZILHAJ</div><div style="font-size:.55rem;color:#6b7280;line-height:1.2;">One Request. Multiple Verified Offers.</div></div>
@@ -4418,218 +4419,21 @@ class App {
 
     navigateToPayment(offerId) {
         this.state.activePaymentOfferId = offerId;
-        this.navigate('payment');
+        this.openOfferPaymentModal(offerId);
     }
 
     renderPaymentPage(offerId) {
-        const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-        const apiOffers = this.state.userOffers || [];
-        const allOffers = [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
-        const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
-        const apiReqs = this.state.myRequirements || [];
-        const allReqs = [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
-
-        const o = allOffers.find(item => item.id === offerId) || allOffers[0] || {
-            id: offerId || '#OFF-891',
-            agentName: 'AL-HARAM PREMIUM TRAVELS',
-            packageTitle: 'AL-HARAM PREMIUM TRAVELS - Exclusive 5-Star 18-Day Package',
-            category: 'Premium Service',
-            makkahHotel: 'Swissotel Makkah (250m from Kaaba)',
-            madinahHotel: 'Pullman Zamzam Madinah (150m from Nabawi)',
-            discountedPrice: 5
-        };
-
-        const perPerson = o.discountedPrice || o.price || 49999;
-        const req = allReqs.find(r => r.id === o.requirementId) || allReqs[0] || {
-            preferredDepartureDate: '2026-08-13',
-            durationDays: 18,
-            departureCity: 'Srinagar',
-            travelersCount: 2,
-            fullAddress: 'House 45, Rajbagh Main Road, Srinagar, Jammu and Kashmir'
-        };
-
-        const travelersCount = o.travelersCount || req.travelersCount || 2;
-        const totalPayable = perPerson * travelersCount;
-
-        return `
-            <div style="background:#f4f9f5; min-height:100vh; padding:6rem 0 5rem; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                <div class="main-container" style="max-width:1240px; margin:0 auto; padding:0 1.5rem;">
-                    
-                    <!-- Stepper Banner (Pastel Mint) -->
-                    <div style="background:#ffffff; border-radius:18px; border:1px solid #e2e8f0; padding:1.2rem 1.8rem; margin-bottom:2rem; box-shadow:0 4px 15px rgba(0,0,0,0.02); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-                        <button class="btn btn-outline btn-sm" onclick="app.navigate('dashboard')" style="font-weight:700; border-radius:8px; border:1px solid #cbd5e1; background:#ffffff;">← Back to Dashboard</button>
-                        
-                        <div style="display:flex; align-items:center; gap:1.5rem; font-weight:800; font-size:0.88rem;">
-                            <span style="color:#2e7d32; display:flex; align-items:center; gap:0.4rem;">
-                                <span style="width:26px; height:26px; background:#e8f5e9; border:1px solid #c8e6c9; border-radius:50%; display:flex; align-items:center; justify-content:center;">1</span>
-                                Review Order
-                            </span>
-                            <span style="color:#cbd5e1;">&rarr;</span>
-                            <span style="color:#2e7d32; display:flex; align-items:center; gap:0.4rem;">
-                                <span style="width:26px; height:26px; background:#2e7d32; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center;">2</span>
-                                Payment Method
-                            </span>
-                            <span style="color:#cbd5e1;">&rarr;</span>
-                            <span style="color:#94a3b8; display:flex; align-items:center; gap:0.4rem;">
-                                <span style="width:26px; height:26px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center;">3</span>
-                                E-Voucher PDF
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Payment Layout Grid -->
-                    <div style="display:grid; grid-template-columns:1fr 1.2fr; gap:1.8rem;">
-                        
-                        <!-- Left Column: Order Breakdown & Review -->
-                        <div style="display:flex; flex-direction:column; gap:1.6rem;">
-                            
-                            <!-- Card A: Package & Agent Summary -->
-                            <div style="background:#ffffff; border-radius:18px; border:1px solid #e2e8f0; padding:1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.02);">
-                                <div style="font-size:0.75rem; font-weight:900; color:#2e7d32; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:0.6rem; background:#e8f5e9; display:inline-block; padding:0.2rem 0.6rem; border-radius:6px; border:1px solid #c8e6c9;">
-                                    SELECTED PACKAGE SUMMARY
-                                </div>
-                                <h3 style="font-size:1.25rem; font-weight:900; color:#0f172a; margin:0.6rem 0 0.3rem;">${this.escapeHtml(o.packageTitle)}</h3>
-                                <div style="font-size:0.86rem; color:#64748b;">Operator: <strong style="color:#0f172a;">${this.escapeHtml(o.agentName)}</strong></div>
-                                
-                                <div style="margin-top:1.2rem; border-top:1px dashed #cbd5e1; padding-top:1rem; display:flex; flex-direction:column; gap:0.55rem; font-size:0.88rem; color:#334155;">
-                                    <div>📅 Departure Date: <strong>${req.preferredDepartureDate} (${req.durationDays} Days)</strong></div>
-                                    <div>✈️ Departure City: <strong>${req.departureCity}</strong></div>
-                                    <div>👥 Travelers: <strong>${travelersCount} Person(s)</strong></div>
-                                    <div>🏨 Makkah: <strong>${o.makkahHotel}</strong></div>
-                                    <div>🏨 Madinah: <strong>${o.madinahHotel}</strong></div>
-                                </div>
-                            </div>
-
-                            <!-- Card B: Itemized Pricing Breakdown -->
-                            <div style="background:#ffffff; border-radius:18px; border:1px solid #e2e8f0; padding:1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.02);">
-                                <div style="font-size:0.75rem; font-weight:900; color:#2e7d32; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:0.8rem;">
-                                    PRICING BREAKDOWN
-                                </div>
-
-                                <div style="display:flex; flex-direction:column; gap:0.75rem; font-size:0.9rem; color:#475569;">
-                                    <div style="display:flex; justify-content:space-between;">
-                                        <span>Package Cost (${travelersCount} Travelers @ ${this.formatCurrency(perPerson)}/person):</span>
-                                        <span style="font-weight:700; color:#0f172a;">${this.formatCurrency(totalPayable)}</span>
-                                    </div>
-                                    <div style="display:flex; justify-content:space-between;">
-                                        <span>Saudi Umrah Visa &amp; Insurance:</span>
-                                        <span style="font-weight:800; color:#2e7d32;">INCLUDED (₹0)</span>
-                                    </div>
-                                    <div style="display:flex; justify-content:space-between;">
-                                        <span>Zilhaj.com Reverse Bidding Fee:</span>
-                                        <span style="font-weight:800; color:#2e7d32;">FREE (₹0)</span>
-                                    </div>
-                                    
-                                    <div style="border-top:1.5px dashed #cbd5e1; padding-top:0.9rem; margin-top:0.3rem; display:flex; justify-content:space-between; align-items:center;">
-                                        <span style="font-size:1.05rem; font-weight:900; color:#0f172a;">Total Amount Payable:</span>
-                                        <span style="font-size:1.45rem; font-weight:900; color:#2e7d32;">${this.formatCurrency(totalPayable)}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <!-- Right Column: Select Payment Method & Payment Action -->
-                        <div style="background:#ffffff; border-radius:18px; border:1px solid #e2e8f0; padding:1.8rem; box-shadow:0 6px 20px rgba(0,0,0,0.03); display:flex; flex-direction:column; justify-space-between;">
-                            <div>
-                                <h3 style="font-size:1.3rem; font-weight:900; color:#0f172a; margin:0 0 0.3rem;">Select Payment Method</h3>
-                                <p style="font-size:0.84rem; color:#64748b; margin:0 0 1.4rem;">Choose your preferred payment method to complete your booking.</p>
-
-                                <!-- Payment Tabs -->
-                                <div style="display:flex; gap:0.5rem; margin-bottom:1.4rem; border-bottom:1px solid #e2e8f0; padding-bottom:0.7rem; overflow-x:auto;">
-                                    <button type="button" onclick="app.switchPaymentTab('upi')" id="payTab-upi" style="padding:0.55rem 1rem; border-radius:8px; font-weight:800; font-size:0.86rem; background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; cursor:pointer;">📱 UPI / QR Code</button>
-                                    <button type="button" onclick="app.switchPaymentTab('card')" id="payTab-card" style="padding:0.55rem 1rem; border-radius:8px; font-weight:800; font-size:0.86rem; background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; cursor:pointer;">💳 Credit/Debit Card</button>
-                                    <button type="button" onclick="app.switchPaymentTab('net')" id="payTab-net" style="padding:0.55rem 1rem; border-radius:8px; font-weight:800; font-size:0.86rem; background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; cursor:pointer;">🏦 Net Banking</button>
-                                    <button type="button" onclick="app.switchPaymentTab('emi')" id="payTab-emi" style="padding:0.55rem 1rem; border-radius:8px; font-weight:800; font-size:0.86rem; background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; cursor:pointer;">💵 0% EMI</button>
-                                </div>
-
-                                <!-- Tab Content Areas -->
-                                <div id="payContentArea">
-                                    
-                                    <!-- UPI / QR Section (Default Active) -->
-                                    <div id="paySection-upi">
-                                        <div style="background:#f8fafc; border-radius:14px; padding:1.2rem; border:1px solid #e2e8f0; text-align:center; margin-bottom:1.2rem;">
-                                            <div style="font-size:0.82rem; font-weight:800; color:#2e7d32; margin-bottom:0.7rem;">SCAN QR CODE WITH ANY UPI APP</div>
-                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi%3A%2F%2Fpay%3Fpa%3D9541692891%40ybl%26pn%3DZilhajTravels%26am%3D${totalPayable}.00%26cu%3DINR%26mc%3D4722" alt="Payment QR Code" style="width:170px; height:170px; border-radius:12px; border:2px solid #a5d6a7; padding:6px; background:#ffffff; box-shadow:0 4px 12px rgba(0,0,0,0.04);" />
-                                            <div style="font-size:0.78rem; color:#64748b; margin-top:0.5rem; font-weight:600;">Accepts Google Pay, PhonePe, Paytm, BHIM &amp; Banking Apps</div>
-                                            <button type="button" onclick="app.processPayment('${o.id}')" style="margin-top:0.8rem; background:#047857; color:#ffffff; font-weight:800; font-size:0.82rem; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; box-shadow:0 2px 8px rgba(4,120,87,0.25);">
-                                                ⚡ Instant QR Scan Test Pay (₹${totalPayable})
-                                            </button>
-                                        </div>
-
-                                        <div style="display:flex; flex-direction:column; gap:0.4rem;">
-                                            <label style="font-size:0.78rem; font-weight:800; color:#475569;">OR ENTER UPI VPA / VIRTUAL ID</label>
-                                            <input type="text" id="upiVpaInput" placeholder="e.g. 9541692891@ybl or user@okaxis" value="9541692891@ybl" style="width:100%; padding:0.7rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:700; font-size:0.92rem;" />
-                                        </div>
-                                    </div>
-
-                                    <!-- Card Section -->
-                                    <div id="paySection-card" style="display:none; flex-direction:column; gap:1rem;">
-                                        <div style="display:flex; flex-direction:column; gap:0.4rem;">
-                                            <label style="font-size:0.78rem; font-weight:800; color:#475569;">CARDHOLDER NAME</label>
-                                            <input type="text" value="${this.escapeHtml(this.state.currentUser?.name || 'Animesh')}" style="width:100%; padding:0.65rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:700;" />
-                                        </div>
-                                        <div style="display:flex; flex-direction:column; gap:0.4rem;">
-                                            <label style="font-size:0.78rem; font-weight:800; color:#475569;">CARD NUMBER</label>
-                                            <input type="text" placeholder="4111 2222 3333 4444" value="4111 2222 3333 4444" style="width:100%; padding:0.65rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:700;" />
-                                        </div>
-                                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-                                            <div style="display:flex; flex-direction:column; gap:0.4rem;">
-                                                <label style="font-size:0.78rem; font-weight:800; color:#475569;">EXPIRY DATE</label>
-                                                <input type="text" placeholder="MM/YY" value="08/28" style="width:100%; padding:0.65rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:700;" />
-                                            </div>
-                                            <div style="display:flex; flex-direction:column; gap:0.4rem;">
-                                                <label style="font-size:0.78rem; font-weight:800; color:#475569;">CVV</label>
-                                                <input type="password" placeholder="123" value="123" style="width:100%; padding:0.65rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:700;" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Net Banking Section -->
-                                    <div id="paySection-net" style="display:none; flex-direction:column; gap:1rem;">
-                                        <label style="font-size:0.78rem; font-weight:800; color:#475569;">SELECT YOUR BANK</label>
-                                        <select style="width:100%; padding:0.75rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:700;">
-                                            <option>State Bank of India (SBI)</option>
-                                            <option>HDFC Bank</option>
-                                            <option>ICICI Bank</option>
-                                            <option>Axis Bank</option>
-                                            <option>Punjab National Bank (PNB)</option>
-                                        </select>
-                                    </div>
-
-                                    <!-- EMI Section -->
-                                    <div id="paySection-emi" style="display:none; flex-direction:column; gap:1rem;">
-                                        <label style="font-size:0.78rem; font-weight:800; color:#475569;">SELECT EMI DURATION (0% INTEREST)</label>
-                                        <div style="display:flex; flex-direction:column; gap:0.6rem;">
-                                            <label style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:10px; padding:0.75rem 1rem; display:flex; justify-content:space-between; font-weight:700; cursor:pointer;">
-                                                <span><input type="radio" name="emiOpt" checked /> 3 Months EMI</span>
-                                                <strong style="color:#2e7d32;">${this.formatCurrency(Math.round(totalPayable / 3))}/mo</strong>
-                                            </label>
-                                            <label style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:10px; padding:0.75rem 1rem; display:flex; justify-content:space-between; font-weight:700; cursor:pointer;">
-                                                <span><input type="radio" name="emiOpt" /> 6 Months EMI</span>
-                                                <strong style="color:#2e7d32;">${this.formatCurrency(Math.round(totalPayable / 6))}/mo</strong>
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- Pay Trigger Action Button -->
-                            <div style="margin-top:1.8rem;">
-                                <div style="font-size:0.78rem; color:#64748b; text-align:center; margin-bottom:0.7rem;">🔒 Protected by 256-Bit SSL Encrypted Escrow Security</div>
-                                <button type="button" onclick="app.processPayment('${o.id}')" style="width:100%; padding:0.95rem; border-radius:12px; background:#2e7d32; color:#ffffff; font-size:1.1rem; font-weight:900; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(46,125,50,0.25); transition:all 0.2s;" onmouseover="this.style.background='#1b5e20'" onmouseout="this.style.background='#2e7d32'">
-                                    💳 Pay ${this.formatCurrency(totalPayable)} &amp; Confirm Booking
-                                </button>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
-        `;
+        const targetOfferId = offerId || this.state.activePaymentOfferId || (this.getAllOffers()[0] || {}).id;
+        setTimeout(() => {
+            if (targetOfferId) {
+                this.openOfferPaymentModal(targetOfferId);
+            }
+        }, 50);
+        return `<div style="min-height:80vh; background:#f8fafc; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
+            <div style="text-align:center; color:#047857; font-weight:800;">
+                <div style="font-size:2.2rem; margin-bottom:0.5rem;">🛡️</div>
+                <div>Opening Secure Payment Page...</div>
+        </div>`;
     }
 
     switchPaymentTab(tabName) {
@@ -4653,13 +4457,12 @@ class App {
 
     async processPayment(offerId) {
         let allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-        let offer = allOffers.find(o => o.id === offerId) || {
-            id: offerId || '#OFF-891',
-            packageTitle: 'Al Huda Group - Umrah Package',
-            discountedPrice: 5
-        };
-        const rawPrice = offer.discountedPrice || offer.price || 5;
-        const totalAmount = (rawPrice > 0 && rawPrice <= 100) ? rawPrice : 5;
+        let offer = allOffers.find(o => o.id === offerId);
+        if (!offer || !offer.id) {
+            this.showToast('This offer is no longer available. Please refresh and try again.', 'warning');
+            return;
+        }
+        const totalAmount = offer.discountedPrice || offer.price || 0;
         const bookingRef = 'BK-' + Date.now().toString().slice(-6);
 
         if (typeof window.Razorpay !== 'undefined') {
@@ -4668,7 +4471,7 @@ class App {
                 "amount": Math.round(totalAmount * 100),
                 "currency": "INR",
                 "name": "ZILHAJ Umrah & Hajj Travel",
-                "description": offer.packageTitle || "Umrah Test Payment",
+                "description": offer.packageTitle || "Umrah Payment",
                 "image": "https://img.icons8.com/color/96/000000/kaaba.png",
                 "config": {
                     "display": {
@@ -4705,8 +4508,8 @@ class App {
                         packageTitle: offer.packageTitle,
                         offerId: offer.id,
                         requirementId: offer.requirementId || '',
-                        travelDate: '2026-08-13',
-                        travelersCount: 2,
+                        travelDate: offer.travelDate || new Date().toISOString().slice(0, 10),
+                        travelersCount: offer.travelersCount || 1,
                         totalPrice: totalAmount,
                         status: 'CONFIRMED',
                         paymentStatus: 'PAID',
@@ -4715,13 +4518,13 @@ class App {
                         transactionId: response.razorpay_payment_id,
                         razorpayOrderId: response.razorpay_order_id || '',
                         paidAt: new Date().toISOString(),
-                        userName: user.name || 'Pilgrim User',
-                        userEmail: user.email || 'pilgrim@gmail.com',
-                        userPhone: user.phone || '9541692891',
+                        userName: user.name || '',
+                        userEmail: user.email || '',
+                        userPhone: user.phone || '',
                         userId: user.id || '',
-                        agentName: offer.agentName || 'AL-HARAM PREMIUM TRAVELS',
-                        makkahHotel: offer.makkahHotel || 'Swissotel Makkah',
-                        madinahHotel: offer.madinahHotel || 'Pullman Zamzam Madinah'
+                        agentName: offer.agentName || '',
+                        makkahHotel: offer.makkahHotel || '',
+                        madinahHotel: offer.madinahHotel || ''
                     };
                     allBookings.unshift(newBooking);
                     localStorage.setItem('umrah_my_bookings', JSON.stringify(allBookings));
@@ -4735,9 +4538,9 @@ class App {
                     this.navigate('dashboard');
                 },
                 "prefill": {
-                    "name": this.state?.currentUser?.name || "Pilgrim User",
-                    "email": this.state?.currentUser?.email || "pilgrim@gmail.com",
-                    "contact": "9541692891"
+                    "name": this.state?.currentUser?.name || "",
+                    "email": this.state?.currentUser?.email || "",
+                    "contact": this.state?.currentUser?.phone || ""
                 },
                 "theme": {
                     "color": "#047857"
@@ -4762,21 +4565,21 @@ class App {
                 packageTitle: offer.packageTitle,
                 offerId: offer.id,
                 requirementId: offer.requirementId || '',
-                travelDate: '2026-08-13',
-                travelersCount: 2,
+                travelDate: offer.travelDate || new Date().toISOString().slice(0, 10),
+                travelersCount: offer.travelersCount || 1,
                 totalPrice: totalAmount,
                 status: 'CONFIRMED',
                 paymentStatus: 'PAID',
                 paymentMethod: 'UPI',
                 transactionId: txnId,
                 paidAt: new Date().toISOString(),
-                userName: user.name || 'Pilgrim User',
-                userEmail: user.email || 'pilgrim@gmail.com',
-                userPhone: user.phone || '9541692891',
+                userName: user.name || '',
+                userEmail: user.email || '',
+                userPhone: user.phone || '',
                 userId: user.id || '',
-                agentName: offer.agentName || 'AL-HARAM PREMIUM TRAVELS',
-                makkahHotel: offer.makkahHotel || 'Swissotel Makkah',
-                madinahHotel: offer.madinahHotel || 'Pullman Zamzam Madinah'
+                agentName: offer.agentName || '',
+                makkahHotel: offer.makkahHotel || '',
+                madinahHotel: offer.madinahHotel || ''
             };
 
             allBookings.unshift(newBooking);
@@ -4798,33 +4601,21 @@ class App {
 
 
     async downloadInvoice(bookingId) {
-        const id = bookingId || 'BK-048846';
+        const id = bookingId || '';
         const allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
         let b = allBookings.find(item => item.id === id);
         if (!b) b = (this.state.myBookings || []).find(item => item.id === id);
 
         if (!b) {
-            b = {
-                id: id,
-                packageTitle: 'Hajj Package 2024 - Premium',
-                travelDate: '02.05.2024',
-                travelersCount: 2,
-                totalPrice: 450000,
-                status: 'Confirmed',
-                agentName: 'AL-HARAM PREMIUM TRAVELS',
-                makkahHotel: 'Swissotel Makkah',
-                madinahHotel: 'Pullman Zamzam Madina',
-                userName: (this.state.currentUser && this.state.currentUser.name) ? this.state.currentUser.name : 'Animesh',
-                userEmail: (this.state.currentUser && this.state.currentUser.email) ? this.state.currentUser.email : '[Redacted]',
-                userPhone: (this.state.currentUser && this.state.currentUser.phone) ? this.state.currentUser.phone : '[Redacted]'
-            };
+            this.showToast('Invoice not found. Please refresh and try again.', 'warning');
+            return;
         }
 
         const user = this.state.currentUser || {};
-        const userName = b.userName || user.name || 'Animesh';
-        const userEmail = b.userEmail || user.email || '[Redacted]';
-        const userPhone = b.userPhone || user.phone || '[Redacted]';
-        const totalPrice = b.totalPrice || 450000;
+        const userName = b.userName || user.name || '';
+        const userEmail = b.userEmail || user.email || '';
+        const userPhone = b.userPhone || user.phone || '';
+        const totalPrice = b.totalPrice || 0;
         const formattedAmount = (typeof totalPrice === 'number') ? totalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : totalPrice;
 
         const numberToWordsINR = (num) => {
@@ -4844,12 +4635,12 @@ class App {
         };
 
         const amountWords = numberToWordsINR(totalPrice);
-        const makkahHotel = b.makkahHotel || 'Swissotel Makkah';
-        const madinahHotel = b.madinahHotel || 'Pullman Zamzam Madina';
-        const bookingDate = b.bookingDate || b.travelDate || '02.05.2024';
-        const invoiceNum = b.invoiceNum || 'HYD8-630451';
-        const invoiceDate = b.invoiceDate || '04.05.2024';
-        const bookingNo = b.id || '402-9749063-3541152';
+        const makkahHotel = b.makkahHotel || '';
+        const madinahHotel = b.madinahHotel || '';
+        const bookingDate = b.bookingDate || b.travelDate || '';
+        const invoiceNum = b.invoiceNum || '';
+        const invoiceDate = b.invoiceDate || '';
+        const bookingNo = b.id || '';
 
         const printWindow = window.open('', '_blank', 'width=900,height=1000');
         if (!printWindow) {
