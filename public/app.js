@@ -725,6 +725,12 @@ class App {
         }
     }
 
+    getAllOffers() {
+        const apiOffers = this.state.userOffers || [];
+        const localOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        return [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
+    }
+
     async fetchPackages() {
         const { maxPrice, maxDistanceMakkah, flightsOnly } = this.state.filters;
         let url = `/packages?maxPrice=${maxPrice}&maxDistanceMakkah=${maxDistanceMakkah}`;
