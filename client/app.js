@@ -6913,8 +6913,11 @@ class App {
                     this.closeModal();
                 }
             };
-            backdrop.style.zIndex = '99999';
+            backdrop.style.zIndex = '999999';
             backdrop.style.display = 'flex';
+            backdrop.style.opacity = '1';
+            backdrop.style.visibility = 'visible';
+            backdrop.style.pointerEvents = 'auto';
             backdrop.style.alignItems = 'center';
             backdrop.style.justifyContent = 'center';
             backdrop.style.padding = is100vw ? '0px' : '1.5rem';
@@ -6940,6 +6943,8 @@ class App {
             backdrop.classList.remove('active');
             backdrop.removeAttribute('style');
             backdrop.style.display = 'none';
+            backdrop.style.opacity = '0';
+            backdrop.style.pointerEvents = 'none';
         }
         const content = document.getElementById('modalContent');
         if (content) content.innerHTML = '';

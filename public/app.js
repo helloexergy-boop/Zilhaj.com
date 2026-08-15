@@ -1381,7 +1381,20 @@ class App {
     }
 
     openPackageDetailModal(packageId) {
-        this.openOfferReviewModal(packageId);
+        const pkg = this.state.packages.find(p => p.id === packageId) || null;
+        if (!pkg) {
+            this.showToast('Package not found', 'error');
+            return;
+        }
+        this.openViewOfferModal({
+            id: pkg.id,
+            title: pkg.title,
+            price: pkg.price,
+            departureDate: pkg.departureDateText || pkg.departureDate,
+            duration: (pkg.durationDays ? pkg.durationDays + ' Days' : pkg.duration),
+            makkahHotel: pkg.makkahHotelName,
+            madinahHotel: pkg.madinahHotelName
+        });
     }
 
 
@@ -6900,8 +6913,11 @@ class App {
                     this.closeModal();
                 }
             };
-            backdrop.style.zIndex = '99999';
+            backdrop.style.zIndex = '999999';
             backdrop.style.display = 'flex';
+            backdrop.style.opacity = '1';
+            backdrop.style.visibility = 'visible';
+            backdrop.style.pointerEvents = 'auto';
             backdrop.style.alignItems = 'center';
             backdrop.style.justifyContent = 'center';
             backdrop.style.padding = is100vw ? '0px' : '1.5rem';
@@ -6927,6 +6943,8 @@ class App {
             backdrop.classList.remove('active');
             backdrop.removeAttribute('style');
             backdrop.style.display = 'none';
+            backdrop.style.opacity = '0';
+            backdrop.style.pointerEvents = 'none';
         }
         const content = document.getElementById('modalContent');
         if (content) content.innerHTML = '';
