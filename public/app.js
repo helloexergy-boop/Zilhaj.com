@@ -101,32 +101,7 @@ class App {
         if (savedPackages && Array.isArray(savedPackages) && savedPackages.length > 0) {
             this.state.packages = savedPackages;
         } else {
-            this.state.packages = [
-                {
-                    id: 'pkg-1',
-                    agentName: 'UMRAH TRAVELS',
-                    title: '18-Day Deluxe Umrah Package (Test Fare: ₹5)',
-                    description: 'Journey of Faith, Comfort & Blessings. Complete 18 days sacred journey featuring top 5-star hotels near Haram, return air tickets, Indian buffet meals, and guided ziyarat.',
-                    price: 5,
-                    durationDays: 18,
-                    distanceToHaramMakkah: 600,
-                    distanceToHaramMadinah: 250,
-                    hotelMakkahStars: 5,
-                    hotelMadinahStars: 5,
-                    availableSeats: 30,
-                    departureDateText: '12 AUGUST',
-                    makkahHotelName: 'Manarat Al Misk / Dream Zone (or similar)',
-                    madinahHotelName: 'Marjan International / Marjan Gold (or similar)',
-                    flightRoute: 'Return Air Ticket (SXR-JED-MED-SXR)',
-                    sharingType: '4/5 Sharing Accommodation',
-                    complimentaryServices: ['Ahram Kit', 'Laundry Service', '5 Litres Zamzam Water'],
-                    importantNote: 'Rawdah permits must be booked through Nusuk App.',
-                    contactPhone: '9541692891',
-                    includes: { flights: true, visa: true, transport: true, meals: true, ziyarah: true },
-                    imageUrls: ['https://images.unsplash.com/photo-1591604466107-ec97de577aff']
-                }
-            ];
-            localStorage.setItem('umrah_packages', JSON.stringify(this.state.packages));
+            this.state.packages = [];
         }
 
         // Browser back/forward support (hash history)
@@ -744,33 +719,8 @@ class App {
             this.state.packages = data;
         } else if (savedPackages && Array.isArray(savedPackages) && savedPackages.length > 0) {
             this.state.packages = savedPackages;
-        } else if (this.state.packages.length === 0) {
-            this.state.packages = [
-                {
-                    id: 'pkg-1',
-                    agentName: 'UMRAH TRAVELS',
-                    title: '18-Day Deluxe Umrah Package',
-                    description: 'Journey of Faith, Comfort & Blessings. Complete 18 days sacred journey featuring top 5-star hotels near Haram, return air tickets, Indian buffet meals, and guided ziyarat.',
-                    price: 125000,
-                    durationDays: 18,
-                    distanceToHaramMakkah: 600,
-                    distanceToHaramMadinah: 250,
-                    hotelMakkahStars: 5,
-                    hotelMadinahStars: 5,
-                    availableSeats: 30,
-                    departureDateText: '12 AUGUST',
-                    makkahHotelName: 'Manarat Al Misk / Dream Zone (or similar)',
-                    madinahHotelName: 'Marjan International / Marjan Gold (or similar)',
-                    flightRoute: 'Return Air Ticket (SXR-JED-MED-SXR)',
-                    sharingType: '4/5 Sharing Accommodation',
-                    complimentaryServices: ['Ahram Kit', 'Laundry Service', '5 Litres Zamzam Water'],
-                    importantNote: 'Rawdah permits must be booked by the Zaireen through the Nusuk App, subject to availability. The company is not responsible for the booking, availability, approval, or non-issuance of the Rawdah permit.',
-                    contactPhone: '9541692891',
-                    includes: { flights: true, visa: true, transport: true, meals: true, ziyarah: true },
-                    imageUrls: ['https://images.unsplash.com/photo-1591604466107-ec97de577aff']
-                }
-            ];
-            localStorage.setItem('umrah_packages', JSON.stringify(this.state.packages));
+        } else {
+            this.state.packages = [];
         }
     }
 
@@ -1329,54 +1279,49 @@ class App {
             ? pkg.imageUrls[0]
             : 'https://images.unsplash.com/photo-1591604466107-ec97de577aff';
 
-        const originalPrice = pkg.price ? Math.round(pkg.price * 2) : 10;
+        const originalPrice = pkg.originalPrice || pkg.basePrice || null;
 
         return `
             <div class="travel-card">
                 <!-- Left Image Thumbnail & Star Rating -->
                 <div class="travel-card-image">
                     <img src="${imageUrl}" alt="${this.escapeHtml(pkg.title)}">
-                    <div class="travel-star-badge">⭐ ${pkg.hotelMakkahStars || 5}-Star Stay</div>
+                    <div class="travel-star-badge">⭐ ${pkg.hotelMakkahStars ? pkg.hotelMakkahStars + '-Star Stay' : 'Hotel Stay'}</div>
                 </div>
 
                 <!-- Middle Content Details -->
                 <div class="travel-card-body">
                     <div>
                         <div class="travel-agency-strip">
-                            <span>🏢 ${this.escapeHtml(pkg.agentName || 'UMRAH TRAVELS')}</span>
-                            <span>•</span>
-                            <span>📅 Departure: ${this.escapeHtml(pkg.departureDateText || '12 AUG')}</span>
-                            <span>•</span>
-                            <span>⏳ ${pkg.durationDays || 18} Days</span>
+                            <span>🏢 ${this.escapeHtml(pkg.agentName || pkg.agencyName || 'Travel Agency')}</span>
+                            ${pkg.departureDateText || pkg.departureDate ? `<span>•</span><span>📅 Departure: ${this.escapeHtml(pkg.departureDateText || pkg.departureDate)}</span>` : ''}
+                            ${pkg.durationDays ? `<span>•</span><span>⏳ ${pkg.durationDays} Days</span>` : ''}
                         </div>
                         <h4 class="travel-pkg-title">${this.escapeHtml(pkg.title)}</h4>
 
                         <div class="travel-hotels-bar">
                             <div class="travel-hotel-loc">
                                 <span>🕋 Makkah:</span>
-                                <strong>${this.escapeHtml(pkg.makkahHotelName || 'Manarat Al Misk')}</strong> (${pkg.distanceToHaramMakkah || 600}m)
+                                <strong>${this.escapeHtml(pkg.makkahHotelName || 'Not specified')}</strong>${pkg.distanceToHaramMakkah ? ` (${pkg.distanceToHaramMakkah}m)` : ''}
                             </div>
                             <div class="travel-hotel-loc">
                                 <span>🕌 Madinah:</span>
-                                <strong>${this.escapeHtml(pkg.madinahHotelName || 'Marjan International')}</strong> (${pkg.distanceToHaramMadinah || 250}m)
+                                <strong>${this.escapeHtml(pkg.madinahHotelName || 'Not specified')}</strong>${pkg.distanceToHaramMadinah ? ` (${pkg.distanceToHaramMadinah}m)` : ''}
                             </div>
                         </div>
                     </div>
 
                     <!-- Highlight Tags -->
                     <div class="travel-highlights-tags">
-                        <span class="travel-tag">✈️ Return Flight (SXR-JED-MED-SXR)</span>
-                        <span class="travel-tag">🍽️ 3x Daily Buffet Meals</span>
-                        <span class="travel-tag">👔 Ahram & Zamzam Included</span>
-                        <span class="travel-tag">📌 Nusuk Permit Assistance</span>
+                        ${(pkg.inclusions && pkg.inclusions.length ? pkg.inclusions : []).map(tag => `<span class="travel-tag">${this.escapeHtml(tag)}</span>`).join('')}
                     </div>
                 </div>
 
                 <!-- Right Price & CTA Sidebar -->
                 <div class="travel-card-pricing">
                     <div>
-                        <div class="travel-original-price">${this.formatCurrency(originalPrice)}</div>
-                        <div class="travel-final-price">${this.formatCurrency(pkg.price)}</div>
+                        ${originalPrice ? `<div class="travel-original-price">${this.formatCurrency(originalPrice)}</div>` : ''}
+                        <div class="travel-final-price">${this.formatCurrency(pkg.price || 0)}</div>
                         <div class="travel-price-unit">per Zaireen (all taxes incl.)</div>
                     </div>
 
@@ -1776,10 +1721,10 @@ class App {
 
     async submitRequirementForm() {
         this.showLoading('Submitting your travel request to verified agents...');
-        const dateRange = document.getElementById('reqDateRange')?.value || document.getElementById('reqDate')?.value || '2026-08-12';
-        const duration = parseInt(document.getElementById('reqDuration')?.value) || 18;
-        const hotelType = document.getElementById('reqHotelType')?.value || '5-Star Luxury Hotels';
-        const departureCity = document.getElementById('reqDepartureCity')?.value || 'Not specified';
+        const dateRange = document.getElementById('reqDateRange')?.value || document.getElementById('reqDate')?.value || '';
+        const duration = parseInt(document.getElementById('reqDuration')?.value) || 0;
+        const hotelType = document.getElementById('reqHotelType')?.value || 'Not specified';
+        const departureCity = document.getElementById('reqDepartureCity')?.value || '';
         const state = document.getElementById('reqState')?.value || '';
         const district = document.getElementById('reqDistrict')?.value || '';
         const address = document.getElementById('reqAddress')?.value || '';
@@ -1787,8 +1732,8 @@ class App {
         const females = parseInt(document.getElementById('reqFemales')?.value) || 0;
         const children = parseInt(document.getElementById('reqChildren')?.value) || 0;
         const travelers = Math.max(1, males + females + children);
-        const budget = parseFloat(document.getElementById('reqBudget')?.value) || 125000;
-        const notes = document.getElementById('reqNotes')?.value || 'Custom trip request';
+        const budget = parseFloat(document.getElementById('reqBudget')?.value) || 0;
+        const notes = document.getElementById('reqNotes')?.value || '';
 
         const currentUser = this.state.currentUser || {
             id: 'usr-guest-' + Date.now()
@@ -2274,7 +2219,7 @@ class App {
                     '<span style="font-size:0.85rem; color:var(--text-muted);">Booking Ref: ' + b.id + '</span>' +
                     '</div>' +
                     '<h4 style="font-size:1.2rem;">' + this.escapeHtml(b.packageTitle) + '</h4>' +
-                    '<p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.2rem;">Agency: ' + this.escapeHtml(b.agentName || 'UMRAH TRAVELS') + ' | Travel Date: ' + (b.travelDate || 'TBD') + '</p>' +
+                    '<p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.2rem;">Agency: ' + this.escapeHtml(b.agentName || 'Not specified') + ' | Travel Date: ' + (b.travelDate || 'TBD') + '</p>' +
                     '<p style="font-size:1.2rem; font-weight:800; color:var(--primary); margin-top:0.4rem;">Total Paid: ' + this.formatCurrency(b.totalPrice) + '</p>' +
                     '</div>' +
                     '<div style="display:flex; gap:0.8rem;">' +
@@ -2428,9 +2373,9 @@ class App {
         const userSettings = JSON.parse(localStorage.getItem('zilhaj_user_settings') || '{"emailNotifs":true,"smsAlerts":true,"offerNotifs":true,"paymentAlerts":true,"privacyMode":true,"twoFactor":false}');
 
         // ── Support contact helpers ──────────────────────────────────────────────
-        const SUPPORT_PHONE  = '+919876543210';
+        const SUPPORT_PHONE  = '+966 800 123 4567';
         const SUPPORT_EMAIL  = 'support@zilhaj.com';
-        const SUPPORT_WA     = 'https://wa.me/919876543210';
+        const SUPPORT_WA     = 'https://wa.me/9541692891';
 
         // ── SVG icons ────────────────────────────────────────────────────────────
         const ic = {
@@ -2670,41 +2615,16 @@ class App {
         } else if (activeTab === 'requestDetail') {
             const selId = this.state.selectedRequestId;
             const r = requirements.find(x => x.id === selId) || requirements[0] || {};
-            const rid = r ? reqId(r) : 'REQ-0000';
+            const sid = r ? reqId(r) : 'REQ-0000';
             const ro = r ? offers.filter(o => o.requirementId === r.id) : [];
             
-            // If no specific offer is associated, create rich fallback offers with real requirement details
-            const displayOffers = ro.length > 0 ? ro : [
-                {
-                    id: `OFFER-${rid}-1`,
-                    requirementId: r.id,
-                    packageTitle: `${r.departureCity || 'Srinagar'} Tailored Deluxe Umrah Package`,
-                    price: 52999,
-                    discountedPrice: 49999,
-                    durationDays: r.durationDays || 14,
-                    makkahHotel: 'Swissotel Makkah (300m from Haram)',
-                    madinahHotel: 'Pullman Zamzam Madinah (200m)',
-                    agencyName: 'Al-Haramain Verified Travel Tours',
-                    inclusions: ['Flight Included', '4★ Hotels', 'Full Transport', 'Umrah Visa', 'Ziyarat Included']
-                },
-                {
-                    id: `OFFER-${rid}-2`,
-                    requirementId: r.id,
-                    packageTitle: `Economy Saver ${r.durationDays || 10} Days Umrah Package`,
-                    price: 44999,
-                    discountedPrice: 41999,
-                    durationDays: r.durationDays || 10,
-                    makkahHotel: 'Anjum Hotel Makkah (500m)',
-                    madinahHotel: 'Al Eiman Royal (400m)',
-                    agencyName: 'Zilhaj Direct Partner Services',
-                    inclusions: ['Flight Included', '3★ Hotels', 'AC Bus Transport', 'Visa Assistance']
-                }
-            ];
+            // Show only real offers from agents
+            const displayOffers = ro;
 
             const steps = [
                 {label:'Request Submitted', desc:`${fmtDate(r.createdAt||r.preferredDepartureDate)} — Received successfully.`, done:true},
-                {label:'Offers Collected',  desc:`${displayOffers.length} verified offer${displayOffers.length!==1?'s':''} ready for review.`, done:true},
-                {label:'Review Offers',     desc:`Review prices, hotels &amp; inclusions below.`, active:!r.selectedOffer},
+                {label:'Offers Collected',  desc: displayOffers.length>0 ? `${displayOffers.length} verified offer${displayOffers.length!==1?'s':''} ready for review.` : 'Waiting for travel agents to submit offers.', done: displayOffers.length>0},
+                {label:'Review Offers',     desc:`Review prices, hotels &amp; inclusions below.`, active:!r.selectedOffer && displayOffers.length>0},
                 {label:'Offer Selected',    desc:'Select your preferred offer to proceed.', done:!!r.selectedOffer},
                 {label:'Payment & Booking', desc:'Complete payment to confirm booking.', done:false},
             ];
@@ -2722,7 +2642,7 @@ class App {
                             <div style="display:flex;align-items:center;gap:.85rem;">
                                 <div style="width:72px;height:56px;border-radius:8px;background:#f0faf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="30" height="30" fill="#d1fae5" viewBox="0 0 100 100"><rect x="20" y="25" width="60" height="70" rx="3"/><path d="M20 25 Q50 -5 80 25Z"/><rect x="5" y="45" width="15" height="50" rx="2"/><rect x="80" y="45" width="15" height="50" rx="2"/><rect x="42" y="55" width="16" height="40" rx="2"/></svg></div>
                                 <div>
-                                    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.35rem;"><span style="font-size:.98rem;font-weight:800;color:#0f172a;">${rid}</span>${statusBadge(displayOffers.length>0?'active':'pending')}</div>
+                                    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.35rem;"><span style="font-size:.98rem;font-weight:800;color:#0f172a;">${sid}</span>${statusBadge(displayOffers.length>0?'active':'pending')}</div>
                                     <div style="display:flex;gap:.9rem;flex-wrap:wrap;font-size:.78rem;color:#374151;">
                                         <span>📅 ${fmtDate(r.preferredDepartureDate)}</span>
                                         <span>👥 ${r.travelersCount||2} Travelers</span>
@@ -2752,15 +2672,15 @@ class App {
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem 1.6rem;">
                                 ${[
                                     ['Service Type','Umrah Package'],
-                                    ['Pickup / Departure City', r.departureCity || 'Srinagar (SXR)'],
+                                    ['Pickup / Departure City', r.departureCity || 'Not specified'],
                                     ['Travel Date', fmtDate(r.preferredDepartureDate) + ' (Approx.)'],
                                     ['Destination City','Jeddah (JED) / Makkah / Madinah'],
-                                    ['Duration', (r.durationDays || 10) + ' Days'],
-                                    ['Phone', '•••••4321 (Masked for Security)'],
-                                    ['Travelers', (r.travelersCount || 2) + ' Adults, ' + (r.children || 0) + ' Children'],
+                                    ['Duration', (r.durationDays || '—') + (r.durationDays ? ' Days' : '')],
+                                    ['Phone', r.userPhone ? r.userPhone.replace(/^(.{3}).*?(\d{2})$/, '$1••••$2') + ' (Masked for Security)' : 'Not shared'],
+                                    ['Travelers', (r.travelersCount || '—') + ' Adults, ' + (r.children || 0) + ' Children'],
                                     ['Email', (user.email || '').replace(/^(.{3}).*?(@.*)$/, '$1****$2')],
-                                    ['Class Preference', r.classPreference || 'Economy'],
-                                    ['Special Requests', r.specialRequests || 'Near Haram Hotel, Ziyarat Included'],
+                                    ['Class Preference', r.classPreference || 'Not specified'],
+                                    ['Special Requests', r.specialRequests || 'None'],
                                 ].map(([k,v])=>`<div><div style="font-size:.68rem;color:#9ca3af;margin-bottom:.1rem;">${k}</div><div style="font-size:.82rem;color:#0f172a;font-weight:600;">${v}</div></div>`).join('')}
                             </div>
                             <div style="margin-top:.8rem;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:.55rem .8rem;display:flex;align-items:center;gap:.4rem;">
@@ -2780,26 +2700,28 @@ class App {
                             </div>
 
                             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.85rem;">
-                                ${displayOffers.map((o,i)=>{
-                                    const travelers = r.travelersCount || o.travelersCount || 2;
-                                    const perPerson = o.discountedPrice || o.price || 49999;
+                                ${displayOffers.length === 0 ? `<div style="grid-column:1/-1; text-align:center; padding:2rem 1rem; color:#6b7280; font-size:.84rem; background:#f8fafc; border:1px dashed #e2e8f0; border-radius:10px;">
+                                    No offers received yet. Agents will submit verified offers against this request — you'll see them here as they arrive.
+                                </div>` : displayOffers.map((o,i)=>{
+                                    const travelers = r.travelersCount || o.travelersCount || 1;
+                                    const perPerson = o.discountedPrice || o.price || 0;
                                     const totalDiscounted = perPerson * travelers;
                                     return `<div style="border:1.5px solid ${i===0?'#d1fae5':'#e5e7eb'};border-radius:11px;padding:1rem;display:flex;flex-direction:column;justify-content:space-between;background:#fff;transition:all .2s ease;" onmouseover="this.style.borderColor='#1a6b3c';this.style.boxShadow='0 4px 14px rgba(26,107,60,0.08)';" onmouseout="this.style.borderColor='${i===0?'#d1fae5':'#e5e7eb'}';this.style.boxShadow='none';">
                                     <div>
                                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem;">
                                             <span style="font-size:.66rem;font-weight:800;color:${i===0?'#059669':'#d97706'};background:${i===0?'#e8f5ee':'#fef3c7'};padding:.12rem .5rem;border-radius:99px;">${i===0?'🏆 Best Value Choice':'⭐ Popular Option'}</span>
-                                            <span style="font-size:.67rem;color:#6b7280;">${o.durationDays||10} Days</span>
+                                            <span style="font-size:.67rem;color:#6b7280;">${o.durationDays ? o.durationDays + ' Days' : 'Duration N/A'}</span>
                                         </div>
                                         <div style="font-size:1.25rem;font-weight:800;color:#0f172a;">${this.formatCurrency(totalDiscounted)}</div>
                                         <div style="font-size:.68rem;color:#1a6b3c;font-weight:700;margin-bottom:.6rem;">Total for ${travelers} Persons (${this.formatCurrency(perPerson)} / person)</div>
                                         
                                         <div style="font-size:.81rem;font-weight:700;color:#0f172a;margin-bottom:.25rem;line-height:1.3;">${this.escapeHtml(o.packageTitle || 'Umrah Package')}</div>
-                                        <div style="font-size:.71rem;color:#1a6b3c;font-weight:600;margin-bottom:.55rem;">Provided by: ${this.escapeHtml(o.agencyName || 'Verified Partner')}</div>
+                                        <div style="font-size:.71rem;color:#1a6b3c;font-weight:600;margin-bottom:.55rem;">Provided by: ${this.escapeHtml(o.agencyName || o.agentName || 'Verified Partner')}</div>
                                         
                                         <div style="font-size:.71rem;color:#4b5563;display:flex;flex-direction:column;gap:.25rem;padding:.5rem 0;border-top:1px dashed #e5e7eb;border-bottom:1px dashed #e5e7eb;margin-bottom:.75rem;">
-                                            <div>🏨 Makkah: <strong>${this.escapeHtml(o.makkahHotel || 'Swissotel (300m)')}</strong></div>
-                                            <div>🏨 Madinah: <strong>${this.escapeHtml(o.madinahHotel || 'Pullman Zamzam (200m)')}</strong></div>
-                                            <div>✈ Flight: <strong>Direct Airlines Included</strong></div>
+                                            ${o.makkahHotel ? `<div>🏨 Makkah: <strong>${this.escapeHtml(o.makkahHotel)}</strong></div>` : ''}
+                                            ${o.madinahHotel ? `<div>🏨 Madinah: <strong>${this.escapeHtml(o.madinahHotel)}</strong></div>` : ''}
+                                            ${o.flightDetails ? `<div>✈ Flight: <strong>${this.escapeHtml(o.flightDetails)}</strong></div>` : ''}
                                         </div>
                                     </div>
                                     <div style="display:flex;flex-direction:column;gap:.4rem;">
@@ -3077,7 +2999,7 @@ class App {
 
     openOfferReviewModal(offerId) {
         this.closeModal();
-        const id = offerId || 'OFF-1024';
+        const id = offerId || '';
         this.state.activeOfferId = id;
         this.state.activeDashboardTab = 'packageDetails';
         this.navigate('package-details');
@@ -3085,7 +3007,7 @@ class App {
 
     openOfferPaymentModal(offerId) {
         this.closeModal();
-        const id = offerId || 'OFF-1024';
+        const id = offerId || '';
         this.state.activeOfferId = id;
         this.state.activeDashboardTab = 'paymentScreen';
         this.navigate('payment');
@@ -3181,9 +3103,9 @@ class App {
                         <span style="position:absolute;top:-2px;right:-2px;background:#047857;color:#fff;font-size:0.65rem;font-weight:800;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;">2</span>
                     </div>
                     <div style="display:flex;align-items:center;gap:0.6rem;background:#f8fafc;padding:0.35rem 0.8rem;border-radius:99px;border:1px solid #e2e8f0;">
-                        <div style="width:30px;height:30px;border-radius:50%;background:#047857;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">T</div>
+                        <div style="width:30px;height:30px;border-radius:50%;background:#047857;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">${this.escapeHtml((user.name || 'G').charAt(0).toUpperCase())}</div>
                         <div>
-                            <div style="font-size:0.82rem;font-weight:800;color:#0f172a;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                            <div style="font-size:0.82rem;font-weight:800;color:#0f172a;">${this.escapeHtml(user.name || 'Guest')}</div>
                             <div style="font-size:0.68rem;color:#64748b;">Customer</div>
                         </div>
                     </div>
@@ -3203,9 +3125,9 @@ class App {
                             <div>
                                 <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem;">
                                     <h3 style="font-size:1.25rem;font-weight:800;color:#0f172a;margin:0;">${this.escapeHtml(offer.packageTitle)}</h3>
-                                    <span style="background:#ecfdf5;color:#047857;font-size:0.75rem;font-weight:800;padding:0.2rem 0.65rem;border-radius:99px;">${offer.durationDays || 10} Days</span>
+                                    <span style="background:#ecfdf5;color:#047857;font-size:0.75rem;font-weight:800;padding:0.2rem 0.65rem;border-radius:99px;">${offer.durationDays ? offer.durationDays + ' Days' : 'Duration N/A'}</span>
                                 </div>
-                                <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.65rem;">REQ-${offer.requirementId || '1024'} • ${travelersCount} Adults, 0 Children</div>
+                                <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.65rem;">${offer.requirementId ? 'REQ-' + offer.requirementId : ''}${offer.requirementId && travelersCount ? ' • ' : ''}${travelersCount} Adults, 0 Children</div>
                                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
                                     <span style="background:#f1f5f9;color:#047857;font-size:0.75rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;">✈ Flights Included</span>
                                     <span style="background:#f1f5f9;color:#047857;font-size:0.75rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;">✓ Visa Included</span>
@@ -3440,7 +3362,7 @@ class App {
 
     openOfferPaymentModal(offerId) {
         this.closeModal();
-        const id = offerId || 'OFF-1024';
+        const id = offerId || '';
         this.state.activeOfferId = id;
         this.navigate('payment');
     }
@@ -3462,31 +3384,19 @@ class App {
 
     renderPackageDetailsTab(offerId) {
         const allOffers = this.getAllOffers();
-        const offer = allOffers.find(o => o.id === offerId) || {
-            id: offerId || 'OFF-1024',
-            packageTitle: 'Umrah Package - Economy',
-            agentName: 'AL-HARAM PREMIUM TRAVELS',
-            discountedPrice: 78500,
-            originalPrice: 86900,
-            discountPercentage: 10,
-            makkahHotel: 'Anjum Hotel Makkah',
-            madinahHotel: 'Durrat Al Eiman Hotel',
-            departureDate: '15 Oct 2026',
-            returnDate: '24 Oct 2026',
-            departureCity: 'Lucknow (LKO)',
-            destinationCity: 'Jeddah (JED)',
-            durationDays: 10,
-            requirementId: '1024'
-        };
+        const offer = allOffers.find(o => o.id === offerId);
+        if (!offer) {
+            return `<div style="min-height:60vh; display:flex; align-items:center; justify-content:center; color:#64748b; font-family:'Inter',sans-serif;">Offer Unavailable</div>`;
+        }
 
         const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
         const apiReqs = this.state.myRequirements || [];
         const req = [...apiReqs, ...localReqs].find(r => r.id === offer.requirementId);
-        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 2;
-        const perPersonPrice = offer.discountedPrice || offer.price || 78500;
+        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 1;
+        const perPersonPrice = offer.discountedPrice || offer.price || 0;
         const totalDiscountedPrice = perPersonPrice * travelersCount;
 
-        const user = this.state.currentUser || { name: 'Tawseef Ahmad', phone: '+91 98765 43210', email: 'tawseefahmad@gmail.com' };
+        const user = this.state.currentUser || {};
 
         return `
         <main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.4rem;">
@@ -3508,9 +3418,9 @@ class App {
                         <span style="position:absolute;top:-2px;right:-2px;background:#047857;color:#fff;font-size:0.65rem;font-weight:800;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;">2</span>
                     </div>
                     <div style="display:flex;align-items:center;gap:0.6rem;background:#f8fafc;padding:0.35rem 0.8rem;border-radius:99px;border:1px solid #e2e8f0;">
-                        <div style="width:30px;height:30px;border-radius:50%;background:#047857;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">T</div>
+                        <div style="width:30px;height:30px;border-radius:50%;background:#047857;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">${this.escapeHtml((user.name || 'G').charAt(0).toUpperCase())}</div>
                         <div>
-                            <div style="font-size:0.82rem;font-weight:800;color:#0f172a;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                            <div style="font-size:0.82rem;font-weight:800;color:#0f172a;">${this.escapeHtml(user.name || 'Guest')}</div>
                             <div style="font-size:0.68rem;color:#64748b;">Customer</div>
                         </div>
                     </div>
@@ -3530,9 +3440,9 @@ class App {
                             <div>
                                 <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem;">
                                     <h3 style="font-size:1.25rem;font-weight:800;color:#0f172a;margin:0;">${this.escapeHtml(offer.packageTitle)}</h3>
-                                    <span style="background:#ecfdf5;color:#047857;font-size:0.75rem;font-weight:800;padding:0.2rem 0.65rem;border-radius:99px;">${offer.durationDays || 10} Days</span>
+                                    <span style="background:#ecfdf5;color:#047857;font-size:0.75rem;font-weight:800;padding:0.2rem 0.65rem;border-radius:99px;">${offer.durationDays ? offer.durationDays + ' Days' : 'Duration N/A'}</span>
                                 </div>
-                                <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.65rem;">REQ-${offer.requirementId || '1024'} • ${travelersCount} Adults, 0 Children</div>
+                                <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.65rem;">${offer.requirementId ? 'REQ-' + offer.requirementId : ''}${offer.requirementId && travelersCount ? ' • ' : ''}${travelersCount} Adults, 0 Children</div>
                                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
                                     <span style="background:#f1f5f9;color:#047857;font-size:0.75rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;">✈ Flights Included</span>
                                     <span style="background:#f1f5f9;color:#047857;font-size:0.75rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;">✓ Visa Included</span>
@@ -3760,23 +3670,19 @@ class App {
 
     renderPaymentScreenTab(offerId) {
         const allOffers = this.getAllOffers();
-        const offer = allOffers.find(o => o.id === offerId) || {
-            id: offerId || 'OFF-1024',
-            packageTitle: 'Umrah Package - Economy',
-            discountedPrice: 78500,
-            originalPrice: 86900,
-            agentName: 'Zilhaj.com Verified Agency',
-            requirementId: '1024'
-        };
+        const offer = allOffers.find(o => o.id === offerId);
+        if (!offer) {
+            return `<div style="min-height:60vh; display:flex; align-items:center; justify-content:center; color:#64748b; font-family:'Inter',sans-serif;">Offer Unavailable</div>`;
+        }
 
         const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
         const apiReqs = this.state.myRequirements || [];
         const req = [...apiReqs, ...localReqs].find(r => r.id === offer.requirementId);
-        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 2;
-        const perPersonPrice = offer.discountedPrice || offer.price || 78500;
+        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 1;
+        const perPersonPrice = offer.discountedPrice || offer.price || 0;
         const totalDiscountedPrice = perPersonPrice * travelersCount;
 
-        const user = this.state.currentUser || { name: 'Tawseef Ahmad', phone: '+91 98765 43210', email: 'tawseefahmad@gmail.com' };
+        const user = this.state.currentUser || {};
         const totalAmountFormatted = this.formatCurrency(totalDiscountedPrice);
 
         const currentPaymentMethod = this.state.selectedPaymentMethod || 'upi';
@@ -3806,9 +3712,9 @@ class App {
                         <span style="position:absolute;top:-2px;right:-2px;background:#047857;color:#fff;font-size:0.65rem;font-weight:800;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;">2</span>
                     </div>
                     <div style="display:flex;align-items:center;gap:0.6rem;background:#f8fafc;padding:0.35rem 0.8rem;border-radius:99px;border:1px solid #e2e8f0;">
-                        <div style="width:30px;height:30px;border-radius:50%;background:#047857;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">T</div>
+                        <div style="width:30px;height:30px;border-radius:50%;background:#047857;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">${this.escapeHtml((user.name || 'G').charAt(0).toUpperCase())}</div>
                         <div>
-                            <div style="font-size:0.82rem;font-weight:800;color:#0f172a;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                            <div style="font-size:0.82rem;font-weight:800;color:#0f172a;">${this.escapeHtml(user.name || 'Guest')}</div>
                             <div style="font-size:0.68rem;color:#64748b;">Customer</div>
                         </div>
                     </div>
@@ -3894,10 +3800,10 @@ class App {
                                         ${showQr ? `
                                             <!-- QR Code Shown -->
                                             <div style="border:2px solid #047857;border-radius:14px;padding:0.8rem;background:#ffffff;display:inline-block;box-shadow:0 4px 14px rgba(4,120,87,0.12);">
-                                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=tawseef@okaxis%26pn=Zilhaj%26am=${totalDiscountedPrice}" alt="UPI QR Code" style="width:150px;height:150px;display:block;">
+                                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi%3A%2F%2Fpay%3Fpa%3D%26pn%3DZilhaj%26am%3D${this.amountFromOffer(offer.id)}%26cu%3DINR" alt="UPI QR Code" style="width:150px;height:150px;display:block;">
                                             </div>
                                             <div style="font-size:0.82rem;color:#475569;">
-                                                UPI ID: <strong style="color:#0f172a;">tawseef@okaxis</strong>
+                                                UPI ID: <strong style="color:#0f172a;">${this.escapeHtml(this.upiIdFromOffer(offer.id) || '')}</strong>
                                             </div>
                                             <button type="button" onclick="app.toggleUpiQrCode()" style="background:#f8fafc;color:#475569;border:1px solid #cbd5e1;border-radius:8px;padding:0.45rem 1rem;font-weight:700;font-size:0.8rem;cursor:pointer;">
                                                 Hide QR Code 📷
@@ -3932,7 +3838,7 @@ class App {
                                         </div>
                                         <div>
                                             <label style="font-size:0.75rem;font-weight:700;color:#475569;display:block;margin-bottom:0.25rem;">Cardholder Name</label>
-                                            <input type="text" value="${this.escapeHtml(user.name || 'Tawseef Ahmad')}" style="width:100%;padding:0.6rem;border:1px solid #cbd5e1;border-radius:8px;font-size:0.88rem;">
+                                            <input type="text" value="${this.escapeHtml(user.name || 'Guest')}" style="width:100%;padding:0.6rem;border:1px solid #cbd5e1;border-radius:8px;font-size:0.88rem;">
                                         </div>
                                     </div>
                                 ` : currentPaymentMethod === 'net' ? `
@@ -3978,15 +3884,15 @@ class App {
                         <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:1.1rem;margin-bottom:1.2rem;">
                             <div>
                                 <div style="font-size:0.68rem;color:#64748b;font-weight:700;text-transform:uppercase;">Booking For</div>
-                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;margin-top:0.15rem;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;margin-top:0.15rem;">${this.escapeHtml(user.name || 'Guest')}</div>
                             </div>
                             <div>
                                 <div style="font-size:0.68rem;color:#64748b;font-weight:700;text-transform:uppercase;">Mobile Number</div>
-                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;margin-top:0.15rem;">${this.escapeHtml(user.phone || '+91 98765 43210')}</div>
+                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;margin-top:0.15rem;">${this.escapeHtml(user.phone || '')}</div>
                             </div>
                             <div>
                                 <div style="font-size:0.68rem;color:#64748b;font-weight:700;text-transform:uppercase;">Email Address</div>
-                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;margin-top:0.15rem;">${this.escapeHtml(user.email || 'tawseefahmad@gmail.com')}</div>
+                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;margin-top:0.15rem;">${this.escapeHtml(user.email || '')}</div>
                             </div>
                         </div>
 
@@ -4016,8 +3922,8 @@ class App {
                             <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=180&q=80" alt="Package" style="width:62px;height:62px;border-radius:10px;object-fit:cover;">
                             <div>
                                 <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">${this.escapeHtml(offer.packageTitle)}</div>
-                                <div style="font-size:0.75rem;color:#64748b;margin-top:0.1rem;">REQ-${offer.requirementId || '1024'} • ${travelersCount} Adults, 0 Children</div>
-                                <span style="background:#ecfdf5;color:#047857;font-size:0.68rem;font-weight:800;padding:0.1rem 0.45rem;border-radius:4px;margin-top:0.2rem;display:inline-block;">${offer.durationDays || 10} Days</span>
+                                <div style="font-size:0.75rem;color:#64748b;margin-top:0.1rem;">${offer.requirementId ? 'REQ-' + offer.requirementId : ''}${offer.requirementId && travelersCount ? ' • ' : ''}${travelersCount} Adults, 0 Children</div>
+                                <span style="background:#ecfdf5;color:#047857;font-size:0.68rem;font-weight:800;padding:0.1rem 0.45rem;border-radius:4px;margin-top:0.2rem;display:inline-block;">${offer.durationDays ? offer.durationDays + ' Days' : 'Duration N/A'}</span>
                             </div>
                         </div>
 
@@ -4397,36 +4303,32 @@ class App {
         const apiReqs = this.state.myRequirements || [];
         const allReqs = [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
 
-        const offer = allOffers.find(item => item.id === offerId) || allOffers[0] || {
-            id: offerId || 'OFF-1024',
-            packageTitle: 'Umrah Package - Economy',
-            agentName: 'AL-HARAM PREMIUM TRAVELS',
-            discountedPrice: 78500,
-            originalPrice: 86900,
-            durationDays: 10,
-            makkahHotel: 'Anjum Hotel Makkah',
-            madinahHotel: 'Durrat Al Eiman Hotel',
-            requirementId: '1024'
-        };
+        const offer = allOffers.find(item => item.id === offerId);
+        if (!offer) {
+            return `
+            <main style="flex:1; min-width:0; display:flex; align-items:center; justify-content:center; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; color:#0f172a; padding:3rem 1rem;">
+                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:2.5rem 2rem; text-align:center; max-width:420px; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                    <div style="font-size:2.2rem; margin-bottom:0.8rem;">📭</div>
+                    <h2 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0 0 0.4rem;">Offer Unavailable</h2>
+                    <p style="font-size:0.85rem; color:#64748b; margin:0 0 1.2rem;">We couldn't find this offer. It may have been removed by the travel agency.</p>
+                    <button onclick="app.setDashboardTab('packageDetails')" style="background:#047857; color:#ffffff; border:none; border-radius:8px; padding:0.6rem 1.3rem; font-size:0.85rem; font-weight:700; cursor:pointer;">Back to Package Details</button>
+                </div>
+            </main>`;
+        }
 
-        const req = allReqs.find(r => r.id === offer.requirementId) || allReqs[0] || {
-            travelersCount: 2,
-            adults: 2,
-            children: 0,
-            durationDays: 10
-        };
+        const req = allReqs.find(r => r.id === offer.requirementId) || {};
 
-        const travelersCount = offer.travelersCount || req.travelersCount || req.adults || 2;
-        const perPersonPrice = offer.discountedPrice || offer.price || 78500;
+        const travelersCount = Number(offer.travelersCount) || Number(req.travelersCount) || Number(req.adults) || 1;
+        const perPersonPrice = Number(offer.discountedPrice) || Number(offer.price) || 0;
         
-        const packagePriceTotal = perPersonPrice * travelersCount; // ₹1,57,000
-        const taxesAndFees = 6400;
-        const visaCharges = 4000;
-        const travelInsurance = 2400;
-        const offerDiscount = 1000;
-        const finalTotalAmount = packagePriceTotal + taxesAndFees + visaCharges + travelInsurance - offerDiscount; // ₹1,69,800
+        const packagePriceTotal = perPersonPrice * travelersCount;
+        const taxesAndFees = Number(offer.taxesAndFees) || Number(req.taxesAndFees) || 0;
+        const visaCharges = Number(offer.visaCharges) || Number(req.visaCharges) || 0;
+        const travelInsurance = Number(offer.travelInsurance) || Number(req.travelInsurance) || 0;
+        const offerDiscount = Number(offer.offerDiscount) || Number(req.offerDiscount) || 0;
+        const finalTotalAmount = packagePriceTotal + taxesAndFees + visaCharges + travelInsurance - offerDiscount;
 
-        const user = this.state.currentUser || { name: 'Tawseef Ahmad', phone: '+91 98765 43210', email: 'tawseefahmad@gmail.com' };
+        const user = this.state.currentUser || {};
 
         return `
         <main style="flex:1; min-width:0; display:flex; flex-direction:column; gap:1.2rem; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; color:#0f172a;">
@@ -4452,9 +4354,9 @@ class App {
                         <span style="position:absolute; top:-2px; right:-2px; background:#047857; color:#ffffff; font-size:0.62rem; font-weight:800; width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center;">2</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:0.55rem; background:#f8fafc; padding:0.3rem 0.75rem; border-radius:99px; border:1px solid #e2e8f0; cursor:pointer;" onclick="app.setDashboardTab('profile')">
-                        <div style="width:28px; height:28px; border-radius:50%; background:#047857; color:#ffffff; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:0.8rem;">T</div>
+                        <div style="width:28px; height:28px; border-radius:50%; background:#047857; color:#ffffff; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:0.8rem;">${this.escapeHtml((user.name || 'G').charAt(0).toUpperCase())}</div>
                         <div>
-                            <div style="font-size:0.8rem; font-weight:800; color:#0f172a;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                            <div style="font-size:0.8rem; font-weight:800; color:#0f172a;">${this.escapeHtml(user.name || 'Guest')}</div>
                             <div style="font-size:0.65rem; color:#64748b;">Customer</div>
                         </div>
                         <span style="font-size:0.65rem; color:#64748b; margin-left:0.15rem;">▼</span>
@@ -4571,15 +4473,15 @@ class App {
                                     <!-- QR Code Box with Central Logo Emblem Overlay -->
                                     <div style="text-align:center; margin-bottom:0.9rem;">
                                         <div style="position:relative; display:inline-block; padding:10px; background:#ffffff; border:2px solid #e2e8f0; border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,0.03);">
-                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi%3A%2F%2Fpay%3Fpa%3Dtawseef%40okaxis%26pn%3DZilhaj%26am%3D169800.00%26cu%3DINR" alt="UPI QR Code" style="width:170px; height:170px; display:block;" />
+                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi%3A%2F%2Fpay%3Fpa%3D%26pn%3DZilhaj%26am%3D${encodeURIComponent(finalTotalAmount)}%26cu%3DINR" alt="UPI QR Code" style="width:170px; height:170px; display:block;" />
                                             <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:34px; height:34px; background:#047857; border:3px solid #ffffff; border-radius:8px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
                                                 <span style="color:#ffffff; font-weight:900; font-size:1rem; font-style:italic;">Z</span>
                                             </div>
                                         </div>
 
                                         <div style="display:flex; align-items:center; justify-content:center; gap:0.35rem; margin-top:0.7rem; font-size:0.8rem; color:#0f172a; font-weight:700;">
-                                            <span>UPI ID: tawseef@okaxis</span>
-                                            <button type="button" onclick="navigator.clipboard.writeText('tawseef@okaxis'); app.showToast('UPI ID copied to clipboard!', 'success');" style="background:none; border:none; color:#047857; cursor:pointer; font-size:0.85rem;" title="Copy UPI ID">📋</button>
+                                            <span>UPI ID: ${this.escapeHtml(offer.upiId || '')}</span>
+                                            <button type="button" onclick="navigator.clipboard.writeText('${this.escapeHtml(offer.upiId || '')}'); app.showToast('UPI ID copied to clipboard!', 'success');" style="background:none; border:none; color:#047857; cursor:pointer; font-size:0.85rem;" title="Copy UPI ID">📋</button>
                                         </div>
                                     </div>
 
@@ -4594,20 +4496,20 @@ class App {
                                     <div style="display:flex; flex-direction:column; gap:0.8rem;">
                                         <div>
                                             <label style="font-size:0.72rem; font-weight:700; color:#475569; display:block; margin-bottom:0.25rem;">CARDHOLDER NAME</label>
-                                            <input type="text" value="${this.escapeHtml(user.name || 'Tawseef Ahmad')}" style="width:100%; box-sizing:border-box; padding:0.6rem; border-radius:7px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;" />
+                                            <input type="text" value="${this.escapeHtml(user.name || '')}" style="width:100%; box-sizing:border-box; padding:0.6rem; border-radius:7px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;" />
                                         </div>
                                         <div>
                                             <label style="font-size:0.72rem; font-weight:700; color:#475569; display:block; margin-bottom:0.25rem;">CARD NUMBER</label>
-                                            <input type="text" placeholder="4111 2222 3333 4444" value="4111 2222 3333 4444" style="width:100%; box-sizing:border-box; padding:0.6rem; border-radius:7px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;" />
+                                            <input type="text" placeholder="4111 2222 3333 4444" style="width:100%; box-sizing:border-box; padding:0.6rem; border-radius:7px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;" />
                                         </div>
                                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.7rem;">
                                             <div>
                                                 <label style="font-size:0.72rem; font-weight:700; color:#475569; display:block; margin-bottom:0.25rem;">EXPIRY</label>
-                                                <input type="text" placeholder="MM/YY" value="08/28" style="width:100%; box-sizing:border-box; padding:0.6rem; border-radius:7px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;" />
+                                                <input type="text" placeholder="MM/YY" style="width:100%; box-sizing:border-box; padding:0.6rem; border-radius:7px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;" />
                                             </div>
                                             <div>
                                                 <label style="font-size:0.72rem; font-weight:700; color:#475569; display:block; margin-bottom:0.25rem;">CVV</label>
-                                                <input type="password" placeholder="123" value="123" style="width:100%; box-sizing:border-box; padding:0.6rem; border-radius:7px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;" />
+                                                <input type="password" placeholder="123" style="width:100%; box-sizing:border-box; padding:0.6rem; border-radius:7px; border:1px solid #cbd5e1; font-weight:600; font-size:0.85rem;" />
                                             </div>
                                         </div>
                                     </div>
@@ -4651,15 +4553,15 @@ class App {
                         <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem; margin-bottom:1rem;">
                             <div>
                                 <div style="font-size:0.68rem; color:#64748b; font-weight:600;">Booking For</div>
-                                <div style="font-size:0.88rem; font-weight:800; color:#0f172a; margin-top:0.15rem;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                                <div style="font-size:0.88rem; font-weight:800; color:#0f172a; margin-top:0.15rem;">${this.escapeHtml(user.name || 'Guest')}</div>
                             </div>
                             <div>
                                 <div style="font-size:0.68rem; color:#64748b; font-weight:600;">Mobile Number</div>
-                                <div style="font-size:0.88rem; font-weight:800; color:#0f172a; margin-top:0.15rem;">${this.escapeHtml(user.phone || '+91 98765 43210')}</div>
+                                <div style="font-size:0.88rem; font-weight:800; color:#0f172a; margin-top:0.15rem;">${this.escapeHtml(user.phone || '')}</div>
                             </div>
                             <div>
                                 <div style="font-size:0.68rem; color:#64748b; font-weight:600;">Email Address</div>
-                                <div style="font-size:0.88rem; font-weight:800; color:#0f172a; margin-top:0.15rem;">${this.escapeHtml(user.email || 'tawseefahmad@gmail.com')}</div>
+                                <div style="font-size:0.88rem; font-weight:800; color:#0f172a; margin-top:0.15rem;">${this.escapeHtml(user.email || '')}</div>
                             </div>
                         </div>
 
@@ -4689,14 +4591,14 @@ class App {
                             <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=120&q=80" alt="Kaaba" style="width:62px; height:62px; border-radius:10px; object-fit:cover; flex-shrink:0;" />
                             <div>
                                 <h4 style="font-size:0.88rem; font-weight:800; color:#0f172a; margin:0 0 0.15rem;">${this.escapeHtml(offer.packageTitle)}</h4>
-                                <div style="font-size:0.72rem; color:#64748b; margin-bottom:0.3rem;">REQ-${offer.requirementId || '1024'} • ${travelersCount} Adults, 0 Children</div>
-                                <span style="background:#ecfdf5; color:#047857; font-size:0.67rem; font-weight:800; padding:0.12rem 0.45rem; border-radius:99px;">${offer.durationDays || 10} Days</span>
+                                <div style="font-size:0.72rem; color:#64748b; margin-bottom:0.3rem;">${offer.requirementId ? 'REQ-' + offer.requirementId : ''}${offer.requirementId && travelersCount ? ' • ' : ''}${this.escapeHtml(String(offer.travelersCount || req.travelersCount || req.adults || travelersCount))} Adults, 0 Children</div>
+                                <span style="background:#ecfdf5; color:#047857; font-size:0.67rem; font-weight:800; padding:0.12rem 0.45rem; border-radius:99px;">${offer.durationDays || '—'} Days</span>
                             </div>
                         </div>
 
                         <div style="display:flex; flex-direction:column; gap:0.55rem; font-size:0.78rem; color:#475569;">
                             <div style="display:flex; justify-content:space-between;">
-                                <span>Package Price (${travelersCount} × ₹78,500)</span>
+                                <span>Package Price (${travelersCount} × ${this.formatCurrency(perPersonPrice)})</span>
                                 <span style="font-weight:700; color:#0f172a;">${this.formatCurrency(packagePriceTotal)}</span>
                             </div>
                             <div style="display:flex; justify-content:space-between;">
@@ -5298,12 +5200,7 @@ class App {
 
 
     renderOffersPage() {
-        const user = this.state.currentUser || {
-            name: 'Traveler User',
-            email: 'user@traveler.com',
-            phone: '9541692891',
-            role: 'ROLE_USER'
-        };
+        const user = this.state.currentUser || {};
 
         // Merge API-sourced data (source of truth) with localStorage fallback
         const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
@@ -5338,8 +5235,8 @@ class App {
                                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-bottom:1.5px dashed #e2e8f0; padding-bottom:1rem; margin-bottom:1.2rem;">
                                         <div>
                                             <span style="background:#047857; color:white; font-size:0.78rem; font-weight:800; padding:0.3rem 0.7rem; border-radius:8px;">REQUEST: ${req.id}</span>
-                                            <h3 style="color:#0f172a; margin-top:0.4rem;">📅 ${req.preferredDepartureDate || '12 AUG'} (${req.durationDays || 18} Days)</h3>
-                                            <p style="color:#64748b; font-size:0.88rem; margin-top:0.2rem;">👥 Travelers: <strong>${req.travelersCount || 2}</strong> | 🏨 Preferred: <strong>${this.escapeHtml(req.hotelType || '5-Star')}</strong> | Max Budget: <strong>${this.formatCurrency(req.maxBudget)}</strong></p>
+                                            <h3 style="color:#0f172a; margin-top:0.4rem;">📅 ${req.preferredDepartureDate || 'Not specified'}</h3>
+                                            <p style="color:#64748b; font-size:0.88rem; margin-top:0.2rem;">👥 Travelers: <strong>${req.travelersCount || '—'}</strong> | 🏨 Preferred: <strong>${this.escapeHtml(req.hotelType || 'Not specified')}</strong> | Max Budget: <strong>${req.maxBudget ? this.formatCurrency(req.maxBudget) : 'Not specified'}</strong></p>
                                         </div>
                                         <button class="btn btn-gold" onclick="app.viewOffersForRequest('${req.id}')" style="font-weight:800; font-size:0.95rem;">
                                             🔍 View All Offers for This Request (${offersForReq.length})
@@ -5349,24 +5246,24 @@ class App {
                                     <!-- Quick Preview of top 2 offers -->
                                     <div style="display:flex; flex-direction:column; gap:1rem;">
                                         ${offersForReq.length > 0 ? offersForReq.map(o => {
-                                            const travelers = req.travelersCount || o.travelersCount || 2;
-                                            const perPerson = o.discountedPrice || 49999;
+                                            const travelers = req.travelersCount || o.travelersCount || 1;
+                                            const perPerson = o.discountedPrice || o.price || 0;
                                             const totalDiscounted = perPerson * travelers;
-                                            const origPerPerson = o.originalPrice || Math.round(perPerson * 1.25);
+                                            const origPerPerson = o.originalPrice || 0;
                                             const totalOriginal = origPerPerson * travelers;
                                             return `
                                             <div style="background:linear-gradient(135deg, #ffffff 0%, #fef3c7 100%); border-radius:12px; padding:1.4rem; border:1.5px solid #fde68a; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
                                                 <div>
                                                     <span style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; font-size:0.75rem; font-weight:800; padding:0.25rem 0.6rem; border-radius:99px;">
-                                                        🔥 ${o.discountPercentage || 15}% DISCOUNT BID
+                                                        🔥 ${o.discountPercentage || 0}% DISCOUNT BID
                                                     </span>
                                                     <h4 style="margin-top:0.5rem; color:#0f172a; font-size:1.1rem;">🏢 ${this.escapeHtml(o.agentName || 'Verified Agent')}</h4>
                                                     <p style="color:#78350f; font-size:0.88rem; margin-top:0.3rem;">
-                                                        ${this.escapeHtml(o.packageTitle)} — ${this.escapeHtml(o.makkahHotel || 'Swissotel Makkah')}
+                                                        ${this.escapeHtml(o.packageTitle)}${o.makkahHotel ? ' — ' + this.escapeHtml(o.makkahHotel) : ''}
                                                     </p>
                                                     <div style="margin-top:0.5rem; display:flex; flex-direction:column; gap:0.2rem;">
                                                         <div style="display:flex; align-items:center; gap:0.8rem;">
-                                                            <span style="text-decoration:line-through; color:var(--text-muted); font-size:0.95rem;">${this.formatCurrency(totalOriginal)}</span>
+                                                            ${origPerPerson > 0 ? `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.95rem;">${this.formatCurrency(totalOriginal)}</span>` : ''}
                                                             <span style="font-size:1.35rem; font-weight:800; color:#047857;">${this.formatCurrency(totalDiscounted)}</span>
                                                         </div>
                                                         <span style="font-size:0.75rem; color:#047857; font-weight:700;">Total for ${travelers} Persons (${this.formatCurrency(perPerson)} / person)</span>
@@ -5416,10 +5313,10 @@ class App {
                                 </div>
                                 <h4 style="font-size:1.15rem; color:#0f172a; margin-bottom:0.4rem;">${this.escapeHtml(o.packageTitle)}</h4>
                                 <p style="font-size:0.88rem; color:#475569; margin-bottom:0.6rem; line-height:1.5;">
-                                    🕋 <strong>Makkah:</strong> ${this.escapeHtml(o.makkahHotel || 'Swissotel Makkah')} | 🕌 <strong>Madinah:</strong> ${this.escapeHtml(o.madinahHotel || 'Pullman Zamzam')}
+                                    🕋 <strong>Makkah:</strong> ${this.escapeHtml(o.makkahHotel || 'Not specified')} | 🕌 <strong>Madinah:</strong> ${this.escapeHtml(o.madinahHotel || 'Not specified')}
                                 </p>
                                 <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;">
-                                    ${(o.inclusions || ['Flights', 'Buffet Meals', 'Ziyarat']).map(inc => `<span style="background:#e2e8f0; color:#334155; font-size:0.75rem; font-weight:600; padding:0.2rem 0.5rem; border-radius:4px;">✓ ${inc}</span>`).join('')}
+                                    ${(o.inclusions && o.inclusions.length ? o.inclusions : []).map(inc => `<span style="background:#e2e8f0; color:#334155; font-size:0.75rem; font-weight:600; padding:0.2rem 0.5rem; border-radius:4px;">✓ ${inc}</span>`).join('')}
                                 </div>
                                 <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #d1fae5; padding-top:0.8rem;">
                                     <div>
@@ -5445,38 +5342,27 @@ class App {
 
 
     openOfferReviewModal_old(offerId) {
-        const offer = allOffers.find(o => o.id === offerId) || {
-            id: offerId,
-            packageTitle: 'Umrah Package - Economy',
-            agentName: 'AL-HARAM PREMIUM TRAVELS',
-            discountedPrice: 78500,
-            originalPrice: 86900,
-            discountPercentage: 10,
-            makkahHotel: 'Anjum Hotel Makkah',
-            madinahHotel: 'Durrat Al Eiman Hotel',
-            departureDate: '15 Oct 2026',
-            returnDate: '24 Oct 2026',
-            departureCity: 'Lucknow (LKO)',
-            destinationCity: 'Jeddah (JED)',
-            durationDays: 10,
-            inclusions: ['Return Flights (Lucknow to Jeddah & Return)', 'Umrah Visa Included', 'All Local Transfers', '9 Nights Stay in Makkah & Madinah', 'Breakfast, Lunch & Dinner', 'Makkah & Madinah Ziyarat', 'Coverage Included'],
-            specialNote: 'Rawdah Al-Sharifa permits must be booked individually through Nusuk App.'
-        };
+        const allOffers = this.getAllOffers();
+        const offer = allOffers.find(o => o.id === offerId);
+        if (!offer) {
+            this.showToast('Offer not found.', 'warning');
+            return;
+        }
 
         const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
         const apiReqs = this.state.myRequirements || [];
         const req = [...apiReqs, ...localReqs].find(r => r.id === offer.requirementId);
-        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 2;
-        const perPersonPrice = offer.discountedPrice || offer.price || 78500;
-        const origPerPerson = offer.originalPrice || Math.round(perPersonPrice * 1.15);
+        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 1;
+        const perPersonPrice = offer.discountedPrice || offer.price || 0;
+        const origPerPerson = offer.originalPrice || 0;
         const totalDiscountedPrice = perPersonPrice * travelersCount;
         const totalOriginalPrice = origPerPerson * travelersCount;
-        const user = this.state.currentUser || { name: 'Tawseef Ahmad', role: 'Customer' };
+        const user = this.state.currentUser || {};
 
         // Calculate itemized fees for display
-        const taxesFee = 3200;
-        const visaFee = 2000;
-        const insuranceFee = 1200;
+        const taxesFee = Number(offer.taxesAndFees) || 0;
+        const visaFee = Number(offer.visaCharges) || 0;
+        const insuranceFee = Number(offer.travelInsurance) || 0;
 
         // Fullscreen Modal setup
         const modal = document.getElementById('modalCard');
@@ -5517,7 +5403,7 @@ class App {
                         <div style="display:flex; align-items:center; gap:0.75rem; background:#f1f5f9; padding:0.4rem 0.9rem 0.4rem 0.5rem; border-radius:99px;">
                             <div style="width:34px; height:34px; background:#047857; color:white; border-radius:50%; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:0.95rem;">T</div>
                             <div>
-                                <div style="font-size:0.85rem; font-weight:800; color:#0f172a;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                                <div style="font-size:0.85rem; font-weight:800; color:#0f172a;">${this.escapeHtml(user.name || 'Guest')}</div>
                                 <div style="font-size:0.7rem; color:#64748b;">Customer</div>
                             </div>
                         </div>
@@ -5538,9 +5424,9 @@ class App {
                                 <div>
                                     <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.35rem;">
                                         <h3 style="font-size:1.25rem; font-weight:800; color:#0f172a; margin:0;">${this.escapeHtml(offer.packageTitle)}</h3>
-                                        <span style="background:#ecfdf5; color:#047857; font-size:0.75rem; font-weight:800; padding:0.2rem 0.61rem; border-radius:99px; border:1px solid #a7f3d0;">${offer.durationDays || 10} Days</span>
+                                        <span style="background:#ecfdf5; color:#047857; font-size:0.75rem; font-weight:800; padding:0.2rem 0.61rem; border-radius:99px; border:1px solid #a7f3d0;">${offer.durationDays ? offer.durationDays + ' Days' : 'Duration N/A'}</span>
                                     </div>
-                                    <div style="font-size:0.84rem; color:#64748b; margin-bottom:0.75rem;">REQ-${offer.requirementId || '1024'} • ${travelersCount} Adults, 0 Children</div>
+                                    <div style="font-size:0.84rem; color:#64748b; margin-bottom:0.75rem;">${offer.requirementId ? 'REQ-' + offer.requirementId : ''}${offer.requirementId && travelersCount ? ' • ' : ''}${travelersCount} Adults, 0 Children</div>
                                     <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
                                         <span style="background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:8px;">✈ Flights Included</span>
                                         <span style="background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:8px;">✓ Visa Included</span>
@@ -5824,23 +5710,21 @@ class App {
 
 
     openOfferPaymentModal_old(offerId) {
-        const offer = allOffers.find(o => o.id === offerId) || {
-            id: offerId,
-            packageTitle: 'Umrah Package - Economy',
-            discountedPrice: 78500,
-            originalPrice: 86900,
-            agentName: 'Zilhaj.com Verified Agency',
-            requirementId: ''
-        };
+        const allOffers = this.getAllOffers();
+        const offer = allOffers.find(o => o.id === offerId);
+        if (!offer) {
+            this.showToast('Offer not found.', 'warning');
+            return;
+        }
 
         const localReqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
         const apiReqs = this.state.myRequirements || [];
         const req = [...apiReqs, ...localReqs].find(r => r.id === offer.requirementId);
-        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 2;
-        const perPersonPrice = offer.discountedPrice || offer.price || 78500;
+        const travelersCount = offer.travelersCount || (req ? (req.travelersCount || req.adults) : null) || 1;
+        const perPersonPrice = offer.discountedPrice || offer.price || 0;
         const totalDiscountedPrice = perPersonPrice * travelersCount;
 
-        const user = this.state.currentUser || { name: 'Tawseef Ahmad', phone: '+91 98765 43210', email: 'tawseefahmad@gmail.com' };
+        const user = this.state.currentUser || {};
         const totalAmountFormatted = this.formatCurrency(totalDiscountedPrice);
 
         // Modal Fullscreen Setup
@@ -5888,7 +5772,7 @@ class App {
                         <div style="display:flex; align-items:center; gap:0.75rem; background:#f1f5f9; padding:0.4rem 0.9rem 0.4rem 0.5rem; border-radius:99px;">
                             <div style="width:34px; height:34px; background:#047857; color:white; border-radius:50%; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:0.95rem;">T</div>
                             <div>
-                                <div style="font-size:0.85rem; font-weight:800; color:#0f172a;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                                <div style="font-size:0.85rem; font-weight:800; color:#0f172a;">${this.escapeHtml(user.name || 'Guest')}</div>
                                 <div style="font-size:0.7rem; color:#64748b;">Customer</div>
                             </div>
                         </div>
@@ -5981,15 +5865,15 @@ class App {
                             <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1.1rem; margin-bottom:1rem;">
                                 <div>
                                     <div style="font-size:0.72rem; color:#64748b; font-weight:700; text-transform:uppercase;">Booking For</div>
-                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">${this.escapeHtml(user.name || 'Tawseef Ahmad')}</div>
+                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">${this.escapeHtml(user.name || 'Guest')}</div>
                                 </div>
                                 <div>
                                     <div style="font-size:0.72rem; color:#64748b; font-weight:700; text-transform:uppercase;">Mobile Number</div>
-                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">${this.escapeHtml(user.phone || '+91 98765 43210')}</div>
+                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">${this.escapeHtml(user.phone || '')}</div>
                                 </div>
                                 <div>
                                     <div style="font-size:0.72rem; color:#64748b; font-weight:700; text-transform:uppercase;">Email Address</div>
-                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">${this.escapeHtml(user.email || 'tawseefahmad@gmail.com')}</div>
+                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a; margin-top:0.2rem;">${this.escapeHtml(user.email || '')}</div>
                                 </div>
                             </div>
 
@@ -6019,14 +5903,14 @@ class App {
                                 <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=180&q=80" alt="Package" style="width:68px; height:68px; border-radius:10px; object-fit:cover;">
                                 <div>
                                     <div style="font-size:0.92rem; font-weight:800; color:#0f172a;">${this.escapeHtml(offer.packageTitle)}</div>
-                                    <div style="font-size:0.78rem; color:#64748b; margin-top:0.15rem;">REQ-${offer.requirementId || '1024'} • ${travelersCount} Adults, 0 Children</div>
-                                    <span style="background:#ecfdf5; color:#047857; font-size:0.7rem; font-weight:800; padding:0.1rem 0.5rem; border-radius:4px; margin-top:0.25rem; display:inline-block;">${offer.durationDays || 10} Days</span>
+                                    <div style="font-size:0.78rem; color:#64748b; margin-top:0.15rem;">${offer.requirementId ? 'REQ-' + offer.requirementId : ''}${offer.requirementId && travelersCount ? ' • ' : ''}${travelersCount} Adults, 0 Children</div>
+                                    <span style="background:#ecfdf5; color:#047857; font-size:0.7rem; font-weight:800; padding:0.1rem 0.5rem; border-radius:4px; margin-top:0.25rem; display:inline-block;">${offer.durationDays ? offer.durationDays + ' Days' : 'Duration N/A'}</span>
                                 </div>
                             </div>
 
                             <div style="display:flex; flex-direction:column; gap:0.75rem; font-size:0.88rem; color:#475569;">
                                 <div style="display:flex; justify-content:space-between;">
-                                    <span>Package Price (${travelersCount} × ₹78,500)</span>
+<span>Package Price (${this.escapeHtml(String(offer.travelersCount || req.travelersCount || req.adults || travelersCount))} × ${this.formatCurrency(perPersonPrice)})</span>
                                     <span style="font-weight:700; color:#0f172a;">₹1,57,000</span>
                                 </div>
                                 <div style="display:flex; justify-content:space-between;">
@@ -6116,6 +6000,18 @@ class App {
         }, 50);
     }
 
+    amountFromOffer(offerId) {
+        const offers = [...(this.state.userOffers || []), ...(JSON.parse(localStorage.getItem('umrah_user_offers') || '[]'))];
+        const offer = offers.find(o => o.id === offerId);
+        return (offer && (Number(offer.discountedPrice) || Number(offer.price))) || '';
+    }
+
+    upiIdFromOffer(offerId) {
+        const offers = [...(this.state.userOffers || []), ...(JSON.parse(localStorage.getItem('umrah_user_offers') || '[]'))];
+        const offer = offers.find(o => o.id === offerId);
+        return (offer && offer.upiId) || '';
+    }
+
     switchPaymentTab(method, totalAmountFormatted, offerId) {
         this.selectedPaymentMethod = method;
         const methods = ['upi', 'card', 'net', 'wallet', 'paylater'];
@@ -6135,6 +6031,10 @@ class App {
 
         const panel = document.getElementById('payTabDynamicPanel');
         const ctaContainer = document.getElementById('dynamicPayCtaContainer');
+        const payOffer = [...(this.state.userOffers || []), ...(JSON.parse(localStorage.getItem('umrah_user_offers') || '[]'))].find(o => o.id === offerId) || {};
+        const payTitle = payOffer.packageTitle || '';
+        const payAmount = Number(payOffer.discountedPrice) || Number(payOffer.price) || Math.round(parseFloat(String(totalAmountFormatted).replace(/[^0-9.]/g, ''))) || 0;
+        const payTravelers = Number(payOffer.travelersCount) || Number((this.state.myRequirements || []).find(r => r.id === payOffer.requirementId)?.travelersCount) || 1;
 
         if (method === 'upi') {
             // UPI Panel Behavior (Matches Image 2 & Explicit Prompt Rules)
@@ -6172,9 +6072,9 @@ class App {
 
                         <!-- QR Code Container -->
                         <div style="background:#ffffff; border:2px solid #047857; border-radius:16px; padding:1rem; display:flex; flex-direction:column; align-items:center; box-shadow:0 4px 15px rgba(4,120,87,0.1);">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi%3A%2F%2Fpay%3Fpa%3Dtawseef%40okaxis%26pn%3DZilhajTravels%26cu%3DINR" alt="UPI QR Code" style="width:160px; height:160px; border-radius:8px;">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi%3A%2F%2Fpay%3Fpa%3D%26pn%3DZilhaj%26am%3D${encodeURIComponent(String(this.amountFromOffer(offerId))) }%26cu%3DINR" alt="UPI QR Code" style="width:160px; height:160px; border-radius:8px;">
                             <div style="display:flex; align-items:center; gap:0.5rem; background:#f8fafc; border:1px solid #e2e8f0; padding:0.35rem 0.8rem; border-radius:8px; margin-top:0.8rem; font-size:0.78rem; color:#0f172a; font-weight:700;">
-                                <span>UPI ID: tawseef@okaxis</span>
+                                <span>UPI ID: ${this.escapeHtml(this.upiIdFromOffer(offerId) || '')}</span>
                                 <span onclick="app.showToast('UPI ID copied!', 'success');" style="cursor:pointer; color:#047857;">📋</span>
                             </div>
                         </div>
@@ -6189,7 +6089,7 @@ class App {
             // DYNAMIC CTA BEHAVIOR RULE: NO "Pay ₹..." button for UPI. Show QR Code button action.
             if (ctaContainer) {
                 ctaContainer.innerHTML = `
-                    <button onclick="app.processPaymentSubmit('${offerId}', '', 'Umrah Package - Economy', 157000, 2);"
+                    <button onclick="app.processPaymentSubmit('${offerId}', '', '${this.escapeHtml(payTitle)}', ${payAmount}, ${payTravelers});"
                         style="background:#047857; color:#ffffff; font-size:0.95rem; font-weight:800; padding:0.85rem 1.6rem; border-radius:10px; border:none; cursor:pointer; font-family:inherit; box-shadow:0 4px 14px rgba(4,120,87,0.25); display:flex; align-items:center; gap:0.5rem;">
                         📱 Show QR Code / Verify Payment
                     </button>
@@ -6204,7 +6104,7 @@ class App {
                         <h4 style="font-size:1rem; font-weight:800; color:#0f172a; margin:0 0 0.3rem;">Credit or Debit Card</h4>
                         <div>
                             <label style="font-size:0.75rem; font-weight:700; color:#475569; display:block; margin-bottom:0.25rem;">Cardholder Name *</label>
-                            <input type="text" id="cardHolder" class="form-control" value="Tawseef Ahmad" placeholder="Name on card" style="border:1.5px solid #cbd5e1; border-radius:8px; padding:0.65rem 0.9rem; font-size:0.88rem; width:100%;">
+                            <input type="text" id="cardHolder" class="form-control" value="${this.escapeHtml((this.state.currentUser && this.state.currentUser.name) || '')}" placeholder="Name on card" style="border:1.5px solid #cbd5e1; border-radius:8px; padding:0.65rem 0.9rem; font-size:0.88rem; width:100%;">
                         </div>
                         <div>
                             <label style="font-size:0.75rem; font-weight:700; color:#475569; display:block; margin-bottom:0.25rem;">Card Number *</label>
@@ -6227,7 +6127,7 @@ class App {
             // DYNAMIC CTA BEHAVIOR RULE: Cards -> Show "Pay ₹1,69,800 Securely" button
             if (ctaContainer) {
                 ctaContainer.innerHTML = `
-                    <button onclick="app.processPaymentSubmit('${offerId}', '', 'Umrah Package - Economy', 157000, 2);"
+                    <button onclick="app.processPaymentSubmit('${offerId}', '', '${this.escapeHtml(payTitle)}', ${payAmount}, ${payTravelers});"
                         style="background:#047857; color:#ffffff; font-size:0.95rem; font-weight:800; padding:0.85rem 1.6rem; border-radius:10px; border:none; cursor:pointer; font-family:inherit; box-shadow:0 4px 14px rgba(4,120,87,0.25);">
                         🔒 Pay ${totalAmountFormatted} Securely
                     </button>
@@ -6265,7 +6165,7 @@ class App {
             // DYNAMIC CTA BEHAVIOR RULE: Net Banking -> Show "Pay ₹1,69,800 Securely" button
             if (ctaContainer) {
                 ctaContainer.innerHTML = `
-                    <button onclick="app.processPaymentSubmit('${offerId}', '', 'Umrah Package - Economy', 157000, 2);"
+                    <button onclick="app.processPaymentSubmit('${offerId}', '', '${this.escapeHtml(payTitle)}', ${payAmount}, ${payTravelers});"
                         style="background:#047857; color:#ffffff; font-size:0.95rem; font-weight:800; padding:0.85rem 1.6rem; border-radius:10px; border:none; cursor:pointer; font-family:inherit; box-shadow:0 4px 14px rgba(4,120,87,0.25);">
                         🔒 Pay ${totalAmountFormatted} Securely
                     </button>
@@ -6299,7 +6199,7 @@ class App {
             // DYNAMIC CTA BEHAVIOR RULE: Wallets -> Show "Pay ₹1,69,800 Securely" button
             if (ctaContainer) {
                 ctaContainer.innerHTML = `
-                    <button onclick="app.processPaymentSubmit('${offerId}', '', 'Umrah Package - Economy', 157000, 2);"
+                    <button onclick="app.processPaymentSubmit('${offerId}', '', '${this.escapeHtml(payTitle)}', ${payAmount}, ${payTravelers});"
                         style="background:#047857; color:#ffffff; font-size:0.95rem; font-weight:800; padding:0.85rem 1.6rem; border-radius:10px; border:none; cursor:pointer; font-family:inherit; box-shadow:0 4px 14px rgba(4,120,87,0.25);">
                         🔒 Pay ${totalAmountFormatted} Securely
                     </button>
@@ -6335,7 +6235,7 @@ class App {
             // DYNAMIC CTA BEHAVIOR RULE: Pay Later -> Show "Continue to Pay Later" button
             if (ctaContainer) {
                 ctaContainer.innerHTML = `
-                    <button onclick="app.processPaymentSubmit('${offerId}', '', 'Umrah Package - Economy', 157000, 2);"
+                    <button onclick="app.processPaymentSubmit('${offerId}', '', '${this.escapeHtml(payTitle)}', ${payAmount}, ${payTravelers});"
                         style="background:#047857; color:#ffffff; font-size:0.95rem; font-weight:800; padding:0.85rem 1.6rem; border-radius:10px; border:none; cursor:pointer; font-family:inherit; box-shadow:0 4px 14px rgba(4,120,87,0.25);">
                         Continue to Pay Later →
                     </button>
@@ -6435,30 +6335,34 @@ class App {
         `);
     }
 
-    async processPaymentSubmit(offerId, reqId, title, price, travelersCount = 2) {
+    async processPaymentSubmit(offerId, reqId, title, price, travelersCount) {
         this.closeModal();
         this.showLoading('Processing secure gateway payment...');
 
         setTimeout(() => {
             const bookings = this.state.myBookings || [];
             const user = this.state.currentUser || {};
+            const allOffers = this.getAllOffers();
+            const offer = allOffers.find(o => o.id === offerId) || {};
+            const req = (this.state.myRequirements || []).find(r => r.id === (reqId || offer.requirementId));
+            const travelerCount = Number(travelersCount) || Number(offer.travelersCount) || (req ? (Number(req.travelersCount) || Number(req.adults)) : null) || 1;
             const txnId = 'TXN-' + Date.now();
             const newBooking = {
                 id: 'BK-' + Date.now().toString().slice(-6),
-                packageTitle: title,
+                packageTitle: title || offer.packageTitle || '',
                 offerId: offerId,
-                requirementId: reqId || '',
-                totalPrice: price,
-                travelersCount: travelersCount,
-                travelDate: '12 AUGUST 2026',
+                requirementId: reqId || offer.requirementId || '',
+                totalPrice: Number(price) || Number(offer.discountedPrice) || Number(offer.price) || 0,
+                travelersCount: travelerCount,
+                travelDate: req && req.preferredDepartureDate ? req.preferredDepartureDate : (offer.departureDateText || ''),
                 status: 'CONFIRMED',
                 paymentStatus: 'PAID',
                 paymentMethod: 'ONLINE PAYMENT',
                 transactionId: txnId,
                 paidAt: new Date().toISOString(),
-                userName: user.name || 'Pilgrim User',
-                userEmail: user.email || 'pilgrim@gmail.com',
-                userPhone: user.phone || '9541692891',
+                userName: user.name || '',
+                userEmail: user.email || '',
+                userPhone: user.phone || '',
                 userId: user.id || ''
             };
             bookings.unshift(newBooking);
@@ -6609,14 +6513,14 @@ class App {
                                     <tr>
                                         <td><span style="background:#e2e8f0; color:#475569; padding:0.3rem 0.6rem; border-radius:6px; font-size:0.75rem; font-weight:700;">${(r.id || '').substring(0, 8)}</span></td>
                                         <td>
-                                            <strong style="color:#0f172a;">${this.escapeHtml(r.userName || 'Zaireen User')}</strong><br>
-                                            <small style="color:#64748b;">${this.escapeHtml(r.userEmail || 'user@example.com')}</small><br>
+                                            <strong style="color:#0f172a;">${this.escapeHtml(r.userName || 'Unnamed User')}</strong><br>
+                                            <small style="color:#64748b;">${this.escapeHtml(r.userEmail || 'no email on file')}</small><br>
                                             <small style="color:#047857; font-weight:700;">📞 ${this.escapeHtml(r.userPhone || 'N/A')}</small>
                                         </td>
                                         <td>
-                                            <strong style="color:#047857;">📅 ${r.preferredDepartureDate || 'Any'}</strong> (⏳ ${r.durationDays || 18}D)<br>
-                                            <small style="color:#64748b;">✈️ Dep: ${this.escapeHtml(r.departureCity || 'Any')}</small><br>
-                                            <small style="color:#64748b;">🏨 ${this.escapeHtml(r.hotelType || '5-Star')}</small>
+                                            <strong style="color:#047857;">📅 ${r.preferredDepartureDate || 'Not specified'}</strong>${r.durationDays ? ` (⏳ ${r.durationDays}D)` : ''}<br>
+                                            <small style="color:#64748b;">✈️ Dep: ${this.escapeHtml(r.departureCity || 'Not specified')}</small><br>
+                                            <small style="color:#64748b;">🏨 ${this.escapeHtml(r.hotelType || 'Not specified')}</small>
                                         </td>
                                         <td>
                                             <strong style="font-size:1rem;">👥 ${r.travelersCount || 1} Total</strong><br>
@@ -6702,13 +6606,13 @@ class App {
                                             <span style="background:#e2e8f0; color:#475569; padding:0.25rem 0.5rem; border-radius:6px; font-size:0.7rem; font-weight:700;">Req: ${(o.requirementId || '').substring(0, 8)}</span>
                                         </td>
                                         <td>
-                                            <strong style="color:#0f172a;">${this.escapeHtml(linkedReq.userName || 'Zaireen User')}</strong><br>
-                                            <small style="color:#64748b;">${this.escapeHtml(linkedReq.userEmail || 'user@example.com')}</small>
+                                            <strong style="color:#0f172a;">${this.escapeHtml(linkedReq.userName || 'Unnamed User')}</strong><br>
+                                            <small style="color:#64748b;">${this.escapeHtml(linkedReq.userEmail || 'no email on file')}</small>
                                         </td>
                                         <td>
                                             <strong style="color:#047857; font-size:0.95rem;">${this.escapeHtml(o.packageTitle)}</strong><br>
-                                            <small style="color:#64748b;">📅 ${o.departureDateText || '12 AUG'} | ⏳ ${o.durationDays || 18} Days</small><br>
-                                            <small style="color:#64748b;">🏨 ${this.escapeHtml(o.makkahHotelName || 'Manarat Al Misk')}</small>
+                                            <small style="color:#64748b;">📅 ${o.departureDateText || 'Not specified'} | ⏳ ${o.durationDays ? o.durationDays + ' Days' : 'Duration N/A'}</small><br>
+                                            <small style="color:#64748b;">🏨 ${this.escapeHtml(o.makkahHotelName || 'Not specified')}</small>
                                         </td>
                                         <td>
                                             <span style="text-decoration:line-through; color:#94a3b8; font-size:0.85rem;">${this.formatCurrency(o.originalPrice)}</span><br>
@@ -6751,13 +6655,13 @@ class App {
                                             ${b.requirementId ? `<small style="color:#64748b; display:inline-block; margin-top:0.4rem;">Req: ${(b.requirementId || '').substring(0, 8)}</small>` : ''}
                                         </td>
                                         <td>
-                                            <strong style="color:#0f172a;">${this.escapeHtml(b.userName || 'Zaireen User')}</strong><br>
-                                            <small style="color:#64748b;">${this.escapeHtml(b.userEmail || 'user@example.com')}</small><br>
+                                            <strong style="color:#0f172a;">${this.escapeHtml(b.userName || 'Unnamed User')}</strong><br>
+                                            <small style="color:#64748b;">${this.escapeHtml(b.userEmail || 'no email on file')}</small><br>
                                             <small style="color:#047857; font-weight:700;">📞 ${this.escapeHtml(b.userPhone || 'N/A')}</small>
                                         </td>
                                         <td>
                                             <strong style="color:#0f172a; font-size:0.95rem;">${this.escapeHtml(b.packageTitle)}</strong><br>
-                                            <small style="color:#64748b;">📅 ${b.travelDate || '12 AUGUST'} | 👥 ${b.travelersCount || 1} Zaireen</small>
+                                            <small style="color:#64748b;">📅 ${b.travelDate || 'Not specified'} | 👥 ${b.travelersCount || '—'} Zaireen</small>
                                         </td>
                                         <td>
                                             <strong style="color:#047857; font-size:1.15rem;">${this.formatCurrency(b.totalPrice)}</strong>
@@ -6799,15 +6703,15 @@ class App {
                             <tbody>
                                 ${packages.map(p => `
                                     <tr>
-                                        <td><strong style="color:#047857;">${p.departureDateText || '12 AUG'}</strong></td>
+                                        <td><strong style="color:#047857;">${p.departureDateText || p.departureDate || 'Not specified'}</strong></td>
                                         <td><strong style="color:#0f172a; font-size:0.95rem;">${this.escapeHtml(p.title)}</strong></td>
                                         <td>
-                                            ${this.escapeHtml(p.makkahHotelName || 'Manarat Al Misk')}<br>
-                                            <small style="color:#64748b;">🚶 ${p.distanceToHaramMakkah || 600}m from Haram</small>
+                                            ${this.escapeHtml(p.makkahHotelName || 'Not specified')}<br>
+                                            ${p.distanceToHaramMakkah ? `<small style="color:#64748b;">🚶 ${p.distanceToHaramMakkah}m from Haram</small>` : ''}
                                         </td>
                                         <td>
-                                            ${this.escapeHtml(p.madinahHotelName || 'Marjan International')}<br>
-                                            <small style="color:#64748b;">🚶 ${p.distanceToHaramMadinah || 250}m from Nabawi</small>
+                                            ${this.escapeHtml(p.madinahHotelName || 'Not specified')}<br>
+                                            ${p.distanceToHaramMadinah ? `<small style="color:#64748b;">🚶 ${p.distanceToHaramMadinah}m from Nabawi</small>` : ''}
                                         </td>
                                         <td><strong style="color:#b45309; font-size:1.1rem;">${this.formatCurrency(p.price)}</strong></td>
                                         <td style="text-align:right;">
@@ -7633,7 +7537,7 @@ class App {
             name: cleanName,
             email: cleanEmail,
             password: cleanPassword,
-            phone: '9541692891',
+            phone: '',
             role: 'ROLE_USER',
             createdAt: new Date().toISOString()
         };
@@ -7797,56 +7701,56 @@ class App {
                 <form onsubmit="event.preventDefault(); app.submitNewPackage();">
                     <div class="form-group" style="margin-bottom:1rem;">
                         <label>Package Title</label>
-                        <input type="text" id="pkgTitle" class="form-control" required value="18-Day Deluxe Umrah Package">
+                        <input type="text" id="pkgTitle" class="form-control" required placeholder="e.g. 18-Day Deluxe Umrah Package">
                     </div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
                         <div class="form-group">
                             <label>Departure Date</label>
-                            <input type="text" id="pkgDeparture" class="form-control" required value="12 AUGUST">
+                            <input type="text" id="pkgDeparture" class="form-control" required placeholder="e.g. 12 AUGUST">
                         </div>
                         <div class="form-group">
                             <label>Duration (Days)</label>
-                            <input type="number" id="pkgDuration" class="form-control" required value="18">
+                            <input type="number" id="pkgDuration" class="form-control" required placeholder="e.g. 18">
                         </div>
                     </div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
                         <div class="form-group">
                             <label>Makkah Hotel Name</label>
-                            <input type="text" id="pkgMakkahHotel" class="form-control" required value="Manarat Al Misk / Dream Zone (or similar)">
+                            <input type="text" id="pkgMakkahHotel" class="form-control" required placeholder="e.g. Manarat Al Misk / Dream Zone">
                         </div>
                         <div class="form-group">
                             <label>Distance to Kaaba (Meters)</label>
-                            <input type="number" id="pkgDistMakkah" class="form-control" required value="600">
+                            <input type="number" id="pkgDistMakkah" class="form-control" required placeholder="e.g. 600">
                         </div>
                     </div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
                         <div class="form-group">
                             <label>Madinah Hotel Name</label>
-                            <input type="text" id="pkgMadinahHotel" class="form-control" required value="Marjan International / Marjan Gold (or similar)">
+                            <input type="text" id="pkgMadinahHotel" class="form-control" required placeholder="e.g. Marjan International / Marjan Gold">
                         </div>
                         <div class="form-group">
                             <label>Distance to Nabawi (Meters)</label>
-                            <input type="number" id="pkgDistMadinah" class="form-control" required value="250">
+                            <input type="number" id="pkgDistMadinah" class="form-control" required placeholder="e.g. 250">
                         </div>
                     </div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
                         <div class="form-group">
                             <label>Flight Route</label>
-                            <input type="text" id="pkgFlightRoute" class="form-control" required value="Return Air Ticket (SXR-JED-MED-SXR)">
+                            <input type="text" id="pkgFlightRoute" class="form-control" required placeholder="e.g. Return Air Ticket (SXR-JED-MED-SXR)">
                         </div>
                         <div class="form-group">
                             <label>Sharing Accommodation</label>
-                            <input type="text" id="pkgSharing" class="form-control" required value="4/5 Sharing Accommodation">
+                            <input type="text" id="pkgSharing" class="form-control" required placeholder="e.g. 4/5 Sharing Accommodation">
                         </div>
                     </div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
                         <div class="form-group">
                             <label>Price (₹)</label>
-                            <input type="number" id="pkgPrice" class="form-control" required value="125000">
+                            <input type="number" id="pkgPrice" class="form-control" required placeholder="e.g. 125000">
                         </div>
                         <div class="form-group">
                             <label>Enquiries Contact Phone</label>
-                            <input type="text" id="pkgPhone" class="form-control" required value="9541692891">
+                            <input type="text" id="pkgPhone" class="form-control" required value="">
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary" style="width:100%;">Publish Package to Website 🚀</button>
@@ -7856,17 +7760,17 @@ class App {
     }
 
     async submitNewPackage() {
-        const title = document.getElementById('pkgTitle')?.value || 'New Umrah Package';
-        const departure = document.getElementById('pkgDeparture')?.value || '12 AUGUST';
-        const duration = parseInt(document.getElementById('pkgDuration')?.value) || 18;
-        const makkahHotel = document.getElementById('pkgMakkahHotel')?.value || 'Manarat Al Misk (or similar)';
-        const distMakkah = parseInt(document.getElementById('pkgDistMakkah')?.value) || 600;
-        const madinahHotel = document.getElementById('pkgMadinahHotel')?.value || 'Marjan International (or similar)';
-        const distMadinah = parseInt(document.getElementById('pkgDistMadinah')?.value) || 250;
-        const flightRoute = document.getElementById('pkgFlightRoute')?.value || 'Return Air Ticket (SXR-JED-MED-SXR)';
-        const sharingType = document.getElementById('pkgSharing')?.value || '4/5 Sharing Accommodation';
-        const price = parseFloat(document.getElementById('pkgPrice')?.value) || 125000;
-        const phone = document.getElementById('pkgPhone')?.value || '9541692891';
+        const title = document.getElementById('pkgTitle')?.value || 'Untitled Umrah Package';
+        const departure = document.getElementById('pkgDeparture')?.value || '';
+        const duration = parseInt(document.getElementById('pkgDuration')?.value) || 0;
+        const makkahHotel = document.getElementById('pkgMakkahHotel')?.value || '';
+        const distMakkah = parseInt(document.getElementById('pkgDistMakkah')?.value) || 0;
+        const madinahHotel = document.getElementById('pkgMadinahHotel')?.value || '';
+        const distMadinah = parseInt(document.getElementById('pkgDistMadinah')?.value) || 0;
+        const flightRoute = document.getElementById('pkgFlightRoute')?.value || '';
+        const sharingType = document.getElementById('pkgSharing')?.value || '';
+        const price = parseFloat(document.getElementById('pkgPrice')?.value) || 0;
+        const phone = document.getElementById('pkgPhone')?.value || '';
 
         const newPkg = {
             id: 'pkg-' + Date.now(),
@@ -7952,9 +7856,9 @@ class App {
                         <!-- ZAIREEN PERSONAL DETAILS CARD -->
                         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:1.1rem;">
                             <div style="font-size:0.78rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.6rem;">👤 Zaireen Profile</div>
-                            <div style="font-size:1.1rem; font-weight:800; color:#0f172a;">${this.escapeHtml(req ? req.userName : 'Zaireen')}</div>
-                            <div style="font-size:0.88rem; color:#475569; margin-top:0.3rem;">✉️ ${this.escapeHtml(req ? req.userEmail : 'user@Zaireen.com')}</div>
-                            <div style="font-size:0.88rem; color:#047857; font-weight:700; margin-top:0.2rem;">📞 ${this.escapeHtml(req ? req.userPhone : '9541692891')}</div>
+                            <div style="font-size:1.1rem; font-weight:800; color:#0f172a;">${this.escapeHtml(req ? req.userName : 'Guest')}</div>
+                            <div style="font-size:0.88rem; color:#475569; margin-top:0.3rem;">✉️ ${this.escapeHtml(req ? req.userEmail : '')}</div>
+                            <div style="font-size:0.88rem; color:#047857; font-weight:700; margin-top:0.2rem;">📞 ${this.escapeHtml(req ? req.userPhone : '')}</div>
                         </div>
 
                         <!-- GROUP SIZE BREAKDOWN MATRIX -->
@@ -7990,15 +7894,15 @@ class App {
                             </div>
                             <div style="display:flex; justify-content:space-between; font-size:0.88rem;">
                                 <span style="color:#64748b;">Date Range:</span>
-                                <strong style="color:#047857;">${req ? req.preferredDepartureDate : '12 AUG 2026'}</strong>
+                                <strong style="color:#047857;">${req ? req.preferredDepartureDate : 'Not specified'}</strong>
                             </div>
                             <div style="display:flex; justify-content:space-between; font-size:0.88rem;">
                                 <span style="color:#64748b;">Duration:</span>
-                                <strong style="color:#0f172a;">${req ? req.durationDays : 18} Days</strong>
+                                <strong style="color:#0f172a;">${req && req.durationDays ? req.durationDays + ' Days' : 'Not specified'}</strong>
                             </div>
                             <div style="display:flex; justify-content:space-between; font-size:0.88rem;">
                                 <span style="color:#64748b;">Hotel Category:</span>
-                                <strong style="color:#0f172a;">${this.escapeHtml(req ? req.hotelType : '5-Star Luxury')}</strong>
+                                <strong style="color:#0f172a;">${this.escapeHtml(req ? req.hotelType : 'Not specified')}</strong>
                             </div>
                         </div>
 
@@ -8069,9 +7973,9 @@ class App {
                                                             </div>
                                                         </div>
                                                         <div style="font-size:0.85rem; color:#475569; margin-top:0.5rem; line-height:1.5;">
-                                                            📅 Departure: <strong>${p.departureDateText || '12 AUG'}</strong> | ⏳ <strong>${p.durationDays || 18} Days</strong> | 🏢 ${this.escapeHtml(p.agentName || 'ZILHAJ Travel')}<br>
-                                                            🕋 Makkah: <strong>${this.escapeHtml(p.makkahHotelName || 'Manarat Al Misk')}</strong> (${p.distanceToHaramMakkah || 600}m)<br>
-                                                            🕌 Madinah: <strong>${this.escapeHtml(p.madinahHotelName || 'Marjan International')}</strong> (${p.distanceToHaramMadinah || 250}m)
+                                                            📅 Departure: <strong>${p.departureDateText || p.departureDate || 'Not specified'}</strong>${p.durationDays ? ` | ⏳ <strong>${p.durationDays} Days</strong>` : ''}${p.agentName ? ` | 🏢 ${this.escapeHtml(p.agentName)}` : ''}<br>
+                                                            🕋 Makkah: <strong>${this.escapeHtml(p.makkahHotelName || 'Not specified')}</strong>${p.distanceToHaramMakkah ? ` (${p.distanceToHaramMakkah}m)` : ''}<br>
+                                                            🕌 Madinah: <strong>${this.escapeHtml(p.madinahHotelName || 'Not specified')}</strong>${p.distanceToHaramMadinah ? ` (${p.distanceToHaramMadinah}m)` : ''}
                                                         </div>
                                                     </div>
                                                 </label>
@@ -8101,45 +8005,45 @@ class App {
                         <form id="formOfferCustom" style="display:none;" onsubmit="event.preventDefault(); app.submitSuggestOffer('${userId}', '${reqId}', 'custom');">
                             <div class="form-group" style="margin-bottom:1.2rem;">
                                 <label style="font-weight:700; color:#0f172a; font-size:0.9rem; display:block; margin-bottom:0.4rem;">Custom Offer Package Title *</label>
-                                <input type="text" id="custTitle" class="form-control premium-input" required value="${req ? 'Tailored ' + req.durationDays + '-Day Package for ' + req.userName : 'Custom Tailored Umrah Package'}">
+                                <input type="text" id="custTitle" class="form-control premium-input" required value="${req ? 'Tailored ' + (req.durationDays || '') + '-Day Package for ' + (req.userName || '') : ''}" placeholder="Custom offer package title">
                             </div>
 
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.2rem;">
                                 <div class="form-group">
                                     <label style="font-weight:700; color:#0f172a; font-size:0.9rem; display:block; margin-bottom:0.4rem;">Offered Price per Zaireen (₹) *</label>
-                                    <input type="number" id="custPrice" class="form-control premium-input" required value="${req ? req.maxBudget : 125000}">
+                                    <input type="number" id="custPrice" class="form-control premium-input" required value="${req && req.maxBudget ? req.maxBudget : ''}" placeholder="e.g. 125000">
                                 </div>
                                 <div class="form-group">
                                     <label style="font-weight:700; color:#0f172a; font-size:0.9rem; display:block; margin-bottom:0.4rem;">Original Base Price (₹) *</label>
-                                    <input type="number" id="custOrigPrice" class="form-control premium-input" required value="${req ? Math.round(req.maxBudget * 1.15) : 145000}">
+                                    <input type="number" id="custOrigPrice" class="form-control premium-input" required value="" placeholder="e.g. 145000">
                                 </div>
                             </div>
 
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.2rem;">
                                 <div class="form-group">
                                     <label style="font-weight:700; color:#0f172a; font-size:0.9rem; display:block; margin-bottom:0.4rem;">Departure Date *</label>
-                                    <input type="text" id="custDeparture" class="form-control premium-input" required value="${req ? req.preferredDepartureDate : '15 AUGUST'}">
+                                    <input type="text" id="custDeparture" class="form-control premium-input" required value="${req ? req.preferredDepartureDate : ''}" placeholder="e.g. 15 AUGUST">
                                 </div>
                                 <div class="form-group">
                                     <label style="font-weight:700; color:#0f172a; font-size:0.9rem; display:block; margin-bottom:0.4rem;">Duration (Days) *</label>
-                                    <input type="number" id="custDuration" class="form-control premium-input" required value="${req ? req.durationDays : 18}">
+                                    <input type="number" id="custDuration" class="form-control premium-input" required value="${req && req.durationDays ? req.durationDays : ''}" placeholder="e.g. 18">
                                 </div>
                             </div>
 
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.2rem;">
                                 <div class="form-group">
                                     <label style="font-weight:700; color:#0f172a; font-size:0.9rem; display:block; margin-bottom:0.4rem;">Makkah Hotel &amp; Distance *</label>
-                                    <input type="text" id="custMakkahHotel" class="form-control premium-input" required value="Swissotel Makkah / Dream Zone (400m)">
+                                    <input type="text" id="custMakkahHotel" class="form-control premium-input" required value="" placeholder="e.g. Swissotel Makkah / Dream Zone (400m)">
                                 </div>
                                 <div class="form-group">
                                     <label style="font-weight:700; color:#0f172a; font-size:0.9rem; display:block; margin-bottom:0.4rem;">Madinah Hotel &amp; Distance *</label>
-                                    <input type="text" id="custMadinahHotel" class="form-control premium-input" required value="Marjan International / Gold (200m)">
+                                    <input type="text" id="custMadinahHotel" class="form-control premium-input" required value="" placeholder="e.g. Marjan International / Gold (200m)">
                                 </div>
                             </div>
 
                             <div class="form-group" style="margin-bottom:1.5rem;">
                                 <label style="font-weight:700; color:#0f172a; font-size:0.9rem; display:block; margin-bottom:0.4rem;">Admin Special Recommendation Note *</label>
-                                <textarea id="custNote" class="form-control premium-input" rows="3" required style="resize:vertical;">Exclusive custom package tailored specifically to your requested dates, room sharing, and budget requirements.</textarea>
+                                <textarea id="custNote" class="form-control premium-input" rows="3" required style="resize:vertical;" placeholder="Exclusive custom package tailored specifically to the zaireen's requested dates, room sharing, and budget."></textarea>
                             </div>
 
                             <button type="submit" class="gradient-btn" style="padding:1rem 2rem; font-size:1.1rem;">
@@ -8185,7 +8089,6 @@ class App {
                 return;
             }
 
-            const discountPercentage = parseFloat(document.getElementById('offerDiscount').value) || 10;
             const specialNote = document.getElementById('offerNote').value;
 
             const pkg = this.state.packages.find(p => p.id === packageId);
@@ -8194,11 +8097,14 @@ class App {
                 return;
             }
 
-            const originalPrice = pkg.price || 125000;
-            const discountedPrice = Math.round(originalPrice * (1 - discountPercentage / 100));
+            const originalPrice = pkg.originalPrice || pkg.basePrice || pkg.price || 0;
+            const discountedPrice = pkg.price || 0;
+            const discountPercentage = originalPrice > 0 && discountedPrice > 0
+                ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100)
+                : 0;
 
             offerObj = {
-                userId: userId || 'usr-1',
+                userId: userId || '',
                 requirementId: reqId,
                 packageId: pkg.id,
                 packageTitle: pkg.title,
@@ -8206,23 +8112,23 @@ class App {
                 discountedPrice,
                 discountPercentage,
                 specialNote,
-                departureDateText: pkg.departureDateText || '12 AUGUST',
-                durationDays: pkg.durationDays || 18,
-                makkahHotelName: pkg.makkahHotelName || 'Manarat Al Misk',
-                madinahHotelName: pkg.madinahHotelName || 'Marjan International'
+                departureDateText: pkg.departureDateText || pkg.departureDate || '',
+                durationDays: pkg.durationDays || 0,
+                makkahHotelName: pkg.makkahHotelName || '',
+                madinahHotelName: pkg.madinahHotelName || ''
             };
         } else {
             // CUSTOM PACKAGE OFFER MODE
             const title = document.getElementById('custTitle').value;
-            const price = parseFloat(document.getElementById('custPrice').value) || 125000;
-            const origPrice = parseFloat(document.getElementById('custOrigPrice').value) || Math.round(price * 1.15);
+            const price = parseFloat(document.getElementById('custPrice').value) || 0;
+            const origPrice = parseFloat(document.getElementById('custOrigPrice').value) || 0;
             const departure = document.getElementById('custDeparture').value;
-            const duration = parseInt(document.getElementById('custDuration').value) || 18;
+            const duration = parseInt(document.getElementById('custDuration').value) || 0;
             const makkahHotel = document.getElementById('custMakkahHotel').value;
             const madinahHotel = document.getElementById('custMadinahHotel').value;
             const note = document.getElementById('custNote').value;
 
-            const discountPercentage = Math.round(((origPrice - price) / origPrice) * 100) || 15;
+            const discountPercentage = origPrice > 0 ? Math.round(((origPrice - price) / origPrice) * 100) : 0;
 
             // Save as new package in available packages list as well
             const newPkg = {
@@ -8232,14 +8138,14 @@ class App {
                 description: `Custom package tailored specifically to your requested dates, room sharing, and budget requirements.`,
                 price,
                 durationDays: duration,
-                distanceToHaramMakkah: 400,
-                distanceToHaramMadinah: 250,
+                distanceToHaramMakkah: 0,
+                distanceToHaramMadinah: 0,
                 departureDateText: departure,
                 makkahHotelName: makkahHotel,
                 madinahHotelName: madinahHotel,
-                flightRoute: 'Return Air Ticket (SXR-JED-MED-SXR)',
+                flightRoute: '',
                 sharingType: 'Custom Room Sharing',
-                contactPhone: '9541692891',
+                contactPhone: (this.state.currentUser && this.state.currentUser.phone) || '',
                 includes: { flights: true, visa: true, transport: true, meals: true, ziyarah: true },
                 imageUrls: ['https://images.unsplash.com/photo-1591604466107-ec97de577aff']
             };
@@ -8248,7 +8154,7 @@ class App {
             localStorage.setItem('umrah_packages', JSON.stringify(this.state.packages));
 
             offerObj = {
-                userId: userId || 'usr-1',
+                userId: userId || '',
                 requirementId: reqId,
                 packageId: newPkg.id,
                 packageTitle: title,
@@ -8305,12 +8211,20 @@ class App {
     }
 
     openViewOfferModal(pkg = {}) {
-        const packageId = pkg.id || 'pkg-1';
-        const title = pkg.title || '18 Days Umrah Package • Manarat Al Misk & Marjan International Hotels • Direct Flights';
-        const price = pkg.price || 118750;
+        const packageId = pkg.id || '';
+        const title = pkg.title || pkg.packageTitle || '';
+        const price = pkg.price || pkg.discountedPrice || 0;
         const formattedPrice = '₹' + price.toLocaleString('en-IN');
-        const travelDate = pkg.departureDate || '12 Aug 2026';
-        const duration = pkg.duration || '18 Days';
+        const travelDate = pkg.departureDate || pkg.startDate || '';
+        const duration = pkg.duration || (pkg.durationDays ? pkg.durationDays + ' Days' : '');
+        const makkahHotel = pkg.makkahHotelName || pkg.makkahHotel || '';
+        const madinahHotel = pkg.madinahHotelName || pkg.madinahHotel || '';
+        const distMakkah = pkg.distanceToHaramMakkah;
+        const distMadinah = pkg.distanceToHaramMadinah;
+        const includesArr = pkg.includes && Array.isArray(pkg.includes)
+            ? pkg.includes
+            : (pkg.inclusions && Array.isArray(pkg.inclusions) ? pkg.inclusions
+                : (pkg.complimentaryServices && Array.isArray(pkg.complimentaryServices) ? pkg.complimentaryServices : []));
 
         this.openModal(`
             <div style="display:flex; flex-direction:column; width:100vw; height:100vh; background:#ffffff; font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif; position:relative; overflow-y:auto; box-sizing:border-box;">
@@ -8396,11 +8310,11 @@ class App {
                                     📍 MAKKAH
                                 </div>
                                 <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin-bottom:0.35rem;">
-                                    Manarat Al Misk / Dream Zone
+                                    ${this.escapeHtml(makkahHotel || 'Not specified')}
                                 </div>
-                                <span style="display:inline-block; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-size:0.72rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:6px;">
-                                    Approx. 600 Metres from Masjid Al-Haram
-                                </span>
+                                ${distMakkah ? `<span style="display:inline-block; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-size:0.72rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:6px;">
+                                    Approx. ${distMakkah} Metres from Masjid Al-Haram
+                                </span>` : ''}
                             </div>
 
                             <div style="height:1px; background:#f1f5f9; margin-bottom:1.4rem;"></div>
@@ -8411,11 +8325,11 @@ class App {
                                     📍 MADINAH
                                 </div>
                                 <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin-bottom:0.35rem;">
-                                    Marjan International / Marjan Gold
+                                    ${this.escapeHtml(madinahHotel || 'Not specified')}
                                 </div>
-                                <span style="display:inline-block; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-size:0.72rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:6px;">
-                                    Approx. 250 Metres from Al-Masjid An-Nabawi
-                                </span>
+                                ${distMadinah ? `<span style="display:inline-block; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-size:0.72rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:6px;">
+                                    Approx. ${distMadinah} Metres from Al-Masjid An-Nabawi
+                                </span>` : ''}
                             </div>
                         </div>
 
@@ -8428,30 +8342,12 @@ class App {
                             </div>
 
                             <div style="display:flex; flex-direction:column; gap:0.8rem; font-size:0.86rem; color:#334155; font-weight:600;">
-                                <div style="display:flex; align-items:center; gap:0.67rem;">
-                                    <span style="color:#166534; font-weight:900;">✓</span>
-                                    <span>Return Air Ticket (SXR-JED-MED-SXR)</span>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:0.67rem;">
-                                    <span style="color:#166534; font-weight:900;">✓</span>
-                                    <span>4/5 Sharing Accommodation</span>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:0.67rem;">
-                                    <span style="color:#166534; font-weight:900;">✓</span>
-                                    <span>03 Times Daily Indian Buffet Meals</span>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:0.67rem;">
-                                    <span style="color:#166534; font-weight:900;">✓</span>
-                                    <span>Half-Day Guided Ziyarat in Makkah</span>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:0.67rem;">
-                                    <span style="color:#166534; font-weight:900;">✓</span>
-                                    <span>Half-Day Guided Ziyarat in Madinah</span>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:0.67rem;">
-                                    <span style="color:#166534; font-weight:900;">✓</span>
-                                    <span>Airport &amp; Intercity Transfers</span>
-                                </div>
+                                ${includesArr.length > 0
+                                    ? includesArr.map(inc => `<div style="display:flex; align-items:center; gap:0.67rem;">
+                                        <span style="color:#166534; font-weight:900;">✓</span>
+                                        <span>${this.escapeHtml(inc)}</span>
+                                    </div>`).join('')
+                                    : '<div style="color:#64748b; font-style:italic;">Package inclusions not listed. Contact the travel agency for full details.</div>'}
                             </div>
                         </div>
 
@@ -8464,21 +8360,11 @@ class App {
                             </div>
 
                             <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.85rem;">
-                                <!-- Ahram Kit -->
-                                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:1.2rem 0.5rem; text-align:center;">
-                                    <div style="font-size:1.6rem; margin-bottom:0.4rem;">🥋</div>
-                                    <div style="font-size:0.72rem; font-weight:800; color:#1e293b; text-transform:uppercase;">AHRAM KIT</div>
-                                </div>
-                                <!-- Laundry -->
-                                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:1.2rem 0.5rem; text-align:center;">
-                                    <div style="font-size:1.6rem; margin-bottom:0.4rem;">🧺</div>
-                                    <div style="font-size:0.72rem; font-weight:800; color:#1e293b; text-transform:uppercase;">LAUNDRY SERVICE</div>
-                                </div>
-                                <!-- Zamzam -->
-                                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:1.2rem 0.5rem; text-align:center;">
-                                    <div style="font-size:1.6rem; margin-bottom:0.4rem;">💧</div>
-                                    <div style="font-size:0.72rem; font-weight:800; color:#1e293b; text-transform:uppercase;">5 LITRES ZAMZAM</div>
-                                </div>
+                                ${(pkg.complimentaryServices && pkg.complimentaryServices.length)
+                                    ? pkg.complimentaryServices.map(svc => `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:1.2rem 0.5rem; text-align:center;">
+                                        <div style="font-size:0.72rem; font-weight:800; color:#1e293b; text-transform:uppercase; line-height:1.4;">${this.escapeHtml(svc)}</div>
+                                    </div>`).join('')
+                                    : '<div style="grid-column:1/-1; color:#64748b; font-style:italic; font-size:0.84rem; text-align:center;">No complimentary services listed for this package.</div>'}
                             </div>
                         </div>
 
@@ -8545,7 +8431,7 @@ class App {
     }
 
     startBooking(packageId) {
-        const pkg = this.state.packages.find(p => p.id === packageId) || { id: packageId, title: 'Umrah Package', price: 118750 };
+        const pkg = this.state.packages.find(p => p.id === packageId) || { id: packageId, title: 'Umrah Package', price: 0 };
         this.openViewOfferModal(pkg);
     }
 
@@ -8559,23 +8445,28 @@ class App {
         }
 
         const bookingId = booking.id || 'BK-' + Math.floor(100000 + Math.random() * 900000);
-        const title = booking.packageTitle || booking.title || '18 Days Umrah Package • Manarat Al Misk & Marjan International Hotels • Direct Flights';
-        const operator = booking.operatorName || booking.agentName || 'ALHUDA GROUP (KHADIM AL MECCA)';
-        const travelDate = booking.travelDate || '2026-08-13 (18 Days)';
-        const departureCity = booking.departureCity || 'Srinagar';
-        const travelers = booking.travelersCount || booking.count || 2;
-        const makkahHotel = booking.makkahHotel || 'Manarat Al Misk / Dream Zone';
-        const madinahHotel = booking.madinahHotel || 'Marjan International / Marjan Gold';
+        const title = booking.packageTitle || booking.title || '';
+        const operator = booking.operatorName || booking.agentName || '';
+        const travelDate = booking.travelDate || '';
+        const departureCity = booking.departureCity || '';
+        const travelers = booking.travelersCount || booking.count || 1;
+        const makkahHotel = booking.makkahHotel || '';
+        const madinahHotel = booking.madinahHotel || '';
         
-        // Testing Fare: Set price between ₹1 and ₹5 for easy testing
-        const rawPrice = booking.totalPrice || booking.price || 5;
-        const totalPrice = (rawPrice > 0 && rawPrice <= 100) ? rawPrice : 5;
-        const perPersonPrice = Math.round(totalPrice / travelers) || 2;
-        const formattedTotal = '₹' + totalPrice.toLocaleString('en-IN');
-        const formattedPerPerson = '₹' + perPersonPrice.toLocaleString('en-IN');
+        const rawPrice = booking.totalPrice || booking.price || 0;
+        const totalPrice = Math.max(0, Math.round(Number(rawPrice)));
+        const perPersonPrice = totalPrice > 0 ? Math.round(totalPrice / travelers) : 0;
+        const formattedTotal = totalPrice > 0 ? '₹' + totalPrice.toLocaleString('en-IN') : '';
+        const formattedPerPerson = perPersonPrice > 0 ? '₹' + perPersonPrice.toLocaleString('en-IN') : '';
+
+        if (!title || totalPrice <= 0) {
+            this.showToast('Unable to load booking details. Please try again.', 'warning');
+            this.closeModal();
+            return;
+        }
 
         // Real Scannable UPI QR Code URL using QRServer API
-        const upiPa = '9541692891@ybl';
+        const upiPa = booking.upiId || '';
         const upiPn = 'Zilhaj.com';
         const upiUrl = `upi://pay?pa=${upiPa}&pn=${encodeURIComponent(upiPn)}&am=${totalPrice}&cu=INR&tn=${encodeURIComponent('Umrah Booking ' + bookingId)}`;
         const qrCodeImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUrl)}`;
@@ -8638,26 +8529,26 @@ class App {
                             <div style="height:1px; background:#f1f5f9; margin-bottom:1rem;"></div>
 
                             <div style="display:flex; flex-direction:column; gap:0.75rem; font-size:0.82rem; color:#334155;">
-                                <div style="display:flex; align-items:flex-start; gap:0.6rem;">
+                                ${travelDate ? `<div style="display:flex; align-items:flex-start; gap:0.6rem;">` : ''}
                                     <span>📅</span>
                                     <div><span style="color:#64748b;">Departure Date:</span> <strong>${this.escapeHtml(travelDate)}</strong></div>
-                                </div>
-                                <div style="display:flex; align-items:flex-start; gap:0.6rem;">
+                                ${travelDate ? `</div>` : ''}
+                                ${departureCity ? `<div style="display:flex; align-items:flex-start; gap:0.6rem;">` : ''}
                                     <span>✈️</span>
                                     <div><span style="color:#64748b;">Departure City:</span> <strong>${this.escapeHtml(departureCity)}</strong></div>
-                                </div>
+                                ${departureCity ? `</div>` : ''}
                                 <div style="display:flex; align-items:flex-start; gap:0.6rem;">
                                     <span>👥</span>
                                     <div><span style="color:#64748b;">Travelers:</span> <strong>${travelers} Person(s)</strong></div>
                                 </div>
-                                <div style="display:flex; align-items:flex-start; gap:0.6rem;">
+                                ${makkahHotel ? `<div style="display:flex; align-items:flex-start; gap:0.6rem;">` : ''}
                                     <span>🏨</span>
                                     <div><span style="color:#64748b;">Makkah:</span> <strong>${this.escapeHtml(makkahHotel)}</strong></div>
-                                </div>
-                                <div style="display:flex; align-items:flex-start; gap:0.6rem;">
+                                ${makkahHotel ? `</div>` : ''}
+                                ${madinahHotel ? `<div style="display:flex; align-items:flex-start; gap:0.6rem;">` : ''}
                                     <span>🏨</span>
                                     <div><span style="color:#64748b;">Madinah:</span> <strong>${this.escapeHtml(madinahHotel)}</strong></div>
-                                </div>
+                                ${madinahHotel ? `</div>` : ''}
                             </div>
                         </div>
 
@@ -8771,7 +8662,7 @@ class App {
                                         OR ENTER UPI VPA / VIRTUAL ID
                                     </label>
                                     <div style="display:flex; gap:0.5rem;">
-                                        <input type="text" id="upiVpaInput" placeholder="9541692891@ybl" value="${this.state?.currentUser?.email ? this.state.currentUser.email.split('@')[0] + '@ybl' : '9541692891@ybl'}" style="flex:1; height:42px; border:1px solid #cbd5e1; border-radius:8px; padding:0 0.9rem; font-size:0.86rem; font-weight:600; color:#0f172a; background:#ffffff;">
+                                        <input type="text" id="upiVpaInput" placeholder="yourname@ybl" value="${this.state?.currentUser?.email ? this.state.currentUser.email.split('@')[0] + '@ybl' : ''}" style="flex:1; height:42px; border:1px solid #cbd5e1; border-radius:8px; padding:0 0.9rem; font-size:0.86rem; font-weight:600; color:#0f172a; background:#ffffff;">
                                         <button type="button" onclick="app.verifyUpiVpa()" style="height:42px; padding:0 1rem; background:#166534; color:#ffffff; border:none; border-radius:8px; font-size:0.78rem; font-weight:800; cursor:pointer;">
                                             VERIFY
                                         </button>
@@ -8789,7 +8680,7 @@ class App {
                                         OR ENTER UPI VPA / VIRTUAL ID
                                     </label>
                                     <div style="display:flex; gap:0.5rem;">
-                                        <input type="text" id="upiVpaInput" placeholder="user@okaxis" value="${this.state?.currentUser?.email ? this.state.currentUser.email.split('@')[0] + '@okaxis' : 'user@okaxis'}" style="flex:1; height:42px; border:1px solid #cbd5e1; border-radius:8px; padding:0 0.9rem; font-size:0.86rem; font-weight:600; color:#0f172a; background:#ffffff;">
+                                        <input type="text" id="upiVpaInput" placeholder="user@okaxis" value="${this.state?.currentUser?.email ? this.state.currentUser.email.split('@')[0] + '@okaxis' : ''}" style="flex:1; height:42px; border:1px solid #cbd5e1; border-radius:8px; padding:0 0.9rem; font-size:0.86rem; font-weight:600; color:#0f172a; background:#ffffff;">
                                         <button type="button" onclick="app.verifyUpiVpa()" style="height:42px; padding:0 1rem; background:#166534; color:#ffffff; border:none; border-radius:8px; font-size:0.78rem; font-weight:800; cursor:pointer;">
                                             VERIFY
                                         </button>
@@ -8927,7 +8818,11 @@ class App {
             return;
         }
 
-        const testAmount = (parseFloat(amount) > 0 && parseFloat(amount) <= 100) ? parseFloat(amount) : 5; // Default testing fare ₹5
+        const realAmount = Math.max(0, Math.round(parseFloat(amount) || 0));
+        if (realAmount <= 0) {
+            this.showToast('Unable to initialise payment: invalid amount.', 'warning');
+            return;
+        }
 
         this.showLoading('Initializing Razorpay Secure Gateway (UPI / Cards)...');
         
@@ -8935,7 +8830,7 @@ class App {
         try {
             orderData = await this.apiCall('/payments/razorpay/create-order', 'POST', {
                 bookingId: bookingId || 'BK-' + Date.now(),
-                amount: testAmount
+                amount: realAmount
             });
         } catch (e) {
             console.warn('Razorpay order API call fallback:', e);
@@ -8943,24 +8838,14 @@ class App {
 
         this.hideLoading();
 
-        // Fallback test order data if backend endpoint unreachable
-        if (!orderData || !orderData.orderId) {
-            orderData = {
-                orderId: 'order_' + Date.now(),
-                key: 'rzp_test_R4z0rp4yT3stK3y',
-                amount: Math.round(testAmount * 100),
-                currency: 'INR'
-            };
-        }
-
         const options = {
-            "key": orderData.key || 'rzp_test_TO6mS9Z6cLAruh',
-            "amount": orderData.amount || Math.round(testAmount * 100),
-            "currency": orderData.currency || "INR",
+            "key": (orderData && orderData.key) || 'rzp_test_TO6mS9Z6cLAruh',
+            "amount": (orderData && typeof orderData.amount !== 'undefined') ? orderData.amount : Math.round(realAmount * 100),
+            "currency": (orderData && orderData.currency) || "INR",
             "name": "ZILHAJ Umrah & Hajj Travel",
-            "description": "Umrah Test Payment (₹" + testAmount + ")",
+            "description": "Umrah Payment",
             "image": "https://img.icons8.com/color/96/000000/kaaba.png",
-            "order_id": orderData.order_id || orderData.orderId,
+            "order_id": (orderData && (orderData.order_id || orderData.orderId)) || undefined,
             "modal": {
                 "ondismiss": () => {
                     this.showToast('Payment checkout cancelled by user.', 'info');
@@ -9040,7 +8925,7 @@ class App {
                             JazakAllah Khair!
                         </h3>
                         <p style="font-size:0.88rem; color:#64748b; margin:0 0 1.2rem 0; line-height:1.5;">
-                            May Allah accept your Umrah! Your payment of ₹${testAmount} has been verified successfully.
+                            May Allah accept your Umrah! Your payment of ₹${realAmount} has been verified successfully.
                         </p>
 
                         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1rem; margin-bottom:1.5rem; text-align:left; font-size:0.82rem; color:#334155;">
@@ -9050,7 +8935,7 @@ class App {
                             </div>
                             <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
                                 <span style="color:#64748b;">Booking ID:</span>
-                                <strong>${bookingId || 'BK-048846'}</strong>
+                                <strong>${bookingId || ''}</strong>
                             </div>
                             <div style="display:flex; justify-content:space-between;">
                                 <span style="color:#64748b;">Payment Method:</span>
@@ -9059,7 +8944,7 @@ class App {
                         </div>
 
                         <div style="display:flex; flex-direction:column; gap:0.75rem;">
-                            <a href="javascript:void(0)" onclick="app.downloadInvoice('${bookingId || 'BK-048846'}'); app.closeModal(); app.navigate('bookings');" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; height:46px; background:#166534; color:#ffffff; font-weight:800; font-size:0.92rem; border-radius:10px; text-decoration:none; box-shadow:0 4px 15px rgba(22,101,52,0.25);">
+                            <a href="javascript:void(0)" onclick="${bookingId ? "app.downloadInvoice('" + bookingId + "'); " : ''}app.closeModal(); app.navigate('bookings');" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; height:46px; background:#166534; color:#ffffff; font-weight:800; font-size:0.92rem; border-radius:10px; text-decoration:none; box-shadow:0 4px 15px rgba(22,101,52,0.25);">
                                 📄 View &amp; Download Invoice (Official Bill)
                             </a>
                             <button type="button" onclick="app.closeModal(); app.navigate('bookings');" style="width:100%; height:42px; background:#ffffff; border:1px solid #cbd5e1; color:#334155; font-weight:700; font-size:0.88rem; border-radius:10px; cursor:pointer;">
@@ -9070,9 +8955,9 @@ class App {
                 `);
             },
             "prefill": {
-                "name": this.state?.currentUser?.name || "Pilgrim User",
-                "email": this.state?.currentUser?.email || "pilgrim@gmail.com",
-                "contact": "9541692891"
+                "name": (this.state && this.state.currentUser && this.state.currentUser.name) || "",
+                "email": (this.state && this.state.currentUser && this.state.currentUser.email) || "",
+                "contact": (this.state && this.state.currentUser && this.state.currentUser.phone) || ""
             },
             "theme": {
                 "color": "#047857"
