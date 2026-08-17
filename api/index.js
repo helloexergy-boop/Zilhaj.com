@@ -42,6 +42,106 @@ const staticOptions = {
 app.use(express.static(publicDir, staticOptions));
 app.use(express.static(clientDir, staticOptions));
 
+// ============================================================================
+// STAFF / SUB-ADMIN AUTHORIZATION MODEL
+// ----------------------------------------------------------------------------
+// Roles:
+//   ROLE_ADMIN     - Super admin. Has every permission. Can manage staff.
+//   ROLE_SUBADMIN  - Limited staff account. Holds an explicit `permissions`
+//                    array; only those permissions are enforced server-side.
+//   ROLE_USER      - Regular pilgrim. No staff access.
+//
+// Permissions catalog (see SUBADMIN_GRANTABLE below for what sub-admins may hold).
+// The following are NEVER grantable to a sub-admin (always-off, hard-enforced):
+//   manage_subadmins, delete_packages, view_financials
+// ============================================================================
+const SUBADMIN_GRANTABLE_PERMISSIONS = [
+    'view_requests',
+    'update_request_status',
+    'send_offers',
+    'view_offers',
+    'view_orders',
+    'view_packages',
+    'manage_packages'
+];
+
+const ADMIN_ONLY_PERMISSIONS = [
+    'manage_subadmins',
+    'delete_packages',
+    'view_financials'
+];
+
+const ALL_STAFF_PERMISSIONS = [...SUBADMIN_GRANTABLE_PERMISSIONS, ...ADMIN_ONLY_PERMISSIONS];
+
+// Staff accounts must be explicitly enabled. Disabled staff get 403 on admin APIs.
+// Token -> email session store (in-memory; survives only server lifetime, same as inMemoryUsers).
+const adminSessions = new Map(); // { token: email }
+
+function issueSession(email) {
+    const token = 'token-' + crypto.randomBytes(24).toString('hex');
+    adminSessions.set(token, email);
+    return token;
+}
+
+// Resolve an email to its live user record (in-memory cache first, then DB).
+async function loadUserByEmail(cleanEmail) {
+    let user = inMemoryUsers.get(cleanEmail);
+    if (!user) {
+        try {
+            const db = await getFastDb();
+            if (db) {
+                user = await db.collection('users').findOne({ email: cleanEmail });
+                if (user) inMemoryUsers.set(cleanEmail, user);
+            }
+        } catch (e) {}
+    }
+    return user || null;
+}
+
+// Returns true when the user is active staff (enabled admin or enabled sub-admin).
+function isStaffUser(user) {
+    return !!user && (user.role === 'ROLE_ADMIN' || user.role === 'ROLE_SUBADMIN') && user.isStaffEnabled !== false;
+}
+
+function hasPermission(user, permission) {
+    if (!isStaffUser(user)) return false;
+    if (user.role === 'ROLE_ADMIN') return true; // super admin has everything
+    return Array.isArray(user.permissions) && user.permissions.includes(permission);
+}
+
+// Express middleware: requires a valid, enabled staff session + specific permission.
+// Usage: app.get('/api/admin/...', requirePermission('view_requests'), handler)
+function requirePermission(permission) {
+    return async (req, res, next) => {
+        try {
+            const authHeader = req.headers.authorization || '';
+            const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : (req.query.token || '');
+            const email = token ? adminSessions.get(token) : null;
+            if (!email) return res.status(401).json({ error: 'Authentication required. Please log in again.' });
+
+            const user = await loadUserByEmail(email);
+            if (!user) {
+                adminSessions.delete(token);
+                return res.status(401).json({ error: 'Session expired. Please log in again.' });
+            }
+            if (!isStaffUser(user)) return res.status(403).json({ error: 'Access restricted to platform staff.' });
+            if (!hasPermission(user, permission)) return res.status(403).json({ error: 'Your account does not have permission to perform this action.' });
+
+            req.user = user;
+            req.sessionToken = token;
+            next();
+        } catch (err) {
+            console.error('Auth middleware error:', err.message);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    };
+}
+
+// Convenience: require super-admin (implicitly includes manage_subadmins).
+function requireSuperAdmin() {
+    return requirePermission('manage_subadmins');
+}
+
 const MONGODB_URI = process.env.MONGODB_URI || process.env.SPRING_DATA_MONGODB_URI || 'mongodb+srv://rajuranjanxbkj_db_user:mSORiUdT4m8ey11k@cluster0.bwdhkat.mongodb.net/umrah_db?retryWrites=true&w=majority';
 
 let cachedDb = null;
@@ -158,19 +258,19 @@ app.get('/api/packages', async (req, res) => {
     }
 });
 
-app.post('/api/packages', async (req, res) => {
-    const pkg = { id: 'pkg-' + Date.now(), ...req.body, createdAt: new Date() };
-    try {
-        const db = await connectToDatabase();
-        await db.collection('packages').insertOne(pkg);
-    } catch (err) {
-        console.warn('MongoDB offline, using in-memory store for package');
-    }
-    inMemoryStore.packages.push(pkg);
-    res.status(201).json(pkg);
+app.post('/api/packages', requirePermission('manage_packages'), async (req, res) => {
+const pkg = { id: 'pkg-' + Date.now(), ...req.body, createdAt: new Date() };
+try {
+const db = await connectToDatabase();
+await db.collection('packages').insertOne(pkg);
+} catch (err) {
+console.warn('MongoDB offline, using in-memory store for package');
+}
+inMemoryStore.packages.push(pkg);
+res.status(201).json(pkg);
 });
 
-app.delete('/api/packages/:id', async (req, res) => {
+app.delete('/api/packages/:id', requirePermission('delete_packages'), async (req, res) => {
     try {
         const db = await connectToDatabase();
         await db.collection('packages').deleteOne({ id: req.params.id });
@@ -248,7 +348,7 @@ app.post('/api/offers', async (req, res) => {
 });
 
 // ADMIN ENDPOINTS – ZAIREEN REQUESTS & OFFERS MANAGEMENT
-app.get('/api/admin/requirements', async (req, res) => {
+app.get('/api/admin/requirements', requirePermission('view_requests'), async (req, res) => {
     try {
         const db = await connectToDatabase();
         const reqs = await db.collection('requirements').find({}).sort({ createdAt: -1 }).toArray();
@@ -258,7 +358,7 @@ app.get('/api/admin/requirements', async (req, res) => {
     }
 });
 
-app.put('/api/admin/requirements/:id/status', async (req, res) => {
+app.put('/api/admin/requirements/:id/status', requirePermission('update_request_status'), async (req, res) => {
     const status = (req.query.status || req.body.status || 'PENDING').toUpperCase();
     try {
         const db = await connectToDatabase();
@@ -274,7 +374,7 @@ app.put('/api/admin/requirements/:id/status', async (req, res) => {
     res.json({ id: req.params.id, status: status });
 });
 
-app.get('/api/admin/offers', async (req, res) => {
+app.get('/api/admin/offers', requirePermission('view_offers'), async (req, res) => {
     try {
         const db = await connectToDatabase();
         const offers = await db.collection('offers').find({}).sort({ createdAt: -1 }).toArray();
@@ -284,7 +384,7 @@ app.get('/api/admin/offers', async (req, res) => {
     }
 });
 
-app.post('/api/admin/offers', async (req, res) => {
+app.post('/api/admin/offers', requirePermission('send_offers'), async (req, res) => {
     const offer = { id: 'off-' + Date.now(), status: 'PENDING', createdAt: new Date(), ...req.body };
     try {
         const db = await connectToDatabase();
@@ -445,6 +545,56 @@ async function getFastDb() {
     }
 }
 
+// ----------------------------------------------------------------------------
+// SUPER-ADMIN BOOTSTRAP
+// The first super admin is created here from environment variables (or a secure
+// default). This REPLACES the old bypass where admin@umrah.com/password123 hard
+// returned ROLE_ADMIN without any account existing. The crew account below goes
+// through the normal password hash + session flow.
+//   ADMIN_EMAIL         e.g. admin@umrah.com      (default)
+//   ADMIN_PASSWORD      initial password          (default: printed once, below)
+//   ADMIN_NAME          display name              (default 'System Admin')
+// ----------------------------------------------------------------------------
+const seededAdminEmail = (process.env.ADMIN_EMAIL || 'admin@umrah.com').trim().toLowerCase();
+const seededAdminName = process.env.ADMIN_NAME || 'System Admin';
+let seededAdminPassword = process.env.ADMIN_PASSWORD || '';
+
+function seedSuperAdmin() {
+    const existing = inMemoryUsers.get(seededAdminEmail);
+    if (existing) {
+        // Make sure the resident super admin is flagged if the bootstrap email is an admin already.
+        return;
+    }
+    if (!seededAdminPassword || seededAdminPassword.length < 8) {
+        // Generate a random strong password so no default credential is ever shipped.
+        seededAdminPassword = 'Admin@' + crypto.randomBytes(4).toString('hex') + '!';
+        console.warn('[BOOT] ADMIN_PASSWORD not set — generated temporary password for ' + seededAdminEmail +
+            ' -> "' + seededAdminPassword + '"  (change it immediately).');
+    }
+    const adminUser = {
+        id: 'admin-' + Date.now(),
+        name: seededAdminName,
+        email: seededAdminEmail,
+        phone: '',
+        role: 'ROLE_ADMIN',
+        permissions: [...ALL_STAFF_PERMISSIONS],
+        isStaffEnabled: true,
+        isVerified: true,
+        password: hashPassword(seededAdminPassword),
+        createdAt: new Date(),
+        isBootstrapAdmin: true
+    };
+    inMemoryUsers.set(seededAdminEmail, adminUser);
+    getFastDb().then(db => {
+        if (db) db.collection('users').updateOne(
+            { email: seededAdminEmail },
+            { $setOnInsert: { name: seededAdminName, email: seededAdminEmail, phone: '', role: 'ROLE_ADMIN', permissions: [...ALL_STAFF_PERMISSIONS], isStaffEnabled: true, isVerified: true, password: adminUser.password, createdAt: adminUser.createdAt, isBootstrapAdmin: true } },
+            { upsert: true }
+        ).catch(() => {});
+    });
+    console.log(`[BOOT] Super admin seeded: ${seededAdminEmail}`);
+}
+
 // AUTH ENDPOINTS - STRICT DATABASE AUTHENTICATION
 
 // Password Hashing Helper via Crypto (HMAC SHA-256 with Salt)
@@ -459,12 +609,15 @@ function verifyPassword(password, hashedPassword) {
     return hash === hashedPassword || password === hashedPassword;
 }
 
+// Seed the super-admin account on boot (idempotent).
+seedSuperAdmin();
+
 // ----------------------------------------------------
 // 📝 SIGNUP API (REGISTER)
 // ----------------------------------------------------
 app.post('/api/auth/register', async (req, res) => {
     try {
-        const { name, email, password, phone, role } = req.body;
+        const { name, email, password, phone } = req.body;
 
         // 1. All fields required
         if (!name || !email || !password) {
@@ -524,12 +677,12 @@ app.post('/api/auth/register', async (req, res) => {
             email: cleanEmail,
             password: hashedPassword,
             phone: phone ? phone.trim() : '',
-            role: role || 'ROLE_USER',
-            isVerified: true, // Account verified upon registration completion
-            otpCode: otpCode,
-            otpExpiry: otpExpiry,
-            resendAttempts: 0,
-            createdAt: new Date()
+role: 'ROLE_USER', // Staff roles are NEVER assigned at registration — only via admin panel
+                isVerified: true, // Account verified upon registration completion
+                otpCode: otpCode,
+                otpExpiry: otpExpiry,
+                resendAttempts: 0,
+                createdAt: new Date()
         };
 
         inMemoryUsers.set(cleanEmail, newUser);
@@ -592,8 +745,7 @@ app.post('/api/auth/register', async (req, res) => {
             success: true,
             message: 'Signup successful, please verify with OTP',
             email: cleanEmail,
-            requiresOtp: true,
-            otp: otpCode // Provided for testing
+            requiresOtp: true
         });
     } catch (err) {
         console.error('Registration server crash:', err);
@@ -614,21 +766,6 @@ app.post('/api/auth/login', async (req, res) => {
         }
 
         const cleanEmail = email.trim().toLowerCase();
-
-        // Admin hardcoded bypass for administration portal
-        if (cleanEmail === 'admin@umrah.com' && password === 'password123') {
-            return res.json({
-                success: true,
-                user: {
-                    id: 'admin-1',
-                    name: 'System Admin',
-                    email: 'admin@umrah.com',
-                    role: 'ROLE_ADMIN',
-                    isVerified: true,
-                    token: 'admin-token-' + Date.now()
-                }
-            });
-        }
 
         // 2. User lookup
         let user = inMemoryUsers.get(cleanEmail);
@@ -661,8 +798,8 @@ app.post('/api/auth/login', async (req, res) => {
             if (db) db.collection('users').updateOne({ email: cleanEmail }, { $set: { isVerified: true } }).catch(() => {});
         });
 
-        // 6. Generate session / JWT token -> 200 OK
-        const token = 'jwt-token-' + Date.now();
+        // 6. Generate server-side session token -> 200 OK
+        const token = issueSession(cleanEmail);
         res.json({
             success: true,
             message: 'Login successful',
@@ -672,6 +809,8 @@ app.post('/api/auth/login', async (req, res) => {
                 email: user.email,
                 phone: user.phone,
                 role: user.role,
+                permissions: user.role === 'ROLE_ADMIN' ? ALL_STAFF_PERMISSIONS : (Array.isArray(user.permissions) ? user.permissions : []),
+                isStaffEnabled: user.isStaffEnabled !== false,
                 isVerified: true,
                 token
             }
@@ -738,7 +877,7 @@ app.post('/api/auth/verify-otp', async (req, res) => {
             if (db) db.collection('users').updateOne({ email: targetEmail }, { $set: { isVerified: true, otpCode: null, otpExpiry: null } }).catch(() => {});
         });
 
-        const token = 'jwt-token-' + Date.now();
+        const token = issueSession(targetEmail);
         res.json({
             success: true,
             message: 'Account verified successfully',
@@ -748,6 +887,8 @@ app.post('/api/auth/verify-otp', async (req, res) => {
                 email: user.email,
                 phone: user.phone,
                 role: user.role,
+                permissions: user.role === 'ROLE_ADMIN' ? ALL_STAFF_PERMISSIONS : (Array.isArray(user.permissions) ? user.permissions : []),
+                isStaffEnabled: user.isStaffEnabled !== false,
                 isVerified: true,
                 token
             }
@@ -792,7 +933,7 @@ const handleGoogleCallback = async (req, res) => {
     const redirectUri = process.env.GOOGLE_CALLBACK_URL || 'https://onerequest.in/oauth2/callback';
 
     if (!code) {
-        return res.redirect('/#google_auth_error?error=missing_code');
+        return res.redirect('/?google_auth_error=1&error=missing_code');
     }
 
     try {
@@ -858,10 +999,10 @@ const handleGoogleCallback = async (req, res) => {
             token: jwtToken
         }));
 
-        res.redirect(`/#google_auth_success?user=${userParam}`);
+        res.redirect(`/?google_auth_success=1&user=${userParam}`);
     } catch (err) {
         console.error('Google Callback Error:', err);
-        res.redirect('/#google_auth_error?error=token_exchange_failed');
+        res.redirect('/?google_auth_error=1&error=token_exchange_failed');
     }
 };
 
@@ -918,7 +1059,7 @@ app.post('/api/auth/google', async (req, res) => {
             });
         }
 
-        const token = 'google-token-' + Date.now();
+        const token = issueSession(cleanEmail);
         res.json({
             success: true,
             message: 'Google Sign-In successful',
@@ -928,6 +1069,8 @@ app.post('/api/auth/google', async (req, res) => {
                 email: user.email,
                 avatar: user.avatar || '',
                 role: user.role,
+                permissions: user.role === 'ROLE_ADMIN' ? ALL_STAFF_PERMISSIONS : (Array.isArray(user.permissions) ? user.permissions : []),
+                isStaffEnabled: user.isStaffEnabled !== false,
                 isVerified: true,
                 token
             }

@@ -74,20 +74,23 @@ class App {
         } catch (e) {}
 
         // Handle Google OAuth callback URL parameters (Step 2 & 5)
-        if (window.location.hash && window.location.hash.includes('google_auth_success')) {
+        const oauthParams = new URLSearchParams(window.location.search);
+        if (oauthParams.get('google_auth_success') === '1') {
             try {
-                const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
-                const userParam = hashParams.get('user');
+                const userParam = oauthParams.get('user');
                 if (userParam) {
                     const userObj = JSON.parse(decodeURIComponent(userParam));
                     this.state.currentUser = userObj;
                     localStorage.setItem('umrah_user', JSON.stringify(userObj));
                     this.showToast(`🌐 Welcome, ${userObj.name}! Logged in via Google OAuth`, 'success');
-                    window.location.hash = '#home';
                 }
+                history.replaceState(null, '', window.location.pathname);
             } catch (e) {
-                console.warn('Google OAuth hash parse notice:', e);
+                console.warn('Google OAuth query parse notice:', e);
             }
+        } else if (oauthParams.get('google_auth_error') === '1') {
+            this.showToast(`Google login failed: ${decodeURIComponent(oauthParams.get('error') || 'unknown error')}`, 'error');
+            history.replaceState(null, '', window.location.pathname);
         }
 
         // Initialize theme
@@ -104,16 +107,13 @@ class App {
             this.state.packages = [];
         }
 
-        // Browser back/forward support (hash history)
+        // Browser back/forward support (History API)
         window.addEventListener('popstate', (e) => {
-            this.renderPage((e.state && e.state.page) || this.getHashPage());
-        });
-        window.addEventListener('hashchange', () => {
-            this.renderPage(this.getHashPage());
+            this.renderPage((e.state && e.state.page) || this.getCurrentPage());
         });
 
         // Render page IMMEDIATELY (0ms delay) so page is never blank!
-        this.navigate(this.getHashPage());
+        this.navigate(this.getCurrentPage());
 
         // Fetch remote updates asynchronously without blocking page rendering
         this.fetchPackages().then(() => {
@@ -502,9 +502,10 @@ class App {
 
         if (navMenu) {
             navMenu.innerHTML = `
-                <a href="#home" class="nav-link ${this.state.currentPage === 'home' ? 'active' : ''}" onclick="app.navigate('home')">Home</a>
-                <a href="#guides" class="nav-link ${this.state.currentPage === 'guides' ? 'active' : ''}" onclick="app.navigate('guides')">Hajj & Umrah Guides</a>
-                <a href="#about" class="nav-link ${this.state.currentPage === 'about' ? 'active' : ''}" onclick="app.navigate('about')">About Us</a>
+                <a href="/home" class="nav-link ${this.state.currentPage === 'home' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('home')">Home</a>
+                <a href="/services" class="nav-link ${this.state.currentPage === 'services' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('services')">Services</a>
+                <a href="#" class="nav-link" onclick="app.scrollToContact(event)">Contact Us</a>
+                <a href="/about" class="nav-link ${this.state.currentPage === 'about' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('about')">About Us</a>
                 <div class="mobile-only-auth" style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid #e2e8f0; display:flex; flex-direction:column; gap:0.5rem; width:100%;">
                     ${!this.state.currentUser ? `
                         <button class="btn btn-outline" onclick="app.openAuthModal('login')" style="width:100%; border:1.5px solid #0f172a; color:#0f172a; font-weight:700; border-radius:10px; padding:0.65rem; font-size:0.9rem; background:transparent; cursor:pointer;">Login</button>
@@ -561,6 +562,16 @@ class App {
                 `;
             }
         }
+    }
+
+    scrollToContact(e) {
+        if (e) e.preventDefault();
+        const footerContact = document.getElementById('footerContactSection') || document.querySelector('footer');
+        if (footerContact) {
+            footerContact.scrollIntoView({ behavior: 'smooth' });
+        }
+        document.getElementById('navMenu')?.classList.remove('open');
+        document.querySelector('.mobile-toggle')?.classList.remove('active');
     }
 
     async loginWithGoogle() {
@@ -837,9 +848,12 @@ class App {
         if (canonical) canonical.setAttribute('href', current.url);
     }
 
-    getHashPage() {
-        const h = window.location.hash || '';
-        const page = h.replace(/^#\/?/, '').trim();
+    getCurrentPage() {
+        const p = window.location.pathname || '/';
+        let page = p.replace(/^\//, '').replace(/\/+$/, '').trim();
+        if (!page && window.location.hash) {
+            page = window.location.hash.replace(/^#\/?/, '').trim();
+        }
         return page === '' ? 'home' : page;
     }
 
@@ -851,9 +865,9 @@ class App {
         }
 
         const norm = String(page).replace(/^\//, '');
-        if (norm && norm !== this.getHashPage()) {
+        if (norm && norm !== this.getCurrentPage()) {
             try {
-                history.pushState({ page: norm }, '', '#/' + norm);
+                history.pushState({ page: norm }, '', '/' + norm);
             } catch (e) {}
         }
 
@@ -863,8 +877,11 @@ class App {
     renderPage(page) {
         const rawPage = page;
         if (page === 'umrah-packages' || page === 'hajj-packages') page = 'packages';
-        if (page === 'mecca-medina-guide' || page === 'blog' || (typeof page === 'string' && page.startsWith('blog/'))) page = 'guides';
-        if (page === 'contact') page = 'about';
+        if (page === 'services' || page === 'guides' || page === 'mecca-medina-guide' || page === 'blog' || (typeof page === 'string' && page.startsWith('blog/'))) page = 'services';
+        if (page === 'contact') {
+            this.scrollToContact();
+            return;
+        }
         if (page === 'faqs') page = 'faqs';
         if (page === 'terms') page = 'terms';
         if (page === 'privacy') page = 'privacy';
@@ -894,8 +911,8 @@ class App {
         if (page === 'home' || page === 'packages') {
             main.innerHTML = this.renderHomePage();
             this.initHeroVideoPlaylist();
-        } else if (page === 'guides') {
-            main.innerHTML = this.renderGuidesPage();
+        } else if (page === 'services' || page === 'guides') {
+            main.innerHTML = this.renderServicesPage();
         } else if (page === 'faqs') {
             main.innerHTML = this.renderFaqsPage();
         } else if (page === 'terms') {
@@ -979,9 +996,10 @@ class App {
                 <!-- Hero Content -->
                 <div class="hero-green-container" style="max-width:860px !important; margin:0 auto !important; text-align:center; position:relative; z-index:4;">
 
-                    <!-- Eyebrow Badge -->
-                    <div class="hero-eyebrow-anim" style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(0,0,0,0.55); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(212,175,90,0.7); color:#F3D98A; padding:0.5rem 1.4rem; border-radius:999px; font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.14em; margin-bottom:1.6rem; text-shadow:0 1px 6px rgba(0,0,0,1); box-shadow:0 4px 24px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.10);">
-                        ✦ PLAN YOUR SACRED JOURNEY
+                    <!-- Liquid Glass Hero Badge Block -->
+                    <div class="hero-liquid-glass-badge">
+                        <span style="font-size:1.15rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6)); position:relative; z-index:2;">🕌</span>
+                        <span class="hero-badge-text">✦ VERIFIED HAJJ &amp; UMRAH TRAVELS PLATFORM ✦</span>
                     </div>
 
                     <!-- Main Headline -->
@@ -9054,240 +9072,137 @@ class App {
         }
     }
 
-    renderGuidesPage() {
+    renderServicesPage() {
         return `
-            <div class="main-container" style="max-width: 1220px; margin: 6.8rem auto 4rem; padding: 0 1.5rem;">
+            <div class="main-container" style="max-width: 1240px; margin: 6.5rem auto 4rem; padding: 0 1.5rem;">
                 
-                <!-- Header Bar -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-                    <div style="text-align: center; flex: 1;">
-                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
-                            <span>🕋</span> <span>SACRED KNOWLEDGE HUB</span>
+                <!-- Services Hero / Header -->
+                <div style="text-align: center; margin-bottom: 3.5rem;">
+                    <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.3rem 1.1rem; border-radius: 99px; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.8rem;">
+                        <span>🕌</span> <span>OUR PILGRIMAGE SERVICES</span>
+                    </div>
+                    <h1 style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 900; color: #0f172a; margin-bottom: 0.6rem; letter-spacing: -0.02em;">
+                        Comprehensive Hajj & Umrah Travel Services
+                    </h1>
+                    <p style="color: #64748b; font-size: 1.02rem; max-width: 720px; margin: 0 auto; line-height: 1.65;">
+                        We connect pilgrims with verified Saudi-licensed operators for 14 & 18 day Umrah packages, VIP Hajj journeys, custom reverse-bidding offers, and sacred guides.
+                    </p>
+                </div>
+
+                <!-- Section 1: Hajj and Umrah Travel Cards (Two Different Cards Form) -->
+                <div style="margin-bottom: 4.5rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h2 style="font-size: 1.65rem; font-weight: 800; color: #0f172a; margin: 0 0 0.3rem 0;">Our Travel Solutions</h2>
+                            <p style="font-size: 0.92rem; color: #64748b; margin: 0;">Explore our core pilgrimage travel offerings below</p>
                         </div>
-                        <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.02em;">Hajj & Umrah Pilgrimage Guides</h2>
-                        <p style="color: #64748b; font-size: 0.95rem; max-width: 680px; margin: 0 auto; line-height: 1.6;">Essential step-by-step rituals, Miqat boundaries, Ihram rules, Nusuk permits, and spiritual advice for your sacred journey.</p>
+                        <span style="background: #f1f5f9; color: #475569; padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.82rem; font-weight: 700;">✦ Verified Saudi Operators</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem;">
+                        
+                        <!-- Card 1: Umrah Travels Service Card -->
+                        <div style="background: #ffffff; border-radius: 24px; padding: 2.2rem; border: 1.5px solid #cbd5e1; box-shadow: 0 10px 30px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 18px 40px rgba(4,120,87,0.12)';" onmouseout="this.style.transform='';this.style.boxShadow='0 10px 30px rgba(0,0,0,0.06)';">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                                    <div style="width: 52px; height: 52px; border-radius: 16px; background: #ecfdf5; border: 1px solid #a7f3d0; display: flex; align-items: center; justify-content: center; font-size: 1.6rem;">
+                                        🕋
+                                    </div>
+                                    <span style="background: #047857; color: #ffffff; font-size: 0.75rem; font-weight: 800; padding: 0.3rem 0.8rem; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em;">Umrah Travel</span>
+                                </div>
+                                <h3 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin-bottom: 0.8rem;">14 & 18 Day Umrah Travels</h3>
+                                <p style="color: #475569; font-size: 0.92rem; line-height: 1.65; margin-bottom: 1.4rem;">
+                                    Complete Umrah packages tailored to your schedule and budget. Enjoy 5-star hotel stays near Masjid al-Haram, round-trip flights, Saudi Nusuk visa processing, guided Ziyarat, and 24/7 pilgrim assistance.
+                                </p>
+                                <ul style="list-style: none; padding: 0; margin: 0 0 1.8rem 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #10b981; font-weight: 900;">✓</span> 5-Star Hotels near Haram (150m – 600m)
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #10b981; font-weight: 900;">✓</span> Direct Saudi Flights & Return Air Tickets
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #10b981; font-weight: 900;">✓</span> Umrah Tourist Visa & Nusuk Permit Support
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #10b981; font-weight: 900;">✓</span> Guided Ziyarat Tours in Makkah & Madinah
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #10b981; font-weight: 900;">✓</span> Complimentary Ihram Kit & 5L Zamzam Water
+                                    </li>
+                                </ul>
+                            </div>
+                            <button onclick="app.navigate('home'); setTimeout(() => app.scrollToRequirementForm(), 100);" style="width: 100%; background: #047857; color: #ffffff; font-weight: 800; font-size: 0.95rem; padding: 0.85rem; border-radius: 12px; border: none; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#065f46'" onmouseout="this.style.background='#047857'">
+                                Request Umrah Bids ➔
+                            </button>
+                        </div>
+
+                        <!-- Card 2: Hajj Travels Service Card -->
+                        <div style="background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%); border-radius: 24px; padding: 2.2rem; border: 1.5px solid #fcd34d; box-shadow: 0 10px 30px rgba(245,158,11,0.08); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 18px 40px rgba(245,158,11,0.18)';" onmouseout="this.style.transform='';this.style.boxShadow='0 10px 30px rgba(245,158,11,0.08)';">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                                    <div style="width: 52px; height: 52px; border-radius: 16px; background: #fef3c7; border: 1px solid #fde68a; display: flex; align-items: center; justify-content: center; font-size: 1.6rem;">
+                                        📜
+                                    </div>
+                                    <span style="background: #b45309; color: #ffffff; font-size: 0.75rem; font-weight: 800; padding: 0.3rem 0.8rem; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em;">Hajj Travel</span>
+                                </div>
+                                <h3 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin-bottom: 0.8rem;">VIP & Executive Hajj Packages</h3>
+                                <p style="color: #475569; font-size: 0.92rem; line-height: 1.65; margin-bottom: 1.4rem;">
+                                    Fulfill your sacred Hajj pillar with peace of mind. Includes 5-day Hajj rituals assistance, Mina VIP A/C tent encampment, Arafat Wuqoof guidance, private transfers, and 100% Escrow safe payments.
+                                </p>
+                                <ul style="list-style: none; padding: 0; margin: 0 0 1.8rem 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #d97706; font-weight: 900;">✓</span> Mina VIP Air-Conditioned Encampment Tents
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #d97706; font-weight: 900;">✓</span> Arafat Wuqoof & Open-Sky Muzdalifah Support
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #d97706; font-weight: 900;">✓</span> Jamarat Stoning Shuttle & Private AC Busses
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #d97706; font-weight: 900;">✓</span> 5-Star Haram Accommodation in Makkah & Madinah
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #d97706; font-weight: 900;">✓</span> 100% Escrow Protected Booking Guarantee
+                                    </li>
+                                </ul>
+                            </div>
+                            <button onclick="app.navigate('home'); setTimeout(() => app.scrollToRequirementForm(), 100);" style="width: 100%; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #ffffff; font-weight: 800; font-size: 0.95rem; padding: 0.85rem; border-radius: 12px; border: none; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                                Request Hajj Bids ➔
+                            </button>
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- Modern Segmented Pill Switcher -->
-                <div class="guide-nav-pills">
-                    <button class="guide-pill-btn ${this.state.guideTab === 'umrah' ? 'active' : ''}" onclick="app.setGuideTab('umrah')">
-                        <span>🕋</span> Umrah Step-by-Step
-                    </button>
-                    <button class="guide-pill-btn ${this.state.guideTab === 'hajj' ? 'active' : ''}" onclick="app.setGuideTab('hajj')">
-                        <span>📜</span> Hajj Rituals Guide
-                    </button>
-                    <button class="guide-pill-btn ${this.state.guideTab === 'rules' ? 'active' : ''}" onclick="app.setGuideTab('rules')">
-                        <span>⚙️</span> Nusuk Permits & Rules
-                    </button>
+                <!-- Section 2: Merged Hajj & Umrah Guides (Below the two cards) -->
+                <div style="background: #ffffff; border-radius: 28px; padding: 2.8rem 2rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 24px rgba(0,0,0,0.04);">
+                    
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
+                            <span>📖</span> <span>SACRED KNOWLEDGE HUB</span>
+                        </div>
+                        <h2 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 0.4rem;">Hajj & Umrah Pilgrimage Guides</h2>
+                        <p style="color: #64748b; font-size: 0.92rem; max-width: 640px; margin: 0 auto;">Essential step-by-step rituals, Miqat boundaries, Ihram rules, Nusuk permits, and spiritual advice.</p>
+                    </div>
+
+                    <!-- Modern Segmented Pill Switcher -->
+                    <div class="guide-nav-pills">
+                        <button class="guide-pill-btn ${this.state.guideTab === 'umrah' ? 'active' : ''}" onclick="app.setGuideTab('umrah')">
+                            <span>🕋</span> Umrah Step-by-Step
+                        </button>
+                        <button class="guide-pill-btn ${this.state.guideTab === 'hajj' ? 'active' : ''}" onclick="app.setGuideTab('hajj')">
+                            <span>📜</span> Hajj Rituals Guide
+                        </button>
+                        <button class="guide-pill-btn ${this.state.guideTab === 'rules' ? 'active' : ''}" onclick="app.setGuideTab('rules')">
+                            <span>⚙️</span> Nusuk Permits & Rules
+                        </button>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    ${this.renderGuideTabContent()}
                 </div>
-
-                <!-- Tab Contents -->
-                ${this.state.guideTab === 'hajj' ? `
-                    <div class="guides-grid-4">
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>DAY 01</span> • 8th Dhul Hijjah
-                                </div>
-                                <h3 class="card-step-title">Mina Encampment</h3>
-                                <p class="card-step-desc">Enter Ihram at your location, declare Talbiyah, and proceed to Mina for quiet reflection and prayers.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Ghusl & Niyyah for Hajj</li>
-                                    <li><span class="dot">✓</span> Recite Talbiyah continuously</li>
-                                    <li><span class="dot">✓</span> Dhuhr, Asr, Maghrib, Isha & Fajr</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Mina Valley
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>DAY 02</span> • 9th Dhul Hijjah
-                                </div>
-                                <h3 class="card-step-title">Arafat & Muzdalifah</h3>
-                                <p class="card-step-desc">Stand at Mount Arafat for Wuqoof (the climax of Hajj). At sunset, depart to Muzdalifah under the open sky.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Wuqoof at Arafat (Peak Ritual)</li>
-                                    <li><span class="dot">✓</span> Combined Dhuhr & Asr prayers</li>
-                                    <li><span class="dot">✓</span> Collect pebbles at Muzdalifah</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Mount Arafat → Muzdalifah
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>DAY 03</span> • 10th Dhul Hijjah
-                                </div>
-                                <h3 class="card-step-title">Rami, Qurbani & Tawaf</h3>
-                                <p class="card-step-desc">Pelt Jamarat Al-Aqaba, perform animal sacrifice, shave/trim hair, and perform Tawaf Al-Ziyarah.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Pelt 7 pebbles at Jamarat Al-Aqaba</li>
-                                    <li><span class="dot">✓</span> Qurbani sacrifice completion</li>
-                                    <li><span class="dot">✓</span> Halq/Taqseer & Tawaf Al-Ziyarah</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Jamarat → Haram Makkah
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>DAYS 04-05</span> • 11th-13th Dhul Hijjah
-                                </div>
-                                <h3 class="card-step-title">Jamarat & Farewell Tawaf</h3>
-                                <p class="card-step-desc">Stay in Mina to pelt all 3 Jamarat pillars daily, then perform Tawaf Al-Wada before departure.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Pelt 21 pebbles daily in Mina</li>
-                                    <li><span class="dot">✓</span> Final supplications in Makkah</li>
-                                    <li><span class="dot">✓</span> Complete Tawaf Al-Wada</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Mina → Masjid Al-Haram
-                            </div>
-                        </div>
-                    </div>
-                ` : this.state.guideTab === 'rules' ? `
-                    <div class="guides-grid-3">
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge" style="background:#fef3c7; color:#92400e; border-color:#fde68a;">
-                                    <span>Nusuk App</span> • Official Permit
-                                </div>
-                                <h3 class="card-step-title">Rawdah Al-Sharifa Permits</h3>
-                                <p class="card-step-desc">Visiting the sacred Rawdah Al-Sharifa in Madinah requires an authorized slot permit issued via Saudi Arabia's official Nusuk application.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Download & register on Nusuk App</li>
-                                    <li><span class="dot">✓</span> Reserve dedicated male/female time slots</li>
-                                    <li><span class="dot">✓</span> Show QR code permit at gate entrance</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📱 Digital Permit Portal
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge" style="background:#eff6ff; color:#1e40af; border-color:#bfdbfe;">
-                                    <span>Visa Guidelines</span> • Entry Rules
-                                </div>
-                                <h3 class="card-step-title">Passport & Umrah Visa</h3>
-                                <p class="card-step-desc">Pilgrims require a valid passport with at least 6 months validity from departure date. Umrah visas allow travel across all Saudi cities.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Passport valid for 6+ months</li>
-                                    <li><span class="dot">✓</span> Verified round-trip flight booking</li>
-                                    <li><span class="dot">✓</span> Travel insurance coverage included</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                🛂 Ministry of Foreign Affairs
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge" style="background:#fef2f2; color:#991b1b; border-color:#fecaca;">
-                                    <span>Sacred State</span> • Restrictions
-                                </div>
-                                <h3 class="card-step-title">Ihram Restrictions & Etiquette</h3>
-                                <p class="card-step-desc">While in the state of Ihram, specific actions are prohibited to preserve spiritual purity and focus on devotion.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> No cutting hair, nails, or using scents</li>
-                                    <li><span class="dot">✓</span> No stitched garments for men</li>
-                                    <li><span class="dot">✓</span> Maintain patience, kindness & humility</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                ⚖️ Fiqh Guidelines
-                            </div>
-                        </div>
-                    </div>
-                ` : `
-                    <div class="guides-grid-4">
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>STEP 01</span> • Entrance
-                                </div>
-                                <h3 class="card-step-title">Entering Ihram & Niyyah</h3>
-                                <p class="card-step-desc">Perform Ghusl, wear Ihram garments before crossing the Miqat, and declare your sacred intention.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Ghusl & Ihram attire at Miqat</li>
-                                    <li><span class="dot">✓</span> Niyyah: <em>"Labbayk Allahumma Umrah"</em></li>
-                                    <li><span class="dot">✓</span> Recite Talbiyah continuously</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Miqat Station
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>STEP 02</span> • Tawaf
-                                </div>
-                                <h3 class="card-step-title">Tawaf around Kaaba</h3>
-                                <p class="card-step-desc">Perform 7 counter-clockwise circuits around the Kaaba starting from Hajar Al-Aswad (Black Stone).</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> 7 Complete Tawaf rounds</li>
-                                    <li><span class="dot">✓</span> 2 Raka'at behind Maqam Ibrahim</li>
-                                    <li><span class="dot">✓</span> Drink blessed Zamzam water</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Al-Masjid Al-Haram
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>STEP 03</span> • Sa'i
-                                </div>
-                                <h3 class="card-step-title">Sa'i (Safa & Marwah)</h3>
-                                <p class="card-step-desc">Walk 7 times between Mount Safa and Mount Marwah, honoring the devotion of Hazrat Hajar (RA).</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Start at Safa, end at Marwah</li>
-                                    <li><span class="dot">✓</span> 7 laps total with Du'as</li>
-                                    <li><span class="dot">✓</span> Light jogging for men between green lights</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Mas'a Corridor
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>STEP 04</span> • Completion
-                                </div>
-                                <h3 class="card-step-title">Halq or Taqseer</h3>
-                                <p class="card-step-desc">Men shave or trim head hair, women trim a fingertip length. Your Umrah is now completed!</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Shave (Halq) or trim (Taqseer)</li>
-                                    <li><span class="dot">✓</span> Ihram restrictions lifted</li>
-                                    <li><span class="dot">✓</span> Umrah Mubarak! 🎉</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Barber Outlets / Hotel
-                            </div>
-                        </div>
-                    </div>
-                `}
 
                 <!-- Bottom AI Helper Banner (Fade Green Gradient) -->
                 <div style="margin-top: 3.5rem; background: linear-gradient(135deg, #059669 0%, #10b981 50%, #047857 100%); border-radius: 20px; padding: 2.2rem 2.4rem; color: #ffffff !important; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; box-shadow: 0 12px 30px rgba(16, 185, 129, 0.28); border: 1px solid #34d399;">
@@ -9299,6 +9214,218 @@ class App {
                     <button class="btn btn-ai-trigger" style="background: #fbbf24; color: #0f172a !important; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 1.8rem; border-radius: 12px; border: none; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 18px rgba(251, 191, 36, 0.4); transition: transform 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" onclick="app.openChatbot(event)">
                         💬 Ask AI Assistant Now
                     </button>
+                </div>
+            </div>
+        `;
+    }
+
+    renderGuidesPage() {
+        return this.renderServicesPage();
+    }
+
+    renderGuideTabContent() {
+        return this.state.guideTab === 'hajj' ? `
+            <div class="guides-grid-4">
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>DAY 01</span> • 8th Dhul Hijjah
+                        </div>
+                        <h3 class="card-step-title">Mina Encampment</h3>
+                        <p class="card-step-desc">Enter Ihram at your location, declare Talbiyah, and proceed to Mina for quiet reflection and prayers.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Ghusl & Niyyah for Hajj</li>
+                            <li><span class="dot">✓</span> Recite Talbiyah continuously</li>
+                            <li><span class="dot">✓</span> Dhuhr, Asr, Maghrib, Isha & Fajr</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Mina Valley
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>DAY 02</span> • 9th Dhul Hijjah
+                        </div>
+                        <h3 class="card-step-title">Arafat & Muzdalifah</h3>
+                        <p class="card-step-desc">Stand at Mount Arafat for Wuqoof (the climax of Hajj). At sunset, depart to Muzdalifah under the open sky.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Wuqoof at Arafat (Peak Ritual)</li>
+                            <li><span class="dot">✓</span> Combined Dhuhr & Asr prayers</li>
+                            <li><span class="dot">✓</span> Collect pebbles at Muzdalifah</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Mount Arafat → Muzdalifah
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>DAY 03</span> • 10th Dhul Hijjah
+                        </div>
+                        <h3 class="card-step-title">Rami, Qurbani & Tawaf</h3>
+                        <p class="card-step-desc">Pelt Jamarat Al-Aqaba, perform animal sacrifice, shave/trim hair, and perform Tawaf Al-Ziyarah.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Pelt 7 pebbles at Jamarat Al-Aqaba</li>
+                            <li><span class="dot">✓</span> Qurbani sacrifice completion</li>
+                            <li><span class="dot">✓</span> Halq/Taqseer & Tawaf Al-Ziyarah</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Jamarat → Haram Makkah
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>DAYS 04-05</span> • 11th-13th Dhul Hijjah
+                        </div>
+                        <h3 class="card-step-title">Jamarat & Farewell Tawaf</h3>
+                        <p class="card-step-desc">Stay in Mina to pelt all 3 Jamarat pillars daily, then perform Tawaf Al-Wada before departure.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Pelt 21 pebbles daily in Mina</li>
+                            <li><span class="dot">✓</span> Final supplications in Makkah</li>
+                            <li><span class="dot">✓</span> Complete Tawaf Al-Wada</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Mina → Masjid Al-Haram
+                    </div>
+                </div>
+            </div>
+        ` : this.state.guideTab === 'rules' ? `
+            <div class="guides-grid-3">
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge" style="background:#fef3c7; color:#92400e; border-color:#fde68a;">
+                            <span>Nusuk App</span> • Official Permit
+                        </div>
+                        <h3 class="card-step-title">Rawdah Al-Sharifa Permits</h3>
+                        <p class="card-step-desc">Visiting the sacred Rawdah Al-Sharifa in Madinah requires an authorized slot permit issued via Saudi Arabia's official Nusuk application.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Download & register on Nusuk App</li>
+                            <li><span class="dot">✓</span> Reserve dedicated male/female time slots</li>
+                            <li><span class="dot">✓</span> Show QR code permit at gate entrance</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📱 Digital Permit Portal
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge" style="background:#eff6ff; color:#1e40af; border-color:#bfdbfe;">
+                            <span>Visa Guidelines</span> • Entry Rules
+                        </div>
+                        <h3 class="card-step-title">Passport & Umrah Visa</h3>
+                        <p class="card-step-desc">Pilgrims require a valid passport with at least 6 months validity from departure date. Umrah visas allow travel across all Saudi cities.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Passport valid for 6+ months</li>
+                            <li><span class="dot">✓</span> Verified round-trip flight booking</li>
+                            <li><span class="dot">✓</span> Travel insurance coverage included</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        🛂 Ministry of Foreign Affairs
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge" style="background:#fef2f2; color:#991b1b; border-color:#fecaca;">
+                            <span>Sacred State</span> • Restrictions
+                        </div>
+                        <h3 class="card-step-title">Ihram Restrictions & Etiquette</h3>
+                        <p class="card-step-desc">While in the state of Ihram, specific actions are prohibited to preserve spiritual purity and focus on devotion.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> No cutting hair, nails, or using scents</li>
+                            <li><span class="dot">✓</span> No stitched garments for men</li>
+                            <li><span class="dot">✓</span> Maintain patience, kindness & humility</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        ⚖️ Fiqh Guidelines
+                    </div>
+                </div>
+            </div>
+        ` : `
+            <div class="guides-grid-4">
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>STEP 01</span> • Entrance
+                        </div>
+                        <h3 class="card-step-title">Entering Ihram & Niyyah</h3>
+                        <p class="card-step-desc">Perform Ghusl, wear Ihram garments before crossing the Miqat, and declare your sacred intention.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Ghusl & Ihram attire at Miqat</li>
+                            <li><span class="dot">✓</span> Niyyah: <em>"Labbayk Allahumma Umrah"</em></li>
+                            <li><span class="dot">✓</span> Recite Talbiyah continuously</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Miqat Station
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>STEP 02</span> • Tawaf
+                        </div>
+                        <h3 class="card-step-title">Tawaf around Kaaba</h3>
+                        <p class="card-step-desc">Perform 7 counter-clockwise circuits around the Kaaba starting from Hajar Al-Aswad (Black Stone).</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> 7 Complete Tawaf rounds</li>
+                            <li><span class="dot">✓</span> 2 Raka'at behind Maqam Ibrahim</li>
+                            <li><span class="dot">✓</span> Drink blessed Zamzam water</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Al-Masjid Al-Haram
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>STEP 03</span> • Sa'i
+                        </div>
+                        <h3 class="card-step-title">Sa'i (Safa & Marwah)</h3>
+                        <p class="card-step-desc">Walk 7 times between Mount Safa and Mount Marwah, honoring the devotion of Hazrat Hajar (RA).</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Start at Safa, end at Marwah</li>
+                            <li><span class="dot">✓</span> 7 laps total with Du'as</li>
+                            <li><span class="dot">✓</span> Light jogging for men between green lights</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Mas'a Corridor
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>STEP 04</span> • Completion
+                        </div>
+                        <h3 class="card-step-title">Halq or Taqseer</h3>
+                        <p class="card-step-desc">Men shave or trim head hair, women trim a fingertip length. Your Umrah is now completed!</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Shave (Halq) or trim (Taqseer)</li>
+                            <li><span class="dot">✓</span> Ihram restrictions lifted</li>
+                            <li><span class="dot">✓</span> Umrah Mubarak! 🎉</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Barber Outlets / Hotel
+                    </div>
                 </div>
             </div>
         `;
@@ -9638,7 +9765,7 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
 
     setGuideTab(tab) {
         this.state.guideTab = tab;
-        this.navigate('guides');
+        this.navigate('services');
     }
 
     escapeHtml(str) {
