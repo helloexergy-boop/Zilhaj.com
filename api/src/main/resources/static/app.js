@@ -1022,6 +1022,90 @@ class App {
                 </div>
             </section>
 
+            <!-- Why Choose Zilhaj Section (Pixel-perfect match to reference design) -->
+            <section style="background: #ffffff; padding: 4.5rem 1.5rem 4rem; text-align: center; border-bottom: 1px solid #f1f5f9; position: relative;">
+                <div style="max-width: 1240px; margin: 0 auto;">
+                    
+                    <!-- Pill Badge -->
+                    <div style="display: inline-flex; align-items: center; gap: 0.45rem; background: #ecfdf5; color: #15803d; border: 1px solid #bbf7d0; padding: 0.35rem 1.1rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.2rem;">
+                        <span style="font-size: 0.85rem; color: #16a34a;">★</span>
+                        <span>WHY CHOOSE ZILHAJ?</span>
+                    </div>
+
+                    <!-- Title & Subtitle -->
+                    <h2 style="font-size: clamp(2rem, 4vw, 2.7rem); font-weight: 900; color: #0f172a; margin: 0 0 0.75rem 0; letter-spacing: -0.02em;">
+                        Why Choose Zilhaj?
+                    </h2>
+                    <p style="color: #64748b; font-size: 1.02rem; max-width: 660px; margin: 0 auto 3.5rem; line-height: 1.65; font-weight: 400;">
+                        We make your Umrah planning simple, transparent, and reliable with verified options and dedicated support.
+                    </p>
+
+                    <!-- 4 Cards Grid Layout -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.6rem; align-items: stretch;">
+                        
+                        <!-- Card 1: Verified Providers -->
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 1.6rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.08)';this.style.borderColor='#e2e8f0';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.03)';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 64px; height: 64px; border-radius: 18px; background: #e6f4ea; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; flex-shrink: 0;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <polyline points="9 12 11 14 15 10"></polyline>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Verified Providers</h3>
+                            <div style="width: 32px; height: 3px; background: #16a34a; border-radius: 2px; margin: 0.4rem 0 1.2rem 0;"></div>
+                            <p style="color: #64748b; font-size: 0.9rem; line-height: 1.65; margin: 0; font-weight: 400;">
+                                We work only with trusted and verified travel providers to ensure a safe and reliable Umrah experience.
+                            </p>
+                        </div>
+
+                        <!-- Card 2: Multiple Options -->
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 1.6rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.08)';this.style.borderColor='#e2e8f0';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.03)';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 64px; height: 64px; border-radius: 18px; background: #fef7e0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; flex-shrink: 0;">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Multiple Options</h3>
+                            <div style="width: 32px; height: 3px; background: #16a34a; border-radius: 2px; margin: 0.4rem 0 1.2rem 0;"></div>
+                            <p style="color: #64748b; font-size: 0.9rem; line-height: 1.65; margin: 0; font-weight: 400;">
+                                Get multiple suitable options based on your requirements and preferences to choose what suits you best.
+                            </p>
+                        </div>
+
+                        <!-- Card 3: Compare Before You Choose -->
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 1.6rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.08)';this.style.borderColor='#e2e8f0';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.03)';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 64px; height: 64px; border-radius: 18px; background: #f3e8ff; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; flex-shrink: 0;">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Compare Before You Choose</h3>
+                            <div style="width: 32px; height: 3px; background: #16a34a; border-radius: 2px; margin: 0.4rem 0 1.2rem 0;"></div>
+                            <p style="color: #64748b; font-size: 0.9rem; line-height: 1.65; margin: 0; font-weight: 400;">
+                                Easily compare options, prices, and inclusions before making the right decision with complete clarity.
+                            </p>
+                        </div>
+
+                        <!-- Card 4: Transparent Process -->
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 1.6rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.08)';this.style.borderColor='#e2e8f0';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.03)';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 64px; height: 64px; border-radius: 18px; background: #e0f2fe; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; flex-shrink: 0;">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2l2.4 1.8 3-.4.6 3 2.6 1.6-1 2.8 1.4 2.6-2.2 2-.2 3-3 .6-1.8 2.4-2.8-1-2.6 1.4-2-2.2-3-.2-.6-3-2.4-1.8 1-2.8-1.4-2.6 2.2-2 .2-3 3-.6L12 2z"></path>
+                                    <polyline points="9 12 11 14 15 10"></polyline>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Transparent Process</h3>
+                            <div style="width: 32px; height: 3px; background: #16a34a; border-radius: 2px; margin: 0.4rem 0 1.2rem 0;"></div>
+                            <p style="color: #64748b; font-size: 0.9rem; line-height: 1.65; margin: 0; font-weight: 400;">
+                                A simple, secure, and transparent process from request to final selection – no hidden surprises.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
             <!-- How It Works Section – Pixel-perfect reference design -->
             <section style="position:relative; overflow:hidden; padding:4.5rem 1.5rem 4rem; background:#f0faf5; text-align:center; border-bottom:1px solid #d8ede2;">
 
