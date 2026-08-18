@@ -911,6 +911,8 @@ class App {
         if (page === 'home' || page === 'packages') {
             main.innerHTML = this.renderHomePage();
             this.initHeroVideoPlaylist();
+        } else if (page === 'request-form' || page === 'submit-request' || page === 'request') {
+            main.innerHTML = this.renderRequestFormPage();
         } else if (page === 'services' || page === 'guides') {
             main.innerHTML = this.renderServicesPage();
         } else if (page === 'faqs') {
@@ -979,6 +981,463 @@ class App {
         }, 4000);
     }
 
+    handleStartJourneyClick() {
+        this.navigate('request-form');
+    }
+
+    setReqRoomType(btn, roomType) {
+        document.querySelectorAll('.btn-room-type').forEach(b => {
+            b.style.background = '#ffffff';
+            b.style.borderColor = '#cbd5e1';
+            b.style.color = '#475569';
+            b.classList.remove('active');
+        });
+        btn.style.background = '#064e3b';
+        btn.style.borderColor = '#064e3b';
+        btn.style.color = '#ffffff';
+        btn.classList.add('active');
+        const hidden = document.getElementById('reqRoomTypeVal');
+        if (hidden) hidden.value = roomType;
+    }
+
+    adjustReqCounter(id, delta) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        let val = parseInt(el.innerText) || 0;
+        val = Math.max(0, val + delta);
+        el.innerText = val;
+    }
+
+    async submitStandaloneUmrahRequest() {
+        const departureCity = document.getElementById('reqDepartureCity')?.value;
+        const departureDate = document.getElementById('reqDepartureDate')?.value;
+        const durationStay = document.getElementById('reqDurationStay')?.value;
+        const roomType = document.getElementById('reqRoomTypeVal')?.value || 'Single Bed';
+        
+        const males = parseInt(document.getElementById('reqMaleCount')?.innerText || '1');
+        const females = parseInt(document.getElementById('reqFemaleCount')?.innerText || '0');
+        const children = parseInt(document.getElementById('reqChildrenCount')?.innerText || '0');
+        const infants = parseInt(document.getElementById('reqInfantsCount')?.innerText || '0');
+        
+        const newlyMarried = document.querySelector('input[name="reqNewlyMarried"]:checked')?.value || 'No';
+        const hotelCategory = document.querySelector('input[name="reqHotelCategory"]:checked')?.value || '3 Star';
+        
+        const fullName = document.getElementById('reqFullName')?.value?.trim();
+        const mobileNumber = document.getElementById('reqMobileNumber')?.value?.trim();
+        const emailAddress = document.getElementById('reqEmailAddress')?.value?.trim();
+        const address = document.getElementById('reqFullAddress')?.value?.trim();
+        const state = document.getElementById('reqState')?.value;
+        const city = document.getElementById('reqCity')?.value?.trim();
+        const specialReqs = document.getElementById('reqSpecialRequirements')?.value?.trim();
+
+        if (!departureCity) {
+            this.showToast('Please select your Departure City', 'error');
+            return;
+        }
+        if (!departureDate) {
+            this.showToast('Please select your Preferred Departure Date', 'error');
+            return;
+        }
+        if (!fullName) {
+            this.showToast('Please enter your Full Name as per Aadhar', 'error');
+            return;
+        }
+        if (!mobileNumber) {
+            this.showToast('Please enter your Mobile Number', 'error');
+            return;
+        }
+
+        const newReq = {
+            id: 'req-' + Date.now(),
+            departureCity,
+            departureDate,
+            durationStay,
+            roomType,
+            adults: males + females,
+            males,
+            females,
+            children,
+            infants,
+            newlyMarried,
+            hotelCategory,
+            fullName,
+            mobileNumber,
+            emailAddress,
+            address,
+            state,
+            city,
+            specialReqs,
+            status: 'OPEN',
+            createdAt: new Date().toISOString()
+        };
+
+        const existing = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        existing.unshift(newReq);
+        localStorage.setItem('umrah_requirements', JSON.stringify(existing));
+        this.state.myRequirements.unshift(newReq);
+
+        this.showToast('🎉 Umrah Request submitted successfully! Travel agents will send custom quotes shortly.', 'success');
+        this.navigate('dashboard');
+    }
+
+    renderRequestFormPage() {
+        return `
+        <div style="background: #f8fafc; min-height: 100vh; padding: 2.5rem 1rem 5rem;">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                
+                <!-- Page Title Header -->
+                <div style="margin-bottom: 2rem;">
+                    <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+                        <div style="width: 34px; height: 34px; border-radius: 10px; background: #e6f4ea; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                        <h1 style="font-size: 1.85rem; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.02em;">Submit Umrah Request</h1>
+                    </div>
+                    <p style="color: #64748b; font-size: 0.95rem; margin: 0; max-width: 780px; line-height: 1.5;">
+                        Fill out the details below to receive personalized Umrah package quotes. Our partner agencies will craft itineraries tailored specifically to your group's needs and preferences.
+                    </p>
+                </div>
+
+                <!-- Two Column Layout: Main Form (Left) & Sidebar Cards (Right) -->
+                <div style="display: grid; grid-template-columns: 1fr 340px; gap: 1.8rem; align-items: start;" class="request-form-grid">
+                    
+                    <!-- Left Form Cards -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        
+                        <!-- 1. Trip Details -->
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.8rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.4rem; padding-bottom: 0.8rem; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #064e3b; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                    </svg>
+                                </div>
+                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Trip Details</h2>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 1.4rem;" class="req-trip-grid">
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">CITY OF DEPARTURE *</label>
+                                    <select id="reqDepartureCity" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;">
+                                        <option value="">Select Departure City</option>
+                                        <option value="Delhi (DEL)">Delhi (DEL)</option>
+                                        <option value="Mumbai (BOM)">Mumbai (BOM)</option>
+                                        <option value="Srinagar (SXR)">Srinagar (SXR)</option>
+                                        <option value="Hyderabad (HYD)">Hyderabad (HYD)</option>
+                                        <option value="Bangalore (BLR)">Bangalore (BLR)</option>
+                                        <option value="Kolkata (CCU)">Kolkata (CCU)</option>
+                                        <option value="Ahmedabad (AMD)">Ahmedabad (AMD)</option>
+                                        <option value="Lucknow (LKO)">Lucknow (LKO)</option>
+                                        <option value="Jaipur (JAI)">Jaipur (JAI)</option>
+                                        <option value="Chennai (MAA)">Chennai (MAA)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">PREFERRED DEPARTURE DATE *</label>
+                                    <input type="date" id="reqDepartureDate" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" />
+                                </div>
+
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">DURATION OF STAY</label>
+                                    <select id="reqDurationStay" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;">
+                                        <option value="14-15 Days">14–15 Days</option>
+                                        <option value="20 Days">20 Days</option>
+                                        <option value="30 Days">30 Days</option>
+                                        <option value="Custom Duration">Custom Duration</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.6rem; text-transform: uppercase;">WHAT KIND OF HOTEL ROOM?</label>
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem;" id="reqRoomTypeButtons">
+                                    <button type="button" class="btn-room-type active" onclick="app.setReqRoomType(this, 'Single Bed')" style="padding: 0.75rem; border-radius: 8px; border: 1.5px solid #064e3b; background: #064e3b; color: #ffffff; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s ease;">Single Bed</button>
+                                    <button type="button" class="btn-room-type" onclick="app.setReqRoomType(this, 'Double Bed')" style="padding: 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: all 0.2s ease;">Double Bed</button>
+                                    <button type="button" class="btn-room-type" onclick="app.setReqRoomType(this, 'Three Bed')" style="padding: 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: all 0.2s ease;">Three Bed</button>
+                                    <button type="button" class="btn-room-type" onclick="app.setReqRoomType(this, 'Four Bed')" style="padding: 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: all 0.2s ease;">Four Bed</button>
+                                </div>
+                                <input type="hidden" id="reqRoomTypeVal" value="Single Bed" />
+                            </div>
+                        </div>
+
+                        <!-- 2. Traveler Details -->
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.8rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.4rem; padding-bottom: 0.8rem; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                </div>
+                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Traveler Details</h2>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.4rem;" class="req-travelers-grid">
+                                <!-- Male Adults -->
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">Male</div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">Adults</div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                        <button type="button" onclick="app.adjustReqCounter('reqMaleCount', -1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">-</button>
+                                        <span id="reqMaleCount" style="font-weight: 800; font-size: 0.95rem; width: 18px; text-align: center;">1</span>
+                                        <button type="button" onclick="app.adjustReqCounter('reqMaleCount', 1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- Female Adults -->
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">Female</div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">Adults (Requires Mehram)</div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                        <button type="button" onclick="app.adjustReqCounter('reqFemaleCount', -1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">-</button>
+                                        <span id="reqFemaleCount" style="font-weight: 800; font-size: 0.95rem; width: 18px; text-align: center;">1</span>
+                                        <button type="button" onclick="app.adjustReqCounter('reqFemaleCount', 1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- Children -->
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">Children</div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">2–11 years</div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                        <button type="button" onclick="app.adjustReqCounter('reqChildrenCount', -1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">-</button>
+                                        <span id="reqChildrenCount" style="font-weight: 800; font-size: 0.95rem; width: 18px; text-align: center;">0</span>
+                                        <button type="button" onclick="app.adjustReqCounter('reqChildrenCount', 1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- Infants -->
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">Infants</div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">Below 2 years</div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                        <button type="button" onclick="app.adjustReqCounter('reqInfantsCount', -1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">-</button>
+                                        <span id="reqInfantsCount" style="font-weight: 800; font-size: 0.95rem; width: 18px; text-align: center;">0</span>
+                                        <button type="button" onclick="app.adjustReqCounter('reqInfantsCount', 1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.6rem; text-transform: uppercase;">ARE YOU A NEWLY MARRIED COUPLE?</label>
+                                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: #0f172a; cursor: pointer;">
+                                        <input type="radio" name="reqNewlyMarried" value="Yes" style="accent-color: #064e3b;" /> Yes
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: #0f172a; cursor: pointer;">
+                                        <input type="radio" name="reqNewlyMarried" value="No" checked style="accent-color: #064e3b;" /> No
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Hotel Preference -->
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.8rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.4rem; padding-bottom: 0.8rem; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 21h18"></path>
+                                        <path d="M19 21v-4a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v4"></path>
+                                        <path d="M9 10h6"></path>
+                                        <path d="M12 7v6"></path>
+                                    </svg>
+                                </div>
+                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Hotel Preference</h2>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.8rem; text-transform: uppercase;">HOTEL CATEGORY</label>
+                                <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                                    <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; color: #0f172a; cursor: pointer;">
+                                        <input type="radio" name="reqHotelCategory" value="3 Star" checked style="accent-color: #064e3b; width: 16px; height: 16px;" />
+                                        <span style="font-weight: 700;">3 Star</span> <span style="color: #64748b; font-size: 0.85rem;">(Best value package with essential services)</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; color: #0f172a; cursor: pointer;">
+                                        <input type="radio" name="reqHotelCategory" value="4 Star" style="accent-color: #064e3b; width: 16px; height: 16px;" />
+                                        <span style="font-weight: 700;">4 Star</span> <span style="color: #64748b; font-size: 0.85rem;">(Better hotels, improved transport, and added comfort)</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; color: #0f172a; cursor: pointer;">
+                                        <input type="radio" name="reqHotelCategory" value="5 Star" style="accent-color: #064e3b; width: 16px; height: 16px;" />
+                                        <span style="font-weight: 700;">5 Star</span> <span style="color: #64748b; font-size: 0.85rem;">(High-quality hotels and premium travel experience)</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Contact & Location -->
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.8rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.4rem; padding-bottom: 0.8rem; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                </div>
+                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Contact & Location</h2>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 1.2rem;" class="req-contact-grid-1">
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">FULL NAME * (as per Aadhar)</label>
+                                    <input type="text" id="reqFullName" placeholder="Enter fullname" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" value="${this.state.currentUser ? this.state.currentUser.name || '' : ''}" />
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">MOBILE NUMBER *</label>
+                                    <input type="tel" id="reqMobileNumber" placeholder="Enter mobile number" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" value="${this.state.currentUser ? this.state.currentUser.phone || '' : ''}" />
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">EMAIL ADDRESS</label>
+                                    <input type="email" id="reqEmailAddress" placeholder="Enter email address" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" value="${this.state.currentUser ? this.state.currentUser.email || '' : ''}" />
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 1.2rem;">
+                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">FULL ADDRESS *</label>
+                                <input type="text" id="reqFullAddress" placeholder="House No., Street, Locality, Landmark." style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" />
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; margin-bottom: 1.2rem;" class="req-contact-grid-2">
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">STATE *</label>
+                                    <select id="reqState" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;">
+                                        <option value="">Select State</option>
+                                        <option value="Jammu & Kashmir">Jammu & Kashmir</option>
+                                        <option value="Delhi">Delhi</option>
+                                        <option value="Maharashtra">Maharashtra</option>
+                                        <option value="Telangana">Telangana</option>
+                                        <option value="Karnataka">Karnataka</option>
+                                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                        <option value="Gujarat">Gujarat</option>
+                                        <option value="West Bengal">West Bengal</option>
+                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">DISTRICT / CITY *</label>
+                                    <input type="text" id="reqCity" placeholder="Select District/City" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">SPECIAL REQUIREMENTS <span style="color:#94a3b8; font-weight:400;">(Optional)</span></label>
+                                <textarea id="reqSpecialRequirements" rows="3" placeholder="e.g. Wheelchair assistance, specific flight preferences, elderly care needed..." style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none; resize: vertical;"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button Row -->
+                        <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+                            <button type="button" onclick="app.submitStandaloneUmrahRequest()" style="background: #064e3b; color: #ffffff; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 2.2rem; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 14px rgba(6, 78, 59, 0.3); transition: all 0.25s ease;" onmouseover="this.style.background='#043a2c';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#064e3b';this.style.transform=''">
+                                <span>Submit Request</span>
+                                <span style="font-size: 1.1rem;">➔</span>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Sidebar Cards -->
+                    <div style="display: flex; flex-direction: column; gap: 1.2rem;">
+                        
+                        <!-- Card 1: Your Request Includes -->
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.4rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                <h3 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0;">Your Request Includes</h3>
+                            </div>
+                            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                                <li style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; color: #475569; line-height: 1.4;">
+                                    <span style="color: #16a34a; font-weight: 900;">✓</span>
+                                    <span>Verified travel agents will review your request</span>
+                                </li>
+                                <li style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; color: #475569; line-height: 1.4;">
+                                    <span style="color: #16a34a; font-weight: 900;">✓</span>
+                                    <span>You will receive multiple offers</span>
+                                </li>
+                                <li style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; color: #475569; line-height: 1.4;">
+                                    <span style="color: #16a34a; font-weight: 900;">✓</span>
+                                    <span>Compare and choose the best package</span>
+                                </li>
+                                <li style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; color: #475569; line-height: 1.4;">
+                                    <span style="color: #16a34a; font-weight: 900;">✓</span>
+                                    <span>Your contact details are 100% private</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Card 2: Your Privacy is Our Priority -->
+                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 1.2rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                                <h3 style="font-size: 0.88rem; font-weight: 800; color: #14532d; margin: 0;">Your Privacy is Our Priority</h3>
+                            </div>
+                            <p style="font-size: 0.78rem; color: #15803d; margin: 0; line-height: 1.45;">
+                                We never share your personal details with agents. You stay in control.
+                            </p>
+                        </div>
+
+                        <!-- Card 3: Need Help? -->
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.4rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                            <h3 style="font-size: 0.92rem; font-weight: 800; color: #0f172a; margin: 0 0 0.3rem 0;">Need Help?</h3>
+                            <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 1rem 0;">Our support team is here to help you at every step.</p>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                                <button type="button" onclick="app.toggleChatbot()" style="width: 100%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 0.65rem 0.8rem; display: flex; align-items: center; gap: 0.6rem; text-align: left; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.borderColor='#064e3b'" onmouseout="this.style.borderColor='#cbd5e1'">
+                                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.82rem; font-weight: 800; color: #0f172a;">Chat with Us</div>
+                                        <div style="font-size: 0.7rem; color: #64748b;">We reply in a few minutes</div>
+                                    </div>
+                                </button>
+
+                                <a href="tel:+919541692891" style="width: 100%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 0.65rem 0.8rem; display: flex; align-items: center; gap: 0.6rem; text-align: left; text-decoration: none; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.borderColor='#064e3b'" onmouseout="this.style.borderColor='#cbd5e1'">
+                                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.82rem; font-weight: 800; color: #0f172a;">Call Support</div>
+                                        <div style="font-size: 0.7rem; color: #64748b;">+91 95416 92891</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        `;
+    }
+
     renderHomePage() {
         return `
             <!-- Full Screen (100vh) Instant Image Slideshow Hero Banner -->
@@ -1025,7 +1484,7 @@ class App {
                     </div>
 
                     <!-- Compact Apple Liquid Glass Square Feature Blocks (Headings & Icons Only) -->
-                    <div style="display:flex; justify-content:center; align-items:center; gap:0.85rem; flex-wrap:wrap; margin-top:1.8rem;">
+                    <div style="display:flex; justify-content:center; align-items:center; gap:0.85rem; flex-wrap:wrap; margin-top:2.8rem;">
                         
                         <!-- Square Block 1: 100% Verified Offers -->
                         <div style="display:inline-flex; align-items:center; gap:0.55rem; background:rgba(255,255,255,0.10); backdrop-filter:blur(22px) saturate(190%); -webkit-backdrop-filter:blur(22px) saturate(190%); border:1px solid rgba(255,255,255,0.38); border-radius:12px; padding:0.65rem 1.1rem; box-shadow:0 8px 24px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.65); transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.background='rgba(255,255,255,0.18)';" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.10)';">
