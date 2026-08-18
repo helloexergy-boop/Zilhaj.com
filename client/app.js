@@ -990,6 +990,70 @@ class App {
         this.navigate('request-form');
     }
 
+    setPilgrimageType(type) {
+        const btnUmrah = document.getElementById('tabUmrahReq');
+        const btnHajj = document.getElementById('tabHajjReq');
+        const hiddenType = document.getElementById('reqPilgrimageType');
+        const titleEl = document.getElementById('reqPageTitle');
+        const subTitleEl = document.getElementById('reqPageSubtitle');
+        const durationSelect = document.getElementById('reqDurationStay');
+
+        if (hiddenType) hiddenType.value = type;
+
+        if (type === 'HAJJ') {
+            if (btnHajj) {
+                btnHajj.style.background = '#064e3b';
+                btnHajj.style.borderColor = '#064e3b';
+                btnHajj.style.color = '#ffffff';
+                btnHajj.classList.add('active');
+            }
+            if (btnUmrah) {
+                btnUmrah.style.background = '#ffffff';
+                btnUmrah.style.borderColor = '#cbd5e1';
+                btnUmrah.style.color = '#475569';
+                btnUmrah.classList.remove('active');
+            }
+            if (titleEl) titleEl.innerText = 'Submit Hajj Request';
+            if (subTitleEl) subTitleEl.innerText = 'Submit your request for VIP & Deluxe Hajj pilgrimage packages with tent encampments in Mina, Arafat Wuqoof, Saudi licensed operators, and escrow safety.';
+            if (durationSelect) {
+                durationSelect.innerHTML = `
+                    <option value="">Select Hajj Duration</option>
+                    <option value="30 Days (Short Hajj Package)">30 Days (Short Hajj Package)</option>
+                    <option value="35 Days (Standard Hajj Package)">35 Days (Standard Hajj Package)</option>
+                    <option value="40 Days (Complete Hajj Package)">40 Days (Complete Hajj Package)</option>
+                    <option value="45 Days (Full VIP Hajj Package)">45 Days (Full VIP Hajj Package)</option>
+                    <option value="Custom Hajj Duration">Custom Hajj Duration</option>
+                `;
+            }
+        } else {
+            if (btnUmrah) {
+                btnUmrah.style.background = '#064e3b';
+                btnUmrah.style.borderColor = '#064e3b';
+                btnUmrah.style.color = '#ffffff';
+                btnUmrah.classList.add('active');
+            }
+            if (btnHajj) {
+                btnHajj.style.background = '#ffffff';
+                btnHajj.style.borderColor = '#cbd5e1';
+                btnHajj.style.color = '#475569';
+                btnHajj.classList.remove('active');
+            }
+            if (titleEl) titleEl.innerText = 'Submit Umrah Request';
+            if (subTitleEl) subTitleEl.innerText = 'Fill out the details below to receive personalized Umrah package quotes. Our partner agencies will craft itineraries tailored specifically to your group\'s needs and preferences.';
+            if (durationSelect) {
+                durationSelect.innerHTML = `
+                    <option value="">Select Umrah Duration</option>
+                    <option value="10–12 Days (Short Umrah)">10–12 Days (Short Umrah)</option>
+                    <option value="14–15 Days (Standard Umrah)">14–15 Days (Standard Umrah)</option>
+                    <option value="18–20 Days (Deluxe Umrah)">18–20 Days (Deluxe Umrah)</option>
+                    <option value="25–28 Days (Full Umrah)">25–28 Days (Full Umrah)</option>
+                    <option value="30 Days (Ramadan / Extended)">30 Days (Ramadan / Extended)</option>
+                    <option value="Custom Duration">Custom Duration</option>
+                `;
+            }
+        }
+    }
+
     setReqRoomType(btn, roomType) {
         document.querySelectorAll('.btn-room-type').forEach(b => {
             b.style.background = '#ffffff';
@@ -1014,12 +1078,13 @@ class App {
     }
 
     async submitStandaloneUmrahRequest() {
+        const pilgrimageType = document.getElementById('reqPilgrimageType')?.value || 'UMRAH';
         const departureCity = document.getElementById('reqDepartureCity')?.value;
         const departureDate = document.getElementById('reqDepartureDate')?.value;
         const durationStay = document.getElementById('reqDurationStay')?.value;
         const roomType = document.getElementById('reqRoomTypeVal')?.value || 'Single Bed';
         
-        const males = parseInt(document.getElementById('reqMaleCount')?.innerText || '1');
+        const males = parseInt(document.getElementById('reqMaleCount')?.innerText || '0');
         const females = parseInt(document.getElementById('reqFemaleCount')?.innerText || '0');
         const children = parseInt(document.getElementById('reqChildrenCount')?.innerText || '0');
         const infants = parseInt(document.getElementById('reqInfantsCount')?.innerText || '0');
@@ -1037,23 +1102,57 @@ class App {
 
         if (!departureCity) {
             this.showToast('Please select your Departure City', 'error');
+            document.getElementById('reqDepartureCity')?.focus();
             return;
         }
         if (!departureDate) {
             this.showToast('Please select your Preferred Departure Date', 'error');
+            document.getElementById('reqDepartureDate')?.focus();
+            return;
+        }
+        if (!durationStay) {
+            this.showToast('Please select your Duration of Stay', 'error');
+            document.getElementById('reqDurationStay')?.focus();
+            return;
+        }
+        if ((males + females + children + infants) === 0) {
+            this.showToast('Please add at least 1 traveler (Male, Female, Child, or Infant)', 'error');
             return;
         }
         if (!fullName) {
             this.showToast('Please enter your Full Name as per Aadhar', 'error');
+            document.getElementById('reqFullName')?.focus();
             return;
         }
         if (!mobileNumber) {
             this.showToast('Please enter your Mobile Number', 'error');
+            document.getElementById('reqMobileNumber')?.focus();
+            return;
+        }
+        if (!emailAddress) {
+            this.showToast('Please enter your Email Address', 'error');
+            document.getElementById('reqEmailAddress')?.focus();
+            return;
+        }
+        if (!address) {
+            this.showToast('Please enter your Full Address', 'error');
+            document.getElementById('reqFullAddress')?.focus();
+            return;
+        }
+        if (!state) {
+            this.showToast('Please select your State', 'error');
+            document.getElementById('reqState')?.focus();
+            return;
+        }
+        if (!city) {
+            this.showToast('Please enter your District / City', 'error');
+            document.getElementById('reqCity')?.focus();
             return;
         }
 
         const newReq = {
             id: 'req-' + Date.now(),
+            pilgrimageType,
             departureCity,
             departureDate,
             durationStay,
@@ -1071,7 +1170,7 @@ class App {
             address,
             state,
             city,
-            specialReqs,
+            specialReqs: specialReqs || 'None',
             status: 'OPEN',
             createdAt: new Date().toISOString()
         };
@@ -1080,31 +1179,51 @@ class App {
         existing.unshift(newReq);
         localStorage.setItem('umrah_requirements', JSON.stringify(existing));
         this.state.myRequirements.unshift(newReq);
+        if (this.state.admin && this.state.admin.requirements) {
+            this.state.admin.requirements.unshift(newReq);
+        }
 
-        this.showToast('🎉 Umrah Request submitted successfully! Travel agents will send custom quotes shortly.', 'success');
+        try {
+            await this.apiCall('/requirements', 'POST', newReq);
+        } catch (e) {
+            console.log('Requirement stored locally.');
+        }
+
+        const typeLabel = pilgrimageType === 'HAJJ' ? 'Hajj' : 'Umrah';
+        this.showToast(`🎉 ${typeLabel} Request submitted successfully! Travel agents will send custom quotes shortly.`, 'success');
         this.navigate('dashboard');
     }
 
     renderRequestFormPage() {
         return `
-        <div style="background: #f8fafc; min-height: 100vh; padding: 2.5rem 1rem 5rem;">
+        <div style="background: #f8fafc; min-height: 100vh; padding: 6rem 1rem 5rem; margin-top: 1rem;">
             <div style="max-width: 1200px; margin: 0 auto;">
                 
+                <!-- Hajj vs Umrah Switcher Pill -->
+                <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.6rem; flex-wrap: wrap;">
+                    <button type="button" id="tabUmrahReq" class="btn-pilgrim-tab active" onclick="app.setPilgrimageType('UMRAH')" style="padding: 0.65rem 1.6rem; border-radius: 99px; border: 1.5px solid #064e3b; background: #064e3b; color: #ffffff; font-weight: 800; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(6,78,59,0.2);">
+                        <span>🕋</span> <span>Umrah Request</span>
+                    </button>
+                    <button type="button" id="tabHajjReq" class="btn-pilgrim-tab" onclick="app.setPilgrimageType('HAJJ')" style="padding: 0.65rem 1.6rem; border-radius: 99px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; transition: all 0.2s ease;" onmouseover="this.style.borderColor='#064e3b'" onmouseout="if(!this.classList.contains('active'))this.style.borderColor='#cbd5e1'">
+                        <span>🕌</span> <span>Hajj Request</span>
+                    </button>
+                    <input type="hidden" id="reqPilgrimageType" value="UMRAH" />
+                </div>
+
                 <!-- Page Title Header -->
                 <div style="margin-bottom: 2rem;">
                     <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
                         <div style="width: 34px; height: 34px; border-radius: 10px; background: #e6f4ea; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
                                 <line x1="16" y1="13" x2="8" y2="13"></line>
                                 <line x1="16" y1="17" x2="8" y2="17"></line>
-                                <polyline points="10 9 9 9 8 9"></polyline>
                             </svg>
                         </div>
-                        <h1 style="font-size: 1.85rem; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.02em;">Submit Umrah Request</h1>
+                        <h1 id="reqPageTitle" style="font-size: 1.45rem; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.02em;">Submit Umrah Request</h1>
                     </div>
-                    <p style="color: #64748b; font-size: 0.95rem; margin: 0; max-width: 780px; line-height: 1.5;">
+                    <p id="reqPageSubtitle" style="color: #64748b; font-size: 0.92rem; margin: 0; max-width: 780px; line-height: 1.5;">
                         Fill out the details below to receive personalized Umrah package quotes. Our partner agencies will craft itineraries tailored specifically to your group's needs and preferences.
                     </p>
                 </div>
@@ -1129,7 +1248,7 @@ class App {
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 1.4rem;" class="req-trip-grid">
                                 <div>
                                     <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">CITY OF DEPARTURE *</label>
-                                    <select id="reqDepartureCity" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;">
+                                    <select id="reqDepartureCity" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #ffffff; outline: none;">
                                         <option value="">Select Departure City</option>
                                         <option value="Delhi (DEL)">Delhi (DEL)</option>
                                         <option value="Mumbai (BOM)">Mumbai (BOM)</option>
@@ -1141,27 +1260,40 @@ class App {
                                         <option value="Lucknow (LKO)">Lucknow (LKO)</option>
                                         <option value="Jaipur (JAI)">Jaipur (JAI)</option>
                                         <option value="Chennai (MAA)">Chennai (MAA)</option>
+                                        <option value="Cochin (COK)">Cochin (COK)</option>
+                                        <option value="Kozhikode (CCJ)">Kozhikode (CCJ)</option>
+                                        <option value="Mangalore (IXE)">Mangalore (IXE)</option>
+                                        <option value="Patna (PAT)">Patna (PAT)</option>
+                                        <option value="Ranchi (IXR)">Ranchi (IXR)</option>
+                                        <option value="Guwahati (GAU)">Guwahati (GAU)</option>
+                                        <option value="Bhopal (BHO)">Bhopal (BHO)</option>
+                                        <option value="Nagpur (NAG)">Nagpur (NAG)</option>
+                                        <option value="Varanasi (VNS)">Varanasi (VNS)</option>
+                                        <option value="Amritsar (ATQ)">Amritsar (ATQ)</option>
                                     </select>
                                 </div>
 
                                 <div>
                                     <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">PREFERRED DEPARTURE DATE *</label>
-                                    <input type="date" id="reqDepartureDate" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" />
+                                    <input type="date" id="reqDepartureDate" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #ffffff; outline: none;" />
                                 </div>
 
                                 <div>
-                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">DURATION OF STAY</label>
-                                    <select id="reqDurationStay" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;">
-                                        <option value="14-15 Days">14–15 Days</option>
-                                        <option value="20 Days">20 Days</option>
-                                        <option value="30 Days">30 Days</option>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">DURATION OF STAY *</label>
+                                    <select id="reqDurationStay" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #ffffff; outline: none;">
+                                        <option value="">Select Umrah Duration</option>
+                                        <option value="10–12 Days (Short Umrah)">10–12 Days (Short Umrah)</option>
+                                        <option value="14–15 Days (Standard Umrah)">14–15 Days (Standard Umrah)</option>
+                                        <option value="18–20 Days (Deluxe Umrah)">18–20 Days (Deluxe Umrah)</option>
+                                        <option value="25–28 Days (Full Umrah)">25–28 Days (Full Umrah)</option>
+                                        <option value="30 Days (Ramadan / Extended)">30 Days (Ramadan / Extended)</option>
                                         <option value="Custom Duration">Custom Duration</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div>
-                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.6rem; text-transform: uppercase;">WHAT KIND OF HOTEL ROOM?</label>
+                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.6rem; text-transform: uppercase;">WHAT KIND OF HOTEL ROOM? *</label>
                                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem;" id="reqRoomTypeButtons">
                                     <button type="button" class="btn-room-type active" onclick="app.setReqRoomType(this, 'Single Bed')" style="padding: 0.75rem; border-radius: 8px; border: 1.5px solid #064e3b; background: #064e3b; color: #ffffff; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s ease;">Single Bed</button>
                                     <button type="button" class="btn-room-type" onclick="app.setReqRoomType(this, 'Double Bed')" style="padding: 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: all 0.2s ease;">Double Bed</button>
@@ -1183,12 +1315,12 @@ class App {
                                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                                     </svg>
                                 </div>
-                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Traveler Details</h2>
+                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Traveler Details *</h2>
                             </div>
 
                             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.4rem;" class="req-travelers-grid">
                                 <!-- Male Adults -->
-                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
                                     <div>
                                         <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">Male</div>
                                         <div style="font-size: 0.72rem; color: #64748b;">Adults</div>
@@ -1201,20 +1333,20 @@ class App {
                                 </div>
 
                                 <!-- Female Adults -->
-                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
                                     <div>
                                         <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">Female</div>
                                         <div style="font-size: 0.72rem; color: #64748b;">Adults (Requires Mehram)</div>
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 0.6rem;">
                                         <button type="button" onclick="app.adjustReqCounter('reqFemaleCount', -1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">-</button>
-                                        <span id="reqFemaleCount" style="font-weight: 800; font-size: 0.95rem; width: 18px; text-align: center;">1</span>
+                                        <span id="reqFemaleCount" style="font-weight: 800; font-size: 0.95rem; width: 18px; text-align: center;">0</span>
                                         <button type="button" onclick="app.adjustReqCounter('reqFemaleCount', 1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">+</button>
                                     </div>
                                 </div>
 
                                 <!-- Children -->
-                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
                                     <div>
                                         <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">Children</div>
                                         <div style="font-size: 0.72rem; color: #64748b;">2–11 years</div>
@@ -1227,7 +1359,7 @@ class App {
                                 </div>
 
                                 <!-- Infants -->
-                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
                                     <div>
                                         <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">Infants</div>
                                         <div style="font-size: 0.72rem; color: #64748b;">Below 2 years</div>
@@ -1264,11 +1396,11 @@ class App {
                                         <path d="M12 7v6"></path>
                                     </svg>
                                 </div>
-                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Hotel Preference</h2>
+                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Hotel Preference *</h2>
                             </div>
 
                             <div>
-                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.8rem; text-transform: uppercase;">HOTEL CATEGORY</label>
+                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.8rem; text-transform: uppercase;">HOTEL CATEGORY *</label>
                                 <div style="display: flex; flex-direction: column; gap: 0.8rem;">
                                     <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; color: #0f172a; cursor: pointer;">
                                         <input type="radio" name="reqHotelCategory" value="3 Star" checked style="accent-color: #064e3b; width: 16px; height: 16px;" />
@@ -1286,7 +1418,7 @@ class App {
                             </div>
                         </div>
 
-                        <!-- 4. Contact & Location -->
+                        <!-- 4. Contact & Location (No default pre-filled values) -->
                         <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.8rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
                             <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.4rem; padding-bottom: 0.8rem; border-bottom: 1px solid #f1f5f9;">
                                 <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -1301,27 +1433,27 @@ class App {
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 1.2rem;" class="req-contact-grid-1">
                                 <div>
                                     <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">FULL NAME * (as per Aadhar)</label>
-                                    <input type="text" id="reqFullName" placeholder="Enter fullname" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" value="${this.state.currentUser ? this.state.currentUser.name || '' : ''}" />
+                                    <input type="text" id="reqFullName" placeholder="Enter fullname" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #ffffff; outline: none;" value="" />
                                 </div>
                                 <div>
                                     <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">MOBILE NUMBER *</label>
-                                    <input type="tel" id="reqMobileNumber" placeholder="Enter mobile number" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" value="${this.state.currentUser ? this.state.currentUser.phone || '' : ''}" />
+                                    <input type="tel" id="reqMobileNumber" placeholder="Enter mobile number" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #ffffff; outline: none;" value="" />
                                 </div>
                                 <div>
-                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">EMAIL ADDRESS</label>
-                                    <input type="email" id="reqEmailAddress" placeholder="Enter email address" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" value="${this.state.currentUser ? this.state.currentUser.email || '' : ''}" />
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">EMAIL ADDRESS *</label>
+                                    <input type="email" id="reqEmailAddress" placeholder="Enter email address" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #ffffff; outline: none;" value="" />
                                 </div>
                             </div>
 
                             <div style="margin-bottom: 1.2rem;">
                                 <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">FULL ADDRESS *</label>
-                                <input type="text" id="reqFullAddress" placeholder="House No., Street, Locality, Landmark." style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" />
+                                <input type="text" id="reqFullAddress" placeholder="House No., Street, Locality, Landmark." style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #ffffff; outline: none;" value="" />
                             </div>
 
                             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; margin-bottom: 1.2rem;" class="req-contact-grid-2">
                                 <div>
                                     <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">STATE *</label>
-                                    <select id="reqState" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;">
+                                    <select id="reqState" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #ffffff; outline: none;">
                                         <option value="">Select State</option>
                                         <option value="Jammu & Kashmir">Jammu & Kashmir</option>
                                         <option value="Delhi">Delhi</option>
@@ -1332,26 +1464,39 @@ class App {
                                         <option value="Gujarat">Gujarat</option>
                                         <option value="West Bengal">West Bengal</option>
                                         <option value="Tamil Nadu">Tamil Nadu</option>
+                                        <option value="Kerala">Kerala</option>
+                                        <option value="Bihar">Bihar</option>
+                                        <option value="Jharkhand">Jharkhand</option>
+                                        <option value="Punjab">Punjab</option>
+                                        <option value="Rajasthan">Rajasthan</option>
+                                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                        <option value="Assam">Assam</option>
+                                        <option value="Haryana">Haryana</option>
+                                        <option value="Odisha">Odisha</option>
+                                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                        <option value="Uttarakhand">Uttarakhand</option>
+                                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                        <option value="Goa">Goa</option>
+                                        <option value="Chhattisgarh">Chhattisgarh</option>
                                     </select>
                                 </div>
 
                                 <div>
                                     <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">DISTRICT / CITY *</label>
-                                    <input type="text" id="reqCity" placeholder="Select District/City" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" />
+                                    <input type="text" id="reqCity" placeholder="Enter District / City" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #ffffff; outline: none;" value="" />
                                 </div>
                             </div>
 
                             <div>
                                 <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">SPECIAL REQUIREMENTS <span style="color:#94a3b8; font-weight:400;">(Optional)</span></label>
-                                <textarea id="reqSpecialRequirements" rows="3" placeholder="e.g. Wheelchair assistance, specific flight preferences, elderly care needed..." style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none; resize: vertical;"></textarea>
+                                <textarea id="reqSpecialRequirements" rows="3" placeholder="e.g. Wheelchair assistance, specific flight preferences, elderly care needed..." style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #ffffff; outline: none; resize: vertical;"></textarea>
                             </div>
                         </div>
 
-                        <!-- Submit Button Row -->
+                        <!-- Submit Button Row (Arrow removed as requested!) -->
                         <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
-                            <button type="button" onclick="app.submitStandaloneUmrahRequest()" style="background: #064e3b; color: #ffffff; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 2.2rem; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 14px rgba(6, 78, 59, 0.3); transition: all 0.25s ease;" onmouseover="this.style.background='#043a2c';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#064e3b';this.style.transform=''">
-                                <span>Submit Request</span>
-                                <span style="font-size: 1.1rem;">➔</span>
+                            <button type="button" onclick="app.submitStandaloneUmrahRequest()" style="background: #064e3b; color: #ffffff; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 2.5rem; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(6, 78, 59, 0.3); transition: all 0.25s ease;" onmouseover="this.style.background='#043a2c';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#064e3b';this.style.transform=''">
+                                Submit Request
                             </button>
                         </div>
 
