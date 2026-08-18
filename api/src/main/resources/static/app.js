@@ -1743,37 +1743,6 @@ class App {
                 </div>
             </section>
 
-            <!-- Live Request Submission Container -->
-            <div id="requestFormAnchor" style="max-width:1140px; margin:3.5rem auto; padding:0 1.5rem;">
-                ${!this.state.currentUser
-                ? `
-                        <div class="sacred-journey-card-modern">
-                            <div class="sacred-journey-icon-badge">🕋</div>
-                            <h2 class="sacred-journey-title">Post Your Sacred Journey Requirement</h2>
-                            <p class="sacred-journey-subtitle">
-                                Please log in or create your free account to access the custom travel request form and receive direct reverse-bidding offers from verified Umrah operators.
-                            </p>
-                            <div class="sacred-journey-actions">
-                                <button class="btn-sacred-login" onclick="app.openAuthModal('login')">
-                                    <span>🔑</span> <span>Login to Continue</span>
-                                </button>
-                                <button class="btn-sacred-signup" onclick="app.openAuthModal('register')">
-                                    <span>✨</span> <span>Create Account</span>
-                                </button>
-                            </div>
-                        </div>
-                    `
-                : this.state.currentUser?.role === 'ROLE_ADMIN'
-                    ? `
-                        <div style="background:#fefce8; border:1.5px solid #fde68a; border-radius:14px; padding:2rem; text-align:center;">
-                            <h3 style="color:#854d0e; margin-bottom:0.8rem;">👑 Administrator Mode</h3>
-                            <p style="color:#713f12; margin-bottom:1.2rem;">You are logged in as an Administrator. You cannot submit Zaireen travel requests.</p>
-                            <button class="btn btn-gold" onclick="app.navigate('admin')">Go to Admin Dashboard</button>
-                        </div>
-                    `
-                    : this.renderCustomRequirementForm()
-            }
-            </div>
             ${this.renderLiquidGlassFeedbackSection()}
         `;
     }

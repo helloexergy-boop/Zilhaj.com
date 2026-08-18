@@ -39,8 +39,8 @@ const staticOptions = {
         }
     }
 };
-app.use(express.static(publicDir, staticOptions));
 app.use(express.static(clientDir, staticOptions));
+app.use(express.static(publicDir, staticOptions));
 
 // ============================================================================
 // STAFF / SUB-ADMIN AUTHORIZATION MODEL

@@ -5488,6 +5488,55 @@ p, body {
     }
 }
 
+/* Premium Liquid Glass Badge for Main Hero Slideshow */
+.hero-liquid-glass-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.10) 100%) !important;
+    backdrop-filter: blur(28px) saturate(220%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(220%) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.65) !important;
+    border-radius: 999px !important;
+    padding: 0.65rem 1.8rem !important;
+    margin-bottom: 1.8rem !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), inset 0 1.5px 2px rgba(255, 255, 255, 0.85), 0 0 25px rgba(255, 255, 255, 0.3) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.hero-liquid-glass-badge::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -50% !important;
+    width: 200% !important;
+    height: 55% !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 100%) !important;
+    transform: rotate(-3deg) !important;
+    pointer-events: none !important;
+}
+
+.hero-liquid-glass-badge:hover {
+    transform: translateY(-3px) scale(1.03) !important;
+    border-color: rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.55), inset 0 1.5px 3px rgba(255, 255, 255, 0.95), 0 0 35px rgba(255, 255, 255, 0.45) !important;
+}
+
+.hero-badge-text {
+    font-size: 0.88rem !important;
+    font-weight: 800 !important;
+    color: #FFFFFF !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.14em !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 0 14px rgba(255, 255, 255, 0.6) !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+
 
 
 

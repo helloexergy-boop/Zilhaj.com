@@ -74,20 +74,23 @@ class App {
         } catch (e) {}
 
         // Handle Google OAuth callback URL parameters (Step 2 & 5)
-        if (window.location.hash && window.location.hash.includes('google_auth_success')) {
+        const oauthParams = new URLSearchParams(window.location.search);
+        if (oauthParams.get('google_auth_success') === '1') {
             try {
-                const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
-                const userParam = hashParams.get('user');
+                const userParam = oauthParams.get('user');
                 if (userParam) {
                     const userObj = JSON.parse(decodeURIComponent(userParam));
                     this.state.currentUser = userObj;
                     localStorage.setItem('umrah_user', JSON.stringify(userObj));
                     this.showToast(`🌐 Welcome, ${userObj.name}! Logged in via Google OAuth`, 'success');
-                    window.location.hash = '#home';
                 }
+                history.replaceState(null, '', window.location.pathname);
             } catch (e) {
-                console.warn('Google OAuth hash parse notice:', e);
+                console.warn('Google OAuth query parse notice:', e);
             }
+        } else if (oauthParams.get('google_auth_error') === '1') {
+            this.showToast(`Google login failed: ${decodeURIComponent(oauthParams.get('error') || 'unknown error')}`, 'error');
+            history.replaceState(null, '', window.location.pathname);
         }
 
         // Initialize theme
@@ -104,16 +107,13 @@ class App {
             this.state.packages = [];
         }
 
-        // Browser back/forward support (hash history)
+        // Browser back/forward support (History API)
         window.addEventListener('popstate', (e) => {
-            this.renderPage((e.state && e.state.page) || this.getHashPage());
-        });
-        window.addEventListener('hashchange', () => {
-            this.renderPage(this.getHashPage());
+            this.renderPage((e.state && e.state.page) || this.getCurrentPage());
         });
 
         // Render page IMMEDIATELY (0ms delay) so page is never blank!
-        this.navigate(this.getHashPage());
+        this.navigate(this.getCurrentPage());
 
         // Fetch remote updates asynchronously without blocking page rendering
         this.fetchPackages().then(() => {
@@ -502,9 +502,10 @@ class App {
 
         if (navMenu) {
             navMenu.innerHTML = `
-                <a href="#home" class="nav-link ${this.state.currentPage === 'home' ? 'active' : ''}" onclick="app.navigate('home')">Home</a>
-                <a href="#guides" class="nav-link ${this.state.currentPage === 'guides' ? 'active' : ''}" onclick="app.navigate('guides')">Hajj & Umrah Guides</a>
-                <a href="#about" class="nav-link ${this.state.currentPage === 'about' ? 'active' : ''}" onclick="app.navigate('about')">About Us</a>
+                <a href="/home" class="nav-link ${this.state.currentPage === 'home' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('home')">Home</a>
+                <a href="/services" class="nav-link ${this.state.currentPage === 'services' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('services')">Services</a>
+                <a href="#" class="nav-link" onclick="app.scrollToContact(event)">Contact Us</a>
+                <a href="/about" class="nav-link ${this.state.currentPage === 'about' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('about')">About Us</a>
                 <div class="mobile-only-auth" style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid #e2e8f0; display:flex; flex-direction:column; gap:0.5rem; width:100%;">
                     ${!this.state.currentUser ? `
                         <button class="btn btn-outline" onclick="app.openAuthModal('login')" style="width:100%; border:1.5px solid #0f172a; color:#0f172a; font-weight:700; border-radius:10px; padding:0.65rem; font-size:0.9rem; background:transparent; cursor:pointer;">Login</button>
@@ -561,6 +562,16 @@ class App {
                 `;
             }
         }
+    }
+
+    scrollToContact(e) {
+        if (e) e.preventDefault();
+        const footerContact = document.getElementById('footerContactSection') || document.querySelector('footer');
+        if (footerContact) {
+            footerContact.scrollIntoView({ behavior: 'smooth' });
+        }
+        document.getElementById('navMenu')?.classList.remove('open');
+        document.querySelector('.mobile-toggle')?.classList.remove('active');
     }
 
     async loginWithGoogle() {
@@ -837,9 +848,12 @@ class App {
         if (canonical) canonical.setAttribute('href', current.url);
     }
 
-    getHashPage() {
-        const h = window.location.hash || '';
-        const page = h.replace(/^#\/?/, '').trim();
+    getCurrentPage() {
+        const p = window.location.pathname || '/';
+        let page = p.replace(/^\//, '').replace(/\/+$/, '').trim();
+        if (!page && window.location.hash) {
+            page = window.location.hash.replace(/^#\/?/, '').trim();
+        }
         return page === '' ? 'home' : page;
     }
 
@@ -851,9 +865,9 @@ class App {
         }
 
         const norm = String(page).replace(/^\//, '');
-        if (norm && norm !== this.getHashPage()) {
+        if (norm && norm !== this.getCurrentPage()) {
             try {
-                history.pushState({ page: norm }, '', '#/' + norm);
+                history.pushState({ page: norm }, '', '/' + norm);
             } catch (e) {}
         }
 
@@ -863,8 +877,11 @@ class App {
     renderPage(page) {
         const rawPage = page;
         if (page === 'umrah-packages' || page === 'hajj-packages') page = 'packages';
-        if (page === 'mecca-medina-guide' || page === 'blog' || (typeof page === 'string' && page.startsWith('blog/'))) page = 'guides';
-        if (page === 'contact') page = 'about';
+        if (page === 'services' || page === 'guides' || page === 'mecca-medina-guide' || page === 'blog' || (typeof page === 'string' && page.startsWith('blog/'))) page = 'services';
+        if (page === 'contact') {
+            this.scrollToContact();
+            return;
+        }
         if (page === 'faqs') page = 'faqs';
         if (page === 'terms') page = 'terms';
         if (page === 'privacy') page = 'privacy';
@@ -894,8 +911,10 @@ class App {
         if (page === 'home' || page === 'packages') {
             main.innerHTML = this.renderHomePage();
             this.initHeroVideoPlaylist();
-        } else if (page === 'guides') {
-            main.innerHTML = this.renderGuidesPage();
+        } else if (page === 'request-form' || page === 'submit-request' || page === 'request') {
+            main.innerHTML = this.renderRequestFormPage();
+        } else if (page === 'services' || page === 'guides') {
+            main.innerHTML = this.renderServicesPage();
         } else if (page === 'faqs') {
             main.innerHTML = this.renderFaqsPage();
         } else if (page === 'terms') {
@@ -962,6 +981,463 @@ class App {
         }, 4000);
     }
 
+    handleStartJourneyClick() {
+        this.navigate('request-form');
+    }
+
+    setReqRoomType(btn, roomType) {
+        document.querySelectorAll('.btn-room-type').forEach(b => {
+            b.style.background = '#ffffff';
+            b.style.borderColor = '#cbd5e1';
+            b.style.color = '#475569';
+            b.classList.remove('active');
+        });
+        btn.style.background = '#064e3b';
+        btn.style.borderColor = '#064e3b';
+        btn.style.color = '#ffffff';
+        btn.classList.add('active');
+        const hidden = document.getElementById('reqRoomTypeVal');
+        if (hidden) hidden.value = roomType;
+    }
+
+    adjustReqCounter(id, delta) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        let val = parseInt(el.innerText) || 0;
+        val = Math.max(0, val + delta);
+        el.innerText = val;
+    }
+
+    async submitStandaloneUmrahRequest() {
+        const departureCity = document.getElementById('reqDepartureCity')?.value;
+        const departureDate = document.getElementById('reqDepartureDate')?.value;
+        const durationStay = document.getElementById('reqDurationStay')?.value;
+        const roomType = document.getElementById('reqRoomTypeVal')?.value || 'Single Bed';
+        
+        const males = parseInt(document.getElementById('reqMaleCount')?.innerText || '1');
+        const females = parseInt(document.getElementById('reqFemaleCount')?.innerText || '0');
+        const children = parseInt(document.getElementById('reqChildrenCount')?.innerText || '0');
+        const infants = parseInt(document.getElementById('reqInfantsCount')?.innerText || '0');
+        
+        const newlyMarried = document.querySelector('input[name="reqNewlyMarried"]:checked')?.value || 'No';
+        const hotelCategory = document.querySelector('input[name="reqHotelCategory"]:checked')?.value || '3 Star';
+        
+        const fullName = document.getElementById('reqFullName')?.value?.trim();
+        const mobileNumber = document.getElementById('reqMobileNumber')?.value?.trim();
+        const emailAddress = document.getElementById('reqEmailAddress')?.value?.trim();
+        const address = document.getElementById('reqFullAddress')?.value?.trim();
+        const state = document.getElementById('reqState')?.value;
+        const city = document.getElementById('reqCity')?.value?.trim();
+        const specialReqs = document.getElementById('reqSpecialRequirements')?.value?.trim();
+
+        if (!departureCity) {
+            this.showToast('Please select your Departure City', 'error');
+            return;
+        }
+        if (!departureDate) {
+            this.showToast('Please select your Preferred Departure Date', 'error');
+            return;
+        }
+        if (!fullName) {
+            this.showToast('Please enter your Full Name as per Aadhar', 'error');
+            return;
+        }
+        if (!mobileNumber) {
+            this.showToast('Please enter your Mobile Number', 'error');
+            return;
+        }
+
+        const newReq = {
+            id: 'req-' + Date.now(),
+            departureCity,
+            departureDate,
+            durationStay,
+            roomType,
+            adults: males + females,
+            males,
+            females,
+            children,
+            infants,
+            newlyMarried,
+            hotelCategory,
+            fullName,
+            mobileNumber,
+            emailAddress,
+            address,
+            state,
+            city,
+            specialReqs,
+            status: 'OPEN',
+            createdAt: new Date().toISOString()
+        };
+
+        const existing = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+        existing.unshift(newReq);
+        localStorage.setItem('umrah_requirements', JSON.stringify(existing));
+        this.state.myRequirements.unshift(newReq);
+
+        this.showToast('🎉 Umrah Request submitted successfully! Travel agents will send custom quotes shortly.', 'success');
+        this.navigate('dashboard');
+    }
+
+    renderRequestFormPage() {
+        return `
+        <div style="background: #f8fafc; min-height: 100vh; padding: 2.5rem 1rem 5rem;">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                
+                <!-- Page Title Header -->
+                <div style="margin-bottom: 2rem;">
+                    <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+                        <div style="width: 34px; height: 34px; border-radius: 10px; background: #e6f4ea; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                        <h1 style="font-size: 1.85rem; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.02em;">Submit Umrah Request</h1>
+                    </div>
+                    <p style="color: #64748b; font-size: 0.95rem; margin: 0; max-width: 780px; line-height: 1.5;">
+                        Fill out the details below to receive personalized Umrah package quotes. Our partner agencies will craft itineraries tailored specifically to your group's needs and preferences.
+                    </p>
+                </div>
+
+                <!-- Two Column Layout: Main Form (Left) & Sidebar Cards (Right) -->
+                <div style="display: grid; grid-template-columns: 1fr 340px; gap: 1.8rem; align-items: start;" class="request-form-grid">
+                    
+                    <!-- Left Form Cards -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        
+                        <!-- 1. Trip Details -->
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.8rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.4rem; padding-bottom: 0.8rem; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #064e3b; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                    </svg>
+                                </div>
+                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Trip Details</h2>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 1.4rem;" class="req-trip-grid">
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">CITY OF DEPARTURE *</label>
+                                    <select id="reqDepartureCity" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;">
+                                        <option value="">Select Departure City</option>
+                                        <option value="Delhi (DEL)">Delhi (DEL)</option>
+                                        <option value="Mumbai (BOM)">Mumbai (BOM)</option>
+                                        <option value="Srinagar (SXR)">Srinagar (SXR)</option>
+                                        <option value="Hyderabad (HYD)">Hyderabad (HYD)</option>
+                                        <option value="Bangalore (BLR)">Bangalore (BLR)</option>
+                                        <option value="Kolkata (CCU)">Kolkata (CCU)</option>
+                                        <option value="Ahmedabad (AMD)">Ahmedabad (AMD)</option>
+                                        <option value="Lucknow (LKO)">Lucknow (LKO)</option>
+                                        <option value="Jaipur (JAI)">Jaipur (JAI)</option>
+                                        <option value="Chennai (MAA)">Chennai (MAA)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">PREFERRED DEPARTURE DATE *</label>
+                                    <input type="date" id="reqDepartureDate" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" />
+                                </div>
+
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">DURATION OF STAY</label>
+                                    <select id="reqDurationStay" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;">
+                                        <option value="14-15 Days">14–15 Days</option>
+                                        <option value="20 Days">20 Days</option>
+                                        <option value="30 Days">30 Days</option>
+                                        <option value="Custom Duration">Custom Duration</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.6rem; text-transform: uppercase;">WHAT KIND OF HOTEL ROOM?</label>
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem;" id="reqRoomTypeButtons">
+                                    <button type="button" class="btn-room-type active" onclick="app.setReqRoomType(this, 'Single Bed')" style="padding: 0.75rem; border-radius: 8px; border: 1.5px solid #064e3b; background: #064e3b; color: #ffffff; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s ease;">Single Bed</button>
+                                    <button type="button" class="btn-room-type" onclick="app.setReqRoomType(this, 'Double Bed')" style="padding: 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: all 0.2s ease;">Double Bed</button>
+                                    <button type="button" class="btn-room-type" onclick="app.setReqRoomType(this, 'Three Bed')" style="padding: 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: all 0.2s ease;">Three Bed</button>
+                                    <button type="button" class="btn-room-type" onclick="app.setReqRoomType(this, 'Four Bed')" style="padding: 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: all 0.2s ease;">Four Bed</button>
+                                </div>
+                                <input type="hidden" id="reqRoomTypeVal" value="Single Bed" />
+                            </div>
+                        </div>
+
+                        <!-- 2. Traveler Details -->
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.8rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.4rem; padding-bottom: 0.8rem; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                </div>
+                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Traveler Details</h2>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.4rem;" class="req-travelers-grid">
+                                <!-- Male Adults -->
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">Male</div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">Adults</div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                        <button type="button" onclick="app.adjustReqCounter('reqMaleCount', -1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">-</button>
+                                        <span id="reqMaleCount" style="font-weight: 800; font-size: 0.95rem; width: 18px; text-align: center;">1</span>
+                                        <button type="button" onclick="app.adjustReqCounter('reqMaleCount', 1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- Female Adults -->
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">Female</div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">Adults (Requires Mehram)</div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                        <button type="button" onclick="app.adjustReqCounter('reqFemaleCount', -1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">-</button>
+                                        <span id="reqFemaleCount" style="font-weight: 800; font-size: 0.95rem; width: 18px; text-align: center;">1</span>
+                                        <button type="button" onclick="app.adjustReqCounter('reqFemaleCount', 1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- Children -->
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">Children</div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">2–11 years</div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                        <button type="button" onclick="app.adjustReqCounter('reqChildrenCount', -1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">-</button>
+                                        <span id="reqChildrenCount" style="font-weight: 800; font-size: 0.95rem; width: 18px; text-align: center;">0</span>
+                                        <button type="button" onclick="app.adjustReqCounter('reqChildrenCount', 1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- Infants -->
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">Infants</div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">Below 2 years</div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                        <button type="button" onclick="app.adjustReqCounter('reqInfantsCount', -1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">-</button>
+                                        <span id="reqInfantsCount" style="font-weight: 800; font-size: 0.95rem; width: 18px; text-align: center;">0</span>
+                                        <button type="button" onclick="app.adjustReqCounter('reqInfantsCount', 1)" style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-weight: 700; cursor: pointer;">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.6rem; text-transform: uppercase;">ARE YOU A NEWLY MARRIED COUPLE?</label>
+                                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: #0f172a; cursor: pointer;">
+                                        <input type="radio" name="reqNewlyMarried" value="Yes" style="accent-color: #064e3b;" /> Yes
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: #0f172a; cursor: pointer;">
+                                        <input type="radio" name="reqNewlyMarried" value="No" checked style="accent-color: #064e3b;" /> No
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Hotel Preference -->
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.8rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.4rem; padding-bottom: 0.8rem; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 21h18"></path>
+                                        <path d="M19 21v-4a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v4"></path>
+                                        <path d="M9 10h6"></path>
+                                        <path d="M12 7v6"></path>
+                                    </svg>
+                                </div>
+                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Hotel Preference</h2>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.8rem; text-transform: uppercase;">HOTEL CATEGORY</label>
+                                <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                                    <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; color: #0f172a; cursor: pointer;">
+                                        <input type="radio" name="reqHotelCategory" value="3 Star" checked style="accent-color: #064e3b; width: 16px; height: 16px;" />
+                                        <span style="font-weight: 700;">3 Star</span> <span style="color: #64748b; font-size: 0.85rem;">(Best value package with essential services)</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; color: #0f172a; cursor: pointer;">
+                                        <input type="radio" name="reqHotelCategory" value="4 Star" style="accent-color: #064e3b; width: 16px; height: 16px;" />
+                                        <span style="font-weight: 700;">4 Star</span> <span style="color: #64748b; font-size: 0.85rem;">(Better hotels, improved transport, and added comfort)</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; color: #0f172a; cursor: pointer;">
+                                        <input type="radio" name="reqHotelCategory" value="5 Star" style="accent-color: #064e3b; width: 16px; height: 16px;" />
+                                        <span style="font-weight: 700;">5 Star</span> <span style="color: #64748b; font-size: 0.85rem;">(High-quality hotels and premium travel experience)</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Contact & Location -->
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.8rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.4rem; padding-bottom: 0.8rem; border-bottom: 1px solid #f1f5f9;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                </div>
+                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Contact & Location</h2>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 1.2rem;" class="req-contact-grid-1">
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">FULL NAME * (as per Aadhar)</label>
+                                    <input type="text" id="reqFullName" placeholder="Enter fullname" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" value="${this.state.currentUser ? this.state.currentUser.name || '' : ''}" />
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">MOBILE NUMBER *</label>
+                                    <input type="tel" id="reqMobileNumber" placeholder="Enter mobile number" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" value="${this.state.currentUser ? this.state.currentUser.phone || '' : ''}" />
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">EMAIL ADDRESS</label>
+                                    <input type="email" id="reqEmailAddress" placeholder="Enter email address" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" value="${this.state.currentUser ? this.state.currentUser.email || '' : ''}" />
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 1.2rem;">
+                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">FULL ADDRESS *</label>
+                                <input type="text" id="reqFullAddress" placeholder="House No., Street, Locality, Landmark." style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" />
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; margin-bottom: 1.2rem;" class="req-contact-grid-2">
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">STATE *</label>
+                                    <select id="reqState" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;">
+                                        <option value="">Select State</option>
+                                        <option value="Jammu & Kashmir">Jammu & Kashmir</option>
+                                        <option value="Delhi">Delhi</option>
+                                        <option value="Maharashtra">Maharashtra</option>
+                                        <option value="Telangana">Telangana</option>
+                                        <option value="Karnataka">Karnataka</option>
+                                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                        <option value="Gujarat">Gujarat</option>
+                                        <option value="West Bengal">West Bengal</option>
+                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">DISTRICT / CITY *</label>
+                                    <input type="text" id="reqCity" placeholder="Select District/City" style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none;" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.05em; margin-bottom: 0.45rem; text-transform: uppercase;">SPECIAL REQUIREMENTS <span style="color:#94a3b8; font-weight:400;">(Optional)</span></label>
+                                <textarea id="reqSpecialRequirements" rows="3" placeholder="e.g. Wheelchair assistance, specific flight preferences, elderly care needed..." style="width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #f8fafc; outline: none; resize: vertical;"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button Row -->
+                        <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+                            <button type="button" onclick="app.submitStandaloneUmrahRequest()" style="background: #064e3b; color: #ffffff; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 2.2rem; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 14px rgba(6, 78, 59, 0.3); transition: all 0.25s ease;" onmouseover="this.style.background='#043a2c';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#064e3b';this.style.transform=''">
+                                <span>Submit Request</span>
+                                <span style="font-size: 1.1rem;">➔</span>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Sidebar Cards -->
+                    <div style="display: flex; flex-direction: column; gap: 1.2rem;">
+                        
+                        <!-- Card 1: Your Request Includes -->
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.4rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                <h3 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0;">Your Request Includes</h3>
+                            </div>
+                            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                                <li style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; color: #475569; line-height: 1.4;">
+                                    <span style="color: #16a34a; font-weight: 900;">✓</span>
+                                    <span>Verified travel agents will review your request</span>
+                                </li>
+                                <li style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; color: #475569; line-height: 1.4;">
+                                    <span style="color: #16a34a; font-weight: 900;">✓</span>
+                                    <span>You will receive multiple offers</span>
+                                </li>
+                                <li style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; color: #475569; line-height: 1.4;">
+                                    <span style="color: #16a34a; font-weight: 900;">✓</span>
+                                    <span>Compare and choose the best package</span>
+                                </li>
+                                <li style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; color: #475569; line-height: 1.4;">
+                                    <span style="color: #16a34a; font-weight: 900;">✓</span>
+                                    <span>Your contact details are 100% private</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Card 2: Your Privacy is Our Priority -->
+                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 1.2rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                                <h3 style="font-size: 0.88rem; font-weight: 800; color: #14532d; margin: 0;">Your Privacy is Our Priority</h3>
+                            </div>
+                            <p style="font-size: 0.78rem; color: #15803d; margin: 0; line-height: 1.45;">
+                                We never share your personal details with agents. You stay in control.
+                            </p>
+                        </div>
+
+                        <!-- Card 3: Need Help? -->
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.4rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                            <h3 style="font-size: 0.92rem; font-weight: 800; color: #0f172a; margin: 0 0 0.3rem 0;">Need Help?</h3>
+                            <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 1rem 0;">Our support team is here to help you at every step.</p>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                                <button type="button" onclick="app.toggleChatbot()" style="width: 100%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 0.65rem 0.8rem; display: flex; align-items: center; gap: 0.6rem; text-align: left; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.borderColor='#064e3b'" onmouseout="this.style.borderColor='#cbd5e1'">
+                                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.82rem; font-weight: 800; color: #0f172a;">Chat with Us</div>
+                                        <div style="font-size: 0.7rem; color: #64748b;">We reply in a few minutes</div>
+                                    </div>
+                                </button>
+
+                                <a href="tel:+919541692891" style="width: 100%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 0.65rem 0.8rem; display: flex; align-items: center; gap: 0.6rem; text-align: left; text-decoration: none; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.borderColor='#064e3b'" onmouseout="this.style.borderColor='#cbd5e1'">
+                                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.82rem; font-weight: 800; color: #0f172a;">Call Support</div>
+                                        <div style="font-size: 0.7rem; color: #64748b;">+91 95416 92891</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        `;
+    }
+
     renderHomePage() {
         return `
             <!-- Full Screen (100vh) Instant Image Slideshow Hero Banner -->
@@ -977,21 +1453,27 @@ class App {
                 <div class="hero-video-overlay" style="z-index:4;"></div>
 
                 <!-- Hero Content -->
-                <div class="hero-green-container" style="max-width:860px !important; margin:0 auto !important; text-align:center; position:relative; z-index:4;">
+                <div class="hero-green-container" style="max-width:860px !important; margin:0 auto !important; padding-top:2.2rem !important; text-align:center; position:relative; z-index:4;">
 
-                    <!-- Eyebrow Badge -->
-                    <div class="hero-eyebrow-anim" style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(0,0,0,0.55); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(212,175,90,0.7); color:#F3D98A; padding:0.5rem 1.4rem; border-radius:999px; font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.14em; margin-bottom:1.6rem; text-shadow:0 1px 6px rgba(0,0,0,1); box-shadow:0 4px 24px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.10);">
-                        ✦ PLAN YOUR SACRED JOURNEY
+                    <!-- Liquid Glass Hero Badge Block (Powered by GoExergy only) -->
+                    <div style="display:flex; justify-content:center; margin-bottom:1.4rem;">
+                        <div class="hero-liquid-glass-badge" style="display:inline-flex !important; align-items:center !important; gap:0.35rem !important; background:rgba(255,255,255,0.10) !important; backdrop-filter:blur(28px) saturate(210%) !important; -webkit-backdrop-filter:blur(28px) saturate(210%) !important; border:1px solid rgba(255,255,255,0.45) !important; border-radius:999px !important; padding:0.45rem 1.4rem !important; box-shadow:0 8px 30px rgba(0,0,0,0.35), inset 0 1px 1.5px rgba(255,255,255,0.7) !important; position:relative !important; overflow:hidden !important; text-align:center;">
+                            <div style="position:absolute; top:0; left:-50%; width:200%; height:50%; background:linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 100%); transform:rotate(-3deg); pointer-events:none;"></div>
+                            <span style="font-size:0.78rem; font-weight:600; color:rgba(255,255,255,0.92); letter-spacing:0.03em; text-shadow:0 1px 4px rgba(0,0,0,0.95); position:relative; z-index:2; display:inline-flex; align-items:center; gap:0.3rem;">
+                                <span>Powered by</span>
+                                <span style="font-weight:800; color:#F9E07A;">GoExergy Private Limited</span>
+                            </span>
+                        </div>
                     </div>
 
                     <!-- Main Headline -->
-                    <h1 class="hero-title-main" style="margin-bottom:1rem !important; line-height:1.08 !important;">
+                    <h1 class="hero-title-main" style="margin-bottom:0.85rem !important; line-height:1.08 !important;">
                         <span class="hero-h1-anim-1" style="display:block; font-size:clamp(2.4rem, 6vw, 4.8rem); font-weight:900; letter-spacing:-0.03em; color:#FFFFFF; text-shadow:0 2px 8px rgba(0,0,0,1), 0 4px 32px rgba(0,0,0,0.9), 0 8px 60px rgba(0,0,0,0.6);">One Request.</span>
                         <span class="hero-h1-anim-2" style="display:block; font-size:clamp(2.4rem, 6vw, 4.8rem); font-weight:900; letter-spacing:-0.03em; margin-top:0.05rem; background:linear-gradient(90deg,#F9E07A 0%,#E8B84B 40%,#FFD580 70%,#C9953A 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; filter:drop-shadow(0 4px 16px rgba(232,184,75,0.65)) drop-shadow(0 2px 8px rgba(0,0,0,0.9));">Multiple Verified Offers.</span>
                     </h1>
 
                     <!-- Sub Text -->
-                    <p class="hero-subtext-anim" style="font-size:1.12rem !important; color:rgba(255,255,255,0.95) !important; max-width:680px !important; margin:0 auto 2.4rem !important; line-height:1.75 !important; font-weight:400 !important; text-shadow:0 1px 4px rgba(0,0,0,1), 0 2px 20px rgba(0,0,0,0.9);">
+                    <p class="hero-subtext-anim" style="font-size:1.08rem !important; color:rgba(255,255,255,0.95) !important; max-width:680px !important; margin:0 auto 2.1rem !important; line-height:1.75 !important; font-weight:400 !important; text-shadow:0 1px 4px rgba(0,0,0,1), 0 2px 20px rgba(0,0,0,0.9);">
                         Post one request and receive transparent offers from verified Umrah travel providers. Compare, choose, and save—without sharing your personal details.
                     </p>
 
@@ -1001,6 +1483,128 @@ class App {
                         ${this.state.currentUser ? `<button onclick="app.navigate('dashboard')" style="background:rgba(255,255,255,0.12); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); color:#FFFFFF; font-weight:800; font-size:0.95rem; padding:14px 32px; border-radius:10px; border:1.5px solid rgba(255,255,255,0.6); cursor:pointer; letter-spacing:0.02em; box-shadow:0 4px 20px rgba(0,0,0,0.35); transition:all 0.25s ease;" onmouseover="this.style.background='rgba(255,255,255,0.22)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,255,255,0.12)';this.style.transform=''">📋 My Requests</button>` : ''}
                     </div>
 
+                    <!-- Compact Apple Liquid Glass Square Feature Blocks (Headings & Icons Only) -->
+                    <div style="display:flex; justify-content:center; align-items:center; gap:0.85rem; flex-wrap:wrap; margin-top:2.8rem;">
+                        
+                        <!-- Square Block 1: 100% Verified Offers -->
+                        <div style="display:inline-flex; align-items:center; gap:0.55rem; background:rgba(255,255,255,0.10); backdrop-filter:blur(22px) saturate(190%); -webkit-backdrop-filter:blur(22px) saturate(190%); border:1px solid rgba(255,255,255,0.38); border-radius:12px; padding:0.65rem 1.1rem; box-shadow:0 8px 24px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.65); transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.background='rgba(255,255,255,0.18)';" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.10)';">
+                            <div style="width:28px; height:28px; border-radius:8px; background:rgba(34,197,94,0.25); border:1px solid rgba(34,197,94,0.5); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <polyline points="9 12 11 14 15 10"></polyline>
+                                </svg>
+                            </div>
+                            <h3 style="font-size:0.88rem; font-weight:800; color:#FFFFFF; margin:0; text-shadow:0 1px 4px rgba(0,0,0,0.95); white-space:nowrap;">100% Verified Offers</h3>
+                        </div>
+
+                        <!-- Square Block 2: 24/7 Support -->
+                        <div style="display:inline-flex; align-items:center; gap:0.55rem; background:rgba(255,255,255,0.10); backdrop-filter:blur(22px) saturate(190%); -webkit-backdrop-filter:blur(22px) saturate(190%); border:1px solid rgba(255,255,255,0.38); border-radius:12px; padding:0.65rem 1.1rem; box-shadow:0 8px 24px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.65); transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.background='rgba(255,255,255,0.18)';" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.10)';">
+                            <div style="width:28px; height:28px; border-radius:8px; background:rgba(245,158,11,0.25); border:1px solid rgba(245,158,11,0.5); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fde047" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                                </svg>
+                            </div>
+                            <h3 style="font-size:0.88rem; font-weight:800; color:#FFFFFF; margin:0; text-shadow:0 1px 4px rgba(0,0,0,0.95); white-space:nowrap;">24/7 Support</h3>
+                        </div>
+
+                        <!-- Square Block 3: Your Data is Safe -->
+                        <div style="display:inline-flex; align-items:center; gap:0.55rem; background:rgba(255,255,255,0.10); backdrop-filter:blur(22px) saturate(190%); -webkit-backdrop-filter:blur(22px) saturate(190%); border:1px solid rgba(255,255,255,0.38); border-radius:12px; padding:0.65rem 1.1rem; box-shadow:0 8px 24px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.65); transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.background='rgba(255,255,255,0.18)';" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.10)';">
+                            <div style="width:28px; height:28px; border-radius:8px; background:rgba(147,51,234,0.25); border:1px solid rgba(147,51,234,0.5); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                            </div>
+                            <h3 style="font-size:0.88rem; font-weight:800; color:#FFFFFF; margin:0; text-shadow:0 1px 4px rgba(0,0,0,0.95); white-space:nowrap;">Your Data is Safe</h3>
+                        </div>
+
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Why Choose Zilhaj Section (Pixel-perfect match to reference design) -->
+            <section style="background: #ffffff; padding: 4.5rem 1.5rem 4rem; text-align: center; border-bottom: 1px solid #f1f5f9; position: relative;">
+                <div style="max-width: 1240px; margin: 0 auto;">
+                    
+                    <!-- Pill Badge -->
+                    <div style="display: inline-flex; align-items: center; gap: 0.45rem; background: #ecfdf5; color: #15803d; border: 1px solid #bbf7d0; padding: 0.35rem 1.1rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.2rem;">
+                        <span style="font-size: 0.85rem; color: #16a34a;">★</span>
+                        <span>WHY CHOOSE ZILHAJ?</span>
+                    </div>
+
+                    <!-- Title & Subtitle -->
+                    <h2 style="font-size: clamp(2rem, 4vw, 2.7rem); font-weight: 900; color: #0f172a; margin: 0 0 0.75rem 0; letter-spacing: -0.02em;">
+                        Why Choose Zilhaj?
+                    </h2>
+                    <p style="color: #64748b; font-size: 1.02rem; max-width: 660px; margin: 0 auto 3.5rem; line-height: 1.65; font-weight: 400;">
+                        We make your Umrah planning simple, transparent, and reliable with verified options and dedicated support.
+                    </p>
+
+                    <!-- 4 Cards Grid Layout -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.6rem; align-items: stretch;">
+                        
+                        <!-- Card 1: Verified Providers -->
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 1.6rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.08)';this.style.borderColor='#e2e8f0';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.03)';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 64px; height: 64px; border-radius: 18px; background: #e6f4ea; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; flex-shrink: 0;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <polyline points="9 12 11 14 15 10"></polyline>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Verified Providers</h3>
+                            <div style="width: 32px; height: 3px; background: #16a34a; border-radius: 2px; margin: 0.4rem 0 1.2rem 0;"></div>
+                            <p style="color: #64748b; font-size: 0.9rem; line-height: 1.65; margin: 0; font-weight: 400;">
+                                We work only with trusted and verified travel providers to ensure a safe and reliable Umrah experience.
+                            </p>
+                        </div>
+
+                        <!-- Card 2: Multiple Options -->
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 1.6rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.08)';this.style.borderColor='#e2e8f0';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.03)';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 64px; height: 64px; border-radius: 18px; background: #fef7e0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; flex-shrink: 0;">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Multiple Options</h3>
+                            <div style="width: 32px; height: 3px; background: #16a34a; border-radius: 2px; margin: 0.4rem 0 1.2rem 0;"></div>
+                            <p style="color: #64748b; font-size: 0.9rem; line-height: 1.65; margin: 0; font-weight: 400;">
+                                Get multiple suitable options based on your requirements and preferences to choose what suits you best.
+                            </p>
+                        </div>
+
+                        <!-- Card 3: Compare Before You Choose -->
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 1.6rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.08)';this.style.borderColor='#e2e8f0';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.03)';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 64px; height: 64px; border-radius: 18px; background: #f3e8ff; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; flex-shrink: 0;">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Compare Before You Choose</h3>
+                            <div style="width: 32px; height: 3px; background: #16a34a; border-radius: 2px; margin: 0.4rem 0 1.2rem 0;"></div>
+                            <p style="color: #64748b; font-size: 0.9rem; line-height: 1.65; margin: 0; font-weight: 400;">
+                                Easily compare options, prices, and inclusions before making the right decision with complete clarity.
+                            </p>
+                        </div>
+
+                        <!-- Card 4: Transparent Process -->
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 1.6rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.08)';this.style.borderColor='#e2e8f0';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.03)';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 64px; height: 64px; border-radius: 18px; background: #e0f2fe; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; flex-shrink: 0;">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2l2.4 1.8 3-.4.6 3 2.6 1.6-1 2.8 1.4 2.6-2.2 2-.2 3-3 .6-1.8 2.4-2.8-1-2.6 1.4-2-2.2-3-.2-.6-3-2.4-1.8 1-2.8-1.4-2.6 2.2-2 .2-3 3-.6L12 2z"></path>
+                                    <polyline points="9 12 11 14 15 10"></polyline>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Transparent Process</h3>
+                            <div style="width: 32px; height: 3px; background: #16a34a; border-radius: 2px; margin: 0.4rem 0 1.2rem 0;"></div>
+                            <p style="color: #64748b; font-size: 0.9rem; line-height: 1.65; margin: 0; font-weight: 400;">
+                                A simple, secure, and transparent process from request to final selection – no hidden surprises.
+                            </p>
+                        </div>
+
+                    </div>
                 </div>
             </section>
 
@@ -1139,37 +1743,6 @@ class App {
                 </div>
             </section>
 
-            <!-- Live Request Submission Container -->
-            <div id="requestFormAnchor" style="max-width:1140px; margin:3.5rem auto; padding:0 1.5rem;">
-                ${!this.state.currentUser
-                ? `
-                        <div class="sacred-journey-card-modern">
-                            <div class="sacred-journey-icon-badge">🕋</div>
-                            <h2 class="sacred-journey-title">Post Your Sacred Journey Requirement</h2>
-                            <p class="sacred-journey-subtitle">
-                                Please log in or create your free account to access the custom travel request form and receive direct reverse-bidding offers from verified Umrah operators.
-                            </p>
-                            <div class="sacred-journey-actions">
-                                <button class="btn-sacred-login" onclick="app.openAuthModal('login')">
-                                    <span>🔑</span> <span>Login to Continue</span>
-                                </button>
-                                <button class="btn-sacred-signup" onclick="app.openAuthModal('register')">
-                                    <span>✨</span> <span>Create Account</span>
-                                </button>
-                            </div>
-                        </div>
-                    `
-                : this.state.currentUser?.role === 'ROLE_ADMIN'
-                    ? `
-                        <div style="background:#fefce8; border:1.5px solid #fde68a; border-radius:14px; padding:2rem; text-align:center;">
-                            <h3 style="color:#854d0e; margin-bottom:0.8rem;">👑 Administrator Mode</h3>
-                            <p style="color:#713f12; margin-bottom:1.2rem;">You are logged in as an Administrator. You cannot submit Zaireen travel requests.</p>
-                            <button class="btn btn-gold" onclick="app.navigate('admin')">Go to Admin Dashboard</button>
-                        </div>
-                    `
-                    : this.renderCustomRequirementForm()
-            }
-            </div>
             ${this.renderLiquidGlassFeedbackSection()}
         `;
     }
@@ -9054,240 +9627,137 @@ class App {
         }
     }
 
-    renderGuidesPage() {
+    renderServicesPage() {
         return `
-            <div class="main-container" style="max-width: 1220px; margin: 6.8rem auto 4rem; padding: 0 1.5rem;">
+            <div class="main-container" style="max-width: 1240px; margin: 6.5rem auto 4rem; padding: 0 1.5rem;">
                 
-                <!-- Header Bar -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-                    <div style="text-align: center; flex: 1;">
-                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
-                            <span>🕋</span> <span>SACRED KNOWLEDGE HUB</span>
+                <!-- Services Hero / Header -->
+                <div style="text-align: center; margin-bottom: 3.5rem;">
+                    <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.3rem 1.1rem; border-radius: 99px; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.8rem;">
+                        <span>🕌</span> <span>OUR PILGRIMAGE SERVICES</span>
+                    </div>
+                    <h1 style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 900; color: #0f172a; margin-bottom: 0.6rem; letter-spacing: -0.02em;">
+                        Comprehensive Hajj & Umrah Travel Services
+                    </h1>
+                    <p style="color: #64748b; font-size: 1.02rem; max-width: 720px; margin: 0 auto; line-height: 1.65;">
+                        We connect pilgrims with verified Saudi-licensed operators for 14 & 18 day Umrah packages, VIP Hajj journeys, custom reverse-bidding offers, and sacred guides.
+                    </p>
+                </div>
+
+                <!-- Section 1: Hajj and Umrah Travel Cards (Two Different Cards Form) -->
+                <div style="margin-bottom: 4.5rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h2 style="font-size: 1.65rem; font-weight: 800; color: #0f172a; margin: 0 0 0.3rem 0;">Our Travel Solutions</h2>
+                            <p style="font-size: 0.92rem; color: #64748b; margin: 0;">Explore our core pilgrimage travel offerings below</p>
                         </div>
-                        <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.02em;">Hajj & Umrah Pilgrimage Guides</h2>
-                        <p style="color: #64748b; font-size: 0.95rem; max-width: 680px; margin: 0 auto; line-height: 1.6;">Essential step-by-step rituals, Miqat boundaries, Ihram rules, Nusuk permits, and spiritual advice for your sacred journey.</p>
+                        <span style="background: #f1f5f9; color: #475569; padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.82rem; font-weight: 700;">✦ Verified Saudi Operators</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem;">
+                        
+                        <!-- Card 1: Umrah Travels Service Card -->
+                        <div style="background: #ffffff; border-radius: 24px; padding: 2.2rem; border: 1.5px solid #cbd5e1; box-shadow: 0 10px 30px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 18px 40px rgba(4,120,87,0.12)';" onmouseout="this.style.transform='';this.style.boxShadow='0 10px 30px rgba(0,0,0,0.06)';">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                                    <div style="width: 52px; height: 52px; border-radius: 16px; background: #ecfdf5; border: 1px solid #a7f3d0; display: flex; align-items: center; justify-content: center; font-size: 1.6rem;">
+                                        🕋
+                                    </div>
+                                    <span style="background: #047857; color: #ffffff; font-size: 0.75rem; font-weight: 800; padding: 0.3rem 0.8rem; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em;">Umrah Travel</span>
+                                </div>
+                                <h3 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin-bottom: 0.8rem;">14 & 18 Day Umrah Travels</h3>
+                                <p style="color: #475569; font-size: 0.92rem; line-height: 1.65; margin-bottom: 1.4rem;">
+                                    Complete Umrah packages tailored to your schedule and budget. Enjoy 5-star hotel stays near Masjid al-Haram, round-trip flights, Saudi Nusuk visa processing, guided Ziyarat, and 24/7 pilgrim assistance.
+                                </p>
+                                <ul style="list-style: none; padding: 0; margin: 0 0 1.8rem 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #10b981; font-weight: 900;">✓</span> 5-Star Hotels near Haram (150m – 600m)
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #10b981; font-weight: 900;">✓</span> Direct Saudi Flights & Return Air Tickets
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #10b981; font-weight: 900;">✓</span> Umrah Tourist Visa & Nusuk Permit Support
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #10b981; font-weight: 900;">✓</span> Guided Ziyarat Tours in Makkah & Madinah
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #10b981; font-weight: 900;">✓</span> Complimentary Ihram Kit & 5L Zamzam Water
+                                    </li>
+                                </ul>
+                            </div>
+                            <button onclick="app.navigate('home'); setTimeout(() => app.scrollToRequirementForm(), 100);" style="width: 100%; background: #047857; color: #ffffff; font-weight: 800; font-size: 0.95rem; padding: 0.85rem; border-radius: 12px; border: none; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#065f46'" onmouseout="this.style.background='#047857'">
+                                Request Umrah Bids ➔
+                            </button>
+                        </div>
+
+                        <!-- Card 2: Hajj Travels Service Card -->
+                        <div style="background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%); border-radius: 24px; padding: 2.2rem; border: 1.5px solid #fcd34d; box-shadow: 0 10px 30px rgba(245,158,11,0.08); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 18px 40px rgba(245,158,11,0.18)';" onmouseout="this.style.transform='';this.style.boxShadow='0 10px 30px rgba(245,158,11,0.08)';">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                                    <div style="width: 52px; height: 52px; border-radius: 16px; background: #fef3c7; border: 1px solid #fde68a; display: flex; align-items: center; justify-content: center; font-size: 1.6rem;">
+                                        📜
+                                    </div>
+                                    <span style="background: #b45309; color: #ffffff; font-size: 0.75rem; font-weight: 800; padding: 0.3rem 0.8rem; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em;">Hajj Travel</span>
+                                </div>
+                                <h3 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin-bottom: 0.8rem;">VIP & Executive Hajj Packages</h3>
+                                <p style="color: #475569; font-size: 0.92rem; line-height: 1.65; margin-bottom: 1.4rem;">
+                                    Fulfill your sacred Hajj pillar with peace of mind. Includes 5-day Hajj rituals assistance, Mina VIP A/C tent encampment, Arafat Wuqoof guidance, private transfers, and 100% Escrow safe payments.
+                                </p>
+                                <ul style="list-style: none; padding: 0; margin: 0 0 1.8rem 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #d97706; font-weight: 900;">✓</span> Mina VIP Air-Conditioned Encampment Tents
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #d97706; font-weight: 900;">✓</span> Arafat Wuqoof & Open-Sky Muzdalifah Support
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #d97706; font-weight: 900;">✓</span> Jamarat Stoning Shuttle & Private AC Busses
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #d97706; font-weight: 900;">✓</span> 5-Star Haram Accommodation in Makkah & Madinah
+                                    </li>
+                                    <li style="display: flex; align-items: center; gap: 0.65rem; color: #334155; font-size: 0.88rem; font-weight: 600;">
+                                        <span style="color: #d97706; font-weight: 900;">✓</span> 100% Escrow Protected Booking Guarantee
+                                    </li>
+                                </ul>
+                            </div>
+                            <button onclick="app.navigate('home'); setTimeout(() => app.scrollToRequirementForm(), 100);" style="width: 100%; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #ffffff; font-weight: 800; font-size: 0.95rem; padding: 0.85rem; border-radius: 12px; border: none; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                                Request Hajj Bids ➔
+                            </button>
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- Modern Segmented Pill Switcher -->
-                <div class="guide-nav-pills">
-                    <button class="guide-pill-btn ${this.state.guideTab === 'umrah' ? 'active' : ''}" onclick="app.setGuideTab('umrah')">
-                        <span>🕋</span> Umrah Step-by-Step
-                    </button>
-                    <button class="guide-pill-btn ${this.state.guideTab === 'hajj' ? 'active' : ''}" onclick="app.setGuideTab('hajj')">
-                        <span>📜</span> Hajj Rituals Guide
-                    </button>
-                    <button class="guide-pill-btn ${this.state.guideTab === 'rules' ? 'active' : ''}" onclick="app.setGuideTab('rules')">
-                        <span>⚙️</span> Nusuk Permits & Rules
-                    </button>
+                <!-- Section 2: Merged Hajj & Umrah Guides (Below the two cards) -->
+                <div style="background: #ffffff; border-radius: 28px; padding: 2.8rem 2rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 24px rgba(0,0,0,0.04);">
+                    
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
+                            <span>📖</span> <span>SACRED KNOWLEDGE HUB</span>
+                        </div>
+                        <h2 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 0.4rem;">Hajj & Umrah Pilgrimage Guides</h2>
+                        <p style="color: #64748b; font-size: 0.92rem; max-width: 640px; margin: 0 auto;">Essential step-by-step rituals, Miqat boundaries, Ihram rules, Nusuk permits, and spiritual advice.</p>
+                    </div>
+
+                    <!-- Modern Segmented Pill Switcher -->
+                    <div class="guide-nav-pills">
+                        <button class="guide-pill-btn ${this.state.guideTab === 'umrah' ? 'active' : ''}" onclick="app.setGuideTab('umrah')">
+                            <span>🕋</span> Umrah Step-by-Step
+                        </button>
+                        <button class="guide-pill-btn ${this.state.guideTab === 'hajj' ? 'active' : ''}" onclick="app.setGuideTab('hajj')">
+                            <span>📜</span> Hajj Rituals Guide
+                        </button>
+                        <button class="guide-pill-btn ${this.state.guideTab === 'rules' ? 'active' : ''}" onclick="app.setGuideTab('rules')">
+                            <span>⚙️</span> Nusuk Permits & Rules
+                        </button>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    ${this.renderGuideTabContent()}
                 </div>
-
-                <!-- Tab Contents -->
-                ${this.state.guideTab === 'hajj' ? `
-                    <div class="guides-grid-4">
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>DAY 01</span> • 8th Dhul Hijjah
-                                </div>
-                                <h3 class="card-step-title">Mina Encampment</h3>
-                                <p class="card-step-desc">Enter Ihram at your location, declare Talbiyah, and proceed to Mina for quiet reflection and prayers.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Ghusl & Niyyah for Hajj</li>
-                                    <li><span class="dot">✓</span> Recite Talbiyah continuously</li>
-                                    <li><span class="dot">✓</span> Dhuhr, Asr, Maghrib, Isha & Fajr</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Mina Valley
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>DAY 02</span> • 9th Dhul Hijjah
-                                </div>
-                                <h3 class="card-step-title">Arafat & Muzdalifah</h3>
-                                <p class="card-step-desc">Stand at Mount Arafat for Wuqoof (the climax of Hajj). At sunset, depart to Muzdalifah under the open sky.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Wuqoof at Arafat (Peak Ritual)</li>
-                                    <li><span class="dot">✓</span> Combined Dhuhr & Asr prayers</li>
-                                    <li><span class="dot">✓</span> Collect pebbles at Muzdalifah</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Mount Arafat → Muzdalifah
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>DAY 03</span> • 10th Dhul Hijjah
-                                </div>
-                                <h3 class="card-step-title">Rami, Qurbani & Tawaf</h3>
-                                <p class="card-step-desc">Pelt Jamarat Al-Aqaba, perform animal sacrifice, shave/trim hair, and perform Tawaf Al-Ziyarah.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Pelt 7 pebbles at Jamarat Al-Aqaba</li>
-                                    <li><span class="dot">✓</span> Qurbani sacrifice completion</li>
-                                    <li><span class="dot">✓</span> Halq/Taqseer & Tawaf Al-Ziyarah</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Jamarat → Haram Makkah
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>DAYS 04-05</span> • 11th-13th Dhul Hijjah
-                                </div>
-                                <h3 class="card-step-title">Jamarat & Farewell Tawaf</h3>
-                                <p class="card-step-desc">Stay in Mina to pelt all 3 Jamarat pillars daily, then perform Tawaf Al-Wada before departure.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Pelt 21 pebbles daily in Mina</li>
-                                    <li><span class="dot">✓</span> Final supplications in Makkah</li>
-                                    <li><span class="dot">✓</span> Complete Tawaf Al-Wada</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Mina → Masjid Al-Haram
-                            </div>
-                        </div>
-                    </div>
-                ` : this.state.guideTab === 'rules' ? `
-                    <div class="guides-grid-3">
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge" style="background:#fef3c7; color:#92400e; border-color:#fde68a;">
-                                    <span>Nusuk App</span> • Official Permit
-                                </div>
-                                <h3 class="card-step-title">Rawdah Al-Sharifa Permits</h3>
-                                <p class="card-step-desc">Visiting the sacred Rawdah Al-Sharifa in Madinah requires an authorized slot permit issued via Saudi Arabia's official Nusuk application.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Download & register on Nusuk App</li>
-                                    <li><span class="dot">✓</span> Reserve dedicated male/female time slots</li>
-                                    <li><span class="dot">✓</span> Show QR code permit at gate entrance</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📱 Digital Permit Portal
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge" style="background:#eff6ff; color:#1e40af; border-color:#bfdbfe;">
-                                    <span>Visa Guidelines</span> • Entry Rules
-                                </div>
-                                <h3 class="card-step-title">Passport & Umrah Visa</h3>
-                                <p class="card-step-desc">Pilgrims require a valid passport with at least 6 months validity from departure date. Umrah visas allow travel across all Saudi cities.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Passport valid for 6+ months</li>
-                                    <li><span class="dot">✓</span> Verified round-trip flight booking</li>
-                                    <li><span class="dot">✓</span> Travel insurance coverage included</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                🛂 Ministry of Foreign Affairs
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge" style="background:#fef2f2; color:#991b1b; border-color:#fecaca;">
-                                    <span>Sacred State</span> • Restrictions
-                                </div>
-                                <h3 class="card-step-title">Ihram Restrictions & Etiquette</h3>
-                                <p class="card-step-desc">While in the state of Ihram, specific actions are prohibited to preserve spiritual purity and focus on devotion.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> No cutting hair, nails, or using scents</li>
-                                    <li><span class="dot">✓</span> No stitched garments for men</li>
-                                    <li><span class="dot">✓</span> Maintain patience, kindness & humility</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                ⚖️ Fiqh Guidelines
-                            </div>
-                        </div>
-                    </div>
-                ` : `
-                    <div class="guides-grid-4">
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>STEP 01</span> • Entrance
-                                </div>
-                                <h3 class="card-step-title">Entering Ihram & Niyyah</h3>
-                                <p class="card-step-desc">Perform Ghusl, wear Ihram garments before crossing the Miqat, and declare your sacred intention.</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Ghusl & Ihram attire at Miqat</li>
-                                    <li><span class="dot">✓</span> Niyyah: <em>"Labbayk Allahumma Umrah"</em></li>
-                                    <li><span class="dot">✓</span> Recite Talbiyah continuously</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Miqat Station
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>STEP 02</span> • Tawaf
-                                </div>
-                                <h3 class="card-step-title">Tawaf around Kaaba</h3>
-                                <p class="card-step-desc">Perform 7 counter-clockwise circuits around the Kaaba starting from Hajar Al-Aswad (Black Stone).</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> 7 Complete Tawaf rounds</li>
-                                    <li><span class="dot">✓</span> 2 Raka'at behind Maqam Ibrahim</li>
-                                    <li><span class="dot">✓</span> Drink blessed Zamzam water</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Al-Masjid Al-Haram
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>STEP 03</span> • Sa'i
-                                </div>
-                                <h3 class="card-step-title">Sa'i (Safa & Marwah)</h3>
-                                <p class="card-step-desc">Walk 7 times between Mount Safa and Mount Marwah, honoring the devotion of Hazrat Hajar (RA).</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Start at Safa, end at Marwah</li>
-                                    <li><span class="dot">✓</span> 7 laps total with Du'as</li>
-                                    <li><span class="dot">✓</span> Light jogging for men between green lights</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Mas'a Corridor
-                            </div>
-                        </div>
-
-                        <div class="modern-guide-card">
-                            <div>
-                                <div class="card-step-badge">
-                                    <span>STEP 04</span> • Completion
-                                </div>
-                                <h3 class="card-step-title">Halq or Taqseer</h3>
-                                <p class="card-step-desc">Men shave or trim head hair, women trim a fingertip length. Your Umrah is now completed!</p>
-                                <ul class="card-key-list">
-                                    <li><span class="dot">✓</span> Shave (Halq) or trim (Taqseer)</li>
-                                    <li><span class="dot">✓</span> Ihram restrictions lifted</li>
-                                    <li><span class="dot">✓</span> Umrah Mubarak! 🎉</li>
-                                </ul>
-                            </div>
-                            <div class="card-location-tag">
-                                📍 Location: Barber Outlets / Hotel
-                            </div>
-                        </div>
-                    </div>
-                `}
 
                 <!-- Bottom AI Helper Banner (Fade Green Gradient) -->
                 <div style="margin-top: 3.5rem; background: linear-gradient(135deg, #059669 0%, #10b981 50%, #047857 100%); border-radius: 20px; padding: 2.2rem 2.4rem; color: #ffffff !important; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; box-shadow: 0 12px 30px rgba(16, 185, 129, 0.28); border: 1px solid #34d399;">
@@ -9299,6 +9769,218 @@ class App {
                     <button class="btn btn-ai-trigger" style="background: #fbbf24; color: #0f172a !important; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 1.8rem; border-radius: 12px; border: none; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 18px rgba(251, 191, 36, 0.4); transition: transform 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" onclick="app.openChatbot(event)">
                         💬 Ask AI Assistant Now
                     </button>
+                </div>
+            </div>
+        `;
+    }
+
+    renderGuidesPage() {
+        return this.renderServicesPage();
+    }
+
+    renderGuideTabContent() {
+        return this.state.guideTab === 'hajj' ? `
+            <div class="guides-grid-4">
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>DAY 01</span> • 8th Dhul Hijjah
+                        </div>
+                        <h3 class="card-step-title">Mina Encampment</h3>
+                        <p class="card-step-desc">Enter Ihram at your location, declare Talbiyah, and proceed to Mina for quiet reflection and prayers.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Ghusl & Niyyah for Hajj</li>
+                            <li><span class="dot">✓</span> Recite Talbiyah continuously</li>
+                            <li><span class="dot">✓</span> Dhuhr, Asr, Maghrib, Isha & Fajr</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Mina Valley
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>DAY 02</span> • 9th Dhul Hijjah
+                        </div>
+                        <h3 class="card-step-title">Arafat & Muzdalifah</h3>
+                        <p class="card-step-desc">Stand at Mount Arafat for Wuqoof (the climax of Hajj). At sunset, depart to Muzdalifah under the open sky.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Wuqoof at Arafat (Peak Ritual)</li>
+                            <li><span class="dot">✓</span> Combined Dhuhr & Asr prayers</li>
+                            <li><span class="dot">✓</span> Collect pebbles at Muzdalifah</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Mount Arafat → Muzdalifah
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>DAY 03</span> • 10th Dhul Hijjah
+                        </div>
+                        <h3 class="card-step-title">Rami, Qurbani & Tawaf</h3>
+                        <p class="card-step-desc">Pelt Jamarat Al-Aqaba, perform animal sacrifice, shave/trim hair, and perform Tawaf Al-Ziyarah.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Pelt 7 pebbles at Jamarat Al-Aqaba</li>
+                            <li><span class="dot">✓</span> Qurbani sacrifice completion</li>
+                            <li><span class="dot">✓</span> Halq/Taqseer & Tawaf Al-Ziyarah</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Jamarat → Haram Makkah
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>DAYS 04-05</span> • 11th-13th Dhul Hijjah
+                        </div>
+                        <h3 class="card-step-title">Jamarat & Farewell Tawaf</h3>
+                        <p class="card-step-desc">Stay in Mina to pelt all 3 Jamarat pillars daily, then perform Tawaf Al-Wada before departure.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Pelt 21 pebbles daily in Mina</li>
+                            <li><span class="dot">✓</span> Final supplications in Makkah</li>
+                            <li><span class="dot">✓</span> Complete Tawaf Al-Wada</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Mina → Masjid Al-Haram
+                    </div>
+                </div>
+            </div>
+        ` : this.state.guideTab === 'rules' ? `
+            <div class="guides-grid-3">
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge" style="background:#fef3c7; color:#92400e; border-color:#fde68a;">
+                            <span>Nusuk App</span> • Official Permit
+                        </div>
+                        <h3 class="card-step-title">Rawdah Al-Sharifa Permits</h3>
+                        <p class="card-step-desc">Visiting the sacred Rawdah Al-Sharifa in Madinah requires an authorized slot permit issued via Saudi Arabia's official Nusuk application.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Download & register on Nusuk App</li>
+                            <li><span class="dot">✓</span> Reserve dedicated male/female time slots</li>
+                            <li><span class="dot">✓</span> Show QR code permit at gate entrance</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📱 Digital Permit Portal
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge" style="background:#eff6ff; color:#1e40af; border-color:#bfdbfe;">
+                            <span>Visa Guidelines</span> • Entry Rules
+                        </div>
+                        <h3 class="card-step-title">Passport & Umrah Visa</h3>
+                        <p class="card-step-desc">Pilgrims require a valid passport with at least 6 months validity from departure date. Umrah visas allow travel across all Saudi cities.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Passport valid for 6+ months</li>
+                            <li><span class="dot">✓</span> Verified round-trip flight booking</li>
+                            <li><span class="dot">✓</span> Travel insurance coverage included</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        🛂 Ministry of Foreign Affairs
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge" style="background:#fef2f2; color:#991b1b; border-color:#fecaca;">
+                            <span>Sacred State</span> • Restrictions
+                        </div>
+                        <h3 class="card-step-title">Ihram Restrictions & Etiquette</h3>
+                        <p class="card-step-desc">While in the state of Ihram, specific actions are prohibited to preserve spiritual purity and focus on devotion.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> No cutting hair, nails, or using scents</li>
+                            <li><span class="dot">✓</span> No stitched garments for men</li>
+                            <li><span class="dot">✓</span> Maintain patience, kindness & humility</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        ⚖️ Fiqh Guidelines
+                    </div>
+                </div>
+            </div>
+        ` : `
+            <div class="guides-grid-4">
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>STEP 01</span> • Entrance
+                        </div>
+                        <h3 class="card-step-title">Entering Ihram & Niyyah</h3>
+                        <p class="card-step-desc">Perform Ghusl, wear Ihram garments before crossing the Miqat, and declare your sacred intention.</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Ghusl & Ihram attire at Miqat</li>
+                            <li><span class="dot">✓</span> Niyyah: <em>"Labbayk Allahumma Umrah"</em></li>
+                            <li><span class="dot">✓</span> Recite Talbiyah continuously</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Miqat Station
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>STEP 02</span> • Tawaf
+                        </div>
+                        <h3 class="card-step-title">Tawaf around Kaaba</h3>
+                        <p class="card-step-desc">Perform 7 counter-clockwise circuits around the Kaaba starting from Hajar Al-Aswad (Black Stone).</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> 7 Complete Tawaf rounds</li>
+                            <li><span class="dot">✓</span> 2 Raka'at behind Maqam Ibrahim</li>
+                            <li><span class="dot">✓</span> Drink blessed Zamzam water</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Al-Masjid Al-Haram
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>STEP 03</span> • Sa'i
+                        </div>
+                        <h3 class="card-step-title">Sa'i (Safa & Marwah)</h3>
+                        <p class="card-step-desc">Walk 7 times between Mount Safa and Mount Marwah, honoring the devotion of Hazrat Hajar (RA).</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Start at Safa, end at Marwah</li>
+                            <li><span class="dot">✓</span> 7 laps total with Du'as</li>
+                            <li><span class="dot">✓</span> Light jogging for men between green lights</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Mas'a Corridor
+                    </div>
+                </div>
+
+                <div class="modern-guide-card">
+                    <div>
+                        <div class="card-step-badge">
+                            <span>STEP 04</span> • Completion
+                        </div>
+                        <h3 class="card-step-title">Halq or Taqseer</h3>
+                        <p class="card-step-desc">Men shave or trim head hair, women trim a fingertip length. Your Umrah is now completed!</p>
+                        <ul class="card-key-list">
+                            <li><span class="dot">✓</span> Shave (Halq) or trim (Taqseer)</li>
+                            <li><span class="dot">✓</span> Ihram restrictions lifted</li>
+                            <li><span class="dot">✓</span> Umrah Mubarak! 🎉</li>
+                        </ul>
+                    </div>
+                    <div class="card-location-tag">
+                        📍 Location: Barber Outlets / Hotel
+                    </div>
                 </div>
             </div>
         `;
@@ -9638,7 +10320,7 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
 
     setGuideTab(tab) {
         this.state.guideTab = tab;
-        this.navigate('guides');
+        this.navigate('services');
     }
 
     escapeHtml(str) {
