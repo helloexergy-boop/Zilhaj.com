@@ -994,35 +994,36 @@ class App {
                 <div class="hero-video-overlay" style="z-index:4;"></div>
 
                 <!-- Hero Content -->
-                <div class="hero-green-container" style="max-width:860px !important; margin:0 auto !important; text-align:center; position:relative; z-index:4;">
+                <div class="hero-green-container" style="max-width:860px !important; margin:0 auto !important; padding-top:2rem !important; text-align:center; position:relative; z-index:4;">
 
-                    <!-- Liquid Glass Hero Badge Block -->
-                    <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem; margin-bottom:1.6rem;">
-                        <div class="hero-liquid-glass-badge" style="display:inline-flex !important; align-items:center !important; gap:0.6rem !important; background:rgba(255,255,255,0.10) !important; backdrop-filter:blur(28px) saturate(210%) !important; -webkit-backdrop-filter:blur(28px) saturate(210%) !important; border:1px solid rgba(255,255,255,0.45) !important; border-radius:999px !important; padding:0.55rem 1.6rem !important; box-shadow:0 8px 30px rgba(0,0,0,0.35), inset 0 1px 1.5px rgba(255,255,255,0.7) !important; position:relative !important; overflow:hidden !important;">
+                    <!-- Liquid Glass Hero Badge Block (Mosque logo removed, Powered by inside badge) -->
+                    <div style="display:flex; justify-content:center; margin-bottom:1.4rem;">
+                        <div class="hero-liquid-glass-badge" style="display:inline-flex !important; flex-direction:column !important; align-items:center !important; gap:0.25rem !important; background:rgba(255,255,255,0.10) !important; backdrop-filter:blur(28px) saturate(210%) !important; -webkit-backdrop-filter:blur(28px) saturate(210%) !important; border:1px solid rgba(255,255,255,0.45) !important; border-radius:999px !important; padding:0.55rem 1.8rem !important; box-shadow:0 8px 30px rgba(0,0,0,0.35), inset 0 1px 1.5px rgba(255,255,255,0.7) !important; position:relative !important; overflow:hidden !important; text-align:center;">
                             <div style="position:absolute; top:0; left:-50%; width:200%; height:50%; background:linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 100%); transform:rotate(-3deg); pointer-events:none;"></div>
-                            <span style="font-size:1.15rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6)); position:relative; z-index:2;">🕌</span>
-                            <span class="hero-badge-text" style="font-size:0.86rem !important; font-weight:800 !important; color:#FFFFFF !important; text-transform:uppercase !important; letter-spacing:0.12em !important; text-shadow:0 2px 8px rgba(0,0,0,0.95), 0 0 10px rgba(255,255,255,0.5) !important; position:relative; z-index:2; display:inline-flex; align-items:center; gap:0.4rem;">
+                            
+                            <!-- Main Badge Title -->
+                            <span class="hero-badge-text" style="font-size:0.84rem !important; font-weight:800 !important; color:#FFFFFF !important; text-transform:uppercase !important; letter-spacing:0.12em !important; text-shadow:0 2px 8px rgba(0,0,0,0.95), 0 0 10px rgba(255,255,255,0.5) !important; position:relative; z-index:2; display:inline-flex; align-items:center; gap:0.4rem;">
                                 <span style="color:#f59e0b; text-shadow:0 0 10px rgba(245,158,11,0.8);">✦</span>
                                 <span>VERIFIED HAJJ &amp; UMRAH TRAVELS PLATFORM</span>
                                 <span style="color:#f59e0b; text-shadow:0 0 10px rgba(245,158,11,0.8);">✦</span>
                             </span>
-                        </div>
-                        
-                        <!-- Powered by GoExergy (Centered on next line) -->
-                        <div style="font-size:0.84rem; font-weight:600; color:rgba(255,255,255,0.92); letter-spacing:0.03em; text-shadow:0 2px 8px rgba(0,0,0,0.95); display:inline-flex; align-items:center; gap:0.35rem;">
-                            <span>Powered by</span>
-                            <span style="font-weight:800; color:#F9E07A; text-shadow:0 0 12px rgba(249,224,122,0.7);">GoExergy Private Limited</span>
+
+                            <!-- Powered by Sub-line inside the badge -->
+                            <span style="font-size:0.75rem; font-weight:600; color:rgba(255,255,255,0.92); letter-spacing:0.03em; text-shadow:0 1px 4px rgba(0,0,0,0.95); position:relative; z-index:2; display:inline-flex; align-items:center; gap:0.3rem;">
+                                <span>Powered by</span>
+                                <span style="font-weight:800; color:#F9E07A;">GoExergy Private Limited</span>
+                            </span>
                         </div>
                     </div>
 
                     <!-- Main Headline -->
-                    <h1 class="hero-title-main" style="margin-bottom:1rem !important; line-height:1.08 !important;">
+                    <h1 class="hero-title-main" style="margin-bottom:0.85rem !important; line-height:1.08 !important;">
                         <span class="hero-h1-anim-1" style="display:block; font-size:clamp(2.4rem, 6vw, 4.8rem); font-weight:900; letter-spacing:-0.03em; color:#FFFFFF; text-shadow:0 2px 8px rgba(0,0,0,1), 0 4px 32px rgba(0,0,0,0.9), 0 8px 60px rgba(0,0,0,0.6);">One Request.</span>
                         <span class="hero-h1-anim-2" style="display:block; font-size:clamp(2.4rem, 6vw, 4.8rem); font-weight:900; letter-spacing:-0.03em; margin-top:0.05rem; background:linear-gradient(90deg,#F9E07A 0%,#E8B84B 40%,#FFD580 70%,#C9953A 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; filter:drop-shadow(0 4px 16px rgba(232,184,75,0.65)) drop-shadow(0 2px 8px rgba(0,0,0,0.9));">Multiple Verified Offers.</span>
                     </h1>
 
                     <!-- Sub Text -->
-                    <p class="hero-subtext-anim" style="font-size:1.12rem !important; color:rgba(255,255,255,0.95) !important; max-width:680px !important; margin:0 auto 2.4rem !important; line-height:1.75 !important; font-weight:400 !important; text-shadow:0 1px 4px rgba(0,0,0,1), 0 2px 20px rgba(0,0,0,0.9);">
+                    <p class="hero-subtext-anim" style="font-size:1.08rem !important; color:rgba(255,255,255,0.95) !important; max-width:680px !important; margin:0 auto 2.1rem !important; line-height:1.75 !important; font-weight:400 !important; text-shadow:0 1px 4px rgba(0,0,0,1), 0 2px 20px rgba(0,0,0,0.9);">
                         Post one request and receive transparent offers from verified Umrah travel providers. Compare, choose, and save—without sharing your personal details.
                     </p>
 
@@ -1032,48 +1033,54 @@ class App {
                         ${this.state.currentUser ? `<button onclick="app.navigate('dashboard')" style="background:rgba(255,255,255,0.12); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); color:#FFFFFF; font-weight:800; font-size:0.95rem; padding:14px 32px; border-radius:10px; border:1.5px solid rgba(255,255,255,0.6); cursor:pointer; letter-spacing:0.02em; box-shadow:0 4px 20px rgba(0,0,0,0.35); transition:all 0.25s ease;" onmouseover="this.style.background='rgba(255,255,255,0.22)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,255,255,0.12)';this.style.transform=''">📋 My Requests</button>` : ''}
                     </div>
 
-                    <!-- Apple-Style Pure Transparent Liquid Glass Square Feature Blocks -->
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:1.2rem; max-width:840px; margin:2.6rem auto 0; text-align:left;">
+                    <!-- Compact Apple Liquid Glass Square Feature Blocks -->
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:0.9rem; max-width:820px; margin:1.6rem auto 0; text-align:left;">
                         
                         <!-- Square Block 1: 100% Verified Offers -->
-                        <div style="background:rgba(255,255,255,0.09); backdrop-filter:blur(24px) saturate(200%); -webkit-backdrop-filter:blur(24px) saturate(200%); border:1px solid rgba(255,255,255,0.35); border-radius:20px; padding:1.5rem 1.3rem; box-shadow:0 10px 30px rgba(0,0,0,0.35), inset 0 1px 1.5px rgba(255,255,255,0.65); transition:all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.background='rgba(255,255,255,0.16)';this.style.borderColor='rgba(255,255,255,0.6)'" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.09)';this.style.borderColor='rgba(255,255,255,0.35)'">
-                            <div style="width:44px; height:44px; border-radius:12px; background:rgba(34,197,94,0.22); border:1px solid rgba(34,197,94,0.45); display:flex; align-items:center; justify-content:center; margin-bottom:1rem; flex-shrink:0;">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                                    <polyline points="9 12 11 14 15 10"></polyline>
-                                </svg>
+                        <div style="background:rgba(255,255,255,0.10); backdrop-filter:blur(22px) saturate(190%); -webkit-backdrop-filter:blur(22px) saturate(190%); border:1px solid rgba(255,255,255,0.38); border-radius:14px; padding:0.9rem 1rem; box-shadow:0 8px 24px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.65); transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.background='rgba(255,255,255,0.18)';" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.10)';">
+                            <div style="display:flex; align-items:center; gap:0.55rem; margin-bottom:0.35rem;">
+                                <div style="width:30px; height:30px; border-radius:8px; background:rgba(34,197,94,0.25); border:1px solid rgba(34,197,94,0.5); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                        <polyline points="9 12 11 14 15 10"></polyline>
+                                    </svg>
+                                </div>
+                                <h3 style="font-size:0.92rem; font-weight:800; color:#FFFFFF; margin:0; text-shadow:0 1px 4px rgba(0,0,0,0.95);">100% Verified Offers</h3>
                             </div>
-                            <h3 style="font-size:1.05rem; font-weight:800; color:#FFFFFF; margin:0 0 0.45rem 0; letter-spacing:-0.01em; text-shadow:0 2px 6px rgba(0,0,0,0.95);">100% Verified Offers</h3>
-                            <p style="font-size:0.83rem; color:rgba(255,255,255,0.85); line-height:1.55; margin:0; font-weight:400; text-shadow:0 1px 4px rgba(0,0,0,0.85);">
-                                Receive authentic offers directly from authorized, verified Umrah travel operators with guaranteed transparent pricing.
+                            <p style="font-size:0.78rem; color:rgba(255,255,255,0.88); line-height:1.45; margin:0; font-weight:400; text-shadow:0 1px 3px rgba(0,0,0,0.9);">
+                                Direct transparent offers from authorized, verified Umrah travel providers.
                             </p>
                         </div>
 
-                        <!-- Square Block 2: 24/7 Dedicated Support -->
-                        <div style="background:rgba(255,255,255,0.09); backdrop-filter:blur(24px) saturate(200%); -webkit-backdrop-filter:blur(24px) saturate(200%); border:1px solid rgba(255,255,255,0.35); border-radius:20px; padding:1.5rem 1.3rem; box-shadow:0 10px 30px rgba(0,0,0,0.35), inset 0 1px 1.5px rgba(255,255,255,0.65); transition:all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.background='rgba(255,255,255,0.16)';this.style.borderColor='rgba(255,255,255,0.6)'" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.09)';this.style.borderColor='rgba(255,255,255,0.35)'">
-                            <div style="width:44px; height:44px; border-radius:12px; background:rgba(245,158,11,0.22); border:1px solid rgba(245,158,11,0.45); display:flex; align-items:center; justify-content:center; margin-bottom:1rem; flex-shrink:0;">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fde047" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
-                                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
-                                </svg>
+                        <!-- Square Block 2: 24/7 Support -->
+                        <div style="background:rgba(255,255,255,0.10); backdrop-filter:blur(22px) saturate(190%); -webkit-backdrop-filter:blur(22px) saturate(190%); border:1px solid rgba(255,255,255,0.38); border-radius:14px; padding:0.9rem 1rem; box-shadow:0 8px 24px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.65); transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.background='rgba(255,255,255,0.18)';" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.10)';">
+                            <div style="display:flex; align-items:center; gap:0.55rem; margin-bottom:0.35rem;">
+                                <div style="width:30px; height:30px; border-radius:8px; background:rgba(245,158,11,0.25); border:1px solid rgba(245,158,11,0.5); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fde047" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                                        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                                    </svg>
+                                </div>
+                                <h3 style="font-size:0.92rem; font-weight:800; color:#FFFFFF; margin:0; text-shadow:0 1px 4px rgba(0,0,0,0.95);">24/7 Support</h3>
                             </div>
-                            <h3 style="font-size:1.05rem; font-weight:800; color:#FFFFFF; margin:0 0 0.45rem 0; letter-spacing:-0.01em; text-shadow:0 2px 6px rgba(0,0,0,0.95);">24/7 Support</h3>
-                            <p style="font-size:0.83rem; color:rgba(255,255,255,0.85); line-height:1.55; margin:0; font-weight:400; text-shadow:0 1px 4px rgba(0,0,0,0.85);">
-                                Dedicated travel advisors available around the clock to guide you step-by-step through your sacred pilgrimage.
+                            <p style="font-size:0.78rem; color:rgba(255,255,255,0.88); line-height:1.45; margin:0; font-weight:400; text-shadow:0 1px 3px rgba(0,0,0,0.9);">
+                                Round-the-clock guidance &amp; assistance throughout your holy pilgrimage.
                             </p>
                         </div>
 
-                        <!-- Square Block 3: Your Data is Safe & Private -->
-                        <div style="background:rgba(255,255,255,0.09); backdrop-filter:blur(24px) saturate(200%); -webkit-backdrop-filter:blur(24px) saturate(200%); border:1px solid rgba(255,255,255,0.35); border-radius:20px; padding:1.5rem 1.3rem; box-shadow:0 10px 30px rgba(0,0,0,0.35), inset 0 1px 1.5px rgba(255,255,255,0.65); transition:all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.background='rgba(255,255,255,0.16)';this.style.borderColor='rgba(255,255,255,0.6)'" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.09)';this.style.borderColor='rgba(255,255,255,0.35)'">
-                            <div style="width:44px; height:44px; border-radius:12px; background:rgba(147,51,234,0.22); border:1px solid rgba(147,51,234,0.45); display:flex; align-items:center; justify-content:center; margin-bottom:1rem; flex-shrink:0;">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                                </svg>
+                        <!-- Square Block 3: Your Data is Safe -->
+                        <div style="background:rgba(255,255,255,0.10); backdrop-filter:blur(22px) saturate(190%); -webkit-backdrop-filter:blur(22px) saturate(190%); border:1px solid rgba(255,255,255,0.38); border-radius:14px; padding:0.9rem 1rem; box-shadow:0 8px 24px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.65); transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.background='rgba(255,255,255,0.18)';" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.10)';">
+                            <div style="display:flex; align-items:center; gap:0.55rem; margin-bottom:0.35rem;">
+                                <div style="width:30px; height:30px; border-radius:8px; background:rgba(147,51,234,0.25); border:1px solid rgba(147,51,234,0.5); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                    </svg>
+                                </div>
+                                <h3 style="font-size:0.92rem; font-weight:800; color:#FFFFFF; margin:0; text-shadow:0 1px 4px rgba(0,0,0,0.95);">Your Data is Safe</h3>
                             </div>
-                            <h3 style="font-size:1.05rem; font-weight:800; color:#FFFFFF; margin:0 0 0.45rem 0; letter-spacing:-0.01em; text-shadow:0 2px 6px rgba(0,0,0,0.95);">Your Data is Safe &amp; Private</h3>
-                            <p style="font-size:0.83rem; color:rgba(255,255,255,0.85); line-height:1.55; margin:0; font-weight:400; text-shadow:0 1px 4px rgba(0,0,0,0.85);">
-                                Your personal details remain 100% confidential. No spam or unsolicited calls—you stay in complete control.
+                            <p style="font-size:0.78rem; color:rgba(255,255,255,0.88); line-height:1.45; margin:0; font-weight:400; text-shadow:0 1px 3px rgba(0,0,0,0.9);">
+                                Your personal information stays 100% confidential with zero spam calls.
                             </p>
                         </div>
 
