@@ -835,6 +835,11 @@ class App {
                 title: 'Pilgrim Help & Technical Support | Zilhaj.com',
                 desc: 'Need help with your booking or payment? Reach 24/7 Zilhaj customer support team instantly.',
                 url: 'https://onerequest.in/support'
+            },
+            'request-form': {
+                title: 'Submit Umrah & Hajj Travel Request | Zilhaj.com',
+                desc: 'Fill in your travel dates, group size, hotel preferences, and budget to receive personalized Umrah package quotes from verified Saudi tour operators.',
+                url: 'https://onerequest.in/request-form'
             }
         };
 
@@ -982,10 +987,7 @@ class App {
     }
 
     handleStartJourneyClick() {
-        try {
-            window.location.hash = '#request-form';
-        } catch (e) {}
-        this.renderPage('request-form');
+        this.navigate('request-form');
     }
 
     setReqRoomType(btn, roomType) {
@@ -2130,15 +2132,6 @@ class App {
     }
 
     currentFormStep = 1;
-
-    handleStartJourneyClick() {
-        if (!this.state.currentUser) {
-            this.showToast('Please log in or create an account to start your travel request.', 'info');
-            this.openAuthModal('login');
-            return;
-        }
-        this.scrollToRequirementForm();
-    }
 
     calcTotalTravelers() {
         const m = parseInt(document.getElementById('reqMales')?.value) || 0;
@@ -10316,7 +10309,11 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
 
     scrollToRequirementForm() {
         const anchor = document.getElementById('requestFormAnchor');
-        if (anchor) anchor.scrollIntoView({ behavior: 'smooth' });
+        if (anchor) {
+            anchor.scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+        this.navigate('request-form');
     }
 
 
