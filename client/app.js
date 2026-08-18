@@ -982,7 +982,10 @@ class App {
     }
 
     handleStartJourneyClick() {
-        this.navigate('request-form');
+        try {
+            window.location.hash = '#request-form';
+        } catch (e) {}
+        this.renderPage('request-form');
     }
 
     setReqRoomType(btn, roomType) {
