@@ -997,9 +997,14 @@ class App {
                 <div class="hero-green-container" style="max-width:860px !important; margin:0 auto !important; text-align:center; position:relative; z-index:4;">
 
                     <!-- Liquid Glass Hero Badge Block -->
-                    <div class="hero-liquid-glass-badge">
-                        <span style="font-size:1.15rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6)); position:relative; z-index:2;">🕌</span>
-                        <span class="hero-badge-text">✦ VERIFIED HAJJ &amp; UMRAH TRAVELS PLATFORM ✦</span>
+                    <div class="hero-liquid-glass-badge" style="display:inline-flex !important; align-items:center !important; gap:0.75rem !important; background:rgba(255,255,255,0.18) !important; background:linear-gradient(135deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.10) 100%) !important; backdrop-filter:blur(28px) saturate(220%) !important; -webkit-backdrop-filter:blur(28px) saturate(220%) !important; border:1.5px solid rgba(255,255,255,0.65) !important; border-radius:999px !important; padding:0.65rem 1.8rem !important; margin-bottom:1.8rem !important; box-shadow:0 12px 36px rgba(0,0,0,0.45), inset 0 1.5px 2px rgba(255,255,255,0.85), 0 0 25px rgba(255,255,255,0.3) !important; position:relative !important; overflow:hidden !important;">
+                        <div style="position:absolute; top:0; left:-50%; width:200%; height:55%; background:linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 100%); transform:rotate(-3deg); pointer-events:none;"></div>
+                        <span style="font-size:1.2rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6)); position:relative; z-index:2;">🕌</span>
+                        <span class="hero-badge-text" style="font-size:0.88rem !important; font-weight:800 !important; color:#FFFFFF !important; text-transform:uppercase !important; letter-spacing:0.14em !important; text-shadow:0 2px 10px rgba(0,0,0,0.95), 0 0 14px rgba(255,255,255,0.6) !important; position:relative; z-index:2; display:inline-flex; align-items:center; gap:0.4rem;">
+                            <span style="color:#f59e0b; text-shadow:0 0 10px rgba(245,158,11,0.8);">✦</span>
+                            <span>VERIFIED HAJJ &amp; UMRAH TRAVELS PLATFORM</span>
+                            <span style="color:#f59e0b; text-shadow:0 0 10px rgba(245,158,11,0.8);">✦</span>
+                        </span>
                     </div>
 
                     <!-- Main Headline -->
