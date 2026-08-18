@@ -997,13 +997,13 @@ class App {
                 <div class="hero-green-container" style="max-width:860px !important; margin:0 auto !important; text-align:center; position:relative; z-index:4;">
 
                     <!-- Liquid Glass Hero Badge Block -->
-                    <div class="hero-liquid-glass-badge" style="display:inline-flex !important; align-items:center !important; gap:0.75rem !important; background:rgba(255,255,255,0.18) !important; background:linear-gradient(135deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.10) 100%) !important; backdrop-filter:blur(28px) saturate(220%) !important; -webkit-backdrop-filter:blur(28px) saturate(220%) !important; border:1.5px solid rgba(255,255,255,0.65) !important; border-radius:999px !important; padding:0.65rem 1.8rem !important; margin-bottom:1.8rem !important; box-shadow:0 12px 36px rgba(0,0,0,0.45), inset 0 1.5px 2px rgba(255,255,255,0.85), 0 0 25px rgba(255,255,255,0.3) !important; position:relative !important; overflow:hidden !important;">
-                        <div style="position:absolute; top:0; left:-50%; width:200%; height:55%; background:linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 100%); transform:rotate(-3deg); pointer-events:none;"></div>
-                        <span style="font-size:1.2rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6)); position:relative; z-index:2;">🕌</span>
-                        <span class="hero-badge-text" style="font-size:0.88rem !important; font-weight:800 !important; color:#FFFFFF !important; text-transform:uppercase !important; letter-spacing:0.14em !important; text-shadow:0 2px 10px rgba(0,0,0,0.95), 0 0 14px rgba(255,255,255,0.6) !important; position:relative; z-index:2; display:inline-flex; align-items:center; gap:0.4rem;">
-                            <span style="color:#f59e0b; text-shadow:0 0 10px rgba(245,158,11,0.8);">✦</span>
-                            <span>VERIFIED HAJJ &amp; UMRAH TRAVELS PLATFORM</span>
-                            <span style="color:#f59e0b; text-shadow:0 0 10px rgba(245,158,11,0.8);">✦</span>
+                    <div class="hero-liquid-glass-badge" style="display:inline-flex !important; align-items:center !important; gap:0.6rem !important; background:rgba(255,255,255,0.12) !important; backdrop-filter:blur(22px) saturate(190%) !important; -webkit-backdrop-filter:blur(22px) saturate(190%) !important; border:1.2px solid rgba(255,255,255,0.45) !important; border-radius:999px !important; padding:0.5rem 1.4rem !important; margin-bottom:1.6rem !important; box-shadow:0 8px 25px rgba(0,0,0,0.35), inset 0 1px 1.5px rgba(255,255,255,0.7) !important; position:relative !important; overflow:hidden !important;">
+                        <div style="position:absolute; top:0; left:-50%; width:200%; height:50%; background:linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 100%); transform:rotate(-3deg); pointer-events:none;"></div>
+                        <span style="font-size:1.1rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6)); position:relative; z-index:2;">🕌</span>
+                        <span class="hero-badge-text" style="font-size:0.82rem !important; font-weight:800 !important; color:#FFFFFF !important; letter-spacing:0.05em !important; text-shadow:0 2px 8px rgba(0,0,0,0.95), 0 0 10px rgba(255,255,255,0.4) !important; position:relative; z-index:2; display:inline-flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
+                            <span style="text-transform:uppercase;">VERIFIED HAJJ &amp; UMRAH PLATFORM</span>
+                            <span style="color:#f59e0b; margin:0 0.1rem;">•</span>
+                            <span style="font-weight:600; color:rgba(255,255,255,0.92); text-transform:none; letter-spacing:0.01em;">Powered by GoExergy Private Limited</span>
                         </span>
                     </div>
 
@@ -1022,6 +1022,29 @@ class App {
                     <div class="hero-cta-anim" style="display:flex; justify-content:center; align-items:center; gap:1rem; flex-wrap:wrap;">
                         <button onclick="app.handleStartJourneyClick()" style="background:linear-gradient(135deg,#E8B84B 0%,#C9953A 100%); color:#0A1A12; font-weight:800; font-size:0.95rem; padding:14px 32px; border-radius:10px; border:none; cursor:pointer; letter-spacing:0.02em; box-shadow:0 6px 28px rgba(232,184,75,0.55), 0 2px 8px rgba(0,0,0,0.3); transition:all 0.25s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 36px rgba(232,184,75,0.65),0 3px 12px rgba(0,0,0,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(232,184,75,0.55),0 2px 8px rgba(0,0,0,0.3)'">✦ Start Your Journey</button>
                         ${this.state.currentUser ? `<button onclick="app.navigate('dashboard')" style="background:rgba(255,255,255,0.12); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); color:#FFFFFF; font-weight:800; font-size:0.95rem; padding:14px 32px; border-radius:10px; border:1.5px solid rgba(255,255,255,0.6); cursor:pointer; letter-spacing:0.02em; box-shadow:0 4px 20px rgba(0,0,0,0.35); transition:all 0.25s ease;" onmouseover="this.style.background='rgba(255,255,255,0.22)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,255,255,0.12)';this.style.transform=''">📋 My Requests</button>` : ''}
+                    </div>
+
+                    <!-- Snug Liquid Glass Feature Cards Below CTAs -->
+                    <div style="display:flex; justify-content:center; align-items:center; gap:0.75rem; flex-wrap:wrap; margin-top:2.2rem;">
+                        
+                        <!-- Card 1: 100% Verified Offers -->
+                        <div style="display:inline-flex; align-items:center; gap:0.45rem; background:rgba(255,255,255,0.12); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.4); border-radius:999px; padding:0.45rem 1.1rem; box-shadow:0 6px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.6); transition:all 0.25s ease;" onmouseover="this.style.background='rgba(255,255,255,0.22)';this.style.borderColor='rgba(255,255,255,0.65)'" onmouseout="this.style.background='rgba(255,255,255,0.12)';this.style.borderColor='rgba(255,255,255,0.4)'">
+                            <span style="color:#22c55e; font-weight:900; font-size:0.9rem; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.8));">✓</span>
+                            <span style="color:#FFFFFF; font-size:0.83rem; font-weight:700; letter-spacing:0.02em; text-shadow:0 1px 4px rgba(0,0,0,0.95), 0 0 8px rgba(255,255,255,0.3);">100% Verified Offers</span>
+                        </div>
+
+                        <!-- Card 2: 24/7 Support -->
+                        <div style="display:inline-flex; align-items:center; gap:0.45rem; background:rgba(255,255,255,0.12); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.4); border-radius:999px; padding:0.45rem 1.1rem; box-shadow:0 6px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.6); transition:all 0.25s ease;" onmouseover="this.style.background='rgba(255,255,255,0.22)';this.style.borderColor='rgba(255,255,255,0.65)'" onmouseout="this.style.background='rgba(255,255,255,0.12)';this.style.borderColor='rgba(255,255,255,0.4)'">
+                            <span style="font-size:0.88rem; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.8));">🎧</span>
+                            <span style="color:#FFFFFF; font-size:0.83rem; font-weight:700; letter-spacing:0.02em; text-shadow:0 1px 4px rgba(0,0,0,0.95), 0 0 8px rgba(255,255,255,0.3);">24/7 Support</span>
+                        </div>
+
+                        <!-- Card 3: Your Data is Safe -->
+                        <div style="display:inline-flex; align-items:center; gap:0.45rem; background:rgba(255,255,255,0.12); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.4); border-radius:999px; padding:0.45rem 1.1rem; box-shadow:0 6px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.6); transition:all 0.25s ease;" onmouseover="this.style.background='rgba(255,255,255,0.22)';this.style.borderColor='rgba(255,255,255,0.65)'" onmouseout="this.style.background='rgba(255,255,255,0.12)';this.style.borderColor='rgba(255,255,255,0.4)'">
+                            <span style="font-size:0.88rem; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.8));">🔒</span>
+                            <span style="color:#FFFFFF; font-size:0.83rem; font-weight:700; letter-spacing:0.02em; text-shadow:0 1px 4px rgba(0,0,0,0.95), 0 0 8px rgba(255,255,255,0.3);">Your Data is Safe &amp; Private</span>
+                        </div>
+
                     </div>
 
                 </div>
