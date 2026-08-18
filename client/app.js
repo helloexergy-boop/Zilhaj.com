@@ -3122,16 +3122,14 @@ class App {
         // ── Sidebar ──────────────────────────────────────────────────────────────
         const sidebar = `
         <aside style="width:235px;flex-shrink:0;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:1.1rem .8rem;display:flex;flex-direction:column;min-height:calc(100vh - 140px);position:sticky;top:98px;align-self:flex-start;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
-            <div style="display:flex;align-items:center;gap:.45rem;padding:.15rem .3rem .9rem;border-bottom:1px solid #f0f0f0;margin-bottom:.8rem;">
-                <svg width="24" height="24" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="8" fill="#1a6b3c"/><text x="8" y="28" font-family="Georgia,serif" font-size="22" font-weight="900" font-style="italic" fill="white">Z</text></svg>
+            <div style="display:flex;align-items:center;gap:.55rem;padding:.15rem .3rem .9rem;border-bottom:1px solid #f0f0f0;margin-bottom:.8rem;">
+                <img src="logo.png" onerror="this.onerror=null;this.src='images/logo.png';" alt="ZILHAJ" style="width:34px;height:34px;object-fit:cover;border-radius:50%;border:1.5px solid #e2e8f0;flex-shrink:0;">
                 <div><div style="font-size:.9rem;font-weight:900;color:#0f172a;letter-spacing:.4px;font-style:italic;">ZILHAJ</div><div style="font-size:.55rem;color:#6b7280;line-height:1.2;">One Request. Multiple Verified Offers.</div></div>
             </div>
             <div style="display:flex;flex-direction:column;gap:.15rem;flex:1;">
-                ${navItem('dashboard', ic.dashboard, 'Dashboard')}
                 ${navItem('requests',  ic.requests,  'My Requests')}
                 ${navItem('payments',  ic.payments,  'Payments')}
                 ${navItem('profile',   ic.profile,   'Profile &amp; Settings')}
-                ${navItem('notifications', ic.notifs, 'Notifications', notifCount)}
                 ${navItem('help',      ic.help,      'Help &amp; Support')}
             </div>
             <div style="margin-top:1.1rem;background:#f0faf5;border:1px solid #d1fae5;border-radius:10px;padding:.8rem;transition:all .2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(26,107,60,0.08)'" onmouseout="this.style.boxShadow='none'">
@@ -3780,21 +3778,17 @@ class App {
         const sidebar = `
         <aside style="width:230px;flex-shrink:0;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);display:flex;flex-direction:column;gap:1.3rem;">
             <div style="padding-bottom:.9rem;border-bottom:1px solid #f3f4f6;">
-                <div style="font-size:1.15rem;font-weight:900;color:#1a6b3c;display:flex;align-items:center;gap:.4rem;">
-                    <span style="font-size:1.25rem;">🕋</span> ZILHAJ
+                <div style="font-size:1.15rem;font-weight:900;color:#1a6b3c;display:flex;align-items:center;gap:.5rem;">
+                    <img src="logo.png" onerror="this.onerror=null;this.src='images/logo.png';" alt="ZILHAJ" style="width:30px;height:30px;object-fit:cover;border-radius:50%;border:1px solid #e2e8f0;flex-shrink:0;">
+                    <span>ZILHAJ</span>
                 </div>
                 <div style="font-size:.67rem;color:#6b7280;margin-top:.15rem;font-weight:500;">One Request. Multiple Verified Offers.</div>
             </div>
 
             <nav style="display:flex;flex-direction:column;gap:.35rem;">
-                <a href="javascript:void(0)" onclick="app.setDashboardTab('dashboard')" style="display:flex;align-items:center;gap:.6rem;padding:.58rem .82rem;border-radius:10px;text-decoration:none;font-size:.84rem;font-weight:500;color:#374151;transition:all .2s;" onmouseover="this.style.background='#f0faf5';this.style.color='#1a6b3c';" onmouseout="this.style.background='transparent';this.style.color='#374151';">⊞ Dashboard</a>
                 <a href="javascript:void(0)" onclick="app.setDashboardTab('requests')" style="display:flex;align-items:center;gap:.6rem;padding:.58rem .82rem;border-radius:10px;text-decoration:none;font-size:.84rem;font-weight:500;color:#374151;transition:all .2s;" onmouseover="this.style.background='#f0faf5';this.style.color='#1a6b3c';" onmouseout="this.style.background='transparent';this.style.color='#374151';">📄 My Requests</a>
                 <a href="javascript:void(0)" onclick="app.setDashboardTab('payments')" style="display:flex;align-items:center;gap:.6rem;padding:.58rem .82rem;border-radius:10px;text-decoration:none;font-size:.84rem;font-weight:500;color:#374151;transition:all .2s;" onmouseover="this.style.background='#f0faf5';this.style.color='#1a6b3c';" onmouseout="this.style.background='transparent';this.style.color='#374151';">💳 Payments</a>
                 <a href="javascript:void(0)" onclick="app.setDashboardTab('profile')" style="display:flex;align-items:center;gap:.6rem;padding:.58rem .82rem;border-radius:10px;text-decoration:none;font-size:.84rem;font-weight:500;color:#374151;transition:all .2s;" onmouseover="this.style.background='#f0faf5';this.style.color='#1a6b3c';" onmouseout="this.style.background='transparent';this.style.color='#374151';">👤 Profile &amp; Settings</a>
-                <a href="javascript:void(0)" onclick="app.setDashboardTab('notifications')" style="display:flex;align-items:center;justify-content:space-between;padding:.58rem .82rem;border-radius:10px;text-decoration:none;font-size:.84rem;font-weight:500;color:#374151;transition:all .2s;" onmouseover="this.style.background='#f0faf5';this.style.color='#1a6b3c';" onmouseout="this.style.background='transparent';this.style.color='#374151';">
-                    <span>🔔 Notifications</span>
-                    <span style="background:#1a6b3c;color:#fff;font-size:.64rem;font-weight:800;border-radius:99px;padding:0 6px;">2</span>
-                </a>
                 <a href="javascript:void(0)" onclick="app.setDashboardTab('help')" style="display:flex;align-items:center;gap:.6rem;padding:.58rem .82rem;border-radius:10px;text-decoration:none;font-size:.84rem;font-weight:500;color:#374151;transition:all .2s;" onmouseover="this.style.background='#f0faf5';this.style.color='#1a6b3c';" onmouseout="this.style.background='transparent';this.style.color='#374151';">🎧 Help &amp; Support</a>
             </nav>
 
