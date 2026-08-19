@@ -504,7 +504,7 @@ class App {
             navMenu.innerHTML = `
                 <a href="/home" class="nav-link ${this.state.currentPage === 'home' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('home')">Home</a>
                 <a href="/services" class="nav-link ${this.state.currentPage === 'services' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('services')">Services</a>
-                <a href="#" class="nav-link" onclick="app.scrollToContact(event)">Contact Us</a>
+                <a href="/contact" class="nav-link ${this.state.currentPage === 'contact' ? 'active' : ''}" onclick="app.scrollToContact(event)">Contact Us</a>
                 <a href="/about" class="nav-link ${this.state.currentPage === 'about' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('about')">About Us</a>
                 <div class="mobile-only-auth" style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid #e2e8f0; display:flex; flex-direction:column; gap:0.5rem; width:100%;">
                     ${!this.state.currentUser ? `
@@ -566,6 +566,14 @@ class App {
 
     scrollToContact(e) {
         if (e) e.preventDefault();
+        this.state.currentPage = 'contact';
+        document.querySelectorAll('.nav-menu .nav-link').forEach(link => {
+            if (link.textContent.trim().toLowerCase().includes('contact')) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
         const footerContact = document.getElementById('footerContactSection') || document.querySelector('footer');
         if (footerContact) {
             footerContact.scrollIntoView({ behavior: 'smooth' });
@@ -907,8 +915,11 @@ class App {
         // Update active class on nav links
         document.querySelectorAll('.nav-menu .nav-link').forEach(link => {
             link.classList.remove('active');
+            const text = link.textContent.trim().toLowerCase();
             const onclickAttr = link.getAttribute('onclick') || '';
-            if (onclickAttr.includes(`'${page}'`)) {
+            if (page === 'contact' && (text.includes('contact') || onclickAttr.includes('scrollToContact'))) {
+                link.classList.add('active');
+            } else if (onclickAttr.includes(`'${page}'`)) {
                 link.classList.add('active');
             }
         });
@@ -1221,7 +1232,7 @@ class App {
                                 <line x1="16" y1="17" x2="8" y2="17"></line>
                             </svg>
                         </div>
-                        <h1 id="reqPageTitle" style="font-size: 1.45rem; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.02em;">Submit Umrah Request</h1>
+                        <h1 id="reqPageTitle" style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.01em;">Submit Umrah Request</h1>
                     </div>
                     <p id="reqPageSubtitle" style="color: #64748b; font-size: 0.92rem; margin: 0; max-width: 880px; line-height: 1.5;">
                         Fill out the details below to receive personalized Umrah package quotes. Our partner agencies will craft itineraries tailored specifically to your group's needs and preferences.
@@ -1242,7 +1253,7 @@ class App {
                                         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                                     </svg>
                                 </div>
-                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Trip Details</h2>
+                                <h2 style="font-size: 0.98rem; font-weight: 700; color: #0f172a; margin: 0;">Trip Details</h2>
                             </div>
 
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 1.4rem;" class="req-trip-grid">
@@ -1315,7 +1326,7 @@ class App {
                                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                                     </svg>
                                 </div>
-                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Traveler Details *</h2>
+                                <h2 style="font-size: 0.98rem; font-weight: 700; color: #0f172a; margin: 0;">Traveler Details *</h2>
                             </div>
 
                             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.4rem;" class="req-travelers-grid">
@@ -1396,7 +1407,7 @@ class App {
                                         <path d="M12 7v6"></path>
                                     </svg>
                                 </div>
-                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Hotel Preference *</h2>
+                                <h2 style="font-size: 0.98rem; font-weight: 700; color: #0f172a; margin: 0;">Hotel Preference *</h2>
                             </div>
 
                             <div>
@@ -1427,7 +1438,7 @@ class App {
                                         <circle cx="12" cy="10" r="3"></circle>
                                     </svg>
                                 </div>
-                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Contact & Location</h2>
+                                <h2 style="font-size: 0.98rem; font-weight: 700; color: #0f172a; margin: 0;">Contact & Location</h2>
                             </div>
 
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 1.2rem;" class="req-contact-grid-1">
@@ -1683,7 +1694,7 @@ class App {
                     </div>
 
                     <!-- Title & Subtitle -->
-                    <h2 style="font-size: clamp(2rem, 4vw, 2.7rem); font-weight: 900; color: #0f172a; margin: 0 0 0.75rem 0; letter-spacing: -0.02em;">
+                    <h2 style="font-size: clamp(1.35rem, 2.5vw, 1.7rem); font-weight: 800; color: #0f172a; margin: 0 0 0.75rem 0; letter-spacing: -0.01em;">
                         Why Choose Zilhaj?
                     </h2>
                     <p style="color: #64748b; font-size: 1.02rem; max-width: 660px; margin: 0 auto 3rem; line-height: 1.65; font-weight: 400;">
@@ -1813,7 +1824,7 @@ class App {
 
                 <!-- Section header -->
                 <div style="position:relative;z-index:1;max-width:600px;margin:0 auto 3rem;">
-                    <h2 style="font-size:2rem;font-weight:900;color:#0f172a;margin:0 0 0.5rem;letter-spacing:-0.3px;">
+                    <h2 style="font-size:1.35rem;font-weight:800;color:#0f172a;margin:0 0 0.5rem;letter-spacing:-0.2px;">
                         <span style="color:#1a6b3c;">✦</span> How It Works <span style="color:#1a6b3c;">✦</span>
                     </h2>
                     <p style="font-size:0.95rem;color:#6b7280;margin:0;">Three simple steps to plan your Umrah with confidence</p>
@@ -2086,7 +2097,7 @@ class App {
                         <div style="display:inline-flex; align-items:center; gap:0.5rem; background:#ecfdf5; color:#047857; padding:0.4rem 1.1rem; border-radius:99px; font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:0.8rem;">
                             ✨ EASY UMRAH PACKAGES
                         </div>
-                        <h2 style="font-size:2.2rem; font-weight:900; color:#0f172a; margin:0 0 0.5rem; letter-spacing:-0.5px;">Post Your Travel Requirement</h2>
+                        <h2 style="font-size:1.4rem; font-weight:800; color:#0f172a; margin:0 0 0.5rem; letter-spacing:-0.3px;">Post Your Travel Requirement</h2>
                         <p style="font-size:0.95rem; color:#64748b; margin:0 auto; max-width:620px; line-height:1.6;">
                             Enter your travel dates, group size, and preferences. Verified travel agents will send you their best price offers!
                         </p>
@@ -2503,7 +2514,7 @@ class App {
             <div class="main-container" style="max-width:100%; width:100%; box-sizing:border-box; margin:7rem auto 3.5rem; padding:0 3.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem; flex-wrap:wrap; gap:1rem;">
                     <div style="text-align:center; flex:1;">
-                        <h2 style="font-size:2.4rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem;">Why Choose Us</h2>
+                        <h2 style="font-size:1.45rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem;">Why Choose Us</h2>
                         <p style="color:#64748b; font-size:1rem;">Transparent competition between verified travel agencies ensuring you get the best price and quality</p>
                     </div>
                 </div>
@@ -2629,7 +2640,7 @@ class App {
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
                             <span>❓</span> <span>PILGRIMAGE FAQS</span>
                         </div>
-                        <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.02em;">Frequently Asked Questions</h2>
+                        <h2 style="font-size: clamp(1.25rem, 2.2vw, 1.5rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.01em;">Frequently Asked Questions</h2>
                         <p style="color: #64748b; font-size: 0.95rem; max-width: 680px; margin: 0 auto; line-height: 1.6;">Short, clear answers to the most common questions pilgrims ask about Umrah, Hajj, payments, and bookings.</p>
                     </div>
                 </div>
@@ -2718,7 +2729,7 @@ class App {
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
                             <span>📜</span> <span>LEGAL</span>
                         </div>
-                        <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.02em;">Terms & Conditions</h2>
+                        <h2 style="font-size: clamp(1.25rem, 2.2vw, 1.5rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.01em;">Terms & Conditions</h2>
                         <p style="color: #64748b; font-size: 0.95rem; max-width: 680px; margin: 0 auto; line-height: 1.6;">Official Terms of Service for pilgrims and verified tour operators using the Zilhaj.com platform.</p>
                     </div>
                 </div>
@@ -2831,7 +2842,7 @@ class App {
                         </div>
 
                         <!-- Heading -->
-                        <h1 style="font-size: clamp(2.2rem, 4.5vw, 3.2rem); font-weight: 900; color: #0f172a; line-height: 1.15; margin: 0 0 1.2rem 0; letter-spacing: -0.02em;">
+                        <h1 style="font-size: clamp(1.45rem, 2.8vw, 1.85rem); font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 1rem 0; letter-spacing: -0.01em;">
                             Your Trusted Companion<br>
                             <span style="color: #15803d;">for Sacred Journeys</span>
                         </h1>
@@ -3131,7 +3142,7 @@ class App {
                     </div>
 
                     <div style="position: relative; z-index: 2; max-width: 650px; margin: 0 auto;">
-                        <h2 style="font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 900; color: #ffffff; margin: 0 0 0.75rem 0; letter-spacing: -0.01em;">
+                        <h2 style="font-size: clamp(1.25rem, 2.2vw, 1.5rem); font-weight: 800; color: #ffffff; margin: 0 0 0.75rem 0; letter-spacing: -0.01em;">
                             Ready to Start Your Blessed Journey?
                         </h2>
                         <p style="font-size: 1rem; color: rgba(255,255,255,0.92); margin: 0 auto 1.8rem; line-height: 1.6; font-weight: 400;">
@@ -5027,7 +5038,7 @@ class App {
                                             <img src="logo.png" onerror="this.onerror=null;this.src='images/logo.png';" alt="Zilhaj.com Logo" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
                                         </div>
                                         <div>
-                                            <h1 style="font-size:2.2rem; font-weight:900; color:#ffffff; margin:0; letter-spacing:-0.5px; line-height:1.1;">ZILHAJ.COM UMRAH PLATFORM</h1>
+                                            <h1 style="font-size:1.45rem; font-weight:800; color:#ffffff; margin:0; letter-spacing:-0.3px; line-height:1.2;">ZILHAJ.COM UMRAH PLATFORM</h1>
                                             <div style="font-size:0.78rem; color:#d4af37; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; margin-top:0.4rem;">OFFICIAL TRAVEL BOOKING VOUCHER &amp; ESCROW RECEIPT</div>
                                         </div>
                                     </div>
@@ -7355,7 +7366,7 @@ class App {
             <div class="admin-container" style="max-width: 100%; width: 100%; box-sizing: border-box; margin: 6rem auto 2rem; padding: 0 3.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
                     <div>
-                        <h2 style="margin:0; color:#0f172a; font-size:2rem; font-weight:800;">👑 Admin Panel</h2>
+                        <h2 style="margin:0; color:#0f172a; font-size:1.35rem; font-weight:800;">👑 Admin Panel</h2>
                         <p style="color:#64748b; font-size:1rem; margin-top:0.3rem;">Manage Zaireen Requests, Offers, and Orders</p>
                     </div>
                     <div style="display:flex; gap:0.6rem;">
@@ -9204,7 +9215,7 @@ class App {
                             <div style="display:inline-block; font-size:0.68rem; font-weight:800; color:#166534; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:0.4rem;">
                                 PREMIUM TRAVEL EXPERIENCE
                             </div>
-                            <h2 style="font-size:1.8rem; font-weight:900; color:#0f172a; margin:0 0 0.3rem 0; letter-spacing:-0.02em; line-height:1.35;">
+                            <h2 style="font-size:1.3rem; font-weight:800; color:#0f172a; margin:0 0 0.3rem 0; letter-spacing:-0.01em; line-height:1.3;">
                                 ${this.escapeHtml(title)}
                             </h2>
                             <p style="font-size:0.88rem; color:#64748b; margin:0;">
@@ -10003,7 +10014,7 @@ class App {
                     <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.3rem 1.1rem; border-radius: 99px; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.8rem;">
                         <span>🕌</span> <span>OUR PILGRIMAGE SERVICES</span>
                     </div>
-                    <h1 style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 900; color: #0f172a; margin-bottom: 0.6rem; letter-spacing: -0.02em;">
+                    <h1 style="font-size: clamp(1.35rem, 2.5vw, 1.7rem); font-weight: 800; color: #0f172a; margin-bottom: 0.6rem; letter-spacing: -0.01em;">
                         Comprehensive Hajj & Umrah Travel Services
                     </h1>
                     <p style="color: #64748b; font-size: 1.02rem; max-width: 720px; margin: 0 auto; line-height: 1.65;">
@@ -10015,7 +10026,7 @@ class App {
                 <div style="margin-bottom: 4.5rem;">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                         <div>
-                            <h2 style="font-size: 1.65rem; font-weight: 800; color: #0f172a; margin: 0 0 0.3rem 0;">Our Travel Solutions</h2>
+                            <h2 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0 0 0.3rem 0;">Our Travel Solutions</h2>
                             <p style="font-size: 0.92rem; color: #64748b; margin: 0;">Explore our core pilgrimage travel offerings below</p>
                         </div>
                         <span style="background: #f1f5f9; color: #475569; padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.82rem; font-weight: 700;">✦ Verified Saudi Operators</span>
@@ -10105,7 +10116,7 @@ class App {
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
                             <span>📖</span> <span>SACRED KNOWLEDGE HUB</span>
                         </div>
-                        <h2 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 0.4rem;">Hajj & Umrah Pilgrimage Guides</h2>
+                        <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-bottom: 0.4rem;">Hajj & Umrah Pilgrimage Guides</h2>
                         <p style="color: #64748b; font-size: 0.92rem; max-width: 640px; margin: 0 auto;">Essential step-by-step rituals, Miqat boundaries, Ihram rules, Nusuk permits, and spiritual advice.</p>
                     </div>
 
