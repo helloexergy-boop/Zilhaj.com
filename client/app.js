@@ -925,7 +925,9 @@ class App {
         });
 
         if (page === 'home' || page === 'packages') {
-            main.innerHTML = this.renderHomePage();
+            if (!main.querySelector('.hero-green-banner') || !main.querySelector('.packages-grid-layout')) {
+                main.innerHTML = this.renderHomePage();
+            }
             this.initHeroVideoPlaylist();
         } else if (page === 'request-form' || page === 'submit-request' || page === 'request') {
             main.innerHTML = this.renderRequestFormPage();
