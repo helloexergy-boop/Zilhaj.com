@@ -1625,8 +1625,6 @@ class App {
                     <!-- Sub Text -->
                     <p class="hero-subtext-anim" style="font-size:1.08rem !important; color:rgba(255,255,255,0.95) !important; max-width:680px !important; margin:0 auto 2.1rem !important; line-height:1.75 !important; font-weight:400 !important; text-shadow:0 1px 4px rgba(0,0,0,1), 0 2px 20px rgba(0,0,0,0.9);">
                         Post one request and receive transparent offers from verified Umrah travel providers. Compare, choose, and save—without sharing your personal details.
-                    </p>
-
                     <!-- CTA Buttons -->
                     <div class="hero-cta-anim" style="display:flex; justify-content:center; align-items:center; gap:1rem; flex-wrap:wrap;">
                         <button onclick="app.handleStartJourneyClick()" style="background:linear-gradient(135deg,#E8B84B 0%,#C9953A 100%); color:#0A1A12; font-weight:800; font-size:0.95rem; padding:14px 32px; border-radius:10px; border:none; cursor:pointer; letter-spacing:0.02em; box-shadow:0 6px 28px rgba(232,184,75,0.55), 0 2px 8px rgba(0,0,0,0.3); transition:all 0.25s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 36px rgba(232,184,75,0.65),0 3px 12px rgba(0,0,0,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(232,184,75,0.55),0 2px 8px rgba(0,0,0,0.3)'">✦ Start Your Journey</button>
@@ -1634,7 +1632,7 @@ class App {
                     </div>
 
                     <!-- Compact Apple Liquid Glass Square Feature Blocks (Headings & Icons Only) -->
-                    <div style="display:flex; justify-content:center; align-items:center; gap:0.85rem; flex-wrap:wrap; margin-top:2.8rem;">
+                    <div style="display:flex; justify-content:center; align-items:center; gap:2rem; flex-wrap:wrap; margin-top:4.8rem;">
                         
                         <!-- Square Block 1: 100% Verified Offers -->
                         <div style="display:inline-flex; align-items:center; gap:0.55rem; background:rgba(255,255,255,0.10); backdrop-filter:blur(22px) saturate(190%); -webkit-backdrop-filter:blur(22px) saturate(190%); border:1px solid rgba(255,255,255,0.38); border-radius:12px; padding:0.65rem 1.1rem; box-shadow:0 8px 24px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.65); transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.background='rgba(255,255,255,0.18)';" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.10)';">
@@ -1675,8 +1673,8 @@ class App {
             </section>
 
             <!-- Why Choose Zilhaj Section (Pixel-perfect match to reference design) -->
-            <section style="background: #ffffff; padding: 4.5rem 1.5rem 4rem; text-align: center; border-bottom: 1px solid #f1f5f9; position: relative;">
-                <div style="max-width: 1240px; margin: 0 auto;">
+            <section style="background: #ffffff; padding: 5rem 2.5rem; text-align: center; border-bottom: 1px solid #f1f5f9; position: relative; width: 100%; box-sizing: border-box;">
+                <div style="max-width: 1320px; margin: 0 auto; width: 100%; box-sizing: border-box;">
                     
                     <!-- Pill Badge -->
                     <div style="display: inline-flex; align-items: center; gap: 0.45rem; background: #ecfdf5; color: #15803d; border: 1px solid #bbf7d0; padding: 0.35rem 1.1rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.2rem;">
@@ -1688,12 +1686,12 @@ class App {
                     <h2 style="font-size: clamp(2rem, 4vw, 2.7rem); font-weight: 900; color: #0f172a; margin: 0 0 0.75rem 0; letter-spacing: -0.02em;">
                         Why Choose Zilhaj?
                     </h2>
-                    <p style="color: #64748b; font-size: 1.02rem; max-width: 660px; margin: 0 auto 3.5rem; line-height: 1.65; font-weight: 400;">
+                    <p style="color: #64748b; font-size: 1.02rem; max-width: 660px; margin: 0 auto 3rem; line-height: 1.65; font-weight: 400;">
                         We make your Umrah planning simple, transparent, and reliable with verified options and dedicated support.
                     </p>
 
                     <!-- 4 Cards Grid Layout -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.6rem; align-items: stretch;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.8rem; align-items: stretch;">
                         
                         <!-- Card 1: Verified Providers -->
                         <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 1.6rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.08)';this.style.borderColor='#e2e8f0';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.03)';this.style.borderColor='#f1f5f9';">
@@ -1759,7 +1757,7 @@ class App {
             </section>
 
             <!-- How It Works Section – Pixel-perfect reference design -->
-            <section style="position:relative; overflow:hidden; padding:4.5rem 1.5rem 4rem; background:#f0faf5; text-align:center; border-bottom:1px solid #d8ede2;">
+            <section style="position:relative; overflow:hidden; padding:5rem 2.5rem; background:#f0faf5; text-align:center; border-bottom:1px solid #d8ede2; width:100%; box-sizing:border-box;">
 
                 <!-- Faded mosque silhouette background -->
                 <div style="position:absolute;inset:0;pointer-events:none;user-select:none;overflow:hidden;">
@@ -1814,7 +1812,7 @@ class App {
                 </div>
 
                 <!-- Section header -->
-                <div style="position:relative;z-index:1;max-width:600px;margin:0 auto 2.5rem;">
+                <div style="position:relative;z-index:1;max-width:600px;margin:0 auto 3rem;">
                     <h2 style="font-size:2rem;font-weight:900;color:#0f172a;margin:0 0 0.5rem;letter-spacing:-0.3px;">
                         <span style="color:#1a6b3c;">✦</span> How It Works <span style="color:#1a6b3c;">✦</span>
                     </h2>
@@ -1822,7 +1820,7 @@ class App {
                 </div>
 
                 <!-- Dashed connector row with icon nodes -->
-                <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:0;max-width:680px;margin:0 auto 2.2rem;">
+                <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:0;max-width:680px;margin:0 auto 2.5rem;">
                     <!-- Node 1: document icon (green circle) -->
                     <div style="width:52px;height:52px;border-radius:50%;background:#ffffff;border:2px solid #2d8c55;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
                         <svg width="22" height="22" fill="none" stroke="#2d8c55" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
@@ -1846,7 +1844,7 @@ class App {
                 </div>
 
                 <!-- 3 Cards (no step labels, no arrows between cards) -->
-                <div style="position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;max-width:1060px;margin:0 auto;">
+                <div style="position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1.8rem;max-width:1120px;margin:0 auto;">
 
                     <!-- Card 1: Submit Request -->
                     <div class="scroll-reveal stagger-1" style="background:#ffffff;border-radius:16px;padding:2.2rem 1.8rem 0;text-align:center;box-shadow:0 2px 16px rgba(0,0,0,0.07);border:1px solid #e2ede6;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;">
@@ -1900,97 +1898,99 @@ class App {
     renderLiquidGlassFeedbackSection() {
         return `
             <!-- Modern & Aesthetic Liquid Glass Zaireen Review Carousel Slider -->
-            <section class="liquid-glass-wrapper" id="liquidFeedbackSection">
-                <div class="reviews-section-header">
-                    <h2 class="reviews-section-title">Read reviews from <span>Zaireen</span></h2>
-                    <p class="reviews-section-subtitle">Real experiences from Zaireen who posted their Umrah requirements and saved on reverse bidding</p>
-                </div>
-
-                <div class="liquid-carousel-outer">
-                    <div class="liquid-carousel-container">
-                        <!-- Navigation Prev/Next Buttons -->
-                        <button type="button" class="carousel-nav-btn prev" onclick="app.slideReviewCarousel(-1)" aria-label="Previous Review">❮</button>
-                        
-                        <!-- Track Viewport -->
-                        <div class="carousel-viewport">
-                            <div class="carousel-track" id="ZaireenReviewTrack" style="transform: translateX(0px);">
-                                
-                                <!-- Card 1 (No Profile Image as requested!) -->
-                                <div class="Zaireen-review-card">
-                                    <div>
-                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
-                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
-                                        <h3 class="card-headline-title">SAVED ₹35,000 WITH REVERSE BIDDING</h3>
-                                        <div class="card-author-name">Tariq Ahmad Bhat • Srinagar</div>
-                                    </div>
-                                    <p class="card-review-text">
-                                        I submitted my 18-day Umrah requirement and received 4 verified agent quotes within 2 hours. Got a 5-star hotel near Haram for 25% lower price!
-                                    </p>
-                                </div>
-
-                                <!-- Card 2 (No Profile Image as requested!) -->
-                                <div class="Zaireen-review-card">
-                                    <div>
-                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
-                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
-                                        <h3 class="card-headline-title">BOOKED 5-STAR HARAM HOTEL AT BUDGET PRICE</h3>
-                                        <div class="card-author-name">Shafiq Ur Rehman • Delhi</div>
-                                    </div>
-                                    <p class="card-review-text">
-                                        The reverse bidding system is incredible. Travel agents competed to give us their lowest package prices. Smooth, transparent, and trustworthy experience!
-                                    </p>
-                                </div>
-
-                                <!-- Card 3 (No Profile Image as requested!) -->
-                                <div class="Zaireen-review-card">
-                                    <div>
-                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
-                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
-                                        <h3 class="card-headline-title">SUPER FAST AGENT RESPONSES</h3>
-                                        <div class="card-author-name">Dr. Ayesha Malik • Mumbai</div>
-                                    </div>
-                                    <p class="card-review-text">
-                                        I was worried about organizing Umrah for my family of 6. Within an hour of posting our details, 3 verified agents sent complete itineraries.
-                                    </p>
-                                </div>
-
-                                <!-- Card 4 (No Profile Image as requested!) -->
-                                <div class="Zaireen-review-card">
-                                    <div>
-                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
-                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
-                                        <h3 class="card-headline-title">RAMADAN SPECIAL DISCOUNT MATCH</h3>
-                                        <div class="card-author-name">Mohammad Owais • Hyderabad</div>
-                                    </div>
-                                    <p class="card-review-text">
-                                        Reverse bidding helped me secure a 14-day Ramadan package under 200m from Masjid al-Haram at an unbeatable group rate. Highly recommended!
-                                    </p>
-                                </div>
-
-                                <!-- Card 5 (No Profile Image as requested!) -->
-                                <div class="Zaireen-review-card">
-                                    <div>
-                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
-                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
-                                        <h3 class="card-headline-title">100% TRANSPARENT & RELIABLE</h3>
-                                        <div class="card-author-name">Shazia Parveen • Bangalore</div>
-                                    </div>
-                                    <p class="card-review-text">
-                                        Very easy to fill out requirement form and directly communicate with top agents. No hidden fees or unexpected charges.
-                                    </p>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <button type="button" class="carousel-nav-btn next" onclick="app.slideReviewCarousel(1)" aria-label="Next Review">❯</button>
+            <section style="background: #ffffff; padding: 5rem 2.5rem 4.5rem; border-bottom: 1px solid #f1f5f9; position: relative; width: 100%; box-sizing: border-box;" id="liquidFeedbackSection">
+                <div class="liquid-glass-wrapper" style="max-width: 1320px; margin: 0 auto; padding: 0; width: 100%;">
+                    <div class="reviews-section-header" style="margin-bottom: 3rem;">
+                        <h2 class="reviews-section-title">Read reviews from <span>Zaireen</span></h2>
+                        <p class="reviews-section-subtitle">Real experiences from Zaireen who posted their Umrah requirements and saved on reverse bidding</p>
                     </div>
 
-                    <!-- Pagination Dots -->
-                    <div class="carousel-dots-wrapper" id="carouselDotsWrapper">
-                        <div class="carousel-dot active" onclick="app.goToReviewSlide(0)"></div>
-                        <div class="carousel-dot" onclick="app.goToReviewSlide(1)"></div>
-                        <div class="carousel-dot" onclick="app.goToReviewSlide(2)"></div>
+                    <div class="liquid-carousel-outer">
+                        <div class="liquid-carousel-container">
+                            <!-- Navigation Prev/Next Buttons -->
+                            <button type="button" class="carousel-nav-btn prev" onclick="app.slideReviewCarousel(-1)" aria-label="Previous Review">❮</button>
+                            
+                            <!-- Track Viewport -->
+                            <div class="carousel-viewport">
+                                <div class="carousel-track" id="ZaireenReviewTrack" style="transform: translateX(0px);">
+                                    
+                                    <!-- Card 1 -->
+                                    <div class="Zaireen-review-card">
+                                        <div>
+                                            <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                            <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                            <h3 class="card-headline-title">SAVED ₹35,000 WITH REVERSE BIDDING</h3>
+                                            <div class="card-author-name">Tariq Ahmad Bhat • Srinagar</div>
+                                        </div>
+                                        <p class="card-review-text">
+                                            I submitted my 18-day Umrah requirement and received 4 verified agent quotes within 2 hours. Got a 5-star hotel near Haram for 25% lower price!
+                                        </p>
+                                    </div>
+
+                                    <!-- Card 2 -->
+                                    <div class="Zaireen-review-card">
+                                        <div>
+                                            <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                            <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                            <h3 class="card-headline-title">BOOKED 5-STAR HARAM HOTEL AT BUDGET PRICE</h3>
+                                            <div class="card-author-name">Shafiq Ur Rehman • Delhi</div>
+                                        </div>
+                                        <p class="card-review-text">
+                                            The reverse bidding system is incredible. Travel agents competed to give us their lowest package prices. Smooth, transparent, and trustworthy experience!
+                                        </p>
+                                    </div>
+
+                                    <!-- Card 3 -->
+                                    <div class="Zaireen-review-card">
+                                        <div>
+                                            <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                            <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                            <h3 class="card-headline-title">SUPER FAST AGENT RESPONSES</h3>
+                                            <div class="card-author-name">Dr. Ayesha Malik • Mumbai</div>
+                                            <p class="card-review-text">
+                                                I was amazed how quickly verified Saudi agents sent detailed proposals. Comparison was super easy and saved me hours of calling around.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card 4 -->
+                                    <div class="Zaireen-review-card">
+                                        <div>
+                                            <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                            <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                            <h3 class="card-headline-title">FAMILY TRIP PERFECTLY ARRANGED</h3>
+                                            <div class="card-author-name">Mohammad Omer • Hyderabad</div>
+                                        </div>
+                                        <p class="card-review-text">
+                                            We were 6 family members with elderly parents. We specified quad sharing and close walking distance to Haram. Got exactly what we needed!
+                                        </p>
+                                    </div>
+
+                                    <!-- Card 5 -->
+                                    <div class="Zaireen-review-card">
+                                        <div>
+                                            <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                            <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                            <h3 class="card-headline-title">100% TRANSPARENT & RELIABLE</h3>
+                                            <div class="card-author-name">Shazia Parveen • Bangalore</div>
+                                        </div>
+                                        <p class="card-review-text">
+                                            Very easy to fill out requirement form and directly communicate with top agents. No hidden fees or unexpected charges.
+                                        </p>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <button type="button" class="carousel-nav-btn next" onclick="app.slideReviewCarousel(1)" aria-label="Next Review">❯</button>
+                        </div>
+
+                        <!-- Pagination Dots -->
+                        <div class="carousel-dots-wrapper" id="carouselDotsWrapper">
+                            <div class="carousel-dot active" onclick="app.goToReviewSlide(0)"></div>
+                            <div class="carousel-dot" onclick="app.goToReviewSlide(1)"></div>
+                            <div class="carousel-dot" onclick="app.goToReviewSlide(2)"></div>
+                        </div>
                     </div>
                 </div>
             </section>
