@@ -249,8 +249,8 @@ a:hover {
 
 .navbar {
     pointer-events: all;
-    width: 80% !important; /* 80% horizontal length, leaving 10% blank space on both sides */
-    max-width: 1180px !important;
+    width: calc(100% - 3rem) !important;
+    max-width: 100% !important;
     margin: 0 auto !important;
     background: rgba(236, 253, 245, 0.94) !important; /* Fade green glass background */
     backdrop-filter: blur(20px) saturate(180%) !important;

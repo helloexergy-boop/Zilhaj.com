@@ -2500,7 +2500,7 @@ class App {
 
     renderTrustPage() {
         return `
-            <div class="main-container" style="max-width:1140px; margin:7rem auto 3.5rem; padding:0 1.5rem;">
+            <div class="main-container" style="max-width:100%; width:100%; box-sizing:border-box; margin:7rem auto 3.5rem; padding:0 3.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem; flex-wrap:wrap; gap:1rem;">
                     <div style="text-align:center; flex:1;">
                         <h2 style="font-size:2.4rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem;">Why Choose Us</h2>
@@ -2623,7 +2623,7 @@ class App {
         `).join('');
 
         return `
-            <div class="main-container" style="max-width: 920px; margin: 6.8rem auto 4rem; padding: 0 1.5rem;">
+            <div class="main-container" style="max-width:100%; width:100%; box-sizing:border-box; margin:6.8rem auto 4rem; padding:0 3.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                     <div style="text-align: center; flex: 1;">
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
@@ -2712,7 +2712,7 @@ class App {
         `).join('');
 
         return `
-            <div class="main-container" style="max-width: 920px; margin: 6.8rem auto 4rem; padding: 0 1.5rem;">
+            <div class="main-container" style="max-width:100%; width:100%; box-sizing:border-box; margin:6.8rem auto 4rem; padding:0 3.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                     <div style="text-align: center; flex: 1;">
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
@@ -2786,7 +2786,7 @@ class App {
         `).join('');
 
         return `
-            <div class="main-container" style="max-width: 920px; margin: 6.8rem auto 4rem; padding: 0 1.5rem;">
+            <div class="main-container" style="max-width:100%; width:100%; box-sizing:border-box; margin:6.8rem auto 4rem; padding:0 3.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                     <div style="text-align: center; flex: 1;">
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
@@ -2818,7 +2818,7 @@ class App {
 
     renderAboutPage() {
         return `
-            <div class="main-container" style="max-width: 1200px; margin: 6.5rem auto 4rem; padding: 0 1.5rem; color: #0f172a; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;">
+            <div class="main-container" style="max-width: 100%; width: 100%; box-sizing: border-box; margin: 6.5rem auto 4rem; padding: 0 3.5rem; color: #0f172a; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;">
                 
                 <!-- BLOCK 1: Hero Section (2-Column Layout) -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center; margin-bottom: 3.5rem;">
@@ -3006,7 +3006,7 @@ class App {
                             <!-- Founder Profile Card -->
                             <div style="text-align: center; flex-shrink: 0; min-width: 170px; margin: 0 auto;">
                                 <div style="width: 110px; height: 110px; border-radius: 50%; overflow: hidden; margin: 0 auto 0.9rem; border: 3px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.08); background: #f8fafc;">
-                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&amp;h=300&amp;fit=crop&amp;crop=faces" alt="Tawseef Assadullah H" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <img src="images/founder.jpg" onerror="this.onerror=null;this.src='founder.jpg';" alt="Tawseef Assadullah H" style="width: 100%; height: 100%; object-fit: cover;">
                                 </div>
                                 <h3 style="font-size: 1.08rem; font-weight: 800; color: #15803d; margin: 0 0 0.25rem 0;">Tawseef Assadullah H</h3>
                                 <div style="font-size: 0.82rem; font-weight: 700; color: #64748b; margin-bottom: 0.35rem;">Founder &amp; CEO</div>
@@ -3184,7 +3184,7 @@ class App {
                 '</div>';
         }
 
-        return '<div class="main-container" style="max-width:1000px; margin:7rem auto 3rem; padding:0 1.5rem;">' +
+        return '<div class="main-container" style="max-width:100%; width:100%; box-sizing:border-box; margin:7rem auto 3rem; padding:0 3.5rem;">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">' +
             '<div>' +
             '<h2 style="margin:0;">🎫 My Bookings &amp; Travel Tickets</h2>' +
@@ -3934,7 +3934,7 @@ class App {
 
         return `
         <div style="background:#f8fafc;min-height:100vh;padding:94px 0 3rem;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-            <div style="max-width:1240px;margin:0 auto;padding:0 1.2rem;display:flex;gap:1.1rem;align-items:flex-start;">
+            <div style="max-width:100%; width:100%; box-sizing:border-box; margin:0 auto; padding:0 3.5rem; display:flex; gap:1.5rem; align-items:flex-start;">
                 ${sidebar}
                 ${panel}
             </div>
@@ -5015,7 +5015,7 @@ class App {
                 </div>
 
                 <!-- VOUCHER CARD MAIN WRAPPER -->
-                <div style="max-width:980px; width:100%; margin:2rem auto; padding:0 1.5rem; box-sizing:border-box;">
+                <div style="max-width:100%; width:100%; margin:2rem auto; padding:0 3.5rem; box-sizing:border-box;">
                     <div style="background:#ffffff; border-radius:24px; border:1px solid #e2e8f0; overflow:hidden; box-shadow:0 15px 45px rgba(0,0,0,0.06);">
                         
                         <!-- 1. DARK EMERALD HERO BANNER -->
@@ -6155,7 +6155,7 @@ class App {
         const allOffers = allOffersList.filter(o => o.userId === user.id || userReqIds.includes(o.requirementId));
 
         return `
-            <div class="main-container" style="max-width:950px; margin:7rem auto 3rem; padding:0 1.5rem;">
+            <div class="main-container" style="max-width:100%; width:100%; box-sizing:border-box; margin:7rem auto 3rem; padding:0 3.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
                     <div>
                         <h2 style="margin:0;">🎁 Offers Available — Competitive Agent Bids</h2>
@@ -7352,7 +7352,7 @@ class App {
     async renderAdminPage() {
         const main = document.getElementById('mainContainer');
         main.innerHTML = `
-            <div class="admin-container" style="max-width: 1400px; margin: 6rem auto 2rem; padding: 0 2rem;">
+            <div class="admin-container" style="max-width: 100%; width: 100%; box-sizing: border-box; margin: 6rem auto 2rem; padding: 0 3.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
                     <div>
                         <h2 style="margin:0; color:#0f172a; font-size:2rem; font-weight:800;">👑 Admin Panel</h2>
@@ -9996,7 +9996,7 @@ class App {
 
     renderServicesPage() {
         return `
-            <div class="main-container" style="max-width: 1240px; margin: 6.5rem auto 4rem; padding: 0 1.5rem;">
+            <div class="main-container" style="max-width: 100%; width: 100%; box-sizing: border-box; margin: 6.5rem auto 4rem; padding: 0 3.5rem;">
                 
                 <!-- Services Hero / Header -->
                 <div style="text-align: center; margin-bottom: 3.5rem;">
