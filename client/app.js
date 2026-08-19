@@ -1196,8 +1196,8 @@ class App {
 
     renderRequestFormPage() {
         return `
-        <div style="background: #f8fafc; min-height: 100vh; padding: 6rem 1rem 5rem; margin-top: 1rem;">
-            <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="background: #f8fafc; min-height: 100vh; padding: 6rem 0 5rem; margin-top: 1rem; width: 100%; box-sizing: border-box;">
+            <div style="max-width: 100%; width: 100%; margin: 0 auto; padding: 0 3.5rem; box-sizing: border-box;">
                 
                 <!-- Hajj vs Umrah Switcher Pill -->
                 <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.6rem; flex-wrap: wrap;">
@@ -1223,13 +1223,13 @@ class App {
                         </div>
                         <h1 id="reqPageTitle" style="font-size: 1.45rem; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.02em;">Submit Umrah Request</h1>
                     </div>
-                    <p id="reqPageSubtitle" style="color: #64748b; font-size: 0.92rem; margin: 0; max-width: 780px; line-height: 1.5;">
+                    <p id="reqPageSubtitle" style="color: #64748b; font-size: 0.92rem; margin: 0; max-width: 880px; line-height: 1.5;">
                         Fill out the details below to receive personalized Umrah package quotes. Our partner agencies will craft itineraries tailored specifically to your group's needs and preferences.
                     </p>
                 </div>
 
                 <!-- Two Column Layout: Main Form (Left) & Sidebar Cards (Right) -->
-                <div style="display: grid; grid-template-columns: 1fr 340px; gap: 1.8rem; align-items: start;" class="request-form-grid">
+                <div style="display: grid; grid-template-columns: 1fr 340px; gap: 1.8rem; align-items: start; width: 100%; box-sizing: border-box;" class="request-form-grid">
                     
                     <!-- Left Form Cards -->
                     <div style="display: flex; flex-direction: column; gap: 1.5rem;">
@@ -10355,28 +10355,74 @@ class App {
 
     logout() {
         this.openModal(`
-            <div style="background: #ffffff; border-radius: 24px; padding: 2.2rem; text-align: center; max-width: 440px; margin: 0 auto; box-shadow: 0 25px 50px rgba(0,0,0,0.25); position: relative; font-family: 'Inter', -apple-system, sans-serif;">
+            <div style="background: #ffffff; border-radius: 24px; padding: 2.2rem 2.2rem 2rem; text-align: center; max-width: 440px; width: 90%; margin: 0 auto; box-shadow: 0 25px 60px rgba(0,0,0,0.18); position: relative; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; border: 1.5px solid #e2e8f0; overflow: hidden;">
                 
-                <!-- Icon Circle Badge -->
-                <div style="width: 72px; height: 72px; background: #fef2f2; border: 2px solid #fecaca; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 1.2rem; box-shadow: 0 6px 16px rgba(220,38,38,0.15);">
-                    🚪
+                <!-- Faded Mosque Background Watermark Illustration -->
+                <div style="position: absolute; inset: 0; pointer-events: none; opacity: 0.06; overflow: hidden; display: flex; align-items: flex-end; justify-content: center;">
+                    <svg viewBox="0 0 600 180" width="100%" height="110" fill="#044e35" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="40" y="50" width="16" height="130"/>
+                        <path d="M40 50 Q48 15 56 50Z"/>
+                        <rect x="90" y="30" width="100" height="150" rx="8"/>
+                        <path d="M90 30 Q140 -40 190 30Z"/>
+                        <rect x="220" y="50" width="16" height="130"/>
+                        <path d="M220 50 Q228 15 236 50Z"/>
+                        <rect x="360" y="50" width="16" height="130"/>
+                        <path d="M360 50 Q368 15 376 50Z"/>
+                        <rect x="410" y="30" width="100" height="150" rx="8"/>
+                        <path d="M410 30 Q460 -40 510 30Z"/>
+                        <rect x="540" y="50" width="16" height="130"/>
+                        <path d="M540 50 Q548 15 556 50Z"/>
+                    </svg>
                 </div>
 
-                <!-- Title & Message -->
-                <h3 style="font-size: 1.4rem; font-weight: 900; color: #0f172a; margin: 0 0 0.5rem 0; letter-spacing: -0.3px;">
+                <!-- Icon Circle Badge with Exit Door & Arrow -->
+                <div style="position: relative; width: 84px; height: 84px; background: #e6f4ea; border: 2px solid #bbf7d0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.3rem; box-shadow: 0 8px 24px rgba(4,78,53,0.12);">
+                    
+                    <!-- Sparkles Around Badge -->
+                    <span style="position: absolute; top: 4px; left: 6px; color: #d4af37; font-size: 0.85rem;">✦</span>
+                    <span style="position: absolute; top: 12px; right: 4px; color: #d4af37; font-size: 0.75rem;">✦</span>
+                    <span style="position: absolute; bottom: 8px; left: 4px; color: #d4af37; font-size: 0.75rem;">✦</span>
+                    <span style="position: absolute; bottom: 4px; right: 8px; color: #d4af37; font-size: 0.85rem;">✦</span>
+
+                    <!-- SVG Exit Door & Golden Arrow -->
+                    <svg width="44" height="44" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="12" y="8" width="18" height="32" rx="3" fill="#044e35" stroke="#033927" stroke-width="2"/>
+                        <circle cx="16" cy="24" r="2" fill="#f59e0b"/>
+                        <path d="M25 24H38" stroke="#d97706" stroke-width="3.5" stroke-linecap="round"/>
+                        <path d="M33 18L39 24L33 30" stroke="#d97706" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <!-- Title -->
+                <h3 style="font-size: 1.55rem; font-weight: 900; color: #044e35; margin: 0 0 0.6rem 0; letter-spacing: -0.02em;">
                     Confirm Logout
                 </h3>
-                <p style="font-size: 0.92rem; color: #64748b; margin: 0 0 1.8rem 0; line-height: 1.5; font-weight: 500;">
-                    Are you sure you want to log out of your account? You will need to log back in to manage your Umrah bookings.
+
+                <!-- Golden Star Line Divider -->
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-bottom: 1.1rem;">
+                    <div style="height: 1.5px; width: 45px; background: linear-gradient(to right, transparent, #d4af37);"></div>
+                    <span style="color: #d4af37; font-size: 0.85rem; font-weight: 900;">◆</span>
+                    <div style="height: 1.5px; width: 45px; background: linear-gradient(to left, transparent, #d4af37);"></div>
+                </div>
+
+                <!-- Subtext Message -->
+                <p style="font-size: 0.94rem; color: #475569; margin: 0 0 1.8rem 0; line-height: 1.6; font-weight: 500;">
+                    Are you sure you want to log out of your account?<br>
+                    You will need to log back in to manage your Umrah bookings.
                 </p>
 
-                <!-- Action Buttons -->
-                <div style="display: flex; gap: 0.9rem; justify-content: center;">
-                    <button type="button" onclick="app.closeModal()" style="flex: 1; padding: 0.75rem 1.4rem; border-radius: 12px; background: #ffffff; color: #334155; border: 1.5px solid #cbd5e1; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f8fafc';this.style.borderColor='#94a3b8'" onmouseout="this.style.background='#ffffff';this.style.borderColor='#cbd5e1'">
+                <!-- Action Buttons Row -->
+                <div style="display: flex; gap: 1rem; justify-content: center; position: relative; z-index: 2;">
+                    <button type="button" onclick="app.closeModal()" style="flex: 1; padding: 0.8rem 1.4rem; border-radius: 12px; background: #ffffff; color: #044e35; border: 1.8px solid #044e35; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='#ffffff'">
                         Cancel
                     </button>
-                    <button type="button" onclick="app.confirmLogout()" style="flex: 1; padding: 0.75rem 1.4rem; border-radius: 12px; background: #dc2626; color: #ffffff; border: none; font-weight: 900; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 14px rgba(220,38,38,0.3); transition: all 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
-                        🚪 Log Out
+                    <button type="button" onclick="app.confirmLogout()" style="flex: 1; padding: 0.8rem 1.4rem; border-radius: 12px; background: #044e35; color: #ffffff; border: none; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 6px 20px rgba(4,78,53,0.3); transition: all 0.2s ease;" onmouseover="this.style.background='#033927'" onmouseout="this.style.background='#044e35'">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <span>Log Out</span>
                     </button>
                 </div>
 
