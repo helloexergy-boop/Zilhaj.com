@@ -115,6 +115,14 @@ class App {
         // Render page IMMEDIATELY (0ms delay) so page is never blank!
         this.navigate(this.getCurrentPage());
 
+        // Remove the branded boot splash once the first page has rendered
+        const bootSplash = document.getElementById('bootSplash');
+        if (bootSplash) {
+            bootSplash.style.transition = 'opacity 0.25s ease';
+            bootSplash.style.opacity = '0';
+            setTimeout(() => { if (bootSplash.parentNode) bootSplash.parentNode.removeChild(bootSplash); }, 300);
+        }
+
         // Fetch remote updates asynchronously without blocking page rendering
         this.fetchPackages().then(() => {
             if (this.state.currentPage === 'home' || this.state.currentPage === 'packages') {
@@ -504,7 +512,7 @@ class App {
             navMenu.innerHTML = `
                 <a href="/home" class="nav-link ${this.state.currentPage === 'home' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('home')">Home</a>
                 <a href="/services" class="nav-link ${this.state.currentPage === 'services' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('services')">Services</a>
-                <a href="#" class="nav-link" onclick="app.scrollToContact(event)">Contact Us</a>
+                <a href="/contact" class="nav-link ${this.state.currentPage === 'contact' ? 'active' : ''}" onclick="app.scrollToContact(event)">Contact Us</a>
                 <a href="/about" class="nav-link ${this.state.currentPage === 'about' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('about')">About Us</a>
                 <div class="mobile-only-auth" style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid #e2e8f0; display:flex; flex-direction:column; gap:0.5rem; width:100%;">
                     ${!this.state.currentUser ? `
@@ -566,6 +574,14 @@ class App {
 
     scrollToContact(e) {
         if (e) e.preventDefault();
+        this.state.currentPage = 'contact';
+        document.querySelectorAll('.nav-menu .nav-link').forEach(link => {
+            if (link.textContent.trim().toLowerCase().includes('contact')) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
         const footerContact = document.getElementById('footerContactSection') || document.querySelector('footer');
         if (footerContact) {
             footerContact.scrollIntoView({ behavior: 'smooth' });
@@ -907,8 +923,11 @@ class App {
         // Update active class on nav links
         document.querySelectorAll('.nav-menu .nav-link').forEach(link => {
             link.classList.remove('active');
+            const text = link.textContent.trim().toLowerCase();
             const onclickAttr = link.getAttribute('onclick') || '';
-            if (onclickAttr.includes(`'${page}'`)) {
+            if (page === 'contact' && (text.includes('contact') || onclickAttr.includes('scrollToContact'))) {
+                link.classList.add('active');
+            } else if (onclickAttr.includes(`'${page}'`)) {
                 link.classList.add('active');
             }
         });
@@ -917,6 +936,12 @@ class App {
             main.innerHTML = this.renderHomePage();
             this.initHeroVideoPlaylist();
         } else if (page === 'request-form' || page === 'submit-request' || page === 'request') {
+            if (!this.state.currentUser) {
+                this.showToast('Please log in or sign up to submit your pilgrimage request', 'warning');
+                this.openAuthModal('login');
+                main.innerHTML = this.renderHomePage();
+                return;
+            }
             main.innerHTML = this.renderRequestFormPage();
         } else if (page === 'services' || page === 'guides') {
             main.innerHTML = this.renderServicesPage();
@@ -987,6 +1012,11 @@ class App {
     }
 
     handleStartJourneyClick() {
+        if (!this.state.currentUser) {
+            this.showToast('Please log in or sign up to start your journey & submit a request', 'warning');
+            this.openAuthModal('login');
+            return;
+        }
         this.navigate('request-form');
     }
 
@@ -1078,6 +1108,11 @@ class App {
     }
 
     async submitStandaloneUmrahRequest() {
+        if (!this.state.currentUser) {
+            this.showToast('🔒 Login Required! Please log in or sign up to submit your travel request.', 'warning');
+            this.openAuthModal('login');
+            return;
+        }
         const pilgrimageType = document.getElementById('reqPilgrimageType')?.value || 'UMRAH';
         const departureCity = document.getElementById('reqDepartureCity')?.value;
         const departureDate = document.getElementById('reqDepartureDate')?.value;
@@ -1196,8 +1231,8 @@ class App {
 
     renderRequestFormPage() {
         return `
-        <div style="background: #f8fafc; min-height: 100vh; padding: 6rem 1rem 5rem; margin-top: 1rem;">
-            <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="background: #f8fafc; min-height: 100vh; padding: 6rem 0 5rem; margin-top: 1rem; width: 100%; box-sizing: border-box;">
+            <div style="max-width: 100%; width: 100%; margin: 0 auto; padding: 0 3.5rem; box-sizing: border-box;">
                 
                 <!-- Hajj vs Umrah Switcher Pill -->
                 <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.6rem; flex-wrap: wrap;">
@@ -1221,15 +1256,15 @@ class App {
                                 <line x1="16" y1="17" x2="8" y2="17"></line>
                             </svg>
                         </div>
-                        <h1 id="reqPageTitle" style="font-size: 1.45rem; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.02em;">Submit Umrah Request</h1>
+                        <h1 id="reqPageTitle" style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.01em;">Submit Umrah Request</h1>
                     </div>
-                    <p id="reqPageSubtitle" style="color: #64748b; font-size: 0.92rem; margin: 0; max-width: 780px; line-height: 1.5;">
+                    <p id="reqPageSubtitle" style="color: #64748b; font-size: 0.92rem; margin: 0; max-width: 880px; line-height: 1.5;">
                         Fill out the details below to receive personalized Umrah package quotes. Our partner agencies will craft itineraries tailored specifically to your group's needs and preferences.
                     </p>
                 </div>
 
                 <!-- Two Column Layout: Main Form (Left) & Sidebar Cards (Right) -->
-                <div style="display: grid; grid-template-columns: 1fr 340px; gap: 1.8rem; align-items: start;" class="request-form-grid">
+                <div style="display: grid; grid-template-columns: 1fr 340px; gap: 1.8rem; align-items: start; width: 100%; box-sizing: border-box;" class="request-form-grid">
                     
                     <!-- Left Form Cards -->
                     <div style="display: flex; flex-direction: column; gap: 1.5rem;">
@@ -1242,7 +1277,7 @@ class App {
                                         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                                     </svg>
                                 </div>
-                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Trip Details</h2>
+                                <h2 style="font-size: 0.98rem; font-weight: 700; color: #0f172a; margin: 0;">Trip Details</h2>
                             </div>
 
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 1.4rem;" class="req-trip-grid">
@@ -1315,7 +1350,7 @@ class App {
                                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                                     </svg>
                                 </div>
-                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Traveler Details *</h2>
+                                <h2 style="font-size: 0.98rem; font-weight: 700; color: #0f172a; margin: 0;">Traveler Details *</h2>
                             </div>
 
                             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.4rem;" class="req-travelers-grid">
@@ -1396,7 +1431,7 @@ class App {
                                         <path d="M12 7v6"></path>
                                     </svg>
                                 </div>
-                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Hotel Preference *</h2>
+                                <h2 style="font-size: 0.98rem; font-weight: 700; color: #0f172a; margin: 0;">Hotel Preference *</h2>
                             </div>
 
                             <div>
@@ -1427,7 +1462,7 @@ class App {
                                         <circle cx="12" cy="10" r="3"></circle>
                                     </svg>
                                 </div>
-                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0;">Contact & Location</h2>
+                                <h2 style="font-size: 0.98rem; font-weight: 700; color: #0f172a; margin: 0;">Contact & Location</h2>
                             </div>
 
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 1.2rem;" class="req-contact-grid-1">
@@ -1625,8 +1660,6 @@ class App {
                     <!-- Sub Text -->
                     <p class="hero-subtext-anim" style="font-size:1.08rem !important; color:rgba(255,255,255,0.95) !important; max-width:680px !important; margin:0 auto 2.1rem !important; line-height:1.75 !important; font-weight:400 !important; text-shadow:0 1px 4px rgba(0,0,0,1), 0 2px 20px rgba(0,0,0,0.9);">
                         Post one request and receive transparent offers from verified Umrah travel providers. Compare, choose, and save—without sharing your personal details.
-                    </p>
-
                     <!-- CTA Buttons -->
                     <div class="hero-cta-anim" style="display:flex; justify-content:center; align-items:center; gap:1rem; flex-wrap:wrap;">
                         <button onclick="app.handleStartJourneyClick()" style="background:linear-gradient(135deg,#E8B84B 0%,#C9953A 100%); color:#0A1A12; font-weight:800; font-size:0.95rem; padding:14px 32px; border-radius:10px; border:none; cursor:pointer; letter-spacing:0.02em; box-shadow:0 6px 28px rgba(232,184,75,0.55), 0 2px 8px rgba(0,0,0,0.3); transition:all 0.25s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 36px rgba(232,184,75,0.65),0 3px 12px rgba(0,0,0,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(232,184,75,0.55),0 2px 8px rgba(0,0,0,0.3)'">✦ Start Your Journey</button>
@@ -1634,7 +1667,7 @@ class App {
                     </div>
 
                     <!-- Compact Apple Liquid Glass Square Feature Blocks (Headings & Icons Only) -->
-                    <div style="display:flex; justify-content:center; align-items:center; gap:0.85rem; flex-wrap:wrap; margin-top:2.8rem;">
+                    <div style="display:flex; justify-content:center; align-items:center; gap:2rem; flex-wrap:wrap; margin-top:4.8rem;">
                         
                         <!-- Square Block 1: 100% Verified Offers -->
                         <div style="display:inline-flex; align-items:center; gap:0.55rem; background:rgba(255,255,255,0.10); backdrop-filter:blur(22px) saturate(190%); -webkit-backdrop-filter:blur(22px) saturate(190%); border:1px solid rgba(255,255,255,0.38); border-radius:12px; padding:0.65rem 1.1rem; box-shadow:0 8px 24px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.65); transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.background='rgba(255,255,255,0.18)';" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.10)';">
@@ -1675,8 +1708,8 @@ class App {
             </section>
 
             <!-- Why Choose Zilhaj Section (Pixel-perfect match to reference design) -->
-            <section style="background: #ffffff; padding: 4.5rem 1.5rem 4rem; text-align: center; border-bottom: 1px solid #f1f5f9; position: relative;">
-                <div style="max-width: 1240px; margin: 0 auto;">
+            <section style="background: #ffffff; padding: 5rem 2.5rem; text-align: center; border-bottom: 1px solid #f1f5f9; position: relative; width: 100%; box-sizing: border-box;">
+                <div style="max-width: 1320px; margin: 0 auto; width: 100%; box-sizing: border-box;">
                     
                     <!-- Pill Badge -->
                     <div style="display: inline-flex; align-items: center; gap: 0.45rem; background: #ecfdf5; color: #15803d; border: 1px solid #bbf7d0; padding: 0.35rem 1.1rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.2rem;">
@@ -1685,15 +1718,15 @@ class App {
                     </div>
 
                     <!-- Title & Subtitle -->
-                    <h2 style="font-size: clamp(2rem, 4vw, 2.7rem); font-weight: 900; color: #0f172a; margin: 0 0 0.75rem 0; letter-spacing: -0.02em;">
+                    <h2 style="font-size: clamp(1.35rem, 2.5vw, 1.7rem); font-weight: 800; color: #0f172a; margin: 0 0 0.75rem 0; letter-spacing: -0.01em;">
                         Why Choose Zilhaj?
                     </h2>
-                    <p style="color: #64748b; font-size: 1.02rem; max-width: 660px; margin: 0 auto 3.5rem; line-height: 1.65; font-weight: 400;">
+                    <p style="color: #64748b; font-size: 1.02rem; max-width: 660px; margin: 0 auto 3rem; line-height: 1.65; font-weight: 400;">
                         We make your Umrah planning simple, transparent, and reliable with verified options and dedicated support.
                     </p>
 
                     <!-- 4 Cards Grid Layout -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.6rem; align-items: stretch;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.8rem; align-items: stretch;">
                         
                         <!-- Card 1: Verified Providers -->
                         <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 1.6rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.08)';this.style.borderColor='#e2e8f0';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.03)';this.style.borderColor='#f1f5f9';">
@@ -1759,7 +1792,7 @@ class App {
             </section>
 
             <!-- How It Works Section – Pixel-perfect reference design -->
-            <section style="position:relative; overflow:hidden; padding:4.5rem 1.5rem 4rem; background:#f0faf5; text-align:center; border-bottom:1px solid #d8ede2;">
+            <section style="position:relative; overflow:hidden; padding:5rem 2.5rem; background:#f0faf5; text-align:center; border-bottom:1px solid #d8ede2; width:100%; box-sizing:border-box;">
 
                 <!-- Faded mosque silhouette background -->
                 <div style="position:absolute;inset:0;pointer-events:none;user-select:none;overflow:hidden;">
@@ -1814,15 +1847,15 @@ class App {
                 </div>
 
                 <!-- Section header -->
-                <div style="position:relative;z-index:1;max-width:600px;margin:0 auto 2.5rem;">
-                    <h2 style="font-size:2rem;font-weight:900;color:#0f172a;margin:0 0 0.5rem;letter-spacing:-0.3px;">
+                <div style="position:relative;z-index:1;max-width:600px;margin:0 auto 3rem;">
+                    <h2 style="font-size:1.35rem;font-weight:800;color:#0f172a;margin:0 0 0.5rem;letter-spacing:-0.2px;">
                         <span style="color:#1a6b3c;">✦</span> How It Works <span style="color:#1a6b3c;">✦</span>
                     </h2>
                     <p style="font-size:0.95rem;color:#6b7280;margin:0;">Three simple steps to plan your Umrah with confidence</p>
                 </div>
 
                 <!-- Dashed connector row with icon nodes -->
-                <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:0;max-width:680px;margin:0 auto 2.2rem;">
+                <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:0;max-width:680px;margin:0 auto 2.5rem;">
                     <!-- Node 1: document icon (green circle) -->
                     <div style="width:52px;height:52px;border-radius:50%;background:#ffffff;border:2px solid #2d8c55;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
                         <svg width="22" height="22" fill="none" stroke="#2d8c55" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
@@ -1846,7 +1879,7 @@ class App {
                 </div>
 
                 <!-- 3 Cards (no step labels, no arrows between cards) -->
-                <div style="position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;max-width:1060px;margin:0 auto;">
+                <div style="position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1.8rem;max-width:1120px;margin:0 auto;">
 
                     <!-- Card 1: Submit Request -->
                     <div class="scroll-reveal stagger-1" style="background:#ffffff;border-radius:16px;padding:2.2rem 1.8rem 0;text-align:center;box-shadow:0 2px 16px rgba(0,0,0,0.07);border:1px solid #e2ede6;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;">
@@ -1900,97 +1933,99 @@ class App {
     renderLiquidGlassFeedbackSection() {
         return `
             <!-- Modern & Aesthetic Liquid Glass Zaireen Review Carousel Slider -->
-            <section class="liquid-glass-wrapper" id="liquidFeedbackSection">
-                <div class="reviews-section-header">
-                    <h2 class="reviews-section-title">Read reviews from <span>Zaireen</span></h2>
-                    <p class="reviews-section-subtitle">Real experiences from Zaireen who posted their Umrah requirements and saved on reverse bidding</p>
-                </div>
-
-                <div class="liquid-carousel-outer">
-                    <div class="liquid-carousel-container">
-                        <!-- Navigation Prev/Next Buttons -->
-                        <button type="button" class="carousel-nav-btn prev" onclick="app.slideReviewCarousel(-1)" aria-label="Previous Review">❮</button>
-                        
-                        <!-- Track Viewport -->
-                        <div class="carousel-viewport">
-                            <div class="carousel-track" id="ZaireenReviewTrack" style="transform: translateX(0px);">
-                                
-                                <!-- Card 1 (No Profile Image as requested!) -->
-                                <div class="Zaireen-review-card">
-                                    <div>
-                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
-                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
-                                        <h3 class="card-headline-title">SAVED ₹35,000 WITH REVERSE BIDDING</h3>
-                                        <div class="card-author-name">Tariq Ahmad Bhat • Srinagar</div>
-                                    </div>
-                                    <p class="card-review-text">
-                                        I submitted my 18-day Umrah requirement and received 4 verified agent quotes within 2 hours. Got a 5-star hotel near Haram for 25% lower price!
-                                    </p>
-                                </div>
-
-                                <!-- Card 2 (No Profile Image as requested!) -->
-                                <div class="Zaireen-review-card">
-                                    <div>
-                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
-                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
-                                        <h3 class="card-headline-title">BOOKED 5-STAR HARAM HOTEL AT BUDGET PRICE</h3>
-                                        <div class="card-author-name">Shafiq Ur Rehman • Delhi</div>
-                                    </div>
-                                    <p class="card-review-text">
-                                        The reverse bidding system is incredible. Travel agents competed to give us their lowest package prices. Smooth, transparent, and trustworthy experience!
-                                    </p>
-                                </div>
-
-                                <!-- Card 3 (No Profile Image as requested!) -->
-                                <div class="Zaireen-review-card">
-                                    <div>
-                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
-                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
-                                        <h3 class="card-headline-title">SUPER FAST AGENT RESPONSES</h3>
-                                        <div class="card-author-name">Dr. Ayesha Malik • Mumbai</div>
-                                    </div>
-                                    <p class="card-review-text">
-                                        I was worried about organizing Umrah for my family of 6. Within an hour of posting our details, 3 verified agents sent complete itineraries.
-                                    </p>
-                                </div>
-
-                                <!-- Card 4 (No Profile Image as requested!) -->
-                                <div class="Zaireen-review-card">
-                                    <div>
-                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
-                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
-                                        <h3 class="card-headline-title">RAMADAN SPECIAL DISCOUNT MATCH</h3>
-                                        <div class="card-author-name">Mohammad Owais • Hyderabad</div>
-                                    </div>
-                                    <p class="card-review-text">
-                                        Reverse bidding helped me secure a 14-day Ramadan package under 200m from Masjid al-Haram at an unbeatable group rate. Highly recommended!
-                                    </p>
-                                </div>
-
-                                <!-- Card 5 (No Profile Image as requested!) -->
-                                <div class="Zaireen-review-card">
-                                    <div>
-                                        <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
-                                        <span class="card-verified-badge">✓ Verified Zaireen</span>
-                                        <h3 class="card-headline-title">100% TRANSPARENT & RELIABLE</h3>
-                                        <div class="card-author-name">Shazia Parveen • Bangalore</div>
-                                    </div>
-                                    <p class="card-review-text">
-                                        Very easy to fill out requirement form and directly communicate with top agents. No hidden fees or unexpected charges.
-                                    </p>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <button type="button" class="carousel-nav-btn next" onclick="app.slideReviewCarousel(1)" aria-label="Next Review">❯</button>
+            <section style="background: #ffffff; padding: 5rem 2.5rem 4.5rem; border-bottom: 1px solid #f1f5f9; position: relative; width: 100%; box-sizing: border-box;" id="liquidFeedbackSection">
+                <div class="liquid-glass-wrapper" style="max-width: 1320px; margin: 0 auto; padding: 0; width: 100%;">
+                    <div class="reviews-section-header" style="margin-bottom: 3rem;">
+                        <h2 class="reviews-section-title">Read reviews from <span>Zaireen</span></h2>
+                        <p class="reviews-section-subtitle">Real experiences from Zaireen who posted their Umrah requirements and saved on reverse bidding</p>
                     </div>
 
-                    <!-- Pagination Dots -->
-                    <div class="carousel-dots-wrapper" id="carouselDotsWrapper">
-                        <div class="carousel-dot active" onclick="app.goToReviewSlide(0)"></div>
-                        <div class="carousel-dot" onclick="app.goToReviewSlide(1)"></div>
-                        <div class="carousel-dot" onclick="app.goToReviewSlide(2)"></div>
+                    <div class="liquid-carousel-outer">
+                        <div class="liquid-carousel-container">
+                            <!-- Navigation Prev/Next Buttons -->
+                            <button type="button" class="carousel-nav-btn prev" onclick="app.slideReviewCarousel(-1)" aria-label="Previous Review">❮</button>
+                            
+                            <!-- Track Viewport -->
+                            <div class="carousel-viewport">
+                                <div class="carousel-track" id="ZaireenReviewTrack" style="transform: translateX(0px);">
+                                    
+                                    <!-- Card 1 -->
+                                    <div class="Zaireen-review-card">
+                                        <div>
+                                            <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                            <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                            <h3 class="card-headline-title">SAVED ₹35,000 WITH REVERSE BIDDING</h3>
+                                            <div class="card-author-name">Tariq Ahmad Bhat • Srinagar</div>
+                                        </div>
+                                        <p class="card-review-text">
+                                            I submitted my 18-day Umrah requirement and received 4 verified agent quotes within 2 hours. Got a 5-star hotel near Haram for 25% lower price!
+                                        </p>
+                                    </div>
+
+                                    <!-- Card 2 -->
+                                    <div class="Zaireen-review-card">
+                                        <div>
+                                            <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                            <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                            <h3 class="card-headline-title">BOOKED 5-STAR HARAM HOTEL AT BUDGET PRICE</h3>
+                                            <div class="card-author-name">Shafiq Ur Rehman • Delhi</div>
+                                        </div>
+                                        <p class="card-review-text">
+                                            The reverse bidding system is incredible. Travel agents competed to give us their lowest package prices. Smooth, transparent, and trustworthy experience!
+                                        </p>
+                                    </div>
+
+                                    <!-- Card 3 -->
+                                    <div class="Zaireen-review-card">
+                                        <div>
+                                            <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                            <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                            <h3 class="card-headline-title">SUPER FAST AGENT RESPONSES</h3>
+                                            <div class="card-author-name">Dr. Ayesha Malik • Mumbai</div>
+                                            <p class="card-review-text">
+                                                I was amazed how quickly verified Saudi agents sent detailed proposals. Comparison was super easy and saved me hours of calling around.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card 4 -->
+                                    <div class="Zaireen-review-card">
+                                        <div>
+                                            <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                            <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                            <h3 class="card-headline-title">FAMILY TRIP PERFECTLY ARRANGED</h3>
+                                            <div class="card-author-name">Mohammad Omer • Hyderabad</div>
+                                        </div>
+                                        <p class="card-review-text">
+                                            We were 6 family members with elderly parents. We specified quad sharing and close walking distance to Haram. Got exactly what we needed!
+                                        </p>
+                                    </div>
+
+                                    <!-- Card 5 -->
+                                    <div class="Zaireen-review-card">
+                                        <div>
+                                            <div class="card-stars-row">⭐⭐⭐⭐⭐</div>
+                                            <span class="card-verified-badge">✓ Verified Zaireen</span>
+                                            <h3 class="card-headline-title">100% TRANSPARENT & RELIABLE</h3>
+                                            <div class="card-author-name">Shazia Parveen • Bangalore</div>
+                                        </div>
+                                        <p class="card-review-text">
+                                            Very easy to fill out requirement form and directly communicate with top agents. No hidden fees or unexpected charges.
+                                        </p>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <button type="button" class="carousel-nav-btn next" onclick="app.slideReviewCarousel(1)" aria-label="Next Review">❯</button>
+                        </div>
+
+                        <!-- Pagination Dots -->
+                        <div class="carousel-dots-wrapper" id="carouselDotsWrapper">
+                            <div class="carousel-dot active" onclick="app.goToReviewSlide(0)"></div>
+                            <div class="carousel-dot" onclick="app.goToReviewSlide(1)"></div>
+                            <div class="carousel-dot" onclick="app.goToReviewSlide(2)"></div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -2086,7 +2121,7 @@ class App {
                         <div style="display:inline-flex; align-items:center; gap:0.5rem; background:#ecfdf5; color:#047857; padding:0.4rem 1.1rem; border-radius:99px; font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:0.8rem;">
                             ✨ EASY UMRAH PACKAGES
                         </div>
-                        <h2 style="font-size:2.2rem; font-weight:900; color:#0f172a; margin:0 0 0.5rem; letter-spacing:-0.5px;">Post Your Travel Requirement</h2>
+                        <h2 style="font-size:1.4rem; font-weight:800; color:#0f172a; margin:0 0 0.5rem; letter-spacing:-0.3px;">Post Your Travel Requirement</h2>
                         <p style="font-size:0.95rem; color:#64748b; margin:0 auto; max-width:620px; line-height:1.6;">
                             Enter your travel dates, group size, and preferences. Verified travel agents will send you their best price offers!
                         </p>
@@ -2434,6 +2469,11 @@ class App {
     }
 
     async submitRequirementForm() {
+        if (!this.state.currentUser) {
+            this.showToast('🔒 Login Required! Please log in or sign up to submit your travel request.', 'warning');
+            this.openAuthModal('login');
+            return;
+        }
         this.showLoading('Submitting your travel request to verified agents...');
         const dateRange = document.getElementById('reqDateRange')?.value || document.getElementById('reqDate')?.value || '';
         const duration = parseInt(document.getElementById('reqDuration')?.value) || 0;
@@ -2449,9 +2489,7 @@ class App {
         const budget = parseFloat(document.getElementById('reqBudget')?.value) || 0;
         const notes = document.getElementById('reqNotes')?.value || '';
 
-        const currentUser = this.state.currentUser || {
-            id: 'usr-guest-' + Date.now()
-        };
+        const currentUser = this.state.currentUser;
 
         const newReq = {
             id: 'req-' + Date.now(),
@@ -2500,10 +2538,10 @@ class App {
 
     renderTrustPage() {
         return `
-            <div class="main-container" style="max-width:1140px; margin:7rem auto 3.5rem; padding:0 1.5rem;">
+            <div class="main-container" style="max-width:100%; width:100%; box-sizing:border-box; margin:7rem auto 3.5rem; padding:0 3.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem; flex-wrap:wrap; gap:1rem;">
                     <div style="text-align:center; flex:1;">
-                        <h2 style="font-size:2.4rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem;">Why Choose Us</h2>
+                        <h2 style="font-size:1.45rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem;">Why Choose Us</h2>
                         <p style="color:#64748b; font-size:1rem;">Transparent competition between verified travel agencies ensuring you get the best price and quality</p>
                     </div>
                 </div>
@@ -2623,13 +2661,13 @@ class App {
         `).join('');
 
         return `
-            <div class="main-container" style="max-width: 920px; margin: 6.8rem auto 4rem; padding: 0 1.5rem;">
+            <div class="main-container" style="max-width:100%; width:100%; box-sizing:border-box; margin:6.8rem auto 4rem; padding:0 3.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                     <div style="text-align: center; flex: 1;">
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
                             <span>❓</span> <span>PILGRIMAGE FAQS</span>
                         </div>
-                        <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.02em;">Frequently Asked Questions</h2>
+                        <h2 style="font-size: clamp(1.25rem, 2.2vw, 1.5rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.01em;">Frequently Asked Questions</h2>
                         <p style="color: #64748b; font-size: 0.95rem; max-width: 680px; margin: 0 auto; line-height: 1.6;">Short, clear answers to the most common questions pilgrims ask about Umrah, Hajj, payments, and bookings.</p>
                     </div>
                 </div>
@@ -2712,13 +2750,13 @@ class App {
         `).join('');
 
         return `
-            <div class="main-container" style="max-width: 920px; margin: 6.8rem auto 4rem; padding: 0 1.5rem;">
+            <div class="main-container" style="max-width:100%; width:100%; box-sizing:border-box; margin:6.8rem auto 4rem; padding:0 3.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                     <div style="text-align: center; flex: 1;">
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
                             <span>📜</span> <span>LEGAL</span>
                         </div>
-                        <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.02em;">Terms & Conditions</h2>
+                        <h2 style="font-size: clamp(1.25rem, 2.2vw, 1.5rem); font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; letter-spacing: -0.01em;">Terms & Conditions</h2>
                         <p style="color: #64748b; font-size: 0.95rem; max-width: 680px; margin: 0 auto; line-height: 1.6;">Official Terms of Service for pilgrims and verified tour operators using the Zilhaj.com platform.</p>
                     </div>
                 </div>
@@ -2786,7 +2824,7 @@ class App {
         `).join('');
 
         return `
-            <div class="main-container" style="max-width: 920px; margin: 6.8rem auto 4rem; padding: 0 1.5rem;">
+            <div class="main-container" style="max-width:100%; width:100%; box-sizing:border-box; margin:6.8rem auto 4rem; padding:0 3.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                     <div style="text-align: center; flex: 1;">
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
@@ -2818,101 +2856,333 @@ class App {
 
     renderAboutPage() {
         return `
-            <div class="main-container" style="max-width: 1050px; margin: 7rem auto 3.5rem; padding: 0 1.5rem; color: #0f172a;">
+            <div class="main-container" style="max-width: 100%; width: 100%; box-sizing: border-box; margin: 6.5rem auto 4rem; padding: 0 3.5rem; color: #0f172a; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;">
                 
-                <!-- Navigation Top Row -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-                    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: #e6f4ea; color: #047857; padding: 0.35rem 1rem; border-radius: 99px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border: 1px solid #a7f3d0;">
-                        <span>🕋</span> <span>About Us</span>
+                <!-- BLOCK 1: Hero Section (2-Column Layout) -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center; margin-bottom: 3.5rem;">
+                    
+                    <!-- Left Hero Content -->
+                    <div>
+                        <!-- Pill Badge -->
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #15803d; border: 1px solid #bbf7d0; padding: 0.35rem 1rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.2rem;">
+                            <span>ABOUT US</span>
+                        </div>
+
+                        <!-- Heading -->
+                        <h1 style="font-size: clamp(1.45rem, 2.8vw, 1.85rem); font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 1rem 0; letter-spacing: -0.01em;">
+                            Your Trusted Companion<br>
+                            <span style="color: #15803d;">for Sacred Journeys</span>
+                        </h1>
+
+                        <!-- Description -->
+                        <p style="font-size: 1.05rem; color: #475569; line-height: 1.68; margin: 0 0 1.8rem 0; font-weight: 400; max-width: 580px;">
+                            We make your Umrah and Hajj journey simple and stress-free. With trusted partners, clear information, and dedicated support, you can travel with peace of mind and focus on what truly matters.
+                        </p>
+
+                        <!-- Inline Feature Pills -->
+                        <div style="display: flex; align-items: center; gap: 1.8rem; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 0.55rem; font-size: 0.92rem; font-weight: 700; color: #0f172a;">
+                                <div style="width: 24px; height: 24px; border-radius: 50%; background: #15803d; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </div>
+                                <span>Trusted &amp; Verified</span>
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 0.55rem; font-size: 0.92rem; font-weight: 700; color: #0f172a;">
+                                <div style="width: 24px; height: 24px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                                        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                                    </svg>
+                                </div>
+                                <span>24/7 Support</span>
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Right Hero Image -->
+                    <div style="position: relative; border-radius: 24px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.10); border: 1px solid #f1f5f9;">
+                        <img src="https://images.pexels.com/photos/18996760/pexels-photo-18996760.jpeg" alt="Holy Kaaba Makkah Pilgrimage" style="width: 100%; height: 380px; object-fit: cover; display: block;">
+                    </div>
+
                 </div>
 
-                <!-- Hero Header -->
-                <div style="text-align: center; margin-bottom: 2.8rem;">
-                    <h1 style="font-size: clamp(2rem, 4vw, 2.6rem); font-weight: 800; color: #0f172a; margin-bottom: 0.8rem; letter-spacing: -0.02em;">
-                        Your Trusted Companion for Sacred Journeys
-                    </h1>
-                    <p style="font-size: 1rem; color: #475569; max-width: 680px; margin: 0 auto; line-height: 1.65;">
-                        Connecting Zaireen with 100% verified travel agencies through transparent reverse bidding — ensuring absolute peace of mind, best value, and unforgettable spiritual experiences.
-                    </p>
-                </div>
 
-                <!-- Mission & Core Story Grid -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
-                    <div style="background: #ffffff; border-radius: 16px; padding: 1.8rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(15,23,42,0.03);">
-                        <div style="width: 44px; height: 44px; background: #ecfdf5; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 1rem; border: 1px solid #a7f3d0;">✨</div>
-                        <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 0.6rem;">Our Sacred Mission</h2>
-                        <p style="color: #475569; line-height: 1.6; font-size: 0.92rem;">
-                            To simplify the pilgrimage planning process for every Muslim around the globe. We eliminate stress, price gouging, and uncertainty by allowing top verified operators to compete transparently for your sacred travel requirement.
+                <!-- BLOCK 2: Two Cards Row (Our Mission & Why We Are Different) -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.8rem; margin-bottom: 3.5rem;">
+                    
+                    <!-- Mission Card -->
+                    <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: transform 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                        <div style="width: 58px; height: 58px; border-radius: 50%; background: #ecfdf5; border: 1.5.px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem;">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <circle cx="12" cy="12" r="6"></circle>
+                                <circle cx="12" cy="12" r="2"></circle>
+                            </svg>
+                        </div>
+                        <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Our Mission</h2>
+                        <p style="color: #475569; font-size: 0.95rem; line-height: 1.65; margin: 0;">
+                            To make Umrah and Hajj planning simple, honest, and stress-free by offering verified options, clear details, and complete support.
                         </p>
                     </div>
 
-                    <div style="background: #ffffff; border-radius: 16px; padding: 1.8rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(15,23,42,0.03);">
-                        <div style="width: 44px; height: 44px; background: #fef3c7; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 1rem; border: 1px solid #fde68a;">🛡️</div>
-                        <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 0.6rem;">Why We Are Different</h2>
-                        <p style="color: #475569; line-height: 1.6; font-size: 0.92rem;">
-                            Instead of searching through dozens of websites or worrying about unverified agents, you post your travel requirement once. Verified agencies send direct quotes, letting you compare prices, hotel distances, and inclusions easily.
+                    <!-- Why We Are Different Card -->
+                    <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: transform 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                        <div style="width: 58px; height: 58px; border-radius: 50%; background: #ecfdf5; border: 1.5px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem;">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="#15803d" stroke="#15803d" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </div>
+                        <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Why We Are Different</h2>
+                        <p style="color: #475569; font-size: 0.95rem; line-height: 1.65; margin: 0;">
+                            We compare many options from trusted partners so you can choose the best one. Clear pricing, honest information, and support you can count on.
                         </p>
                     </div>
+
                 </div>
 
-                <!-- Impact Metrics Bar -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; text-align: center;">
-                    <div>
-                        <div style="font-size: 1.6rem; font-weight: 800; color: #065f46;">100%</div>
-                        <div style="font-size: 0.82rem; font-weight: 600; color: #64748b; margin-top: 0.2rem;">Verified Agencies</div>
+
+                <!-- BLOCK 3: Why Choose Zilhaj.com? (5 Grid Cards) -->
+                <div style="margin-bottom: 3.8rem;">
+                    
+                    <!-- Section Header with Divider -->
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 0.8rem; margin-bottom: 2.5rem;">
+                        <div style="height: 1.5px; width: 80px; background: linear-gradient(to right, transparent, #86efac);"></div>
+                        <span style="width: 7px; height: 7px; background: #15803d; border-radius: 50%; display: inline-block;"></span>
+                        <h2 style="font-size: 1.6rem; font-weight: 900; color: #15803d; margin: 0; letter-spacing: -0.01em;">Why Choose Zilhaj.com?</h2>
+                        <span style="width: 7px; height: 7px; background: #15803d; border-radius: 50%; display: inline-block;"></span>
+                        <div style="height: 1.5px; width: 80px; background: linear-gradient(to left, transparent, #86efac);"></div>
                     </div>
-                    <div>
-                        <div style="font-size: 1.6rem; font-weight: 800; color: #065f46;">₹35,000+</div>
-                        <div style="font-size: 0.82rem; font-weight: 600; color: #64748b; margin-top: 0.2rem;">Avg Zaireen Savings</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 1.6rem; font-weight: 800; color: #065f46;">10,000+</div>
-                        <div style="font-size: 0.82rem; font-weight: 600; color: #64748b; margin-top: 0.2rem;">Pilgrims Served</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 1.6rem; font-weight: 800; color: #065f46;">24/7</div>
-                        <div style="font-size: 0.82rem; font-weight: 600; color: #64748b; margin-top: 0.2rem;">Dedicated Support</div>
+
+                    <!-- 5 Cards Row -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.2rem;">
+                        
+                        <!-- Card 1: Easy Comparison -->
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.1rem; flex-shrink: 0;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Easy Comparison</h3>
+                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">
+                                Compare packages from multiple trusted travel partners in one place.
+                            </p>
+                        </div>
+
+                        <!-- Card 2: Best Prices -->
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.1rem; flex-shrink: 0;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Best Prices</h3>
+                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">
+                                Get the best value for your money with no hidden charges.
+                            </p>
+                        </div>
+
+                        <!-- Card 3: Clear Information -->
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.1rem; flex-shrink: 0;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Clear Information</h3>
+                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">
+                                All details are shared clearly so you can decide with confidence.
+                            </p>
+                        </div>
+
+                        <!-- Card 4: Time Saving -->
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.1rem; flex-shrink: 0;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Time Saving</h3>
+                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">
+                                Save time by viewing and comparing the best options quickly.
+                            </p>
+                        </div>
+
+                        <!-- Card 5: Safe & Secure -->
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.1rem; flex-shrink: 0;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Safe &amp; Secure</h3>
+                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">
+                                Your information and bookings are always safe with us.
+                            </p>
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- Key Benefits List -->
-                <div style="background: #ffffff; border-radius: 18px; padding: 2.2rem 2rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(15,23,42,0.03); margin-bottom: 2.5rem;">
-                    <h2 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; text-align: center; margin-bottom: 2rem;">The Pillars of Our Service</h2>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.8rem;">
-                        <div>
-                            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">🥇</div>
-                            <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.3rem;">Direct Operator Offers</h3>
-                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.55;">Receive quotes straight from verified Umrah tour operators with full price transparency.</p>
+
+                <!-- BLOCK 4: "Our Approach" & "What Drives Us" Grid Block -->
+                <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 24px; padding: 2.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 3.5rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem; align-items: center;">
+                        
+                        <!-- Left Side: Founder Profile + Approach List -->
+                        <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
+                            
+                            <!-- Founder Profile Card -->
+                            <div style="text-align: center; flex-shrink: 0; min-width: 170px; margin: 0 auto;">
+                                <div style="width: 110px; height: 110px; border-radius: 50%; overflow: hidden; margin: 0 auto 0.9rem; border: 3px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.08); background: #f8fafc;">
+                                    <img src="images/founder.jpg" onerror="this.onerror=null;this.src='founder.jpg';" alt="Tawseef Assadullah H" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <h3 style="font-size: 1.08rem; font-weight: 800; color: #15803d; margin: 0 0 0.25rem 0;">Tawseef Assadullah H</h3>
+                                <div style="font-size: 0.82rem; font-weight: 700; color: #64748b; margin-bottom: 0.35rem;">Founder &amp; CEO</div>
+                                <div style="font-size: 0.72rem; color: #94a3b8; line-height: 1.35; max-width: 170px; margin: 0 auto 0.7rem;">
+                                    B.Tech – National Institute of Technology Srinagar
+                                </div>
+                                <!-- LinkedIn Icon -->
+                                <a href="https://linkedin.com" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 5px; background: #0077b5; color: #ffffff; text-decoration: none;">
+                                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+                                </a>
+                            </div>
+
+                            <!-- Approach List -->
+                            <div style="flex: 1; min-width: 240px;">
+                                <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0 0 1.2rem 0;">Our Approach</h2>
+                                
+                                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                    
+                                    <!-- Point 1 -->
+                                    <div style="display: flex; align-items: flex-start; gap: 0.8rem;">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                                <polyline points="9 12 11 14 15 10"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 0.15rem;">Verified Partners</div>
+                                            <div style="font-size: 0.82rem; color: #64748b; line-height: 1.45;">We work only with trusted and verified travel partners to ensure a safe and reliable journey.</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Point 2 -->
+                                    <div style="display: flex; align-items: flex-start; gap: 0.8rem;">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 0.15rem;">Transparent Process</div>
+                                            <div style="font-size: 0.82rem; color: #64748b; line-height: 1.45;">From comparison to booking, everything is clear and straightforward.</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Point 3 -->
+                                    <div style="display: flex; align-items: flex-start; gap: 0.8rem;">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                                <circle cx="9" cy="7" r="4"></circle>
+                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 0.15rem;">Customer First</div>
+                                            <div style="font-size: 0.82rem; color: #64748b; line-height: 1.45;">We are always here to help you before, during, and after your journey.</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Point 4 -->
+                                    <div style="display: flex; align-items: flex-start; gap: 0.8rem;">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 0.15rem;">Continuous Improvement</div>
+                                            <div style="font-size: 0.82rem; color: #64748b; line-height: 1.45;">We keep improving our platform and services based on your feedback.</div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
                         </div>
-                        <div>
-                            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">🏨</div>
-                            <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.3rem;">Verified Hotel Distance</h3>
-                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.55;">Accurate distances to Masjid al-Haram and Al-Masjid an-Nabawi to ensure complete comfort.</p>
+
+                        <!-- Right Side Box: What Drives Us -->
+                        <div style="background: #f4fbf7; border: 1px solid #d1fae5; border-radius: 20px; padding: 2.2rem 2rem; display: flex; flex-direction: column; justify-content: center; height: 100%; box-sizing: border-box;">
+                            <h3 style="font-size: 1.25rem; font-weight: 800; color: #15803d; margin: 0 0 0.8rem 0;">What Drives Us</h3>
+                            
+                            <div style="font-size: 3.2rem; color: #16a34a; line-height: 0.8; font-family: Georgia, serif; margin-bottom: 0.5rem; user-select: none;">“</div>
+                            
+                            <p style="font-size: 1rem; color: #334155; line-height: 1.65; font-weight: 500; margin: 0 0 1.4rem 0;">
+                                Our goal is simple:<br>
+                                To provide honest service, clear information, and peace of mind to every traveler.
+                            </p>
+                            
+                            <div style="font-size: 0.9rem; font-weight: 800; color: #15803d;">
+                                – Tawseef Assadullah H
+                            </div>
                         </div>
-                        <div>
-                            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">📋</div>
-                            <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.3rem;">Complete Itineraries</h3>
-                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.55;">Full clarity on flight routes, 3x daily meals, Ziyarat tours, and Nusuk permit assistance.</p>
-                        </div>
-                        <div>
-                            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">📞</div>
-                            <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.3rem;">24/7 Assistance</h3>
-                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.55;">Our support team and AI assistant are always available to answer questions and offer guidance.</p>
-                        </div>
+
                     </div>
                 </div>
 
-                <!-- Call to Action Card -->
-                <div style="background: linear-gradient(135deg, #022c22 0%, #064e3b 100%); border-radius: 18px; padding: 2.5rem 1.8rem; text-align: center; color: #ffffff; box-shadow: 0 10px 25px rgba(6, 78, 59, 0.2);">
-                    <h2 style="font-size: 1.6rem; font-weight: 800; color: #ffffff; margin-bottom: 0.6rem;">Ready to Begin Your Sacred Journey?</h2>
-                    <p style="font-size: 0.95rem; color: rgba(255,255,255,0.9); max-width: 560px; margin: 0 auto 1.5rem; line-height: 1.55;">
-                        Post your travel requirements today and let top operators send you tailored offers at unbeatable rates.
-                    </p>
-                    <button onclick="app.navigate('home'); setTimeout(() => app.scrollToRequirementForm(), 200);" style="background: #f59e0b; color: #0f172a; font-weight: 800; font-size: 0.95rem; padding: 0.8rem 2.2rem; border-radius: 10px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-                        ✨ Post Your Requirement Now
-                    </button>
+
+                <!-- BLOCK 5: Bottom CTA Banner (Ready to Start Your Blessed Journey?) -->
+                <div style="background: linear-gradient(135deg, #15803d 0%, #065f46 100%); border-radius: 20px; padding: 3.2rem 2rem; text-align: center; color: #ffffff; box-shadow: 0 12px 32px rgba(21, 128, 61, 0.22); position: relative; overflow: hidden;">
+                    
+                    <!-- Faded Mosque Background Overlay -->
+                    <div style="position: absolute; inset: 0; pointer-events: none; opacity: 0.12; overflow: hidden;">
+                        <svg viewBox="0 0 800 200" width="100%" height="100%" fill="#ffffff" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="50" y="80" width="20" height="120"/>
+                            <path d="M50 80 Q60 40 70 80Z"/>
+                            <rect x="100" y="50" width="120" height="150" rx="10"/>
+                            <path d="M100 50 Q160 -30 220 50Z"/>
+                            <rect x="250" y="80" width="20" height="120"/>
+                            <path d="M250 80 Q260 40 270 80Z"/>
+                            <rect x="550" y="80" width="20" height="120"/>
+                            <path d="M550 80 Q560 40 570 80Z"/>
+                            <rect x="600" y="50" width="120" height="150" rx="10"/>
+                            <path d="M600 50 Q660 -30 720 50Z"/>
+                            <rect x="750" y="80" width="20" height="120"/>
+                            <path d="M750 80 Q760 40 770 80Z"/>
+                        </svg>
+                    </div>
+
+                    <div style="position: relative; z-index: 2; max-width: 650px; margin: 0 auto;">
+                        <h2 style="font-size: clamp(1.25rem, 2.2vw, 1.5rem); font-weight: 800; color: #ffffff; margin: 0 0 0.75rem 0; letter-spacing: -0.01em;">
+                            Ready to Start Your Blessed Journey?
+                        </h2>
+                        <p style="font-size: 1rem; color: rgba(255,255,255,0.92); margin: 0 auto 1.8rem; line-height: 1.6; font-weight: 400;">
+                            Find the best Umrah and Hajj options from trusted travel partners.
+                        </p>
+                        <button onclick="app.navigate('home'); setTimeout(() => app.scrollToRequirementForm(), 200);" style="background: #f59e0b; color: #0a1a12; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 2.2rem; border-radius: 10px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4); transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(245, 158, 11, 0.5)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(245, 158, 11, 0.4)'">
+                            <span>Explore Packages</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+
                 </div>
+
             </div>
         `;
     }
@@ -2952,7 +3222,7 @@ class App {
                 '</div>';
         }
 
-        return '<div class="main-container" style="max-width:1000px; margin:7rem auto 3rem; padding:0 1.5rem;">' +
+        return '<div class="main-container" style="max-width:100%; width:100%; box-sizing:border-box; margin:7rem auto 3rem; padding:0 3.5rem;">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">' +
             '<div>' +
             '<h2 style="margin:0;">🎫 My Bookings &amp; Travel Tickets</h2>' +
@@ -3702,7 +3972,7 @@ class App {
 
         return `
         <div style="background:#f8fafc;min-height:100vh;padding:94px 0 3rem;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-            <div style="max-width:1240px;margin:0 auto;padding:0 1.2rem;display:flex;gap:1.1rem;align-items:flex-start;">
+            <div style="max-width:100%; width:100%; box-sizing:border-box; margin:0 auto; padding:0 3.5rem; display:flex; gap:1.5rem; align-items:flex-start;">
                 ${sidebar}
                 ${panel}
             </div>
@@ -4783,7 +5053,7 @@ class App {
                 </div>
 
                 <!-- VOUCHER CARD MAIN WRAPPER -->
-                <div style="max-width:980px; width:100%; margin:2rem auto; padding:0 1.5rem; box-sizing:border-box;">
+                <div style="max-width:100%; width:100%; margin:2rem auto; padding:0 3.5rem; box-sizing:border-box;">
                     <div style="background:#ffffff; border-radius:24px; border:1px solid #e2e8f0; overflow:hidden; box-shadow:0 15px 45px rgba(0,0,0,0.06);">
                         
                         <!-- 1. DARK EMERALD HERO BANNER -->
@@ -4795,7 +5065,7 @@ class App {
                                             <img src="logo.png" onerror="this.onerror=null;this.src='images/logo.png';" alt="Zilhaj.com Logo" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">
                                         </div>
                                         <div>
-                                            <h1 style="font-size:2.2rem; font-weight:900; color:#ffffff; margin:0; letter-spacing:-0.5px; line-height:1.1;">ZILHAJ.COM UMRAH PLATFORM</h1>
+                                            <h1 style="font-size:1.45rem; font-weight:800; color:#ffffff; margin:0; letter-spacing:-0.3px; line-height:1.2;">ZILHAJ.COM UMRAH PLATFORM</h1>
                                             <div style="font-size:0.78rem; color:#d4af37; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; margin-top:0.4rem;">OFFICIAL TRAVEL BOOKING VOUCHER &amp; ESCROW RECEIPT</div>
                                         </div>
                                     </div>
@@ -5923,7 +6193,7 @@ class App {
         const allOffers = allOffersList.filter(o => o.userId === user.id || userReqIds.includes(o.requirementId));
 
         return `
-            <div class="main-container" style="max-width:950px; margin:7rem auto 3rem; padding:0 1.5rem;">
+            <div class="main-container" style="max-width:100%; width:100%; box-sizing:border-box; margin:7rem auto 3rem; padding:0 3.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
                     <div>
                         <h2 style="margin:0;">🎁 Offers Available — Competitive Agent Bids</h2>
@@ -7120,10 +7390,10 @@ class App {
     async renderAdminPage() {
         const main = document.getElementById('mainContainer');
         main.innerHTML = `
-            <div class="admin-container" style="max-width: 1400px; margin: 6rem auto 2rem; padding: 0 2rem;">
+            <div class="admin-container" style="max-width: 100%; width: 100%; box-sizing: border-box; margin: 6rem auto 2rem; padding: 0 3.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
                     <div>
-                        <h2 style="margin:0; color:#0f172a; font-size:2rem; font-weight:800;">👑 Admin Panel</h2>
+                        <h2 style="margin:0; color:#0f172a; font-size:1.35rem; font-weight:800;">👑 Admin Panel</h2>
                         <p style="color:#64748b; font-size:1rem; margin-top:0.3rem;">Manage Zaireen Requests, Offers, and Orders</p>
                     </div>
                     <div style="display:flex; gap:0.6rem;">
@@ -8972,7 +9242,7 @@ class App {
                             <div style="display:inline-block; font-size:0.68rem; font-weight:800; color:#166534; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:0.4rem;">
                                 PREMIUM TRAVEL EXPERIENCE
                             </div>
-                            <h2 style="font-size:1.8rem; font-weight:900; color:#0f172a; margin:0 0 0.3rem 0; letter-spacing:-0.02em; line-height:1.35;">
+                            <h2 style="font-size:1.3rem; font-weight:800; color:#0f172a; margin:0 0 0.3rem 0; letter-spacing:-0.01em; line-height:1.3;">
                                 ${this.escapeHtml(title)}
                             </h2>
                             <p style="font-size:0.88rem; color:#64748b; margin:0;">
@@ -9764,14 +10034,14 @@ class App {
 
     renderServicesPage() {
         return `
-            <div class="main-container" style="max-width: 1240px; margin: 6.5rem auto 4rem; padding: 0 1.5rem;">
+            <div class="main-container" style="max-width: 100%; width: 100%; box-sizing: border-box; margin: 6.5rem auto 4rem; padding: 0 3.5rem;">
                 
                 <!-- Services Hero / Header -->
                 <div style="text-align: center; margin-bottom: 3.5rem;">
                     <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.3rem 1.1rem; border-radius: 99px; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.8rem;">
                         <span>🕌</span> <span>OUR PILGRIMAGE SERVICES</span>
                     </div>
-                    <h1 style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 900; color: #0f172a; margin-bottom: 0.6rem; letter-spacing: -0.02em;">
+                    <h1 style="font-size: clamp(1.35rem, 2.5vw, 1.7rem); font-weight: 800; color: #0f172a; margin-bottom: 0.6rem; letter-spacing: -0.01em;">
                         Comprehensive Hajj & Umrah Travel Services
                     </h1>
                     <p style="color: #64748b; font-size: 1.02rem; max-width: 720px; margin: 0 auto; line-height: 1.65;">
@@ -9783,7 +10053,7 @@ class App {
                 <div style="margin-bottom: 4.5rem;">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                         <div>
-                            <h2 style="font-size: 1.65rem; font-weight: 800; color: #0f172a; margin: 0 0 0.3rem 0;">Our Travel Solutions</h2>
+                            <h2 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0 0 0.3rem 0;">Our Travel Solutions</h2>
                             <p style="font-size: 0.92rem; color: #64748b; margin: 0;">Explore our core pilgrimage travel offerings below</p>
                         </div>
                         <span style="background: #f1f5f9; color: #475569; padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.82rem; font-weight: 700;">✦ Verified Saudi Operators</span>
@@ -9873,7 +10143,7 @@ class App {
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 0.25rem 0.9rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
                             <span>📖</span> <span>SACRED KNOWLEDGE HUB</span>
                         </div>
-                        <h2 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 0.4rem;">Hajj & Umrah Pilgrimage Guides</h2>
+                        <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-bottom: 0.4rem;">Hajj & Umrah Pilgrimage Guides</h2>
                         <p style="color: #64748b; font-size: 0.92rem; max-width: 640px; margin: 0 auto;">Essential step-by-step rituals, Miqat boundaries, Ihram rules, Nusuk permits, and spiritual advice.</p>
                     </div>
 
@@ -10123,28 +10393,74 @@ class App {
 
     logout() {
         this.openModal(`
-            <div style="background: #ffffff; border-radius: 24px; padding: 2.2rem; text-align: center; max-width: 440px; margin: 0 auto; box-shadow: 0 25px 50px rgba(0,0,0,0.25); position: relative; font-family: 'Inter', -apple-system, sans-serif;">
+            <div style="background: #ffffff; border-radius: 24px; padding: 2.2rem 2.2rem 2rem; text-align: center; max-width: 440px; width: 90%; margin: 0 auto; box-shadow: 0 25px 60px rgba(0,0,0,0.18); position: relative; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; border: 1.5px solid #e2e8f0; overflow: hidden;">
                 
-                <!-- Icon Circle Badge -->
-                <div style="width: 72px; height: 72px; background: #fef2f2; border: 2px solid #fecaca; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 1.2rem; box-shadow: 0 6px 16px rgba(220,38,38,0.15);">
-                    🚪
+                <!-- Faded Mosque Background Watermark Illustration -->
+                <div style="position: absolute; inset: 0; pointer-events: none; opacity: 0.06; overflow: hidden; display: flex; align-items: flex-end; justify-content: center;">
+                    <svg viewBox="0 0 600 180" width="100%" height="110" fill="#044e35" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="40" y="50" width="16" height="130"/>
+                        <path d="M40 50 Q48 15 56 50Z"/>
+                        <rect x="90" y="30" width="100" height="150" rx="8"/>
+                        <path d="M90 30 Q140 -40 190 30Z"/>
+                        <rect x="220" y="50" width="16" height="130"/>
+                        <path d="M220 50 Q228 15 236 50Z"/>
+                        <rect x="360" y="50" width="16" height="130"/>
+                        <path d="M360 50 Q368 15 376 50Z"/>
+                        <rect x="410" y="30" width="100" height="150" rx="8"/>
+                        <path d="M410 30 Q460 -40 510 30Z"/>
+                        <rect x="540" y="50" width="16" height="130"/>
+                        <path d="M540 50 Q548 15 556 50Z"/>
+                    </svg>
                 </div>
 
-                <!-- Title & Message -->
-                <h3 style="font-size: 1.4rem; font-weight: 900; color: #0f172a; margin: 0 0 0.5rem 0; letter-spacing: -0.3px;">
+                <!-- Icon Circle Badge with Exit Door & Arrow -->
+                <div style="position: relative; width: 84px; height: 84px; background: #e6f4ea; border: 2px solid #bbf7d0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.3rem; box-shadow: 0 8px 24px rgba(4,78,53,0.12);">
+                    
+                    <!-- Sparkles Around Badge -->
+                    <span style="position: absolute; top: 4px; left: 6px; color: #d4af37; font-size: 0.85rem;">✦</span>
+                    <span style="position: absolute; top: 12px; right: 4px; color: #d4af37; font-size: 0.75rem;">✦</span>
+                    <span style="position: absolute; bottom: 8px; left: 4px; color: #d4af37; font-size: 0.75rem;">✦</span>
+                    <span style="position: absolute; bottom: 4px; right: 8px; color: #d4af37; font-size: 0.85rem;">✦</span>
+
+                    <!-- SVG Exit Door & Golden Arrow -->
+                    <svg width="44" height="44" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="12" y="8" width="18" height="32" rx="3" fill="#044e35" stroke="#033927" stroke-width="2"/>
+                        <circle cx="16" cy="24" r="2" fill="#f59e0b"/>
+                        <path d="M25 24H38" stroke="#d97706" stroke-width="3.5" stroke-linecap="round"/>
+                        <path d="M33 18L39 24L33 30" stroke="#d97706" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <!-- Title -->
+                <h3 style="font-size: 1.55rem; font-weight: 900; color: #044e35; margin: 0 0 0.6rem 0; letter-spacing: -0.02em;">
                     Confirm Logout
                 </h3>
-                <p style="font-size: 0.92rem; color: #64748b; margin: 0 0 1.8rem 0; line-height: 1.5; font-weight: 500;">
-                    Are you sure you want to log out of your account? You will need to log back in to manage your Umrah bookings.
+
+                <!-- Golden Star Line Divider -->
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-bottom: 1.1rem;">
+                    <div style="height: 1.5px; width: 45px; background: linear-gradient(to right, transparent, #d4af37);"></div>
+                    <span style="color: #d4af37; font-size: 0.85rem; font-weight: 900;">◆</span>
+                    <div style="height: 1.5px; width: 45px; background: linear-gradient(to left, transparent, #d4af37);"></div>
+                </div>
+
+                <!-- Subtext Message -->
+                <p style="font-size: 0.94rem; color: #475569; margin: 0 0 1.8rem 0; line-height: 1.6; font-weight: 500;">
+                    Are you sure you want to log out of your account?<br>
+                    You will need to log back in to manage your Umrah bookings.
                 </p>
 
-                <!-- Action Buttons -->
-                <div style="display: flex; gap: 0.9rem; justify-content: center;">
-                    <button type="button" onclick="app.closeModal()" style="flex: 1; padding: 0.75rem 1.4rem; border-radius: 12px; background: #ffffff; color: #334155; border: 1.5px solid #cbd5e1; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f8fafc';this.style.borderColor='#94a3b8'" onmouseout="this.style.background='#ffffff';this.style.borderColor='#cbd5e1'">
+                <!-- Action Buttons Row -->
+                <div style="display: flex; gap: 1rem; justify-content: center; position: relative; z-index: 2;">
+                    <button type="button" onclick="app.closeModal()" style="flex: 1; padding: 0.8rem 1.4rem; border-radius: 12px; background: #ffffff; color: #044e35; border: 1.8px solid #044e35; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='#ffffff'">
                         Cancel
                     </button>
-                    <button type="button" onclick="app.confirmLogout()" style="flex: 1; padding: 0.75rem 1.4rem; border-radius: 12px; background: #dc2626; color: #ffffff; border: none; font-weight: 900; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 14px rgba(220,38,38,0.3); transition: all 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
-                        🚪 Log Out
+                    <button type="button" onclick="app.confirmLogout()" style="flex: 1; padding: 0.8rem 1.4rem; border-radius: 12px; background: #044e35; color: #ffffff; border: none; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 6px 20px rgba(4,78,53,0.3); transition: all 0.2s ease;" onmouseover="this.style.background='#033927'" onmouseout="this.style.background='#044e35'">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <span>Log Out</span>
                     </button>
                 </div>
 
@@ -10447,6 +10763,11 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
     }
 
     scrollToRequirementForm() {
+        if (!this.state.currentUser) {
+            this.showToast('Please log in or sign up to submit your pilgrimage request', 'warning');
+            this.openAuthModal('login');
+            return;
+        }
         const anchor = document.getElementById('requestFormAnchor');
         if (anchor) {
             anchor.scrollIntoView({ behavior: 'smooth' });

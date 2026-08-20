@@ -115,6 +115,14 @@ class App {
         // Render page IMMEDIATELY (0ms delay) so page is never blank!
         this.navigate(this.getCurrentPage());
 
+        // Remove the branded boot splash once the first page has rendered
+        const bootSplash = document.getElementById('bootSplash');
+        if (bootSplash) {
+            bootSplash.style.transition = 'opacity 0.25s ease';
+            bootSplash.style.opacity = '0';
+            setTimeout(() => { if (bootSplash.parentNode) bootSplash.parentNode.removeChild(bootSplash); }, 300);
+        }
+
         // Fetch remote updates asynchronously without blocking page rendering
         this.fetchPackages().then(() => {
             if (this.state.currentPage === 'home' || this.state.currentPage === 'packages') {
