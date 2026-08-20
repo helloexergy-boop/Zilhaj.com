@@ -928,6 +928,12 @@ class App {
             main.innerHTML = this.renderHomePage();
             this.initHeroVideoPlaylist();
         } else if (page === 'request-form' || page === 'submit-request' || page === 'request') {
+            if (!this.state.currentUser) {
+                this.showToast('Please log in or sign up to submit your pilgrimage request', 'warning');
+                this.openAuthModal('login');
+                main.innerHTML = this.renderHomePage();
+                return;
+            }
             main.innerHTML = this.renderRequestFormPage();
         } else if (page === 'services' || page === 'guides') {
             main.innerHTML = this.renderServicesPage();
@@ -998,6 +1004,11 @@ class App {
     }
 
     handleStartJourneyClick() {
+        if (!this.state.currentUser) {
+            this.showToast('Please log in or sign up to start your journey & submit a request', 'warning');
+            this.openAuthModal('login');
+            return;
+        }
         this.navigate('request-form');
     }
 
@@ -1089,6 +1100,11 @@ class App {
     }
 
     async submitStandaloneUmrahRequest() {
+        if (!this.state.currentUser) {
+            this.showToast('🔒 Login Required! Please log in or sign up to submit your travel request.', 'warning');
+            this.openAuthModal('login');
+            return;
+        }
         const pilgrimageType = document.getElementById('reqPilgrimageType')?.value || 'UMRAH';
         const departureCity = document.getElementById('reqDepartureCity')?.value;
         const departureDate = document.getElementById('reqDepartureDate')?.value;
@@ -2445,6 +2461,11 @@ class App {
     }
 
     async submitRequirementForm() {
+        if (!this.state.currentUser) {
+            this.showToast('🔒 Login Required! Please log in or sign up to submit your travel request.', 'warning');
+            this.openAuthModal('login');
+            return;
+        }
         this.showLoading('Submitting your travel request to verified agents...');
         const dateRange = document.getElementById('reqDateRange')?.value || document.getElementById('reqDate')?.value || '';
         const duration = parseInt(document.getElementById('reqDuration')?.value) || 0;
@@ -2460,9 +2481,7 @@ class App {
         const budget = parseFloat(document.getElementById('reqBudget')?.value) || 0;
         const notes = document.getElementById('reqNotes')?.value || '';
 
-        const currentUser = this.state.currentUser || {
-            id: 'usr-guest-' + Date.now()
-        };
+        const currentUser = this.state.currentUser;
 
         const newReq = {
             id: 'req-' + Date.now(),
@@ -10736,6 +10755,11 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
     }
 
     scrollToRequirementForm() {
+        if (!this.state.currentUser) {
+            this.showToast('Please log in or sign up to submit your pilgrimage request', 'warning');
+            this.openAuthModal('login');
+            return;
+        }
         const anchor = document.getElementById('requestFormAnchor');
         if (anchor) {
             anchor.scrollIntoView({ behavior: 'smooth' });
