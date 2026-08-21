@@ -7895,89 +7895,90 @@ class App {
             <div class="page-wrapper">
                 
                 <!-- ==========================================
-                     LEFT PANEL (40% Width - Soft Emerald Green)
+                     LEFT PANEL (40% Width - Pexels Kaaba Full Photo Background)
                      ========================================== -->
-                <aside class="left-panel">
+                <aside class="left-panel" style="width: 38%; min-width: 420px; height: 100vh; position: relative; overflow: hidden; background: #061F17; border-bottom-right-radius: 80px; box-shadow: 12px 0 35px rgba(0, 0, 0, 0.25);">
                   
-                  <div class="left-panel-content">
+                  <!-- 1. FULL-PANEL PEXELS BACKGROUND IMAGE -->
+                  <img src="kaaba-full-bg1.jpg" alt="Kaaba Mecca Background" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 1;">
+
+                  <!-- 2. DARK EMERALD CONTRAST OVERLAY -->
+                  <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6, 30, 23, 0.85) 0%, rgba(8, 38, 29, 0.80) 45%, rgba(4, 18, 14, 0.94) 100%); z-index: 2;"></div>
+
+                  <!-- 3. CONTENT CONTAINER OVERLAY -->
+                  <div class="left-panel-content" style="position: relative; z-index: 3; padding: 40px 44px 36px 44px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
                     
                     <!-- 1. LOGO -->
-                    <div class="brand-logo" onclick="app.closeModal(); app.navigate('home');" style="cursor:pointer;">
-                      <img src="zilhaj-logo.jpg" alt="ZILHAJ Logo" class="brand-logo-img" style="width:48px; height:48px; max-width:48px; max-height:48px; object-fit:contain; border-radius:50%; flex-shrink:0;">
-                      <span class="brand-text">ZILHAJ</span>
+                    <div class="brand-logo" onclick="app.closeModal(); app.navigate('home');" style="cursor:pointer; display:flex; align-items:center; gap:14px;">
+                      <img src="zilhaj-logo.jpg" alt="ZILHAJ Logo" class="brand-logo-img" style="width:48px; height:48px; max-width:48px; max-height:48px; object-fit:contain; border-radius:50%; border: 2px solid #F59E0B; flex-shrink:0;">
+                      <span class="brand-text" style="font-family:'Cinzel', serif; font-size:28px; font-weight:800; letter-spacing:3px; color:#FFFFFF;">ZILHAJ</span>
                     </div>
 
                     <!-- 2. TAGLINE & UNDERLINE -->
-                    <div class="tagline-container">
-                      <div class="tagline-text-white">One Request.</div>
-                      <div class="tagline-text-gold">Multiple Verified Offers.</div>
-                      <div class="tagline-underline">
-                        <div class="tagline-dot"></div>
-                        <div class="tagline-line"></div>
+                    <div class="tagline-container" style="display:flex; flex-direction:column; gap:4px; margin-top:6px;">
+                      <div class="tagline-text-white" style="font-size:30px; font-weight:800; color:#FFFFFF; line-height:1.15; letter-spacing:-0.3px; text-shadow:0 2px 8px rgba(0,0,0,0.5);">One Request.</div>
+                      <div class="tagline-text-gold" style="font-size:30px; font-weight:800; color:#F59E0B; line-height:1.15; letter-spacing:-0.3px; text-shadow:0 2px 8px rgba(0,0,0,0.5);">Multiple Verified Offers.</div>
+                      <div class="tagline-underline" style="display:flex; align-items:center; gap:0; margin-top:6px;">
+                        <div class="tagline-dot" style="width:6px; height:6px; background-color:#F59E0B; border-radius:50%; box-shadow:0 0 8px rgba(245, 158, 11, 0.8);"></div>
+                        <div class="tagline-line" style="width:54px; height:2px; background:linear-gradient(90deg, #F59E0B 0%, rgba(245, 158, 11, 0.15) 100%); border-radius:1px;"></div>
                       </div>
                     </div>
 
                     <!-- 3. DESCRIPTION -->
-                    <p class="description-text">
+                    <p class="description-text" style="font-size:14px; line-height:1.6; color:rgba(255, 255, 255, 0.92); font-weight:400; margin:0; text-shadow:0 1px 4px rgba(0,0,0,0.5);">
                       ZILHAJ is your trusted platform for Umrah packages, flights, trains and more. One request gets you multiple verified offers—so you can choose with confidence.
                     </p>
 
                     <!-- 4. FEATURE LIST -->
-                    <div class="feature-list">
+                    <div class="feature-list" style="display:flex; flex-direction:column; margin-top:8px;">
                       
                       <!-- Row 1: Verified & Trusted -->
-                      <div class="feature-item">
-                        <div class="feature-badge">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <div class="feature-item" style="display:flex; align-items:flex-start; gap:14px; padding:12px 0; border-top:1px solid rgba(255, 255, 255, 0.15);">
+                        <div class="feature-badge" style="width:44px; height:44px; border-radius:50%; background:rgba(255, 255, 255, 0.12); backdrop-filter:blur(8px); border:1.5px solid rgba(245, 158, 11, 0.55); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px;">
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                             <path d="M9 12l2 2 4-4"/>
                           </svg>
                         </div>
-                        <div class="feature-info">
-                          <span class="feature-title">Verified & Trusted</span>
-                          <span class="feature-subtext">All offers are verified for your peace of mind.</span>
+                        <div class="feature-info" style="display:flex; flex-direction:column; gap:2px;">
+                          <span class="feature-title" style="font-size:15px; font-weight:700; color:#FFFFFF; text-shadow:0 1px 4px rgba(0,0,0,0.5);">Verified & Trusted</span>
+                          <span class="feature-subtext" style="font-size:13px; color:rgba(255, 255, 255, 0.85); line-height:1.35; text-shadow:0 1px 3px rgba(0,0,0,0.4);">All offers are verified for your peace of mind.</span>
                         </div>
                       </div>
 
                       <!-- Row 2: Multiple Offers -->
-                      <div class="feature-item">
-                        <div class="feature-badge">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <div class="feature-item" style="display:flex; align-items:flex-start; gap:14px; padding:12px 0; border-top:1px solid rgba(255, 255, 255, 0.15);">
+                        <div class="feature-badge" style="width:44px; height:44px; border-radius:50%; background:rgba(255, 255, 255, 0.12); backdrop-filter:blur(8px); border:1.5px solid rgba(245, 158, 11, 0.55); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px;">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                             <circle cx="9" cy="7" r="4"/>
                             <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                           </svg>
                         </div>
-                        <div class="feature-info">
-                          <span class="feature-title">Multiple Offers</span>
-                          <span class="feature-subtext">Compare multiple offers and choose what's best for you.</span>
+                        <div class="feature-info" style="display:flex; flex-direction:column; gap:2px;">
+                          <span class="feature-title" style="font-size:15px; font-weight:700; color:#FFFFFF; text-shadow:0 1px 4px rgba(0,0,0,0.5);">Multiple Offers</span>
+                          <span class="feature-subtext" style="font-size:13px; color:rgba(255, 255, 255, 0.85); line-height:1.35; text-shadow:0 1px 3px rgba(0,0,0,0.4);">Compare multiple offers and choose what's best for you.</span>
                         </div>
                       </div>
 
                       <!-- Row 3: Secure & Private -->
-                      <div class="feature-item">
-                        <div class="feature-badge">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <div class="feature-item" style="display:flex; align-items:flex-start; gap:14px; padding:12px 0; border-top:1px solid rgba(255, 255, 255, 0.15); border-bottom:1px solid rgba(255, 255, 255, 0.15);">
+                        <div class="feature-badge" style="width:44px; height:44px; border-radius:50%; background:rgba(255, 255, 255, 0.12); backdrop-filter:blur(8px); border:1.5px solid rgba(245, 158, 11, 0.55); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px;">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                           </svg>
                         </div>
-                        <div class="feature-info">
-                          <span class="feature-title">Secure & Private</span>
-                          <span class="feature-subtext">Your data and identity are 100% safe and protected.</span>
+                        <div class="feature-info" style="display:flex; flex-direction:column; gap:2px;">
+                          <span class="feature-title" style="font-size:15px; font-weight:700; color:#FFFFFF; text-shadow:0 1px 4px rgba(0,0,0,0.5);">Secure & Private</span>
+                          <span class="feature-subtext" style="font-size:13px; color:rgba(255, 255, 255, 0.85); line-height:1.35; text-shadow:0 1px 3px rgba(0,0,0,0.4);">Your data and identity are 100% safe and protected.</span>
                         </div>
                       </div>
 
                     </div>
 
                   </div>
-
-                  <!-- BOTTOM SEAMLESS ARTWORK -->
-                  <div class="illustration-container">
-                    <img src="kaaba-signup.png" alt="ZILHAJ Kaaba Artwork" class="seamless-artwork-img">
-                  </div>
-
                 </aside>
 
                 <!-- ==========================================
