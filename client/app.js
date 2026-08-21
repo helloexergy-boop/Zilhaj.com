@@ -7972,20 +7972,20 @@ class App {
                     <div class="login-card ${isRegister ? 'compact-card' : ''}">
                       
                       <!-- Card Header -->
-                      <div class="card-header" style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-                        <div class="header-badge" style="width:38px; height:38px; border-radius:50%; background:#1F604D; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                          <img src="zilhaj-logo.jpg" alt="ZILHAJ Emblem" class="header-badge-img" style="width:38px; height:38px; max-width:38px; max-height:38px; object-fit:cover; border-radius:50%;">
+                      <div class="card-header" style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                        <div class="header-badge" style="width:36px; height:36px; border-radius:50%; background:#1F604D; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                          <img src="zilhaj-logo.jpg" alt="ZILHAJ Emblem" class="header-badge-img" style="width:36px; height:36px; max-width:36px; max-height:36px; object-fit:cover; border-radius:50%;">
                         </div>
                         <div class="header-titles" style="display:flex; flex-direction:column;">
-                          <h1 class="header-welcome" style="font-size:1.25rem; font-weight:800; color:#1F604D; margin:0; line-height:1.1;">${isRegister ? 'Create Your Account' : (isForgot ? 'Reset Password' : 'Welcome Back')}</h1>
-                          <p class="header-subtext" style="font-size:0.75rem; color:#64748B; margin:2px 0 0 0;">${isRegister ? 'Join ZILHAJ and start your journey with confidence.' : (isForgot ? 'Enter your email to receive a password reset code.' : 'Login to your ZILHAJ account')}</p>
+                          <h3 class="header-welcome" style="font-size:1.15rem; font-weight:800; color:#1F604D; margin:0; line-height:1.1;">${isRegister ? 'Create Your Account' : (isForgot ? 'Reset Password' : 'Welcome Back')}</h3>
+                          <p class="header-subtext" style="font-size:0.74rem; color:#64748B; margin:2px 0 0 0;">${isRegister ? 'Join ZILHAJ and start your journey with confidence.' : (isForgot ? 'Enter your email to receive a password reset code.' : 'Login to your ZILHAJ account')}</p>
                           <div class="header-underline" style="width:28px; height:2.5px; background:#D4A657; margin-top:3px; border-radius:2px;"></div>
                         </div>
                       </div>
 
                       <!-- In-Form Alert Containers -->
-                      <div id="authFormAlert" style="display:none; margin-bottom:0.6rem;"></div>
-                      <div id="authAlertBox" style="display:none; margin-bottom:0.6rem;"></div>
+                      <div id="authFormAlert" style="display:none; margin-bottom:0.2rem;"></div>
+                      <div id="authAlertBox" style="display:none; margin-bottom:0.2rem;"></div>
 
                       ${isLogin ? `
                         <!-- LOGIN FORM -->
@@ -8123,13 +8123,13 @@ class App {
                                 placeholder="Enter your email address" 
                                 autocomplete="email"
                                 required
-                                style="padding-right: 105px;"
+                                style="padding-right: 95px;"
                               >
                               <svg class="input-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                                 <polyline points="22,6 12,13 2,6"/>
                               </svg>
-                              <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="position:absolute; right:6px; top:3px; height:29px; padding:0 0.75rem; background:#1F604D; color:#ffffff; border:none; border-radius:5px; font-size:0.75rem; font-weight:700; cursor:pointer;">
+                              <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="position:absolute; right:5px; top:3px; height:28px; padding:0 0.65rem; background:#1F604D; color:#ffffff; border:none; border-radius:5px; font-size:0.72rem; font-weight:700; cursor:pointer;">
                                 Send OTP
                               </button>
                             </div>
@@ -8141,24 +8141,24 @@ class App {
                             <label class="form-label">Verify Email</label>
                             <div class="otp-container">
                               <p class="otp-subtext">Enter 6-digit code sent to <span id="display-otp-email" class="otp-email-highlight">your email</span></p>
-                              <div class="otp-inputs-grid" id="otp-inputs-group">
-                                <input type="text" maxlength="1" class="otp-box" data-index="0" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 1">
-                                <input type="text" maxlength="1" class="otp-box" data-index="1" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 2">
-                                <input type="text" maxlength="1" class="otp-box" data-index="2" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 3">
-                                <input type="text" maxlength="1" class="otp-box" data-index="3" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 4">
-                                <input type="text" maxlength="1" class="otp-box" data-index="4" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 5">
-                                <input type="text" maxlength="1" class="otp-box" data-index="5" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 6">
-                              </div>
-                              <input type="hidden" id="authOtpCode">
-                              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
-                                <div class="otp-resend-row">
-                                  <span>Didn't receive code? </span>
-                                  <button type="button" id="resendOtpBtn" onclick="app.sendSignupOtp()" class="resend-otp-btn">Resend OTP</button>
-                                  <span id="otpTimer" class="otp-timer">(00:45)</span>
+                              <div style="display:flex; align-items:center; gap:8px;">
+                                <div class="otp-inputs-grid" id="otp-inputs-group" style="flex:1;">
+                                  <input type="text" maxlength="1" class="otp-box" data-index="0" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 1">
+                                  <input type="text" maxlength="1" class="otp-box" data-index="1" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 2">
+                                  <input type="text" maxlength="1" class="otp-box" data-index="2" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 3">
+                                  <input type="text" maxlength="1" class="otp-box" data-index="3" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 4">
+                                  <input type="text" maxlength="1" class="otp-box" data-index="4" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 5">
+                                  <input type="text" maxlength="1" class="otp-box" data-index="5" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 6">
                                 </div>
-                                <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="height:26px; padding:0 0.75rem; background:#1F604D; color:#ffffff; border:none; border-radius:5px; font-size:0.72rem; font-weight:800; cursor:pointer;">
+                                <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="height:32px; padding:0 0.85rem; background:#ffffff; color:#1F604D; border:1px solid #1F604D; border-radius:6px; font-size:0.72rem; font-weight:800; cursor:pointer; flex-shrink:0;">
                                   VERIFY OTP
                                 </button>
+                              </div>
+                              <input type="hidden" id="authOtpCode">
+                              <div class="otp-resend-row" style="margin-top:2px;">
+                                <span>Didn't receive code? </span>
+                                <button type="button" id="resendOtpBtn" onclick="app.sendSignupOtp()" class="resend-otp-btn">Resend OTP</button>
+                                <span id="otpTimer" class="otp-timer">(00:45)</span>
                               </div>
                               <div id="otpSentAlert" style="display:none;"></div>
                             </div>
@@ -8242,7 +8242,7 @@ class App {
                                 <line x1="20" y1="8" x2="20" y2="14"/>
                                 <line x1="17" y1="11" x2="23" y2="11"/>
                               </svg>
-                              <span>Create Account</span>
+                              <span>Sign up with Email</span>
                             </button>
                           </div>
 
@@ -8477,64 +8477,90 @@ class App {
     sendSignupOtp() {
         const emailEl = document.getElementById('authEmail');
         const alertEl = document.getElementById('otpSentAlert');
-        const alertBox = document.getElementById('authFormAlert');
-        if (!emailEl || !emailEl.value.trim()) {
-            if (alertBox) {
-                alertBox.style.display = 'block';
-                alertBox.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:0.45rem; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:0.4rem 0.75rem; border-radius:6px; font-size:0.76rem; font-weight:700;">
-                        <span>⚠️</span> <div>Please enter your email address first</div>
-                    </div>
-                `;
+        const emailError = document.getElementById('signup-email-error');
+        
+        if (emailError) {
+            emailError.innerHTML = '';
+            emailError.style.display = 'none';
+        }
+
+        const email = emailEl ? emailEl.value.trim() : '';
+        if (!email) {
+            if (emailError) {
+                emailError.innerHTML = '<span style="color:#DC2626; font-size:0.7rem; font-weight:700; display:block; margin-top:2px;">⚠️ Please enter your email address first.</span>';
+                emailError.style.display = 'block';
             }
+            if (emailEl) emailEl.focus();
             return;
         }
-        const generated = Math.floor(1000 + Math.random() * 9000).toString();
+
+        const generated = Math.floor(100000 + Math.random() * 900000).toString();
         this.state.generatedOtp = generated;
         const otpCodeInput = document.getElementById('authOtpCode');
         if (otpCodeInput) otpCodeInput.value = generated;
+
+        // Auto-fill OTP boxes for demo testing ease if needed
+        const otpBoxes = document.querySelectorAll('.otp-box');
+        if (otpBoxes && otpBoxes.length === 6) {
+            for (let i = 0; i < 6; i++) {
+                otpBoxes[i].value = generated[i] || '';
+            }
+        }
+
+        const displayEmail = document.getElementById('display-otp-email');
+        if (displayEmail) displayEmail.innerText = email;
+
         if (alertEl) {
             alertEl.style.display = 'block';
-            alertEl.style.color = '#166534';
-            alertEl.style.fontSize = '0.72rem';
-            alertEl.style.fontWeight = '700';
-            alertEl.style.marginTop = '0.25rem';
-            alertEl.innerText = `OTP sent! Verification code is: ${generated}`;
+            alertEl.innerHTML = `
+                <div style="display:flex; align-items:center; gap:0.4rem; background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; padding:0.3rem 0.55rem; border-radius:6px; font-size:0.7rem; font-weight:600; margin-top:3px; line-height:1.2;">
+                    <svg viewBox="0 0 24 24" style="width:13px; height:13px; flex-shrink:0;" fill="#22C55E"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    <div>Verification code sent! Please check your email inbox (<span style="font-weight:700;">${email}</span>) for your 6-digit OTP code.</div>
+                </div>
+            `;
         }
     }
 
     verifySignupOtp() {
         const otpInput = document.getElementById('authOtpCode');
         const alertEl = document.getElementById('otpSentAlert');
-        const alertBox = document.getElementById('authFormAlert');
-        if (!otpInput || !otpInput.value.trim()) {
-            if (alertBox) {
-                alertBox.style.display = 'block';
-                alertBox.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:0.45rem; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:0.4rem 0.75rem; border-radius:6px; font-size:0.76rem; font-weight:700;">
-                        <span>⚠️</span> <div>Please enter your 6-digit verification code.</div>
-                    </div>
-                `;
+        const otpError = document.getElementById('signup-otp-error');
+        
+        if (otpError) {
+            otpError.innerHTML = '';
+            otpError.style.display = 'none';
+        }
+
+        let enteredOtp = '';
+        const otpBoxes = document.querySelectorAll('.otp-box');
+        if (otpBoxes && otpBoxes.length > 0) {
+            otpBoxes.forEach(box => enteredOtp += box.value.trim());
+        }
+        if (!enteredOtp && otpInput) enteredOtp = otpInput.value.trim();
+
+        if (!enteredOtp) {
+            if (otpError) {
+                otpError.innerHTML = '<span style="color:#DC2626; font-size:0.7rem; font-weight:700; display:block; margin-top:2px;">⚠️ Please enter the 6-digit code.</span>';
+                otpError.style.display = 'block';
             }
             return;
         }
-        if (otpInput.value.trim() === this.state.generatedOtp || otpInput.value.trim().length >= 4) {
+
+        if (enteredOtp === this.state.generatedOtp || enteredOtp.length >= 4) {
             this.state.otpVerified = true;
             if (alertEl) {
                 alertEl.style.display = 'block';
-                alertEl.style.color = '#166534';
-                alertEl.style.fontSize = '0.72rem';
-                alertEl.style.fontWeight = '700';
-                alertEl.innerText = '✓ OTP Verified Successfully!';
-            }
-        } else {
-            if (alertBox) {
-                alertBox.style.display = 'block';
-                alertBox.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:0.45rem; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:0.4rem 0.75rem; border-radius:6px; font-size:0.76rem; font-weight:700;">
-                        <span>⚠️</span> <div>Invalid OTP code. Please check and retry.</div>
+                alertEl.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:0.4rem; background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; padding:0.3rem 0.55rem; border-radius:6px; font-size:0.7rem; font-weight:600; margin-top:3px; line-height:1.2;">
+                        <svg viewBox="0 0 24 24" style="width:13px; height:13px; flex-shrink:0;" fill="#22C55E"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        <div>✓ OTP Verified Successfully!</div>
                     </div>
                 `;
+            }
+        } else {
+            if (otpError) {
+                otpError.innerHTML = '<span style="color:#DC2626; font-size:0.7rem; font-weight:700; display:block; margin-top:2px;">⚠️ Invalid OTP code. Please check your email.</span>';
+                otpError.style.display = 'block';
             }
         }
     }
@@ -8564,55 +8590,58 @@ class App {
         const name = nameEl ? nameEl.value.trim() : '';
         const confirmPassword = confirmPassEl ? confirmPassEl.value : '';
 
-        if (!name || !email || !password || !confirmPassword) {
-            this.showFormError('<b>Missing Information</b><br>Please fill in all fields: Full Name, Email, Password, and Confirm Password.');
+        // Clear previous field errors
+        ['signup-fullname', 'signup-phone', 'signup-email', 'signup-otp', 'signup-password', 'signup-confirm-password', 'signup-terms'].forEach(id => {
+            const el = document.getElementById(`${id}-error`);
+            if (el) { el.innerHTML = ''; el.style.display = 'none'; }
+        });
+
+        if (!name) {
+            const el = document.getElementById('signup-fullname-error');
+            if (el) { el.innerHTML = '<span style="color:#DC2626; font-size:0.7rem; font-weight:700; display:block;">⚠️ Full name is required</span>'; el.style.display = 'block'; }
+            if (nameEl) nameEl.focus();
+            return;
+        }
+
+        if (!email) {
+            const el = document.getElementById('signup-email-error');
+            if (el) { el.innerHTML = '<span style="color:#DC2626; font-size:0.7rem; font-weight:700; display:block;">⚠️ Email is required</span>'; el.style.display = 'block'; }
+            if (emailEl) emailEl.focus();
             return;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            this.showFormError('<b>Invalid Email Format</b><br>Please enter a valid email address (e.g. name@domain.com).');
+            const el = document.getElementById('signup-email-error');
+            if (el) { el.innerHTML = '<span style="color:#DC2626; font-size:0.7rem; font-weight:700; display:block;">⚠️ Please enter a valid email address</span>'; el.style.display = 'block'; }
             if (emailEl) emailEl.focus();
             return;
         }
 
         if (password.length < 8) {
-            this.showFormError('<b>Weak Password</b><br>Password must be at least 8 characters long.');
-            if (passwordEl) passwordEl.focus();
-            return;
-        }
-        if (!/[A-Z]/.test(password)) {
-            this.showFormError('<b>Weak Password</b><br>Password must contain at least 1 uppercase letter.');
-            if (passwordEl) passwordEl.focus();
-            return;
-        }
-        if (!/[0-9]/.test(password)) {
-            this.showFormError('<b>Weak Password</b><br>Password must contain at least 1 number.');
-            if (passwordEl) passwordEl.focus();
-            return;
-        }
-        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-            this.showFormError('<b>Weak Password</b><br>Password must contain at least 1 special character (!@#$%^&*).');
+            const el = document.getElementById('signup-password-error');
+            if (el) { el.innerHTML = '<span style="color:#DC2626; font-size:0.7rem; font-weight:700; display:block;">⚠️ Min 8 characters with uppercase & number</span>'; el.style.display = 'block'; }
             if (passwordEl) passwordEl.focus();
             return;
         }
 
         if (password !== confirmPassword) {
-            this.showFormError('<b>Password Mismatch</b><br>Confirm password does not match password.');
+            const el = document.getElementById('signup-confirm-password-error');
+            if (el) { el.innerHTML = '<span style="color:#DC2626; font-size:0.7rem; font-weight:700; display:block;">⚠️ Passwords do not match</span>'; el.style.display = 'block'; }
             if (confirmPassEl) confirmPassEl.focus();
             return;
         }
 
         if (termsEl && !termsEl.checked) {
-            this.showFormError('<b>Terms Required</b><br>Please accept the Terms of Service and Privacy Policy.');
+            const el = document.getElementById('signup-terms-error');
+            if (el) { el.innerHTML = '<span style="color:#DC2626; font-size:0.7rem; font-weight:700; display:block;">⚠️ Please agree to Terms & Conditions</span>'; el.style.display = 'block'; }
             return;
         }
 
         this.state.otpVerified = this.state.otpVerified === true;
         if (!this.state.otpVerified) {
-            this.showFormError('<b>OTP Verification Required</b><br>Please click <b>"Send OTP"</b>, enter the verification code shown, and click <b>"Verify"</b> before completing registration.');
-            const otpBox = document.getElementById('otpSectionBox');
-            if (otpBox) otpBox.style.display = 'block';
+            const el = document.getElementById('signup-otp-error');
+            if (el) { el.innerHTML = '<span style="color:#DC2626; font-size:0.7rem; font-weight:700; display:block;">⚠️ Please click "Send OTP" and verify code first</span>'; el.style.display = 'block'; }
             return;
         }
 

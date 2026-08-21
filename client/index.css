@@ -5903,63 +5903,65 @@ p, body {
 }
 
 .compact-card {
-  padding: 16px 28px !important;
+  padding: 12px 24px !important;
   border-radius: 16px !important;
 }
 
 .compact-card .card-header {
-  margin-bottom: 8px !important;
+  margin-bottom: 6px !important;
   gap: 10px !important;
 }
 
 .compact-card .header-badge {
-  width: 38px !important;
-  height: 38px !important;
+  width: 36px !important;
+  height: 36px !important;
 }
 
 .compact-card .header-badge-img {
-  max-width: 38px !important;
-  max-height: 38px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
 }
 
 .compact-card .header-welcome {
-  font-size: 20px !important;
-  line-height: 1.15 !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
   margin: 0 !important;
 }
 
 .compact-card .header-subtext {
-  font-size: 12px !important;
+  font-size: 11.5px !important;
   margin-top: 1px !important;
 }
 
 .compact-card .header-underline {
-  margin-top: 3px !important;
+  margin-top: 2px !important;
   height: 2.5px !important;
-  width: 28px !important;
+  width: 26px !important;
 }
 
 .compact-card .form-group {
-  gap: 3px !important;
+  gap: 2px !important;
 }
 
 .compact-card .form-label {
-  font-size: 11px !important;
-  letter-spacing: 0.4px !important;
+  font-size: 10.5px !important;
+  letter-spacing: 0.3px !important;
+  font-weight: 700 !important;
   text-transform: uppercase !important;
 }
 
 .compact-card .form-input {
-  height: 36px !important;
-  font-size: 13px !important;
+  height: 34px !important;
+  font-size: 12.5px !important;
   border-radius: 6px !important;
-  padding-left: 36px !important;
+  padding-left: 34px !important;
 }
 
 .compact-card .input-icon-left {
-  width: 16px !important;
-  height: 16px !important;
-  left: 12px !important;
+  width: 15px !important;
+  height: 15px !important;
+  left: 10px !important;
 }
 
 .compact-card .otp-container {
@@ -5968,31 +5970,32 @@ p, body {
 }
 
 .compact-card .otp-subtext {
-  font-size: 11.5px !important;
-  line-height: 1.25 !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
 }
 
 .compact-card .otp-inputs-grid {
-  gap: 6px !important;
+  gap: 5px !important;
   margin-top: 2px !important;
 }
 
 .compact-card .otp-box {
-  width: 32px !important;
-  height: 34px !important;
-  font-size: 15px !important;
-  border-radius: 6px !important;
+  width: 30px !important;
+  height: 32px !important;
+  font-size: 14px !important;
+  border-radius: 5px !important;
 }
 
 .compact-card .otp-resend-row {
-  font-size: 11px !important;
+  font-size: 10.5px !important;
   margin-top: 1px !important;
 }
 
 .compact-card .login-submit-btn {
-  height: 38px !important;
-  font-size: 14px !important;
-  margin-top: 5px !important;
+  height: 36px !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  margin-top: 4px !important;
   border-radius: 6px !important;
 }
 
