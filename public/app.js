@@ -8740,30 +8740,58 @@ class App {
 
     showSuccessModal(type = 'login', customTitle = null, customSubtitle = null) {
         this.hideLoading();
+        this.closeModal();
+
         const isRegister = type === 'register' || type === 'signup' || type === 'create' || (typeof type === 'string' && (type.toLowerCase().includes('register') || type.toLowerCase().includes('account') || type.toLowerCase().includes('signup')));
         const title = customTitle || 'Welcome to ZILHAJ!';
         const subtitle = customSubtitle || (isRegister ? 'Your account has been created successfully.' : 'You have logged in successfully.');
 
-        this.openModal(`
-            <div class="zilhaj-success-popup" style="
+        const existing = document.getElementById('zilhajSuccessOverlay');
+        if (existing) existing.remove();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'zilhajSuccessOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 9999999;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            animation: zilhajFadeIn 0.25s ease-out;
+        `;
+
+        overlay.innerHTML = `
+            <style>
+                @keyframes zilhajFadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes zilhajScaleUp { from { opacity: 0; transform: scale(0.82) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+                @keyframes zilhajStarPulse { 0%, 100% { opacity: 0.5; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.25); } }
+                @keyframes zilhajCheckPop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+            </style>
+            <div style="
                 text-align: center;
                 padding: 2.2rem 1.8rem 4.5rem 1.8rem;
                 background: #ffffff;
                 border-radius: 24px;
                 position: relative;
                 overflow: hidden;
+                width: 100%;
                 max-width: 360px;
-                margin: 0 auto;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+                box-shadow: 0 25px 70px rgba(0, 0, 0, 0.22);
+                animation: zilhajScaleUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             ">
                 <!-- Top Mint Circle with Checkmark & Golden Sparkle Stars -->
                 <div style="position: relative; width: 72px; height: 72px; margin: 0 auto 1.2rem;">
-                    <span style="position: absolute; top: -6px; left: -10px; color: #E5A93C; font-size: 16px;">✦</span>
-                    <span style="position: absolute; top: -4px; right: -12px; color: #E5A93C; font-size: 18px;">✦</span>
-                    <span style="position: absolute; bottom: 4px; left: -14px; color: #E5A93C; font-size: 14px;">✦</span>
-                    <span style="position: absolute; bottom: 6px; right: -10px; color: #E5A93C; font-size: 14px;">✦</span>
+                    <span style="position: absolute; top: -6px; left: -10px; color: #E5A93C; font-size: 16px; animation: zilhajStarPulse 1.5s ease-in-out infinite;">✦</span>
+                    <span style="position: absolute; top: -4px; right: -12px; color: #E5A93C; font-size: 18px; animation: zilhajStarPulse 1.8s ease-in-out infinite 0.3s;">✦</span>
+                    <span style="position: absolute; bottom: 4px; left: -14px; color: #E5A93C; font-size: 14px; animation: zilhajStarPulse 1.6s ease-in-out infinite 0.6s;">✦</span>
+                    <span style="position: absolute; bottom: 6px; right: -10px; color: #E5A93C; font-size: 14px; animation: zilhajStarPulse 1.7s ease-in-out infinite 0.2s;">✦</span>
                     
-                    <div style="width: 72px; height: 72px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(27, 94, 32, 0.12);">
+                    <div style="width: 72px; height: 72px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(27, 94, 32, 0.12); animation: zilhajCheckPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
                         <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1B5E20" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
@@ -8798,12 +8826,17 @@ class App {
                     background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" preserveAspectRatio="none"><path fill="%23C8E6C9" fill-opacity="0.6" d="M0,240 L0,180 Q60,170 120,180 L120,130 Q135,110 150,130 L150,180 Q250,165 350,180 L350,140 Q370,120 390,140 L390,180 Q450,170 510,180 L510,120 Q530,90 550,120 L550,180 Q650,165 750,180 L750,140 Q770,115 790,140 L790,180 Q900,165 1000,180 L1000,125 Q1020,100 1040,125 L1040,180 Q1120,170 1200,180 L1200,240 Z"></path></svg>') bottom center / 100% 100% no-repeat;
                 "></div>
             </div>
-        `, false);
+        `;
+
+        document.body.appendChild(overlay);
 
         if (this._successPopupTimer) clearTimeout(this._successPopupTimer);
         this._successPopupTimer = setTimeout(() => {
-            this.closeModal();
-            this.navigate('home');
+            overlay.style.animation = 'zilhajFadeIn 0.2s ease reverse';
+            setTimeout(() => {
+                if (overlay && overlay.parentNode) overlay.remove();
+                this.navigate('home');
+            }, 200);
         }, 2500);
     }
 
