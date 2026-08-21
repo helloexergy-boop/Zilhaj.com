@@ -95,28 +95,27 @@
     </aside>e>
 
     <!-- ==========================================
-         RIGHT PANEL (60% Width - Light Background)
+         RIGHT PANEL (60% Width - Clean Full Layout)
          ========================================== -->
-    <main class="right-panel" style="width: 62%; height: 100vh; background: #FAFAFA; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; position: relative; box-sizing: border-box;">
+    <main class="right-panel" style="width: 62%; height: 100vh; background: #FFFFFF; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 28px 40px; position: relative; box-sizing: border-box; overflow-y: auto;">
       
       <!-- TOP CLOSE BUTTON -->
-      <a href="../#home" title="Close" style="position: absolute; top: 24px; right: 28px; border-radius: 50%; width: 38px; height: 38px; border: 1px solid #E2E8F0; background: #FFFFFF; font-weight: 700; font-size: 1rem; color: #64748B; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-decoration: none; transition: all 0.2s;">
+      <a href="../#home" title="Close" style="position: absolute; top: 24px; right: 28px; border-radius: 50%; width: 38px; height: 38px; border: 1.5px solid #E2E8F0; background: #FFFFFF; font-weight: 700; font-size: 1rem; color: #64748B; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-decoration: none; transition: all 0.2s;">
         ✕
       </a>
 
-      <!-- 2. COMPACT SINGLE-PAGE SIGNUP CARD -->
+      <!-- 2. COMPACT SINGLE-PAGE SIGNUP CONTAINER -->
       <div class="login-card-container" style="width: 100%; max-width: 480px; margin: 0 auto;">
-        <div class="login-card compact-card" style="background: #FFFFFF; border-radius: 20px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.03); padding: 30px 36px; border: 1px solid #F1F5F9; box-sizing: border-box;">
-          
-          <!-- Card Header (Matching User's Reference Image) -->
-          <div class="card-header" style="margin-bottom: 16px; text-align: left; display: block;">
-            <h1 style="font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; font-size: 26px; font-weight: 800; color: #0F172A; margin: 0 0 4px 0; letter-spacing: -0.5px;">
-              Create Account
-            </h1>
-            <p style="font-size: 13.5px; color: #64748B; margin: 0; font-weight: 500;">
-              Already have an account? <a href="login.html" style="color: #0F5A47; font-weight: 700; text-decoration: underline;">Sign In</a>
-            </p>
-          </div>
+        
+        <!-- Card Header (Matching User's Reference Image) -->
+        <div class="card-header" style="margin-bottom: 16px; text-align: left; display: block;">
+          <h1 style="font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; font-size: 28px; font-weight: 800; color: #0F172A; margin: 0 0 4px 0; letter-spacing: -0.5px;">
+            Create Account
+          </h1>
+          <p style="font-size: 14px; color: #64748B; margin: 0; font-weight: 500;">
+            Already have an account? <a href="login.html" style="color: #0F5A47; font-weight: 700; text-decoration: underline;">Sign In</a>
+          </p>
+        </div>
 
           <!-- 2-Column Form Layout -->
           <form id="signupForm" class="login-form signup-form-grid" action="#" method="POST" novalidate>
