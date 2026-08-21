@@ -5336,7 +5336,207 @@ p, body {
     .no-print {
         display: none !important;
     }
+/* User Profile Avatar Image in Navbar */
+.nav-user-avatar-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #2e7d32;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
+.nav-user-avatar-img:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+}
+
+/* ============================================================================
+   HOW IT WORKS SECTION STYLES (MATCHING REFERENCE DESIGN)
+   ============================================================================ */
+.how-it-works-section {
+    background: #ffffff;
+    padding: 3.5rem 1.5rem 2.5rem;
+    width: 100%;
+    box-sizing: border-box;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.how-it-works-header {
+    text-align: center;
+    max-width: 650px;
+    margin: 0 auto 3rem;
+}
+
+.how-it-works-title {
+    font-size: 2.35rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    margin: 0 0 0.75rem;
+    line-height: 1.2;
+}
+
+.how-it-works-subtitle {
+    font-size: 0.98rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+    font-weight: 400;
+}
+
+.how-steps-row {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+    gap: 1rem;
+}
+
+.how-step-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    padding: 0 0.5rem;
+}
+
+.how-step-icon-wrap {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.4rem;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+
+.how-step-item:hover .how-step-icon-wrap {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.how-step-icon-gray {
+    background: #ede9fe;
+    color: #6366f1;
+}
+
+.how-step-icon-amber {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.how-step-icon-blue {
+    background: #e0f2fe;
+    color: #0284c7;
+}
+
+.how-step-connector {
+    flex: 0 0 80px;
+    height: 2px;
+    background: #e2e8f0;
+    margin-top: 29px; /* Aligns with middle of 58px icon */
+    position: relative;
+}
+
+.how-step-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.6rem 0;
+    line-height: 1.3;
+}
+
+.how-step-desc {
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+    font-weight: 400;
+    max-width: 320px;
+}
+
+@media (max-width: 768px) {
+    .how-it-works-section {
+        padding: 2.5rem 1rem 2rem;
+    }
+
+    .how-it-works-title {
+        font-size: 1.85rem;
+    }
+
+    .how-steps-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .how-step-connector {
+        display: none;
+    }
+
+    .how-step-desc {
+        max-width: 100%;
+    }
+}
+
+/* Premium Liquid Glass Badge for Main Hero Slideshow */
+.hero-liquid-glass-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.10) 100%) !important;
+    backdrop-filter: blur(28px) saturate(220%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(220%) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.65) !important;
+    border-radius: 999px !important;
+    padding: 0.65rem 1.8rem !important;
+    margin-bottom: 1.8rem !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), inset 0 1.5px 2px rgba(255, 255, 255, 0.85), 0 0 25px rgba(255, 255, 255, 0.3) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.hero-liquid-glass-badge::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -50% !important;
+    width: 200% !important;
+    height: 55% !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 100%) !important;
+    transform: rotate(-3deg) !important;
+    pointer-events: none !important;
+}
+
+.hero-liquid-glass-badge:hover {
+    transform: translateY(-3px) scale(1.03) !important;
+    border-color: rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.55), inset 0 1.5px 3px rgba(255, 255, 255, 0.95), 0 0 35px rgba(255, 255, 255, 0.45) !important;
+}
+
+.hero-badge-text {
+    font-size: 0.88rem !important;
+    font-weight: 800 !important;
+    color: #FFFFFF !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.14em !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 0 14px rgba(255, 255, 255, 0.6) !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+
 
 
 
