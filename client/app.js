@@ -664,12 +664,7 @@ class App {
 
             this.renderAuthNav();
             this.fetchUserData();
-            this.navigate('dashboard');
-
-            this.showSuccessModal(
-                `🌐 Google Sign-In Successful!`,
-                `Welcome, <b>${this.escapeHtml(this.state.currentUser.name)}</b>! Your account profile and picture are permanently synchronized.`
-            );
+            this.showSuccessModal('login');
         } catch (err) {
             console.error('Google auth error:', err);
             const googleUser = {
@@ -684,8 +679,7 @@ class App {
             this.state.currentUser = googleUser;
             localStorage.setItem('umrah_user', JSON.stringify(googleUser));
             this.renderAuthNav();
-            this.navigate('dashboard');
-            this.showSuccessModal('🌐 Google Sign-In Successful!', `Welcome, <b>${googleUser.name}</b>! Logged in via Google.`);
+            this.showSuccessModal('login');
         } finally {
             this.hideLoading();
         }
@@ -8709,30 +8703,72 @@ class App {
         }
     }
 
-    showSuccessModal(title = '✦ Logged In Successfully!', message = 'Welcome to Zilhaj.com. Your account is verified.') {
+    showSuccessModal(type = 'login', customTitle = null, customSubtitle = null) {
+        const isRegister = type === 'register' || type === 'signup' || type === 'create' || (typeof type === 'string' && (type.toLowerCase().includes('register') || type.toLowerCase().includes('account') || type.toLowerCase().includes('signup')));
+        const title = customTitle || 'Welcome to ZILHAJ!';
+        const subtitle = customSubtitle || (isRegister ? 'Your account has been created successfully.' : 'You have logged in successfully.');
+
         this.openModal(`
-            <div style="text-align: center; padding: 2.2rem 1.6rem; background: #ffffff; border-radius: 20px;">
-                <!-- Premium Golden Glowing Badge -->
-                <div style="width: 84px; height: 84px; margin: 0 auto 1.4rem; background: linear-gradient(135deg, #F9E07A 0%, #E8B84B 50%, #C9953A 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 28px rgba(232, 184, 75, 0.45); border: 4px solid #FFF8E7;">
-                    <span style="font-size: 2.8rem; color: #0A1A12; line-height: 1;">✦</span>
+            <div class="zilhaj-success-popup" style="
+                text-align: center;
+                padding: 2.2rem 1.8rem 4.5rem 1.8rem;
+                background: #ffffff;
+                border-radius: 24px;
+                position: relative;
+                overflow: hidden;
+                max-width: 360px;
+                margin: 0 auto;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            ">
+                <!-- Top Mint Circle with Checkmark & Golden Sparkle Stars -->
+                <div style="position: relative; width: 72px; height: 72px; margin: 0 auto 1.2rem;">
+                    <span style="position: absolute; top: -6px; left: -10px; color: #E5A93C; font-size: 16px;">✦</span>
+                    <span style="position: absolute; top: -4px; right: -12px; color: #E5A93C; font-size: 18px;">✦</span>
+                    <span style="position: absolute; bottom: 4px; left: -14px; color: #E5A93C; font-size: 14px;">✦</span>
+                    <span style="position: absolute; bottom: 6px; right: -10px; color: #E5A93C; font-size: 14px;">✦</span>
+                    
+                    <div style="width: 72px; height: 72px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(27, 94, 32, 0.12);">
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1B5E20" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
                 </div>
 
-                <!-- Golden Title -->
-                <h3 style="font-size: 1.6rem; font-weight: 900; background: linear-gradient(90deg, #D4AF37 0%, #AA771C 50%, #D4AF37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.6rem; letter-spacing: -0.02em;">
+                <!-- Title -->
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: #0F4C3A; margin: 0 0 0.8rem 0; letter-spacing: -0.01em;">
                     ${this.escapeHtml(title)}
-                </h3>
+                </h2>
 
-                <!-- Subtitle Text -->
-                <p style="font-size: 0.96rem; color: #475569; margin: 0 auto 1.8rem; line-height: 1.6; max-width: 380px;">
-                    ${this.escapeHtml(message)}
+                <!-- Golden Separator Bar -->
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 1.1rem;">
+                    <div style="width: 36px; height: 2px; background: #D4A657; border-radius: 2px;"></div>
+                    <span style="color: #D4A657; font-size: 12px;">◆</span>
+                    <div style="width: 36px; height: 2px; background: #D4A657; border-radius: 2px;"></div>
+                </div>
+
+                <!-- Subtitle -->
+                <p style="font-size: 1rem; color: #1E293B; font-weight: 600; line-height: 1.45; margin: 0 auto; max-width: 260px;">
+                    ${this.escapeHtml(subtitle)}
                 </p>
 
-                <!-- Premium Gold Action Button -->
-                <button onclick="app.closeModal()" style="width: 100%; max-width: 280px; height: 46px; background: linear-gradient(135deg, #E8B84B 0%, #C9953A 100%); color: #0A1A12; font-weight: 800; font-size: 0.95rem; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 22px rgba(232, 184, 75, 0.45); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-                    ✨ Continue to Platform
-                </button>
+                <!-- Bottom Mosque Silhouette Graphics -->
+                <div style="
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 55px;
+                    pointer-events: none;
+                    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" preserveAspectRatio="none"><path fill="%23C8E6C9" fill-opacity="0.6" d="M0,240 L0,180 Q60,170 120,180 L120,130 Q135,110 150,130 L150,180 Q250,165 350,180 L350,140 Q370,120 390,140 L390,180 Q450,170 510,180 L510,120 Q530,90 550,120 L550,180 Q650,165 750,180 L750,140 Q770,115 790,140 L790,180 Q900,165 1000,180 L1000,125 Q1020,100 1040,125 L1040,180 Q1120,170 1200,180 L1200,240 Z"></path></svg>') bottom center / 100% 100% no-repeat;
+                "></div>
             </div>
-        `);
+        `, false);
+
+        if (this._successPopupTimer) clearTimeout(this._successPopupTimer);
+        this._successPopupTimer = setTimeout(() => {
+            this.closeModal();
+            this.navigate('home');
+        }, 2500);
     }
 
     async sendSignupOtp() {
@@ -8939,20 +8975,16 @@ class App {
         }
         localStorage.setItem('umrah_registered_users', JSON.stringify(localUsers));
 
+        // Log the new user in immediately upon successful registration
+        this.state.currentUser = newUser;
+        localStorage.setItem('umrah_user', JSON.stringify(newUser));
+
         this.setAuthButtonLoading(false, 'register');
         this.hideLoading();
+        this.renderAuthNav();
 
-        // Switch to Login Modal & pre-fill email/password
-        this.openAuthModal('login');
-        setTimeout(() => {
-            const loginEmail = document.getElementById('authEmail');
-            const loginPass = document.getElementById('authPassword');
-            if (loginEmail) loginEmail.value = cleanEmail;
-            if (loginPass) loginPass.value = cleanPassword;
-        }, 50);
-
-        // Show success notification modal
-        this.showSuccessModal('✦ Account Registered in MongoDB!', `Welcome to Zilhaj.com, ${cleanName}! Your account has been created in MongoDB database. Please log in to continue.`);
+        // Show success popup ("Your account has been created successfully.") for 2.5s then redirect to home
+        this.showSuccessModal('register');
     }
 
     async login(email, password) {
@@ -9005,18 +9037,10 @@ class App {
 
                 this.setAuthButtonLoading(false, 'login');
                 this.hideLoading();
-                this.closeModal();
                 this.renderAuthNav();
 
-                if (userPayload.role === 'ROLE_ADMIN') {
-                    // Redirect admin -> /admin/dashboard
-                    this.navigate('admin');
-                    this.showSuccessModal('👑 Admin Control Panel Unlocked', `Welcome Admin, ${userPayload.name}! Admin control features are active.`);
-                } else {
-                    // Redirect user -> /dashboard
-                    this.navigate('dashboard');
-                    this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${userPayload.name}. You have logged in successfully.`);
-                }
+                // Show success popup ("You have logged in successfully.") for 2.5s then redirect to home
+                this.showSuccessModal('login');
                 return;
             } else {
                 backendErrorMsg = data.error || data.message || 'Invalid email or password.';
@@ -9053,18 +9077,10 @@ class App {
             localStorage.setItem('umrah_user', JSON.stringify(userPayload));
             this.setAuthButtonLoading(false, 'login');
             this.hideLoading();
-            this.closeModal();
             this.renderAuthNav();
 
-            if (userPayload.role === 'ROLE_ADMIN') {
-                // Redirect admin -> /admin/dashboard
-                this.navigate('admin');
-                this.showSuccessModal('👑 Admin Control Panel Unlocked', `Welcome Admin, ${userPayload.name}! Admin control features are active.`);
-            } else {
-                // Redirect user -> /dashboard
-                this.navigate('dashboard');
-                this.showSuccessModal('✦ Logged In Successfully!', `Welcome back, ${userPayload.name}. You have logged in successfully.`);
-            }
+            // Show success popup ("You have logged in successfully.") for 2.5s then redirect to home
+            this.showSuccessModal('login');
             return;
         }
 
