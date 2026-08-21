@@ -7909,7 +7909,8 @@ class App {
 
                     <!-- 2. TAGLINE & UNDERLINE -->
                     <div class="tagline-container">
-                      <h2 class="tagline-text">One Request. Multiple Verified Offers.</h2>
+                      <div class="tagline-text-white">One Request.</div>
+                      <div class="tagline-text-gold">Multiple Verified Offers.</div>
                       <div class="tagline-underline">
                         <div class="tagline-dot"></div>
                         <div class="tagline-line"></div>
@@ -7974,7 +7975,7 @@ class App {
 
                   <!-- BOTTOM SEAMLESS ARTWORK -->
                   <div class="illustration-container">
-                    <img src="seamless-bg.png" alt="ZILHAJ Seamless Background Artwork" class="seamless-artwork-img">
+                    <img src="kaaba-signup.png" alt="ZILHAJ Kaaba Artwork" class="seamless-artwork-img">
                   </div>
 
                 </aside>
