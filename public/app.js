@@ -7983,22 +7983,22 @@ class App {
                 <!-- ==========================================
                      RIGHT PANEL (60% Width - Clean Full Layout)
                      ========================================== -->
-                <main class="right-panel" style="width: 62%; height: 100vh; background: #FFFFFF; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 36px 48px; position: relative; box-sizing: border-box; overflow-y: auto;">
+                <main class="right-panel" style="width: 62%; height: 100vh; background: #FFFFFF; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 28px 40px; position: relative; box-sizing: border-box; overflow-y: auto;">
                   
                   <!-- TOP CLOSE BUTTON -->
-                  <button type="button" onclick="app.closeModal()" title="Close" style="position: absolute; top: 28px; right: 32px; border-radius: 50%; width: 40px; height: 40px; border: 1.5px solid #E2E8F0; background: #FFFFFF; font-weight: 700; font-size: 1.1rem; color: #64748B; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: all 0.2s;">
+                  <button type="button" onclick="app.closeModal()" title="Close" style="position: absolute; top: 28px; right: 36px; border-radius: 50%; width: 42px; height: 42px; border: 1.5px solid #CBD5E1; background: #FFFFFF; font-weight: 700; font-size: 1.15rem; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: all 0.2s;">
                     ✕
                   </button>
 
-                  <!-- FORM CONTAINER (Fits 100% on 1 Page) -->
-                  <div class="login-card-container" style="width: 100%; max-width: 440px; margin: 0 auto;">
+                  <!-- FORM CONTAINER (Expanded Max-Width 640px to Fill Right Panel Space) -->
+                  <div class="login-card-container" style="width: 100%; max-width: 640px; margin: 0 auto; box-sizing: border-box;">
                     
                     <!-- Card Header -->
                     <div class="card-header" style="margin-bottom: 24px; text-align: left;">
-                      <h2 style="font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; font-size: 30px; font-weight: 800; color: #0F172A; margin: 0 0 6px 0; letter-spacing: -0.5px;">
+                      <h2 style="font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; font-size: 32px; font-weight: 800; color: #0F172A; margin: 0 0 6px 0; letter-spacing: -0.5px;">
                         ${isRegister ? 'Sign Up' : (isForgot ? 'Reset Password' : 'Login')}
                       </h2>
-                      <p style="font-size: 14px; color: #64748B; margin: 0; font-weight: 500;">
+                      <p style="font-size: 15px; color: #64748B; margin: 0; font-weight: 500;">
                         ${isRegister ? 'Already have an account? <a href="#" onclick="event.preventDefault(); app.openAuthModal(\'login\')" style="color: #0F5A47; font-weight: 700; text-decoration: underline;">Sign In</a>' : (isForgot ? 'Remember your password? <a href="#" onclick="event.preventDefault(); app.openAuthModal(\'login\')" style="color: #0F5A47; font-weight: 700; text-decoration: underline;">Sign In</a>' : 'Doesn\'t have an account yet? <a href="#" onclick="event.preventDefault(); app.openAuthModal(\'register\')" style="color: #0F5A47; font-weight: 700; text-decoration: underline;">Sign Up</a>')}
                       </p>
                     </div>
@@ -8008,18 +8008,18 @@ class App {
                     <div id="authAlertBox" style="display:none; margin-bottom: 12px;"></div>
 
                     ${isLogin ? `
-                      <!-- LOGIN FORM -->
-                      <form id="loginForm" class="login-form" onsubmit="event.preventDefault(); app.handleAuthSubmit('login');" novalidate style="display: flex; flex-direction: column; gap: 18px;">
+                      <!-- LOGIN FORM (Full Width 640px) -->
+                      <form id="loginForm" class="login-form" onsubmit="event.preventDefault(); app.handleAuthSubmit('login');" novalidate style="display: flex; flex-direction: column; gap: 20px;">
                         
                         <!-- Email Field -->
                         <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                          <label for="authEmail" style="font-size: 12px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">EMAIL ADDRESS</label>
+                          <label for="authEmail" style="font-size: 12.5px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">EMAIL ADDRESS</label>
                           <div class="input-wrapper" style="position: relative;">
                             <input 
                               type="text" 
                               id="authEmail" 
                               name="email-or-phone" 
-                              style="width: 100%; height: 48px; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0 16px; font-size: 14.5px; color: #0F172A; background: #FFFFFF; box-sizing: border-box; outline: none; transition: border-color 0.2s;" 
+                              style="width: 100%; height: 52px; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0 18px; font-size: 15px; color: #0F172A; background: #FFFFFF; box-sizing: border-box; outline: none; transition: border-color 0.2s;" 
                               placeholder="you@example.com" 
                               autocomplete="username"
                               required
@@ -8031,15 +8031,15 @@ class App {
                         <!-- Password Field -->
                         <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
                           <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <label for="authPassword" style="font-size: 12px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">PASSWORD</label>
-                            <a href="#" onclick="event.preventDefault(); app.openAuthModal('forgot-password');" style="font-size: 13px; font-weight: 700; color: #0F5A47; text-decoration: underline;">Forgot Password?</a>
+                            <label for="authPassword" style="font-size: 12.5px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">PASSWORD</label>
+                            <a href="#" onclick="event.preventDefault(); app.openAuthModal('forgot-password');" style="font-size: 13.5px; font-weight: 700; color: #0F5A47; text-decoration: underline;">Forgot Password?</a>
                           </div>
                           <div class="input-wrapper" style="position: relative;">
                             <input 
                               type="password" 
                               id="authPassword" 
                               name="password" 
-                              style="width: 100%; height: 48px; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0 44px 0 16px; font-size: 14.5px; color: #0F172A; background: #FFFFFF; box-sizing: border-box; outline: none; transition: border-color 0.2s;" 
+                              style="width: 100%; height: 52px; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0 46px 0 18px; font-size: 15px; color: #0F172A; background: #FFFFFF; box-sizing: border-box; outline: none; transition: border-color 0.2s;" 
                               placeholder="Enter 6 character or more" 
                               autocomplete="current-password"
                               required
@@ -8057,25 +8057,25 @@ class App {
                         <!-- Remember Me Checkbox -->
                         <div style="display: flex; align-items: center; gap: 10px; margin-top: 2px;">
                           <input type="checkbox" id="remember-me" name="remember-me" checked style="width: 18px; height: 18px; accent-color: #0F5A47; cursor: pointer; border-radius: 4px;">
-                          <label for="remember-me" style="font-size: 14px; color: #475569; font-weight: 600; cursor: pointer;">Remember me</label>
+                          <label for="remember-me" style="font-size: 14.5px; color: #475569; font-weight: 600; cursor: pointer;">Remember me</label>
                         </div>
 
                         <!-- Primary Submit Button -->
-                        <button type="submit" style="width: 100%; height: 50px; background: #0F5A47; color: #FFFFFF; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; margin-top: 6px; box-shadow: 0 4px 14px rgba(15, 90, 71, 0.25); transition: background 0.2s;">
+                        <button type="submit" style="width: 100%; height: 52px; background: #0F5A47; color: #FFFFFF; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; margin-top: 6px; box-shadow: 0 4px 14px rgba(15, 90, 71, 0.25); transition: background 0.2s;">
                           LOGIN
                         </button>
                       </form>
 
                       <!-- Divider -->
-                      <div style="display: flex; align-items: center; margin: 22px 0 18px 0;">
+                      <div style="display: flex; align-items: center; margin: 24px 0 20px 0;">
                         <div style="flex: 1; height: 1px; background: #E2E8F0;"></div>
-                        <span style="padding: 0 14px; font-size: 12.5px; color: #94A3B8; font-weight: 500;">or login with</span>
+                        <span style="padding: 0 16px; font-size: 13px; color: #94A3B8; font-weight: 500;">or login with</span>
                         <div style="flex: 1; height: 1px; background: #E2E8F0;"></div>
                       </div>
 
                       <!-- Social Buttons (Single Row of Google & Facebook) -->
-                      <div style="display: flex; gap: 14px;">
-                        <button type="button" onclick="app.handleSocialLogin('Google')" style="flex: 1; height: 44px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; font-weight: 700; color: #EA4335; cursor: pointer; transition: background 0.2s;">
+                      <div style="display: flex; gap: 16px;">
+                        <button type="button" onclick="app.handleSocialLogin('Google')" style="flex: 1; height: 46px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14.5px; font-weight: 700; color: #EA4335; cursor: pointer; transition: background 0.2s;">
                           <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -8084,8 +8084,186 @@ class App {
                           </svg>
                           Google
                         </button>
-                        <button type="button" onclick="app.handleSocialLogin('Facebook')" style="flex: 1; height: 44px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; font-weight: 700; color: #1877F2; cursor: pointer; transition: background 0.2s;">
+                        <button type="button" onclick="app.handleSocialLogin('Facebook')" style="flex: 1; height: 46px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14.5px; font-weight: 700; color: #1877F2; cursor: pointer; transition: background 0.2s;">
                           <svg style="width: 20px; height: 20px;" fill="#1877F2" viewBox="0 0 24 24">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                          </svg>
+                          Facebook
+                        </button>
+                      </div>
+                    ` : ''}
+
+                    ${isRegister ? `
+                      <!-- SIGNUP FORM (Full Width 640px) -->
+                      <form id="signupForm" class="login-form signup-form-grid" onsubmit="event.preventDefault(); app.handleAuthSubmit('register');" novalidate style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px;">
+                        
+                        <!-- Col 1: Full Name -->
+                        <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                          <label for="authName" style="font-size: 11.5px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">FULL NAME</label>
+                          <div class="input-wrapper" style="position: relative;">
+                            <input 
+                              type="text" 
+                              id="authName" 
+                              name="signup-fullname" 
+                              style="width: 100%; height: 44px; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 0 14px; font-size: 14px; color: #0F172A; background: #FFFFFF; box-sizing: border-box; outline: none;" 
+                              placeholder="Enter your full name" 
+                              autocomplete="name"
+                              required
+                            >
+                          </div>
+                          <div class="error-msg-container" id="signup-fullname-error" style="font-size: 11.5px; color: #EF4444;"></div>
+                        </div>
+
+                        <!-- Col 2: Phone Number -->
+                        <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                          <label for="signup-phone" style="font-size: 11.5px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">PHONE NUMBER</label>
+                          <div class="input-wrapper" style="position: relative;">
+                            <input 
+                              type="tel" 
+                              id="signup-phone" 
+                              name="signup-phone" 
+                              style="width: 100%; height: 44px; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 0 14px; font-size: 14px; color: #0F172A; background: #FFFFFF; box-sizing: border-box; outline: none;" 
+                              placeholder="Enter your phone number" 
+                              autocomplete="tel"
+                              required
+                            >
+                          </div>
+                          <div class="error-msg-container" id="signup-phone-error" style="font-size: 11.5px; color: #EF4444;"></div>
+                        </div>
+
+                        <!-- Full Width: Email for Login -->
+                        <div class="form-group full-width-col" style="grid-column: span 2; display: flex; flex-direction: column; gap: 4px;">
+                          <label for="authEmail" style="font-size: 11.5px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">EMAIL FOR LOGIN</label>
+                          <div class="input-wrapper" style="position: relative;">
+                            <input 
+                              type="email" 
+                              id="authEmail" 
+                              name="signup-email" 
+                              style="width: 100%; height: 44px; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 0 100px 0 14px; font-size: 14px; color: #0F172A; background: #FFFFFF; box-sizing: border-box; outline: none;" 
+                              placeholder="Enter your email address" 
+                              autocomplete="email"
+                              required
+                            >
+                            <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); height: 32px; padding: 0 14px; background: #0F5A47; color: #FFFFFF; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                              Send OTP
+                            </button>
+                          </div>
+                          <div class="error-msg-container" id="signup-email-error" style="font-size: 11.5px; color: #EF4444;"></div>
+                        </div>
+
+                        <!-- Full Width: Verify Email OTP -->
+                        <div class="form-group full-width-col" style="grid-column: span 2; display: flex; flex-direction: column; gap: 4px;">
+                          <label style="font-size: 11.5px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">VERIFY EMAIL</label>
+                          <div class="otp-container" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px 14px;">
+                            <p class="otp-subtext" style="font-size: 12px; color: #64748B; margin: 0 0 6px 0;">Enter 6-digit code sent to <span id="display-otp-email" style="font-weight: 700; color: #0F5A47;">your email</span></p>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                              <div class="otp-inputs-grid" id="otp-inputs-group" style="display: flex; gap: 8px; flex: 1;">
+                                <input type="text" maxlength="1" class="otp-box" data-index="0" inputmode="numeric" pattern="[0-9]*" style="width: 38px; height: 38px; text-align: center; font-size: 16px; font-weight: 700; border: 1.5px solid #CBD5E1; border-radius: 6px;">
+                                <input type="text" maxlength="1" class="otp-box" data-index="1" inputmode="numeric" pattern="[0-9]*" style="width: 38px; height: 38px; text-align: center; font-size: 16px; font-weight: 700; border: 1.5px solid #CBD5E1; border-radius: 6px;">
+                                <input type="text" maxlength="1" class="otp-box" data-index="2" inputmode="numeric" pattern="[0-9]*" style="width: 38px; height: 38px; text-align: center; font-size: 16px; font-weight: 700; border: 1.5px solid #CBD5E1; border-radius: 6px;">
+                                <input type="text" maxlength="1" class="otp-box" data-index="3" inputmode="numeric" pattern="[0-9]*" style="width: 38px; height: 38px; text-align: center; font-size: 16px; font-weight: 700; border: 1.5px solid #CBD5E1; border-radius: 6px;">
+                                <input type="text" maxlength="1" class="otp-box" data-index="4" inputmode="numeric" pattern="[0-9]*" style="width: 38px; height: 38px; text-align: center; font-size: 16px; font-weight: 700; border: 1.5px solid #CBD5E1; border-radius: 6px;">
+                                <input type="text" maxlength="1" class="otp-box" data-index="5" inputmode="numeric" pattern="[0-9]*" style="width: 38px; height: 38px; text-align: center; font-size: 16px; font-weight: 700; border: 1.5px solid #CBD5E1; border-radius: 6px;">
+                              </div>
+                              <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="height: 36px; padding: 0 14px; background: #FFFFFF; color: #0F5A47; border: 1.5px solid #0F5A47; border-radius: 6px; font-size: 12px; font-weight: 800; cursor: pointer; flex-shrink: 0;">
+                                VERIFY OTP
+                              </button>
+                            </div>
+                            <input type="hidden" id="authOtpCode">
+                            <div class="otp-resend-row" style="margin-top: 4px; font-size: 11.5px; color: #64748B;">
+                              <span>Didn't receive code? </span>
+                              <button type="button" id="resendOtpBtn" onclick="app.sendSignupOtp()" style="background: none; border: none; color: #0F5A47; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 0;">Resend OTP</button>
+                              <span id="otpTimer" style="color: #94A3B8;">(00:45)</span>
+                            </div>
+                            <div id="otpSentAlert" style="display:none;"></div>
+                          </div>
+                          <div class="error-msg-container" id="signup-otp-error" style="font-size: 11.5px; color: #EF4444;"></div>
+                        </div>
+
+                        <!-- Col 1: Create Password -->
+                        <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                          <label for="authPassword" style="font-size: 11.5px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">CREATE PASSWORD</label>
+                          <div class="input-wrapper" style="position: relative;">
+                            <input 
+                              type="password" 
+                              id="authPassword" 
+                              name="signup-password" 
+                              style="width: 100%; height: 44px; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 0 40px 0 14px; font-size: 14px; color: #0F172A; background: #FFFFFF; box-sizing: border-box; outline: none;" 
+                              placeholder="Create a password" 
+                              autocomplete="new-password"
+                              required
+                            >
+                            <button type="button" id="toggleSignupPasswordBtn" class="toggle-password-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #94A3B8;">
+                              <svg id="signupEyeIcon" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                              </svg>
+                            </button>
+                          </div>
+                          <div class="error-msg-container" id="signup-password-error" style="font-size: 11.5px; color: #EF4444;"></div>
+                        </div>
+
+                        <!-- Col 2: Confirm Password -->
+                        <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                          <label for="authConfirmPassword" style="font-size: 11.5px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">CONFIRM PASSWORD</label>
+                          <div class="input-wrapper" style="position: relative;">
+                            <input 
+                              type="password" 
+                              id="authConfirmPassword" 
+                              name="signup-confirm-password" 
+                              style="width: 100%; height: 44px; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 0 40px 0 14px; font-size: 14px; color: #0F172A; background: #FFFFFF; box-sizing: border-box; outline: none;" 
+                              placeholder="Confirm your password" 
+                              autocomplete="new-password"
+                              required
+                            >
+                            <button type="button" id="toggleSignupConfirmPasswordBtn" class="toggle-password-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #94A3B8;">
+                              <svg id="signupConfirmEyeIcon" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                              </svg>
+                            </button>
+                          </div>
+                          <div class="error-msg-container" id="signup-confirm-password-error" style="font-size: 11.5px; color: #EF4444;"></div>
+                        </div>
+
+                        <!-- Full Width: Terms & Conditions -->
+                        <div class="form-group full-width-col" style="grid-column: span 2; margin-top: 2px;">
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="termsCheck" name="signup-terms" required style="width: 16px; height: 16px; accent-color: #0F5A47; cursor: pointer; border-radius: 4px;">
+                            <label for="termsCheck" style="font-size: 12.5px; color: #475569; font-weight: 500; cursor: pointer;">I agree to the Terms & Conditions and Privacy Policy</label>
+                          </div>
+                          <div class="error-msg-container" id="signup-terms-error" style="font-size: 11.5px; color: #EF4444;"></div>
+                        </div>
+
+                        <!-- Full Width: Submit Button -->
+                        <div class="form-group full-width-col" style="grid-column: span 2; margin-top: 4px;">
+                          <button type="submit" style="width: 100%; height: 48px; background: #0F5A47; color: #FFFFFF; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; box-shadow: 0 4px 14px rgba(15, 90, 71, 0.25); transition: background 0.2s;">
+                            Sign up with Email
+                          </button>
+                        </div>
+
+                      </form>
+
+                      <!-- Divider for Signup -->
+                      <div style="display: flex; align-items: center; margin: 16px 0 12px 0;">
+                        <div style="flex: 1; height: 1px; background: #E2E8F0;"></div>
+                        <span style="padding: 0 14px; font-size: 12px; color: #94A3B8; font-weight: 500;">or sign up with</span>
+                        <div style="flex: 1; height: 1px; background: #E2E8F0;"></div>
+                      </div>
+
+                      <!-- Social Buttons for Signup -->
+                      <div style="display: flex; gap: 14px;">
+                        <button type="button" onclick="app.handleSocialLogin('Google')" style="flex: 1; height: 42px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 13.5px; font-weight: 700; color: #EA4335; cursor: pointer;">
+                          <svg style="width: 18px; height: 18px;" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                          </svg>
+                          Google
+                        </button>
+                        <button type="button" onclick="app.handleSocialLogin('Facebook')" style="flex: 1; height: 42px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 13.5px; font-weight: 700; color: #1877F2; cursor: pointer;">
+                          <svg style="width: 18px; height: 18px;" fill="#1877F2" viewBox="0 0 24 24">
                             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                           </svg>
                           Facebook

@@ -187,22 +187,22 @@
     <!-- ==========================================
          RIGHT PANEL (60% Width - Clean Full Layout)
          ========================================== -->
-    <main class="right-panel" style="width: 62%; height: 100vh; background: #FFFFFF; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 36px 48px; position: relative; box-sizing: border-box; overflow-y: auto;">
+    <main class="right-panel" style="width: 62%; height: 100vh; background: #FFFFFF; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 28px 40px; position: relative; box-sizing: border-box; overflow-y: auto;">
       
       <!-- TOP CLOSE BUTTON -->
-      <a href="../#home" title="Close" style="position: absolute; top: 28px; right: 32px; border-radius: 50%; width: 40px; height: 40px; border: 1.5px solid #E2E8F0; background: #FFFFFF; font-weight: 700; font-size: 1.1rem; color: #64748B; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-decoration: none; transition: all 0.2s;">
+      <a href="../#home" title="Close" style="position: absolute; top: 28px; right: 36px; border-radius: 50%; width: 42px; height: 42px; border: 1.5px solid #CBD5E1; background: #FFFFFF; font-weight: 700; font-size: 1.15rem; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-decoration: none; transition: all 0.2s;">
         ✕
       </a>
 
-      <!-- FORM CONTAINER (Fits 100% on 1 Page) -->
-      <div class="login-card-container" style="width: 100%; max-width: 440px; margin: 0 auto;">
+      <!-- FORM CONTAINER (Expanded Max-Width 640px to Fill Right Panel Space) -->
+      <div class="login-card-container" style="width: 100%; max-width: 640px; margin: 0 auto; box-sizing: border-box;">
         
         <!-- Card Header -->
         <div class="card-header" style="margin-bottom: 24px; text-align: left;">
-          <h1 style="font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; font-size: 30px; font-weight: 800; color: #0F172A; margin: 0 0 6px 0; letter-spacing: -0.5px;">
+          <h1 style="font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; font-size: 32px; font-weight: 800; color: #0F172A; margin: 0 0 6px 0; letter-spacing: -0.5px;">
             Login
           </h1>
-          <p style="font-size: 14px; color: #64748B; margin: 0; font-weight: 500;">
+          <p style="font-size: 15px; color: #64748B; margin: 0; font-weight: 500;">
             Doesn't have an account yet? <a href="signup.html" style="color: #0F5A47; font-weight: 700; text-decoration: underline;">Sign Up</a>
           </p>
         </div>
@@ -211,18 +211,18 @@
         <div id="authFormAlert" style="display:none; margin-bottom: 12px;"></div>
         <div id="authAlertBox" style="display:none; margin-bottom: 12px;"></div>
 
-        <!-- LOGIN FORM -->
-        <form id="loginForm" class="login-form" action="#" method="POST" novalidate style="display: flex; flex-direction: column; gap: 18px;">
+        <!-- LOGIN FORM (Full Width 640px) -->
+        <form id="loginForm" class="login-form" action="#" method="POST" novalidate style="display: flex; flex-direction: column; gap: 20px;">
           
           <!-- Email Field -->
           <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label for="email-or-phone" style="font-size: 12px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">EMAIL ADDRESS</label>
+            <label for="email-or-phone" style="font-size: 12.5px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">EMAIL ADDRESS</label>
             <div class="input-wrapper" style="position: relative;">
               <input 
                 type="text" 
                 id="email-or-phone" 
                 name="email-or-phone" 
-                style="width: 100%; height: 48px; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0 16px; font-size: 14.5px; color: #0F172A; background: #FFFFFF; box-sizing: border-box; outline: none; transition: border-color 0.2s;" 
+                style="width: 100%; height: 52px; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0 18px; font-size: 15px; color: #0F172A; background: #FFFFFF; box-sizing: border-box; outline: none; transition: border-color 0.2s;" 
                 placeholder="you@example.com" 
                 autocomplete="username"
                 required
@@ -234,15 +234,15 @@
           <!-- Password Field -->
           <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <label for="password" style="font-size: 12px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">PASSWORD</label>
-              <a href="#" style="font-size: 13px; font-weight: 700; color: #0F5A47; text-decoration: underline;">Forgot Password?</a>
+              <label for="password" style="font-size: 12.5px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">PASSWORD</label>
+              <a href="#" style="font-size: 13.5px; font-weight: 700; color: #0F5A47; text-decoration: underline;">Forgot Password?</a>
             </div>
             <div class="input-wrapper" style="position: relative;">
               <input 
                 type="password" 
                 id="password" 
                 name="password" 
-                style="width: 100%; height: 48px; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0 44px 0 16px; font-size: 14.5px; color: #0F172A; background: #FFFFFF; box-sizing: border-box; outline: none; transition: border-color 0.2s;" 
+                style="width: 100%; height: 52px; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0 46px 0 18px; font-size: 15px; color: #0F172A; background: #FFFFFF; box-sizing: border-box; outline: none; transition: border-color 0.2s;" 
                 placeholder="Enter 6 character or more" 
                 autocomplete="current-password"
                 required
@@ -260,25 +260,25 @@
           <!-- Remember Me Checkbox -->
           <div style="display: flex; align-items: center; gap: 10px; margin-top: 2px;">
             <input type="checkbox" id="remember-me" name="remember-me" checked style="width: 18px; height: 18px; accent-color: #0F5A47; cursor: pointer; border-radius: 4px;">
-            <label for="remember-me" style="font-size: 14px; color: #475569; font-weight: 600; cursor: pointer;">Remember me</label>
+            <label for="remember-me" style="font-size: 14.5px; color: #475569; font-weight: 600; cursor: pointer;">Remember me</label>
           </div>
 
           <!-- Primary Submit Button -->
-          <button type="submit" style="width: 100%; height: 50px; background: #0F5A47; color: #FFFFFF; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; margin-top: 6px; box-shadow: 0 4px 14px rgba(15, 90, 71, 0.25); transition: background 0.2s;">
+          <button type="submit" style="width: 100%; height: 52px; background: #0F5A47; color: #FFFFFF; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; margin-top: 6px; box-shadow: 0 4px 14px rgba(15, 90, 71, 0.25); transition: background 0.2s;">
             LOGIN
           </button>
         </form>
 
         <!-- Divider -->
-        <div style="display: flex; align-items: center; margin: 22px 0 18px 0;">
+        <div style="display: flex; align-items: center; margin: 24px 0 20px 0;">
           <div style="flex: 1; height: 1px; background: #E2E8F0;"></div>
-          <span style="padding: 0 14px; font-size: 12.5px; color: #94A3B8; font-weight: 500;">or login with</span>
+          <span style="padding: 0 16px; font-size: 13px; color: #94A3B8; font-weight: 500;">or login with</span>
           <div style="flex: 1; height: 1px; background: #E2E8F0;"></div>
         </div>
 
         <!-- Social Buttons (Single Row of Google & Facebook) -->
-        <div style="display: flex; gap: 14px;">
-          <button type="button" style="flex: 1; height: 44px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; font-weight: 700; color: #EA4335; cursor: pointer; transition: background 0.2s;">
+        <div style="display: flex; gap: 16px;">
+          <button type="button" style="flex: 1; height: 46px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14.5px; font-weight: 700; color: #EA4335; cursor: pointer; transition: background 0.2s;">
             <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -287,7 +287,7 @@
             </svg>
             Google
           </button>
-          <button type="button" style="flex: 1; height: 44px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; font-weight: 700; color: #1877F2; cursor: pointer; transition: background 0.2s;">
+          <button type="button" style="flex: 1; height: 46px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14.5px; font-weight: 700; color: #1877F2; cursor: pointer; transition: background 0.2s;">
             <svg style="width: 20px; height: 20px;" fill="#1877F2" viewBox="0 0 24 24">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
             </svg>
