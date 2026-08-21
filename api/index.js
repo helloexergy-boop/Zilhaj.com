@@ -21,9 +21,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from /public and /client directories
+// Serve static files from /public, /client, and /login directories
 const publicDir = path.join(__dirname, '../public');
 const clientDir = path.join(__dirname, '../client');
+const loginDir = path.join(__dirname, '../login');
 const staticOptions = {
     setHeaders: (res, filePath) => {
         const ext = path.extname(filePath).toLowerCase();
@@ -39,8 +40,11 @@ const staticOptions = {
         }
     }
 };
+app.use('/login', express.static(loginDir, staticOptions));
+app.use(express.static(loginDir, staticOptions));
 app.use(express.static(publicDir, staticOptions));
 app.use(express.static(clientDir, staticOptions));
+
 
 const MONGODB_URI = process.env.MONGODB_URI || process.env.SPRING_DATA_MONGODB_URI || 'mongodb+srv://rajuranjanxbkj_db_user:mSORiUdT4m8ey11k@cluster0.bwdhkat.mongodb.net/umrah_db?retryWrites=true&w=majority';
 

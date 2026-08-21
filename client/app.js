@@ -1,4 +1,4 @@
-﻿/**
+/**
  * RAJU TRAVELS – Single Page Web Application Engine
  * Journey of Faith, Comfort & Blessings
  */
@@ -892,6 +892,18 @@ class App {
     getHashPage() {
         const h = window.location.hash || '';
         const page = h.replace(/^#\/?/, '').trim();
+        if (page === 'login' || page === 'signup' || page === 'register') return page;
+        
+        try {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('login') || params.get('mode') === 'login' || params.get('auth') === 'login') return 'login';
+            if (params.has('signup') || params.has('register') || params.get('mode') === 'register' || params.get('auth') === 'register') return 'register';
+            
+            const pathname = window.location.pathname.toLowerCase();
+            if (pathname.endsWith('/login') || pathname.endsWith('/login.html')) return 'login';
+            if (pathname.endsWith('/signup') || pathname.endsWith('/signup.html') || pathname.endsWith('/register')) return 'register';
+        } catch (e) {}
+
         return page === '' ? 'home' : page;
     }
 
@@ -5213,198 +5225,513 @@ class App {
         this.state.generatedOtp = null;
 
         this.openModal(`
-            <div style="display:flex; width:100vw; height:100vh; background:#ffffff; box-sizing:border-box; overflow:hidden; position:relative; font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;">
+            <div class="page-wrapper">
                 
-                <!-- TOP RIGHT CLOSE BUTTON -->
-                <button type="button" onclick="app.closeModal()" title="Close" style="position:absolute; top:24px; right:24px; z-index:9999; background:#ffffff; border:1px solid #cbd5e1; width:38px; height:38px; border-radius:50%; font-size:1.05rem; font-weight:800; color:#475569; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(0,0,0,0.18); transition:all 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform=''">
-                    ✕
-                </button>
-
-                <!-- LEFT COLUMN: AUTHENTICATION FORM PANEL (COMPACT FULL SCREEN PAGE) -->
-                <div style="flex:1; height:100vh; background:#ffffff; padding:1.2rem 2.8rem 1rem; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; overflow-y:auto;">
+                <!-- ==========================================
+                     LEFT PANEL (40% Width - Soft Emerald Green)
+                     ========================================== -->
+                <aside class="left-panel">
+                  
+                  <div class="left-panel-content">
                     
-                    <!-- TOP HEADER ROW -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-shrink:0;">
-                        <!-- Left Logo -->
-                        <div onclick="app.closeModal(); app.navigate('home');" style="cursor:pointer; display:flex; align-items:center; gap:0.5rem; text-decoration:none;">
-                            <span style="font-size:1.35rem;">🕋</span>
-                            <div style="display:flex; flex-direction:column; line-height:1.05;">
-                                <span style="font-weight:900; font-size:1.15rem; color:#0f172a; letter-spacing:0.3px;">Zilhaj</span>
-                                <span style="font-size:0.55rem; font-weight:800; color:#2b5e48; letter-spacing:0.8px; text-transform:uppercase;">UMRAH &amp; HAJJ</span>
-                            </div>
-                        </div>
-
-                        <!-- Right Switch Link / Outline Button -->
-                        <div style="margin-right:3.2rem;">
-                            ${isRegister ? `
-                                <span style="font-size:0.82rem; color:#64748b; font-weight:500;">Already have an account?</span>
-                                <button type="button" onclick="app.openAuthModal('login')" style="border:1px solid #cbd5e1; border-radius:8px; padding:0.4rem 1.1rem; font-weight:700; background:#ffffff; color:#0f172a; font-size:0.82rem; cursor:pointer; margin-left:0.4rem; transition:all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#ffffff'">Login</button>
-                            ` : ''}
-                            ${isLogin ? `
-                                <span style="font-size:0.82rem; color:#64748b; font-weight:500;">Don't have an account?</span>
-                                <button type="button" onclick="app.openAuthModal('register')" style="border:1px solid #cbd5e1; border-radius:8px; padding:0.4rem 1.1rem; font-weight:700; background:#ffffff; color:#0f172a; font-size:0.82rem; cursor:pointer; margin-left:0.4rem; transition:all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#ffffff'">Sign up</button>
-                            ` : ''}
-                        </div>
+                    <!-- 1. LOGO -->
+                    <div class="brand-logo" onclick="app.closeModal(); app.navigate('home');" style="cursor:pointer;">
+                      <img src="zilhaj-logo.jpg" alt="ZILHAJ Logo" class="brand-logo-img" style="width:48px; height:48px; max-width:48px; max-height:48px; object-fit:contain; border-radius:50%; flex-shrink:0;">
+                      <span class="brand-text">ZILHAJ</span>
                     </div>
 
-                    <!-- CENTERED FORM CONTAINER (SHIFTED UPWARDS TO REMOVE BLANK SPACE AT TOP) -->
-                    <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-start; max-width:400px; width:100%; margin:0 auto; box-sizing:border-box; padding-top:0.3rem; padding-bottom:0;">
-                        
-                        <!-- AVATAR BADGE TOP -->
-                        <div style="margin-bottom:0.3rem; text-align:center; flex-shrink:0;">
-                            <div style="width:32px; height:32px; border-radius:50%; background:#e0e7ff; display:flex; align-items:center; justify-content:center; font-size:0.95rem; color:#4338ca; margin:0 auto;">
-                                👤
-                            </div>
+                    <!-- 2. TAGLINE & UNDERLINE -->
+                    <div class="tagline-container">
+                      <h2 class="tagline-text">One Request. Multiple Verified Offers.</h2>
+                      <div class="tagline-underline">
+                        <div class="tagline-dot"></div>
+                        <div class="tagline-line"></div>
+                      </div>
+                    </div>
+
+                    <!-- 3. DESCRIPTION -->
+                    <p class="description-text">
+                      ZILHAJ is your trusted platform for Umrah packages, flights, trains and more. One request gets you multiple verified offers—so you can choose with confidence.
+                    </p>
+
+                    <!-- 4. FEATURE LIST -->
+                    <div class="feature-list">
+                      
+                      <!-- Row 1: Verified & Trusted -->
+                      <div class="feature-item">
+                        <div class="feature-badge">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            <path d="M9 12l2 2 4-4"/>
+                          </svg>
                         </div>
+                        <div class="feature-info">
+                          <span class="feature-title">Verified & Trusted</span>
+                          <span class="feature-subtext">All offers are verified for your peace of mind.</span>
+                        </div>
+                      </div>
 
-                        <!-- HEADING & SUBTITLE -->
-                        ${isRegister ? `
-                            <h1 style="font-size:1.15rem; font-weight:800; color:#0f172a; text-align:center; margin:0 0 0.1rem 0; letter-spacing:-0.01em; flex-shrink:0;">Create your account</h1>
-                            <p style="font-size:0.8rem; color:#64748b; text-align:center; margin:0 0 0.6rem 0; flex-shrink:0;">Get started with your spiritual journey in minutes.</p>
-                        ` : ''}
-                        ${isLogin ? `
-                            <h1 style="font-size:1.2rem; font-weight:800; color:#0f172a; text-align:center; margin:0 0 0.1rem 0; letter-spacing:-0.01em; flex-shrink:0;">Welcome back!</h1>
-                            <p style="font-size:0.8rem; color:#64748b; text-align:center; margin:0 0 0.6rem 0; flex-shrink:0;">Sign in to continue where your left off.</p>
-                        ` : ''}
+                      <!-- Row 2: Multiple Offers -->
+                      <div class="feature-item">
+                        <div class="feature-badge">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                          </svg>
+                        </div>
+                        <div class="feature-info">
+                          <span class="feature-title">Multiple Offers</span>
+                          <span class="feature-subtext">Compare multiple offers and choose what's best for you.</span>
+                        </div>
+                      </div>
 
-                        <!-- IN-FORM ALERT CONTAINERS -->
-                        <div id="authFormAlert" style="display:none; margin-bottom:0.5rem; font-size:0.8rem;"></div>
-                        <div id="authAlertBox" style="display:none; margin-bottom:0.5rem; font-size:0.8rem;"></div>
+                      <!-- Row 3: Secure & Private -->
+                      <div class="feature-item">
+                        <div class="feature-badge">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                          </svg>
+                        </div>
+                        <div class="feature-info">
+                          <span class="feature-title">Secure & Private</span>
+                          <span class="feature-subtext">Your data and identity are 100% safe and protected.</span>
+                        </div>
+                      </div>
 
-                        ${!isForgot ? `
-                            <!-- SOCIAL LOGIN BUTTONS -->
-                            <button type="button" onclick="app.loginWithGoogle()" style="width:100%; height:40px; border:1px solid #e2e8f0; border-radius:8px; background:#ffffff; display:flex; align-items:center; justify-content:center; gap:0.5rem; cursor:pointer; font-weight:700; font-size:0.85rem; color:#0f172a; margin-bottom:0.5rem; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
-                                <svg width="16" height="16" viewBox="0 0 24 24">
-                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                    <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z"/>
-                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </div>
+
+                  </div>
+
+                  <!-- BOTTOM SEAMLESS ARTWORK -->
+                  <div class="illustration-container">
+                    <img src="seamless-bg.png" alt="ZILHAJ Seamless Background Artwork" class="seamless-artwork-img">
+                  </div>
+
+                </aside>
+
+                <!-- ==========================================
+                     RIGHT PANEL (60% Width - Light Background)
+                     ========================================== -->
+                <main class="right-panel">
+                  
+                  <!-- 1. TOP BAR -->
+                  <header class="top-bar">
+                    <span class="top-bar-text">
+                      ${isRegister ? 'Already have an account? <a href="#" onclick="event.preventDefault(); app.openAuthModal(\'login\')" class="create-account-link">Login</a>' : ''}
+                      ${isLogin ? 'New here? <a href="#" onclick="event.preventDefault(); app.openAuthModal(\'register\')" class="create-account-link">Create Account</a>' : ''}
+                      ${isForgot ? 'Remember your password? <a href="#" onclick="event.preventDefault(); app.openAuthModal(\'login\')" class="create-account-link">Login</a>' : ''}
+                    </span>
+                    <button type="button" onclick="app.closeModal()" title="Close" class="user-add-btn" style="border-radius:50%; width:36px; height:36px; font-weight:800; font-size:1rem; cursor:pointer;">
+                      ✕
+                    </button>
+                  </header>
+
+                  <!-- 2. LOGIN / SIGNUP CARD -->
+                  <div class="login-card-container">
+                    <div class="login-card ${isRegister ? 'compact-card' : ''}">
+                      
+                      <!-- Card Header -->
+                      <div class="card-header">
+                        <div class="header-badge">
+                          <img src="zilhaj-logo.jpg" alt="ZILHAJ Emblem" class="header-badge-img" style="width:100%; height:100%; max-width:54px; max-height:54px; object-fit:cover; border-radius:50%; flex-shrink:0;">
+                        </div>
+                        <div class="header-titles">
+                          <h1 class="header-welcome">${isRegister ? 'Create Your Account' : (isForgot ? 'Reset Password' : 'Welcome Back')}</h1>
+                          <p class="header-subtext">${isRegister ? 'Join ZILHAJ and start your journey with confidence.' : (isForgot ? 'Enter your email to receive a password reset code.' : 'Login to your ZILHAJ account')}</p>
+                          <div class="header-underline"></div>
+                        </div>
+                      </div>
+
+                      <!-- In-Form Alert Containers -->
+                      <div id="authFormAlert" style="display:none; margin-bottom:0.8rem;"></div>
+                      <div id="authAlertBox" style="display:none; margin-bottom:0.8rem;"></div>
+
+                      ${isLogin ? `
+                        <!-- LOGIN FORM -->
+                        <form id="loginForm" class="login-form" onsubmit="event.preventDefault(); app.handleAuthSubmit('login');" novalidate>
+                          
+                          <!-- Email or Phone Field -->
+                          <div class="form-group">
+                            <label for="authEmail" class="form-label">Email or Phone Number</label>
+                            <div class="input-wrapper">
+                              <input 
+                                type="text" 
+                                id="authEmail" 
+                                name="email-or-phone" 
+                                class="form-input" 
+                                placeholder="Enter your email or phone number" 
+                                autocomplete="username"
+                                required
+                              >
+                              <svg class="input-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                              </svg>
+                            </div>
+                            <div class="error-msg-container" id="email-or-phone-error"></div>
+                          </div>
+
+                          <!-- Password Field -->
+                          <div class="form-group">
+                            <label for="authPassword" class="form-label">Password</label>
+                            <div class="input-wrapper">
+                              <input 
+                                type="password" 
+                                id="authPassword" 
+                                name="password" 
+                                class="form-input form-input-password" 
+                                placeholder="Enter your password" 
+                                autocomplete="current-password"
+                                required
+                              >
+                              <svg class="input-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                              </svg>
+                              <button type="button" id="togglePasswordBtn" class="toggle-password-btn" aria-label="Show password">
+                                <svg id="eyeIcon" viewBox="0 0 24 24">
+                                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                  <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                <span>${isRegister ? 'Sign up with Google' : 'Login with Google'}</span>
-                            </button>
-
-                            <button type="button" onclick="app.showToast('Apple Sign-In feature available soon', 'info')" style="width:100%; height:40px; border:1px solid #e2e8f0; border-radius:8px; background:#ffffff; display:flex; align-items:center; justify-content:center; gap:0.5rem; cursor:pointer; font-weight:700; font-size:0.85rem; color:#0f172a; margin-bottom:0.5rem; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
-                                <span style="font-size:0.95rem; line-height:1;"></span>
-                                <span>${isRegister ? 'Sign up with Apple' : 'Login with Apple'}</span>
-                            </button>
-
-                            <!-- DIVIDER -->
-                            <div style="display:flex; align-items:center; margin-bottom:0.5rem; gap:0.45rem; flex-shrink:0;">
-                                <div style="flex:1; height:1px; background:#e2e8f0;"></div>
-                                <span style="font-size:0.64rem; color:#94a3b8; font-weight:700; text-transform:uppercase;">OR</span>
-                                <div style="flex:1; height:1px; background:#e2e8f0;"></div>
+                              </button>
                             </div>
-                        ` : ''}
+                            <div class="error-msg-container" id="password-error"></div>
+                            <div class="forgot-password-wrapper">
+                              <a href="#" onclick="event.preventDefault(); app.openAuthModal('forgot-password');" class="forgot-password-link">Forgot Password?</a>
+                            </div>
+                          </div>
 
-                        <!-- FORM INPUTS -->
-                        <form onsubmit="event.preventDefault(); app.handleAuthSubmit('${mode}');" style="display:flex; flex-direction:column; flex-shrink:0;">
-                            ${isRegister ? `
-                                <!-- FULL NAME -->
-                                <input type="text" id="authName" required placeholder="Full name" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:8px; padding:0 0.9rem; font-size:0.9rem; box-sizing:border-box; margin-bottom:0.5rem; background:#ffffff; color:#0f172a; font-weight:500;">
+                          <!-- Remember Me Checkbox -->
+                          <label class="remember-me-container">
+                            <input type="checkbox" id="remember-me" name="remember-me" checked>
+                            <span class="custom-checkbox">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                            </span>
+                            <span class="remember-me-label">Remember me</span>
+                          </label>
 
-                                <!-- EMAIL ADDRESS WITH INLINE OTP BUTTON -->
-                                <div style="position:relative; margin-bottom:0.5rem;">
-                                    <input type="email" id="authEmail" required placeholder="Email address" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:8px; padding:0 5.4rem 0 0.9rem; font-size:0.9rem; box-sizing:border-box; background:#ffffff; color:#0f172a; font-weight:500;">
-                                    <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="position:absolute; right:3px; top:4px; height:34px; padding:0 0.7rem; background:#3d5245; color:#ffffff; border:none; border-radius:6px; font-size:0.76rem; font-weight:700; cursor:pointer;">
-                                        Send OTP
-                                    </button>
-                                </div>
+                          <!-- Login Submit Button -->
+                          <button type="submit" class="login-submit-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                              <polyline points="10 17 15 12 10 7"/>
+                              <line x1="15" y1="12" x2="3" y2="12"/>
+                            </svg>
+                            <span>Login</span>
+                          </button>
 
-                                <!-- VERIFICATION CODE BOX -->
-                                <div id="otpSectionBox" style="margin-bottom:0.5rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:0.4rem 0.7rem;">
-                                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                                        <div>
-                                            <label style="font-size:0.64rem; color:#166534; font-weight:700; display:block;">Verification Code</label>
-                                            <input type="text" id="authOtpCode" placeholder="0 0 0 0" maxlength="6" style="width:90px; border:none; outline:none; font-size:0.84rem; font-weight:800; letter-spacing:3px; color:#0f172a; background:transparent;">
-                                        </div>
-                                        <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="height:26px; padding:0 0.75rem; background:#3d5245; color:#ffffff; border:none; border-radius:6px; font-size:0.68rem; font-weight:800; cursor:pointer;">
-                                            VERIFY
-                                        </button>
-                                    </div>
-                                    <div id="otpSentAlert" style="display:none;"></div>
-                                </div>
-
-                                <!-- CREATE PASSWORD -->
-                                <div style="position:relative; margin-bottom:0.5rem;">
-                                    <input type="password" id="authPassword" required placeholder="Create password" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:8px; padding:0 2.2rem 0 0.9rem; font-size:0.9rem; box-sizing:border-box; background:#ffffff; color:#0f172a;" onkeyup="app.checkPasswordStrength(this.value)">
-                                    <button type="button" id="eyeRegPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeRegPass')" style="position:absolute; right:0.8rem; top:10px; background:none; border:none; cursor:pointer; font-size:0.95rem; color:#64748b;">👁️</button>
-                                </div>
-
-                                <!-- CONFIRM PASSWORD -->
-                                <div style="position:relative; margin-bottom:0.55rem;">
-                                    <input type="password" id="authConfirmPassword" required placeholder="Confirm password" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:8px; padding:0 2.2rem 0 0.9rem; font-size:0.9rem; box-sizing:border-box; background:#ffffff; color:#0f172a;">
-                                    <button type="button" id="eyeConfirmPass" onclick="app.togglePasswordVisibility('authConfirmPassword', 'eyeConfirmPass')" style="position:absolute; right:0.8rem; top:10px; background:none; border:none; cursor:pointer; font-size:0.95rem; color:#64748b;">👁️</button>
-                                </div>
-                            ` : `
-                                <!-- LOGIN EMAIL -->
-                                <input type="text" id="authEmail" required placeholder="Email address" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:8px; padding:0 0.9rem; font-size:0.9rem; box-sizing:border-box; margin-bottom:0.55rem; background:#ffffff; color:#0f172a; font-weight:500;">
-
-                                <!-- LOGIN PASSWORD -->
-                                <div style="position:relative; margin-bottom:0.55rem;">
-                                    <input type="password" id="authPassword" required placeholder="Password" style="width:100%; height:42px; border:1px solid #e2e8f0; border-radius:8px; padding:0 2.2rem 0 0.9rem; font-size:0.9rem; box-sizing:border-box; background:#ffffff; color:#0f172a;">
-                                    <button type="button" id="eyeLoginPass" onclick="app.togglePasswordVisibility('authPassword', 'eyeLoginPass')" style="position:absolute; right:0.8rem; top:10px; background:none; border:none; cursor:pointer; font-size:0.95rem; color:#64748b;">👁️</button>
-                                </div>
-                            `}
-
-                            <!-- SUBMIT BUTTON -->
-                            <button type="submit" class="auth-submit-btn" style="width:100%; height:44px; background:#3d5245; color:#ffffff; border:none; border-radius:8px; font-weight:800; font-size:0.92rem; cursor:pointer; transition:background 0.2s; margin-top:0.15rem;" onmouseover="this.style.background='#2b3c31'" onmouseout="this.style.background='#3d5245'">
-                                ${isRegister ? 'Sign up with Email' : 'Login with Email'}
-                            </button>
                         </form>
+                      ` : ''}
 
-                        ${isLogin ? `
-                            <div style="font-size:0.76rem; color:#64748b; text-align:center; margin-top:0.5rem; flex-shrink:0;">
-                                By continuing, you acknowledge Zilhaj <a href="#" onclick="event.preventDefault(); app.navigate('privacy');" style="color:#0f172a; text-decoration:underline;">Privacy Policy</a>.
+                      ${isRegister ? `
+                        <!-- SIGNUP FORM -->
+                        <form id="signupForm" class="login-form signup-form-grid" onsubmit="event.preventDefault(); app.handleAuthSubmit('register');" novalidate>
+                          
+                          <!-- Col 1: Full Name -->
+                          <div class="form-group">
+                            <label for="authName" class="form-label">Full Name</label>
+                            <div class="input-wrapper">
+                              <input 
+                                type="text" 
+                                id="authName" 
+                                name="signup-fullname" 
+                                class="form-input" 
+                                placeholder="Enter your full name" 
+                                autocomplete="name"
+                                required
+                              >
+                              <svg class="input-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                              </svg>
                             </div>
-                        ` : ''}
+                            <div class="error-msg-container" id="signup-fullname-error"></div>
+                          </div>
+
+                          <!-- Col 2: Phone Number -->
+                          <div class="form-group">
+                            <label for="signup-phone" class="form-label">Phone Number</label>
+                            <div class="input-wrapper">
+                              <input 
+                                type="tel" 
+                                id="signup-phone" 
+                                name="signup-phone" 
+                                class="form-input" 
+                                placeholder="Enter your phone number" 
+                                autocomplete="tel"
+                                required
+                              >
+                              <svg class="input-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                              </svg>
+                            </div>
+                            <div class="error-msg-container" id="signup-phone-error"></div>
+                          </div>
+
+                          <!-- Full Width: Email for Login with inline OTP Button -->
+                          <div class="form-group full-width-col">
+                            <label for="authEmail" class="form-label">Email for Login</label>
+                            <div class="input-wrapper">
+                              <input 
+                                type="email" 
+                                id="authEmail" 
+                                name="signup-email" 
+                                class="form-input" 
+                                placeholder="Enter your email address" 
+                                autocomplete="email"
+                                required
+                                style="padding-right: 105px;"
+                              >
+                              <svg class="input-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                              </svg>
+                              <button type="button" id="btnSendOtp" onclick="app.sendSignupOtp()" style="position:absolute; right:6px; top:4px; height:34px; padding:0 0.85rem; background:#1F604D; color:#ffffff; border:none; border-radius:6px; font-size:0.78rem; font-weight:700; cursor:pointer;">
+                                Send OTP
+                              </button>
+                            </div>
+                            <div class="error-msg-container" id="signup-email-error"></div>
+                          </div>
+
+                          <!-- Full Width: Verify Email OTP -->
+                          <div class="form-group full-width-col">
+                            <label class="form-label">Verify Email</label>
+                            <div class="otp-container">
+                              <p class="otp-subtext">Enter 6-digit code sent to <span id="display-otp-email" class="otp-email-highlight">your email</span></p>
+                              <div class="otp-inputs-grid" id="otp-inputs-group">
+                                <input type="text" maxlength="1" class="otp-box" data-index="0" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 1">
+                                <input type="text" maxlength="1" class="otp-box" data-index="1" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 2">
+                                <input type="text" maxlength="1" class="otp-box" data-index="2" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 3">
+                                <input type="text" maxlength="1" class="otp-box" data-index="3" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 4">
+                                <input type="text" maxlength="1" class="otp-box" data-index="4" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 5">
+                                <input type="text" maxlength="1" class="otp-box" data-index="5" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 6">
+                              </div>
+                              <input type="hidden" id="authOtpCode">
+                              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                                <div class="otp-resend-row">
+                                  <span>Didn't receive code? </span>
+                                  <button type="button" id="resendOtpBtn" onclick="app.sendSignupOtp()" class="resend-otp-btn">Resend OTP</button>
+                                  <span id="otpTimer" class="otp-timer">(00:45)</span>
+                                </div>
+                                <button type="button" id="btnVerifyOtp" onclick="app.verifySignupOtp()" style="height:30px; padding:0 0.85rem; background:#1F604D; color:#ffffff; border:none; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer;">
+                                  VERIFY OTP
+                                </button>
+                              </div>
+                              <div id="otpSentAlert" style="display:none;"></div>
+                            </div>
+                            <div class="error-msg-container" id="signup-otp-error"></div>
+                          </div>
+
+                          <!-- Col 1: Create Password -->
+                          <div class="form-group">
+                            <label for="authPassword" class="form-label">Create Password</label>
+                            <div class="input-wrapper">
+                              <input 
+                                type="password" 
+                                id="authPassword" 
+                                name="signup-password" 
+                                class="form-input form-input-password" 
+                                placeholder="Create a password" 
+                                autocomplete="new-password"
+                                required
+                              >
+                              <svg class="input-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                              </svg>
+                              <button type="button" id="toggleSignupPasswordBtn" class="toggle-password-btn" aria-label="Show password">
+                                <svg id="signupEyeIcon" viewBox="0 0 24 24">
+                                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                  <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                              </button>
+                            </div>
+                            <div class="error-msg-container" id="signup-password-error"></div>
+                          </div>
+
+                          <!-- Col 2: Confirm Password -->
+                          <div class="form-group">
+                            <label for="authConfirmPassword" class="form-label">Confirm Password</label>
+                            <div class="input-wrapper">
+                              <input 
+                                type="password" 
+                                id="authConfirmPassword" 
+                                name="signup-confirm-password" 
+                                class="form-input form-input-password" 
+                                placeholder="Confirm your password" 
+                                autocomplete="new-password"
+                                required
+                              >
+                              <svg class="input-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                              </svg>
+                              <button type="button" id="toggleSignupConfirmPasswordBtn" class="toggle-password-btn" aria-label="Show password">
+                                <svg id="signupConfirmEyeIcon" viewBox="0 0 24 24">
+                                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                  <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                              </button>
+                            </div>
+                            <div class="error-msg-container" id="signup-confirm-password-error"></div>
+                          </div>
+
+                          <!-- Full Width: Terms & Conditions -->
+                          <div class="form-group full-width-col">
+                            <label class="remember-me-container" id="terms-container">
+                              <input type="checkbox" id="termsCheck" name="signup-terms" required>
+                              <span class="custom-checkbox">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                  <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                              </span>
+                              <span class="remember-me-label">I agree to the Terms & Conditions and Privacy Policy</span>
+                            </label>
+                            <div class="error-msg-container" id="signup-terms-error"></div>
+                          </div>
+
+                          <!-- Full Width: Submit Button -->
+                          <div class="form-group full-width-col">
+                            <button type="submit" class="login-submit-btn">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="8.5" cy="7" r="4"/>
+                                <line x1="20" y1="8" x2="20" y2="14"/>
+                                <line x1="17" y1="11" x2="23" y2="11"/>
+                              </svg>
+                              <span>Create Account</span>
+                            </button>
+                          </div>
+
+                        </form>
+                      ` : ''}
+
+                      ${isForgot ? `
+                        <!-- FORGOT PASSWORD FORM -->
+                        <form class="login-form" onsubmit="event.preventDefault(); app.handleForgotPasswordSubmit();">
+                          <div class="form-group">
+                            <label for="forgotEmail" class="form-label">Email Address</label>
+                            <div class="input-wrapper">
+                              <input type="email" id="forgotEmail" class="form-input" placeholder="Enter your registered email" required style="padding-right:110px;">
+                              <svg class="input-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                              </svg>
+                              <button type="button" id="btnForgotSendOtp" onclick="app.sendForgotPasswordOtp()" style="position:absolute; right:6px; top:4px; height:34px; padding:0 0.85rem; background:#1F604D; color:#ffffff; border:none; border-radius:6px; font-size:0.78rem; font-weight:700; cursor:pointer;">
+                                Send Code
+                              </button>
+                            </div>
+                          </div>
+
+                          <div class="form-group">
+                            <label for="forgotOtpCode" class="form-label">Reset Verification Code</label>
+                            <div class="input-wrapper">
+                              <input type="text" id="forgotOtpCode" class="form-input" placeholder="Enter 4-digit code (e.g. 1234)" required>
+                              <svg class="input-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                              </svg>
+                            </div>
+                          </div>
+
+                          <div class="form-group">
+                            <label for="forgotNewPassword" class="form-label">New Password</label>
+                            <div class="input-wrapper">
+                              <input type="password" id="forgotNewPassword" class="form-input" placeholder="Enter new password" required>
+                              <svg class="input-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                              </svg>
+                            </div>
+                          </div>
+
+                          <button type="submit" class="login-submit-btn">
+                            <span>Reset Password</span>
+                          </button>
+                        </form>
+                      ` : ''}
+
+                      <!-- OR Divider -->
+                      <div class="divider-container">
+                        <div class="divider-line"></div>
+                        <span class="divider-text">OR</span>
+                        <div class="divider-line"></div>
+                      </div>
+
+                      <!-- Social Buttons Grid -->
+                      <div class="social-buttons-grid">
+                        
+                        <!-- Google Button -->
+                        <button type="button" class="social-btn" onclick="app.loginWithGoogle()">
+                          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+                          </svg>
+                          <span>${isRegister ? 'Sign up with Google' : 'Continue with Google'}</span>
+                        </button>
+
+                        <!-- Apple Button -->
+                        <button type="button" class="social-btn" onclick="app.showToast('Apple Sign-In feature available soon', 'info')">
+                          <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.33c.62-.76 1.04-1.81.93-2.87-.9.04-2 .6-2.64 1.36-.57.66-1.07 1.73-.93 2.76 1.01.08 2.02-.49 2.64-1.25z"/>
+                          </svg>
+                          <span>${isRegister ? 'Sign up with Apple' : 'Continue with Apple'}</span>
+                        </button>
+
+                      </div>
+
+                      <!-- Trust Strip at bottom of card -->
+                      <div class="trust-strip">
+                        
+                        <!-- Security priority -->
+                        <div class="trust-item">
+                          <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            <path d="M9 12l2 2 4-4"/>
+                          </svg>
+                          <div class="trust-text-block">
+                            <span class="trust-heading">Your security is our priority</span>
+                            <span class="trust-subtext">We use industry-standard encryption to keep your data safe.</span>
+                          </div>
+                        </div>
+
+                        <!-- 24/7 Support -->
+                        <div class="trust-item">
+                          <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+                            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+                          </svg>
+                          <div class="trust-text-block">
+                            <span class="trust-heading">24/7 Support</span>
+                            <span class="trust-subtext">We're here to help you anytime.</span>
+                          </div>
+                        </div>
+
+                        <!-- Email Support -->
+                        <div class="trust-item">
+                          <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                          </svg>
+                          <div class="trust-text-block">
+                            <span class="trust-heading">Email Support</span>
+                            <span class="trust-subtext">support@zilhaj.com</span>
+                          </div>
+                        </div>
+
+                      </div>
 
                     </div>
+                  </div>
 
-                    <!-- FIXED BOTTOM FOOTER METADATA -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; font-size:0.78rem; color:#64748b; padding-top:0.15rem; flex-shrink:0;">
-                        <div>© 2024 Zilhaj Umrah and Hajj Travel.</div>
-                        <div style="cursor:pointer; font-weight:600;">🌐 ENG ˅</div>
-                    </div>
-
-                </div>
-
-                <!-- RIGHT COLUMN: SACRED HERO PHOTO TAKING FULL SCREEN HEIGHT -->
-                <div style="flex:1; height:100vh; position:relative; overflow:hidden;">
-                    ${isRegister ? `
-                        <!-- SCENIC HARAM MOUNTAIN HERO (SIGNUP) -->
-                        <div style="position:absolute; inset:0; background: url('https://images.pexels.com/photos/18996760/pexels-photo-18996760.jpeg') center center / cover no-repeat; padding:3rem; display:flex; flex-direction:column; justify-content:flex-end; color:#ffffff; box-sizing:border-box;">
-                            <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.75) 100%);"></div>
-                            <div style="position:relative; z-index:2; max-width:460px;">
-                                <h2 style="font-size:clamp(1.9rem, 3vw, 2.4rem); font-weight:900; line-height:1.15; color:#ffffff; margin:0 0 0.8rem 0; letter-spacing:-0.02em;">
-                                    Begin your sacred journey with peace of mind.
-                                </h2>
-                                <p style="font-size:0.9rem; color:rgba(255,255,255,0.92); line-height:1.55; font-weight:400; margin:0;">
-                                    Join thousands of pilgrims who have trusted our premium services for a fulfilling and spiritually clear experience.
-                                </p>
-                            </div>
-                        </div>
-                    ` : `
-                        <!-- SACRED HOLY KAABA AT NIGHT HERO PHOTO (LOGIN) -->
-                        <div style="position:absolute; inset:0; background: url('https://images.pexels.com/photos/35315919/pexels-photo-35315919.jpeg') center center / cover no-repeat; padding:3rem; display:flex; flex-direction:column; justify-content:flex-end; color:#ffffff; box-sizing:border-box;">
-                            <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(11,31,23,0.3) 0%, rgba(11,31,23,0.85) 100%);"></div>
-                            
-                            <!-- FLOATING GLASS CARD OVER SACRED KAABA PHOTO -->
-                            <div style="position:relative; z-index:2; background:rgba(15, 23, 42, 0.72); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-radius:18px; padding:1.8rem; border:1px solid rgba(255, 255, 255, 0.2); max-width:420px; box-shadow:0 12px 35px rgba(0,0,0,0.35);">
-                                <h2 style="font-size:1.85rem; font-weight:900; color:#F9E07A; line-height:1.2; margin:0 0 0.5rem 0; letter-spacing:-0.02em;">
-                                    Begin Your<br>Spiritual Journey
-                                </h2>
-                                <p style="font-size:0.88rem; color:rgba(255,255,255,0.92); line-height:1.55; font-weight:400; margin:0;">
-                                    Experience peace of mind with our meticulously planned, premium pilgrimage services designed for your spiritual clarity and comfort.
-                                </p>
-                            </div>
-
-                            <!-- FLOATING AIRPLANE BADGE BOTTOM RIGHT -->
-                            <div style="position:absolute; bottom:2.5rem; right:2.5rem; z-index:2; width:48px; height:48px; background:#ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.25rem; color:#334155; box-shadow:0 10px 25px rgba(0,0,0,0.25);">
-                                ✈️
-                            </div>
-                        </div>
-                    `}
-                </div>
+                </main>
 
             </div>
         `, false, {
@@ -5423,7 +5750,99 @@ class App {
             modal.style.transition = 'none';
             modal.style.animation = 'none';
         }
+
+        this.initAuthModalEvents();
     }
+
+    initAuthModalEvents() {
+        const eyeOpenSvg = `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+        const eyeClosedSvg = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-10-7-10-7a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+        const setupToggle = (btnId, inputId, iconId) => {
+            const btn = document.getElementById(btnId);
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (btn && input && icon) {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    const isPass = input.type === 'password';
+                    input.type = isPass ? 'text' : 'password';
+                    icon.innerHTML = isPass ? eyeClosedSvg : eyeOpenSvg;
+                    btn.setAttribute('aria-label', isPass ? 'Hide password' : 'Show password');
+                };
+            }
+        };
+
+        setupToggle('togglePasswordBtn', 'authPassword', 'eyeIcon');
+        setupToggle('toggleSignupPasswordBtn', 'authPassword', 'signupEyeIcon');
+        setupToggle('toggleSignupConfirmPasswordBtn', 'authConfirmPassword', 'signupConfirmEyeIcon');
+
+        const emailEl = document.getElementById('authEmail');
+        const displayOtpEmail = document.getElementById('display-otp-email');
+        if (emailEl && displayOtpEmail) {
+            emailEl.oninput = () => {
+                const val = emailEl.value.trim();
+                displayOtpEmail.textContent = val || 'your email';
+            };
+        }
+
+        const otpBoxes = document.querySelectorAll('.otp-box');
+        const hiddenOtpInput = document.getElementById('authOtpCode');
+        if (otpBoxes.length > 0) {
+            const syncOtpValue = () => {
+                let val = '';
+                otpBoxes.forEach(box => { val += box.value; });
+                if (hiddenOtpInput) hiddenOtpInput.value = val;
+            };
+
+            otpBoxes.forEach((box, index) => {
+                box.oninput = () => {
+                    box.classList.remove('is-invalid');
+                    syncOtpValue();
+                    if (box.value.length === 1 && index < otpBoxes.length - 1) {
+                        otpBoxes[index + 1].focus();
+                    }
+                };
+                box.onkeydown = (e) => {
+                    if (e.key === 'Backspace' && !box.value && index > 0) {
+                        otpBoxes[index - 1].focus();
+                    }
+                };
+                box.onpaste = (e) => {
+                    e.preventDefault();
+                    const pasteData = (e.clipboardData || window.clipboardData).getData('text').trim();
+                    if (/^\d+$/.test(pasteData)) {
+                        const digits = pasteData.split('');
+                        otpBoxes.forEach((b, i) => {
+                            if (digits[i]) b.value = digits[i];
+                        });
+                        syncOtpValue();
+                        const focusIndex = Math.min(digits.length, otpBoxes.length - 1);
+                        otpBoxes[focusIndex].focus();
+                    }
+                };
+            });
+        }
+
+        const otpTimer = document.getElementById('otpTimer');
+        const resendBtn = document.getElementById('resendOtpBtn');
+        if (otpTimer) {
+            let timeLeft = 45;
+            if (this._otpTimerInterval) clearInterval(this._otpTimerInterval);
+            if (resendBtn) resendBtn.disabled = true;
+            this._otpTimerInterval = setInterval(() => {
+                timeLeft--;
+                const formatted = timeLeft < 10 ? `0${timeLeft}` : `${timeLeft}`;
+                otpTimer.textContent = `(00:${formatted})`;
+                if (timeLeft <= 0) {
+                    clearInterval(this._otpTimerInterval);
+                    otpTimer.textContent = '';
+                    if (resendBtn) resendBtn.disabled = false;
+                }
+            }, 1000);
+        }
+    }
+
 
     checkPasswordStrength(val) {
         const b1 = document.getElementById('strBar1');
