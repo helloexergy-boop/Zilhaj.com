@@ -192,6 +192,56 @@ document.addEventListener('DOMContentLoaded', function () {
   if (googleLoginBtn) googleLoginBtn.addEventListener('click', handleGoogleRedirect);
   if (googleSignupBtn) googleSignupBtn.addEventListener('click', handleGoogleRedirect);
 
+  // Forgot Password handler
+  const forgotLink = document.getElementById('forgotPasswordLink');
+  if (forgotLink) {
+    forgotLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      const email = prompt('Enter your registered email address:');
+      if (!email || !email.trim()) return;
+      const cleanEmail = email.trim();
+      if (!isValidEmail(cleanEmail)) { showToast('Please enter a valid email address'); return; }
+      const newPass = prompt('Enter your new password (min 6 characters):');
+      if (!newPass || newPass.length < 6) { showToast('Password must be at least 6 characters'); return; }
+      const confirmPass = prompt('Confirm your new password:');
+      if (newPass !== confirmPass) { showToast('Passwords do not match'); return; }
+      const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+      fetch(apiBase + '/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, newPassword: newPass })
+      }).then(r => r.json().then(d => ({ ok: r.ok, data: d }))).then(({ ok, data }) => {
+        if (ok) {
+          // Also update local fallback
+          try {
+            const users = JSON.parse(localStorage.getItem('zilhaj_users') || '[]');
+            const idx = users.findIndex(u => u.email && u.email.toLowerCase() === cleanEmail.toLowerCase());
+            if (idx !== -1) { users[idx].password = newPass; localStorage.setItem('zilhaj_users', JSON.stringify(users)); }
+            const cur = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+            if (cur && cur.email && cur.email.toLowerCase() === cleanEmail.toLowerCase()) { cur.password = newPass; localStorage.setItem('umrah_user', JSON.stringify(cur)); }
+          } catch (e) {}
+          showToast('Password updated successfully! Please login with your new password.');
+        } else {
+          const msg = (data && (data.error || data.message)) || 'Failed to reset password';
+          showToast(msg);
+          // Fallback local update even if API says user not found, for demo accounts
+          try {
+            const users = JSON.parse(localStorage.getItem('zilhaj_users') || '[]');
+            const idx = users.findIndex(u => u.email && u.email.toLowerCase() === cleanEmail.toLowerCase());
+            if (idx !== -1) { users[idx].password = newPass; localStorage.setItem('zilhaj_users', JSON.stringify(users)); showToast('Password updated locally. Please login.'); }
+          } catch (e) {}
+        }
+      }).catch(() => {
+        try {
+          const users = JSON.parse(localStorage.getItem('zilhaj_users') || '[]');
+          const idx = users.findIndex(u => u.email && u.email.toLowerCase() === cleanEmail.toLowerCase());
+          if (idx !== -1) { users[idx].password = newPass; localStorage.setItem('zilhaj_users', JSON.stringify(users)); showToast('Password updated locally. Please login.'); }
+          else showToast('Password reset failed. Please try again.');
+        } catch (e) { showToast('Password reset failed. Please try again.'); }
+      });
+    });
+  }
+
   // ==========================================
   // SIGNUP FORM & OTP HANDLING
   // ==========================================
