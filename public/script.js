@@ -138,11 +138,59 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       if (isValid) {
-        console.log('Login Success:', { emailOrPhone: emailOrPhoneVal });
-        showToast('Login Successful! Welcome back to ZILHAJ.');
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        const origText = submitBtn ? submitBtn.textContent : '';
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'LOGGING IN...'; }
+        const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+        fetch(apiBase + '/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailOrPhoneVal, password: passwordVal })
+        }).then(r => r.json().then(d => ({ ok: r.ok, data: d }))).then(({ ok, data }) => {
+          if (ok && data && data.user) {
+            const userToStore = { ...data.user, token: data.token || data.user.token };
+            localStorage.setItem('umrah_user', JSON.stringify(userToStore));
+            showToast('Login Successful! Welcome back to ZILHAJ.');
+            setTimeout(() => { window.location.href = '../#dashboard'; }, 900);
+          } else {
+            const msg = (data && (data.error || data.message)) || 'Invalid email or password';
+            showError(emailOrPhoneInput, 'email-or-phone-error', msg);
+            showToast(msg);
+          }
+        }).catch(() => {
+          // Fallback: store locally for demo if backend unreachable, still allow login with created account
+          try {
+            const stored = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+            const users = JSON.parse(localStorage.getItem('zilhaj_users') || '[]');
+            const found = users.find(u => (u.email && u.email.toLowerCase() === emailOrPhoneVal.toLowerCase()) || u.phone === emailOrPhoneVal);
+            if (found && found.password === passwordVal) {
+              localStorage.setItem('umrah_user', JSON.stringify(found));
+              showToast('Login Successful! Welcome back to ZILHAJ.');
+              setTimeout(() => { window.location.href = '../#dashboard'; }, 900);
+              return;
+            }
+          } catch (e) {}
+          showToast('Login failed. Please check your credentials.');
+        }).finally(() => {
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = origText; }
+        });
       }
     });
   }
+
+  // Google OAuth handlers for standalone login/signup pages
+  const googleLoginBtn = document.getElementById('googleLoginBtn');
+  const googleSignupBtn = document.getElementById('googleSignupBtn');
+  const handleGoogleRedirect = () => {
+    const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+    const origin = encodeURIComponent(window.location.origin);
+    fetch(apiBase + '/auth/google/url?origin=' + origin).then(r => r.json()).then(d => {
+      if (d && d.url) window.location.href = d.url;
+      else showToast('Unable to start Google Sign-In. Please try again.');
+    }).catch(() => showToast('Google Sign-In unavailable. Please try again.'));
+  };
+  if (googleLoginBtn) googleLoginBtn.addEventListener('click', handleGoogleRedirect);
+  if (googleSignupBtn) googleSignupBtn.addEventListener('click', handleGoogleRedirect);
 
   // ==========================================
   // SIGNUP FORM & OTP HANDLING
@@ -339,8 +387,50 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       if (isValid) {
-        console.log('Signup Success:', { fullname: fullnameVal, email: emailVal, phone: phoneVal, otpCode });
-        showToast('Account Created Successfully! Welcome to ZILHAJ.');
+        const submitBtn = signupForm.querySelector('button[type="submit"]');
+        const origText = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = 'CREATING...'; }
+        const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+        fetch(apiBase + '/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: fullnameVal, email: emailVal, phone: phoneVal, password: passwordVal, otp: otpCode })
+        }).then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d }))).then(({ ok, data }) => {
+          if (ok && (data.success || data.user)) {
+            const userToStore = data.user ? { ...data.user, token: data.token || data.user.token } : { id: 'usr-' + Date.now(), name: fullnameVal, email: emailVal, phone: phoneVal, role: 'ROLE_USER', token: 'local-' + Date.now() };
+            if (!data.user) {
+              userToStore.password = passwordVal;
+              const users = JSON.parse(localStorage.getItem('zilhaj_users') || '[]');
+              users.push(userToStore);
+              localStorage.setItem('zilhaj_users', JSON.stringify(users));
+            }
+            localStorage.setItem('umrah_user', JSON.stringify(userToStore));
+            showToast('Account Created Successfully! Welcome to ZILHAJ.');
+            setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+          } else {
+            const msg = (data && (data.error || data.message)) || 'Registration failed';
+            if (msg.toLowerCase().includes('already exists') || msg.toLowerCase().includes('already registered')) {
+              showError(emailInput, 'signup-email-error', msg);
+            }
+            showToast(msg);
+          }
+        }).catch(() => {
+          // Fallback local creation when backend unreachable
+          const users = JSON.parse(localStorage.getItem('zilhaj_users') || '[]');
+          if (users.some(u => u.email && u.email.toLowerCase() === emailVal.toLowerCase())) {
+            showError(emailInput, 'signup-email-error', 'An account with this email already exists. Please log in.');
+            showToast('Email already registered');
+          } else {
+            const localUser = { id: 'usr-' + Date.now(), name: fullnameVal, email: emailVal, phone: phoneVal, password: passwordVal, role: 'ROLE_USER', token: 'local-' + Date.now() };
+            users.push(localUser);
+            localStorage.setItem('zilhaj_users', JSON.stringify(users));
+            localStorage.setItem('umrah_user', JSON.stringify(localUser));
+            showToast('Account Created Successfully! Welcome to ZILHAJ.');
+            setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+          }
+        }).finally(() => {
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = origText; }
+        });
       }
     });
   }

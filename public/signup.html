@@ -13,120 +13,109 @@
     <!-- ==========================================
          LEFT PANEL (40% Width - Soft Emerald Green with Bottom Right Curve)
          ========================================== -->
-    <aside class="left-panel">
+    <aside class="left-panel" style="width: 38%; min-width: 420px; height: 100vh; position: relative; overflow: hidden; background: #061F17; border-bottom-right-radius: 80px; box-shadow: 12px 0 35px rgba(0, 0, 0, 0.25);">
       
-      <div class="left-panel-content">
+      <!-- 1. FULL-PANEL PEXELS BACKGROUND IMAGE (Signup Page - Photo 2) -->
+      <img src="kaaba-full-bg2.jpg" alt="Kaaba Mecca Background" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 1; filter: brightness(0.88) contrast(1.1);">
+
+      <!-- 2. CRYSTAL-CLEAR SHADOW OVERLAY -->
+      <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.35) 40%, rgba(0, 0, 0, 0.72) 100%); z-index: 2;"></div>
+
+      <!-- 3. CONTENT CONTAINER OVERLAY (Balanced Compact Layout) -->
+      <div class="left-panel-content" style="position: relative; z-index: 3; padding: 44px; display: flex; flex-direction: column; justify-content: center; gap: 22px; height: 100%; box-sizing: border-box;">
         
-        <!-- 1. LOGO -->
-        <div class="brand-logo">
-          <img src="zilhaj-logo.jpg" alt="ZILHAJ Logo" class="brand-logo-img" style="width:48px; height:48px; max-width:48px; max-height:48px; object-fit:contain; border-radius:50%; flex-shrink:0;">
-          <span class="brand-text">ZILHAJ</span>
+        <!-- 1. LOGO & BRAND (zilhaj.com) -->
+        <div class="brand-logo" style="display:flex; align-items:center; gap:12px; margin-bottom: 4px;">
+          <img src="zilhaj-logo.jpg" alt="zilhaj.com Logo" class="brand-logo-img" style="width:44px; height:44px; max-width:44px; max-height:44px; object-fit:contain; border-radius:50%; border: 2px solid #F59E0B; flex-shrink:0; box-shadow: 0 4px 14px rgba(0,0,0,0.5);">
+          <span class="brand-text" style="font-family:'Plus Jakarta Sans', 'Inter', sans-serif; font-size:26px; font-weight:800; letter-spacing:-0.5px; color:#FFFFFF; text-shadow:0 3px 12px rgba(0,0,0,0.85);">zilhaj.com</span>
         </div>
 
-        <!-- 2. TAGLINE & UNDERLINE -->
-        <div class="tagline-container">
-          <h2 class="tagline-text">One Request. Multiple Verified Offers.</h2>
-          <div class="tagline-underline">
-            <div class="tagline-dot"></div>
-            <div class="tagline-line"></div>
-          </div>
+        <!-- 2. HUGE BOLD TAGLINE (Matching Reference Image 2) -->
+        <div class="tagline-container" style="display:flex; flex-direction:column; gap:2px;">
+          <div class="tagline-text-white" style="font-family:'Plus Jakarta Sans', sans-serif; font-size:44px; font-weight:900; color:#FFFFFF; line-height:1.05; letter-spacing:-1px; text-shadow:0 4px 16px rgba(0,0,0,0.85);">One Request.</div>
+          <div class="tagline-text-gold" style="font-family:'Plus Jakarta Sans', sans-serif; font-size:44px; font-weight:900; color:#F59E0B; line-height:1.05; letter-spacing:-1px; text-shadow:0 4px 16px rgba(0,0,0,0.85);">Multiple Verified</div>
+          <div class="tagline-text-gold" style="font-family:'Plus Jakarta Sans', sans-serif; font-size:44px; font-weight:900; color:#F59E0B; line-height:1.05; letter-spacing:-1px; text-shadow:0 4px 16px rgba(0,0,0,0.85);">Offers.</div>
         </div>
 
-        <!-- 3. DESCRIPTION -->
-        <p class="description-text">
-          ZILHAJ is your trusted platform for Umrah packages, flights, trains and more. One request gets you multiple verified offers—so you can choose with confidence.
+        <!-- 3. DESCRIPTION (Matching Reference Image 2) -->
+        <p class="description-text" style="font-size:14.5px; line-height:1.55; color:rgba(255, 255, 255, 0.92); font-weight:400; margin:0; max-width:370px; text-shadow:0 2px 8px rgba(0,0,0,0.85);">
+          Post one request and receive transparent offers from verified Umrah travel providers. Compare, choose, and save—without sharing your personal details.
         </p>
 
-        <!-- 4. FEATURE LIST -->
-        <div class="feature-list">
+        <!-- 4. FEATURE LIST (Sleek Compact Rows) -->
+        <div class="feature-list" style="display:flex; flex-direction:column; gap:10px; margin-top:6px;">
           
           <!-- Row 1: Verified & Trusted -->
-          <div class="feature-item">
-            <div class="feature-badge">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="feature-item" style="display:flex; align-items:center; gap:12px; padding-top:10px; border-top:1px solid rgba(255, 255, 255, 0.18);">
+            <div class="feature-badge" style="width:38px; height:38px; border-radius:50%; background:rgba(0, 0, 0, 0.35); backdrop-filter:blur(10px); border:1.5px solid #F59E0B; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 3px 10px rgba(0,0,0,0.4);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 <path d="M9 12l2 2 4-4"/>
               </svg>
             </div>
-            <div class="feature-info">
-              <span class="feature-title">Verified & Trusted</span>
-              <span class="feature-subtext">All offers are verified for your peace of mind.</span>
+            <div class="feature-info" style="display:flex; flex-direction:column; gap:1px;">
+              <span class="feature-title" style="font-size:14.5px; font-weight:700; color:#FFFFFF; text-shadow:0 2px 6px rgba(0,0,0,0.8);">Verified & Trusted</span>
+              <span class="feature-subtext" style="font-size:12.5px; color:rgba(255, 255, 255, 0.85); line-height:1.3; text-shadow:0 1px 4px rgba(0,0,0,0.7);">All offers are verified for your peace of mind.</span>
             </div>
           </div>
 
           <!-- Row 2: Multiple Offers -->
-          <div class="feature-item">
-            <div class="feature-badge">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="feature-item" style="display:flex; align-items:center; gap:12px; padding-top:10px; border-top:1px solid rgba(255, 255, 255, 0.18);">
+            <div class="feature-badge" style="width:38px; height:38px; border-radius:50%; background:rgba(0, 0, 0, 0.35); backdrop-filter:blur(10px); border:1.5px solid #F59E0B; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 3px 10px rgba(0,0,0,0.4);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                 <circle cx="9" cy="7" r="4"/>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
             </div>
-            <div class="feature-info">
-              <span class="feature-title">Multiple Offers</span>
-              <span class="feature-subtext">Compare multiple offers and choose what's best for you.</span>
+            <div class="feature-info" style="display:flex; flex-direction:column; gap:1px;">
+              <span class="feature-title" style="font-size:14.5px; font-weight:700; color:#FFFFFF; text-shadow:0 2px 6px rgba(0,0,0,0.8);">Multiple Offers</span>
+              <span class="feature-subtext" style="font-size:12.5px; color:rgba(255, 255, 255, 0.85); line-height:1.3; text-shadow:0 1px 4px rgba(0,0,0,0.7);">Compare multiple offers and choose what's best for you.</span>
             </div>
           </div>
 
           <!-- Row 3: Secure & Private -->
-          <div class="feature-item">
-            <div class="feature-badge">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="feature-item" style="display:flex; align-items:center; gap:12px; padding-top:10px; border-top:1px solid rgba(255, 255, 255, 0.18);">
+            <div class="feature-badge" style="width:38px; height:38px; border-radius:50%; background:rgba(0, 0, 0, 0.35); backdrop-filter:blur(10px); border:1.5px solid #F59E0B; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 3px 10px rgba(0,0,0,0.4);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
             </div>
-            <div class="feature-info">
-              <span class="feature-title">Secure & Private</span>
-              <span class="feature-subtext">Your data and identity are 100% safe and protected.</span>
+            <div class="feature-info" style="display:flex; flex-direction:column; gap:1px;">
+              <span class="feature-title" style="font-size:14.5px; font-weight:700; color:#FFFFFF; text-shadow:0 2px 6px rgba(0,0,0,0.8);">Secure & Private</span>
+              <span class="feature-subtext" style="font-size:12.5px; color:rgba(255, 255, 255, 0.85); line-height:1.3; text-shadow:0 1px 4px rgba(0,0,0,0.7);">Your data and identity are 100% safe and protected.</span>
             </div>
           </div>
 
         </div>
 
       </div>
-
-      <!-- BOTTOM SEAMLESS ARTWORK -->
-      <div class="illustration-container">
-        <img src="seamless-bg.png" alt="ZILHAJ Seamless Background Artwork" class="seamless-artwork-img">
-      </div>
-
-    </aside>
+    </aside>e>
 
     <!-- ==========================================
-         RIGHT PANEL (60% Width - Light Background)
+         RIGHT PANEL (60% Width - Clean Full Layout)
          ========================================== -->
-    <main class="right-panel">
+    <main class="right-panel" style="width: 62%; height: 100vh; background: #FFFFFF; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 28px 40px; position: relative; box-sizing: border-box; overflow-y: auto;">
       
-      <!-- 1. TOP BAR -->
-      <header class="top-bar">
-        <span class="top-bar-text">Already have an account? <a href="login.html" class="create-account-link">Login</a></span>
-        <a href="login.html" class="user-add-btn" aria-label="Log in page">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-            <polyline points="10 17 15 12 10 7"/>
-            <line x1="15" y1="12" x2="3" y2="12"/>
-          </svg>
-        </a>
-      </header>
+      <!-- TOP CLOSE BUTTON -->
+      <a href="../#home" title="Close" style="position: absolute; top: 28px; right: 36px; border-radius: 50%; width: 42px; height: 42px; border: 1.5px solid #CBD5E1; background: #FFFFFF; font-weight: 700; font-size: 1.15rem; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-decoration: none; transition: all 0.2s;">
+        ✕
+      </a>
 
-      <!-- 2. COMPACT SINGLE-PAGE SIGNUP CARD -->
-      <div class="login-card-container">
-        <div class="login-card compact-card">
-          
-          <!-- Card Header -->
-          <div class="card-header" style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-            <div class="header-badge" style="width:38px; height:38px; border-radius:50%; background:#1F604D; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-              <img src="zilhaj-logo.jpg" alt="ZILHAJ Emblem" class="header-badge-img" style="width:38px; height:38px; max-width:38px; max-height:38px; object-fit:cover; border-radius:50%;">
-            </div>
-            <div class="header-titles" style="display:flex; flex-direction:column;">
-              <h1 class="header-welcome" style="font-size:1.25rem; font-weight:800; color:#1F604D; margin:0; line-height:1.1;">Create Your Account</h1>
-              <p class="header-subtext" style="font-size:0.75rem; color:#64748B; margin:2px 0 0 0;">Join ZILHAJ and start your journey with confidence.</p>
-              <div class="header-underline" style="width:28px; height:2.5px; background:#D4A657; margin-top:3px; border-radius:2px;"></div>
-            </div>
-          </div>
+      <!-- 2. COMPACT SINGLE-PAGE SIGNUP CONTAINER (Expanded Max-Width 640px) -->
+      <div class="login-card-container" style="width: 100%; max-width: 640px; margin: 0 auto; box-sizing: border-box;">
+        
+        <!-- Card Header (Matching User's Reference Image) -->
+        <div class="card-header" style="margin-bottom: 20px; text-align: left; display: block;">
+          <h1 style="font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; font-size: 30px; font-weight: 800; color: #0F172A; margin: 0 0 4px 0; letter-spacing: -0.5px;">
+            Create Account
+          </h1>
+          <p style="font-size: 14.5px; color: #64748B; margin: 0; font-weight: 500;">
+            Already have an account? <a href="login.html" style="color: #0F5A47; font-weight: 700; text-decoration: underline;">Sign In</a>
+          </p>
+        </div>
 
           <!-- 2-Column Form Layout -->
           <form id="signupForm" class="login-form signup-form-grid" action="#" method="POST" novalidate>
@@ -305,26 +294,26 @@
             <div class="divider-line" style="flex:1; height:1px; background-color:#E2E8F0;"></div>
           </div>
 
-          <!-- Social Buttons Grid -->
-          <div class="social-buttons-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:0;">
+          <!-- Social Buttons Grid (Single Row of Google & Apple) -->
+          <div class="social-buttons-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:0;">
             
             <!-- Google Button -->
-            <button type="button" class="social-btn" style="height:34px; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:6px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; font-weight:600; color:#1E293B; cursor:pointer;">
-              <svg viewBox="0 0 24 24" style="width:16px; height:16px;" xmlns="http://www.w3.org/2000/svg">
+            <button type="button" id="googleSignupBtn" class="social-btn" style="height:42px; background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:13.5px; font-weight:700; color:#EA4335; cursor:pointer;">
+              <svg viewBox="0 0 24 24" style="width:18px; height:18px;" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
               </svg>
-              <span>Continue with Google</span>
+              <span>Google</span>
             </button>
 
             <!-- Apple Button -->
-            <button type="button" class="social-btn" style="height:34px; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:6px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; font-weight:600; color:#1E293B; cursor:pointer;">
-              <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px; height:16px;" xmlns="http://www.w3.org/2000/svg">
+            <button type="button" class="social-btn" style="height:42px; background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:13.5px; font-weight:700; color:#0F172A; cursor:pointer;">
+              <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px; height:18px;" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.33c.62-.76 1.04-1.81.93-2.87-.9.04-2 .6-2.64 1.36-.57.66-1.07 1.73-.93 2.76 1.01.08 2.02-.49 2.64-1.25z"/>
               </svg>
-              <span>Continue with Apple</span>
+              <span>Apple</span>
             </button>
 
           </div>
