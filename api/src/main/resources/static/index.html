@@ -244,7 +244,8 @@
     <link rel="preload" as="image" href="https://images.pexels.com/photos/38498727/pexels-photo-38498727.jpeg">
     <link rel="preload" as="image" href="https://images.pexels.com/photos/28209449/pexels-photo-28209449.jpeg">
     <!-- Custom CSS Design System -->
-    <link rel="stylesheet" href="index.css?v=20260816_v35">
+    <link rel="stylesheet" href="styles.css?v=20260820_v99">
+    <link rel="stylesheet" href="index.css?v=20260820_v99">
     <!-- Razorpay Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
@@ -258,19 +259,26 @@
 </head>
 
 <body>
-    <!-- Branded Boot Splash to prevent flash of the static placeholder before the SPA renders -->
+    <!-- Minimal Green Circle Boot Splash Overlay -->
     <div id="bootSplash" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:2147483000;background:#ffffff;display:flex;align-items:center;justify-content:center;">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;">
-            <img src="logo.png" onerror="this.onerror=null;this.src='images/logo.png';" alt="Zilhaj.com" style="width:74px;height:74px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;box-shadow:0 6px 20px rgba(0,0,0,0.10);">
-            <div style="font-weight:800;color:#0f172a;font-size:1.05rem;letter-spacing:0.5px;">Zilhaj.com</div>
-            <div style="width:34px;height:34px;border:3px solid #cbd5e1;border-top-color:#047857;border-radius:50%;animation:splash-spin 0.8s linear infinite;"></div>
-        </div>
+        <svg width="72" height="72" viewBox="0 0 50 50" style="animation: brand-spinner-rotate 0.8s linear infinite;">
+            <circle cx="25" cy="25" r="19" fill="none" stroke="#a7f3d0" stroke-width="5.5" />
+            <circle cx="25" cy="25" r="19" fill="none" stroke="#059669" stroke-width="5.5" stroke-dasharray="32 88" stroke-linecap="round" />
+        </svg>
     </div>
     <style>
-        @keyframes splash-spin {
-            to { transform: rotate(360deg); }
+        @keyframes brand-spinner-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
+    <script>
+        // Fallback: remove boot splash after 2s even if app.js fails, so login/Google remain clickable
+        setTimeout(function() {
+            var s = document.getElementById('bootSplash');
+            if (s) { s.style.opacity = '0'; s.style.pointerEvents = 'none'; setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); }, 350); }
+        }, 2000);
+    </script>
     <div id="app"> <!-- Floating Pill Navbar -->
         <div class="navbar-wrapper" id="navbarWrapper">
             <header class="navbar" id="navbar">
@@ -439,12 +447,11 @@
         <div class="toast-container" id="toastContainer"></div>
 
         <!-- Global Loading Animation Spinner Overlay -->
-        <div id="loadingOverlay" class="loading-overlay" style="display:none;">
-            <div style="background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 2.5rem 3rem; border-radius: 24px; border: 1.5px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 420px; width: 90%;">
-                <div class="spinner-circle" style="width: 58px; height: 58px; border-width: 4px; margin-bottom: 1.4rem;"></div>
-                <h3 id="loadingTitle" style="color: #ffffff; font-size: 1.25rem; font-weight: 800; margin: 0 0 0.4rem 0; letter-spacing: -0.3px;">Authenticating...</h3>
-                <p id="loadingText" style="color: #94a3b8; font-size: 0.88rem; font-weight: 500; margin: 0; line-height: 1.45;">Connecting to server. Please hold on a moment.</p>
-            </div>
+        <div id="loadingOverlay" class="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2147483647; background:rgba(255, 255, 255, 0.45); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); align-items:center; justify-content:center;">
+            <svg width="72" height="72" viewBox="0 0 50 50" style="animation: brand-spinner-rotate 0.8s linear infinite;">
+                <circle cx="25" cy="25" r="19" fill="none" stroke="#a7f3d0" stroke-width="5.5" />
+                <circle cx="25" cy="25" r="19" fill="none" stroke="#059669" stroke-width="5.5" stroke-dasharray="32 88" stroke-linecap="round" />
+            </svg>
         </div>
 
         <!-- ZILHAJ Footer - Pixel-perfect match to reference image -->
@@ -594,7 +601,7 @@
     <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;" onchange="app.handleProfilePhotoUpload(event)">
 
     <!-- Application Script Logic -->
-    <script src="app.js?v=20260816_v35" defer></script>
+    <script src="app.js?v=20260820_v99" defer></script>
 </body>
 
 </html>

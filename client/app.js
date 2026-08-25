@@ -549,7 +549,7 @@ class App {
                 `;
             }
         } else {
-            const userPic = this.state.currentUser.profilePictureUrl || this.state.currentUser.picture || null;
+            const userPic = this.state.currentUser.profilePhoto || this.state.currentUser.profilePictureUrl || this.state.currentUser.picture || this.state.currentUser.avatar || null;
             if (authContainer) {
                 authContainer.innerHTML = `
                     <div style="display:flex; align-items:center; gap:1rem;">
@@ -3313,6 +3313,9 @@ class App {
             const base64Photo = e.target.result;
             if (this.state.currentUser) {
                 this.state.currentUser.profilePhoto = base64Photo;
+                this.state.currentUser.profilePictureUrl = base64Photo;
+                this.state.currentUser.picture = base64Photo;
+                this.state.currentUser.avatar = base64Photo;
                 localStorage.setItem('umrah_user', JSON.stringify(this.state.currentUser));
             } else {
                 localStorage.setItem('umrah_custom_photo', base64Photo);
@@ -3329,7 +3332,38 @@ class App {
         reader.readAsDataURL(file);
     }
 
-
+    editProfileField(field) {
+        const user = this.state.currentUser || {};
+        let currentVal = '';
+        let promptText = '';
+        if (field === 'name') { currentVal = user.name || ''; promptText = 'Enter your full name:'; }
+        else if (field === 'email') { currentVal = user.email || ''; promptText = 'Enter your email address:'; }
+        else if (field === 'phone') { currentVal = user.phone || ''; promptText = 'Enter your phone number:'; }
+        else return;
+        const newVal = prompt(promptText, currentVal);
+        if (newVal === null) return;
+        const trimmed = newVal.trim();
+        if (!trimmed) { this.showToast('Value cannot be empty', 'error'); return; }
+        if (field === 'email' && !trimmed.includes('@')) { this.showToast('Please enter a valid email', 'error'); return; }
+        if (field === 'name') user.name = trimmed;
+        if (field === 'email') user.email = trimmed;
+        if (field === 'phone') user.phone = trimmed;
+        this.state.currentUser = user;
+        localStorage.setItem('umrah_user', JSON.stringify(user));
+        try {
+            const reqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
+            reqs.forEach(r => {
+                if (field === 'name') r.userName = trimmed;
+                if (field === 'email') r.userEmail = trimmed;
+                if (field === 'phone') r.userPhone = trimmed;
+            });
+            localStorage.setItem('umrah_requirements', JSON.stringify(reqs));
+        } catch (e) {}
+        this.showToast('Profile updated successfully!', 'success');
+        this.renderAuthNav();
+        const main = document.getElementById('mainContainer');
+        if (main) main.innerHTML = this.renderDashboardPage();
+    }
 
     setDashboardTab(tabName) {
         this.state.activeDashboardTab = tabName || 'dashboard';
@@ -3960,7 +3994,13 @@ class App {
                                 <span style="background:#d1fae5;color:#065f46;font-size:.65rem;font-weight:700;padding:.08rem .45rem;border-radius:99px;">Verified Account</span>
                             </div>
                         </div>
-                        ${[['Full Name',user.name],['Email Address',user.email],['Phone Number',user.phone||'—'],['Account Status','Active &amp; Verified'],['Member Since','2025']].map(([k,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px dashed #f3f4f6;"><span style="font-size:.8rem;color:#6b7280;">${k}</span><strong style="font-size:.8rem;color:#0f172a;">${this.escapeHtml(String(v))}</strong></div>`).join('')}
+                        ${[
+                            ['Full Name', user.name, 'name'],
+                            ['Email Address', user.email, 'email'],
+                            ['Phone Number', user.phone||'—', 'phone'],
+                            ['Account Status','Active &amp; Verified', null],
+                            ['Member Since','2025', null]
+                        ].map(([k,v,field])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px dashed #f3f4f6;"><span style="font-size:.8rem;color:#6b7280;">${k}</span><div style="display:flex;align-items:center;gap:.5rem;"><strong style="font-size:.8rem;color:#0f172a;">${this.escapeHtml(String(v))}</strong>${field?`<button onclick="app.editProfileField('${field}')" style="background:#fff;color:#1a6b3c;border:1px solid #d1fae5;border-radius:6px;padding:.2rem .5rem;font-size:.7rem;font-weight:700;cursor:pointer;">Edit</button>`:''}</div></div>`).join('')}
                         <div style="display:flex;gap:.6rem;margin-top:1rem;">
                             <button onclick="app.logout()" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:.48rem 1rem;border-radius:7px;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='#fee2e2';" onmouseout="this.style.background='#fef2f2';">🚪 Log Out</button>
                             <button onclick="app.triggerPhotoUpload()" style="background:#f0faf5;color:#1a6b3c;border:1px solid #d1fae5;padding:.48rem 1rem;border-radius:7px;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='#d1fae5';" onmouseout="this.style.background='#f0faf5';">📷 Change Photo</button>

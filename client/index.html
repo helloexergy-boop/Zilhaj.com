@@ -272,6 +272,13 @@
             100% { transform: rotate(360deg); }
         }
     </style>
+    <script>
+        // Fallback: remove boot splash after 2s even if app.js fails, so login/Google remain clickable
+        setTimeout(function() {
+            var s = document.getElementById('bootSplash');
+            if (s) { s.style.opacity = '0'; s.style.pointerEvents = 'none'; setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); }, 350); }
+        }, 2000);
+    </script>
     <div id="app"> <!-- Floating Pill Navbar -->
         <div class="navbar-wrapper" id="navbarWrapper">
             <header class="navbar" id="navbar">
