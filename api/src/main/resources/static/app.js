@@ -1013,7 +1013,8 @@ class App {
         } else if (page === 'offers') {
             main.innerHTML = this.renderOffersPage();
         } else if (page === 'dashboard' || page === '/dashboard') {
-            main.innerHTML = this.renderDashboardPage();
+            window.location.href = '/dashboard/index.html';
+            return;
         } else if (page === 'package-details' || page === 'packageDetails' || page === 'review-package') {
             main.innerHTML = this.renderPackageDetailsFullPage(this.state.activeOfferId);
         } else if (page === 'payment' || page === 'paymentScreen' || page === 'secure-payment') {
