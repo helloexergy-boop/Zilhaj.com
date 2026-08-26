@@ -488,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="horizontal-timeline-steps">
             <div class="h-timeline-step step-completed">
-              <div class="step-icon-circle">Γ£ô</div>
+              <div class="step-icon-circle">✓</div>
               <div class="step-label-group">
                 <span class="step-name-text">Request Received</span>
                 <span class="step-sub-status">Completed</span>
@@ -593,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </svg>
             </div>
 
-            <h3 class="empty-state-title">No Offers Yet ΓÇö We're Working on the Best Ones for You! Γ£¿</h3>
+            <h3 class="empty-state-title">No Offers Yet Çö We're Working on the Best Ones for You! £</h3>
             <p class="empty-state-subtext">Our verified partners are reviewing your request and collecting the most suitable options. You'll be notified as soon as offers are ready.</p>
 
             <div class="empty-state-info-bar">
@@ -953,14 +953,14 @@ window.currentShareData = null;
 
 // Helper: Build shareable summary text
 function buildShareText(reqCode, offersList) {
-  let shareText = `≡ƒòï ZILHAJ Travel Offers Summary (${reqCode || ''})\n\n` +
+  let shareText = `òï ZILHAJ Travel Offers Summary (${reqCode || ''})\n\n` +
                   `Here are the verified agency offers received for this request:\n\n`;
 
   if (Array.isArray(offersList) && offersList.length > 0) {
     offersList.forEach((offer, idx) => {
       shareText += `${idx + 1}. ${offer.agency}\n` +
-                   `   ≡ƒÆ░ Price: ${offer.price}\n` +
-                   `   Γ¡É Rating: ${offer.rating}\n\n`;
+                   `   Æ░ Price: ${offer.price}\n` +
+                   `   ¡ Rating: ${offer.rating}\n\n`;
     });
   }
 
@@ -1263,7 +1263,7 @@ window.confirmTermsAndProceedPayment = function() {
     if (checkoutTitle) checkoutTitle.textContent = `${window.pendingBooking.packageName || 'Umrah Package'} - ${window.pendingBooking.agencyName}`;
     if (checkoutAgent) checkoutAgent.textContent = `Agent Code: ${window.pendingBooking.agentCode} | Verified Partner`;
     if (checkoutPricePerson) checkoutPricePerson.textContent = window.pendingBooking.price;
-    if (checkoutTotalPrice) checkoutTotalPrice.textContent = 'Γé╣1,000';
+    if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹╣1,000';
   }
 
   if (checkoutView) checkoutView.style.display = 'block';
@@ -1307,9 +1307,9 @@ window.closePaymentSuccessModal = function() {
   if (checkoutView) checkoutView.style.display = 'none';
   if (emptyPaymentsView) {
     emptyPaymentsView.innerHTML = `
-      <div class="payments-icon">Γ£ô</div>
-      <h3 style="color:#127A4D;">Booking Fee Confirmed (Γé╣1,000)!</h3>
-      <p>Your Γé╣1,000 confirmation fee has been received and your package offer is locked. Invoice #INV-2026-089 has been generated. The partner agency will contact you shortly regarding the remaining balance.</p>
+      <div class="payments-icon">✓</div>
+      <h3 style="color:#127A4D;">Booking Fee Confirmed (₹╣1,000)!</h3>
+      <p>Your ₹╣1,000 confirmation fee has been received and your package offer is locked. Invoice #INV-2026-089 has been generated. The partner agency will contact you shortly regarding the remaining balance.</p>
       
       <div class="confirmed-booking-details" style="display:flex; flex-direction:column; gap:8px; background:#F8FCF9; border:1px solid #D2EBE0; border-radius:var(--radius-md); padding:14px 20px; margin:16px 0; width:100%; max-width:420px; text-align:left;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
