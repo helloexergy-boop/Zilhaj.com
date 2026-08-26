@@ -590,6 +590,15 @@ class App {
         document.querySelector('.mobile-toggle')?.classList.remove('active');
     }
 
+    handleSocialLogin(provider) {
+        if (provider === 'Google' || provider === 'google') {
+            return this.loginWithGoogle();
+        } else if (provider === 'Apple' || provider === 'apple') {
+            return this.loginWithApple();
+        }
+        return this.loginWithGoogle();
+    }
+
     async loginWithGoogle() {
         this.closeModal();
         this.showLoading('Connecting to Google Accounts...', '🌐 Signing in with Google');
