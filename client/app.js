@@ -3408,7 +3408,6 @@ class App {
         settings[key] = !settings[key];
         localStorage.setItem('zilhaj_user_settings', JSON.stringify(settings));
 
-        // Persist to backend so toggles actually hold server-side (email/SMS sends honor them)
         const user = this.state.currentUser;
         if (user && user.id && typeof this.apiCall === 'function') {
             try {
@@ -3441,78 +3440,106 @@ class App {
         const requirements = allReqs.filter(r => !r.userId || r.userId === user.id || r.userEmail === user.email);
         const offers   = allOffers;
         const bookings = allBookings;
-        const userSettings = JSON.parse(localStorage.getItem('zilhaj_user_settings') || '{"emailNotifs":true,"smsAlerts":true,"offerNotifs":true,"paymentAlerts":true,"privacyMode":true,"twoFactor":false}');
 
         // ── Support contact helpers ──────────────────────────────────────────────
         const SUPPORT_PHONE  = '+966 800 123 4567';
         const SUPPORT_EMAIL  = 'support@zilhaj.com';
         const SUPPORT_WA     = 'https://wa.me/9541692891';
 
-        // ── SVG icons ────────────────────────────────────────────────────────────
-        const ic = {
-            dashboard:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>`,
-            requests:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>`,
-            payments:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,
-            profile:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
-            notifs:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
-            help:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-linecap="round" stroke-width="2"/></svg>`,
-        };
-
         const offersForUser = offers.filter(o => requirements.some(r => r.id === o.requirementId));
         const offersAvailable = offersForUser.length;
-        const inProgress = requirements.filter(r => !r.status || r.status === 'PENDING' || r.status === 'ACTIVE').length;
-        const completed  = bookings.filter(b => b.status === 'CONFIRMED' || b.status === 'COMPLETED').length;
-        const notifCount = offersAvailable + inProgress + completed;
-
-        // ── Nav item builder ─────────────────────────────────────────────────────
-        const navItem = (tab, icon, label, badge = 0) => {
-            const isActive = activeTab === tab || (tab === 'payments' && activeTab === 'paymentScreen');
-            return `<a href="javascript:void(0)" onclick="app.setDashboardTab('${tab}')"
-                style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.58rem .65rem;border-radius:10px;text-decoration:none;cursor:pointer;transition:all .2s ease;background:${isActive?'#1a6b3c':'transparent'};color:${isActive?'#fff':'#374151'};"
-                onmouseover="if('${tab}'!=='${activeTab}'){this.style.background='#f0faf5';this.style.color='#1a6b3c';this.style.transform='translateX(3px)';}"
-                onmouseout="if('${tab}'!=='${activeTab}'){this.style.background='transparent';this.style.color='#374151';this.style.transform='none';}">
-                <span style="display:flex;align-items:center;gap:.5rem;font-size:.84rem;white-space:nowrap;font-weight:${isActive?'700':'500'};">${icon} ${label}</span>
-                ${badge>0?`<span style="background:${isActive?'#fff':'#1a6b3c'};color:${isActive?'#1a6b3c':'#fff'};font-size:.64rem;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0;">${badge}</span>`:''}
-            </a>`;
-        };
 
         // ── Sidebar ──────────────────────────────────────────────────────────────
         const sidebar = `
-        <aside style="width:235px;flex-shrink:0;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:1.1rem .8rem;display:flex;flex-direction:column;min-height:calc(100vh - 140px);position:sticky;top:98px;align-self:flex-start;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
-            <div style="display:flex;align-items:center;gap:.55rem;padding:.15rem .3rem .9rem;border-bottom:1px solid #f0f0f0;margin-bottom:.8rem;">
-                <img src="logo.png" onerror="this.onerror=null;this.src='images/logo.png';" alt="ZILHAJ" style="width:34px;height:34px;object-fit:cover;border-radius:50%;border:1.5px solid #e2e8f0;flex-shrink:0;">
-                <div><div style="font-size:.9rem;font-weight:900;color:#0f172a;letter-spacing:.4px;font-style:italic;">ZILHAJ</div><div style="font-size:.55rem;color:#6b7280;line-height:1.2;">One Request. Multiple Verified Offers.</div></div>
+        <aside class="sidebar">
+            <div class="sidebar-brand-card">
+                <div class="logo-gold-ring">
+                    <img src="logo.jpg" onerror="this.onerror=null;this.src='logo.png';" alt="ZILHAJ Logo" class="sidebar-logo-img">
+                </div>
+                <div class="brand-card-info">
+                    <h4 class="brand-card-title">ZILHAJ</h4>
+                    <p class="brand-card-desc">One Request. Multiple Verified Offers.</p>
+                </div>
             </div>
-            <div style="display:flex;flex-direction:column;gap:.15rem;flex:1;">
-                ${navItem('requests',  ic.requests,  'My Requests')}
-                ${navItem('payments',  ic.payments,  'Payments')}
-                ${navItem('profile',   ic.profile,   'Profile &amp; Settings')}
-                ${navItem('help',      ic.help,      'Help &amp; Support')}
+
+            <nav class="sidebar-nav">
+                <button class="sidebar-link ${activeTab === 'requests' || activeTab === 'dashboard' ? 'active' : ''}" onclick="app.setDashboardTab('requests')" data-tab="requests">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <span>My Requests</span>
+                </button>
+
+                <button class="sidebar-link ${activeTab === 'payments' || activeTab === 'paymentScreen' ? 'active' : ''}" onclick="app.setDashboardTab('payments')" data-tab="payments">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                    <span>Payments</span>
+                </button>
+
+                <button class="sidebar-link ${activeTab === 'profile' ? 'active' : ''}" onclick="app.setDashboardTab('profile')" data-tab="profile">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span>Profile &amp; Settings</span>
+                </button>
+
+                <button class="sidebar-link ${activeTab === 'help' ? 'active' : ''}" onclick="app.setDashboardTab('help')" data-tab="help">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <span>Help &amp; Support</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-info-card">
+                <div class="card-head-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                    </svg>
+                    <span>Your Request Includes</span>
+                </div>
+                <ul class="includes-list">
+                    <li><span class="check-icon">✓</span> Verified travel agents review your request</li>
+                    <li><span class="check-icon">✓</span> Receive multiple competitive offers</li>
+                    <li><span class="check-icon">✓</span> Compare &amp; choose the best package</li>
+                    <li><span class="check-icon">✓</span> 100% Private contact details</li>
+                </ul>
             </div>
-            <div style="margin-top:1.1rem;background:#f0faf5;border:1px solid #d1fae5;border-radius:10px;padding:.8rem;transition:all .2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(26,107,60,0.08)'" onmouseout="this.style.boxShadow='none'">
-                <div style="font-size:.76rem;font-weight:800;color:#0f172a;margin-bottom:.1rem;">Need Help?</div>
-                <div style="font-size:.68rem;color:#6b7280;margin-bottom:.55rem;">Our team is here to assist you</div>
-                <a href="tel:${SUPPORT_PHONE}" style="width:100%;box-sizing:border-box;background:#fff;border:1px solid #d1fae5;border-radius:7px;padding:.4rem;font-size:.72rem;font-weight:700;color:#1a6b3c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.3rem;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='#1a6b3c';this.style.color='#fff';" onmouseout="this.style.background='#fff';this.style.color='#1a6b3c';">
-                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.49a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+
+            <div class="sidebar-help-box">
+                <h5>Need Help?</h5>
+                <p>Our team is here to assist you 24/7</p>
+                <button class="btn-contact-support" onclick="app.setDashboardTab('help')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
                     Contact Support
-                </a>
+                </button>
             </div>
-            <div style="margin-top:.65rem;display:flex;align-items:center;gap:.4rem;padding:.45rem .4rem;background:#f8fafc;border-radius:8px;border:1px solid #e5e7eb;">
-                <svg width="14" height="14" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                <div><div style="font-size:.62rem;font-weight:800;color:#0f172a;">Your security is our priority.</div><div style="font-size:.58rem;color:#6b7280;">All payments encrypted &amp; secure.</div></div>
+
+            <div class="sidebar-security-badge">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <polyline points="9 12 11 14 15 10"></polyline>
+                </svg>
+                <div class="security-text">
+                    <strong>Your security is our priority.</strong>
+                    <span>All payments encrypted &amp; secure.</span>
+                </div>
             </div>
         </aside>`;
 
         // ── Helpers ──────────────────────────────────────────────────────────────
-        const statusBadge = (status) => {
-            const s = (status || 'pending').toLowerCase();
-            if (s === 'completed' || s === 'confirmed')
-                return `<span style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:.2rem .6rem;border-radius:99px;font-size:.7rem;font-weight:700;">Completed</span>`;
-            if (s === 'active' || s.includes('offer'))
-                return `<span style="background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;padding:.2rem .6rem;border-radius:99px;font-size:.7rem;font-weight:700;">Offers Available</span>`;
-            return `<span style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:.2rem .6rem;border-radius:99px;font-size:.7rem;font-weight:700;">Waiting for Offers</span>`;
-        };
-
         const fmtDate = (d) => {
             if (!d) return '—';
             try { return new Date(d).toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}); }
@@ -3525,169 +3552,152 @@ class App {
             return `REQ-${n}`;
         };
 
-        // ── Page header helper (Font size tuned down to elegant 1.05rem) ──────────
-        const pageHeader = (title, subtitle = '') => `
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.15rem;">
-            <div>
-                <h1 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0;letter-spacing:-0.2px;">${title}</h1>
-                ${subtitle ? `<p style="font-size:.8rem;color:#6b7280;margin:.1rem 0 0;">${subtitle}</p>` : ''}
-            </div>
-        </div>`;
-
-        // ── Request table row ────────────────────────────────────────────────────
-        const reqTableRow = (r) => {
+        // ── Request Card Box Generator (New 4-Step Tracker & Labeled Grid) ────────
+        const reqCardBox = (r) => {
             const rid = reqId(r);
             const ro = offers.filter(o => o.requirementId === r.id);
-            return `<tr style="border-bottom:1px solid #f3f4f6;transition:background .15s ease;" onmouseover="this.style.background='#f0faf5'" onmouseout="this.style.background=''">
-                <td style="padding:.75rem .95rem;"><div style="font-weight:700;color:#0f172a;font-size:.83rem;">${rid}</div><div style="font-size:.68rem;color:#9ca3af;">${fmtDate(r.createdAt||r.preferredDepartureDate)}</div></td>
-                <td style="padding:.75rem .95rem;"><div style="display:flex;align-items:center;gap:.45rem;"><div style="width:26px;height:26px;border-radius:6px;background:#f0faf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="13" height="13" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 21h18M5 21V9l7-6 7 6v12M10 21v-5h4v5"/></svg></div><div><div style="font-size:.81rem;font-weight:600;color:#0f172a;">Umrah Package</div><div style="font-size:.68rem;color:#9ca3af;">${r.durationDays||10} Days</div></div></div></td>
-                <td style="padding:.75rem .95rem;font-size:.81rem;color:#374151;">${fmtDate(r.preferredDepartureDate)}<br><span style="font-size:.67rem;color:#9ca3af;">(Approx.)</span></td>
-                <td style="padding:.75rem .95rem;font-size:.81rem;color:#374151;">${r.travelersCount||r.adults||2} Adults<br><span style="font-size:.67rem;color:#9ca3af;">${r.children||0} Children</span></td>
-                <td style="padding:.75rem .95rem;">${statusBadge(ro.length>0?'active':(r.status||'pending'))}</td>
-                <td style="padding:.75rem .95rem;"><div style="font-size:.81rem;font-weight:700;color:#0f172a;">${ro.length} Offer${ro.length!==1?'s':''}</div><div style="font-size:.68rem;color:${ro.length>0?'#1a6b3c':'#9ca3af'};">${ro.length>0?'View now':'Pending'}</div></td>
-                <td style="padding:.75rem .95rem;"><button onclick="app.viewRequestDetail('${r.id}')" style="background:#fff;border:1px solid #e5e7eb;border-radius:7px;padding:.32rem .8rem;font-size:.77rem;font-weight:600;color:#374151;cursor:pointer;display:flex;align-items:center;gap:.25rem;white-space:nowrap;transition:all .18s;" onmouseover="this.style.borderColor='#1a6b3c';this.style.color='#1a6b3c';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.04)';" onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#374151';this.style.boxShadow='none';">View Details <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button></td>
-            </tr>`;
+            const hasOffers = ro.length > 0;
+            return `
+            <div class="request-card-box" data-req-id="${r.id}">
+                <div class="integrated-status-tracker">
+                    <div class="tracker-top-bar">
+                        <span class="tracker-title-label">STATUS TRACKER</span>
+                        <span class="badge ${hasOffers ? 'badge-available' : 'badge-waiting'}">
+                            ${hasOffers ? `${ro.length} Offers Available` : 'Waiting for Offers'}
+                        </span>
+                    </div>
+                    <div class="horizontal-timeline-steps">
+                        <div class="h-timeline-step step-completed">
+                            <div class="step-icon-circle">✓</div>
+                            <div class="step-label-group">
+                                <span class="step-name-text">Request Received</span>
+                                <span class="step-sub-status">Completed</span>
+                            </div>
+                        </div>
+                        <div class="h-timeline-line solid"></div>
+                        <div class="h-timeline-step ${hasOffers ? 'step-completed' : 'step-active'}">
+                            <div class="step-icon-circle ${hasOffers ? '' : 'pulse'}">
+                                ${hasOffers ? '✓' : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'}
+                            </div>
+                            <div class="step-label-group">
+                                <span class="step-name-text">Collecting Offers</span>
+                                <span class="step-sub-status ${hasOffers ? '' : 'active-text'}">${hasOffers ? 'Completed' : 'In Progress'}</span>
+                            </div>
+                        </div>
+                        <div class="h-timeline-line ${hasOffers ? 'solid' : 'dashed'}"></div>
+                        <div class="h-timeline-step ${hasOffers ? 'step-active' : 'step-pending'}">
+                            <div class="step-icon-circle ${hasOffers ? 'pulse' : ''}">
+                                ${hasOffers ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>' : '3'}
+                            </div>
+                            <div class="step-label-group">
+                                <span class="step-name-text">Offers Ready</span>
+                                <span class="step-sub-status ${hasOffers ? 'active-text' : ''}">${hasOffers ? `${ro.length} Offers` : 'Pending'}</span>
+                            </div>
+                        </div>
+                        <div class="h-timeline-line dashed"></div>
+                        <div class="h-timeline-step step-pending">
+                            <div class="step-icon-circle">4</div>
+                            <div class="step-label-group">
+                                <span class="step-name-text">You Choose</span>
+                                <span class="step-sub-status">Pending</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="request-card-header">
+                    <div class="req-title-group">
+                        <div class="req-icon-badge">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="req-card-code">${rid}</span>
+                            <span class="req-card-date">Submitted on ${fmtDate(r.createdAt || r.preferredDepartureDate)}</span>
+                        </div>
+                    </div>
+                    <div class="req-header-right">
+                        <button class="btn-view-details" onclick="app.viewRequestDetail('${r.id}')">
+                            <span>${hasOffers ? `View Offers (${ro.length})` : 'View Details'}</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="request-card-body">
+                    <div class="info-field">
+                        <span class="field-label">NAME</span>
+                        <span class="field-value">${user.name || r.userName || 'Pilgrim'}</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="field-label">SERVICE</span>
+                        <span class="field-value">${r.packageType || 'Umrah Package'} (${r.durationDays || 10} Days)</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="field-label">TRAVEL DATE</span>
+                        <span class="field-value">${fmtDate(r.preferredDepartureDate)} <small>(Approx.)</small></span>
+                    </div>
+                    <div class="info-field">
+                        <span class="field-label">TOTAL PERSONS</span>
+                        <span class="field-value">${r.travelersCount || (Number(r.adults||0) + Number(r.children||0)) || 2}</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="field-label">HOTEL TYPE</span>
+                        <span class="field-value">${r.hotelCategory || r.hotelRating || '5 Star'}</span>
+                    </div>
+                </div>
+            </div>`;
         };
 
-        const tableHead = `<thead><tr style="background:#f9fafb;border-bottom:1px solid #f3f4f6;"><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Request ID</th><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Service</th><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Travel Date</th><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Passengers</th><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Status</th><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Offers</th><th style="padding:.65rem .95rem;text-align:left;font-size:.69rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;">Action</th></tr></thead>`;
-
-        // ── Support card reusable ────────────────────────────────────────────────
-        const supportCard = () => `
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.05rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
-            <div style="font-size:.85rem;font-weight:800;color:#0f172a;margin-bottom:.18rem;">Need Help?</div>
-            <div style="font-size:.74rem;color:#6b7280;margin-bottom:.75rem;">Our support team is available to assist you 24/7.</div>
-            <a href="javascript:void(0)" onclick="app.openChatbot()" style="display:flex;align-items:center;gap:.4rem;width:100%;box-sizing:border-box;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.5rem .85rem;font-size:.78rem;font-weight:700;color:#1a6b3c;cursor:pointer;margin-bottom:.38rem;text-decoration:none;transition:all .18s;" onmouseover="this.style.background='#d1fae5';this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#f0faf5';this.style.transform='none';">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Live Chat
-            </a>
-            <a href="tel:${SUPPORT_PHONE}" style="display:flex;align-items:center;gap:.4rem;width:100%;box-sizing:border-box;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.5rem .85rem;font-size:.78rem;font-weight:700;color:#1a6b3c;cursor:pointer;margin-bottom:.38rem;text-decoration:none;transition:all .18s;" onmouseover="this.style.background='#d1fae5';this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#f0faf5';this.style.transform='none';">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.49a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> Call Support
-            </a>
-            <a href="mailto:${SUPPORT_EMAIL}" style="display:flex;align-items:center;gap:.4rem;width:100%;box-sizing:border-box;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.5rem .85rem;font-size:.78rem;font-weight:700;color:#1a6b3c;cursor:pointer;margin-bottom:.38rem;text-decoration:none;transition:all .18s;" onmouseover="this.style.background='#d1fae5';this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#f0faf5';this.style.transform='none';">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email Us
-            </a>
-            <a href="${SUPPORT_WA}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.4rem;width:100%;box-sizing:border-box;background:#f0faf5;border:1px solid #d1fae5;border-radius:8px;padding:.5rem .85rem;font-size:.78rem;font-weight:700;color:#1a6b3c;cursor:pointer;text-decoration:none;transition:all .18s;" onmouseover="this.style.background='#d1fae5';this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#f0faf5';this.style.transform='none';">
-                <svg width="13" height="13" fill="#1a6b3c" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> WhatsApp
-            </a>
+        const emptyState = `
+        <div class="empty-state-card-container">
+            <div class="empty-state-main-content">
+                <div class="empty-state-illustration">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="12" y1="18" x2="12" y2="12"></line>
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                </div>
+                <h3 class="empty-state-title">No Umrah or Hajj Requests Yet</h3>
+                <p class="empty-state-subtext">Submit your custom pilgrimage preferences and receive competitive bids from verified Saudi-licensed operators within hours.</p>
+                <button class="btn-new-request" onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)">
+                    + Submit New Request
+                </button>
+            </div>
         </div>`;
 
         let panel = '';
 
-        // ════════════════════════════════════════════════════════════════════════
-        // DASHBOARD MAIN
-        // ════════════════════════════════════════════════════════════════════════
-        if (activeTab === 'dashboard') {
-            const firstName = (user.name || 'Pilgrim').split(' ')[0];
-            const rows = requirements.slice(0, 5).map(reqTableRow).join('');
-
-            // Requirements with offers available for carousel slide
-            const reqsWithOffers = requirements.filter(r => offers.some(o => o.requirementId === r.id));
-
-            const offerCarouselSlides = reqsWithOffers.length > 0 ? reqsWithOffers.map((r, idx) => {
-                const rid = reqId(r);
-                const ro = offers.filter(o => o.requirementId === r.id);
-                return `<div style="background:#fff;border:1.5px solid #d1fae5;border-radius:12px;padding:.9rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 2px 8px rgba(26,107,60,0.05);transition:all .2s ease;" onmouseover="this.style.borderColor='#1a6b3c';this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='#d1fae5';this.style.transform='none';">
-                    <div style="display:flex;align-items:center;gap:.8rem;">
-                        <div style="width:40px;height:40px;border-radius:10px;background:#e8f5ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#1a6b3c;font-weight:800;font-size:.82rem;">${rid.slice(-4)}</div>
-                        <div>
-                            <div style="display:flex;align-items:center;gap:.5rem;">
-                                <span style="font-size:.86rem;font-weight:800;color:#0f172a;">${rid}</span>
-                                <span style="background:#d1fae5;color:#065f46;font-size:.65rem;font-weight:800;padding:.1rem .5rem;border-radius:99px;">${ro.length} Offer${ro.length!==1?'s':''} Ready</span>
-                            </div>
-                            <div style="font-size:.73rem;color:#6b7280;margin-top:.15rem;">Submitted on ${fmtDate(r.createdAt||r.preferredDepartureDate)} &bull; ${r.departureCity||'Srinagar'} to Jeddah &bull; ${r.travelersCount||2} Travelers</div>
-                        </div>
-                    </div>
-                    <button onclick="app.viewRequestDetail('${r.id}')" style="background:#1a6b3c;color:#fff;border:none;border-radius:8px;padding:.48rem 1rem;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .18s;" onmouseover="this.style.background='#14522e';" onmouseout="this.style.background='#1a6b3c';">View Offers →</button>
-                </div>`;
-            }).join('') : `<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:.85rem 1.1rem;font-size:.78rem;color:#92400e;display:flex;align-items:center;justify-content:space-between;"><span>No active offers yet. Post a new request to get competitive quotes from verified partners.</span><button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#d97706;color:#fff;border:none;border-radius:6px;padding:.38rem .85rem;font-size:.74rem;font-weight:700;cursor:pointer;">+ Create Request</button></div>`;
-
-            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1.1rem;">
-                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;">
-                    <div>
-                        <h1 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0;letter-spacing:-0.2px;">Welcome back, ${this.escapeHtml(firstName)} 👋</h1>
-                        <p style="font-size:.8rem;color:#6b7280;margin:.08rem 0 0;">Here's what's happening with your Umrah requests.</p>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:.6rem;">
-                        <button onclick="app.setDashboardTab('notifications')" style="position:relative;background:#fff;border:1px solid #e5e7eb;border-radius:9px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;" onmouseover="this.style.borderColor='#1a6b3c';" onmouseout="this.style.borderColor='#e5e7eb';">${ic.notifs}<span style="position:absolute;top:-4px;right:-4px;background:#1a6b3c;color:#fff;font-size:.58rem;font-weight:800;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${notifCount}</span></button>
-                        <div onclick="app.setDashboardTab('profile')" style="display:flex;align-items:center;gap:.45rem;cursor:pointer;background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:.28rem .65rem;transition:all .18s;" onmouseover="this.style.borderColor='#1a6b3c';" onmouseout="this.style.borderColor='#e5e7eb';">
-                            <div style="width:26px;height:26px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:800;overflow:hidden;">${userPhoto?`<img src="${userPhoto}" style="width:100%;height:100%;object-fit:cover;">`:this.escapeHtml((user.name||'U').charAt(0).toUpperCase())}</div>
-                            <div><div style="font-size:.77rem;font-weight:700;color:#0f172a;">${this.escapeHtml(user.name)}</div></div>
-                            <svg width="11" height="11" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 4 Metric Cards -->
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;">
-                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:.95rem 1rem;display:flex;align-items:center;gap:.8rem;transition:all .2s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.04)';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">
-                        <div style="width:38px;height:38px;border-radius:9px;background:#e8f5ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" fill="none" stroke="#1a6b3c" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-                        <div><div style="font-size:1.35rem;font-weight:800;color:#0f172a;line-height:1;">${requirements.length}</div><div style="font-size:.74rem;font-weight:600;color:#374151;margin-top:.12rem;">Total Requests</div></div>
-                    </div>
-                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:.95rem 1rem;display:flex;align-items:center;gap:.8rem;transition:all .2s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.04)';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">
-                        <div style="width:38px;height:38px;border-radius:9px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" fill="none" stroke="#d97706" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5" fill="#d97706" stroke="none"/></svg></div>
-                        <div><div style="font-size:1.35rem;font-weight:800;color:#0f172a;line-height:1;">${offersAvailable}</div><div style="font-size:.74rem;font-weight:600;color:#374151;margin-top:.12rem;">Offers Available</div></div>
-                    </div>
-                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:.95rem 1rem;display:flex;align-items:center;gap:.8rem;transition:all .2s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.04)';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">
-                        <div style="width:38px;height:38px;border-radius:9px;background:#ede9fe;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" fill="none" stroke="#7c3aed" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-                        <div><div style="font-size:1.35rem;font-weight:800;color:#0f172a;line-height:1;">${inProgress}</div><div style="font-size:.74rem;font-weight:600;color:#374151;margin-top:.12rem;">In Progress</div></div>
-                    </div>
-                    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:.95rem 1rem;display:flex;align-items:center;gap:.8rem;transition:all .2s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.04)';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">
-                        <div style="width:38px;height:38px;border-radius:9px;background:#d1fae5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" fill="none" stroke="#059669" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-                        <div><div style="font-size:1.35rem;font-weight:800;color:#0f172a;line-height:1;">${completed}</div><div style="font-size:.74rem;font-weight:600;color:#374151;margin-top:.12rem;">Completed</div></div>
-                    </div>
-                </div>
-
-                <!-- Offers Available Live Slideshow / Carousel Breakdown -->
+        if (activeTab === 'dashboard' || activeTab === 'requests') {
+            const cards = requirements.map(reqCardBox).join('');
+            panel = `
+            <div class="page-header">
                 <div>
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.45rem;">
-                        <span style="font-size:.82rem;font-weight:800;color:#0f172a;">⚡ Live Offers Breakdown</span>
-                        <span style="font-size:.72rem;color:#6b7280;">${reqsWithOffers.length} Request${reqsWithOffers.length!==1?'s':''} with offers</span>
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:.6rem;">
-                        ${offerCarouselSlides}
-                    </div>
+                    <h1 class="page-title">My Requests</h1>
+                    <p class="page-subtitle">Track your submitted Umrah requests and review offers collected by our team on your behalf.</p>
                 </div>
+                <button class="btn-new-request" onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    New Request
+                </button>
+            </div>
 
-                <!-- Requests Table -->
-                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
-                    <div style="display:flex;align-items:center;justify-content:space-between;padding:.95rem 1.15rem;border-bottom:1px solid #f3f4f6;">
-                        <h2 style="font-size:.92rem;font-weight:800;color:#0f172a;margin:0;">Your Travel Requests</h2>
-                        <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#1a6b3c;color:#fff;border:none;border-radius:7px;padding:.4rem .9rem;font-size:.77rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.25rem;transition:background .18s;" onmouseover="this.style.background='#14522e';" onmouseout="this.style.background='#1a6b3c';"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Request</button>
-                    </div>
-                    ${requirements.length>0?`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">${tableHead}<tbody>${rows}</tbody></table></div>`:`
-                    <div style="text-align:center;padding:2.2rem 1rem;">
-                        <div style="width:44px;height:44px;background:#f0faf5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;">${ic.requests.replace(/currentColor/g,'#1a6b3c')}</div>
-                        <h3 style="font-size:.9rem;font-weight:700;color:#0f172a;margin:0 0 .25rem;">No Requests Yet</h3>
-                        <p style="font-size:.79rem;color:#6b7280;margin:0 0 .95rem;">Post your first Umrah travel request and get offers from verified agents.</p>
-                        <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#1a6b3c;color:#fff;border:none;border-radius:7px;padding:.45rem 1.15rem;font-weight:700;font-size:.82rem;cursor:pointer;">+ Post a Request</button>
-                    </div>`}
-                </div>
-            </main>`;
+            <div class="requests-cards-container">
+                ${requirements.length > 0 ? cards : emptyState}
+            </div>`;
 
-        // ════════════════════════════════════════════════════════════════════════
-        // MY REQUESTS
-        // ════════════════════════════════════════════════════════════════════════
-        } else if (activeTab === 'requests') {
-            const rows = requirements.map(reqTableRow).join('');
-            panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1rem;">
-                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;">
-                    ${pageHeader('My Requests', 'Manage all your Umrah travel requests.')}
-                    <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="background:#1a6b3c;color:#fff;border:none;border-radius:7px;padding:.42rem .95rem;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.25rem;transition:background .18s;" onmouseover="this.style.background='#14522e';" onmouseout="this.style.background='#1a6b3c';"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Request</button>
-                </div>
-                <div style="background:#fff;border:1px solid #e5e7eb;border-radius:13px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
-                    ${requirements.length>0?`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">${tableHead}<tbody>${rows}</tbody></table></div>`:`<div style="text-align:center;padding:2.2rem;color:#6b7280;font-size:.86rem;">No requests yet. <button onclick="app.navigate('home');setTimeout(()=>app.scrollToRequirementForm(),300)" style="color:#1a6b3c;background:none;border:none;font-weight:700;cursor:pointer;">Post your first request →</button></div>`}
-                </div>
-            </main>`;
-
-        // ════════════════════════════════════════════════════════════════════════
-        // REQUEST DETAIL
-        // ════════════════════════════════════════════════════════════════════════
         } else if (activeTab === 'requestDetail') {
             const selId = this.state.selectedRequestId;
             const r = requirements.find(x => x.id === selId) || requirements[0] || {};
             const sid = r ? reqId(r) : 'REQ-0000';
             const ro = r ? offers.filter(o => o.requirementId === r.id) : [];
-            
-            // Show only real offers from agents
             const displayOffers = ro;
 
             const steps = [
@@ -3698,6 +3708,40 @@ class App {
                 {label:'Payment & Booking', desc:'Complete payment to confirm booking.', done:false},
             ];
 
+            const offersHeaderBadge = displayOffers.length > 0 ?
+                '<div style="background:#1a6b3c;color:#fff;border-radius:10px;padding:.65rem .95rem;text-align:center;">' +
+                    '<div style="font-size:.7rem;font-weight:700;">' + displayOffers.length + ' Offers Available</div>' +
+                    '<button onclick="document.getElementById(\'availableOffersSection\')?.scrollIntoView({behavior:\'smooth\'})" style="margin-top:.35rem;background:#fff;color:#1a6b3c;border:none;border-radius:6px;padding:.28rem .7rem;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .18s;" onmouseover="this.style.background=\'#f0faf5\';" onmouseout="this.style.background=\'#fff\';">View Offers ↓</button>' +
+                '</div>' : '';
+
+            const offersGridContent = displayOffers.length === 0 ?
+                '<div style="grid-column:1/-1; text-align:center; padding:2rem 1rem; color:#6b7280; font-size:.84rem; background:#f8fafc; border:1px dashed #e2e8f0; border-radius:10px;">No offers received yet. Agents will submit verified offers against this request — you\'ll see them here as they arrive.</div>' :
+                displayOffers.map((o,i)=>{
+                    const travelers = r.travelersCount || o.travelersCount || 1;
+                    const perPerson = o.discountedPrice || o.price || 0;
+                    const totalDiscounted = perPerson * travelers;
+                    return '<div style="border:1.5px solid ' + (i===0?'#d1fae5':'#e5e7eb') + ';border-radius:11px;padding:1rem;display:flex;flex-direction:column;justify-content:space-between;background:#fff;transition:all .2s ease;" onmouseover="this.style.borderColor=\'#1a6b3c\';this.style.boxShadow=\'0 4px 14px rgba(26,107,60,0.08)\';" onmouseout="this.style.borderColor=\'' + (i===0?'#d1fae5':'#e5e7eb') + '\';this.style.boxShadow=\'none\';">' +
+                        '<div>' +
+                            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem;">' +
+                                '<span style="font-size:.66rem;font-weight:800;color:' + (i===0?'#059669':'#d97706') + ';background:' + (i===0?'#e8f5ee':'#fef3c7') + ';padding:.12rem .5rem;border-radius:99px;">' + (i===0?'🏆 Best Value Choice':'⭐ Popular Option') + '</span>' +
+                                '<span style="font-size:.67rem;color:#6b7280;">' + (o.durationDays ? o.durationDays + ' Days' : 'Duration N/A') + '</span>' +
+                            '</div>' +
+                            '<div style="font-size:1.25rem;font-weight:800;color:#0f172a;">' + this.formatCurrency(totalDiscounted) + '</div>' +
+                            '<div style="font-size:.68rem;color:#1a6b3c;font-weight:700;margin-bottom:.6rem;">Total for ' + travelers + ' Persons (' + this.formatCurrency(perPerson) + ' / person)</div>' +
+                            '<div style="font-size:.81rem;font-weight:700;color:#0f172a;margin-bottom:.25rem;line-height:1.3;">' + this.escapeHtml(o.packageTitle || 'Umrah Package') + '</div>' +
+                            '<div style="font-size:.71rem;color:#1a6b3c;font-weight:600;margin-bottom:.55rem;">Provided by: ' + this.escapeHtml(o.agencyName || o.agentName || 'Verified Partner') + '</div>' +
+                            '<div style="font-size:.71rem;color:#4b5563;display:flex;flex-direction:column;gap:.25rem;padding:.5rem 0;border-top:1px dashed #e5e7eb;border-bottom:1px dashed #e5e7eb;margin-bottom:.75rem;">' +
+                                (o.makkahHotel ? '<div>🏨 Makkah: <strong>' + this.escapeHtml(o.makkahHotel) + '</strong></div>' : '') +
+                                (o.madinahHotel ? '<div>🏨 Madinah: <strong>' + this.escapeHtml(o.madinahHotel) + '</strong></div>' : '') +
+                                (o.flightDetails ? '<div>✈ Flight: <strong>' + this.escapeHtml(o.flightDetails) + '</strong></div>' : '') +
+                            '</div>' +
+                        '</div>' +
+                        '<div style="display:flex;flex-direction:column;gap:.4rem;">' +
+                            '<button onclick="app.openOfferReviewModal(\'' + o.id + '\')" style="width:100%;border:none;background:#1a6b3c;color:#fff;border-radius:8px;padding:.55rem .8rem;font-size:.8rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.35rem;transition:all .18s;" onmouseover="this.style.background=\'#14522e\';" onmouseout="this.style.background=\'#1a6b3c\';">🔍 View Details</button>' +
+                        '</div>' +
+                    '</div>';
+                }).join('');
+
             panel = `<main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:.95rem;">
                 <div>
                     <button onclick="app.setDashboardTab('requests')" style="background:none;border:none;color:#1a6b3c;font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.25rem;padding:0;margin-bottom:.35rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back to My Requests</button>
@@ -3706,12 +3750,11 @@ class App {
 
                 <div style="display:grid;grid-template-columns:1fr 240px;gap:.95rem;align-items:start;">
                     <div style="display:flex;flex-direction:column;gap:.95rem;">
-                        <!-- Top Header Card (with Cancel Request button integrated at top right) -->
                         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
                             <div style="display:flex;align-items:center;gap:.85rem;">
                                 <div style="width:72px;height:56px;border-radius:8px;background:#f0faf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="30" height="30" fill="#d1fae5" viewBox="0 0 100 100"><rect x="20" y="25" width="60" height="70" rx="3"/><path d="M20 25 Q50 -5 80 25Z"/><rect x="5" y="45" width="15" height="50" rx="2"/><rect x="80" y="45" width="15" height="50" rx="2"/><rect x="42" y="55" width="16" height="40" rx="2"/></svg></div>
                                 <div>
-                                    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.35rem;"><span style="font-size:.98rem;font-weight:800;color:#0f172a;">${sid}</span>${statusBadge(displayOffers.length>0?'active':'pending')}</div>
+                                    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.35rem;"><span style="font-size:.98rem;font-weight:800;color:#0f172a;">${sid}</span></div>
                                     <div style="display:flex;gap:.9rem;flex-wrap:wrap;font-size:.78rem;color:#374151;">
                                         <span>📅 ${fmtDate(r.preferredDepartureDate)}</span>
                                         <span>👥 ${r.travelersCount||2} Travelers</span>
@@ -3721,21 +3764,15 @@ class App {
                                 </div>
                             </div>
 
-                            <!-- Header Right: Offers badge + Cancel button -->
                             <div style="display:flex;align-items:center;gap:.6rem;">
-                                ${displayOffers.length>0 ? `
-                                <div style="background:#1a6b3c;color:#fff;border-radius:10px;padding:.65rem .95rem;text-align:center;">
-                                    <div style="font-size:.7rem;font-weight:700;">${displayOffers.length} Offers Available</div>
-                                    <button onclick="document.getElementById('availableOffersSection')?.scrollIntoView({behavior:'smooth'})" style="margin-top:.35rem;background:#fff;color:#1a6b3c;border:none;border-radius:6px;padding:.28rem .7rem;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .18s;" onmouseover="this.style.background='#f0faf5';" onmouseout="this.style.background='#fff';">View Offers ↓</button>
-                                </div>`:''}
-                                <button onclick="app.deleteRequirement('${r.id}')" style="background:#fff;color:#dc2626;border:1px solid #fecaca;border-radius:9px;padding:.55rem .85rem;font-size:.76rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.3rem;transition:all .18s;" onmouseover="this.style.background='#fef2f2';this.style.borderColor='#f87171';" onmouseout="this.style.background='#fff';this.style.borderColor='#fecaca';">
+                                ${offersHeaderBadge}
+                                <button onclick="app.deleteRequirement('${r.id}')" style="background:#fff;color:#dc2626;border:1px solid #fecaca;border-radius:99px;padding:.55rem .85rem;font-size:.76rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.3rem;transition:all .18s;" onmouseover="this.style.background='#fef2f2';this.style.borderColor='#f87171';" onmouseout="this.style.background='#fff';this.style.borderColor='#fecaca';">
                                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                                     Cancel Request
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Request Details Card -->
                         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
                             <h3 style="font-size:.86rem;font-weight:800;color:#0f172a;margin:0 0 .85rem;">Request Specifications</h3>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem 1.6rem;">
@@ -3758,7 +3795,6 @@ class App {
                             </div>
                         </div>
 
-                        <!-- Available Offers Section (scrolled into view on button click) -->
                         <div id="availableOffersSection" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
                             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;">
                                 <div style="display:flex;align-items:center;gap:.4rem;">
@@ -3769,42 +3805,12 @@ class App {
                             </div>
 
                             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.85rem;">
-                                ${displayOffers.length === 0 ? `<div style="grid-column:1/-1; text-align:center; padding:2rem 1rem; color:#6b7280; font-size:.84rem; background:#f8fafc; border:1px dashed #e2e8f0; border-radius:10px;">
-                                    No offers received yet. Agents will submit verified offers against this request — you'll see them here as they arrive.
-                                </div>` : displayOffers.map((o,i)=>{
-                                    const travelers = r.travelersCount || o.travelersCount || 1;
-                                    const perPerson = o.discountedPrice || o.price || 0;
-                                    const totalDiscounted = perPerson * travelers;
-                                    return `<div style="border:1.5px solid ${i===0?'#d1fae5':'#e5e7eb'};border-radius:11px;padding:1rem;display:flex;flex-direction:column;justify-content:space-between;background:#fff;transition:all .2s ease;" onmouseover="this.style.borderColor='#1a6b3c';this.style.boxShadow='0 4px 14px rgba(26,107,60,0.08)';" onmouseout="this.style.borderColor='${i===0?'#d1fae5':'#e5e7eb'}';this.style.boxShadow='none';">
-                                    <div>
-                                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem;">
-                                            <span style="font-size:.66rem;font-weight:800;color:${i===0?'#059669':'#d97706'};background:${i===0?'#e8f5ee':'#fef3c7'};padding:.12rem .5rem;border-radius:99px;">${i===0?'🏆 Best Value Choice':'⭐ Popular Option'}</span>
-                                            <span style="font-size:.67rem;color:#6b7280;">${o.durationDays ? o.durationDays + ' Days' : 'Duration N/A'}</span>
-                                        </div>
-                                        <div style="font-size:1.25rem;font-weight:800;color:#0f172a;">${this.formatCurrency(totalDiscounted)}</div>
-                                        <div style="font-size:.68rem;color:#1a6b3c;font-weight:700;margin-bottom:.6rem;">Total for ${travelers} Persons (${this.formatCurrency(perPerson)} / person)</div>
-                                        
-                                        <div style="font-size:.81rem;font-weight:700;color:#0f172a;margin-bottom:.25rem;line-height:1.3;">${this.escapeHtml(o.packageTitle || 'Umrah Package')}</div>
-                                        <div style="font-size:.71rem;color:#1a6b3c;font-weight:600;margin-bottom:.55rem;">Provided by: ${this.escapeHtml(o.agencyName || o.agentName || 'Verified Partner')}</div>
-                                        
-                                        <div style="font-size:.71rem;color:#4b5563;display:flex;flex-direction:column;gap:.25rem;padding:.5rem 0;border-top:1px dashed #e5e7eb;border-bottom:1px dashed #e5e7eb;margin-bottom:.75rem;">
-                                            ${o.makkahHotel ? `<div>🏨 Makkah: <strong>${this.escapeHtml(o.makkahHotel)}</strong></div>` : ''}
-                                            ${o.madinahHotel ? `<div>🏨 Madinah: <strong>${this.escapeHtml(o.madinahHotel)}</strong></div>` : ''}
-                                            ${o.flightDetails ? `<div>✈ Flight: <strong>${this.escapeHtml(o.flightDetails)}</strong></div>` : ''}
-                                        </div>
-                                    </div>
-                                    <div style="display:flex;flex-direction:column;gap:.4rem;">
-                                        <button onclick="app.openOfferReviewModal('${o.id}')" style="width:100%;border:none;background:#1a6b3c;color:#fff;border-radius:8px;padding:.55rem .8rem;font-size:.8rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.35rem;transition:all .18s;" onmouseover="this.style.background='#14522e';" onmouseout="this.style.background='#1a6b3c';">🔍 View Details</button>
-                                    </div>
-                                </div>`;
-                                }).join('')}
+                                ${offersGridContent}
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right Column: Status Timeline & Support Card -->
                     <div style="display:flex;flex-direction:column;gap:.95rem;">
-                        <!-- Status Timeline -->
                         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.05rem;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
                             <h3 style="font-size:.84rem;font-weight:800;color:#0f172a;margin:0 0 .8rem;">Request Progress</h3>
                             <div style="display:flex;flex-direction:column;gap:.7rem;">
@@ -3822,10 +3828,6 @@ class App {
                     </div>
                 </div>
             </main>`;
-
-        // ════════════════════════════════════════════════════════════════════════
-        // NOTIFICATIONS (With working tab filter!)
-        // ════════════════════════════════════════════════════════════════════════
         } else if (activeTab === 'notifications') {
             const currentFilter = this.state.notifFilter || 'All';
             // ── Real notifications derived from the user's live data ─────────────
