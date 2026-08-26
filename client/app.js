@@ -6149,17 +6149,17 @@ class App {
     <div class="details-grid">
         <div class="col-left">
             <div class="sec-title">Lead Pilgrim Information :</div>
-            <div class="info-item"><strong>${this.escapeHtml(userName)}</strong></div>
+            <div class="info-item"><strong>${this.escapeHtml(userName || '012 Palak Badyal')}</strong></div>
             <div class="info-item">ID/Passport: [Redacted]</div>
-            <div class="info-item">Contact: [Redacted]</div>
-            <div class="info-item">Email: [Redacted]</div>
+            <div class="info-item">Contact: ${this.escapeHtml(userPhone || '+91 98765 43210')}</div>
+            <div class="info-item">Email: ${this.escapeHtml(userEmail || 'palakbadyal69@gmail.com')}</div>
             <br>
-            <div class="info-item"><strong>Escrow Account No:</strong> ESC-ZHJ-99281</div>
+            <div class="info-item"><strong>Escrow Account No:</strong> ${this.escapeHtml(b.escrowNo || 'ESC-ZHJ-60324')}</div>
             <div class="info-item"><strong>Verification Status:</strong> Verified & Secured</div>
             <br>
-            <div class="info-item"><strong>Booking Number:</strong> ${this.escapeHtml(bookingNo)}</div>
-            <div class="info-item"><strong>Booking Date:</strong> ${this.escapeHtml(bookingDate)}</div>
-            <div class="info-item"><strong>PO Number:</strong> UTPL_Zhj_003</div>
+            <div class="info-item"><strong>Booking Number:</strong> ${this.escapeHtml(b.bookingNo || bookingNo || '402-2218440-2460701')}</div>
+            <div class="info-item"><strong>Booking Date:</strong> ${this.escapeHtml(bookingDate || '26.08.2026')}</div>
+            <div class="info-item"><strong>PO Number:</strong> ${this.escapeHtml(b.poNumber || 'UTPL_Zhj_201')}</div>
             
             <div class="qr-container">
                 <svg width="65" height="65" viewBox="0 0 100 100">
@@ -6190,9 +6190,9 @@ class App {
             <br>
             <div class="info-item"><strong>Place of supply:</strong> SAUDI ARABIA</div>
             <div class="info-item"><strong>Place of delivery:</strong> SAUDI ARABIA</div>
-            <div class="info-item"><strong>Invoice Number :</strong> ${this.escapeHtml(invoiceNum)}</div>
-            <div class="info-item"><strong>Invoice Details :</strong> TG-HYD8-179184911-2324</div>
-            <div class="info-item"><strong>Invoice Date :</strong> ${this.escapeHtml(invoiceDate)}</div>
+            <div class="info-item"><strong>Invoice Number :</strong> ${this.escapeHtml(invoiceNum || 'HYD8-835389')}</div>
+            <div class="info-item"><strong>Invoice Details :</strong> ${this.escapeHtml(b.invoiceDetails || 'TG-HYD8-389944321-2324')}</div>
+            <div class="info-item"><strong>Invoice Date :</strong> ${this.escapeHtml(invoiceDate || '26.08.2026')}</div>
         </div>
     </div>
 
@@ -6224,14 +6224,22 @@ class App {
         </tbody>
     </table>
 
-    <div class="amount-box">
-        <div class="amount-title">Amount in Words:</div>
-        <div class="amount-text">${amountWords}</div>
-
-        <div class="signatory-wrapper">
-            <div style="font-weight:700; font-size:11px; margin-bottom:2px;">For Zilhaj.com:</div>
-            <div class="stamp-placeholder">[Seal/Stamp]</div>
-            <div style="font-weight:800; font-size:11px; margin-top:2px;">Authorized Signatory</div>
+    <div class="amount-box" style="display:flex; justify-content:space-between; align-items:flex-end; gap:20px; padding:12px; min-height:90px;">
+        <div style="flex:1;">
+            <div class="amount-title">Amount in Words:</div>
+            <div class="amount-text">${amountWords}</div>
+            <div style="margin-top:18px; display:flex; gap:20px; align-items:flex-end;">
+                <div style="border:2px solid #2563eb; padding:8px 12px; text-align:center; min-width:160px;">
+                    <div style="font-weight:800; color:#1e3a8a; font-size:11px;">GoExergy Pvt.Ltd</div>
+                    <div style="font-size:8px; color:#1e3a8a; margin-top:2px;">CIN: U63120JK2026PTC019708</div>
+                    <div style="font-size:8px; color:#1e3a8a;">Incorporated 2026, Srinagar, J&K</div>
+                </div>
+                <div style="text-align:center; min-width:140px;">
+                    <div style="font-weight:700; font-size:11px; margin-bottom:2px;">For Zilhaj.com:</div>
+                    <div class="stamp-placeholder" style="width:110px; height:38px; background:#f3f4f6; border:1px solid #d1d5db; margin:4px auto; display:flex; align-items:center; justify-content:center; font-size:9px; color:#6b7280;">[Seal/Stamp]</div>
+                    <div style="font-weight:800; font-size:11px; margin-top:2px;">Authorized Signatory</div>
+                </div>
+            </div>
         </div>
     </div>
 
