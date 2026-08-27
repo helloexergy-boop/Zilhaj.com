@@ -488,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="horizontal-timeline-steps">
             <div class="h-timeline-step step-completed">
-              <div class="step-icon-circle">Γ£ô</div>
+              <div class="step-icon-circle">✓</div>
               <div class="step-label-group">
                 <span class="step-name-text">Request Received</span>
                 <span class="step-sub-status">Completed</span>
@@ -593,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </svg>
             </div>
 
-            <h3 class="empty-state-title">No Offers Yet ΓÇö We're Working on the Best Ones for You! Γ£¿</h3>
+            <h3 class="empty-state-title">No Offers Yet Çö We're Working on the Best Ones for You! £</h3>
             <p class="empty-state-subtext">Our verified partners are reviewing your request and collecting the most suitable options. You'll be notified as soon as offers are ready.</p>
 
             <div class="empty-state-info-bar">
@@ -869,6 +869,104 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (text === 'About Us') link.addEventListener('click', e => { e.preventDefault(); window.location.href = '/#about'; });
   });
 
+  // Profile icon click -> Profile & Settings
+  const userPill = document.querySelector('.user-pill-badge');
+  if (userPill) {
+    userPill.style.cursor = 'pointer';
+    userPill.addEventListener('click', () => switchTab('profile'));
+  }
+
+  // Unified single Edit for Name/Email/Phone in Profile
+  const btnEditProfile = document.getElementById('btnEditProfile');
+  let isEditingProfile = false;
+  if (btnEditProfile) {
+    btnEditProfile.addEventListener('click', () => {
+      isEditingProfile = !isEditingProfile;
+      const nameDisplay = document.getElementById('profileNameDisplay');
+      const nameInput = document.getElementById('profileNameInput');
+      const emailDisplay = document.getElementById('profileEmailDisplay');
+      const emailInput = document.getElementById('profileEmailInput');
+      const phoneDisplay = document.getElementById('profilePhoneDisplay');
+      const phoneInput = document.getElementById('profilePhoneInput');
+      const btnAddPhone = document.getElementById('btnAddPhone');
+      
+      if (isEditingProfile) {
+        if (nameDisplay) nameDisplay.style.display = 'none';
+        if (nameInput) { nameInput.style.display = 'block'; nameInput.value = nameDisplay ? nameDisplay.textContent.trim() : ''; }
+        if (emailDisplay) emailDisplay.style.display = 'none';
+        if (emailInput) { emailInput.style.display = 'block'; emailInput.value = emailDisplay ? emailDisplay.textContent.trim() : ''; }
+        if (phoneDisplay) phoneDisplay.style.display = 'none';
+        if (phoneInput) {
+          phoneInput.style.display = 'block';
+          const phoneVal = phoneDisplay && phoneDisplay.textContent.trim() && phoneDisplay.textContent.trim() !== '—' ? phoneDisplay.textContent.trim() : '';
+          phoneInput.value = phoneVal;
+        }
+        if (btnAddPhone) btnAddPhone.style.display = 'none';
+        btnEditProfile.textContent = 'Save';
+        btnEditProfile.style.background = '#127A4D';
+        btnEditProfile.style.color = '#fff';
+        btnEditProfile.style.borderColor = '#127A4D';
+      } else {
+        const newName = nameInput ? nameInput.value.trim() : '';
+        const newEmail = emailInput ? emailInput.value.trim() : '';
+        const newPhone = phoneInput ? phoneInput.value.trim() : '';
+        if (!newName) { alert('Full Name is required'); return; }
+        if (newEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) { alert('Please enter a valid email'); return; }
+        if (newPhone && !/^\d+$/.test(newPhone)) { alert('Phone number must contain only numbers'); return; }
+        if (nameDisplay && newName) nameDisplay.textContent = newName;
+        if (emailDisplay && newEmail) emailDisplay.textContent = newEmail;
+        if (phoneDisplay) {
+          if (newPhone) {
+            phoneDisplay.textContent = newPhone;
+            phoneDisplay.style.display = 'block';
+          } else {
+            phoneDisplay.textContent = '';
+            phoneDisplay.style.display = 'none';
+          }
+        }
+        // Persist to localStorage
+        try {
+          const user = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+          if (user) {
+            if (newName) user.name = newName;
+            if (newEmail) user.email = newEmail;
+            if (newPhone) user.phone = newPhone;
+            localStorage.setItem('umrah_user', JSON.stringify(user));
+            // Update top navbar
+            const userNameEls = document.querySelectorAll('.user-name, .user-meta-name');
+            userNameEls.forEach(el => { if (el && newName) el.textContent = newName; });
+          }
+        } catch (e) {}
+        if (nameDisplay) nameDisplay.style.display = 'block';
+        if (nameInput) nameInput.style.display = 'none';
+        if (emailDisplay) emailDisplay.style.display = 'block';
+        if (emailInput) emailInput.style.display = 'none';
+        if (phoneInput) phoneInput.style.display = 'none';
+        if (btnAddPhone && !newPhone) btnAddPhone.style.display = 'inline-flex';
+        btnEditProfile.textContent = 'Edit';
+        btnEditProfile.style.background = '#fff';
+        btnEditProfile.style.color = '#127A4D';
+        btnEditProfile.style.borderColor = '#D2EBE0';
+        // Show toast if available
+        if (typeof showToast === 'function') showToast('Profile updated successfully!');
+      }
+    });
+  }
+
+  // Phone field numeric-only validation
+  const profilePhoneInput = document.getElementById('profilePhoneInput');
+  if (profilePhoneInput) {
+    profilePhoneInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 15);
+    });
+  }
+  const mobileInput = document.getElementById('mobileInput');
+  if (mobileInput) {
+    mobileInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+    });
+  }
+
 });
 
 // ------------------------------------------------------------------------
@@ -953,14 +1051,14 @@ window.currentShareData = null;
 
 // Helper: Build shareable summary text
 function buildShareText(reqCode, offersList) {
-  let shareText = `≡ƒòï ZILHAJ Travel Offers Summary (${reqCode || ''})\n\n` +
+  let shareText = `òï ZILHAJ Travel Offers Summary (${reqCode || ''})\n\n` +
                   `Here are the verified agency offers received for this request:\n\n`;
 
   if (Array.isArray(offersList) && offersList.length > 0) {
     offersList.forEach((offer, idx) => {
       shareText += `${idx + 1}. ${offer.agency}\n` +
-                   `   ≡ƒÆ░ Price: ${offer.price}\n` +
-                   `   Γ¡É Rating: ${offer.rating}\n\n`;
+                   `   Æ░ Price: ${offer.price}\n` +
+                   `   ¡ Rating: ${offer.rating}\n\n`;
     });
   }
 
@@ -1263,7 +1361,7 @@ window.confirmTermsAndProceedPayment = function() {
     if (checkoutTitle) checkoutTitle.textContent = `${window.pendingBooking.packageName || 'Umrah Package'} - ${window.pendingBooking.agencyName}`;
     if (checkoutAgent) checkoutAgent.textContent = `Agent Code: ${window.pendingBooking.agentCode} | Verified Partner`;
     if (checkoutPricePerson) checkoutPricePerson.textContent = window.pendingBooking.price;
-    if (checkoutTotalPrice) checkoutTotalPrice.textContent = 'Γé╣1,000';
+    if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹╣1,000';
   }
 
   if (checkoutView) checkoutView.style.display = 'block';
@@ -1307,9 +1405,9 @@ window.closePaymentSuccessModal = function() {
   if (checkoutView) checkoutView.style.display = 'none';
   if (emptyPaymentsView) {
     emptyPaymentsView.innerHTML = `
-      <div class="payments-icon">Γ£ô</div>
-      <h3 style="color:#127A4D;">Booking Fee Confirmed (Γé╣1,000)!</h3>
-      <p>Your Γé╣1,000 confirmation fee has been received and your package offer is locked. Invoice #INV-2026-089 has been generated. The partner agency will contact you shortly regarding the remaining balance.</p>
+      <div class="payments-icon">✓</div>
+      <h3 style="color:#127A4D;">Booking Fee Confirmed (₹╣1,000)!</h3>
+      <p>Your ₹╣1,000 confirmation fee has been received and your package offer is locked. Invoice #INV-2026-089 has been generated. The partner agency will contact you shortly regarding the remaining balance.</p>
       
       <div class="confirmed-booking-details" style="display:flex; flex-direction:column; gap:8px; background:#F8FCF9; border:1px solid #D2EBE0; border-radius:var(--radius-md); padding:14px 20px; margin:16px 0; width:100%; max-width:420px; text-align:left;">
         <div style="display:flex; justify-content:space-between; align-items:center;">

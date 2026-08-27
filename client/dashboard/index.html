@@ -1164,7 +1164,10 @@
           </div>
 
           <div class="profile-card">
-            <h3 class="profile-card-title">Account Information</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+              <h3 class="profile-card-title" style="margin:0;">Account Information</h3>
+              <button type="button" id="btnEditProfile" class="btn-action-link" style="font-weight:700; color:#127A4D; border:1px solid #D2EBE0; padding:6px 14px; border-radius:8px; background:#fff;">Edit</button>
+            </div>
 
             <!-- User Header Block -->
             <div class="user-profile-header">
@@ -1191,15 +1194,19 @@
             <div class="profile-rows-list">
               <div class="profile-row">
                 <span class="row-label">Full Name</span>
-                <span class="row-value bold">012 Palak Badyal</span>
+                <span class="row-value bold" id="profileNameDisplay">012 Palak Badyal</span>
+                <input type="text" id="profileNameInput" class="form-input" style="display:none; max-width:200px; height:36px; font-size:14px;" value="012 Palak Badyal">
               </div>
               <div class="profile-row">
                 <span class="row-label">Email Address</span>
-                <span class="row-value bold">palakbadyal69@gmail.com</span>
+                <span class="row-value bold" id="profileEmailDisplay">palakbadyal69@gmail.com</span>
+                <input type="email" id="profileEmailInput" class="form-input" style="display:none; max-width:200px; height:36px; font-size:14px;" value="palakbadyal69@gmail.com">
               </div>
               <div class="profile-row" id="phoneProfileRow">
                 <span class="row-label">Phone Number</span>
                 <div class="row-value-container" id="phoneValueContainer">
+                  <span class="row-value bold" id="profilePhoneDisplay" style="display:none;"></span>
+                  <input type="tel" id="profilePhoneInput" class="form-input" style="display:none; max-width:200px; height:36px; font-size:14px;" placeholder="Enter phone number" inputmode="numeric" pattern="[0-9]*">
                   <button type="button" class="btn-action-link" id="btnAddPhone">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                       <line x1="12" y1="5" x2="12" y2="19"></line>

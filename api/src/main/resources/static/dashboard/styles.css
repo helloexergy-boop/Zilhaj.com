@@ -55,7 +55,7 @@ body {
 }
 
 .app-container {
-  max-width: 1360px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 16px 24px;
 }
@@ -79,6 +79,10 @@ body {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
+  position: sticky;
+  top: 16px;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .nav-brand {
@@ -3069,7 +3073,8 @@ body {
 }
 
 .offer-card-item:hover {
-  border-color: var(--primary-green);
+  border: 1px solid var(--primary-green);
+  border-top: 1px solid var(--primary-green);
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
@@ -3931,6 +3936,20 @@ body {
   border-top: 1px dashed var(--border-color);
   padding-top: 12px;
   margin-top: 16px;
+}
+
+.requests-cards-container .request-card-box:first-child {
+  margin-bottom: 16px;
+}
+
+.requests-cards-container .request-card-box:first-child .request-card-body,
+.requests-cards-container .request-card-box:first-child .integrated-status-tracker {
+  padding: 12px;
+}
+
+.content-area {
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
 }
 
 .btn-cancel-request {
