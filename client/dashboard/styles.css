@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    ZILHAJ.COM - GLOBAL STYLES & DESIGN SYSTEM
    ========================================================================== */
 
@@ -56,33 +56,36 @@ body {
 
 .app-container {
   max-width: 100%;
+  width: 100%;
   margin: 0 auto;
-  padding: 16px 24px;
+  padding: 12px 24px;
+  box-sizing: border-box;
 }
 
 .app-container.full-width-mode {
   max-width: 100%;
-  padding-left: 40px;
-  padding-right: 40px;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 /* ==========================================================================
-   TOP NAVIGATION HEADER
+   TOP NAVIGATION HEADER (Floating Pill Style)
    ========================================================================== */
 
 .top-navbar {
-  background-color: var(--primary-green-light);
+  background: rgba(232, 246, 239, 0.95);
+  backdrop-filter: blur(12px);
   border: 1px solid #D2EBE0;
   border-radius: var(--radius-lg);
   padding: 12px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   position: sticky;
-  top: 16px;
+  top: 12px;
   z-index: 100;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
 .nav-brand {
@@ -887,7 +890,8 @@ body {
 }
 
 .offer-card:hover {
-  border-color: var(--primary-green);
+  border: 1px solid var(--primary-green) !important;
+  border-top: 2px solid var(--primary-green) !important;
   box-shadow: var(--shadow-sm);
 }
 
@@ -3073,8 +3077,8 @@ body {
 }
 
 .offer-card-item:hover {
-  border: 1px solid var(--primary-green);
-  border-top: 1px solid var(--primary-green);
+  border: 1px solid var(--primary-green) !important;
+  border-top: 2px solid var(--primary-green) !important;
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }

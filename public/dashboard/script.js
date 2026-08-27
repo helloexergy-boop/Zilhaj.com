@@ -1,4 +1,4 @@
-﻿// ==========================================================================
+// ==========================================================================
 // ZILHAJ.COM - INTERACTIVE JAVASCRIPT LOGIC
 // ==========================================================================
 
@@ -49,7 +49,122 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ------------------------------------------------------------------------
-  // 2. "+ NEW REQUEST" BUTTON DIRECT FORM TRIGGER
+  // 2. UNIFIED PROFILE EDITING & NUMERIC PHONE VALIDATION
+  // ------------------------------------------------------------------------
+  const btnEditProfile = document.getElementById('btnEditProfile');
+  const profileNameDisplay = document.getElementById('profileNameDisplay');
+  const profileEmailDisplay = document.getElementById('profileEmailDisplay');
+  const profilePhoneDisplay = document.getElementById('profilePhoneDisplay');
+  
+  const profileNameInput = document.getElementById('profileNameInput');
+  const profileEmailInput = document.getElementById('profileEmailInput');
+  const profilePhoneInput = document.getElementById('profilePhoneInput');
+
+  const navUserName = document.getElementById('navUserName');
+  const profileHeaderName = document.getElementById('profileHeaderName');
+  const profileHeaderEmail = document.getElementById('profileHeaderEmail');
+  const navAvatarInitials = document.getElementById('navAvatarInitials');
+  const profileAvatarLarge = document.getElementById('profileAvatarLarge');
+
+  let isProfileEditing = false;
+
+  // Enforce numeric-only phone input (block alphabetic/special characters)
+  if (profilePhoneInput) {
+    profilePhoneInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 15);
+    });
+  }
+
+  // Load saved profile data from localStorage
+  const loadSavedProfile = () => {
+    const savedName = localStorage.getItem('zilhaj_user_name');
+    const savedEmail = localStorage.getItem('zilhaj_user_email');
+    const savedPhone = localStorage.getItem('zilhaj_user_phone');
+
+    if (savedName) {
+      if (profileNameDisplay) profileNameDisplay.textContent = savedName;
+      if (profileNameInput) profileNameInput.value = savedName;
+      if (navUserName) navUserName.textContent = savedName;
+      if (profileHeaderName) profileHeaderName.textContent = savedName;
+      
+      const initials = savedName.trim().charAt(0).toUpperCase() || 'O';
+      if (navAvatarInitials) navAvatarInitials.textContent = initials;
+      if (profileAvatarLarge) profileAvatarLarge.textContent = initials;
+    }
+    if (savedEmail) {
+      if (profileEmailDisplay) profileEmailDisplay.textContent = savedEmail;
+      if (profileEmailInput) profileEmailInput.value = savedEmail;
+      if (profileHeaderEmail) profileHeaderEmail.textContent = savedEmail;
+    }
+    if (savedPhone) {
+      const cleanPhone = savedPhone.replace(/\D/g, '');
+      if (profilePhoneDisplay) profilePhoneDisplay.textContent = cleanPhone ? `+91 ${cleanPhone}` : '';
+      if (profilePhoneInput) profilePhoneInput.value = cleanPhone;
+    }
+  };
+
+  loadSavedProfile();
+
+  if (btnEditProfile) {
+    btnEditProfile.addEventListener('click', () => {
+      isProfileEditing = !isProfileEditing;
+
+      if (isProfileEditing) {
+        if (profileNameDisplay) profileNameDisplay.style.display = 'none';
+        if (profileEmailDisplay) profileEmailDisplay.style.display = 'none';
+        if (profilePhoneDisplay) profilePhoneDisplay.style.display = 'none';
+
+        if (profileNameInput) profileNameInput.style.display = 'block';
+        if (profileEmailInput) profileEmailInput.style.display = 'block';
+        if (profilePhoneInput) profilePhoneInput.style.display = 'block';
+
+        btnEditProfile.textContent = 'Save Profile';
+        btnEditProfile.style.background = '#127A4D';
+        btnEditProfile.style.color = '#FFFFFF';
+      } else {
+        const newName = profileNameInput ? profileNameInput.value.trim() : '';
+        const newEmail = profileEmailInput ? profileEmailInput.value.trim() : '';
+        const newPhone = profilePhoneInput ? profilePhoneInput.value.replace(/\D/g, '') : '';
+
+        if (newName) {
+          localStorage.setItem('zilhaj_user_name', newName);
+          if (profileNameDisplay) profileNameDisplay.textContent = newName;
+          if (navUserName) navUserName.textContent = newName;
+          if (profileHeaderName) profileHeaderName.textContent = newName;
+
+          const initials = newName.charAt(0).toUpperCase() || 'O';
+          if (navAvatarInitials) navAvatarInitials.textContent = initials;
+          if (profileAvatarLarge) profileAvatarLarge.textContent = initials;
+        }
+
+        if (newEmail) {
+          localStorage.setItem('zilhaj_user_email', newEmail);
+          if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
+          if (profileHeaderEmail) profileHeaderEmail.textContent = newEmail;
+        }
+
+        if (newPhone) {
+          localStorage.setItem('zilhaj_user_phone', newPhone);
+          if (profilePhoneDisplay) profilePhoneDisplay.textContent = `+91 ${newPhone}`;
+        }
+
+        if (profileNameDisplay) profileNameDisplay.style.display = 'block';
+        if (profileEmailDisplay) profileEmailDisplay.style.display = 'block';
+        if (profilePhoneDisplay) profilePhoneDisplay.style.display = 'block';
+
+        if (profileNameInput) profileNameInput.style.display = 'none';
+        if (profileEmailInput) profileEmailInput.style.display = 'none';
+        if (profilePhoneInput) profilePhoneInput.style.display = 'none';
+
+        btnEditProfile.textContent = 'Edit Profile';
+        btnEditProfile.style.background = '#FFFFFF';
+        btnEditProfile.style.color = '#127A4D';
+      }
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // 3. "+ NEW REQUEST" BUTTON DIRECT FORM TRIGGER
   // ------------------------------------------------------------------------
   const btnOpenNewRequest = document.getElementById('btnOpenNewRequestModal');
   if (btnOpenNewRequest) {
