@@ -708,7 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </svg>
             </div>
 
-            <h3 class="empty-state-title">No Offers Yet Çö We're Working on the Best Ones for You! £</h3>
+            <h3 class="empty-state-title">No Offers Yet - We are Working on the Best Ones for You!ng on the Best Ones for You! £</h3>
             <p class="empty-state-subtext">Our verified partners are reviewing your request and collecting the most suitable options. You'll be notified as soon as offers are ready.</p>
 
             <div class="empty-state-info-bar">
@@ -928,6 +928,13 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   setupOffersScrollIndicators();
+
+  // Ensure dashboard defaults to My Requests (not Help) and handles submit-request hash
+  if (window.location.hash === '#submit-request') {
+    switchTab('submit-request');
+  } else {
+    switchTab('requests');
+  }
 
   // Initialize empty state check & cancel button states on startup
   checkEmptyRequestsState();

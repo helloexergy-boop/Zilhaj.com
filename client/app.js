@@ -995,7 +995,8 @@ class App {
                 main.innerHTML = this.renderHomePage();
                 return;
             }
-            main.innerHTML = this.renderRequestFormPage();
+            window.location.href = '/dashboard/index.html#submit-request';
+            return;
         } else if (page === 'services' || page === 'guides') {
             main.innerHTML = this.renderServicesPage();
         } else if (page === 'faqs') {

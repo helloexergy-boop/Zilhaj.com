@@ -708,7 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </svg>
             </div>
 
-            <h3 class="empty-state-title">No Offers Yet Çö We're Working on the Best Ones for You! £</h3>
+            <h3 class="empty-state-title">No Offers Yet - We are Working on the Best Ones for You!ng on the Best Ones for You! £</h3>
             <p class="empty-state-subtext">Our verified partners are reviewing your request and collecting the most suitable options. You'll be notified as soon as offers are ready.</p>
 
             <div class="empty-state-info-bar">
@@ -929,6 +929,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupOffersScrollIndicators();
 
+  // Ensure dashboard defaults to My Requests (not Help) and handles submit-request hash
+  if (window.location.hash === '#submit-request') {
+    switchTab('submit-request');
+  } else {
+    switchTab('requests');
+  }
+
   // Initialize empty state check & cancel button states on startup
   checkEmptyRequestsState();
   applyCancelButtonStates();
@@ -989,97 +996,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (userPill) {
     userPill.style.cursor = 'pointer';
     userPill.addEventListener('click', () => switchTab('profile'));
-  }
-
-  // Unified single Edit for Name/Email/Phone in Profile
-  const btnEditProfile = document.getElementById('btnEditProfile');
-  let isEditingProfile = false;
-  if (btnEditProfile) {
-    btnEditProfile.addEventListener('click', () => {
-      isEditingProfile = !isEditingProfile;
-      const nameDisplay = document.getElementById('profileNameDisplay');
-      const nameInput = document.getElementById('profileNameInput');
-      const emailDisplay = document.getElementById('profileEmailDisplay');
-      const emailInput = document.getElementById('profileEmailInput');
-      const phoneDisplay = document.getElementById('profilePhoneDisplay');
-      const phoneInput = document.getElementById('profilePhoneInput');
-      const btnAddPhone = document.getElementById('btnAddPhone');
-      
-      if (isEditingProfile) {
-        if (nameDisplay) nameDisplay.style.display = 'none';
-        if (nameInput) { nameInput.style.display = 'block'; nameInput.value = nameDisplay ? nameDisplay.textContent.trim() : ''; }
-        if (emailDisplay) emailDisplay.style.display = 'none';
-        if (emailInput) { emailInput.style.display = 'block'; emailInput.value = emailDisplay ? emailDisplay.textContent.trim() : ''; }
-        if (phoneDisplay) phoneDisplay.style.display = 'none';
-        if (phoneInput) {
-          phoneInput.style.display = 'block';
-          const phoneVal = phoneDisplay && phoneDisplay.textContent.trim() && phoneDisplay.textContent.trim() !== '—' ? phoneDisplay.textContent.trim() : '';
-          phoneInput.value = phoneVal;
-        }
-        if (btnAddPhone) btnAddPhone.style.display = 'none';
-        btnEditProfile.textContent = 'Save';
-        btnEditProfile.style.background = '#127A4D';
-        btnEditProfile.style.color = '#fff';
-        btnEditProfile.style.borderColor = '#127A4D';
-      } else {
-        const newName = nameInput ? nameInput.value.trim() : '';
-        const newEmail = emailInput ? emailInput.value.trim() : '';
-        const newPhone = phoneInput ? phoneInput.value.trim() : '';
-        if (!newName) { alert('Full Name is required'); return; }
-        if (newEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) { alert('Please enter a valid email'); return; }
-        if (newPhone && !/^\d+$/.test(newPhone)) { alert('Phone number must contain only numbers'); return; }
-        if (nameDisplay && newName) nameDisplay.textContent = newName;
-        if (emailDisplay && newEmail) emailDisplay.textContent = newEmail;
-        if (phoneDisplay) {
-          if (newPhone) {
-            phoneDisplay.textContent = newPhone;
-            phoneDisplay.style.display = 'block';
-          } else {
-            phoneDisplay.textContent = '';
-            phoneDisplay.style.display = 'none';
-          }
-        }
-        // Persist to localStorage
-        try {
-          const user = JSON.parse(localStorage.getItem('umrah_user') || 'null');
-          if (user) {
-            if (newName) user.name = newName;
-            if (newEmail) user.email = newEmail;
-            if (newPhone) user.phone = newPhone;
-            localStorage.setItem('umrah_user', JSON.stringify(user));
-            // Update top navbar
-            const userNameEls = document.querySelectorAll('.user-name, .user-meta-name');
-            userNameEls.forEach(el => { if (el && newName) el.textContent = newName; });
-          }
-        } catch (e) {}
-        if (nameDisplay) nameDisplay.style.display = 'block';
-        if (nameInput) nameInput.style.display = 'none';
-        if (emailDisplay) emailDisplay.style.display = 'block';
-        if (emailInput) emailInput.style.display = 'none';
-        if (phoneInput) phoneInput.style.display = 'none';
-        if (btnAddPhone && !newPhone) btnAddPhone.style.display = 'inline-flex';
-        btnEditProfile.textContent = 'Edit';
-        btnEditProfile.style.background = '#fff';
-        btnEditProfile.style.color = '#127A4D';
-        btnEditProfile.style.borderColor = '#D2EBE0';
-        // Show toast if available
-        if (typeof showToast === 'function') showToast('Profile updated successfully!');
-      }
-    });
-  }
-
-  // Phone field numeric-only validation
-  const profilePhoneInput = document.getElementById('profilePhoneInput');
-  if (profilePhoneInput) {
-    profilePhoneInput.addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 15);
-    });
-  }
-  const mobileInput = document.getElementById('mobileInput');
-  if (mobileInput) {
-    mobileInput.addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
-    });
   }
 
 });
