@@ -25,18 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Toggle full-width mode for submit-request tab (expands app-container & removes left sidebar on this page only)
-    const appContainer = document.querySelector('.app-container');
-    const mainLayout = document.querySelector('.main-layout');
-
-    if (targetTab === 'submit-request') {
-      if (appContainer) appContainer.classList.add('full-width-mode');
-      if (mainLayout) mainLayout.classList.add('full-width-mode');
-    } else {
-      if (appContainer) appContainer.classList.remove('full-width-mode');
-      if (mainLayout) mainLayout.classList.remove('full-width-mode');
-    }
-
     // Scroll smoothly to top of content
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -44,9 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
   sidebarLinks.forEach(link => {
     link.addEventListener('click', () => {
       const targetTab = link.getAttribute('data-tab');
-      switchTab(targetTab);
+      if (targetTab === 'help') {
+        switchTab('requests');
+      } else {
+        switchTab(targetTab);
+      }
     });
   });
+
+  // URL Hash Navigation / Hash Redirect Handling (Help -> My Requests)
+  const initialHash = window.location.hash.replace('#', '').toLowerCase();
+  if (initialHash === 'submit-request' || initialHash === 'request-form') {
+    switchTab('submit-request');
+  } else if (initialHash === 'help' || initialHash === 'support') {
+    switchTab('requests');
+  }
 
   // ------------------------------------------------------------------------
   // 2. UNIFIED PROFILE EDITING & NUMERIC PHONE VALIDATION
@@ -708,7 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </svg>
             </div>
 
-            <h3 class="empty-state-title">No Offers Yet - We are Working on the Best Ones for You!ng on the Best Ones for You! £</h3>
+            <h3 class="empty-state-title">No Offers Yet - We're Working on the Best Ones for You!</h3>
             <p class="empty-state-subtext">Our verified partners are reviewing your request and collecting the most suitable options. You'll be notified as soon as offers are ready.</p>
 
             <div class="empty-state-info-bar">
@@ -767,14 +767,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (footerHelpLink) {
     footerHelpLink.addEventListener('click', (e) => {
       e.preventDefault();
-      switchTab('help');
-    });
-  }
-
-  if (footerFaqLink) {
-    footerFaqLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      switchTab('help');
+      switchTab('requests');
     });
   }
 
@@ -928,13 +921,6 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   setupOffersScrollIndicators();
-
-  // Ensure dashboard defaults to My Requests (not Help) and handles submit-request hash
-  if (window.location.hash === '#submit-request') {
-    switchTab('submit-request');
-  } else {
-    switchTab('requests');
-  }
 
   // Initialize empty state check & cancel button states on startup
   checkEmptyRequestsState();

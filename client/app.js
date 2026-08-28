@@ -1072,7 +1072,7 @@ class App {
             this.openAuthModal('login');
             return;
         }
-        this.navigate('request-form');
+        window.location.href = '/dashboard/index.html#submit-request';
     }
 
     setPilgrimageType(type) {
@@ -11293,7 +11293,7 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
             anchor.scrollIntoView({ behavior: 'smooth' });
             return;
         }
-        this.navigate('request-form');
+        window.location.href = '/dashboard/index.html#submit-request';
     }
 
 

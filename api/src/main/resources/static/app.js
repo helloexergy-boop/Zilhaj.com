@@ -995,7 +995,8 @@ class App {
                 main.innerHTML = this.renderHomePage();
                 return;
             }
-            main.innerHTML = this.renderRequestFormPage();
+            window.location.href = '/dashboard/index.html#submit-request';
+            return;
         } else if (page === 'services' || page === 'guides') {
             main.innerHTML = this.renderServicesPage();
         } else if (page === 'faqs') {
@@ -1071,7 +1072,7 @@ class App {
             this.openAuthModal('login');
             return;
         }
-        this.navigate('request-form');
+        window.location.href = '/dashboard/index.html#submit-request';
     }
 
     setPilgrimageType(type) {
@@ -11292,7 +11293,7 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
             anchor.scrollIntoView({ behavior: 'smooth' });
             return;
         }
-        this.navigate('request-form');
+        window.location.href = '/dashboard/index.html#submit-request';
     }
 
 
