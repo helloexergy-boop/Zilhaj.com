@@ -73,14 +73,15 @@ body {
    ========================================================================== */
 
 .top-navbar {
-  background-color: var(--primary-green-light);
-  border: 1px solid #D2EBE0;
+  background-color: #E8F6EF;
+  border: 1.5px solid #D2EBE0;
   border-radius: var(--radius-lg);
-  padding: 12px 24px;
+  padding: 10px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
+  box-shadow: 0 2px 10px rgba(18, 122, 77, 0.05);
 }
 
 .nav-brand {
@@ -141,20 +142,44 @@ body {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 16px;
 }
 
 .nav-link {
   text-decoration: none;
   color: var(--text-dark);
   font-size: 14px;
-  font-weight: 600;
-  transition: color 0.2s ease;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 10px;
+  position: relative;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.nav-link:hover,
+.nav-link:hover {
+  color: var(--primary-green);
+  background-color: rgba(18, 122, 77, 0.06);
+}
+
 .nav-link.active {
   color: var(--primary-green);
+  background-color: #D6EFE3;
+  font-weight: 800;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55%;
+  height: 3px;
+  background-color: var(--primary-green);
+  border-radius: 99px;
 }
 
 .nav-user-area {
@@ -166,47 +191,55 @@ body {
 .user-pill-badge {
   background: #FFFFFF;
   border-radius: var(--radius-pill);
-  padding: 6px 16px 6px 6px;
+  padding: 5px 14px 5px 5px;
   display: flex;
   align-items: center;
   gap: 10px;
   box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(18, 122, 77, 0.1);
+  border: 1px solid #D2EBE0;
+  transition: all 0.2s ease;
+}
+
+.user-pill-badge:hover {
+  border-color: var(--primary-green);
+  transform: translateY(-1px);
 }
 
 .user-avatar-circle {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   background-color: var(--primary-green);
   color: #FFFFFF;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 13px;
+  font-weight: 800;
+  font-size: 14px;
 }
 
 .user-name {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 800;
   color: var(--text-dark);
 }
 
 .btn-logout-header {
-  background: #FFFFFF;
+  background: #FDF2F2;
   color: #DC2626;
   border: 1px solid #FECACA;
-  border-radius: var(--radius-pill);
-  padding: 8px 18px;
+  border-radius: 8px;
+  padding: 7px 16px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-logout-header:hover {
-  background: #FDF2F2;
+  background: #FEE2E2;
+  border-color: #FCA5A5;
+  color: #B91C1C;
 }
 
 /* ==========================================================================

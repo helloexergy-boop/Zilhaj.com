@@ -24,7 +24,7 @@
     
     <!-- Top Navigation Header -->
     <header class="top-navbar">
-      <div class="nav-brand">
+      <div class="nav-brand" onclick="window.location.href='/'" style="cursor: pointer;">
         <div class="logo-gold-ring">
           <img src="dashboard/logo.jpg" onError="this.src='logo.png'" alt="ZILHAJ Logo" class="brand-logo-img">
         </div>
@@ -42,13 +42,11 @@
       </nav>
 
       <div class="nav-user-area">
-        <a href="/dashboard/index.html#requests" class="btn-back-dashboard">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          Go to Dashboard
-        </a>
+        <div class="user-pill-badge" onclick="window.location.href='/dashboard/index.html#profile'" style="cursor: pointer;" title="Go to Profile & Settings">
+          <span class="user-avatar-circle" id="navAvatarInitials">P</span>
+          <span class="user-name" id="navUserName">Pilgrim Profile</span>
+        </div>
+        <button class="btn-logout-header" id="btnLogoutHeader" onclick="localStorage.removeItem('umrah_user'); window.location.href='/';">Logout</button>
       </div>
     </header>
 

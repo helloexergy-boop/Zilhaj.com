@@ -17,11 +17,11 @@
 
   <div class="app-container">
     
-    <!-- Top Navigation Header -->
+    <!-- Floating Pill Header Bar -->
     <header class="top-navbar">
-      <div class="nav-brand">
+      <div class="nav-brand" onclick="window.location.href='/'" style="cursor: pointer;">
         <div class="logo-gold-ring">
-          <img src="logo.jpg" alt="ZILHAJ Logo" class="brand-logo-img">
+          <img src="logo.jpg" onError="this.src='logo.png'" alt="ZILHAJ Logo" class="brand-logo-img">
         </div>
         <div class="brand-text">
           <span class="brand-name">Zilhaj.com</span>
@@ -30,17 +30,18 @@
       </div>
 
       <nav class="nav-links">
-        <a href="#" class="nav-link active">Home</a>
-        <a href="#" class="nav-link">Services</a>
-        <a href="#" class="nav-link">Contact Us</a>
-        <a href="#" class="nav-link">About Us</a>
+        <a href="/" class="nav-link">Home</a>
+        <a href="/#services" class="nav-link">Services</a>
+        <a href="#" class="nav-link active" onclick="if(typeof switchTab==='function') switchTab('requests'); return false;">My Requests</a>
+        <a href="/#about" class="nav-link">About Us</a>
       </nav>
 
       <div class="nav-user-area">
-        <div class="user-pill-badge" onclick="switchTab('profile')" style="cursor: pointer;" title="Go to Profile & Settings">
+        <div class="user-pill-badge" onclick="if(typeof switchTab==='function') switchTab('profile'); else window.location.href='/dashboard/index.html#profile';" style="cursor: pointer;" title="Go to Profile & Settings">
           <span class="user-avatar-circle" id="navAvatarInitials">P</span>
           <span class="user-name" id="navUserName">Pilgrim Profile</span>
         </div>
+        <button class="btn-logout-header" id="btnLogoutHeader" onclick="localStorage.removeItem('umrah_user'); window.location.href='/';">Logout</button>
       </div>
     </header>
 
