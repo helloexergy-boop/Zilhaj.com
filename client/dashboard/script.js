@@ -11,6 +11,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabPanes = document.querySelectorAll('.tab-pane');
 
   window.switchTab = (targetTab) => {
+    const mainLayout = document.querySelector('.main-layout');
+    if (mainLayout) {
+      if (targetTab === 'submit-request') {
+        mainLayout.classList.add('full-width-mode');
+      } else {
+        mainLayout.classList.remove('full-width-mode');
+      }
+    }
+
     sidebarLinks.forEach(l => {
       l.classList.remove('active');
       if (l.getAttribute('data-tab') === targetTab) {
@@ -497,6 +506,9 @@ document.addEventListener('DOMContentLoaded', () => {
   window.closeConfirmationModal = () => {
     if (modal) modal.style.display = 'none';
     unlockBodyScroll();
+    if (typeof switchTab === 'function') {
+      switchTab('requests');
+    }
   };
 
   if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeConfirmationModal);

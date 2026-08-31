@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Umrah & Hajj Request | Zilhaj.com</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="dashboard/styles.css">
+  <style>
+    body { background-color: var(--bg-main); padding: 16px 24px; }
+    .standalone-container { max-width: 1080px; margin: 0 auto; }
+    .back-nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .btn-back-dashboard { display: inline-flex; align-items: center; gap: 8px; background: #FFFFFF; color: var(--primary-green); border: 1.5px solid #D2EBE0; border-radius: 99px; padding: 8px 18px; font-weight: 700; font-size: 14px; text-decoration: none; transition: all 0.2s ease; }
+    .btn-back-dashboard:hover { background: var(--primary-green-light); transform: translateX(-2px); }
+  </style>
+</head>
+<body>
+
+  <div class="standalone-container">
+    
+    <!-- Top Navigation Header -->
+    <header class="top-navbar">
+      <div class="nav-brand">
+        <div class="logo-gold-ring">
+          <img src="dashboard/logo.jpg" onError="this.src='logo.png'" alt="ZILHAJ Logo" class="brand-logo-img">
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Zilhaj.com</span>
+          <span class="brand-sub">UMRAH & HAJJ TRAVEL</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/#services" class="nav-link">Services</a>
+        <a href="/dashboard/index.html#requests" class="nav-link">My Requests</a>
+        <a href="/#about" class="nav-link">About Us</a>
+      </nav>
+
+      <div class="nav-user-area">
+        <a href="/dashboard/index.html#requests" class="btn-back-dashboard">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Go to Dashboard
+        </a>
+      </div>
+    </header>
+
+    <!-- Heading Block -->
+    <div class="submit-request-header" style="margin-bottom: 1.5rem;">
+      <div class="submit-header-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
+          <path d="M3 21h18M5 21V7l7-4 7 4v14M9 10a3 3 0 0 1 6 0v11H9V10z"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="page-title" id="submitFormHeading">Submit Umrah & Hajj Request</h1>
+        <p class="page-subtitle" id="submitFormSub">Fill out the details below to receive personalized package quotes from verified Saudi-licensed operators. Compare multiple custom bids for free.</p>
+      </div>
+    </div>
+
+    <!-- Main Full-Width Form Layout (No Sidebar) -->
+    <div class="submit-form-container" style="width:100%;">
+      
+      <form class="main-form-column" id="fullRequestFormStandalone">
+
+        <!-- SECTION 1: TRIP DETAILS -->
+        <div class="form-section-card">
+          <div class="form-section-header">
+            <div class="section-icon-badge">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
+                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path>
+              </svg>
+            </div>
+            <h3 class="section-title">Trip Details</h3>
+          </div>
+
+          <div class="form-grid-3">
+            <div class="form-field-group col-span-3">
+              <label class="form-label required">APPLYING FOR</label>
+              <select id="applyingForSelect" class="form-select bold-select" required>
+                <option value="Umrah" selected>Umrah</option>
+                <option value="Hajj">Hajj</option>
+              </select>
+            </div>
+
+            <div class="form-field-group">
+              <label class="form-label required">CITY OF DEPARTURE</label>
+              <select id="cityDepartureSelect" class="form-select" required>
+                <option value="" disabled selected>Select Departure City</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Srinagar">Srinagar</option>
+                <option value="Bangalore (Bengaluru)">Bangalore (Bengaluru)</option>
+                <option value="Hyderabad">Hyderabad</option>
+                <option value="Kolkata">Kolkata</option>
+                <option value="Ahmedabad">Ahmedabad</option>
+                <option value="Lucknow">Lucknow</option>
+                <option value="Chennai">Chennai</option>
+                <option value="Jaipur">Jaipur</option>
+                <option value="Calicut (Kozhikode)">Calicut (Kozhikode)</option>
+              </select>
+            </div>
+
+            <div class="form-field-group">
+              <label class="form-label required">PREFERRED DEPARTURE DATE</label>
+              <input type="date" id="departureDateInput" class="form-input" required>
+            </div>
+
+            <div class="form-field-group">
+              <label class="form-label">DURATION OF STAY</label>
+              <select id="durationSelect" class="form-select">
+                <option value="12-14 Days" selected>12-14 Days</option>
+                <option value="18-20 Days">18-20 Days</option>
+                <option value="22-24 Days">22-24 Days</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: TRAVELER DETAILS -->
+        <div class="form-section-card">
+          <div class="form-section-header">
+            <div class="section-icon-badge">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <h3 class="section-title">Traveler Details</h3>
+          </div>
+
+          <div class="traveler-counters-grid">
+            <div class="counter-box">
+              <div class="counter-label-block">
+                <span class="counter-title">Male</span>
+                <span class="counter-sub">Adults</span>
+              </div>
+              <div class="counter-controls">
+                <button type="button" class="btn-counter" onclick="adjustCounter('maleCount', -1)">-</button>
+                <span class="counter-value" id="maleCount">1</span>
+                <button type="button" class="btn-counter" onclick="adjustCounter('maleCount', 1)">+</button>
+              </div>
+            </div>
+
+            <div class="counter-box">
+              <div class="counter-label-block">
+                <span class="counter-title">Female</span>
+                <span class="counter-sub">Adults (Requires Mehram)</span>
+              </div>
+              <div class="counter-controls">
+                <button type="button" class="btn-counter" onclick="adjustCounter('femaleCount', -1)">-</button>
+                <span class="counter-value" id="femaleCount">1</span>
+                <button type="button" class="btn-counter" onclick="adjustCounter('femaleCount', 1)">+</button>
+              </div>
+            </div>
+
+            <div class="counter-box">
+              <div class="counter-label-block">
+                <span class="counter-title">Children</span>
+                <span class="counter-sub">2–11 years</span>
+              </div>
+              <div class="counter-controls">
+                <button type="button" class="btn-counter" onclick="adjustCounter('childCount', -1)">-</button>
+                <span class="counter-value" id="childCount">0</span>
+                <button type="button" class="btn-counter" onclick="adjustCounter('childCount', 1)">+</button>
+              </div>
+            </div>
+
+            <div class="counter-box">
+              <div class="counter-label-block">
+                <span class="counter-title">Infants</span>
+                <span class="counter-sub">Below 2 years</span>
+              </div>
+              <div class="counter-controls">
+                <button type="button" class="btn-counter" onclick="adjustCounter('infantCount', -1)">-</button>
+                <span class="counter-value" id="infantCount">0</span>
+                <button type="button" class="btn-counter" onclick="adjustCounter('infantCount', 1)">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: HOTEL PREFERENCE -->
+        <div class="form-section-card">
+          <div class="form-section-header">
+            <div class="section-icon-badge">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
+                <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"></path>
+                <path d="M9 7h6M9 11h6M9 15h6"></path>
+              </svg>
+            </div>
+            <h3 class="section-title">Hotel Preference</h3>
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">HOTEL CATEGORY</label>
+            <div class="hotel-category-list">
+              <label class="hotel-radio-card">
+                <input type="radio" name="hotelCategory" value="3 Star" checked>
+                <span class="hotel-radio-text">
+                  <strong>3 Star</strong> (Best value package with essential services)
+                </span>
+              </label>
+              <label class="hotel-radio-card">
+                <input type="radio" name="hotelCategory" value="4 Star">
+                <span class="hotel-radio-text">
+                  <strong>4 Star</strong> (Better hotels, improved transport, and added comfort)
+                </span>
+              </label>
+              <label class="hotel-radio-card">
+                <input type="radio" name="hotelCategory" value="5 Star">
+                <span class="hotel-radio-text">
+                  <strong>5 Star</strong> (High-quality hotels and premium travel experience)
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: CONTACT DETAILS -->
+        <div class="form-section-card">
+          <div class="form-section-header">
+            <div class="section-icon-badge">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+            </div>
+            <h3 class="section-title">Contact Information</h3>
+          </div>
+
+          <div class="form-grid-3">
+            <div class="form-field-group">
+              <label class="form-label required">FULL NAME</label>
+              <input type="text" id="fullnameInput" placeholder="Enter full name" class="form-input" required>
+            </div>
+            <div class="form-field-group">
+              <label class="form-label required">MOBILE NUMBER</label>
+              <input type="tel" id="mobileInput" placeholder="10-digit mobile number" class="form-input" maxlength="10" required>
+            </div>
+            <div class="form-field-group">
+              <label class="form-label">EMAIL ADDRESS</label>
+              <input type="email" id="emailInput" placeholder="Enter email address" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">SPECIAL REQUIREMENTS <small>(Optional)</small></label>
+            <textarea id="specialReqInput" rows="3" placeholder="e.g. Wheelchair assistance, specific flight preferences, elderly care..." class="form-textarea"></textarea>
+          </div>
+        </div>
+
+        <!-- SUBMIT ACTION -->
+        <div class="form-submit-row">
+          <a href="/dashboard/index.html#requests" class="btn-back-home">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back to Dashboard</span>
+          </a>
+          <button type="submit" class="btn-submit-full-request">
+            Submit Request & View Offers
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+  <script>
+    function adjustCounter(id, change) {
+      const el = document.getElementById(id);
+      if (el) {
+        let v = (parseInt(el.textContent) || 0) + change;
+        if (v < 0) v = 0;
+        el.textContent = v;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const u = JSON.parse(localStorage.getItem('umrah_user') || '{}');
+        if (u.name) document.getElementById('fullnameInput').value = u.name;
+        if (u.email) document.getElementById('emailInput').value = u.email;
+        if (u.phone) document.getElementById('mobileInput').value = u.phone;
+      } catch(e) {}
+
+      const form = document.getElementById('fullRequestFormStandalone');
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const applyingFor = document.getElementById('applyingForSelect').value;
+          const departureCity = document.getElementById('cityDepartureSelect').value || 'Delhi';
+          const rawDate = document.getElementById('departureDateInput').value;
+          const duration = document.getElementById('durationSelect').value;
+          const hotelCategory = document.querySelector('input[name="hotelCategory"]:checked')?.value || '5 Star';
+          const maleCount = parseInt(document.getElementById('maleCount').textContent) || 0;
+          const femaleCount = parseInt(document.getElementById('femaleCount').textContent) || 0;
+          const childCount = parseInt(document.getElementById('childCount').textContent) || 0;
+          const infantCount = parseInt(document.getElementById('infantCount').textContent) || 0;
+          const fullname = document.getElementById('fullnameInput').value;
+          const mobile = document.getElementById('mobileInput').value;
+          const email = document.getElementById('emailInput').value;
+          const specialRequirements = document.getElementById('specialReqInput')?.value || '';
+
+          const randomReqId = `REQ-${Math.floor(1000 + Math.random() * 9000)}`;
+          const payload = {
+            id: randomReqId, applyingFor, departureCity, travelDate: rawDate || 'Flexible',
+            duration, hotelCategory, totalPersons: maleCount + femaleCount + childCount + infantCount,
+            maleCount, femaleCount, childCount, infantCount, fullname, mobile, email,
+            specialRequirements, status: 'BIDDING', createdAt: new Date()
+          };
+
+          const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+          try {
+            await fetch(apiBase + '/requirements', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+          } catch(err) { console.warn('Request POST warning:', err); }
+
+          alert(`Request ${randomReqId} submitted successfully! Redirecting to your Dashboard to view submitted requests.`);
+          window.location.href = '/dashboard/index.html#requests';
+        });
+      }
+    });
+  </script>
+</body>
+</html>
