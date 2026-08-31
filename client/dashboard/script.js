@@ -49,10 +49,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // URL Hash Navigation / Hash Redirect Handling (Help -> My Requests)
+  // URL Hash Navigation / Hash Redirect Handling (Submit-Request / Profile / Payments / Help)
   const initialHash = window.location.hash.replace('#', '').toLowerCase();
   if (initialHash === 'submit-request' || initialHash === 'request-form') {
     switchTab('submit-request');
+  } else if (initialHash === 'profile' || initialHash === 'settings') {
+    switchTab('profile');
+  } else if (initialHash === 'payments') {
+    switchTab('payments');
   } else if (initialHash === 'help' || initialHash === 'support') {
     switchTab('requests');
   }

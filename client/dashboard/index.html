@@ -569,75 +569,67 @@
           <div class="page-header">
             <div>
               <h1 class="page-title">Profile & Settings</h1>
-              <p class="page-subtitle">Manage your account details, preferences and security.</p>
+              <p class="page-subtitle">Manage your personal information and account preferences.</p>
             </div>
           </div>
 
-          <div class="profile-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
-              <h3 class="profile-card-title" style="margin:0;">Account Information</h3>
-              <button type="button" id="btnEditProfile" class="btn-action-link" style="font-weight:700; color:#127A4D; border:1px solid #D2EBE0; padding:8px 18px; border-radius:8px; background:#fff; cursor:pointer; transition:all 0.2s;">Edit Profile</button>
-            </div>
+          <div class="profile-card" style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 32px; box-shadow: var(--shadow-sm); max-width: 800px; margin: 0 auto;">
 
             <!-- User Header Block -->
-            <div class="user-profile-header">
-              <div class="avatar-large-wrapper">
-                <div class="avatar-large" id="profileAvatarLarge">O</div>
-                <button class="avatar-edit-badge" title="Change Photo" id="avatarCameraBtn">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A2B23" stroke-width="2">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                    <circle cx="12" cy="13" r="4"></circle>
-                  </svg>
-                </button>
+            <div class="user-profile-header" style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 24px; margin-bottom: 28px; border-bottom: 1px solid var(--border-color);">
+              <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="avatar-large-wrapper" style="position: relative;">
+                  <div class="avatar-large" id="profileAvatarLarge" style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary-green); color: #FFFFFF; font-size: 32px; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(18,122,77,0.25);">P</div>
+                  <button class="avatar-edit-badge" title="Change Photo" id="avatarCameraBtn" style="position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; border-radius: 50%; background: #FFFFFF; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A2B23" stroke-width="2">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                      <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                  </button>
+                </div>
+                <div class="user-meta-info" style="display: flex; flex-direction: column; gap: 4px;">
+                  <h2 class="user-meta-name" id="profileHeaderName" style="font-size: 22px; font-weight: 800; color: var(--text-dark); margin: 0;">Pilgrim User</h2>
+                  <p class="user-meta-email" id="profileHeaderEmail" style="font-size: 14px; color: var(--text-muted); margin: 0;">user@example.com</p>
+                  <span class="badge badge-verified" style="display: inline-flex; align-items: center; gap: 6px; background: var(--primary-green-light); color: var(--primary-green); font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 99px; margin-top: 4px; width: fit-content;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Verified Account
+                  </span>
+                </div>
               </div>
-              <div class="user-meta-info">
-                <h2 class="user-meta-name" id="profileHeaderName">Pilgrim User</h2>
-                <p class="user-meta-email" id="profileHeaderEmail">user@example.com</p>
-                <span class="badge badge-verified">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  Verified Account
-                </span>
-              </div>
+              <button type="button" id="btnEditProfile" style="background: #FFFFFF; color: var(--primary-green); font-weight: 700; font-size: 14px; border: 1.5px solid #D2EBE0; padding: 10px 22px; border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s ease;">Edit Profile</button>
             </div>
 
-            <!-- Profile Rows Grid -->
-            <div class="profile-rows-list">
-              <div class="profile-row">
-                <span class="row-label">Full Name</span>
-                <span class="row-value bold" id="profileNameDisplay">Pilgrim User</span>
+            <!-- Profile Rows Grid (Symmetrical) -->
+            <div class="profile-rows-list" style="display: flex; flex-direction: column; gap: 14px;">
+              <div class="profile-row" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #F8FCF9; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <span class="row-label" style="font-size: 14px; font-weight: 700; color: var(--text-muted); min-width: 140px;">Full Name</span>
+                <span class="row-value bold" id="profileNameDisplay" style="font-size: 15px; font-weight: 800; color: var(--text-dark);">Pilgrim User</span>
                 <input type="text" id="profileNameInput" class="form-input" style="display:none; width:100%; max-width:280px; height:38px; font-size:14px;" value="Pilgrim User">
               </div>
-              <div class="profile-row">
-                <span class="row-label">Email Address</span>
-                <span class="row-value bold" id="profileEmailDisplay">user@example.com</span>
+
+              <div class="profile-row" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #F8FCF9; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <span class="row-label" style="font-size: 14px; font-weight: 700; color: var(--text-muted); min-width: 140px;">Email Address</span>
+                <span class="row-value bold" id="profileEmailDisplay" style="font-size: 15px; font-weight: 800; color: var(--text-dark);">user@example.com</span>
                 <input type="email" id="profileEmailInput" class="form-input" style="display:none; width:100%; max-width:280px; height:38px; font-size:14px;" value="user@example.com">
               </div>
-              <div class="profile-row" id="phoneProfileRow">
-                <span class="row-label">Phone Number</span>
-                <div class="row-value-container" id="phoneValueContainer" style="width:100%; max-width:280px;">
-                  <span class="row-value bold" id="profilePhoneDisplay">+91 --</span>
+
+              <div class="profile-row" id="phoneProfileRow" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #F8FCF9; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <span class="row-label" style="font-size: 14px; font-weight: 700; color: var(--text-muted); min-width: 140px;">Phone Number</span>
+                <div class="row-value-container" id="phoneValueContainer" style="display:flex; justify-content:flex-end; width:100%; max-width:280px;">
+                  <span class="row-value bold" id="profilePhoneDisplay" style="font-size: 15px; font-weight: 800; color: var(--text-dark);">+91 --</span>
                   <input type="tel" id="profilePhoneInput" class="form-input" style="display:none; width:100%; height:38px; font-size:14px;" placeholder="Numeric digits only (max 15)" inputmode="numeric" pattern="[0-9]*" maxlength="15" value="">
                 </div>
               </div>
-              <div class="profile-row">
-                <span class="row-label">Account Status</span>
-                <span class="row-value bold" style="color:#127A4D;">Active & Verified</span>
-              </div>
-              <div class="profile-row">
-                <span class="row-label">Member Since</span>
-                <span class="row-value bold">15-03-2025</span>
-              </div>
-            </div>
 
-            <!-- Profile Action Buttons -->
-            <div class="profile-actions">
-              <button class="btn-change-photo" id="btnChangePhoto">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                  <circle cx="12" cy="13" r="4"></circle>
-                </svg>
-                Change Photo
-              </button>
+              <div class="profile-row" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #F8FCF9; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <span class="row-label" style="font-size: 14px; font-weight: 700; color: var(--text-muted); min-width: 140px;">Account Status</span>
+                <span class="row-value bold" style="font-size: 15px; font-weight: 800; color: #127A4D;">Active & Verified</span>
+              </div>
+
+              <div class="profile-row" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #F8FCF9; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <span class="row-label" style="font-size: 14px; font-weight: 700; color: var(--text-muted); min-width: 140px;">Member Since</span>
+                <span class="row-value bold" style="font-size: 15px; font-weight: 800; color: var(--text-dark);">15-03-2025</span>
+              </div>
             </div>
 
           </div>
@@ -649,54 +641,52 @@
           <div class="page-header">
             <div>
               <h1 class="page-title">Help & Support</h1>
-              <p class="page-subtitle">Find answers and connect with our support team.</p>
+              <p class="page-subtitle">Find answers and connect with our dedicated support team 24/7.</p>
             </div>
           </div>
 
-          <!-- Search Box -->
-          <div class="help-search-wrapper">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#687970" stroke-width="2">
+          <!-- Symmetrical Help Search Box -->
+          <div class="help-search-wrapper" style="position: relative; max-width: 600px; margin: 0 auto 32px auto;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#687970" stroke-width="2" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%);">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input type="text" id="helpSearchInput" class="help-search-input" placeholder="Search for help...">
+            <input type="text" id="helpSearchInput" class="help-search-input" placeholder="Search help topics or FAQs..." style="width: 100%; height: 50px; padding-left: 50px; padding-right: 20px; font-size: 15px; border-radius: 99px; border: 1.5px solid var(--border-color); background: #FFFFFF; box-shadow: var(--shadow-sm); outline: none;">
           </div>
 
-          <!-- Quick Contact Cards -->
-          <div class="contact-grid">
-            <div class="contact-card" onclick="alert('Opening Live Chat window...')">
-              <div class="contact-card-icon">
+          <!-- Symmetrical Contact Cards Grid -->
+          <div class="contact-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+            <div class="contact-card" onclick="alert('Connecting to Live Chat Support...')" style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
+              <div class="contact-card-icon" style="width: 52px; height: 52px; border-radius: 50%; background: var(--primary-green-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                  <circle cx="9" cy="10" r="1" fill="#127A4D"></circle>
-                  <circle cx="12" cy="10" r="1" fill="#127A4D"></circle>
-                  <circle cx="15" cy="10" r="1" fill="#127A4D"></circle>
                 </svg>
               </div>
-              <span class="contact-card-label">Live Chat</span>
+              <h4 style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Live Chat</h4>
+              <p style="font-size: 13px; color: var(--text-muted); margin: 0;">24/7 instant agent chat</p>
             </div>
 
-            <div class="contact-card" onclick="location.href='mailto:support@zilhaj.com'">
-              <div class="contact-card-icon">
+            <div class="contact-card" onclick="location.href='mailto:support@zilhaj.com'" style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
+              <div class="contact-card-icon" style="width: 52px; height: 52px; border-radius: 50%; background: var(--primary-green-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
               </div>
-              <span class="contact-card-label">Email Us</span>
+              <h4 style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Email Support</h4>
+              <p style="font-size: 13px; color: var(--text-muted); margin: 0;">support@zilhaj.com</p>
             </div>
 
-            <div class="contact-card" onclick="window.open('https://wa.me/1234567890', '_blank')">
-              <div class="contact-card-icon">
+            <div class="contact-card" onclick="window.open('https://wa.me/919541692891', '_blank')" style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
+              <div class="contact-card-icon" style="width: 52px; height: 52px; border-radius: 50%; background: var(--primary-green-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                 </svg>
               </div>
-              <span class="contact-card-label">WhatsApp</span>
+              <h4 style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">WhatsApp Help</h4>
+              <p style="font-size: 13px; color: var(--text-muted); margin: 0;">+91 95416 92891</p>
             </div>
           </div>
-
-
         </section>
 
 
