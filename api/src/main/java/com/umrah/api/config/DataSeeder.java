@@ -46,18 +46,23 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
 
-        // Seed default accounts if database is empty
-        if (userRepository.count() == 0) {
-            logger.info("Database is empty. Seeding initial accounts, agents, and Umrah packages...");
-
-            // 1. Seed Admin User Account (email: admin@umrah.com / password: password123)
+        // Always ensure Super Admin and Sub-Admin accounts exist in database
+        if (!userRepository.existsByEmail("admin@umrah.com")) {
             User admin = new User("System Administrator", "admin@umrah.com", passwordEncoder.encode("password123"), "+1234567890", "ROLE_ADMIN");
             userRepository.save(admin);
+            logger.info("Seeded default Super Admin account: admin@umrah.com");
+        }
 
-            // 1b. Seed Sub-Admin User Account (email: subadmin@umrah.com / password: password123)
+        if (!userRepository.existsByEmail("subadmin@umrah.com")) {
             User subAdmin = new User("Operations SubAdmin", "subadmin@umrah.com", passwordEncoder.encode("password123"), "+1234567899", "ROLE_SUBADMIN");
             subAdmin.setPermissions(Arrays.asList("MANAGE_USERS", "MANAGE_AGENTS", "APPROVE_REQUIREMENTS"));
             userRepository.save(subAdmin);
+            logger.info("Seeded default Sub-Admin account: subadmin@umrah.com");
+        }
+
+        // Seed additional default sample data if database is empty
+        if (userRepository.count() <= 2) {
+            logger.info("Database is empty. Seeding initial accounts, agents, and Umrah packages...");
 
             // 2. Seed Travel Agent User Account (email: agent@alharam.com / password: password123)
             User agentUser = new User("Umrah Travels", "agent@alharam.com", passwordEncoder.encode("password123"), "9541692891", "ROLE_AGENT");
