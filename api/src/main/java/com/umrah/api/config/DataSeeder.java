@@ -54,6 +54,11 @@ public class DataSeeder implements CommandLineRunner {
             User admin = new User("System Administrator", "admin@umrah.com", passwordEncoder.encode("password123"), "+1234567890", "ROLE_ADMIN");
             userRepository.save(admin);
 
+            // 1b. Seed Sub-Admin User Account (email: subadmin@umrah.com / password: password123)
+            User subAdmin = new User("Operations SubAdmin", "subadmin@umrah.com", passwordEncoder.encode("password123"), "+1234567899", "ROLE_SUBADMIN");
+            subAdmin.setPermissions(Arrays.asList("MANAGE_USERS", "MANAGE_AGENTS", "APPROVE_REQUIREMENTS"));
+            userRepository.save(subAdmin);
+
             // 2. Seed Travel Agent User Account (email: agent@alharam.com / password: password123)
             User agentUser = new User("Umrah Travels", "agent@alharam.com", passwordEncoder.encode("password123"), "9541692891", "ROLE_AGENT");
             User savedAgentUser = userRepository.save(agentUser);

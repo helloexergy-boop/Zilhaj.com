@@ -113,13 +113,16 @@ public class AuthController {
 
             User dbUser = userRepository.findById(userDetails.getId()).orElse(null);
             String picUrl = dbUser != null ? dbUser.getProfilePictureUrl() : null;
+            java.util.List<String> perms = dbUser != null ? dbUser.getPermissions() : java.util.Collections.emptyList();
+            String userRole = dbUser != null && dbUser.getRole() != null ? dbUser.getRole() : role;
 
             return ResponseEntity.ok(new JwtResponse(jwt,
                     userDetails.getId(),
                     userDetails.getName(),
                     userDetails.getEmail(),
-                    role,
-                    picUrl));
+                    userRole,
+                    picUrl,
+                    perms));
         } catch (Exception e) {
             return ResponseEntity.status(401).body(new MessageResponse("Invalid credentials or user not found"));
         }

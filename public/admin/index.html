@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin & Sub-Admin Portal - Zilhaj.com</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="../dashboard/styles.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="app-container full-width-mode">
+    
+    <!-- Floating Pill Header Bar (Identical to Dashboard Design) -->
+    <header class="top-navbar">
+      <div class="nav-brand" onclick="window.location.href='/'" style="cursor: pointer;">
+        <div class="logo-gold-ring">
+          <img src="../dashboard/logo.jpg" onError="this.src='../dashboard/logo.png'" alt="ZILHAJ Logo" class="brand-logo-img">
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Zilhaj.com</span>
+          <span class="brand-sub">ADMINISTRATION PORTAL</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="/" class="nav-link">Main Portal</a>
+        <a href="../dashboard/index.html" class="nav-link">User Dashboard</a>
+        <a href="#" class="nav-link active" onclick="return false;">Admin Control</a>
+      </nav>
+
+      <div class="nav-user-area">
+        <div class="user-pill-badge" id="adminUserPill" title="Current Admin Account">
+          <span class="user-avatar-circle" id="navAdminAvatarInitials">SA</span>
+          <div style="display: flex; flex-direction: column; text-align: left; margin-left: 4px;">
+            <span class="user-name" id="navAdminName" style="line-height: 1.2; font-weight: 700;">Admin User</span>
+            <span class="admin-role-tag" id="navAdminRoleTag">SUPER ADMIN</span>
+          </div>
+        </div>
+        <button class="btn-logout-header" id="btnLogoutAdmin" onclick="logoutAdmin()">Logout</button>
+      </div>
+    </header>
+
+    <!-- Main Content Wrapper (Sidebar + Main View) -->
+    <div class="main-layout">
+
+      <!-- Left Sidebar -->
+      <aside class="sidebar">
+        <!-- Zilhaj Admin Info Card -->
+        <div class="sidebar-brand-card">
+          <div class="logo-gold-ring">
+            <img src="../dashboard/logo.jpg" alt="ZILHAJ Logo" class="sidebar-logo-img">
+          </div>
+          <div class="brand-card-info">
+            <h4 class="brand-card-title">ZILHAJ ADMIN</h4>
+            <p class="brand-card-desc" id="sidebarAdminBadgeText">Super Admin Control & Sub-Admin Access</p>
+          </div>
+        </div>
+
+        <!-- Sidebar Navigation Menu (Filtered dynamically by Sub-Admin permissions) -->
+        <nav class="sidebar-nav" id="adminSidebarNav">
+          <button class="sidebar-link active" data-tab="overview" data-permission="VIEW_FINANCES">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+              <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+              <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+              <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+            </svg>
+            <span>Overview & Stats</span>
+          </button>
+
+          <button class="sidebar-link" data-tab="users" data-permission="MANAGE_USERS">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Users Management</span>
+          </button>
+
+          <button class="sidebar-link" data-tab="agents" data-permission="MANAGE_AGENTS">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <polyline points="16 11 18 13 22 9"></polyline>
+            </svg>
+            <span>Agent Verifications</span>
+            <span class="badge-count-pill" id="badgePendingAgents">0</span>
+          </button>
+
+          <button class="sidebar-link" data-tab="requirements" data-permission="APPROVE_REQUIREMENTS">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Umrah Requirements</span>
+          </button>
+
+          <button class="sidebar-link" data-tab="packages" data-permission="MODERATE_PACKAGES">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            <span>Package Moderation</span>
+          </button>
+
+          <button class="sidebar-link" data-tab="payments" data-permission="VIEW_FINANCES">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+              <line x1="1" y1="10" x2="23" y2="10"></line>
+            </svg>
+            <span>Payments & Revenue</span>
+          </button>
+
+          <button class="sidebar-link" data-tab="subadmins" data-permission="MANAGE_SUBADMINS">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <path d="M12 8v4"></path>
+              <path d="M12 16h.01"></path>
+            </svg>
+            <span>Sub-Admin Management</span>
+          </button>
+        </nav>
+
+        <!-- Access Info Box -->
+        <div class="sidebar-info-card" style="margin-top: auto;">
+          <div class="card-head-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>Sub-Admin Security</span>
+          </div>
+          <ul class="includes-list" style="font-size: 12px;">
+            <li><span class="check-icon">✓</span> Limited access based on checked permissions</li>
+            <li><span class="check-icon">✓</span> Operations logged for audit trail</li>
+            <li><span class="check-icon">✓</span> Real-time permission revocation</li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Right Main Content Area -->
+      <main class="content-area">
+
+        <!-- TAB 1: OVERVIEW & STATS -->
+        <section id="tab-overview" class="tab-pane active">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Admin Dashboard Overview</h1>
+              <p class="page-subtitle">Real-time platform metrics, user growth, agency verifications, and financial analytics.</p>
+            </div>
+            <button class="btn-primary-action" onclick="refreshAdminData()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+              Refresh Real-time Metrics
+            </button>
+          </div>
+
+          <!-- Metrics Cards Grid -->
+          <div class="admin-metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon-box bg-mint">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div class="metric-details">
+                <span class="metric-label">Total Users (Zaireen)</span>
+                <h3 class="metric-value" id="statTotalUsers">0</h3>
+                <span class="metric-trend trend-up">↑ Platform Registered</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon-box bg-gold">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <polyline points="16 11 18 13 22 9"></polyline>
+                </svg>
+              </div>
+              <div class="metric-details">
+                <span class="metric-label">Travel Agencies</span>
+                <h3 class="metric-value" id="statTotalAgents">0</h3>
+                <span class="metric-trend" id="statPendingAgentsText">0 Pending Review</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon-box bg-purple">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5B67F6" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+              </div>
+              <div class="metric-details">
+                <span class="metric-label">Umrah Requirements</span>
+                <h3 class="metric-value" id="statTotalRequirements">0</h3>
+                <span class="metric-trend trend-up">Active Traveler Bids</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon-box bg-green">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2">
+                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                  <line x1="1" y1="10" x2="23" y2="10"></line>
+                </svg>
+              </div>
+              <div class="metric-details">
+                <span class="metric-label">Total Revenue (INR)</span>
+                <h3 class="metric-value" id="statTotalRevenue">₹0.00</h3>
+                <span class="metric-trend trend-up">Confirmed Bookings</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Action Banner & Sub-Admin Summary -->
+          <div class="admin-overview-sections" style="margin-top: 24px;">
+            <div class="admin-card">
+              <div class="card-header-row">
+                <h3>Quick Administrative Actions</h3>
+              </div>
+              <div class="quick-actions-flex">
+                <button class="action-tile-btn" onclick="switchAdminTab('agents')">
+                  <div class="tile-icon">🛡️</div>
+                  <div class="tile-text">
+                    <strong>Verify Travel Agents</strong>
+                    <span>Review licenses & approve business accounts</span>
+                  </div>
+                </button>
+                <button class="action-tile-btn" onclick="switchAdminTab('subadmins')">
+                  <div class="tile-icon">🔐</div>
+                  <div class="tile-text">
+                    <strong>Manage Sub-Admins</strong>
+                    <span>Assign & revoke granular portal permissions</span>
+                  </div>
+                </button>
+                <button class="action-tile-btn" onclick="exportAdminCSVReport()">
+                  <div class="tile-icon">📊</div>
+                  <div class="tile-text">
+                    <strong>Download CSV Report</strong>
+                    <span>Export full bookings & financial logs</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 2: USERS MANAGEMENT -->
+        <section id="tab-users" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Users Management</h1>
+              <p class="page-subtitle">Manage registered Pilgrims, Travel Agents, Admins, and Sub-Admin accounts.</p>
+            </div>
+            <div class="search-filter-row">
+              <input type="text" id="inputSearchUsers" class="admin-search-input" placeholder="Search user by name, email, or phone..." onkeyup="filterUsersTable()">
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="table-responsive">
+              <table class="admin-data-table" id="usersTable">
+                <thead>
+                  <tr>
+                    <th>User Details</th>
+                    <th>Email & Contact</th>
+                    <th>Role</th>
+                    <th>Permissions</th>
+                    <th>Registered Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                  <!-- Populated via script.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: AGENT VERIFICATIONS -->
+        <section id="tab-agents" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Travel Agent Verifications</h1>
+              <p class="page-subtitle">Verify agency license numbers, business credentials, and grant bidding access.</p>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="filter-tabs-row" id="agentStatusFilterTabs">
+              <button class="filter-tab active" onclick="filterAgentStatus('ALL')">All Agencies</button>
+              <button class="filter-tab" onclick="filterAgentStatus('PENDING')">Pending Approval <span class="badge-pending-pill" id="badgePendingCount">0</span></button>
+              <button class="filter-tab" onclick="filterAgentStatus('VERIFIED')">Verified</button>
+              <button class="filter-tab" onclick="filterAgentStatus('REJECTED')">Rejected</button>
+            </div>
+
+            <div class="table-responsive" style="margin-top: 16px;">
+              <table class="admin-data-table" id="agentsTable">
+                <thead>
+                  <tr>
+                    <th>Agency & Company Name</th>
+                    <th>License Number</th>
+                    <th>Owner / Contact</th>
+                    <th>Verification Status</th>
+                    <th>Rating</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="agentsTableBody">
+                  <!-- Populated via script.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 4: UMRAH REQUIREMENTS MODERATION -->
+        <section id="tab-requirements" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Umrah Travel Requirements</h1>
+              <p class="page-subtitle">Inspect submitted Zaireen requests, approve for travel agency bidding, or moderate spam.</p>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="table-responsive">
+              <table class="admin-data-table">
+                <thead>
+                  <tr>
+                    <th>Traveler</th>
+                    <th>Departure & Cities</th>
+                    <th>Travelers & Budget</th>
+                    <th>Preferences</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="requirementsTableBody">
+                  <!-- Populated via script.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 5: PACKAGE MODERATION -->
+        <section id="tab-packages" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Package Moderation</h1>
+              <p class="page-subtitle">Review published Umrah packages and perform administrative moderation removals.</p>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="table-responsive">
+              <table class="admin-data-table">
+                <thead>
+                  <tr>
+                    <th>Package Title</th>
+                    <th>Agency</th>
+                    <th>Duration & Distance</th>
+                    <th>Price per Person</th>
+                    <th>Departure Text</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="packagesTableBody">
+                  <!-- Populated via script.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 6: PAYMENTS & REVENUE -->
+        <section id="tab-payments" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Payments & Financial Audit</h1>
+              <p class="page-subtitle">Track Razorpay transactions, confirmed booking payments, and revenue analytics.</p>
+            </div>
+            <button class="btn-primary-action" onclick="exportAdminCSVReport()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Export CSV Financial Report
+            </button>
+          </div>
+
+          <div class="admin-card">
+            <div class="table-responsive">
+              <table class="admin-data-table">
+                <thead>
+                  <tr>
+                    <th>Booking Ref</th>
+                    <th>User ID</th>
+                    <th>Package Details</th>
+                    <th>Travel Agency</th>
+                    <th>Amount Paid</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="paymentsTableBody">
+                  <!-- Populated via script.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 7: SUB-ADMIN ACCESS CONTROL (SUPER ADMIN MODULE) -->
+        <section id="tab-subadmins" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Sub-Admin Access Control</h1>
+              <p class="page-subtitle">Create Sub-Admin accounts and assign custom limited permission access rights.</p>
+            </div>
+            <button class="btn-primary-action" id="btnOpenSubAdminModal" onclick="openSubAdminModal()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Create New Sub-Admin
+            </button>
+          </div>
+
+          <div class="admin-card">
+            <div class="table-responsive">
+              <table class="admin-data-table">
+                <thead>
+                  <tr>
+                    <th>Sub-Admin Account</th>
+                    <th>Email</th>
+                    <th>Contact Phone</th>
+                    <th>Assigned Permissions</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="subAdminsTableBody">
+                  <!-- Populated via script.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: CREATE / EDIT SUB-ADMIN PERMISSIONS -->
+  <div class="admin-modal-overlay" id="subAdminModalOverlay" style="display: none;">
+    <div class="admin-modal-box">
+      <div class="modal-header-row">
+        <div>
+          <h2 class="modal-title" id="modalSubAdminTitle">Create Sub-Admin Account</h2>
+          <p class="modal-subtitle">Specify contact details and check limited permissions allowed for this account.</p>
+        </div>
+        <button class="btn-close-modal" onclick="closeSubAdminModal()">&times;</button>
+      </div>
+
+      <form id="formSubAdmin" onsubmit="handleSubAdminSubmit(event)">
+        <input type="hidden" id="subAdminEditId" value="">
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Full Name <span class="req-star">*</span></label>
+            <input type="text" id="subAdminName" class="form-input" placeholder="e.g. Operations Assistant" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address <span class="req-star">*</span></label>
+            <input type="email" id="subAdminEmail" class="form-input" placeholder="e.g. subadmin@zilhaj.com" required>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Password <span class="req-star" id="subAdminPasswordStar">*</span></label>
+            <input type="password" id="subAdminPassword" class="form-input" placeholder="Minimum 6 characters">
+            <small class="form-hint" id="subAdminPasswordHint" style="display: none;">Leave empty to keep existing password.</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="text" id="subAdminPhone" class="form-input" placeholder="e.g. +91 9876543210">
+          </div>
+        </div>
+
+        <!-- Permission Checkbox Matrix -->
+        <div class="permissions-section">
+          <h4 class="perm-heading">Select Access Permissions (Limited Access Portal):</h4>
+          <p class="perm-sub">The Sub-Admin will only see and be permitted to operate on checked modules.</p>
+
+          <div class="permissions-checkbox-grid">
+            <label class="perm-checkbox-card">
+              <input type="checkbox" name="subadmin_perm" value="MANAGE_USERS" checked>
+              <div class="perm-card-info">
+                <strong>Users Management</strong>
+                <span>View registered pilgrims/travelers, search & inspect account profiles.</span>
+              </div>
+            </label>
+
+            <label class="perm-checkbox-card">
+              <input type="checkbox" name="subadmin_perm" value="MANAGE_AGENTS" checked>
+              <div class="perm-card-info">
+                <strong>Agent Verification</strong>
+                <span>Review agency license documents, approve or reject agency credentials.</span>
+              </div>
+            </label>
+
+            <label class="perm-checkbox-card">
+              <input type="checkbox" name="subadmin_perm" value="APPROVE_REQUIREMENTS" checked>
+              <div class="perm-card-info">
+                <strong>Umrah Requirements Moderation</strong>
+                <span>Inspect traveler requests & approve them for agency bidding.</span>
+              </div>
+            </label>
+
+            <label class="perm-checkbox-card">
+              <input type="checkbox" name="subadmin_perm" value="MODERATE_PACKAGES">
+              <div class="perm-card-info">
+                <strong>Package Moderation</strong>
+                <span>Moderate & remove invalid or violating Umrah packages.</span>
+              </div>
+            </label>
+
+            <label class="perm-checkbox-card">
+              <input type="checkbox" name="subadmin_perm" value="VIEW_FINANCES">
+              <div class="perm-card-info">
+                <strong>Payments & Revenue Audit</strong>
+                <span>Access payment transaction logs & download financial CSV reports.</span>
+              </div>
+            </label>
+
+            <label class="perm-checkbox-card">
+              <input type="checkbox" name="subadmin_perm" value="MANAGE_SUBADMINS">
+              <div class="perm-card-info">
+                <strong>Sub-Admin Management</strong>
+                <span>Grant or modify permissions for other Sub-Admins.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer-row">
+          <button type="button" class="btn-cancel" onclick="closeSubAdminModal()">Cancel</button>
+          <button type="submit" class="btn-save-subadmin" id="btnSaveSubAdmin">Save Sub-Admin Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

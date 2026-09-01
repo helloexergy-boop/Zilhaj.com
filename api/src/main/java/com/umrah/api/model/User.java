@@ -30,8 +30,11 @@ public class User {
     // Contact phone number of the user
     private String phone;
 
-    // Role assigned to the user: ROLE_USER, ROLE_AGENT, or ROLE_ADMIN
+    // Role assigned to the user: ROLE_USER, ROLE_AGENT, ROLE_ADMIN, or ROLE_SUBADMIN
     private String role;
+
+    // Granular permissions assigned to sub-admins (e.g. MANAGE_USERS, MANAGE_AGENTS, APPROVE_REQUIREMENTS, MODERATE_PACKAGES, VIEW_FINANCES, MANAGE_SUBADMINS)
+    private java.util.List<String> permissions = new java.util.ArrayList<>();
 
     // Google OAuth 2.0 unique subject/user ID (null for email/password users)
     private String googleId;
@@ -77,6 +80,9 @@ public class User {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public java.util.List<String> getPermissions() { return permissions; }
+    public void setPermissions(java.util.List<String> permissions) { this.permissions = permissions != null ? permissions : new java.util.ArrayList<>(); }
 
     public String getGoogleId() { return googleId; }
     public void setGoogleId(String googleId) { this.googleId = googleId; }

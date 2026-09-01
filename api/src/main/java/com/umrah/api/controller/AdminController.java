@@ -24,7 +24,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin")
 @CrossOrigin(origins = "*")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN') or hasRole('SUBADMIN')")
 public class AdminController {
 
     @Autowired
@@ -38,6 +38,9 @@ public class AdminController {
 
     @Autowired
     private BookingRepository bookingRepository;
+
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     /**
      * GET /api/admin/users
@@ -146,5 +149,88 @@ public class AdminController {
                 .headers(headers)
                 .contentType(org.springframework.http.MediaType.parseMediaType("text/csv"))
                 .body(csvBytes);
+    }
+
+    /**
+     * GET /api/admin/subadmins
+     * Fetch all registered Sub-Admin users. (Super Admin or Sub-Admin with MANAGE_SUBADMINS authority)
+     */
+    @GetMapping("/subadmins")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('PERM_MANAGE_SUBADMINS')")
+    public ResponseEntity<List<User>> getAllSubAdmins() {
+        List<User> subAdmins = userRepository.findByRole("ROLE_SUBADMIN");
+        subAdmins.forEach(u -> u.setPasswordHash(null));
+        return ResponseEntity.ok(subAdmins);
+    }
+
+    /**
+     * POST /api/admin/subadmins
+     * Creates a new Sub-Admin account with assigned granular permissions. (Requires Super Admin ROLE_ADMIN)
+     */
+    @PostMapping("/subadmins")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> createSubAdmin(@RequestBody Map<String, Object> payload) {
+        String name = (String) payload.get("name");
+        String email = (String) payload.get("email");
+        String password = (String) payload.get("password");
+        String phone = (String) payload.get("phone");
+        @SuppressWarnings("unchecked")
+        List<String> permissions = (List<String>) payload.get("permissions");
+
+        if (email == null || password == null || name == null) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Name, email, and password are required."));
+        }
+
+        if (userRepository.existsByEmail(email)) {
+            return ResponseEntity.badRequest().body(new MessageResponse("User with this email already exists."));
+        }
+
+        User subAdmin = new User();
+        subAdmin.setName(name);
+        subAdmin.setEmail(email.toLowerCase().trim());
+        subAdmin.setPasswordHash(passwordEncoder.encode(password));
+        subAdmin.setPhone(phone != null ? phone : "");
+        subAdmin.setRole("ROLE_SUBADMIN");
+        subAdmin.setPermissions(permissions != null ? permissions : java.util.Collections.emptyList());
+
+        userRepository.save(subAdmin);
+        subAdmin.setPasswordHash(null);
+
+        return ResponseEntity.ok(subAdmin);
+    }
+
+    /**
+     * PUT /api/admin/subadmins/{id}/permissions
+     * Updates permission access matrix for a specific Sub-Admin. (Requires Super Admin ROLE_ADMIN)
+     */
+    @PutMapping("/subadmins/{id}/permissions")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateSubAdminPermissions(@PathVariable String id, @RequestBody Map<String, List<String>> payload) {
+        return userRepository.findById(id).map(subAdmin -> {
+            if (!"ROLE_SUBADMIN".equals(subAdmin.getRole())) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Target user is not a Sub-Admin."));
+            }
+            List<String> newPermissions = payload.get("permissions");
+            subAdmin.setPermissions(newPermissions != null ? newPermissions : java.util.Collections.emptyList());
+            userRepository.save(subAdmin);
+            subAdmin.setPasswordHash(null);
+            return ResponseEntity.ok(subAdmin);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * DELETE /api/admin/subadmins/{id}
+     * Revokes and deletes a Sub-Admin account. (Requires Super Admin ROLE_ADMIN)
+     */
+    @DeleteMapping("/subadmins/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteSubAdmin(@PathVariable String id) {
+        return userRepository.findById(id).map(subAdmin -> {
+            if (!"ROLE_SUBADMIN".equals(subAdmin.getRole())) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Target user is not a Sub-Admin."));
+            }
+            userRepository.deleteById(id);
+            return ResponseEntity.ok(new MessageResponse("Sub-Admin account revoked and deleted successfully."));
+        }).orElse(ResponseEntity.notFound().build());
     }
 }

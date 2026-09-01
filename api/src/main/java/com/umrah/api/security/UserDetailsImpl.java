@@ -41,9 +41,17 @@ public class UserDetailsImpl implements UserDetails {
      * Builds a UserDetailsImpl instance from a User MongoDB entity document.
      */
     public static UserDetailsImpl build(User user) {
-        List<GrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority(user.getRole() != null ? user.getRole() : "ROLE_USER")
-        );
+        List<GrantedAuthority> authorities = new java.util.ArrayList<>();
+        String primaryRole = user.getRole() != null ? user.getRole() : "ROLE_USER";
+        authorities.add(new SimpleGrantedAuthority(primaryRole));
+
+        if (user.getPermissions() != null) {
+            for (String perm : user.getPermissions()) {
+                if (perm != null && !perm.trim().isEmpty()) {
+                    authorities.add(new SimpleGrantedAuthority("PERM_" + perm.trim().toUpperCase()));
+                }
+            }
+        }
 
         return new UserDetailsImpl(
                 user.getId(),

@@ -14,6 +14,7 @@ public class JwtResponse {
     private String email;
     private String role;
     private String profilePictureUrl;
+    private java.util.List<String> permissions;
 
     public JwtResponse(String accessToken, String id, String name, String email, String role) {
         this.token = accessToken;
@@ -30,6 +31,16 @@ public class JwtResponse {
         this.email = email;
         this.role = role;
         this.profilePictureUrl = profilePictureUrl;
+    }
+
+    public JwtResponse(String accessToken, String id, String name, String email, String role, String profilePictureUrl, java.util.List<String> permissions) {
+        this.token = accessToken;
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.role = role;
+        this.profilePictureUrl = profilePictureUrl;
+        this.permissions = permissions;
     }
 
     public String getToken() { return token; }
@@ -52,4 +63,7 @@ public class JwtResponse {
 
     public String getProfilePictureUrl() { return profilePictureUrl; }
     public void setProfilePictureUrl(String profilePictureUrl) { this.profilePictureUrl = profilePictureUrl; }
+
+    public java.util.List<String> getPermissions() { return permissions; }
+    public void setPermissions(java.util.List<String> permissions) { this.permissions = permissions; }
 }

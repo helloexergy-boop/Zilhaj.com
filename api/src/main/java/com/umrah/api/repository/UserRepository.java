@@ -24,4 +24,7 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     // Checks if a given phone number is already registered in MongoDB
     Boolean existsByPhone(String phone);
+
+    // Custom query to find all users with a specific role (e.g. ROLE_SUBADMIN)
+    java.util.List<User> findByRole(String role);
 }
