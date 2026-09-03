@@ -590,6 +590,133 @@ class App {
         document.querySelector('.mobile-toggle')?.classList.remove('active');
     }
 
+    navigate(page) {
+        if (!page) page = 'home';
+        this.state.currentPage = page;
+        if (page === 'privacy' || page === 'terms' || page === 'refund' || page === 'contact') {
+            this.openPolicyModal(page);
+            return;
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    openPolicyModal(type = 'terms') {
+        const existing = document.getElementById('policyModalOverlay');
+        if (existing) existing.remove();
+
+        let title = 'Terms & Conditions';
+        let icon = '📜';
+        let content = '';
+
+        if (type === 'privacy') {
+            title = 'Privacy Policy';
+            icon = '🔒';
+            content = `
+                <div style="text-align:left; color:#334155; font-size:0.92rem; line-height:1.7;">
+                    <p><strong>ZILHAJ Private Limited (onerequest.in)</strong> is committed to protecting the privacy and personal data of pilgrims.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">1. Information We Collect</h4>
+                    <p>We collect essential pilgrim details (Name, Contact Number, Email Address, Passport Details) required solely for Umrah package quotes, Saudi eVisa processing, and hotel bookings.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">2. 256-Bit SSL Data Encryption</h4>
+                    <p>All sensitive information transmitted through our website is encrypted using 256-bit SSL technology. Your contact details remain 100% private and are never shared or sold to third-party telemarketers.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">3. Secure Payment Gateway</h4>
+                    <p>All online transactions are processed through Razorpay's PCI-DSS compliant payment gateway. ZILHAJ does not store credit card numbers, net banking passwords, or UPI PINs on its servers.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">4. Contact Privacy Officer</h4>
+                    <p>Email: <a href="mailto:privacy@zilhaj.com" style="color:#047857;">privacy@zilhaj.com</a> | Hotline: +91 95416 92891</p>
+                </div>
+            `;
+        } else if (type === 'refund') {
+            title = 'Refund & Cancellation Policy';
+            icon = '💳';
+            content = `
+                <div style="text-align:left; color:#334155; font-size:0.92rem; line-height:1.7;">
+                    <p><strong>ZILHAJ Private Limited (onerequest.in)</strong> provides transparent refund and cancellation guidelines for all Umrah pilgrimage bookings.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">1. Cancellation Timelines & Refunds</h4>
+                    <ul style="padding-left:1.2rem; margin:0.4rem 0;">
+                        <li><strong>30+ Days Before Departure:</strong> 100% Refund of the booking confirmation deposit.</li>
+                        <li><strong>15 - 29 Days Before Departure:</strong> 50% Refund of the booking confirmation deposit.</li>
+                        <li><strong>Under 14 Days Before Departure:</strong> Deposit is non-refundable due to pre-blocked Saudi hotel & airline seat commitments.</li>
+                    </ul>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">2. Refund Processing Time (5-7 Business Days)</h4>
+                    <p>All eligible refunds are processed automatically back to the pilgrim's original payment method (Bank Account, UPI, or Credit/Debit Card) via Razorpay within <strong>5 to 7 working days</strong>.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">3. How to Request a Refund</h4>
+                    <p>Submit your cancellation request directly through your User Dashboard or send an email with your Booking Reference to <a href="mailto:support@zilhaj.com" style="color:#047857;">support@zilhaj.com</a>.</p>
+                </div>
+            `;
+        } else if (type === 'contact') {
+            title = 'Contact Us & Support Details';
+            icon = '📞';
+            content = `
+                <div style="text-align:left; color:#334155; font-size:0.92rem; line-height:1.7;">
+                    <p>Our dedicated pilgrim support team is available 24/7 to assist you with package inquiries, offer reviews, and booking assistance.</p>
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:1.2rem; margin:1rem 0;">
+                        <p style="margin:0 0 0.5rem; color:#166534; font-weight:800; font-size:1.05rem;">🏢 ZILHAJ Private Limited</p>
+                        <p style="margin:0 0 0.3rem;"><strong>Website:</strong> https://onerequest.in</p>
+                        <p style="margin:0 0 0.3rem;"><strong>Customer Support Hotline:</strong> +91 95416 92891 / +966 800 123 4567</p>
+                        <p style="margin:0 0 0.3rem;"><strong>Support Email:</strong> support@zilhaj.com / hello.exergy@gmail.com</p>
+                        <p style="margin:0 0 0.3rem;"><strong>Registered Office:</strong> Zilhaj Complex, Main Boulevard, Srinagar / New Delhi, India - 110001</p>
+                        <p style="margin:0;"><strong>Support Hours:</strong> 24 Hours / 7 Days a Week</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            title = 'Terms & Conditions';
+            icon = '📜';
+            content = `
+                <div style="text-align:left; color:#334155; font-size:0.92rem; line-height:1.7;">
+                    <p>Welcome to <strong>ZILHAJ Private Limited (onerequest.in)</strong>. By using our platform, you agree to the following terms:</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">1. Platform Marketplace Services</h4>
+                    <p>ZILHAJ operates as a verified travel marketplace connecting pilgrims with government-approved Saudi Umrah travel agencies.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">2. Booking Confirmation & Escrow Protection</h4>
+                    <p>Initial booking deposits (₹1,000) are held securely until travel agency credentials and package details are verified.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">3. Pilgrim Responsibilities</h4>
+                    <p>Pilgrims must hold a passport valid for at least 6 months from the travel date. Rawdah visit permits must be requested via the official Nusuk application.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">4. Governing Law</h4>
+                    <p>These terms are governed by the laws of India and Saudi Ministry of Hajj & Umrah travel guidelines.</p>
+                </div>
+            `;
+        }
+
+        const overlay = document.createElement('div');
+        overlay.id = 'policyModalOverlay';
+        overlay.style.cssText = `
+            position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            padding: 1.5rem; animation: fadeIn 0.2s ease;
+        `;
+
+        overlay.innerHTML = `
+            <div style="
+                background: #ffffff; border-radius: 24px; padding: 2rem;
+                max-width: 580px; width: 100%; max-height: 85vh; overflow-y: auto;
+                box-shadow: 0 25px 60px rgba(0,0,0,0.25); position: relative;
+            ">
+                <button onclick="document.getElementById('policyModalOverlay').remove()" style="
+                    position: absolute; top: 1.2rem; right: 1.2rem;
+                    background: #f1f5f9; border: none; border-radius: 50%;
+                    width: 32px; height: 32px; font-weight: 800; cursor: pointer; color: #64748b;
+                ">✕</button>
+
+                <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem; border-bottom:1.5px solid #e2e8f0; padding-bottom:0.8rem;">
+                    <span style="font-size:1.8rem;">${icon}</span>
+                    <h3 style="margin:0; font-size:1.35rem; font-weight:800; color:#0f172a;">${title}</h3>
+                </div>
+
+                ${content}
+
+                <div style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid #e2e8f0; text-align:right;">
+                    <button onclick="document.getElementById('policyModalOverlay').remove()" style="
+                        background: #047857; color: white; border: none;
+                        padding: 0.65rem 1.5rem; border-radius: 10px; font-weight: 700;
+                        cursor: pointer; font-size: 0.9rem;
+                    ">Close Policy Document</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+    }
+
     handleSocialLogin(provider) {
         if (provider === 'Google' || provider === 'google') {
             return this.loginWithGoogle();
