@@ -8,13 +8,15 @@ const nodemailer = require('nodemailer');
 const { MongoClient } = require('mongodb');
 const Razorpay = require('razorpay');
 
-const razorpayKeyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_TO6mS9Z6cLAruh';
-const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET || 'hucccML7XwUohM5VB1J6by0D';
-
-const razorpayInstance = new Razorpay({
-    key_id: razorpayKeyId,
-    key_secret: razorpayKeySecret
-});
+function getRazorpayConfig() {
+    const keyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_TO6mS9Z6cLAruh';
+    const keySecret = process.env.RAZORPAY_KEY_SECRET || 'hucccML7XwUohM5VB1J6by0D';
+    const instance = new Razorpay({
+        key_id: keyId,
+        key_secret: keySecret
+    });
+    return { instance, keyId, keySecret };
+}
 
 const app = express();
 
@@ -1465,6 +1467,7 @@ app.delete('/api/requirements/:id', async (req, res) => {
 const handleCreateRazorpayOrder = async (req, res) => {
     try {
         let { amount, currency, receipt, bookingId } = req.body || {};
+        const { instance: rzpInstance, keyId } = getRazorpayConfig();
         
         let amountInPaise;
         if (!amount) {
@@ -1486,7 +1489,7 @@ const handleCreateRazorpayOrder = async (req, res) => {
 
         let order;
         try {
-            order = await razorpayInstance.orders.create({
+            order = await rzpInstance.orders.create({
                 amount: amountInPaise,
                 currency: currency,
                 receipt: receipt
@@ -1506,7 +1509,7 @@ const handleCreateRazorpayOrder = async (req, res) => {
             orderId: order.id,
             amount: order.amount,
             currency: order.currency,
-            key: razorpayKeyId,
+            key: keyId,
             status: 'created',
             bookingId: bookingId || 'BK-' + Date.now()
         });
@@ -1519,6 +1522,7 @@ const handleCreateRazorpayOrder = async (req, res) => {
 const handleVerifyRazorpayPayment = async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId, paymentId, signature, bookingId } = req.body || {};
+        const { keySecret } = getRazorpayConfig();
         
         const finalOrderId = razorpay_order_id || orderId;
         const finalPaymentId = razorpay_payment_id || paymentId;
@@ -1531,7 +1535,7 @@ const handleVerifyRazorpayPayment = async (req, res) => {
         if (finalSignature) {
             const body = finalOrderId + "|" + finalPaymentId;
             const expectedSignature = crypto
-                .createHmac('sha256', razorpayKeySecret)
+                .createHmac('sha256', keySecret)
                 .update(body.toString())
                 .digest('hex');
 

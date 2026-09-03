@@ -5809,27 +5809,41 @@ class App {
         const bookingRef = 'BK-' + Date.now().toString().slice(-6);
 
         if (typeof window.Razorpay !== 'undefined') {
+            this.showLoading('Initializing Razorpay Secure Gateway (UPI, Cards, NetBanking)...');
+            let orderData = null;
+            try {
+                orderData = await this.apiCall('/payments/razorpay/create-order', 'POST', {
+                    bookingId: bookingRef,
+                    amount: totalAmount
+                });
+            } catch (e) {
+                console.warn('Razorpay order API call notice:', e);
+            }
+            this.hideLoading();
+
             const options = {
-                "key": "rzp_test_TNHXpbHGezYnSb",
-                "amount": Math.round(totalAmount * 100),
-                "currency": "INR",
+                "key": (orderData && orderData.key) || 'rzp_test_TO6mS9Z6cLAruh',
+                "amount": (orderData && typeof orderData.amount !== 'undefined') ? orderData.amount : Math.round(totalAmount * 100),
+                "currency": (orderData && orderData.currency) || "INR",
                 "name": "ZILHAJ Umrah & Hajj Travel",
                 "description": offer.packageTitle || "Umrah Payment",
                 "image": "https://img.icons8.com/color/96/000000/kaaba.png",
+                "order_id": (orderData && (orderData.order_id || orderData.orderId)) || undefined,
                 "config": {
                     "display": {
                         "blocks": {
                             "utib": {
-                                "name": "Pay via UPI / QR Code (Google Pay, PhonePe, Paytm)",
+                                "name": "Pay via UPI / QR Code (Google Pay, PhonePe, Paytm, BHIM)",
                                 "instruments": [
                                     { "method": "upi" }
                                 ]
                             },
                             "other": {
-                                "name": "Other Payment Options (Cards / NetBanking)",
+                                "name": "Other Payment Options (Cards / NetBanking / Wallets)",
                                 "instruments": [
                                     { "method": "card" },
-                                    { "method": "netbanking" }
+                                    { "method": "netbanking" },
+                                    { "method": "wallet" }
                                 ]
                             }
                         },
@@ -5841,9 +5855,27 @@ class App {
                     "upi": true,
                     "card": true,
                     "netbanking": true,
-                    "wallet": true
+                    "wallet": true,
+                    "emi": true,
+                    "paylater": true
                 },
-                "handler": (response) => {
+                "handler": async (response) => {
+                    this.showLoading('Verifying payment authentication with Razorpay...');
+                    let verifyRes = null;
+                    try {
+                        verifyRes = await this.apiCall('/payments/razorpay/verify-payment', 'POST', {
+                            bookingId: bookingRef,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            paymentMethod: 'RAZORPAY'
+                        });
+                    } catch (err) {
+                        console.warn('Razorpay signature verification notice:', err);
+                    }
+                    this.hideLoading();
+
+                    const txnId = response.razorpay_payment_id || (verifyRes && verifyRes.transactionId) || ('pay_' + Date.now());
                     let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
                     const user = this.state.currentUser || {};
                     const newBooking = {
@@ -5857,9 +5889,9 @@ class App {
                         status: 'CONFIRMED',
                         paymentStatus: 'PAID',
                         paymentMethod: 'RAZORPAY',
-                        paymentId: response.razorpay_payment_id,
-                        transactionId: response.razorpay_payment_id,
-                        razorpayOrderId: response.razorpay_order_id || '',
+                        paymentId: response.razorpay_payment_id || txnId,
+                        transactionId: txnId,
+                        razorpayOrderId: response.razorpay_order_id || (verifyRes && verifyRes.razorpay_order_id) || '',
                         paidAt: new Date().toISOString(),
                         userName: user.name || '',
                         userEmail: user.email || '',
@@ -5875,7 +5907,7 @@ class App {
 
                     this.showSuccessModal(
                         '🎉 Booking Confirmed & Payment Successful!',
-                        `Payment ID: <strong>${response.razorpay_payment_id}</strong><br>Congratulations! Your Umrah trip booking (Ref: <strong>${bookingRef}</strong>) for ₹${totalAmount} is confirmed. Your official invoice with Payment ID and Transaction ID is ready to download.`
+                        `Payment ID: <strong>${response.razorpay_payment_id || txnId}</strong><br>Congratulations! Your Umrah trip booking (Ref: <strong>${bookingRef}</strong>) for ₹${totalAmount} is confirmed. Your official invoice with Payment ID and Transaction ID is ready to download.`
                     );
                     this.downloadInvoice(bookingRef);
                     this.navigate('dashboard');

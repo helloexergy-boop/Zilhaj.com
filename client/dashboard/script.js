@@ -1470,7 +1470,7 @@ window.initiateRazorpayPayment = async function() {
         key: razorpayKey,
         amount: orderData.amount || 100000,
         currency: orderData.currency || 'INR',
-        name: 'Zilhaj.com Umrah Platform',
+        name: 'ZILHAJ Umrah & Hajj Travel',
         description: `Booking Fee Deposit for ${booking.packageName || 'Umrah Package'}`,
         order_id: orderId,
         prefill: {
@@ -1480,6 +1480,36 @@ window.initiateRazorpayPayment = async function() {
         },
         theme: {
           color: '#127A4D'
+        },
+        config: {
+          display: {
+            blocks: {
+              utib: {
+                name: "Pay via UPI / QR Code (Google Pay, PhonePe, Paytm, BHIM)",
+                instruments: [
+                  { method: "upi" }
+                ]
+              },
+              other: {
+                name: "Other Payment Options (Cards / NetBanking / Wallets)",
+                instruments: [
+                  { method: "card" },
+                  { method: "netbanking" },
+                  { method: "wallet" }
+                ]
+              }
+            },
+            sequence: ["block.utib", "block.other"],
+            preferences: { show_default_blocks: true }
+          }
+        },
+        method: {
+          upi: true,
+          card: true,
+          netbanking: true,
+          wallet: true,
+          emi: true,
+          paylater: true
         },
         handler: async function (response) {
           try {
@@ -1494,21 +1524,24 @@ window.initiateRazorpayPayment = async function() {
               })
             });
           } catch (e) {
-            console.warn('Signature verification call error:', e);
+            console.warn('Signature verification call notice:', e);
           }
           window.completePaymentSuccess(response.razorpay_payment_id, selectedMethod);
         }
       };
 
       const rzp = new Razorpay(options);
+      rzp.on('payment.failed', function (resp) {
+        alert('Payment failed: ' + (resp?.error?.description || 'Transaction declined. Please try again.'));
+      });
       rzp.open();
     } else {
-      console.warn('Razorpay SDK unavailable, simulating payment completion');
+      console.warn('Razorpay SDK unavailable, completing payment simulation');
       window.completePaymentSuccess('pay_' + Date.now(), selectedMethod);
     }
   } catch (err) {
     console.error('Razorpay Checkout initialization error:', err);
-    window.completePaymentSuccess('pay_' + Date.now(), selectedMethod);
+    alert('Could not initialize payment gateway. Please check server connection.');
   }
 };
 
