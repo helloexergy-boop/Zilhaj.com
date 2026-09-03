@@ -5828,7 +5828,7 @@ class App {
                 "name": "ZILHAJ Umrah & Hajj Travel",
                 "description": offer.packageTitle || "Umrah Payment",
                 "image": "https://img.icons8.com/color/96/000000/kaaba.png",
-                "order_id": (orderData && (orderData.order_id || orderData.orderId)) || undefined,
+                ...(orderData && (orderData.order_id || orderData.orderId) ? { "order_id": orderData.order_id || orderData.orderId } : {}),
                 "config": {
                     "display": {
                         "blocks": {
@@ -10375,7 +10375,7 @@ class App {
             "name": "ZILHAJ Umrah & Hajj Travel",
             "description": "Umrah Payment",
             "image": "https://img.icons8.com/color/96/000000/kaaba.png",
-            "order_id": (orderData && (orderData.order_id || orderData.orderId)) || undefined,
+            ...(orderData && (orderData.order_id || orderData.orderId) ? { "order_id": orderData.order_id || orderData.orderId } : {}),
             "modal": {
                 "ondismiss": () => {
                     this.showToast('Payment checkout cancelled by user.', 'info');

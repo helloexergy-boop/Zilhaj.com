@@ -21,15 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (targetTab === 'payments') {
-      if (!window.pendingBooking) {
-        window.pendingBooking = {
-          reqId: 'REQ-0517',
-          packageName: '15-Day Economy Umrah Test Package (Razorpay Test Fare: ₹1)',
-          agencyName: 'Al-Safwa Travels',
-          agentCode: 'AGENT-1042',
-          price: '₹1'
-        };
-      }
       const checkoutView = document.getElementById('checkoutView');
       const emptyPaymentsView = document.getElementById('emptyPaymentsView');
       const checkoutTitle = document.getElementById('checkoutPackageTitle');
@@ -37,13 +28,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const checkoutPricePerson = document.getElementById('checkoutPricePerson');
       const checkoutTotalPrice = document.getElementById('checkoutTotalPrice');
 
-      if (checkoutTitle) checkoutTitle.textContent = `${window.pendingBooking.packageName || 'Umrah Package'} - ${window.pendingBooking.agencyName}`;
-      if (checkoutAgent) checkoutAgent.textContent = `Agent Code: ${window.pendingBooking.agentCode} | Verified Partner`;
-      if (checkoutPricePerson) checkoutPricePerson.textContent = window.pendingBooking.price;
-      if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1,000';
+      if (window.pendingBooking) {
+        if (checkoutTitle) checkoutTitle.textContent = `${window.pendingBooking.packageName || 'Umrah Package'} - ${window.pendingBooking.agencyName}`;
+        if (checkoutAgent) checkoutAgent.textContent = `Agent Code: ${window.pendingBooking.agentCode} | Verified Partner`;
+        if (checkoutPricePerson) checkoutPricePerson.textContent = window.pendingBooking.price;
+        if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1,000';
 
-      if (checkoutView) checkoutView.style.display = 'block';
-      if (emptyPaymentsView) emptyPaymentsView.style.display = 'none';
+        if (checkoutView) checkoutView.style.display = 'block';
+        if (emptyPaymentsView) emptyPaymentsView.style.display = 'none';
+      } else {
+        if (checkoutView) checkoutView.style.display = 'none';
+        if (emptyPaymentsView) emptyPaymentsView.style.display = 'flex';
+      }
     }
 
     sidebarLinks.forEach(l => {
@@ -1488,17 +1484,17 @@ window.initiateRazorpayPayment = async function() {
     });
     const orderData = await res.json();
 
-    const orderId = orderData.order_id || orderData.orderId || ('order_' + Date.now());
-    const razorpayKey = orderData.key || 'rzp_test_TO6mS9Z6cLAruh';
+    const validOrderId = orderData && (orderData.order_id || orderData.orderId);
+    const razorpayKey = (orderData && orderData.key) || 'rzp_test_TO6mS9Z6cLAruh';
 
     if (window.Razorpay) {
       const options = {
         key: razorpayKey,
-        amount: orderData.amount || 100000,
-        currency: orderData.currency || 'INR',
+        amount: (orderData && orderData.amount) || 100000,
+        currency: (orderData && orderData.currency) || 'INR',
         name: 'ZILHAJ Umrah & Hajj Travel',
         description: `Booking Fee Deposit for ${booking.packageName || 'Umrah Package'}`,
-        order_id: orderId,
+        ...(validOrderId ? { order_id: validOrderId } : {}),
         prefill: {
           name: customerName,
           email: customerEmail,

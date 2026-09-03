@@ -1534,7 +1534,7 @@ const handleCreateRazorpayOrder = async (req, res) => {
         currency = currency || 'INR';
         receipt = receipt || ('rcpt_' + Date.now());
 
-        let order;
+        let order = null;
         try {
             order = await rzpInstance.orders.create({
                 amount: amountInPaise,
@@ -1542,22 +1542,16 @@ const handleCreateRazorpayOrder = async (req, res) => {
                 receipt: receipt
             });
         } catch (apiErr) {
-            console.error('Razorpay SDK Order Notice, formatted fallback order:', apiErr.message);
-            order = {
-                id: 'order_' + Date.now() + Math.random().toString(36).substring(2, 8),
-                amount: amountInPaise,
-                currency: currency,
-                receipt: receipt
-            };
+            console.warn('Razorpay SDK Order Notice (direct checkout mode active):', apiErr.message);
         }
 
         return res.json({
-            order_id: order.id,
-            orderId: order.id,
-            amount: order.amount,
-            currency: order.currency,
+            order_id: order ? order.id : undefined,
+            orderId: order ? order.id : undefined,
+            amount: amountInPaise,
+            currency: currency,
             key: keyId,
-            status: 'created',
+            status: order ? 'created' : 'ready',
             bookingId: bookingId || 'BK-' + Date.now()
         });
     } catch (err) {
