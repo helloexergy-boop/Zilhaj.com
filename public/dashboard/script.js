@@ -20,6 +20,32 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    if (targetTab === 'payments') {
+      if (!window.pendingBooking) {
+        window.pendingBooking = {
+          reqId: 'REQ-0517',
+          packageName: '15-Day Economy Umrah Test Package (Razorpay Test Fare: ₹1)',
+          agencyName: 'Al-Safwa Travels',
+          agentCode: 'AGENT-1042',
+          price: '₹1'
+        };
+      }
+      const checkoutView = document.getElementById('checkoutView');
+      const emptyPaymentsView = document.getElementById('emptyPaymentsView');
+      const checkoutTitle = document.getElementById('checkoutPackageTitle');
+      const checkoutAgent = document.getElementById('checkoutAgentCode');
+      const checkoutPricePerson = document.getElementById('checkoutPricePerson');
+      const checkoutTotalPrice = document.getElementById('checkoutTotalPrice');
+
+      if (checkoutTitle) checkoutTitle.textContent = `${window.pendingBooking.packageName || 'Umrah Package'} - ${window.pendingBooking.agencyName}`;
+      if (checkoutAgent) checkoutAgent.textContent = `Agent Code: ${window.pendingBooking.agentCode} | Verified Partner`;
+      if (checkoutPricePerson) checkoutPricePerson.textContent = window.pendingBooking.price;
+      if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1,000';
+
+      if (checkoutView) checkoutView.style.display = 'block';
+      if (emptyPaymentsView) emptyPaymentsView.style.display = 'none';
+    }
+
     sidebarLinks.forEach(l => {
       l.classList.remove('active');
       if (l.getAttribute('data-tab') === targetTab) {

@@ -164,12 +164,12 @@ async function connectToDatabase() {
     return db;
 }
 
-// Initial Seed Packages Data (Testing prices set between ₹1 and ₹5)
+// Initial Seed Packages Data (Testing prices set between ₹1 and ₹10 for Razorpay testing)
 const INITIAL_PACKAGES = [
     {
         id: 'pkg-1',
         agentName: 'UMRAH TRAVELS',
-        title: '18-Day Deluxe Umrah Package (Testing Fare: ₹5)',
+        title: '18-Day Deluxe Umrah Package (Razorpay Test Fare: ₹5)',
         description: 'Journey of Faith, Comfort & Blessings. Complete 18 days pilgrimage featuring top 5-star hotels near Haram, return air tickets, Indian buffet meals, and guided ziyarat.',
         price: 5,
         durationDays: 18,
@@ -191,8 +191,8 @@ const INITIAL_PACKAGES = [
     },
     {
         id: 'pkg-2',
-        agentName: 'AL-HARAM EXERVICE',
-        title: '14-Day Executive Ramadan Special (Testing Fare: ₹3)',
+        agentName: 'AL-HARAM EXSERVICE',
+        title: '14-Day Executive Ramadan Special (Razorpay Test Fare: ₹3)',
         description: 'Premium 14-day Umrah package with VIP transport and luxury accommodation under 300m from Masjid al-Haram.',
         price: 3,
         durationDays: 14,
@@ -211,6 +211,52 @@ const INITIAL_PACKAGES = [
         contactPhone: '9541692891',
         includes: { flights: true, visa: true, transport: true, meals: true, ziyarah: true },
         imageUrls: ['https://images.unsplash.com/photo-1565552645632-d725f8bfc19a']
+    },
+    {
+        id: 'pkg-3',
+        agentName: 'AL-SAFWA TRAVELS',
+        title: '15-Day Economy Umrah Test Package (Razorpay Test Fare: ₹1)',
+        description: 'Budget-friendly Umrah package perfect for testing instant online payments. Includes 3-star hotel stay, Saudi eVisa, and bus transfers.',
+        price: 1,
+        durationDays: 15,
+        distanceToHaramMakkah: 500,
+        distanceToHaramMadinah: 400,
+        hotelMakkahStars: 4,
+        hotelMadinahStars: 4,
+        availableSeats: 25,
+        departureDateText: '10 SEPTEMBER',
+        makkahHotelName: 'Al Kiswah Towers Hotel',
+        madinahHotelName: 'Saja Al Madinah Hotel',
+        flightRoute: 'Connecting Indigo Flight via Dubai',
+        sharingType: 'Quad Sharing',
+        complimentaryServices: ['Saudi eVisa', 'Group Ziyarah Transport', '5L Zamzam'],
+        importantNote: 'Ideal for testing Razorpay UPI and Credit/Debit card payments (₹1 charge).',
+        contactPhone: '9541692891',
+        includes: { flights: true, visa: true, transport: true, meals: true, ziyarah: true },
+        imageUrls: ['https://images.unsplash.com/photo-1542810634-71277d95dcbb']
+    },
+    {
+        id: 'pkg-4',
+        agentName: 'EXERGY VIP TOURS',
+        title: '21-Day Royal VIP Umrah Package (Razorpay Test Fare: ₹10)',
+        description: 'Complete 21-day royal spiritual journey featuring 5-star luxury Haram facing suites, private GMC transfers, and dedicated mutawwif service.',
+        price: 10,
+        durationDays: 21,
+        distanceToHaramMakkah: 50,
+        distanceToHaramMadinah: 100,
+        hotelMakkahStars: 5,
+        hotelMadinahStars: 5,
+        availableSeats: 12,
+        departureDateText: '01 OCTOBER',
+        makkahHotelName: 'Raffles Makkah Palace',
+        madinahHotelName: 'The Oberoi Madinah',
+        flightRoute: 'Direct Saudi Airlines First Class',
+        sharingType: 'Private Suite Accommodation',
+        complimentaryServices: ['Private GMC Transfers', 'Unlimited Zamzam', 'All Meals Included'],
+        importantNote: 'Full luxury suite experience.',
+        contactPhone: '9541692891',
+        includes: { flights: true, visa: true, transport: true, meals: true, ziyarah: true },
+        imageUrls: ['https://images.unsplash.com/photo-1591604466107-ec97de577aff']
     }
 ];
 
@@ -254,7 +300,8 @@ app.get('/api/packages', async (req, res) => {
         const db = await connectToDatabase();
         const packagesColl = db.collection('packages');
         let packages = await packagesColl.find({}).toArray();
-        if (packages.length === 0) {
+        if (!packages || packages.length < 2) {
+            await packagesColl.deleteMany({});
             await packagesColl.insertMany(INITIAL_PACKAGES);
             packages = INITIAL_PACKAGES;
         }
