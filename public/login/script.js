@@ -77,6 +77,73 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Toast Notification Helper
+  
+  // Success Popup Modal
+  function showLoginSuccessPopup(title, subtitle, redirectUrl) {
+    const existing = document.getElementById('loginSuccessPopupOverlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'loginSuccessPopupOverlay';
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999999; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 16px; animation: popupFadeIn 0.25s ease-out;';
+
+    overlay.innerHTML = `
+      <style>
+        @keyframes popupFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popupScale { from { opacity: 0; transform: scale(0.85) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes starPulse { 0%, 100% { opacity: 0.5; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.25); } }
+        @keyframes checkPop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+      </style>
+      <div style="text-align: center; padding: 2.4rem 2rem 2.2rem; background: #ffffff; border-radius: 24px; position: relative; overflow: hidden; width: 100%; max-width: 380px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28); animation: popupScale 0.35s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="position: relative; width: 78px; height: 78px; margin: 0 auto 1.2rem;">
+          <span style="position: absolute; top: -6px; left: -10px; color: #E5A93C; font-size: 16px; animation: starPulse 1.5s ease-in-out infinite;">✦</span>
+          <span style="position: absolute; top: -4px; right: -12px; color: #E5A93C; font-size: 18px; animation: starPulse 1.8s ease-in-out infinite 0.3s;">✦</span>
+          <span style="position: absolute; bottom: 4px; left: -14px; color: #E5A93C; font-size: 14px; animation: starPulse 1.6s ease-in-out infinite 0.6s;">✦</span>
+          <span style="position: absolute; bottom: 6px; right: -10px; color: #E5A93C; font-size: 14px; animation: starPulse 1.7s ease-in-out infinite 0.2s;">✦</span>
+          <div style="width: 78px; height: 78px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(27, 94, 32, 0.16); animation: checkPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1B5E20" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+        </div>
+        <h2 style="font-size: 1.55rem; font-weight: 800; color: #0F4C3A; margin: 0 0 0.6rem 0; letter-spacing: -0.01em;">
+          ${title || 'Login Successful!'}
+        </h2>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 0.9rem;">
+          <div style="width: 36px; height: 2px; background: #D4A657; border-radius: 2px;"></div>
+          <span style="color: #D4A657; font-size: 12px;">◆</span>
+          <div style="width: 36px; height: 2px; background: #D4A657; border-radius: 2px;"></div>
+        </div>
+        <p style="font-size: 0.98rem; color: #334155; font-weight: 600; line-height: 1.45; margin: 0 auto 1.4rem auto; max-width: 300px;">
+          ${subtitle || 'Welcome back to ZILHAJ! Redirecting...'}
+        </p>
+        <button id="popupProceedBtn" style="background: linear-gradient(135deg, #0F5A47 0%, #16a34a 100%); color: #ffffff; border: none; border-radius: 12px; padding: 0.75rem 2rem; font-size: 0.95rem; font-weight: 700; cursor: pointer; width: 100%; box-shadow: 0 4px 14px rgba(15, 90, 71, 0.28);">
+          Continue →
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const proceed = () => {
+      overlay.style.animation = 'popupFadeIn 0.2s ease reverse';
+      setTimeout(() => {
+        if (overlay && overlay.parentNode) overlay.remove();
+        if (window.opener && !window.opener.closed) {
+          try { window.opener.location.href = redirectUrl; } catch (e) {}
+          window.close();
+          return;
+        }
+        window.location.href = redirectUrl;
+      }, 150);
+    };
+
+    const btn = document.getElementById('popupProceedBtn');
+    if (btn) btn.addEventListener('click', proceed);
+
+    setTimeout(proceed, 1200);
+  }
+
   function showToast(message) {
     const existing = document.querySelector('.toast-notification');
     if (existing) existing.remove();
@@ -155,15 +222,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const userToStore = data.user ? { ...data.user, token: data.token || data.user.token } : data;
             if (!userToStore.role && data.role) userToStore.role = data.role;
             localStorage.setItem('umrah_user', JSON.stringify(userToStore));
-            showToast('Login Successful! Welcome to ZILHAJ Admin & Travel Portal.');
-
-            setTimeout(() => {
-              if (userToStore.role === 'ROLE_ADMIN' || userToStore.role === 'ROLE_SUBADMIN') {
-                window.location.href = '../admin/index.html';
-              } else {
-                window.location.href = '../dashboard/index.html';
-              }
-            }, 800);
+            const isStaff = userToStore.role === 'ROLE_ADMIN' || userToStore.role === 'ROLE_SUBADMIN' || userToStore.email === 'admin@umrah.com';
+            const dest = isStaff ? '../admin/index.html' : '../dashboard/index.html';
+            showLoginSuccessPopup('Login Successful!', isStaff ? 'Welcome Admin! Opening Admin Panel...' : 'Welcome to ZILHAJ! Opening Dashboard...', dest);
           } else {
             // Check fallback for demo admin accounts
             checkDemoAdminFallback(emailOrPhoneVal, passwordVal, submitBtn, origText, (data && (data.message || data.error)) || 'Invalid credentials');

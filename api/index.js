@@ -33,11 +33,13 @@ const staticOptions = {
         const basename = path.basename(filePath);
         // Hashed build assets (e.g. index-DHYInrD2.js) are cache-safe forever
         const isHashedAsset = /-[A-Za-z0-9_-]{8,}\.\w+$/.test(basename);
-        if (ext === '.html') {
-            res.setHeader('Cache-Control', 'no-cache');
+        if (ext === '.html' || ext === '.js' || ext === '.css') {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
         } else if (isHashedAsset) {
             res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-        } else if (['.js', '.css', '.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.mp4', '.webm'].includes(ext)) {
+        } else if (['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.mp4', '.webm'].includes(ext)) {
             res.setHeader('Cache-Control', 'public, max-age=86400');
         }
     }
@@ -47,7 +49,7 @@ app.use(express.static(clientDir, staticOptions));
 app.use('/login', express.static(loginDir, staticOptions));
 app.use(express.static(loginDir, staticOptions));
 
-app.get(['/admin', '/admin/'], (req, res) => {
+app.get(['/admin', '/admin/', '/admin/dashboard', '/admin/index.html'], (req, res) => {
     res.sendFile(path.join(publicDir, 'admin', 'index.html'));
 });
 
