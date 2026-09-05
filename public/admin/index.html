@@ -3,577 +3,1385 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin & Sub-Admin Portal - Zilhaj.com</title>
+  <title>ZILHAJ Admin Panel - One Request. Multiple Verified Offers.</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Amiri:wght@700&display=swap" rel="stylesheet">
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="../dashboard/styles.css">
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <div class="app-container full-width-mode">
+  <div class="app-container">
     
-    <!-- Floating Pill Header Bar (Identical to Dashboard Design) -->
-    <header class="top-navbar">
-      <div class="nav-brand" onclick="window.location.href='/'" style="cursor: pointer;">
-        <div class="logo-gold-ring">
-          <img src="../dashboard/logo.jpg" onError="this.src='../dashboard/logo.png'" alt="ZILHAJ Logo" class="brand-logo-img">
-        </div>
-        <div class="brand-text">
-          <span class="brand-name">Zilhaj.com</span>
-          <span class="brand-sub">ADMINISTRATION PORTAL</span>
-        </div>
-      </div>
-
-      <nav class="nav-links">
-        <a href="/" class="nav-link">Main Portal</a>
-        <a href="../dashboard/index.html" class="nav-link">User Dashboard</a>
-        <a href="#" class="nav-link active" onclick="return false;">Admin Control</a>
-      </nav>
-
-      <div class="nav-user-area">
-        <div class="user-pill-badge" id="adminUserPill" title="Current Admin Account">
-          <span class="user-avatar-circle" id="navAdminAvatarInitials">SA</span>
-          <div style="display: flex; flex-direction: column; text-align: left; margin-left: 4px;">
-            <span class="user-name" id="navAdminName" style="line-height: 1.2; font-weight: 700;">Admin User</span>
-            <span class="admin-role-tag" id="navAdminRoleTag">SUPER ADMIN</span>
+    <!-- Top Navbar -->
+    <header class="navbar">
+      <div class="navbar-inner">
+        
+        <!-- Left: Logo & Tagline -->
+        <div class="brand-section" onclick="navigateToTab('dashboard')">
+          <div class="logo-badge">
+            <span class="logo-arabic">زلحج</span>
           </div>
-        </div>
-        <button class="btn-logout-header" id="btnLogoutAdmin" onclick="logoutAdmin()">Logout</button>
-      </div>
-    </header>
-
-    <!-- Main Content Wrapper (Sidebar + Main View) -->
-    <div class="main-layout">
-
-      <!-- Left Sidebar -->
-      <aside class="sidebar">
-        <!-- Zilhaj Admin Info Card -->
-        <div class="sidebar-brand-card">
-          <div class="logo-gold-ring">
-            <img src="../dashboard/logo.jpg" alt="ZILHAJ Logo" class="sidebar-logo-img">
+          <div>
+            <div class="brand-title">ZILHAJ</div>
+            <div class="brand-subtitle">Admin Panel</div>
           </div>
-          <div class="brand-card-info">
-            <h4 class="brand-card-title">ZILHAJ ADMIN</h4>
-            <p class="brand-card-desc" id="sidebarAdminBadgeText">Super Admin Control & Sub-Admin Access</p>
-          </div>
+          <span class="brand-tagline">One Request. Multiple Verified Offers.</span>
         </div>
 
-        <!-- Sidebar Navigation Menu (Filtered dynamically by Sub-Admin permissions) -->
-        <nav class="sidebar-nav" id="adminSidebarNav">
-          <button class="sidebar-link active" data-tab="overview" data-permission="VIEW_FINANCES">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="7" height="7" rx="1"></rect>
-              <rect x="14" y="3" width="7" height="7" rx="1"></rect>
-              <rect x="14" y="14" width="7" height="7" rx="1"></rect>
-              <rect x="3" y="14" width="7" height="7" rx="1"></rect>
-            </svg>
-            <span>Overview & Stats</span>
+        <!-- Center: Nav Tabs (Pill style matching screenshot) -->
+        <nav class="nav-tabs">
+          <button class="nav-tab-btn active" data-tab="dashboard">
+            <span>Dashboard</span>
           </button>
-
-          <button class="sidebar-link" data-tab="users" data-permission="MANAGE_USERS">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-            <span>Users Management</span>
+          <button class="nav-tab-btn" data-tab="requests">
+            <span>Requests</span>
+            <span class="tab-badge" id="nav-req-count-badge">0</span>
           </button>
-
-          <button class="sidebar-link" data-tab="agents" data-permission="MANAGE_AGENTS">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <polyline points="16 11 18 13 22 9"></polyline>
-            </svg>
-            <span>Agent Verifications</span>
-            <span class="badge-count-pill" id="badgePendingAgents">0</span>
+          <button class="nav-tab-btn" data-tab="users">
+            <span>Users</span>
           </button>
-
-          <button class="sidebar-link" data-tab="requirements" data-permission="APPROVE_REQUIREMENTS">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-            </svg>
-            <span>Umrah Requirements</span>
+          <button class="nav-tab-btn" data-tab="sub-admins">
+            <span>Sub Admins</span>
           </button>
-
-          <button class="sidebar-link" data-tab="packages" data-permission="MODERATE_PACKAGES">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-              <line x1="12" y1="22.08" x2="12" y2="12"></line>
-            </svg>
-            <span>Package Moderation</span>
+          <button class="nav-tab-btn" data-tab="agents">
+            <span>Agents / Providers</span>
           </button>
-
-          <button class="sidebar-link" data-tab="payments" data-permission="VIEW_FINANCES">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-              <line x1="1" y1="10" x2="23" y2="10"></line>
-            </svg>
-            <span>Payments & Revenue</span>
-          </button>
-
-          <button class="sidebar-link" data-tab="subadmins" data-permission="MANAGE_SUBADMINS">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              <path d="M12 8v4"></path>
-              <path d="M12 16h.01"></path>
-            </svg>
-            <span>Sub-Admin Management</span>
+          <button class="nav-tab-btn" data-tab="reports">
+            <span>Reports</span>
           </button>
         </nav>
 
-        <!-- Access Info Box -->
-        <div class="sidebar-info-card" style="margin-top: auto;">
-          <div class="card-head-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="16" x2="12" y2="12"></line>
-              <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
-            <span>Sub-Admin Security</span>
+        <!-- Right: Notifications & Profile -->
+        <div class="navbar-right">
+          <button class="icon-btn" onclick="openModal('notifications-modal')" title="Notifications">
+            <span>🔔</span>
+            <span class="badge-dot" id="header-notif-dot">3</span>
+          </button>
+
+          <div class="admin-profile-pill" id="admin-profile-trigger" onclick="toggleAdminMenu(event)">
+            <div class="admin-avatar" id="header-admin-avatar">PB</div>
+            <div>
+              <div class="admin-role" id="header-admin-role">Admin</div>
+              <div class="admin-name" id="header-admin-name">Palak Badyal</div>
+            </div>
+            <span style="font-size: 10px; color: var(--text-light); margin-left: 2px;">▼</span>
           </div>
-          <ul class="includes-list" style="font-size: 12px;">
-            <li><span class="check-icon">✓</span> Limited access based on checked permissions</li>
-            <li><span class="check-icon">✓</span> Operations logged for audit trail</li>
-            <li><span class="check-icon">✓</span> Real-time permission revocation</li>
-          </ul>
+
+          <!-- Dropdown menu for Admin -->
+          <div id="admin-dropdown-menu" style="display: none; position: absolute; top: 68px; right: 24px; background: #fff; border: 1px solid var(--border-light); border-radius: var(--radius-md); box-shadow: var(--shadow-xl); padding: 8px; z-index: 100; min-width: 180px;">
+            <div style="padding: 8px 12px; font-size: 12px; font-weight: 700; color: var(--text-main); border-bottom: 1px solid var(--border-subtle);" id="dropdown-user-email">admin@umrah.com</div>
+            <button onclick="window.location.href='/dashboard/index.html'" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; font-size: 12px; color: var(--text-body); text-align: left; border-radius: var(--radius-sm); transition: background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
+              <span>👤</span> User Portal
+            </button>
+            <button onclick="handleAdminLogout()" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; font-size: 12px; color: #dc2626; text-align: left; border-radius: var(--radius-sm); transition: background 0.15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">
+              <span>🚪</span> Sign Out
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Layout Body: Sidebar + Views -->
+    <div class="main-layout">
+      
+      <!-- Left Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-menu">
+          <button class="sidebar-btn active" data-tab="dashboard">
+            <div class="sidebar-btn-left">
+              <span>🏠</span>
+              <span>Dashboard</span>
+            </div>
+          </button>
+
+          <button class="sidebar-btn" data-tab="requests">
+            <div class="sidebar-btn-left">
+              <span>📋</span>
+              <span>Requests</span>
+            </div>
+            <span class="tab-badge" id="sidebar-req-count-badge">0</span>
+          </button>
+
+          <button class="sidebar-btn" data-tab="users">
+            <div class="sidebar-btn-left">
+              <span>👥</span>
+              <span>Users</span>
+            </div>
+          </button>
+
+          <button class="sidebar-btn" data-tab="sub-admins">
+            <div class="sidebar-btn-left">
+              <span>🛡️</span>
+              <span>Sub Admins</span>
+            </div>
+          </button>
+
+          <button class="sidebar-btn" data-tab="agents">
+            <div class="sidebar-btn-left">
+              <span>🏢</span>
+              <span>Agents / Providers</span>
+            </div>
+          </button>
+
+          <button class="sidebar-btn" data-tab="reports">
+            <div class="sidebar-btn-left">
+              <span>📊</span>
+              <span>Reports</span>
+            </div>
+          </button>
+        </div>
+
+        <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-light);">
+          <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md); padding: 12px; font-size: 11px; color: #065f46;">
+            <div style="display: flex; align-items: center; gap: 6px; font-weight: 800;">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+              <span>Live Database Connected</span>
+            </div>
+            <div style="font-size: 10px; color: #047857; margin-top: 4px;">Real-time sync active (MongoDB Atlas)</div>
+          </div>
         </div>
       </aside>
 
-      <!-- Right Main Content Area -->
+      <!-- Main Content Area with View Panels -->
       <main class="content-area">
 
-        <!-- TAB 1: OVERVIEW & STATS -->
-        <section id="tab-overview" class="tab-pane active">
+        <!-- ======================================================= -->
+        <!-- 1. DASHBOARD VIEW (Screenshot 1) -->
+        <!-- ======================================================= -->
+        <section id="dashboard-view" class="view-panel active">
+          
           <div class="page-header">
             <div>
-              <h1 class="page-title">Admin Dashboard Overview</h1>
-              <p class="page-subtitle">Real-time platform metrics, user growth, agency verifications, and financial analytics.</p>
+              <h1 class="page-title">Admin Dashboard</h1>
+              <p class="page-subtitle">Welcome back! Live real-time operations across pilgrimage requests and agency offers.</p>
             </div>
-            <button class="btn-primary-action" onclick="refreshAdminData()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="23 4 23 10 17 10"></polyline>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-              </svg>
-              Refresh Real-time Metrics
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button onclick="refreshAllData(true)" class="btn btn-secondary btn-sm" title="Refresh Live Data">
+                <span>🔄</span>
+                <span>Refresh Live</span>
+              </button>
+              <div class="date-badge">
+                <span>📅</span>
+                <span id="dash-date-display">Today</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Stat Cards -->
+          <div class="kpi-grid-4">
+            <div class="kpi-card" onclick="navigateToTab('requests')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Total Requests</div>
+                <div class="kpi-value" id="dash-kpi-requests">0</div>
+                <div class="kpi-trend">↑ Live in database</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-green">📄</div>
+            </div>
+
+            <div class="kpi-card" onclick="navigateToTab('users')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Total Users</div>
+                <div class="kpi-value" id="dash-kpi-users">0</div>
+                <div class="kpi-trend">↑ Registered pilgrims</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-blue">👥</div>
+            </div>
+
+            <div class="kpi-card" onclick="navigateToTab('reports')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Bookings</div>
+                <div class="kpi-value" id="dash-kpi-bookings">0</div>
+                <div class="kpi-trend">↑ Confirmed orders</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-amber">🛡️</div>
+            </div>
+
+            <div class="kpi-card" onclick="navigateToTab('users')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Total Customers</div>
+                <div class="kpi-value" id="dash-kpi-customers">0</div>
+                <div class="kpi-trend">↑ Active accounts</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-teal">📅</div>
+            </div>
+          </div>
+
+          <!-- Row 1: Recent Requests + Sub Admins Performance -->
+          <div class="dash-row-main">
+            
+            <!-- Recent Requests Table -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Recent Requests</h3>
+                  <div class="filter-pills" style="margin-top: 8px;">
+                    <button class="pill-btn dash-filter-pill active" data-filter="All" id="dash-pill-all">All</button>
+                    <button class="pill-btn dash-filter-pill" data-filter="Hajj" id="dash-pill-hajj">Hajj</button>
+                    <button class="pill-btn dash-filter-pill" data-filter="Umrah" id="dash-pill-umrah">Umrah</button>
+                  </div>
+                </div>
+                <button onclick="navigateToTab('requests')" class="btn btn-secondary btn-sm" style="font-weight: 700; color: var(--primary);">
+                  View All →
+                </button>
+              </div>
+
+              <div class="table-container" style="border: none; box-shadow: none;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Customer</th>
+                      <th>Service</th>
+                      <th>Travel Date</th>
+                      <th>Status</th>
+                      <th style="text-align: center;">Offers</th>
+                      <th style="text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-recent-requests-tbody">
+                    <!-- Dynamic Live Rows -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Sub Admins Performance -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Sub Admins Performance</h3>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">By offers sent to customers</p>
+                  </div>
+                  <button onclick="navigateToTab('sub-admins')" class="btn btn-secondary btn-sm" style="color: var(--primary);">
+                    View All →
+                  </button>
+                </div>
+
+                <div style="text-align: right; font-size: 10px; font-weight: 700; color: var(--text-light); margin-bottom: 8px;">Offers Sent</div>
+                <div id="subadmins-chart-container">
+                  <!-- Dynamic Bar Chart Rows -->
+                </div>
+
+                <!-- X Axis Scale -->
+                <div style="display: flex; justify-content: space-between; padding-left: 140px; font-size: 10px; color: var(--text-light); font-family: monospace; margin-top: 6px;">
+                  <span>0</span>
+                  <span>10</span>
+                  <span>20</span>
+                  <span>30</span>
+                  <span>40</span>
+                  <span>50+</span>
+                </div>
+              </div>
+
+              <div style="padding-top: 14px; border-top: 1px solid var(--border-subtle); text-align: center; font-size: 11px; color: var(--text-muted);">
+                Total offers sent by sub admins in selected period
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Row 2: Customer Support + Booking Overview + Top Services -->
+          <div class="dash-row-bottom">
+            
+            <!-- Customer Support Overview -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-header">
+                  <h3 class="card-title">Customer Support Overview</h3>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0;">
+                  <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 12px 6px; text-align: center;">
+                    <div style="font-size: 14px;">👥</div>
+                    <div style="font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="cs-handled-count">56</div>
+                    <div style="font-size: 9px; color: var(--text-muted); line-height: 1.1; margin-top: 2px;">Handled</div>
+                  </div>
+
+                  <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 12px 6px; text-align: center;">
+                    <div style="font-size: 14px;">💬</div>
+                    <div style="font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="cs-active-count">18</div>
+                    <div style="font-size: 9px; color: var(--text-muted); line-height: 1.1; margin-top: 2px;">Active</div>
+                  </div>
+
+                  <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 12px 6px; text-align: center;">
+                    <div style="font-size: 14px;">✓</div>
+                    <div style="font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="cs-resolved-count">42</div>
+                    <div style="font-size: 9px; color: var(--text-muted); line-height: 1.1; margin-top: 2px;">Resolved</div>
+                  </div>
+
+                  <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-md); padding: 12px 6px; text-align: center;">
+                    <div style="font-size: 14px;">⭐</div>
+                    <div style="font-size: 18px; font-weight: 800; color: #b45309; margin-top: 2px;">4.9 <span style="font-size: 10px; font-weight: normal;">/5</span></div>
+                    <div style="font-size: 9px; color: #b45309; line-height: 1.1; margin-top: 2px;">Rating</div>
+                  </div>
+                </div>
+              </div>
+
+              <button onclick="showToast('Live customer support inquiries synced in real-time', 'info')" class="btn btn-secondary" style="width: 100%;">
+                <span>💬</span>
+                <span>View All Inquiries</span>
+              </button>
+            </div>
+
+            <!-- Booking Overview -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-header">
+                  <h3 class="card-title">Booking Overview</h3>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0;">
+                  <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md); padding: 14px 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 900; color: #065f46;" id="booking-total-val">0</div>
+                    <div style="font-size: 11px; font-weight: 700; color: #047857; margin-top: 2px;">Total Bookings</div>
+                  </div>
+
+                  <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-md); padding: 14px 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 900; color: #b45309;" id="booking-process-val">0</div>
+                    <div style="font-size: 11px; font-weight: 700; color: #b45309; margin-top: 2px;">In Process</div>
+                  </div>
+
+                  <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-md); padding: 14px 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 900; color: #dc2626;" id="booking-cancel-val">0</div>
+                    <div style="font-size: 11px; font-weight: 700; color: #dc2626; margin-top: 2px;">Cancelled</div>
+                  </div>
+                </div>
+              </div>
+
+              <button onclick="navigateToTab('reports')" class="btn btn-secondary" style="width: 100%;">
+                <span>📅</span>
+                <span>View All Bookings</span>
+              </button>
+            </div>
+
+            <!-- Top Services Donut Chart -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-header">
+                  <h3 class="card-title">Top Services</h3>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin: 12px 0;">
+                  <!-- Custom SVG Donut -->
+                  <div class="donut-wrap">
+                    <svg viewBox="0 0 36 36" style="width: 120px; height: 120px; transform: rotate(-90deg);">
+                      <path stroke="#a7f3d0" stroke-width="4.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                      <path id="donut-stroke-fill" stroke="#0d5c3a" stroke-dasharray="63, 100" stroke-width="4.5" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    </svg>
+                    <div class="donut-label-center" id="donut-percent-label">63%</div>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; color: var(--text-main);">
+                        <span style="width: 10px; height: 10px; border-radius: 3px; background: var(--primary);"></span>
+                        <span>Umrah Packages</span>
+                      </div>
+                      <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); padding-left: 16px;" id="donut-umrah-legend">0 (0%)</div>
+                    </div>
+
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; color: var(--text-main);">
+                        <span style="width: 10px; height: 10px; border-radius: 3px; background: #a7f3d0;"></span>
+                        <span>Hajj Packages</span>
+                      </div>
+                      <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); padding-left: 16px;" id="donut-hajj-legend">0 (0%)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="text-align: center; font-size: 11px; color: var(--text-light); padding-top: 8px;">
+                Verified pilgrim demand index
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 2. REQUESTS VIEW (Screenshot 4) -->
+        <!-- ======================================================= -->
+        <section id="requests-view" class="view-panel">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Requests</h1>
+              <p class="page-subtitle">Manage all service requests submitted by customers.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button onclick="exportRequestsCsv()" class="btn btn-secondary">
+                <span>⬇️</span>
+                <span>Export</span>
+              </button>
+              <button onclick="openModal('new-request-modal')" class="btn btn-primary">
+                <span>+</span>
+                <span>New Request</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Category Selector Tabs -->
+          <div class="filter-pills" style="margin-bottom: 20px;">
+            <button class="pill-btn req-tab-pill active" data-filter="All" id="req-pill-all">All Requests</button>
+            <button class="pill-btn req-tab-pill" data-filter="Umrah" id="req-pill-umrah">Umrah</button>
+            <button class="pill-btn req-tab-pill" data-filter="Hajj" id="req-pill-hajj">Hajj</button>
+          </div>
+
+          <!-- 5 Status Metric Cards -->
+          <div class="kpi-grid-5">
+            <div class="kpi-card" onclick="setStatusFilter('In Progress')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">In Progress</div>
+                <div class="kpi-value" style="color: #b45309;" id="req-kpi-inprogress">0</div>
+                <div class="kpi-subtext" id="req-kpi-inprogress-pct">--</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-amber">🛡️</div>
+            </div>
+
+            <div class="kpi-card" onclick="setStatusFilter('Offers Ready')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Offers Ready</div>
+                <div class="kpi-value" style="color: #2563eb;" id="req-kpi-offersready">0</div>
+                <div class="kpi-subtext" id="req-kpi-offersready-pct">--</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-blue">👥</div>
+            </div>
+
+            <div class="kpi-card" onclick="setStatusFilter('Pending')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Pending</div>
+                <div class="kpi-value" style="color: #475569;" id="req-kpi-pending">0</div>
+                <div class="kpi-subtext" id="req-kpi-pending-pct">--</div>
+              </div>
+              <div class="kpi-icon-wrap" style="background: #f1f5f9; color: #475569;">📥</div>
+            </div>
+
+            <div class="kpi-card" onclick="setStatusFilter('Selected')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Selected</div>
+                <div class="kpi-value" style="color: #0f766e;" id="req-kpi-selected">0</div>
+                <div class="kpi-subtext" id="req-kpi-selected-pct">--</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-teal">✓</div>
+            </div>
+
+            <div class="kpi-card" onclick="setStatusFilter('Completed')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Completed</div>
+                <div class="kpi-value" style="color: #047857;" id="req-kpi-completed">0</div>
+                <div class="kpi-subtext" id="req-kpi-completed-pct">--</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-green">🏆</div>
+            </div>
+          </div>
+
+          <!-- Filter Controls Bar -->
+          <div class="filter-bar">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="requests-search-input" class="search-input" placeholder="Search request ID, customer, phone...">
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <select id="requests-service-select" class="select-control" onchange="state.requestsFilter = this.value; renderRequestsList();">
+                <option value="All">Service Type: All</option>
+                <option value="Umrah">Umrah</option>
+                <option value="Hajj">Hajj</option>
+              </select>
+
+              <select id="requests-status-select" class="select-control">
+                <option value="All">Status: All</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Offers Ready">Offers Ready</option>
+                <option value="Pending">Pending</option>
+                <option value="Selected">Selected</option>
+                <option value="Completed">Completed</option>
+              </select>
+
+              <button onclick="clearRequestsFilters()" class="btn btn-secondary btn-sm" style="font-weight: 700;">
+                Clear Filters
+              </button>
+            </div>
+          </div>
+
+          <!-- Requests Table Container -->
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Customer</th>
+                  <th>Service</th>
+                  <th>Travel Date</th>
+                  <th>Travelers</th>
+                  <th>Status</th>
+                  <th style="text-align: center;">Offers</th>
+                  <th>Submitted On</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="requests-list-tbody">
+                <!-- Dynamic Live Requests Rows -->
+              </tbody>
+            </table>
+
+            <div class="pagination-bar">
+              <span id="requests-showing-count">Showing 0 requests</span>
+              <div class="page-numbers" id="requests-pagination-btns">
+                <!-- Page buttons -->
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 3. REQUEST DETAILS VIEW (Screenshot 3) -->
+        <!-- ======================================================= -->
+        <section id="request-details-view" class="view-panel">
+          
+          <div style="margin-bottom: 16px;">
+            <button onclick="navigateToTab('requests')" class="btn btn-secondary btn-sm" style="color: var(--primary); font-weight: 700;">
+              ← Back to Requests
             </button>
           </div>
 
-          <!-- Metrics Cards Grid -->
-          <div class="admin-metrics-grid">
-            <div class="metric-card">
-              <div class="metric-icon-box bg-mint">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                </svg>
+          <div class="page-header">
+            <div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <h1 class="page-title" id="req-detail-title-h1">Request Details</h1>
+                <div id="req-detail-badge-slot"></div>
               </div>
-              <div class="metric-details">
-                <span class="metric-label">Total Users (Zaireen)</span>
-                <h3 class="metric-value" id="statTotalUsers">0</h3>
-                <span class="metric-trend trend-up">↑ Platform Registered</span>
-              </div>
+              <p id="req-detail-subtitle" class="page-subtitle">Submitted recently</p>
             </div>
 
-            <div class="metric-card">
-              <div class="metric-icon-box bg-gold">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <polyline points="16 11 18 13 22 9"></polyline>
-                </svg>
-              </div>
-              <div class="metric-details">
-                <span class="metric-label">Travel Agencies</span>
-                <h3 class="metric-value" id="statTotalAgents">0</h3>
-                <span class="metric-trend" id="statPendingAgentsText">0 Pending Review</span>
-              </div>
-            </div>
-
-            <div class="metric-card">
-              <div class="metric-icon-box bg-purple">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5B67F6" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                </svg>
-              </div>
-              <div class="metric-details">
-                <span class="metric-label">Umrah Requirements</span>
-                <h3 class="metric-value" id="statTotalRequirements">0</h3>
-                <span class="metric-trend trend-up">Active Traveler Bids</span>
-              </div>
-            </div>
-
-            <div class="metric-card">
-              <div class="metric-icon-box bg-green">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2">
-                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                  <line x1="1" y1="10" x2="23" y2="10"></line>
-                </svg>
-              </div>
-              <div class="metric-details">
-                <span class="metric-label">Total Revenue (INR)</span>
-                <h3 class="metric-value" id="statTotalRevenue">₹0.00</h3>
-                <span class="metric-trend trend-up">Confirmed Bookings</span>
-              </div>
+            <div style="display: flex; gap: 10px;">
+              <button onclick="copyRequestInfo()" class="btn btn-secondary">
+                <span>📋</span>
+                <span>Copy Request Info</span>
+              </button>
+              <button onclick="openModal('new-request-modal')" class="btn btn-secondary">
+                <span>✏️</span>
+                <span>New Request</span>
+              </button>
+              <button onclick="openModal('add-offer-modal')" class="btn btn-primary">
+                <span>+</span>
+                <span>Add Offer</span>
+              </button>
             </div>
           </div>
 
-          <!-- Quick Action Banner & Sub-Admin Summary -->
-          <div class="admin-overview-sections" style="margin-top: 24px;">
-            <div class="admin-card">
-              <div class="card-header-row">
-                <h3>Quick Administrative Actions</h3>
-              </div>
-              <div class="quick-actions-flex">
-                <button class="action-tile-btn" onclick="switchAdminTab('agents')">
-                  <div class="tile-icon">🛡️</div>
-                  <div class="tile-text">
-                    <strong>Verify Travel Agents</strong>
-                    <span>Review licenses & approve business accounts</span>
+          <!-- 3 Info Cards Grid -->
+          <div class="req-details-grid">
+            
+            <!-- 1. Customer Information -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-header">
+                  <h3 class="card-title">Customer Information</h3>
+                </div>
+
+                <div style="display: flex; gap: 16px; margin-top: 12px;">
+                  <div class="avatar-circle" id="req-detail-cust-avatar" style="width: 48px; height: 48px; font-size: 16px; background: #d1fae5; color: #065f46;">
+                    PB
                   </div>
-                </button>
-                <button class="action-tile-btn" onclick="switchAdminTab('subadmins')">
-                  <div class="tile-icon">🔐</div>
-                  <div class="tile-text">
-                    <strong>Manage Sub-Admins</strong>
-                    <span>Assign & revoke granular portal permissions</span>
+                  <div style="font-size: 12px; display: flex; flex-direction: column; gap: 6px;">
+                    <h4 id="req-detail-cust-name" style="font-size: 16px; font-weight: 800;">Customer</h4>
+                    <div style="color: var(--text-muted);">📧 <span id="req-detail-cust-email">customer@gmail.com</span></div>
+                    <div style="color: var(--text-muted);">📞 <span id="req-detail-cust-phone1">+91 98765 43210</span></div>
+                    <div style="color: var(--text-muted); line-height: 1.3; margin-top: 4px;">
+                      📍 <span id="req-detail-cust-address">India</span>
+                    </div>
                   </div>
-                </button>
-                <button class="action-tile-btn" onclick="exportAdminCSVReport()">
-                  <div class="tile-icon">📊</div>
-                  <div class="tile-text">
-                    <strong>Download CSV Report</strong>
-                    <span>Export full bookings & financial logs</span>
+                </div>
+              </div>
+
+              <button onclick="openModal('payment-proof-modal')" class="btn btn-secondary" style="width: 100%; margin-top: 20px;">
+                <span>📄</span>
+                <span>View Payment Proof</span>
+              </button>
+            </div>
+
+            <!-- 2. Request Information -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Request Information</h3>
+              </div>
+
+              <div style="font-size: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Service Type</span>
+                  <span id="req-detail-service" style="font-weight: 800;">Umrah Package</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Travel Date</span>
+                  <span id="req-detail-date" style="font-weight: 800;">--</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Travelers</span>
+                  <span id="req-detail-travelers" style="font-weight: 800;">--</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Hotel Type</span>
+                  <span id="req-detail-hotel" style="font-weight: 800;">5 Star</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Duration</span>
+                  <span id="req-detail-duration" style="font-weight: 800;">25 Days</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Budget</span>
+                  <span id="req-detail-budget" style="font-weight: 800; color: var(--primary);">--</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Purpose of Travel</span>
+                  <span id="req-detail-purpose" style="font-weight: 800;">Family</span>
+                </div>
+
+                <div style="padding-top: 8px; border-top: 1px solid var(--border-subtle);">
+                  <span style="color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 4px;">Special Requests</span>
+                  <div id="req-detail-special-list" style="display: flex; flex-direction: column; gap: 2px;">
+                    <!-- Special Requests List -->
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Request Status & Workflow Stepper -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-header">
+                  <h3 class="card-title">Request Status</h3>
+                </div>
+
+                <!-- 5-Stage Workflow Stepper -->
+                <div id="req-stepper-container" class="stepper-wrap">
+                  <!-- Dynamic Stepper Nodes -->
+                </div>
+
+                <!-- Payment Proof Preview Card -->
+                <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 12px; display: flex; align-items: center; justify-content: space-between; margin-top: 16px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 36px; height: 36px; border-radius: var(--radius-md); background: #d1fae5; color: #065f46; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                      📄
+                    </div>
+                    <div>
+                      <div style="font-size: 12px; font-weight: 800; color: var(--text-main);">Payment Proof</div>
+                      <div style="font-size: 10px; color: var(--text-muted);" id="req-detail-proof-name">Receipt.jpg</div>
+                      <div style="font-size: 9px; color: var(--text-light);" id="req-detail-proof-time">Uploaded recently</div>
+                    </div>
+                  </div>
+
+                  <button onclick="openModal('payment-proof-modal')" class="btn btn-secondary btn-sm" style="font-weight: 800;">
+                    View
+                  </button>
+                </div>
+              </div>
+
+              <!-- Status Dropdown Selector -->
+              <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--border-subtle); margin-top: 14px;">
+                <span style="font-size: 12px; font-weight: 700; color: var(--text-body);">Request Status</span>
+                <select id="req-status-select" class="select-control" style="background: #fffbeb; border-color: #fde68a; color: #b45309; font-weight: 800;" onchange="handleStatusChange(this.value)">
+                  <option value="Pending">Pending</option>
+                  <option value="Collecting Offers">Collecting Offers</option>
+                  <option value="Offers Ready">Offers Ready</option>
+                  <option value="Selected">Selected</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Offers Section -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 id="req-offers-count-header" class="card-title">Offers (0)</h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Offers collected from verified agents for this request.</p>
+              </div>
+
+              <div style="display: flex; gap: 10px;">
+                <button onclick="openModal('add-offer-modal')" class="btn btn-primary btn-sm">
+                  <span>+</span>
+                  <span>Add Offer</span>
+                </button>
+                <button onclick="refreshAllData(true)" class="btn btn-secondary btn-sm">
+                  <span>🔄</span>
+                  <span>Refresh</span>
                 </button>
               </div>
             </div>
+
+            <!-- Offers 3-Col Grid -->
+            <div id="req-offers-grid" class="offers-grid">
+              <!-- Dynamic Offer Cards -->
+            </div>
+
+            <div class="info-banner" style="margin-top: 20px;">
+              <span>ℹ️</span>
+              <span>Customer will be able to see published offers only after status is changed to 'Offers Ready'.</span>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 4. USERS VIEW (Screenshot 2) -->
+        <!-- ======================================================= -->
+        <section id="users-view" class="view-panel">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Users</h1>
+              <p class="page-subtitle">Manage all registered users on the platform.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button onclick="exportUsersCsv()" class="btn btn-secondary">
+                <span>⬇️</span>
+                <span>Export Users</span>
+              </button>
+              <button onclick="openModal('add-subadmin-modal')" class="btn btn-primary">
+                <span>+</span>
+                <span>Add Sub Admin</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 5 User Metric Cards -->
+          <div class="kpi-grid-5">
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Total Customers</div>
+                <div id="users-kpi-total" class="kpi-value">0</div>
+                <div class="kpi-subtext">Registered customers</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-green">👥</div>
+            </div>
+
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">New This Month</div>
+                <div id="users-kpi-new" class="kpi-value" style="color: #2563eb;">0</div>
+                <div class="kpi-subtext">Recent registrations</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-blue">➕</div>
+            </div>
+
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Requested Users</div>
+                <div id="users-kpi-requested" class="kpi-value" style="color: #b45309;">0</div>
+                <div class="kpi-subtext">Users who made requests</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-amber">📄</div>
+            </div>
+
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Active Users</div>
+                <div id="users-kpi-active" class="kpi-value" style="color: #7c3aed;">0</div>
+                <div class="kpi-subtext">Active accounts</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-purple">👤</div>
+            </div>
+
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Pending Inquiries</div>
+                <div id="users-kpi-inactive" class="kpi-value" style="color: #dc2626;">0</div>
+                <div class="kpi-subtext">Not requested yet</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-rose">🚫</div>
+            </div>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="filter-bar">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="users-search-input" class="search-input" placeholder="Search by name, email or phone...">
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <select id="users-role-select" class="select-control">
+                <option value="All">All Roles</option>
+                <option value="Customer">Customer</option>
+              </select>
+
+              <select id="users-status-select" class="select-control">
+                <option value="All">All Status</option>
+                <option value="Request Submitted">Request Submitted</option>
+                <option value="Not Requested Yet">Not Requested Yet</option>
+              </select>
+
+              <button onclick="refreshAllData(true)" class="btn btn-secondary btn-sm">
+                <span>🔄</span>
+                <span>Refresh</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Users Table -->
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th>User Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Role</th>
+                  <th style="text-align: center;">Requests</th>
+                  <th>Joined On</th>
+                  <th>Last Active</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="users-list-tbody">
+                <!-- Dynamic Customer Rows -->
+              </tbody>
+            </table>
+
+            <div class="pagination-bar">
+              <span id="users-pagination-count">Showing 0 customers</span>
+              <div style="display: flex; align-items: center; gap: 16px;">
+                <div class="page-numbers" id="users-pagination-btns">
+                  <!-- Dynamic page buttons -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 5. SUB ADMINS VIEW (Screenshot 5) -->
+        <!-- ======================================================= -->
+        <section id="sub-admins-view" class="view-panel">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Sub Admins</h1>
+              <p class="page-subtitle">Manage and monitor sub admin members and their performance.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button onclick="exportSubAdminsCsv()" class="btn btn-secondary">
+                <span>⬇️</span>
+                <span>Export Sub Admins</span>
+              </button>
+              <button onclick="openModal('add-subadmin-modal')" class="btn btn-primary">
+                <span>+</span>
+                <span>Add Sub Admin</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3 Sub Admin Metric Cards -->
+          <div class="kpi-grid-3">
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Total Sub Admins</div>
+                <div class="kpi-value" style="color: #7c3aed;" id="subadmins-kpi-total">0</div>
+                <div class="kpi-subtext">All staff team members</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-purple">👥</div>
+            </div>
+
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Total Customers Booked</div>
+                <div class="kpi-value" style="color: #047857;" id="subadmins-kpi-booked">0</div>
+                <div class="kpi-subtext">By sub admin members</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-green">🏆</div>
+            </div>
+
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Total Customers Handled</div>
+                <div class="kpi-value" style="color: #2563eb;" id="subadmins-kpi-handled">0</div>
+                <div class="kpi-subtext">Requests processed</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-blue">👥</div>
+            </div>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="filter-bar">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="subadmins-search-input" class="search-input" placeholder="Search by name, email or phone...">
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <select id="subadmins-status-select" class="select-control">
+                <option value="All">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+
+              <select id="subadmins-role-select" class="select-control">
+                <option value="All">All Roles</option>
+                <option value="Senior Sub Admin">Senior Sub Admin</option>
+                <option value="Sub Admin">Sub Admin</option>
+              </select>
+
+              <button onclick="refreshAllData(true)" class="btn btn-secondary btn-sm">
+                <span>🔄</span>
+                <span>Refresh</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Sub Admins Table -->
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th>Sub Admin Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Role</th>
+                  <th style="text-align: center;">Customers Booked ⓘ</th>
+                  <th style="text-align: center;">Requests Handled</th>
+                  <th>Joined On</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="subadmins-list-tbody">
+                <!-- Dynamic Live Sub Admin Rows -->
+              </tbody>
+            </table>
+
+            <div class="info-banner" style="margin: 16px;">
+              <span>ℹ️</span>
+              <span>Sub admins can collect offers from agents and send them to customers. Performance is updated in real-time.</span>
+            </div>
+
+            <div class="pagination-bar">
+              <span id="subadmins-count-span">Showing sub admins</span>
+              <div class="page-numbers">
+                <button class="page-btn active">1</button>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 6. AGENTS & PROVIDERS VIEW -->
+        <!-- ======================================================= -->
+        <section id="agents-view" class="view-panel">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Agents & Providers</h1>
+              <p class="page-subtitle">Verified Umrah and Hajj agency partners delivering authentic packages.</p>
+            </div>
+            <button onclick="showToast('Agency registration verification active', 'info')" class="btn btn-primary">
+              <span>+</span>
+              <span>Register New Agent</span>
+            </button>
+          </div>
+
+          <div id="agents-grid-container" class="offers-grid">
+            <!-- Dynamic Agent Cards -->
           </div>
         </section>
 
-        <!-- TAB 2: USERS MANAGEMENT -->
-        <section id="tab-users" class="tab-pane">
+        <!-- ======================================================= -->
+        <!-- 7. REPORTS VIEW -->
+        <!-- ======================================================= -->
+        <section id="reports-view" class="view-panel">
           <div class="page-header">
             <div>
-              <h1 class="page-title">Users Management</h1>
-              <p class="page-subtitle">Manage registered Pilgrims, Travel Agents, Admins, and Sub-Admin accounts.</p>
+              <h1 class="page-title">Reports & Business Analytics</h1>
+              <p class="page-subtitle">Detailed metrics on pilgrim requests, agency turnaround, and booking conversions.</p>
             </div>
-            <div class="search-filter-row">
-              <input type="text" id="inputSearchUsers" class="admin-search-input" placeholder="Search user by name, email, or phone..." onkeyup="filterUsersTable()">
+            <button onclick="exportReportsCsv()" class="btn btn-primary">
+              <span>⬇️</span>
+              <span>Download Executive Summary</span>
+            </button>
+          </div>
+
+          <div class="kpi-grid-4">
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Gross Bookings</div>
+                <div class="kpi-value" id="rep-gross-val">₹1.84 Cr</div>
+                <div class="kpi-trend">↑ Live platform aggregate</div>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Commission (5%)</div>
+                <div class="kpi-value" id="rep-comm-val">₹9.20 Lakh</div>
+                <div class="kpi-trend">↑ Service fee earnings</div>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Conversion Rate</div>
+                <div class="kpi-value" id="rep-conv-val">68.4%</div>
+                <div class="kpi-trend">↑ Request to book ratio</div>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Avg. Turnaround</div>
+                <div class="kpi-value">2.4 Hrs</div>
+                <div class="kpi-trend">↓ Faster agent response</div>
+              </div>
             </div>
           </div>
 
-          <div class="admin-card">
-            <div class="table-responsive">
-              <table class="admin-data-table" id="usersTable">
+          <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+              <h3 class="card-title">Completed Orders & Payment Transactions</h3>
+              <button onclick="refreshAllData(true)" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+            </div>
+            <div class="table-container" style="border: none;">
+              <table class="data-table">
                 <thead>
                   <tr>
-                    <th>User Details</th>
-                    <th>Email & Contact</th>
-                    <th>Role</th>
-                    <th>Permissions</th>
-                    <th>Registered Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="usersTableBody">
-                  <!-- Populated via script.js -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- TAB 3: AGENT VERIFICATIONS -->
-        <section id="tab-agents" class="tab-pane">
-          <div class="page-header">
-            <div>
-              <h1 class="page-title">Travel Agent Verifications</h1>
-              <p class="page-subtitle">Verify agency license numbers, business credentials, and grant bidding access.</p>
-            </div>
-          </div>
-
-          <div class="admin-card">
-            <div class="filter-tabs-row" id="agentStatusFilterTabs">
-              <button class="filter-tab active" onclick="filterAgentStatus('ALL')">All Agencies</button>
-              <button class="filter-tab" onclick="filterAgentStatus('PENDING')">Pending Approval <span class="badge-pending-pill" id="badgePendingCount">0</span></button>
-              <button class="filter-tab" onclick="filterAgentStatus('VERIFIED')">Verified</button>
-              <button class="filter-tab" onclick="filterAgentStatus('REJECTED')">Rejected</button>
-            </div>
-
-            <div class="table-responsive" style="margin-top: 16px;">
-              <table class="admin-data-table" id="agentsTable">
-                <thead>
-                  <tr>
-                    <th>Agency & Company Name</th>
-                    <th>License Number</th>
-                    <th>Owner / Contact</th>
-                    <th>Verification Status</th>
-                    <th>Rating</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="agentsTableBody">
-                  <!-- Populated via script.js -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- TAB 4: UMRAH REQUIREMENTS MODERATION -->
-        <section id="tab-requirements" class="tab-pane">
-          <div class="page-header">
-            <div>
-              <h1 class="page-title">Umrah Travel Requirements</h1>
-              <p class="page-subtitle">Inspect submitted Zaireen requests, approve for travel agency bidding, or moderate spam.</p>
-            </div>
-          </div>
-
-          <div class="admin-card">
-            <div class="table-responsive">
-              <table class="admin-data-table">
-                <thead>
-                  <tr>
-                    <th>Traveler</th>
-                    <th>Departure & Cities</th>
-                    <th>Travelers & Budget</th>
-                    <th>Preferences</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="requirementsTableBody">
-                  <!-- Populated via script.js -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- TAB 5: PACKAGE MODERATION -->
-        <section id="tab-packages" class="tab-pane">
-          <div class="page-header">
-            <div>
-              <h1 class="page-title">Package Moderation</h1>
-              <p class="page-subtitle">Review published Umrah packages and perform administrative moderation removals.</p>
-            </div>
-          </div>
-
-          <div class="admin-card">
-            <div class="table-responsive">
-              <table class="admin-data-table">
-                <thead>
-                  <tr>
+                    <th>Booking ID</th>
                     <th>Package Title</th>
                     <th>Agency</th>
-                    <th>Duration & Distance</th>
-                    <th>Price per Person</th>
-                    <th>Departure Text</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody id="packagesTableBody">
-                  <!-- Populated via script.js -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- TAB 6: PAYMENTS & REVENUE -->
-        <section id="tab-payments" class="tab-pane">
-          <div class="page-header">
-            <div>
-              <h1 class="page-title">Payments & Financial Audit</h1>
-              <p class="page-subtitle">Track Razorpay transactions, confirmed booking payments, and revenue analytics.</p>
-            </div>
-            <button class="btn-primary-action" onclick="exportAdminCSVReport()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              Export CSV Financial Report
-            </button>
-          </div>
-
-          <div class="admin-card">
-            <div class="table-responsive">
-              <table class="admin-data-table">
-                <thead>
-                  <tr>
-                    <th>Booking Ref</th>
-                    <th>User ID</th>
-                    <th>Package Details</th>
-                    <th>Travel Agency</th>
-                    <th>Amount Paid</th>
+                    <th>Travelers</th>
+                    <th>Amount</th>
                     <th>Status</th>
                     <th>Date</th>
                   </tr>
                 </thead>
-                <tbody id="paymentsTableBody">
-                  <!-- Populated via script.js -->
+                <tbody id="reports-bookings-tbody">
+                  <!-- Populated from DB bookings -->
                 </tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <!-- TAB 7: SUB-ADMIN ACCESS CONTROL (SUPER ADMIN MODULE) -->
-        <section id="tab-subadmins" class="tab-pane">
-          <div class="page-header">
-            <div>
-              <h1 class="page-title">Sub-Admin Access Control</h1>
-              <p class="page-subtitle">Create Sub-Admin accounts and assign custom limited permission access rights.</p>
-            </div>
-            <button class="btn-primary-action" id="btnOpenSubAdminModal" onclick="openSubAdminModal()">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-              Create New Sub-Admin
-            </button>
-          </div>
-
-          <div class="admin-card">
-            <div class="table-responsive">
-              <table class="admin-data-table">
-                <thead>
-                  <tr>
-                    <th>Sub-Admin Account</th>
-                    <th>Email</th>
-                    <th>Contact Phone</th>
-                    <th>Assigned Permissions</th>
-                    <th>Created At</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="subAdminsTableBody">
-                  <!-- Populated via script.js -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
+        <!-- Footer matching screenshot -->
+        <footer style="margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border-light); font-size: 11px; color: var(--text-light); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>© 2026 ZILHAJ Private Limited. All rights reserved.</div>
+          <div>Powered by <strong style="color: var(--text-body);">GOEXERGY PRIVATE LIMITED</strong></div>
+          <div>Designed, developed & maintained by <strong style="color: var(--text-body);">GOEXERGY PRIVATE LIMITED</strong></div>
+        </footer>
 
       </main>
+
     </div>
+
   </div>
 
-  <!-- MODAL: CREATE / EDIT SUB-ADMIN PERMISSIONS -->
-  <div class="admin-modal-overlay" id="subAdminModalOverlay" style="display: none;">
-    <div class="admin-modal-box">
-      <div class="modal-header-row">
-        <div>
-          <h2 class="modal-title" id="modalSubAdminTitle">Create Sub-Admin Account</h2>
-          <p class="modal-subtitle">Specify contact details and check limited permissions allowed for this account.</p>
-        </div>
-        <button class="btn-close-modal" onclick="closeSubAdminModal()">&times;</button>
+  <!-- ======================================================= -->
+  <!-- MODALS -->
+  <!-- ======================================================= -->
+
+  <!-- 1. New Request Modal -->
+  <div id="new-request-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <h3 style="font-size: 18px; font-weight: 800;">Create New Pilgrim Request</h3>
+        <button onclick="closeModal('new-request-modal')" style="font-size: 20px; color: var(--text-light);">✕</button>
       </div>
 
-      <form id="formSubAdmin" onsubmit="handleSubAdminSubmit(event)">
-        <input type="hidden" id="subAdminEditId" value="">
-
-        <div class="form-grid-2">
+      <form onsubmit="handleNewRequestSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Customer Name *</label>
+          <input type="text" id="new-req-customer" required class="form-input" placeholder="e.g. Palak Badyal">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number *</label>
+          <input type="text" id="new-req-phone" required class="form-input" placeholder="+91 98765 43210">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address (Optional)</label>
+          <input type="email" id="new-req-email" class="form-input" placeholder="customer@gmail.com">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div class="form-group">
-            <label class="form-label">Full Name <span class="req-star">*</span></label>
-            <input type="text" id="subAdminName" class="form-input" placeholder="e.g. Operations Assistant" required>
+            <label class="form-label">Service Type</label>
+            <select id="new-req-service" class="form-select">
+              <option value="Umrah">Umrah</option>
+              <option value="Hajj">Hajj</option>
+            </select>
           </div>
-
           <div class="form-group">
-            <label class="form-label">Email Address <span class="req-star">*</span></label>
-            <input type="email" id="subAdminEmail" class="form-input" placeholder="e.g. subadmin@zilhaj.com" required>
+            <label class="form-label">Travel Date</label>
+            <input type="text" id="new-req-date" class="form-input" value="27 Apr 2026">
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Adults</label>
+            <input type="number" id="new-req-adults" class="form-input" value="8" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Children</label>
+            <input type="number" id="new-req-children" class="form-input" value="2" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Budget Range</label>
+            <input type="text" id="new-req-budget" class="form-input" value="₹1,20,000 - ₹1,50,000">
           </div>
         </div>
 
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label class="form-label">Password <span class="req-star" id="subAdminPasswordStar">*</span></label>
-            <input type="password" id="subAdminPassword" class="form-input" placeholder="Minimum 6 characters">
-            <small class="form-hint" id="subAdminPasswordHint" style="display: none;">Leave empty to keep existing password.</small>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Phone Number</label>
-            <input type="text" id="subAdminPhone" class="form-input" placeholder="e.g. +91 9876543210">
-          </div>
-        </div>
-
-        <!-- Permission Checkbox Matrix -->
-        <div class="permissions-section">
-          <h4 class="perm-heading">Select Access Permissions (Limited Access Portal):</h4>
-          <p class="perm-sub">The Sub-Admin will only see and be permitted to operate on checked modules.</p>
-
-          <div class="permissions-checkbox-grid">
-            <label class="perm-checkbox-card">
-              <input type="checkbox" name="subadmin_perm" value="MANAGE_USERS" checked>
-              <div class="perm-card-info">
-                <strong>Users Management</strong>
-                <span>View registered pilgrims/travelers, search & inspect account profiles.</span>
-              </div>
-            </label>
-
-            <label class="perm-checkbox-card">
-              <input type="checkbox" name="subadmin_perm" value="MANAGE_AGENTS" checked>
-              <div class="perm-card-info">
-                <strong>Agent Verification</strong>
-                <span>Review agency license documents, approve or reject agency credentials.</span>
-              </div>
-            </label>
-
-            <label class="perm-checkbox-card">
-              <input type="checkbox" name="subadmin_perm" value="APPROVE_REQUIREMENTS" checked>
-              <div class="perm-card-info">
-                <strong>Umrah Requirements Moderation</strong>
-                <span>Inspect traveler requests & approve them for agency bidding.</span>
-              </div>
-            </label>
-
-            <label class="perm-checkbox-card">
-              <input type="checkbox" name="subadmin_perm" value="MODERATE_PACKAGES">
-              <div class="perm-card-info">
-                <strong>Package Moderation</strong>
-                <span>Moderate & remove invalid or violating Umrah packages.</span>
-              </div>
-            </label>
-
-            <label class="perm-checkbox-card">
-              <input type="checkbox" name="subadmin_perm" value="VIEW_FINANCES">
-              <div class="perm-card-info">
-                <strong>Payments & Revenue Audit</strong>
-                <span>Access payment transaction logs & download financial CSV reports.</span>
-              </div>
-            </label>
-
-            <label class="perm-checkbox-card">
-              <input type="checkbox" name="subadmin_perm" value="MANAGE_SUBADMINS">
-              <div class="perm-card-info">
-                <strong>Sub-Admin Management</strong>
-                <span>Grant or modify permissions for other Sub-Admins.</span>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        <div class="modal-footer-row">
-          <button type="button" class="btn-cancel" onclick="closeSubAdminModal()">Cancel</button>
-          <button type="submit" class="btn-save-subadmin" id="btnSaveSubAdmin">Save Sub-Admin Account</button>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+          <button type="button" onclick="closeModal('new-request-modal')" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Request</button>
         </div>
       </form>
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <!-- 2. Add Offer Modal -->
+  <div id="add-offer-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <h3 style="font-size: 18px; font-weight: 800;">Add Agency Offer</h3>
+        <button onclick="closeModal('add-offer-modal')" style="font-size: 20px; color: var(--text-light);">✕</button>
+      </div>
+
+      <form onsubmit="handleAddOfferSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Select Travel Agency</label>
+          <select id="add-offer-agent-name" class="form-select">
+            <option value="Al-Safwa Travel">Al-Safwa Travel (AGENT-1042)</option>
+            <option value="Makkah Tours">Makkah Tours (AGENT-8091)</option>
+            <option value="Haramain Express">Haramain Express (AGENT-3310)</option>
+            <option value="Rawdah Holidays">Rawdah Holidays (AGENT-7720)</option>
+            <option value="Al-Haramain Group">Al-Haramain Group (AGENT-4501)</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Package Title</label>
+            <input type="text" id="add-offer-pkg-title" class="form-input" value="Umrah Deluxe Package">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration</label>
+            <input type="text" id="add-offer-duration" class="form-input" value="25 Days">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Price Per Person (₹)</label>
+            <input type="number" id="add-offer-price" class="form-input" value="125000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select id="add-offer-status" class="form-select">
+              <option value="Published">Published (Customer Visible)</option>
+              <option value="Draft">Draft (Internal Review)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Makkah Hotel</label>
+            <input type="text" id="add-offer-makkah-hotel" class="form-input" value="Dar Al Eiman">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Distance</label>
+            <input type="text" id="add-offer-makkah-dist" class="form-input" value="500m from Haram">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Madinah Hotel</label>
+            <input type="text" id="add-offer-madinah-hotel" class="form-input" value="Anwar Al Madinah">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Distance</label>
+            <input type="text" id="add-offer-madinah-dist" class="form-input" value="200m from Haram">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Transport</label>
+            <input type="text" id="add-offer-transport" class="form-input" value="AC Bus">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Meal Plan</label>
+            <input type="text" id="add-offer-meal" class="form-input" value="Full Board">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ziyarat</label>
+            <input type="text" id="add-offer-ziyarat" class="form-input" value="Included">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+          <button type="button" onclick="closeModal('add-offer-modal')" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Attach Offer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Add Sub Admin Modal -->
+  <div id="add-subadmin-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 480px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <h3 style="font-size: 18px; font-weight: 800;">Add New Sub Admin</h3>
+        <button onclick="closeModal('add-subadmin-modal')" style="font-size: 20px; color: var(--text-light);">✕</button>
+      </div>
+
+      <form onsubmit="handleAddSubAdminSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input type="text" id="add-subadmin-name" required class="form-input" placeholder="e.g. Tariq Ahmad">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address *</label>
+          <input type="email" id="add-subadmin-email" required class="form-input" placeholder="tariq@gmail.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number *</label>
+          <input type="text" id="add-subadmin-phone" required class="form-input" placeholder="+91 99065 11223">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select id="add-subadmin-role" class="form-select">
+            <option value="Sub Admin">Sub Admin</option>
+            <option value="Senior Sub Admin">Senior Sub Admin</option>
+          </select>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+          <button type="button" onclick="closeModal('add-subadmin-modal')" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Payment Proof Modal -->
+  <div id="payment-proof-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 500px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <h3 style="font-size: 16px; font-weight: 800;">Verified Payment Receipt</h3>
+        <button onclick="closeModal('payment-proof-modal')" style="font-size: 20px; color: var(--text-light);">✕</button>
+      </div>
+
+      <div style="background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%); border: 1px solid #a7f3d0; border-radius: var(--radius-lg); padding: 24px; text-align: center;">
+        <div style="width: 52px; height: 52px; border-radius: 50%; background: #059669; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 12px;">
+          ✓
+        </div>
+        <div style="font-size: 11px; font-weight: 800; color: #065f46; text-transform: uppercase;">Payment Verified</div>
+        <div style="font-size: 32px; font-weight: 900; color: var(--text-main); margin: 4px 0;" id="modal-receipt-amount">₹50,000</div>
+        <div style="font-size: 11px; color: var(--text-muted);" id="modal-receipt-subtext">Advance Token for Pilgrimage Request</div>
+
+        <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 14px; margin-top: 16px; font-size: 12px; display: flex; flex-direction: column; gap: 6px; text-align: left;">
+          <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-muted);">Customer:</span><strong style="color: var(--text-main);" id="modal-receipt-cust">Customer</strong></div>
+          <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-muted);">Bank / Channel:</span><strong style="color: var(--text-main);" id="modal-receipt-bank">HDFC Bank UPI</strong></div>
+          <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-muted);">Txn Reference:</span><span style="font-family: monospace; font-weight: 700;" id="modal-receipt-txn">UPI/20260811/987654321</span></div>
+          <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-muted);">Timestamp:</span><span id="modal-receipt-time">11 Aug 2026</span></div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button onclick="window.print()" class="btn btn-secondary" style="flex: 1;">🖨️ Print</button>
+        <button onclick="showToast('Receipt verified and downloaded', 'success'); closeModal('payment-proof-modal');" class="btn btn-primary" style="flex: 1;">⬇️ Download PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Offer Details Modal -->
+  <div id="offer-details-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 600px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <div>
+          <h3 id="modal-offer-agent-name" style="font-size: 18px; font-weight: 800;">Al-Safwa Travel</h3>
+          <p style="font-size: 11px; color: var(--text-muted);">Comprehensive Pilgrimage Itinerary & Inclusions</p>
+        </div>
+        <button onclick="closeModal('offer-details-modal')" style="font-size: 20px; color: var(--text-light);">✕</button>
+      </div>
+
+      <div style="background: var(--primary); color: white; border-radius: var(--radius-lg); padding: 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <div style="font-size: 11px; color: #a7f3d0; text-transform: uppercase; font-weight: 700;">Price Per Person</div>
+          <div id="modal-offer-price-pp" style="font-size: 26px; font-weight: 900; color: #fde68a;">₹1,25,000</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 11px; color: #a7f3d0;">Total Group Package</div>
+          <div id="modal-offer-price-total" style="font-size: 20px; font-weight: 800;">₹12,50,000</div>
+        </div>
+      </div>
+
+      <div style="font-size: 12px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">🏢 Makkah Accommodation:</span>
+          <strong id="modal-offer-makkah">Dar Al Eiman (500m from Haram)</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">🏢 Madinah Accommodation:</span>
+          <strong id="modal-offer-madinah">Anwar Al Madinah (200m from Haram)</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">🚌 Ground Transport:</span>
+          <strong id="modal-offer-transport">AC Luxury Bus</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">🍽️ Meal Plan:</span>
+          <strong id="modal-offer-meal">Full Board (Indian/Kashmiri)</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">🧭 Historical Ziyarat:</span>
+          <strong id="modal-offer-ziyarat">Included in Makkah & Madinah</strong>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+        <button onclick="closeModal('offer-details-modal')" class="btn btn-secondary">Close</button>
+        <button onclick="handleSelectCurrentOffer()" class="btn btn-primary">
+          Select & Approve Offer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Notifications Modal -->
+  <div id="notifications-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 440px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <h3 style="font-size: 16px; font-weight: 800;">Recent Platform Alerts</h3>
+        <button onclick="closeModal('notifications-modal')" style="font-size: 20px; color: var(--text-light);">✕</button>
+      </div>
+
+      <div id="notifs-container-list" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Dynamic Alerts List -->
+      </div>
+
+      <div style="margin-top: 16px; text-align: center;">
+        <button onclick="markAllNotifsRead()" class="btn btn-secondary btn-sm" style="width: 100%;">
+          Mark All As Read
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Vanilla JavaScript Admin Engine -->
+  <script src="app.js"></script>
 </body>
 </html>
