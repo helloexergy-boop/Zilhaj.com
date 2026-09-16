@@ -9,12 +9,19 @@ const { MongoClient } = require('mongodb');
 const Razorpay = require('razorpay');
 
 function getRazorpayConfig() {
-    const keyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_TO6mS9Z6cLAruh';
-    const keySecret = process.env.RAZORPAY_KEY_SECRET || 'hucccML7XwUohM5VB1J6by0D';
-    const instance = new Razorpay({
-        key_id: keyId,
-        key_secret: keySecret
-    });
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    let instance = null;
+    if (keyId && keySecret) {
+        try {
+            instance = new Razorpay({
+                key_id: keyId,
+                key_secret: keySecret
+            });
+        } catch (e) {
+            console.error('Failed to initialize Razorpay instance:', e);
+        }
+    }
     return { instance, keyId, keySecret };
 }
 
@@ -52,6 +59,11 @@ app.use(express.static(loginDir, staticOptions));
 app.get(['/admin', '/admin/', '/admin/dashboard', '/admin/index.html'], (req, res) => {
     res.sendFile(path.join(publicDir, 'admin', 'index.html'));
 });
+
+app.get(['/checkout', '/checkout.html'], (req, res) => {
+    res.sendFile(path.join(publicDir, 'checkout.html'));
+});
+
 
 // ============================================================================
 // STAFF / SUB-ADMIN AUTHORIZATION MODEL
@@ -1834,49 +1846,69 @@ app.delete('/api/requirements/:id', async (req, res) => {
 // RAZORPAY & UPI PAYMENT ENDPOINTS
 const handleCreateRazorpayOrder = async (req, res) => {
     try {
-        let { amount, currency, receipt, bookingId } = req.body || {};
-        const { instance: rzpInstance, keyId } = getRazorpayConfig();
-        
-        let amountInPaise;
-        if (!amount) {
-            amountInPaise = 500; // Default ₹5 (500 paise) for testing
-        } else if (parseFloat(amount) < 100) {
-            // Amount passed in Rupees (e.g., 5 => 500 paise)
-            amountInPaise = Math.round(parseFloat(amount) * 100);
-        } else {
-            // Amount passed directly in Paise (e.g., 500)
-            amountInPaise = Math.round(parseFloat(amount));
+        let { amount, currency, receipt, notes, bookingId } = req.body || {};
+        const { instance: rzpInstance, keyId, keySecret } = getRazorpayConfig();
+
+        if (!rzpInstance || !keyId || !keySecret) {
+            return res.status(401).json({
+                error: 'Razorpay authentication failed: API credentials missing on server'
+            });
         }
+
+        if (amount === undefined || amount === null || isNaN(Number(amount))) {
+            return res.status(400).json({ error: 'Amount is required and must be a number in paise' });
+        }
+
+        const amountInPaise = Math.round(Number(amount));
 
         if (amountInPaise < 100) {
             return res.status(400).json({ error: 'Minimum amount must be at least 100 paise (₹1)' });
         }
 
         currency = currency || 'INR';
-        receipt = receipt || ('rcpt_' + Date.now());
+        receipt = receipt || ('rcpt_' + Date.now().toString().slice(-8));
 
-        let order = null;
-        try {
-            order = await rzpInstance.orders.create({
-                amount: amountInPaise,
-                currency: currency,
-                receipt: receipt
-            });
-        } catch (apiErr) {
-            console.warn('Razorpay SDK Order Notice (direct checkout mode active):', apiErr.message);
-        }
-
-        return res.json({
-            order_id: order ? order.id : undefined,
-            orderId: order ? order.id : undefined,
+        const orderOptions = {
             amount: amountInPaise,
             currency: currency,
-            key: keyId,
-            status: order ? 'created' : 'ready',
-            bookingId: bookingId || 'BK-' + Date.now()
-        });
+            receipt: receipt
+        };
+
+        if (notes && typeof notes === 'object') {
+            orderOptions.notes = notes;
+        } else if (bookingId) {
+            orderOptions.notes = { bookingId: String(bookingId) };
+        }
+
+        try {
+            const order = await rzpInstance.orders.create(orderOptions);
+            return res.status(200).json({
+                order_id: order.id,
+                orderId: order.id,
+                amount: order.amount,
+                currency: order.currency,
+                receipt: order.receipt,
+                status: order.status,
+                key_id: keyId,
+                key: keyId,
+                bookingId: bookingId || 'BK-' + Date.now()
+            });
+        } catch (apiErr) {
+            console.error('Razorpay order creation failure:', apiErr);
+            const statusCode = (apiErr.statusCode === 401 || (apiErr.error && apiErr.error.code === 'BAD_REQUEST_ERROR' && apiErr.statusCode === 401)) ? 401 : (apiErr.statusCode || 500);
+            if (statusCode === 401 || (apiErr.message && /auth|unauthorized|key/i.test(apiErr.message))) {
+                return res.status(401).json({
+                    error: 'Razorpay authentication failed',
+                    message: apiErr.description || apiErr.message || 'Unauthorized credentials'
+                });
+            }
+            return res.status(500).json({
+                error: 'Failed to create Razorpay order',
+                message: apiErr.description || apiErr.message || 'Internal Razorpay error'
+            });
+        }
     } catch (err) {
-        console.error('Razorpay order creation failure:', err);
+        console.error('Unexpected order creation error:', err);
         return res.status(500).json({ error: 'Failed to create Razorpay order', message: err.message });
     }
 };
@@ -1885,37 +1917,71 @@ const handleVerifyRazorpayPayment = async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId, paymentId, signature, bookingId } = req.body || {};
         const { keySecret } = getRazorpayConfig();
-        
+
+        if (!keySecret) {
+            return res.status(500).json({ success: false, error: 'Server configuration error: Key Secret missing' });
+        }
+
         const finalOrderId = razorpay_order_id || orderId;
         const finalPaymentId = razorpay_payment_id || paymentId;
         const finalSignature = razorpay_signature || signature;
 
-        if (!finalOrderId || !finalPaymentId) {
-            return res.status(400).json({ success: false, error: 'Missing required payment verification fields' });
+        // Backend - Verify Signature: Missing fields return 400
+        if (!finalOrderId || !finalPaymentId || !finalSignature) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required payment verification fields',
+                required: ['razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature']
+            });
         }
 
-        if (finalSignature) {
-            const body = finalOrderId + "|" + finalPaymentId;
-            const expectedSignature = crypto
-                .createHmac('sha256', keySecret)
-                .update(body.toString())
-                .digest('hex');
+        // HMAC-SHA256 algorithm: order_id + "|" + payment_id, KEY_SECRET
+        const body = finalOrderId + "|" + finalPaymentId;
+        const expectedSignature = crypto
+            .createHmac('sha256', keySecret)
+            .update(body.toString())
+            .digest('hex');
 
-            if (expectedSignature !== finalSignature) {
-                console.warn('Razorpay HMAC-SHA256 signature mismatch');
-                return res.status(400).json({ success: false, message: 'Invalid payment signature. Verification failed.' });
+        let isMatch = false;
+        try {
+            const expectedBuf = Buffer.from(expectedSignature, 'utf8');
+            const actualBuf = Buffer.from(finalSignature, 'utf8');
+            if (expectedBuf.length === actualBuf.length && crypto.timingSafeEqual(expectedBuf, actualBuf)) {
+                isMatch = true;
             }
+        } catch (e) {
+            isMatch = (expectedSignature === finalSignature);
         }
 
+        // Backend - Verify Signature: Signature mismatch return 400, do NOT mark as paid
+        if (!isMatch) {
+            console.warn(`Razorpay HMAC signature mismatch. Expected: ${expectedSignature}, Received: ${finalSignature}`);
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid payment signature. Verification failed.'
+            });
+        }
+
+        // Signature verified successfully -> update booking in database if applicable
         const db = await connectToDatabase().catch(() => null);
         if (db && bookingId) {
             await db.collection('bookings').updateOne(
                 { id: bookingId },
-                { $set: { status: 'CONFIRMED', paymentStatus: 'PAID', paymentMethod: 'RAZORPAY_STANDARD', paymentId: finalPaymentId, transactionId: finalPaymentId, razorpayOrderId: finalOrderId, updatedAt: new Date() } }
+                {
+                    $set: {
+                        status: 'CONFIRMED',
+                        paymentStatus: 'PAID',
+                        paymentMethod: 'RAZORPAY_STANDARD',
+                        paymentId: finalPaymentId,
+                        transactionId: finalPaymentId,
+                        razorpayOrderId: finalOrderId,
+                        updatedAt: new Date()
+                    }
+                }
             ).catch(() => {});
         }
 
-        return res.json({
+        return res.status(200).json({
             success: true,
             status: 'SUCCESS',
             message: 'Payment signature verified successfully',
@@ -1929,6 +1995,7 @@ const handleVerifyRazorpayPayment = async (req, res) => {
         return res.status(500).json({ success: false, error: 'Internal server error during verification' });
     }
 };
+
 
 const handleDirectCheckout = async (req, res) => {
     const txnId = 'TXN-' + Date.now();
@@ -2185,6 +2252,11 @@ app.post('/api/verify-payment', handleVerifyRazorpayPayment);
 app.post('/verify-payment', handleVerifyRazorpayPayment);
 app.post('/api/payments/razorpay/verify-payment', handleVerifyRazorpayPayment);
 app.post('/payments/razorpay/verify-payment', handleVerifyRazorpayPayment);
+
+app.get(['/api/razorpay-key', '/api/payments/razorpay/key', '/razorpay-key'], (req, res) => {
+    const { keyId } = getRazorpayConfig();
+    res.json({ key_id: keyId, key: keyId });
+});
 
 app.get('/api/invoice/:bookingId', handleGeneratePDFInvoice);
 app.get('/invoice/:bookingId', handleGeneratePDFInvoice);

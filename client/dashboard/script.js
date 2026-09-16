@@ -1466,7 +1466,7 @@ window.confirmTermsAndProceedPayment = function() {
 window.initiateRazorpayPayment = async function() {
   const booking = window.pendingBooking || {};
   const bookingId = booking.reqId || ('BK-' + Date.now());
-  const amount = 1000; // ₹1,000 confirmation deposit
+  const amountInPaise = 1000 * 100; // ₹1,000 confirmation deposit in paise
 
   const user = (() => { try { return JSON.parse(localStorage.getItem('umrah_user') || '{}'); } catch(e) { return {}; } })();
   const customerName = document.getElementById('checkoutTravelerName')?.textContent || user.name || 'Valued Pilgrim';
@@ -1477,20 +1477,25 @@ window.initiateRazorpayPayment = async function() {
   const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
 
   try {
-    const res = await fetch(apiBase + '/payments/razorpay/create-order', {
+    const res = await fetch(apiBase + '/create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: amount, currency: 'INR', bookingId })
+      body: JSON.stringify({ amount: amountInPaise, currency: 'INR', bookingId: bookingId })
     });
-    const orderData = await res.json();
 
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || errData.error || `Server returned ${res.status}`);
+    }
+
+    const orderData = await res.json();
     const validOrderId = orderData && (orderData.order_id || orderData.orderId);
-    const razorpayKey = (orderData && orderData.key) || 'rzp_test_TO6mS9Z6cLAruh';
+    const razorpayKey = (orderData && (orderData.key_id || orderData.key));
 
     if (window.Razorpay) {
       const options = {
         key: razorpayKey,
-        amount: (orderData && orderData.amount) || 100000,
+        amount: (orderData && orderData.amount) || amountInPaise,
         currency: (orderData && orderData.currency) || 'INR',
         name: 'ZILHAJ Umrah & Hajj Travel',
         description: `Booking Fee Deposit for ${booking.packageName || 'Umrah Package'}`,
@@ -1502,6 +1507,12 @@ window.initiateRazorpayPayment = async function() {
         },
         theme: {
           color: '#127A4D'
+        },
+        modal: {
+          ondismiss: function() {
+            console.log('Payment modal dismissed by user');
+            alert('Payment was cancelled. You can complete it anytime from your dashboard.');
+          }
         },
         config: {
           display: {
@@ -1535,20 +1546,26 @@ window.initiateRazorpayPayment = async function() {
         },
         handler: async function (response) {
           try {
-            await fetch(apiBase + '/payments/razorpay/verify-payment', {
+            const vRes = await fetch(apiBase + '/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id || orderId,
+                razorpay_order_id: response.razorpay_order_id || validOrderId,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
                 bookingId: bookingId
               })
             });
+            const vData = await vRes.json();
+            if (!vRes.ok || !vData.success) {
+              alert('Payment verification failed: ' + (vData.message || 'Signature mismatch'));
+              return;
+            }
+            window.completePaymentSuccess(response.razorpay_payment_id, selectedMethod);
           } catch (e) {
-            console.warn('Signature verification call notice:', e);
+            console.error('Signature verification call error:', e);
+            alert('Payment verification failed. Please contact support.');
           }
-          window.completePaymentSuccess(response.razorpay_payment_id, selectedMethod);
         }
       };
 
@@ -1558,12 +1575,12 @@ window.initiateRazorpayPayment = async function() {
       });
       rzp.open();
     } else {
-      console.warn('Razorpay SDK unavailable, completing payment simulation');
-      window.completePaymentSuccess('pay_' + Date.now(), selectedMethod);
+      console.warn('Razorpay SDK unavailable');
+      alert('Razorpay Checkout SDK is not loaded. Please check your internet connection.');
     }
   } catch (err) {
     console.error('Razorpay Checkout initialization error:', err);
-    alert('Could not initialize payment gateway. Please check server connection.');
+    alert('Could not initialize payment gateway: ' + err.message);
   }
 };
 

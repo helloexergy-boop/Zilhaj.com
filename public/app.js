@@ -5924,37 +5924,47 @@ class App {
         });
     }
 
-    async processPayment(offerId) {
+    async payWithRazorpay(offerId, amount, method = 'UPI') {
         let allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
         let offer = allOffers.find(o => o.id === offerId);
         if (!offer || !offer.id) {
             this.showToast('This offer is no longer available. Please refresh and try again.', 'warning');
             return;
         }
-        const totalAmount = offer.discountedPrice || offer.price || 0;
+        const totalAmount = offer.discountedPrice || offer.price || parseFloat(amount) || 0;
         const bookingRef = 'BK-' + Date.now().toString().slice(-6);
 
         if (typeof window.Razorpay !== 'undefined') {
             this.showLoading('Initializing Razorpay Secure Gateway (UPI, Cards, NetBanking)...');
             let orderData = null;
+            const amountInPaise = Math.round(totalAmount * 100);
             try {
-                orderData = await this.apiCall('/payments/razorpay/create-order', 'POST', {
+                orderData = await this.apiCall('/create-order', 'POST', {
                     bookingId: bookingRef,
-                    amount: totalAmount
+                    amount: amountInPaise,
+                    currency: 'INR'
                 });
             } catch (e) {
                 console.warn('Razorpay order API call notice:', e);
             }
             this.hideLoading();
 
+            const razorpayKey = (orderData && (orderData.key_id || orderData.key));
+            const validOrderId = orderData && (orderData.order_id || orderData.orderId);
+
             const options = {
-                "key": (orderData && orderData.key) || 'rzp_test_TO6mS9Z6cLAruh',
-                "amount": (orderData && typeof orderData.amount !== 'undefined') ? orderData.amount : Math.round(totalAmount * 100),
+                "key": razorpayKey,
+                "amount": (orderData && typeof orderData.amount !== 'undefined') ? orderData.amount : amountInPaise,
                 "currency": (orderData && orderData.currency) || "INR",
                 "name": "ZILHAJ Umrah & Hajj Travel",
                 "description": offer.packageTitle || "Umrah Payment",
                 "image": "https://img.icons8.com/color/96/000000/kaaba.png",
-                ...(orderData && (orderData.order_id || orderData.orderId) ? { "order_id": orderData.order_id || orderData.orderId } : {}),
+                ...(validOrderId ? { "order_id": validOrderId } : {}),
+                "modal": {
+                    "ondismiss": () => {
+                        this.showToast('Payment was cancelled by user.', 'info');
+                    }
+                },
                 "config": {
                     "display": {
                         "blocks": {
@@ -5989,17 +5999,22 @@ class App {
                     this.showLoading('Verifying payment authentication with Razorpay...');
                     let verifyRes = null;
                     try {
-                        verifyRes = await this.apiCall('/payments/razorpay/verify-payment', 'POST', {
+                        verifyRes = await this.apiCall('/verify-payment', 'POST', {
                             bookingId: bookingRef,
-                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_order_id: response.razorpay_order_id || validOrderId,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
                             paymentMethod: 'RAZORPAY'
                         });
                     } catch (err) {
-                        console.warn('Razorpay signature verification notice:', err);
+                        console.error('Razorpay signature verification notice:', err);
                     }
                     this.hideLoading();
+
+                    if (!verifyRes || !verifyRes.success) {
+                        this.showToast('Payment verification failed: ' + (verifyRes?.message || 'Invalid signature'), 'error');
+                        return;
+                    }
 
                     const txnId = response.razorpay_payment_id || (verifyRes && verifyRes.transactionId) || ('pay_' + Date.now());
                     let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
