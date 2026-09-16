@@ -11,6 +11,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabPanes = document.querySelectorAll('.tab-pane');
 
   window.switchTab = (targetTab) => {
+    const mainLayout = document.querySelector('.main-layout');
+    if (mainLayout) {
+      if (targetTab === 'submit-request') {
+        mainLayout.classList.add('full-width-mode');
+      } else {
+        mainLayout.classList.remove('full-width-mode');
+      }
+    }
+
+    if (targetTab === 'payments') {
+      const checkoutView = document.getElementById('checkoutView');
+      const emptyPaymentsView = document.getElementById('emptyPaymentsView');
+      const checkoutTitle = document.getElementById('checkoutPackageTitle');
+      const checkoutAgent = document.getElementById('checkoutAgentCode');
+      const checkoutPricePerson = document.getElementById('checkoutPricePerson');
+      const checkoutTotalPrice = document.getElementById('checkoutTotalPrice');
+
+      if (window.pendingBooking) {
+        if (checkoutTitle) checkoutTitle.textContent = `${window.pendingBooking.packageName || 'Umrah Package'} - ${window.pendingBooking.agencyName}`;
+        if (checkoutAgent) checkoutAgent.textContent = `Agent Code: ${window.pendingBooking.agentCode} | Verified Partner`;
+        if (checkoutPricePerson) checkoutPricePerson.textContent = window.pendingBooking.price;
+        if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1,000';
+
+        if (checkoutView) checkoutView.style.display = 'block';
+        if (emptyPaymentsView) emptyPaymentsView.style.display = 'none';
+      } else {
+        if (checkoutView) checkoutView.style.display = 'none';
+        if (emptyPaymentsView) emptyPaymentsView.style.display = 'flex';
+      }
+    }
+
     sidebarLinks.forEach(l => {
       l.classList.remove('active');
       if (l.getAttribute('data-tab') === targetTab) {
@@ -40,10 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // URL Hash Navigation / Hash Redirect Handling (Help -> My Requests)
+  // URL Hash Navigation / Hash Redirect Handling (Submit-Request / Profile / Payments / Help)
   const initialHash = window.location.hash.replace('#', '').toLowerCase();
   if (initialHash === 'submit-request' || initialHash === 'request-form') {
     switchTab('submit-request');
+  } else if (initialHash === 'profile' || initialHash === 'settings') {
+    switchTab('profile');
+  } else if (initialHash === 'payments') {
+    switchTab('payments');
   } else if (initialHash === 'help' || initialHash === 'support') {
     switchTab('requests');
   }
@@ -497,6 +532,9 @@ document.addEventListener('DOMContentLoaded', () => {
   window.closeConfirmationModal = () => {
     if (modal) modal.style.display = 'none';
     unlockBodyScroll();
+    if (typeof switchTab === 'function') {
+      switchTab('requests');
+    }
   };
 
   if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeConfirmationModal);
@@ -566,10 +604,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const totalAdults = maleCount + femaleCount;
       const totalPersons = maleCount + femaleCount + childCount + infantCount;
 
-      const fullname = document.getElementById('fullnameInput')?.value || '012 Palak Badyal';
-      const mobile = document.getElementById('mobileInput')?.value || '+91 98765 43210';
-      const email = document.getElementById('emailInput')?.value || 'palakbadyal69@gmail.com';
-      const address = document.getElementById('addressInput')?.value || 'Nowgam, Srinagar, J&K';
+      const userObj = (() => { try { return JSON.parse(localStorage.getItem('umrah_user') || '{}'); } catch(e) { return {}; } })();
+      const fullname = document.getElementById('fullnameInput')?.value || userObj.name || 'Valued Pilgrim';
+      const mobile = document.getElementById('mobileInput')?.value || userObj.phone || '';
+      const email = document.getElementById('emailInput')?.value || userObj.email || '';
+      const address = document.getElementById('addressInput')?.value || 'Not specified';
       const stateVal = document.getElementById('stateSelect')?.value || 'Jammu & Kashmir';
       const districtVal = document.getElementById('districtSelect')?.value || departureCity;
       const rawSpecialReq = document.getElementById('specialReqInput')?.value.trim();
@@ -585,6 +624,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Generate random REQ Code
       const randomReqId = `REQ-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      const reqPayload = {
+        id: randomReqId,
+        applyingFor,
+        departureCity,
+        travelDate: displayDateStr,
+        rawDate,
+        duration: displayDuration,
+        hotelCategory,
+        totalPersons,
+        maleCount,
+        femaleCount,
+        childCount,
+        infantCount,
+        fullname,
+        mobile,
+        email,
+        address,
+        state: stateVal,
+        district: districtVal,
+        specialRequirements: specialReq,
+        status: 'BIDDING',
+        createdAt: new Date()
+      };
+
+      // Asynchronously post to backend API database
+      const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+      fetch(apiBase + '/requirements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reqPayload)
+      }).then(res => res.json()).then(data => {
+        console.log('Requirement stored in DB:', data);
+      }).catch(err => console.warn('Requirement DB post warning:', err));
 
       // Create new self-contained request card element with integrated tracker and 5-field info grid
       const newCard = document.createElement('div');
@@ -1220,10 +1293,10 @@ window.openSubmissionSummaryModal = function(reqId, service, date, passengers, h
 
     if (document.getElementById('sumHotelCategory')) document.getElementById('sumHotelCategory').textContent = hotelCategory || '5 Star';
     
-    if (document.getElementById('sumFullName')) document.getElementById('sumFullName').textContent = fullname || '012 Palak Badyal';
-    if (document.getElementById('sumMobile')) document.getElementById('sumMobile').textContent = mobile || '+91 98765 43210';
-    if (document.getElementById('sumEmail')) document.getElementById('sumEmail').textContent = email || 'palakbadyal69@gmail.com';
-    if (document.getElementById('sumAddress')) document.getElementById('sumAddress').textContent = address || 'Nowgam, Srinagar';
+    if (document.getElementById('sumFullName')) document.getElementById('sumFullName').textContent = fullname || 'Pilgrim User';
+    if (document.getElementById('sumMobile')) document.getElementById('sumMobile').textContent = mobile || 'N/A';
+    if (document.getElementById('sumEmail')) document.getElementById('sumEmail').textContent = email || 'N/A';
+    if (document.getElementById('sumAddress')) document.getElementById('sumAddress').textContent = address || 'N/A';
     if (document.getElementById('sumState')) document.getElementById('sumState').textContent = state || 'Jammu & Kashmir';
     if (document.getElementById('sumDistrict')) document.getElementById('sumDistrict').textContent = district || (city || 'Srinagar');
     if (document.getElementById('sumSpecialReq')) document.getElementById('sumSpecialReq').textContent = specialReq || 'None specified';
@@ -1378,7 +1451,7 @@ window.confirmTermsAndProceedPayment = function() {
     if (checkoutTitle) checkoutTitle.textContent = `${window.pendingBooking.packageName || 'Umrah Package'} - ${window.pendingBooking.agencyName}`;
     if (checkoutAgent) checkoutAgent.textContent = `Agent Code: ${window.pendingBooking.agentCode} | Verified Partner`;
     if (checkoutPricePerson) checkoutPricePerson.textContent = window.pendingBooking.price;
-    if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹╣1,000';
+    if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1,000';
   }
 
   if (checkoutView) checkoutView.style.display = 'block';
@@ -1390,14 +1463,134 @@ window.confirmTermsAndProceedPayment = function() {
   }
 };
 
-window.completeCheckoutPayment = function() {
-  const paymentOption = document.querySelector('input[name="paymentOption"]:checked')?.value || 'UPI';
+window.initiateRazorpayPayment = async function() {
+  const booking = window.pendingBooking || {};
+  const bookingId = booking.reqId || ('BK-' + Date.now());
+  const amountInPaise = 1000 * 100; // ₹1,000 confirmation deposit in paise
+
+  const user = (() => { try { return JSON.parse(localStorage.getItem('umrah_user') || '{}'); } catch(e) { return {}; } })();
+  const customerName = document.getElementById('checkoutTravelerName')?.textContent || user.name || 'Valued Pilgrim';
+  const customerEmail = document.getElementById('checkoutEmail')?.textContent || user.email || 'customer@zilhaj.com';
+  const customerPhone = document.getElementById('checkoutMobile')?.textContent || user.phone || '9876543210';
+  const selectedMethod = document.querySelector('input[name="paymentOption"]:checked')?.value || 'Razorpay Online';
+
+  const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+
+  try {
+    const res = await fetch(apiBase + '/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: amountInPaise, currency: 'INR', bookingId: bookingId })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || errData.error || `Server returned ${res.status}`);
+    }
+
+    const orderData = await res.json();
+    const validOrderId = orderData && (orderData.order_id || orderData.orderId);
+    const razorpayKey = (orderData && (orderData.key_id || orderData.key));
+
+    if (window.Razorpay) {
+      const options = {
+        key: razorpayKey,
+        amount: (orderData && orderData.amount) || amountInPaise,
+        currency: (orderData && orderData.currency) || 'INR',
+        name: 'ZILHAJ Umrah & Hajj Travel',
+        description: `Booking Fee Deposit for ${booking.packageName || 'Umrah Package'}`,
+        ...(validOrderId ? { order_id: validOrderId } : {}),
+        prefill: {
+          name: customerName,
+          email: customerEmail,
+          contact: customerPhone
+        },
+        theme: {
+          color: '#127A4D'
+        },
+        modal: {
+          ondismiss: function() {
+            console.log('Payment modal dismissed by user');
+            alert('Payment was cancelled. You can complete it anytime from your dashboard.');
+          }
+        },
+        config: {
+          display: {
+            blocks: {
+              utib: {
+                name: "Pay via UPI / QR Code (Google Pay, PhonePe, Paytm, BHIM)",
+                instruments: [
+                  { method: "upi" }
+                ]
+              },
+              other: {
+                name: "Other Payment Options (Cards / NetBanking / Wallets)",
+                instruments: [
+                  { method: "card" },
+                  { method: "netbanking" },
+                  { method: "wallet" }
+                ]
+              }
+            },
+            sequence: ["block.utib", "block.other"],
+            preferences: { show_default_blocks: true }
+          }
+        },
+        method: {
+          upi: true,
+          card: true,
+          netbanking: true,
+          wallet: true,
+          emi: true,
+          paylater: true
+        },
+        handler: async function (response) {
+          try {
+            const vRes = await fetch(apiBase + '/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id || validOrderId,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                bookingId: bookingId
+              })
+            });
+            const vData = await vRes.json();
+            if (!vRes.ok || !vData.success) {
+              alert('Payment verification failed: ' + (vData.message || 'Signature mismatch'));
+              return;
+            }
+            window.completePaymentSuccess(response.razorpay_payment_id, selectedMethod);
+          } catch (e) {
+            console.error('Signature verification call error:', e);
+            alert('Payment verification failed. Please contact support.');
+          }
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.on('payment.failed', function (resp) {
+        alert('Payment failed: ' + (resp?.error?.description || 'Transaction declined. Please try again.'));
+      });
+      rzp.open();
+    } else {
+      console.warn('Razorpay SDK unavailable');
+      alert('Razorpay Checkout SDK is not loaded. Please check your internet connection.');
+    }
+  } catch (err) {
+    console.error('Razorpay Checkout initialization error:', err);
+    alert('Could not initialize payment gateway: ' + err.message);
+  }
+};
+
+window.completePaymentSuccess = function(paymentId, method) {
   const booking = window.pendingBooking || {};
   const agencyName = booking.agencyName || 'Al-Safwa Travel';
 
   const methodEl = document.getElementById('paySuccessMethod');
   const agencyEl = document.getElementById('paySuccessAgency');
-  if (methodEl) methodEl.textContent = paymentOption;
+  if (methodEl) methodEl.textContent = method || 'Razorpay / UPI';
   if (agencyEl) agencyEl.textContent = agencyName;
 
   const modal = document.getElementById('paymentSuccessModal');
@@ -1423,8 +1616,8 @@ window.closePaymentSuccessModal = function() {
   if (emptyPaymentsView) {
     emptyPaymentsView.innerHTML = `
       <div class="payments-icon">✓</div>
-      <h3 style="color:#127A4D;">Booking Fee Confirmed (₹╣1,000)!</h3>
-      <p>Your ₹╣1,000 confirmation fee has been received and your package offer is locked. Invoice #INV-2026-089 has been generated. The partner agency will contact you shortly regarding the remaining balance.</p>
+      <h3 style="color:#127A4D;">Booking Fee Confirmed (₹1,000)!</h3>
+      <p>Your ₹1,000 confirmation fee has been received via Razorpay escrow and your package offer is locked. Official tax invoice receipt has been generated. The partner agency will contact you shortly regarding the remaining balance.</p>
       
       <div class="confirmed-booking-details" style="display:flex; flex-direction:column; gap:8px; background:#F8FCF9; border:1px solid #D2EBE0; border-radius:var(--radius-md); padding:14px 20px; margin:16px 0; width:100%; max-width:420px; text-align:left;">
         <div style="display:flex; justify-content:space-between; align-items:center;">

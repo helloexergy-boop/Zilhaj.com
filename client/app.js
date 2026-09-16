@@ -10240,7 +10240,7 @@ class App {
         try {
             orderData = await this.apiCall('/payments/razorpay/create-order', 'POST', {
                 bookingId: bookingId || 'BK-' + Date.now(),
-                amount: realAmount
+                amount: Math.round(realAmount * 100)
             });
         } catch (e) {
             console.warn('Razorpay order API call fallback:', e);
@@ -10249,7 +10249,7 @@ class App {
         this.hideLoading();
 
         const options = {
-            "key": (orderData && orderData.key) || 'rzp_test_TO6mS9Z6cLAruh',
+            "key": (orderData && orderData.key) || 'rzp_test_Tci6hC14lJxzq8',
             "amount": (orderData && typeof orderData.amount !== 'undefined') ? orderData.amount : Math.round(realAmount * 100),
             "currency": (orderData && orderData.currency) || "INR",
             "name": "ZILHAJ Umrah & Hajj Travel",

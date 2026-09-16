@@ -58,7 +58,7 @@ public class PaymentController {
      * POST /api/payments/razorpay/create-order
      * Generates a Razorpay Order ID for standard checkout popup (UPI, Cards, NetBanking, Wallets).
      */
-    @PostMapping("/razorpay/create-order")
+    @PostMapping({"/razorpay/create-order", "/create-order"})
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createRazorpayOrder(@RequestBody Map<String, Object> request) {
         UserDetailsImpl currentUser = getCurrentUser();
@@ -90,9 +90,11 @@ public class PaymentController {
             Order order = razorPayService.createOrder(amount, "INR", "rec_" + bookingId.substring(0, Math.min(bookingId.length(), 10)));
 
             Map<String, Object> response = new HashMap<>();
+            response.put("order_id", order.get("id"));
             response.put("orderId", order.get("id"));
             response.put("amount", order.get("amount"));
             response.put("currency", order.get("currency"));
+            response.put("key_id", razorPayService.getApiKey());
             response.put("key", razorPayService.getApiKey());
             response.put("bookingId", bookingId);
 
@@ -107,7 +109,7 @@ public class PaymentController {
      * POST /api/payments/razorpay/verify-payment
      * Verifies the Razorpay payment HMAC-SHA256 signature, updates payment and booking status to CONFIRMED.
      */
-    @PostMapping("/razorpay/verify-payment")
+    @PostMapping({"/razorpay/verify-payment", "/verify-payment"})
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> verifyRazorpayPayment(@RequestBody Map<String, String> request) {
         UserDetailsImpl currentUser = getCurrentUser();
@@ -116,9 +118,9 @@ public class PaymentController {
         }
 
         String bookingId = request.get("bookingId");
-        String razorpayOrderId = request.get("razorpayOrderId");
-        String razorpayPaymentId = request.get("razorpayPaymentId");
-        String razorpaySignature = request.get("razorpaySignature");
+        String razorpayOrderId = request.get("razorpayOrderId") != null ? request.get("razorpayOrderId") : request.get("razorpay_order_id");
+        String razorpayPaymentId = request.get("razorpayPaymentId") != null ? request.get("razorpayPaymentId") : request.get("razorpay_payment_id");
+        String razorpaySignature = request.get("razorpaySignature") != null ? request.get("razorpaySignature") : request.get("razorpay_signature");
         String paymentMethod = request.getOrDefault("paymentMethod", "RAZORPAY");
 
         if (bookingId == null || razorpayOrderId == null || razorpayPaymentId == null || razorpaySignature == null) {
