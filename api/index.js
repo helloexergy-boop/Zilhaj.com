@@ -9,8 +9,10 @@ const { MongoClient } = require('mongodb');
 const Razorpay = require('razorpay');
 
 function getRazorpayConfig() {
-    const keyId = process.env.RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    const rawKeyId = process.env.RAZORPAY_KEY_ID || 'rzp_live_TdOWoVLFjxHfTO';
+    const rawKeySecret = process.env.RAZORPAY_KEY_SECRET || '7ZOl0oWaGNDoMQwt2v2AnMAv';
+    const keyId = rawKeyId ? String(rawKeyId).replace(/[\r\n\s]+/g, '').trim() : 'rzp_live_TdOWoVLFjxHfTO';
+    const keySecret = rawKeySecret ? String(rawKeySecret).replace(/[\r\n\s]+/g, '').trim() : '7ZOl0oWaGNDoMQwt2v2AnMAv';
     let instance = null;
     if (keyId && keySecret) {
         try {
@@ -944,17 +946,23 @@ app.post('/api/bookings', async (req, res) => {
 app.put('/api/bookings/:id', async (req, res) => {
     const updates = { ...req.body, updatedAt: new Date() };
     delete updates.id;
+    delete updates._id;
     try {
         const db = await connectToDatabase();
         await db.collection('bookings').updateOne(
             { id: req.params.id },
-            { $set: updates }
+            { $set: updates },
+            { upsert: true }
         );
     } catch (err) {
         console.warn('MongoDB offline, updating in-memory store for booking');
     }
     const idx = inMemoryStore.bookings.findIndex(b => b.id === req.params.id);
-    if (idx !== -1) inMemoryStore.bookings[idx] = { ...inMemoryStore.bookings[idx], ...updates };
+    if (idx !== -1) {
+        inMemoryStore.bookings[idx] = { ...inMemoryStore.bookings[idx], ...updates };
+    } else {
+        inMemoryStore.bookings.unshift({ id: req.params.id, ...updates });
+    }
     res.json({ id: req.params.id, ...updates });
 });
 
@@ -1962,23 +1970,50 @@ const handleVerifyRazorpayPayment = async (req, res) => {
             });
         }
 
-        // Signature verified successfully -> update booking in database if applicable
+        // Signature verified successfully -> update or insert booking in database and in-memory store
         const db = await connectToDatabase().catch(() => null);
-        if (db && bookingId) {
-            await db.collection('bookings').updateOne(
-                { id: bookingId },
-                {
-                    $set: {
-                        status: 'CONFIRMED',
-                        paymentStatus: 'PAID',
-                        paymentMethod: 'RAZORPAY_STANDARD',
-                        paymentId: finalPaymentId,
-                        transactionId: finalPaymentId,
-                        razorpayOrderId: finalOrderId,
-                        updatedAt: new Date()
-                    }
+        const bookingData = (req.body && req.body.bookingData && typeof req.body.bookingData === 'object') ? req.body.bookingData : {};
+        const bookingRecord = {
+            ...bookingData,
+            status: 'CONFIRMED',
+            paymentStatus: 'PAID',
+            paymentMethod: req.body.paymentMethod || 'RAZORPAY_STANDARD',
+            paymentId: finalPaymentId,
+            transactionId: finalPaymentId,
+            razorpayOrderId: finalOrderId,
+            paidAt: new Date(),
+            updatedAt: new Date()
+        };
+        delete bookingRecord._id;
+
+        if (bookingId) {
+            bookingRecord.id = bookingId;
+            if (db) {
+                await db.collection('bookings').updateOne(
+                    { id: bookingId },
+                    { $set: bookingRecord },
+                    { upsert: true }
+                ).catch((err) => console.warn('Failed to upsert verified booking in MongoDB:', err));
+            }
+            const bIdx = inMemoryStore.bookings.findIndex(b => b.id === bookingId);
+            if (bIdx !== -1) {
+                inMemoryStore.bookings[bIdx] = { ...inMemoryStore.bookings[bIdx], ...bookingRecord };
+            } else {
+                inMemoryStore.bookings.unshift(bookingRecord);
+            }
+
+            // If an offer is associated, mark it accepted
+            const offerId = req.body.offerId || bookingRecord.offerId;
+            if (offerId) {
+                if (db) {
+                    await db.collection('offers').updateOne(
+                        { id: offerId },
+                        { $set: { status: 'ACCEPTED', updatedAt: new Date() } }
+                    ).catch(() => {});
                 }
-            ).catch(() => {});
+                const oIdx = inMemoryStore.offers.findIndex(o => o.id === offerId);
+                if (oIdx !== -1) inMemoryStore.offers[oIdx].status = 'ACCEPTED';
+            }
         }
 
         return res.status(200).json({
@@ -2015,11 +2050,18 @@ const handleGeneratePDFInvoice = async (req, res) => {
         const db = await connectToDatabase().catch(() => null);
 
         let booking = null;
-        if (db) {
-            booking = await db.collection('bookings').findOne({ id: bookingId }).catch(() => null);
+        if (db && bookingId) {
+            booking = await db.collection('bookings').findOne({
+                $or: [
+                    { id: bookingId },
+                    { paymentId: bookingId },
+                    { transactionId: bookingId },
+                    { razorpayOrderId: bookingId }
+                ]
+            }).catch(() => null);
         }
-        if (!booking) {
-            booking = inMemoryStore.bookings.find(b => b.id === bookingId) || null;
+        if (!booking && bookingId) {
+            booking = inMemoryStore.bookings.find(b => b.id === bookingId || b.paymentId === bookingId || b.transactionId === bookingId || b.razorpayOrderId === bookingId) || null;
         }
 
         if (!booking) {

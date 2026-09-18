@@ -1471,10 +1471,11 @@ window.initiateRazorpayPayment = async function() {
   const user = (() => { try { return JSON.parse(localStorage.getItem('umrah_user') || '{}'); } catch(e) { return {}; } })();
   const customerName = document.getElementById('checkoutTravelerName')?.textContent || user.name || 'Valued Pilgrim';
   const customerEmail = document.getElementById('checkoutEmail')?.textContent || user.email || 'customer@zilhaj.com';
-  const customerPhone = document.getElementById('checkoutMobile')?.textContent || user.phone || '9876543210';
+  const rawPhone = document.getElementById('checkoutMobile')?.textContent || user.phone || '9876543210';
+  const customerPhone = String(rawPhone).replace(/[^0-9]/g, '').slice(-10) || '9876543210';
   const selectedMethod = document.querySelector('input[name="paymentOption"]:checked')?.value || 'Razorpay Online';
 
-  const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+  const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
 
   try {
     const res = await fetch(apiBase + '/create-order', {
@@ -1485,12 +1486,17 @@ window.initiateRazorpayPayment = async function() {
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.message || errData.error || `Server returned ${res.status}`);
+      throw new Error(errData.message || errData.error || ('Server returned ' + res.status));
     }
 
     const orderData = await res.json();
     const validOrderId = orderData && (orderData.order_id || orderData.orderId);
-    const razorpayKey = (orderData && (orderData.key_id || orderData.key));
+    const razorpayKey = (orderData && (orderData.key_id || orderData.key)) || 'rzp_live_TdOWoVLFjxHfTO';
+
+    if (!validOrderId) {
+      alert('Could not initialize Razorpay order: ' + ((orderData && (orderData.message || orderData.error)) || 'Failed to create order on server.'));
+      return;
+    }
 
     if (window.Razorpay) {
       const options = {
@@ -1498,8 +1504,8 @@ window.initiateRazorpayPayment = async function() {
         amount: (orderData && orderData.amount) || amountInPaise,
         currency: (orderData && orderData.currency) || 'INR',
         name: 'ZILHAJ Umrah & Hajj Travel',
-        description: `Booking Fee Deposit for ${booking.packageName || 'Umrah Package'}`,
-        ...(validOrderId ? { order_id: validOrderId } : {}),
+        description: 'Booking Fee Deposit for ' + (booking.packageName || 'Umrah Package'),
+        order_id: validOrderId,
         prefill: {
           name: customerName,
           email: customerEmail,
@@ -1513,36 +1519,6 @@ window.initiateRazorpayPayment = async function() {
             console.log('Payment modal dismissed by user');
             alert('Payment was cancelled. You can complete it anytime from your dashboard.');
           }
-        },
-        config: {
-          display: {
-            blocks: {
-              utib: {
-                name: "Pay via UPI / QR Code (Google Pay, PhonePe, Paytm, BHIM)",
-                instruments: [
-                  { method: "upi" }
-                ]
-              },
-              other: {
-                name: "Other Payment Options (Cards / NetBanking / Wallets)",
-                instruments: [
-                  { method: "card" },
-                  { method: "netbanking" },
-                  { method: "wallet" }
-                ]
-              }
-            },
-            sequence: ["block.utib", "block.other"],
-            preferences: { show_default_blocks: true }
-          }
-        },
-        method: {
-          upi: true,
-          card: true,
-          netbanking: true,
-          wallet: true,
-          emi: true,
-          paylater: true
         },
         handler: async function (response) {
           try {
@@ -1558,7 +1534,7 @@ window.initiateRazorpayPayment = async function() {
             });
             const vData = await vRes.json();
             if (!vRes.ok || !vData.success) {
-              alert('Payment verification failed: ' + (vData.message || 'Signature mismatch'));
+              alert('Payment verification failed: ' + ((vData && vData.message) || 'Signature mismatch'));
               return;
             }
             window.completePaymentSuccess(response.razorpay_payment_id, selectedMethod);
@@ -1571,7 +1547,8 @@ window.initiateRazorpayPayment = async function() {
 
       const rzp = new Razorpay(options);
       rzp.on('payment.failed', function (resp) {
-        alert('Payment failed: ' + (resp?.error?.description || 'Transaction declined. Please try again.'));
+        const desc = (resp && resp.error && (resp.error.description || resp.error.reason || resp.error.code)) || 'Transaction declined. Please try again.';
+        alert('Payment failed: ' + desc);
       });
       rzp.open();
     } else {

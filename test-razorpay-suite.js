@@ -60,7 +60,7 @@ async function runTests() {
     console.log('\n[Test 1] Public Key Endpoint (/api/razorpay-key)');
     const keyRes = await makeRequest('/api/razorpay-key');
     assert('Key endpoint returns status 200', keyRes.status === 200);
-    assert('Key endpoint returns correct Key ID (rzp_test_Tci6hC14lJxzq8)', keyRes.data?.key_id === 'rzp_test_Tci6hC14lJxzq8');
+    assert('Key endpoint returns correct Key ID (rzp_live_TdOWoVLFjxHfTO)', keyRes.data?.key_id === 'rzp_live_TdOWoVLFjxHfTO');
     assert('Key endpoint does NOT expose secret', !keyRes.data?.keySecret && !keyRes.data?.secret);
 
     // 2. Order Creation - Success
@@ -112,7 +112,7 @@ async function runTests() {
 
     // 7. Signature Verification - Valid signature verified
     console.log('\n[Test 7] Signature Verification - Valid HMAC-SHA256 signature');
-    const secret = process.env.RAZORPAY_KEY_SECRET;
+    const secret = (process.env.RAZORPAY_KEY_SECRET || '7ZOl0oWaGNDoMQwt2v2AnMAv').replace(/[\r\n\s]+/g, '').trim();
     const testPaymentId = 'pay_TciTest' + Date.now().toString().slice(-6);
     const validPayload = createdOrderId + '|' + testPaymentId;
     const validSig = crypto.createHmac('sha256', secret).update(validPayload).digest('hex');

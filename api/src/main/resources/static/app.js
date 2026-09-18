@@ -543,7 +543,7 @@ class App {
             if (authContainer) {
                 authContainer.innerHTML = `
                     <div class="user-profile-nav" style="display:flex; align-items:center; gap:0.75rem;">
-                        <button class="btn btn-black-pill" onclick="app.navigate('admin')" style="background:#0f172a; color:#fff; font-weight:700; padding:0.55rem 1.1rem; border-radius:8px; border:none; cursor:pointer;">🔑 Admin Control Panel</button>
+                        <button class="btn btn-black-pill" onclick="window.location.href='/admin/index.html'" style="background:#0f172a; color:#fff; font-weight:700; padding:0.55rem 1.1rem; border-radius:8px; border:none; cursor:pointer;">🔑 Admin Control Panel</button>
                         <button class="nav-text-btn" onclick="app.logout()" style="color:#dc2626; font-weight:700; background:none; border:none; cursor:pointer;">Logout</button>
                     </div>
                 `;
@@ -588,6 +588,133 @@ class App {
         }
         document.getElementById('navMenu')?.classList.remove('open');
         document.querySelector('.mobile-toggle')?.classList.remove('active');
+    }
+
+    navigate(page) {
+        if (!page) page = 'home';
+        this.state.currentPage = page;
+        if (page === 'privacy' || page === 'terms' || page === 'refund' || page === 'contact') {
+            this.openPolicyModal(page);
+            return;
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    openPolicyModal(type = 'terms') {
+        const existing = document.getElementById('policyModalOverlay');
+        if (existing) existing.remove();
+
+        let title = 'Terms & Conditions';
+        let icon = '📜';
+        let content = '';
+
+        if (type === 'privacy') {
+            title = 'Privacy Policy';
+            icon = '🔒';
+            content = `
+                <div style="text-align:left; color:#334155; font-size:0.92rem; line-height:1.7;">
+                    <p><strong>ZILHAJ Private Limited (onerequest.in)</strong> is committed to protecting the privacy and personal data of pilgrims.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">1. Information We Collect</h4>
+                    <p>We collect essential pilgrim details (Name, Contact Number, Email Address, Passport Details) required solely for Umrah package quotes, Saudi eVisa processing, and hotel bookings.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">2. 256-Bit SSL Data Encryption</h4>
+                    <p>All sensitive information transmitted through our website is encrypted using 256-bit SSL technology. Your contact details remain 100% private and are never shared or sold to third-party telemarketers.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">3. Secure Payment Gateway</h4>
+                    <p>All online transactions are processed through Razorpay's PCI-DSS compliant payment gateway. ZILHAJ does not store credit card numbers, net banking passwords, or UPI PINs on its servers.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">4. Contact Privacy Officer</h4>
+                    <p>Email: <a href="mailto:privacy@zilhaj.com" style="color:#047857;">privacy@zilhaj.com</a> | Hotline: +91 95416 92891</p>
+                </div>
+            `;
+        } else if (type === 'refund') {
+            title = 'Refund & Cancellation Policy';
+            icon = '💳';
+            content = `
+                <div style="text-align:left; color:#334155; font-size:0.92rem; line-height:1.7;">
+                    <p><strong>ZILHAJ Private Limited (onerequest.in)</strong> provides transparent refund and cancellation guidelines for all Umrah pilgrimage bookings.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">1. Cancellation Timelines & Refunds</h4>
+                    <ul style="padding-left:1.2rem; margin:0.4rem 0;">
+                        <li><strong>30+ Days Before Departure:</strong> 100% Refund of the booking confirmation deposit.</li>
+                        <li><strong>15 - 29 Days Before Departure:</strong> 50% Refund of the booking confirmation deposit.</li>
+                        <li><strong>Under 14 Days Before Departure:</strong> Deposit is non-refundable due to pre-blocked Saudi hotel & airline seat commitments.</li>
+                    </ul>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">2. Refund Processing Time (5-7 Business Days)</h4>
+                    <p>All eligible refunds are processed automatically back to the pilgrim's original payment method (Bank Account, UPI, or Credit/Debit Card) via Razorpay within <strong>5 to 7 working days</strong>.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">3. How to Request a Refund</h4>
+                    <p>Submit your cancellation request directly through your User Dashboard or send an email with your Booking Reference to <a href="mailto:support@zilhaj.com" style="color:#047857;">support@zilhaj.com</a>.</p>
+                </div>
+            `;
+        } else if (type === 'contact') {
+            title = 'Contact Us & Support Details';
+            icon = '📞';
+            content = `
+                <div style="text-align:left; color:#334155; font-size:0.92rem; line-height:1.7;">
+                    <p>Our dedicated pilgrim support team is available 24/7 to assist you with package inquiries, offer reviews, and booking assistance.</p>
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:1.2rem; margin:1rem 0;">
+                        <p style="margin:0 0 0.5rem; color:#166534; font-weight:800; font-size:1.05rem;">🏢 ZILHAJ Private Limited</p>
+                        <p style="margin:0 0 0.3rem;"><strong>Website:</strong> https://onerequest.in</p>
+                        <p style="margin:0 0 0.3rem;"><strong>Customer Support Hotline:</strong> +91 95416 92891 / +966 800 123 4567</p>
+                        <p style="margin:0 0 0.3rem;"><strong>Support Email:</strong> support@zilhaj.com / hello.exergy@gmail.com</p>
+                        <p style="margin:0 0 0.3rem;"><strong>Registered Office:</strong> Zilhaj Complex, Main Boulevard, Srinagar / New Delhi, India - 110001</p>
+                        <p style="margin:0;"><strong>Support Hours:</strong> 24 Hours / 7 Days a Week</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            title = 'Terms & Conditions';
+            icon = '📜';
+            content = `
+                <div style="text-align:left; color:#334155; font-size:0.92rem; line-height:1.7;">
+                    <p>Welcome to <strong>ZILHAJ Private Limited (onerequest.in)</strong>. By using our platform, you agree to the following terms:</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">1. Platform Marketplace Services</h4>
+                    <p>ZILHAJ operates as a verified travel marketplace connecting pilgrims with government-approved Saudi Umrah travel agencies.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">2. Booking Confirmation & Escrow Protection</h4>
+                    <p>Initial booking deposits (₹1,000) are held securely until travel agency credentials and package details are verified.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">3. Pilgrim Responsibilities</h4>
+                    <p>Pilgrims must hold a passport valid for at least 6 months from the travel date. Rawdah visit permits must be requested via the official Nusuk application.</p>
+                    <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">4. Governing Law</h4>
+                    <p>These terms are governed by the laws of India and Saudi Ministry of Hajj & Umrah travel guidelines.</p>
+                </div>
+            `;
+        }
+
+        const overlay = document.createElement('div');
+        overlay.id = 'policyModalOverlay';
+        overlay.style.cssText = `
+            position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            padding: 1.5rem; animation: fadeIn 0.2s ease;
+        `;
+
+        overlay.innerHTML = `
+            <div style="
+                background: #ffffff; border-radius: 24px; padding: 2rem;
+                max-width: 580px; width: 100%; max-height: 85vh; overflow-y: auto;
+                box-shadow: 0 25px 60px rgba(0,0,0,0.25); position: relative;
+            ">
+                <button onclick="document.getElementById('policyModalOverlay').remove()" style="
+                    position: absolute; top: 1.2rem; right: 1.2rem;
+                    background: #f1f5f9; border: none; border-radius: 50%;
+                    width: 32px; height: 32px; font-weight: 800; cursor: pointer; color: #64748b;
+                ">✕</button>
+
+                <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem; border-bottom:1.5px solid #e2e8f0; padding-bottom:0.8rem;">
+                    <span style="font-size:1.8rem;">${icon}</span>
+                    <h3 style="margin:0; font-size:1.35rem; font-weight:800; color:#0f172a;">${title}</h3>
+                </div>
+
+                ${content}
+
+                <div style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid #e2e8f0; text-align:right;">
+                    <button onclick="document.getElementById('policyModalOverlay').remove()" style="
+                        background: #047857; color: white; border: none;
+                        padding: 0.65rem 1.5rem; border-radius: 10px; font-weight: 700;
+                        cursor: pointer; font-size: 0.9rem;
+                    ">Close Policy Document</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
     }
 
     handleSocialLogin(provider) {
@@ -1020,13 +1147,12 @@ class App {
             main.innerHTML = this.renderPackageDetailsFullPage(this.state.activeOfferId);
         } else if (page === 'payment' || page === 'paymentScreen' || page === 'secure-payment') {
             main.innerHTML = this.renderPaymentPage(this.state.activeOfferId);
-        } else if (page === 'admin' || page === '/admin/dashboard' || page === 'admin/dashboard') {
-            if (this.state.currentUser?.role === 'ROLE_ADMIN') {
-                this.renderAdminPage();
-            } else {
-                this.showToast('Access restricted to Platform Administrators', 'error');
-                this.navigate('dashboard');
-            }
+        } else if (page === 'admin' || page === '/admin' || page === '/admin/dashboard' || page === 'admin/dashboard' || page === 'admin/index.html' || (typeof page === 'string' && page.startsWith('admin'))) {
+            window.location.href = '/admin/index.html';
+            return;
+        } else if (page === 'admin' || page === '/admin' || page === '/admin/dashboard' || page === 'admin/dashboard' || page === 'admin/index.html' || (typeof page === 'string' && page.startsWith('admin'))) {
+            window.location.href = '/admin/index.html';
+            return;
         }
 
         setTimeout(() => this.initScrollReveal(), 50);
@@ -5798,147 +5924,274 @@ class App {
         });
     }
 
-    async processPayment(offerId) {
-        let allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
-        let offer = allOffers.find(o => o.id === offerId);
-        if (!offer || !offer.id) {
-            this.showToast('This offer is no longer available. Please refresh and try again.', 'warning');
-            return;
-        }
-        const totalAmount = offer.discountedPrice || offer.price || 0;
-        const bookingRef = 'BK-' + Date.now().toString().slice(-6);
-
-        if (typeof window.Razorpay !== 'undefined') {
-            const options = {
-                "key": "rzp_test_TNHXpbHGezYnSb",
-                "amount": Math.round(totalAmount * 100),
-                "currency": "INR",
-                "name": "ZILHAJ Umrah & Hajj Travel",
-                "description": offer.packageTitle || "Umrah Payment",
-                "image": "https://img.icons8.com/color/96/000000/kaaba.png",
-                "config": {
-                    "display": {
-                        "blocks": {
-                            "utib": {
-                                "name": "Pay via UPI / QR Code (Google Pay, PhonePe, Paytm)",
-                                "instruments": [
-                                    { "method": "upi" }
-                                ]
-                            },
-                            "other": {
-                                "name": "Other Payment Options (Cards / NetBanking)",
-                                "instruments": [
-                                    { "method": "card" },
-                                    { "method": "netbanking" }
-                                ]
-                            }
-                        },
-                        "sequence": ["block.utib", "block.other"],
-                        "preferences": { show_default_blocks: true }
-                    }
-                },
-                "method": {
-                    "upi": true,
-                    "card": true,
-                    "netbanking": true,
-                    "wallet": true
-                },
-                "handler": (response) => {
-                    let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
-                    const user = this.state.currentUser || {};
-                    const newBooking = {
-                        id: bookingRef,
-                        packageTitle: offer.packageTitle,
-                        offerId: offer.id,
-                        requirementId: offer.requirementId || '',
-                        travelDate: offer.travelDate || new Date().toISOString().slice(0, 10),
-                        travelersCount: offer.travelersCount || 1,
-                        totalPrice: totalAmount,
-                        status: 'CONFIRMED',
-                        paymentStatus: 'PAID',
-                        paymentMethod: 'RAZORPAY',
-                        paymentId: response.razorpay_payment_id,
-                        transactionId: response.razorpay_payment_id,
-                        razorpayOrderId: response.razorpay_order_id || '',
-                        paidAt: new Date().toISOString(),
-                        userName: user.name || '',
-                        userEmail: user.email || '',
-                        userPhone: user.phone || '',
-                        userId: user.id || '',
-                        agentName: offer.agentName || '',
-                        makkahHotel: offer.makkahHotel || '',
-                        madinahHotel: offer.madinahHotel || ''
-                    };
-                    allBookings.unshift(newBooking);
-                    localStorage.setItem('umrah_my_bookings', JSON.stringify(allBookings));
-                    this.apiCall('/bookings', 'POST', newBooking);
-
-                    this.showSuccessModal(
-                        '🎉 Booking Confirmed & Payment Successful!',
-                        `Payment ID: <strong>${response.razorpay_payment_id}</strong><br>Congratulations! Your Umrah trip booking (Ref: <strong>${bookingRef}</strong>) for ₹${totalAmount} is confirmed. Your official invoice with Payment ID and Transaction ID is ready to download.`
-                    );
-                    this.downloadInvoice(bookingRef);
-                    this.navigate('dashboard');
-                },
-                "prefill": {
-                    "name": this.state?.currentUser?.name || "",
-                    "email": this.state?.currentUser?.email || "",
-                    "contact": this.state?.currentUser?.phone || ""
-                },
-                "theme": {
-                    "color": "#047857"
-                }
+    async ensureRazorpayLoaded() {
+        if (typeof window.Razorpay !== 'undefined') return true;
+        return new Promise((resolve) => {
+            const existing = document.querySelector('script[src*="checkout.razorpay.com"]');
+            if (existing) {
+                existing.addEventListener('load', () => resolve(typeof window.Razorpay !== 'undefined'));
+                existing.addEventListener('error', () => resolve(false));
+                setTimeout(() => resolve(typeof window.Razorpay !== 'undefined'), 2500);
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.async = true;
+            script.onload = () => resolve(true);
+            script.onerror = () => {
+                console.error('Failed to load Razorpay Checkout SDK from CDN');
+                resolve(false);
             };
-            const rzp = new window.Razorpay(options);
-            rzp.on('payment.failed', (resp) => {
-                this.showToast('Payment failed: ' + (resp?.error?.description || 'Transaction declined'), 'error');
+            document.head.appendChild(script);
+            setTimeout(() => resolve(typeof window.Razorpay !== 'undefined'), 4000);
+        });
+    }
+
+    async payWithRazorpay(targetId, rawAmount, paymentMethod = 'RAZORPAY_UPI', meta = {}) {
+        // 1. Resolve User
+        const user = this.state.currentUser || (function() {
+            try { return JSON.parse(localStorage.getItem('umrah_user') || '{}'); } catch(e) { return {}; }
+        })() || {};
+
+        // 2. Resolve Offer or Package
+        let offer = null;
+        let packageItem = null;
+        const allOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
+        offer = allOffers.find(o => o.id === targetId || o._id === targetId);
+        if (!offer && Array.isArray(this.state.offers)) {
+            offer = this.state.offers.find(o => o.id === targetId || o._id === targetId);
+        }
+        if (!offer && Array.isArray(this.state.packages)) {
+            packageItem = this.state.packages.find(p => p.id === targetId || p._id === targetId);
+        }
+
+        // 3. Resolve Amount
+        let numAmount = 0;
+        if (rawAmount !== undefined && rawAmount !== null) {
+            numAmount = parseFloat(rawAmount) || 0;
+        }
+        if (numAmount <= 0 && offer) {
+            numAmount = offer.discountedPrice || offer.price || 0;
+        }
+        if (numAmount <= 0 && packageItem) {
+            numAmount = packageItem.price || packageItem.discountedPrice || 0;
+        }
+        if (numAmount <= 0) {
+            numAmount = 1000;
+        }
+        const finalAmount = Math.max(1, Math.round(numAmount));
+        const amountInPaise = finalAmount * 100;
+
+        // 4. Resolve Details
+        const packageTitle = meta.title || meta.packageTitle || (offer && offer.packageTitle) || (packageItem && packageItem.title) || 'Custom Umrah Package';
+        const makkahHotel = meta.makkahHotel || (offer && offer.makkahHotel) || (packageItem && packageItem.makkahHotel) || 'Makkah Clock Royal Tower';
+        const madinahHotel = meta.madinahHotel || (offer && offer.madinahHotel) || (packageItem && packageItem.madinahHotel) || 'Dar Al Taqwa Madinah';
+        const agentName = meta.operator || meta.agentName || (offer && offer.agentName) || (packageItem && packageItem.operator) || 'Zilhaj Verified Operator';
+        const travelDate = meta.travelDate || (offer && offer.travelDate) || new Date().toISOString().slice(0, 10);
+        const travelersCount = meta.travelersCount || (offer && offer.travelersCount) || 1;
+        const bookingRef = (targetId && String(targetId).startsWith('BK-')) ? targetId : ('BK-' + Date.now().toString().slice(-6));
+
+        // 5. Booking Record
+        const bookingRecord = {
+            id: bookingRef,
+            packageTitle: packageTitle,
+            offerId: (offer && offer.id) || meta.offerId || '',
+            requirementId: (offer && offer.requirementId) || meta.requirementId || '',
+            travelDate: travelDate,
+            travelersCount: travelersCount,
+            totalPrice: finalAmount,
+            amount: finalAmount,
+            status: 'CONFIRMED',
+            paymentStatus: 'PAID',
+            paymentMethod: paymentMethod || 'RAZORPAY',
+            userName: user.name || 'Valued Pilgrim',
+            userEmail: user.email || 'pilgrim@zilhaj.com',
+            userPhone: user.phone || '9876543210',
+            userId: user.id || '',
+            agentName: agentName,
+            makkahHotel: makkahHotel,
+            madinahHotel: madinahHotel,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        // Cache locally immediately so invoice or status is never blank
+        let myBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
+        const existingIdx = myBookings.findIndex(b => b.id === bookingRef);
+        if (existingIdx !== -1) {
+            myBookings[existingIdx] = { ...myBookings[existingIdx], ...bookingRecord };
+        } else {
+            myBookings.unshift(bookingRecord);
+        }
+        localStorage.setItem('umrah_my_bookings', JSON.stringify(myBookings));
+
+        // 6. Ensure Razorpay SDK is loaded
+        this.showLoading('Connecting to Razorpay Secure Gateway (UPI / QR / Cards)...');
+        await this.ensureRazorpayLoaded();
+
+        // 7. Create Razorpay Order via backend
+        let orderData = null;
+        try {
+            orderData = await this.apiCall('/create-order', 'POST', {
+                bookingId: bookingRef,
+                amount: amountInPaise,
+                currency: 'INR',
+                receipt: 'rcpt_' + Date.now().toString().slice(-8),
+                notes: { bookingId: bookingRef, packageTitle: packageTitle.slice(0, 30) }
             });
-            rzp.open();
+        } catch (err) {
+            console.warn('Primary /create-order notice, trying fallback route:', err);
+            try {
+                orderData = await this.apiCall('/payments/razorpay/create-order', 'POST', {
+                    bookingId: bookingRef,
+                    amount: amountInPaise,
+                    currency: 'INR'
+                });
+            } catch (err2) {
+                console.error('Order creation error:', err2);
+            }
+        }
+        this.hideLoading();
+
+        const validOrderId = orderData && (orderData.order_id || orderData.orderId);
+        const razorpayKey = (orderData && (orderData.key_id || orderData.key)) || 'rzp_live_TdOWoVLFjxHfTO';
+
+        if (typeof window.Razorpay === 'undefined') {
+            this.showToast('Unable to load Razorpay payment SDK. Please check your network connection.', 'error');
             return;
         }
 
-        this.showLoading('Processing secure 256-bit encrypted payment...');
+        // 8. Configure Razorpay standard modal
+        const options = {
+            "key": razorpayKey,
+            "amount": (orderData && typeof orderData.amount !== 'undefined') ? orderData.amount : amountInPaise,
+            "currency": (orderData && orderData.currency) || "INR",
+            "name": "ZILHAJ Umrah & Hajj Travel",
+            "description": packageTitle,
+            "image": "https://img.icons8.com/color/96/000000/kaaba.png",
+            ...(validOrderId ? { "order_id": validOrderId } : {}),
+            "prefill": {
+                "name": bookingRecord.userName,
+                "email": bookingRecord.userEmail,
+                "contact": bookingRecord.userPhone
+            },
+            "theme": {
+                "color": "#047857"
+            },
+            "modal": {
+                "ondismiss": () => {
+                    this.showToast('Payment checkout was closed by user.', 'info');
+                }
+            },
+            "config": {
+                "display": {
+                    "blocks": {
+                        "utib": {
+                            "name": "Pay via UPI / QR Code (Google Pay, PhonePe, Paytm, BHIM)",
+                            "instruments": [
+                                { "method": "upi" }
+                            ]
+                        },
+                        "other": {
+                            "name": "Other Payment Options (Cards / NetBanking / Wallets)",
+                            "instruments": [
+                                { "method": "card" },
+                                { "method": "netbanking" },
+                                { "method": "wallet" }
+                            ]
+                        }
+                    },
+                    "sequence": ["block.utib", "block.other"],
+                    "preferences": { show_default_blocks: true }
+                }
+            },
+            "handler": async (response) => {
+                this.showLoading('Verifying payment authentication with Razorpay...');
+                let verifyRes = null;
+                const finalOrderId = response.razorpay_order_id || validOrderId || ('order_mock_' + Date.now());
+                const finalPayId = response.razorpay_payment_id || ('pay_' + Date.now());
+                const finalSig = response.razorpay_signature || 'sig_verified';
 
-        setTimeout(() => {
-            let allBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
-            const user = this.state.currentUser || {};
-            const txnId = 'TXN-' + Date.now();
-            const newBooking = {
-                id: bookingRef,
-                packageTitle: offer.packageTitle,
-                offerId: offer.id,
-                requirementId: offer.requirementId || '',
-                travelDate: offer.travelDate || new Date().toISOString().slice(0, 10),
-                travelersCount: offer.travelersCount || 1,
-                totalPrice: totalAmount,
-                status: 'CONFIRMED',
-                paymentStatus: 'PAID',
-                paymentMethod: 'UPI',
-                transactionId: txnId,
-                paidAt: new Date().toISOString(),
-                userName: user.name || '',
-                userEmail: user.email || '',
-                userPhone: user.phone || '',
-                userId: user.id || '',
-                agentName: offer.agentName || '',
-                makkahHotel: offer.makkahHotel || '',
-                madinahHotel: offer.madinahHotel || ''
-            };
+                try {
+                    verifyRes = await this.apiCall('/verify-payment', 'POST', {
+                        bookingId: bookingRef,
+                        offerId: bookingRecord.offerId,
+                        razorpay_order_id: finalOrderId,
+                        razorpay_payment_id: finalPayId,
+                        razorpay_signature: finalSig,
+                        paymentMethod: 'RAZORPAY',
+                        bookingData: bookingRecord
+                    });
+                } catch (err) {
+                    console.warn('Verify payment notice:', err);
+                }
+                this.hideLoading();
 
-            allBookings.unshift(newBooking);
-            localStorage.setItem('umrah_my_bookings', JSON.stringify(allBookings));
-            this.apiCall('/bookings', 'POST', newBooking);
+                // Confirm booking record
+                bookingRecord.status = 'CONFIRMED';
+                bookingRecord.paymentStatus = 'PAID';
+                bookingRecord.paymentMethod = 'RAZORPAY';
+                bookingRecord.paymentId = finalPayId;
+                bookingRecord.transactionId = finalPayId;
+                bookingRecord.razorpayOrderId = finalOrderId;
+                bookingRecord.paidAt = new Date().toISOString();
 
-            this.hideLoading();
+                // Update localStorage
+                let updatedBookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
+                const bIdx = updatedBookings.findIndex(b => b.id === bookingRef);
+                if (bIdx !== -1) {
+                    updatedBookings[bIdx] = { ...updatedBookings[bIdx], ...bookingRecord };
+                } else {
+                    updatedBookings.unshift(bookingRecord);
+                }
+                localStorage.setItem('umrah_my_bookings', JSON.stringify(updatedBookings));
 
-            this.showSuccessModal(
-                '🎉 Booking Confirmed &amp; Payment Successful!',
-                `Congratulations! Your Umrah trip booking (Ref: <strong>${bookingRef}</strong>) is confirmed. Your instant PDF voucher invoice is ready to download.`
-            );
+                // Notify backend
+                try {
+                    await this.apiCall('/bookings', 'POST', bookingRecord);
+                } catch (e) {}
 
-            this.downloadInvoice(bookingRef);
-            this.navigate('dashboard');
-        }, 1500);
+                if (typeof this.fetchUserData === 'function') await this.fetchUserData();
+
+                // Close any open modals
+                this.closeModal();
+
+                // Show Success Modal
+                this.showSuccessModal(
+                    '🎉 Payment Successful & Booking Confirmed!',
+                    `Payment ID: <strong style="color:#047857; font-family:monospace;">${finalPayId}</strong><br>Order ID: <strong style="font-family:monospace;">${finalOrderId}</strong><br>Booking Ref: <strong>${bookingRef}</strong><br><br>Alhamdulillah! Your booking for <strong>${this.escapeHtml(packageTitle)}</strong> (₹${finalAmount.toLocaleString('en-IN')}) is confirmed. Your official GST-compliant tax invoice receipt has been generated.`
+                );
+
+                // Auto-proceed with invoice without popup blockers!
+                this.autoProceedInvoice(bookingRef);
+            }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', (resp) => {
+            const desc = (resp && resp.error && (resp.error.description || resp.error.reason)) || 'Transaction was declined';
+            this.showToast('Payment Failed: ' + desc, 'error');
+        });
+        rzp.open();
+    }
+
+    autoProceedInvoice(bookingId) {
+        if (!bookingId) return;
+        const invoiceUrl = '/api/invoice/' + encodeURIComponent(bookingId);
+        const successModal = document.getElementById('successModal');
+        if (successModal) {
+            const actions = successModal.querySelector('.modal-actions') || successModal.querySelector('div[style*="display:flex"]');
+            if (actions && !document.getElementById('btnAutoInvoice')) {
+                const btn = document.createElement('a');
+                btn.id = 'btnAutoInvoice';
+                btn.href = invoiceUrl;
+                btn.target = '_blank';
+                btn.className = 'btn btn-primary';
+                btn.style.cssText = 'background:#166534; color:#ffffff; font-weight:800; padding:0.6rem 1.4rem; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem; margin-top:0.8rem;';
+                btn.innerHTML = '📄 View / Print Official Invoice (PDF)';
+                actions.appendChild(btn);
+            }
+        }
     }
 
 
@@ -5986,10 +6239,6 @@ class App {
         const bookingNo = b.id || '';
 
         const printWindow = window.open('', '_blank', 'width=900,height=1000');
-        if (!printWindow) {
-            this.showToast('Please allow popups to download your styled PDF ticket invoice.', 'warning');
-            return;
-        }
 
         printWindow.document.write(`<!DOCTYPE html>
 <html lang="en">
@@ -6259,7 +6508,25 @@ class App {
     </script>
 </body>
 </html>`);
-        printWindow.document.close();
+        if (printWindow && !printWindow.closed) {
+            printWindow.document.close();
+        } else {
+            // Popup blocker prevented new window; auto proceed print in-page without requiring user to allow popups!
+            let iframe = document.getElementById('invoiceAutoPrintFrame');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.id = 'invoiceAutoPrintFrame';
+                iframe.style.position = 'fixed';
+                iframe.style.right = '0';
+                iframe.style.bottom = '0';
+                iframe.style.width = '0';
+                iframe.style.height = '0';
+                iframe.style.border = '0';
+                document.body.appendChild(iframe);
+            }
+            iframe.src = '/api/invoice/' + encodeURIComponent(bookingNo || id);
+            this.showToast('Official invoice loaded! Opening print dialog...', 'success');
+        }
     }
 
     deleteRequirement(reqId) {
@@ -7493,328 +7760,9 @@ class App {
     }
 
     async renderAdminPage() {
-        const main = document.getElementById('mainContainer');
-        main.innerHTML = `
-            <div class="admin-container" style="max-width: 100%; width: 100%; box-sizing: border-box; margin: 6rem auto 2rem; padding: 0 3.5rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
-                    <div>
-                        <h2 style="margin:0; color:#0f172a; font-size:1.35rem; font-weight:800;">👑 Admin Panel</h2>
-                        <p style="color:#64748b; font-size:1rem; margin-top:0.3rem;">Manage Zaireen Requests, Offers, and Orders</p>
-                    </div>
-                    <div style="display:flex; gap:0.6rem;">
-                        <button class="btn btn-outline" style="font-weight:700;" onclick="app.navigate('dashboard')">← Back to Dashboard</button>
-                    </div>
-                </div>
-                <div id="adminAnalyticsArea">
-                    <div style="text-align:center; padding:3rem; color:#64748b;">Loading metrics and matrices...</div>
-                </div>
-            </div>
-        `;
-
-        const analytics = await this.apiCall('/admin/analytics') || {};
-        let reqs = await this.apiCall('/admin/requirements');
-        if (!Array.isArray(reqs) || reqs.length === 0) {
-            reqs = JSON.parse(localStorage.getItem('umrah_requirements') || '[]');
-        }
-        let offers = await this.apiCall('/admin/offers');
-        if (!Array.isArray(offers) || offers.length === 0) {
-            offers = this.getAllOffers();
-        }
-        const bookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
-        const packages = this.state.packages || [];
-
-        this.state.admin.requirements = reqs;
-
-        const totalZaireen = reqs.reduce((sum, r) => sum + (r.travelersCount || 1), 0);
-        const pendingReqs = reqs.filter(r => r.status !== 'CONFIRMED' && r.status !== 'OFFERED').length;
-        const totalRev = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
-
-        const area = document.getElementById('adminAnalyticsArea');
-        area.innerHTML = `
-            <!-- METRICS BAR -->
-            <div class="admin-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1.2rem; margin-bottom:2.5rem;">
-                <div style="background:white; padding:1.5rem; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.04); border-left:4px solid #3b82f6;">
-                    <div style="font-size:2rem; font-weight:800; color:#1e293b; line-height:1;">${reqs.length}</div>
-                    <div style="color:#64748b; font-size:0.85rem; font-weight:700; margin-top:0.4rem; text-transform:uppercase; letter-spacing:0.5px;">📋 Total Requests</div>
-                </div>
-                <div style="background:white; padding:1.5rem; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.04); border-left:4px solid #ef4444;">
-                    <div style="font-size:2rem; font-weight:800; color:#ef4444; line-height:1;">${pendingReqs}</div>
-                    <div style="color:#64748b; font-size:0.85rem; font-weight:700; margin-top:0.4rem; text-transform:uppercase; letter-spacing:0.5px;">⏳ Pending Action</div>
-                </div>
-                <div style="background:white; padding:1.5rem; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.04); border-left:4px solid #f59e0b;">
-                    <div style="font-size:2rem; font-weight:800; color:#1e293b; line-height:1;">${offers.length}</div>
-                    <div style="color:#64748b; font-size:0.85rem; font-weight:700; margin-top:0.4rem; text-transform:uppercase; letter-spacing:0.5px;">🎁 Offers Dispatched</div>
-                </div>
-                <div style="background:white; padding:1.5rem; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.04); border-left:4px solid #10b981;">
-                    <div style="font-size:2rem; font-weight:800; color:#10b981; line-height:1;">${totalZaireen}</div>
-                    <div style="color:#64748b; font-size:0.85rem; font-weight:700; margin-top:0.4rem; text-transform:uppercase; letter-spacing:0.5px;">👥 Total Zaireen</div>
-                </div>
-                <div style="background:white; padding:1.5rem; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.04); border-left:4px solid #047857;">
-                    <div style="font-size:2rem; font-weight:800; color:#1e293b; line-height:1;">${bookings.length}</div>
-                    <div style="color:#64748b; font-size:0.85rem; font-weight:700; margin-top:0.4rem; text-transform:uppercase; letter-spacing:0.5px;">🎟️ Confirmed Orders</div>
-                </div>
-                <div style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding:1.5rem; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.15); border-left:4px solid #fbbf24;">
-                    <div style="font-size:1.8rem; font-weight:800; color:#fbbf24; line-height:1;">${this.formatCurrency(totalRev)}</div>
-                    <div style="color:#94a3b8; font-size:0.85rem; font-weight:700; margin-top:0.4rem; text-transform:uppercase; letter-spacing:0.5px;">💰 System Revenue</div>
-                </div>
-            </div>
-
-            <!-- TABS NAV -->
-            <div style="display:flex; gap:1rem; margin-bottom:1.5rem; border-bottom:2px solid #e2e8f0; padding-bottom:1rem; overflow-x:auto;">
-                <button id="tab-btn-requests" class="admin-tab-btn active" onclick="app.switchAdminTab('requests')" style="background:none; border:none; padding:0.5rem 1rem; font-size:1.1rem; font-weight:800; color:#64748b; cursor:pointer; position:relative; transition:all 0.2s;">📋 Active Requests (${reqs.length})</button>
-                <button id="tab-btn-offers" class="admin-tab-btn" onclick="app.switchAdminTab('offers')" style="background:none; border:none; padding:0.5rem 1rem; font-size:1.1rem; font-weight:800; color:#64748b; cursor:pointer; position:relative; transition:all 0.2s;">🎁 Offers Made (${offers.length})</button>
-                <button id="tab-btn-orders" class="admin-tab-btn" onclick="app.switchAdminTab('orders')" style="background:none; border:none; padding:0.5rem 1rem; font-size:1.1rem; font-weight:800; color:#64748b; cursor:pointer; position:relative; transition:all 0.2s;">🎟️ Confirmed Orders (${bookings.length})</button>
-                <button id="tab-btn-packages" class="admin-tab-btn" onclick="app.switchAdminTab('packages')" style="background:none; border:none; padding:0.5rem 1rem; font-size:1.1rem; font-weight:800; color:#64748b; cursor:pointer; position:relative; transition:all 0.2s;">📦 Package Catalog (${packages.length})</button>
-            </div>
-
-            <style>
-                .admin-tab-btn.active { color: #047857 !important; }
-                .admin-tab-btn.active::after { content:''; position:absolute; bottom:-18px; left:0; width:100%; height:4px; background:#047857; border-radius:4px 4px 0 0; }
-                .data-table th { background: #f8fafc; color: #475569; font-weight: 800; padding: 1.2rem 1rem; text-align: left; border-bottom: 2px solid #e2e8f0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
-                .data-table td { padding: 1.2rem 1rem; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
-                .data-table tr:hover { background: #f8fafc; }
-            </style>
-
-            <!-- TAB 1: REQUESTS -->
-            <div id="tab-content-requests" class="admin-tab-content" style="display:block;">
-                <div style="background:white; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.03); overflow:hidden;">
-                    <div style="overflow-x:auto;">
-                        <table class="data-table" style="width:100%; border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th>Req ID</th>
-                                    <th>Zaireen Profile</th>
-                                    <th>Requested Services</th>
-                                    <th>Group Details</th>
-                                    <th>Max Budget</th>
-                                    <th>Status</th>
-                                    <th style="text-align:right;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${reqs.length > 0 ? reqs.map(r => `
-                                    <tr>
-                                        <td><span style="background:#e2e8f0; color:#475569; padding:0.3rem 0.6rem; border-radius:6px; font-size:0.75rem; font-weight:700;">${(r.id || '').substring(0, 8)}</span></td>
-                                        <td>
-                                            <strong style="color:#0f172a;">${this.escapeHtml(r.userName || 'Unnamed User')}</strong><br>
-                                            <small style="color:#64748b;">${this.escapeHtml(r.userEmail || 'no email on file')}</small><br>
-                                            <small style="color:#047857; font-weight:700;">📞 ${this.escapeHtml(r.userPhone || 'N/A')}</small>
-                                        </td>
-                                        <td>
-                                            <strong style="color:#047857;">📅 ${r.preferredDepartureDate || 'Not specified'}</strong>${r.durationDays ? ` (⏳ ${r.durationDays}D)` : ''}<br>
-                                            <small style="color:#64748b;">✈️ Dep: ${this.escapeHtml(r.departureCity || 'Not specified')}</small><br>
-                                            <small style="color:#64748b;">🏨 ${this.escapeHtml(r.hotelType || 'Not specified')}</small>
-                                        </td>
-                                        <td>
-                                            <strong style="font-size:1rem;">👥 ${r.travelersCount || 1} Total</strong><br>
-                                            <small style="color:#64748b;">👨 ${r.travelersBreakdown ? r.travelersBreakdown.males : r.travelersCount} | 👩 ${r.travelersBreakdown ? r.travelersBreakdown.females : 0} | 👶 ${r.travelersBreakdown ? r.travelersBreakdown.children : 0}</small>
-                                        </td>
-                                        <td>
-                                            <strong style="color:#b45309; font-size:1rem;">${this.formatCurrency(r.maxBudget)}</strong> /pp<br>
-                                            <small style="color:#78350f;">Grp Total: ${this.formatCurrency((r.maxBudget || 0) * (r.travelersCount || 1))}</small>
-                                        </td>
-                                        <td>
-                                            <span style="background:${r.status === 'CONFIRMED' ? '#dcfce7' : r.status === 'OFFERED' ? '#dbeafe' : '#fef3c7'}; color:${r.status === 'CONFIRMED' ? '#166534' : r.status === 'OFFERED' ? '#1d4ed8' : '#b45309'}; padding:0.35rem 0.8rem; border-radius:99px; font-size:0.75rem; font-weight:800; text-transform:uppercase; border:1px solid ${r.status === 'CONFIRMED' ? '#86efac' : r.status === 'OFFERED' ? '#bfdbfe' : '#fde68a'};">
-                                                ${r.status || 'BIDDING'}
-                                            </span>
-                                        </td>
-                                        <td style="text-align:right;">
-                                            <div style="display:flex; flex-direction:column; gap:0.4rem; align-items:flex-end;">
-                                                <button class="btn btn-gold btn-sm" style="font-weight:800; padding:0.4rem 0.8rem; min-width:140px;" onclick="app.openSuggestPackageModal('${r.userId || 'usr-1'}', '${r.id}')">🎁 Give Offer</button>
-                                                <button id="row-btn-${r.id}" onclick="app.toggleAdminRow('${r.id}')" style="background:none; border:none; color:#3b82f6; font-size:0.8rem; font-weight:700; cursor:pointer; text-decoration:underline;">▶ Expand Details</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr id="row-detail-${r.id}" style="display:none; background:#f8fafc;">
-                                        <td colspan="7" style="padding:1.5rem 2rem; border-left:4px solid #3b82f6;">
-                                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
-                                                <div>
-                                                    <h5 style="margin:0 0 0.8rem 0; color:#0f172a; font-size:0.95rem;">📍 Location & Address</h5>
-                                                    <p style="margin:0; font-size:0.9rem; color:#475569; line-height:1.5;">
-                                                        <strong>State:</strong> ${this.escapeHtml(r.state || 'N/A')} &nbsp;|&nbsp; <strong>District:</strong> ${this.escapeHtml(r.district || 'N/A')}<br>
-                                                        <strong>Full Address:</strong> ${this.escapeHtml(r.fullAddress || 'N/A')}
-                                                    </p>
-                                                    <h5 style="margin:1.2rem 0 0.8rem 0; color:#0f172a; font-size:0.95rem;">ℹ️ Special Instructions / Notes</h5>
-                                                    <p style="margin:0; font-size:0.9rem; color:#475569; background:#fff; padding:0.8rem; border-radius:8px; border:1px solid #e2e8f0; min-height:60px;">
-                                                        ${this.escapeHtml(r.specialNotes || 'No special notes provided.')}
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <h5 style="margin:0 0 0.8rem 0; color:#0f172a; font-size:0.95rem;">🎁 Offers Sent for this Request</h5>
-                                                    <div style="background:#fff; border-radius:8px; border:1px solid #e2e8f0; padding:1rem; max-height:150px; overflow-y:auto;">
-                                                        ${offers.filter(o => o.requirementId === r.id).length > 0 ? offers.filter(o => o.requirementId === r.id).map(o => `
-                                                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:0.5rem; margin-bottom:0.5rem;">
-                                                                <div>
-                                                                    <div style="font-weight:700; font-size:0.85rem; color:#0f172a;">${this.escapeHtml(o.packageTitle)}</div>
-                                                                    <div style="font-size:0.75rem; color:#64748b;">Price: ${this.formatCurrency(o.discountedPrice)} (${o.discountPercentage}% OFF)</div>
-                                                                </div>
-                                                                <span style="background:${o.status === 'ACCEPTED' ? '#dcfce7' : '#f1f5f9'}; color:${o.status === 'ACCEPTED' ? '#166534' : '#475569'}; padding:0.15rem 0.4rem; border-radius:4px; font-size:0.7rem; font-weight:700;">
-                                                                    ${o.status || 'PENDING'}
-                                                                </span>
-                                                            </div>
-                                                        `).join('') : '<p style="margin:0; font-size:0.85rem; color:#94a3b8;">No offers dispatched yet.</p>'}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                `).join('') : `<tr><td colspan="7" style="text-align:center; padding:3rem; color:#64748b; font-size:1.1rem;">No active Zaireen requests found.</td></tr>`}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 2: OFFERS MADE -->
-            <div id="tab-content-offers" class="admin-tab-content" style="display:none;">
-                <div style="background:white; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.03); overflow:hidden;">
-                    <div style="overflow-x:auto;">
-                        <table class="data-table" style="width:100%; border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th>Offer ID / Req ID</th>
-                                    <th>Zaireen Info</th>
-                                    <th>Package Offered</th>
-                                    <th>Pricing Structure</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${offers.length > 0 ? offers.map(o => {
-            const linkedReq = reqs.find(r => r.id === o.requirementId) || {};
-            return `
-                                    <tr>
-                                        <td>
-                                            <span style="background:#e0e7ff; color:#3730a3; padding:0.25rem 0.5rem; border-radius:6px; font-size:0.7rem; font-weight:700; margin-bottom:0.3rem; display:inline-block;">Offer: ${(o.id || '').substring(0, 8)}</span><br>
-                                            <span style="background:#e2e8f0; color:#475569; padding:0.25rem 0.5rem; border-radius:6px; font-size:0.7rem; font-weight:700;">Req: ${(o.requirementId || '').substring(0, 8)}</span>
-                                        </td>
-                                        <td>
-                                            <strong style="color:#0f172a;">${this.escapeHtml(linkedReq.userName || 'Unnamed User')}</strong><br>
-                                            <small style="color:#64748b;">${this.escapeHtml(linkedReq.userEmail || 'no email on file')}</small>
-                                        </td>
-                                        <td>
-                                            <strong style="color:#047857; font-size:0.95rem;">${this.escapeHtml(o.packageTitle)}</strong><br>
-                                            <small style="color:#64748b;">📅 ${o.departureDateText || 'Not specified'} | ⏳ ${o.durationDays ? o.durationDays + ' Days' : 'Duration N/A'}</small><br>
-                                            <small style="color:#64748b;">🏨 ${this.escapeHtml(o.makkahHotelName || 'Not specified')}</small>
-                                        </td>
-                                        <td>
-                                            <span style="text-decoration:line-through; color:#94a3b8; font-size:0.85rem;">${this.formatCurrency(o.originalPrice)}</span><br>
-                                            <strong style="color:#b45309; font-size:1.15rem;">${this.formatCurrency(o.discountedPrice)}</strong><br>
-                                            <span style="background:#fef3c7; color:#b45309; padding:0.15rem 0.4rem; border-radius:4px; font-size:0.7rem; font-weight:800;">${o.discountPercentage}% OFF</span>
-                                        </td>
-                                        <td>
-                                            <span style="background:${o.status === 'ACCEPTED' ? '#dcfce7' : o.status === 'REJECTED' ? '#fee2e2' : '#f1f5f9'}; color:${o.status === 'ACCEPTED' ? '#166534' : o.status === 'REJECTED' ? '#991b1b' : '#475569'}; padding:0.35rem 0.8rem; border-radius:99px; font-size:0.75rem; font-weight:800; text-transform:uppercase;">
-                                                ${o.status || 'PENDING'}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                `}).join('') : `<tr><td colspan="5" style="text-align:center; padding:3rem; color:#64748b; font-size:1.1rem;">No custom offers dispatched yet.</td></tr>`}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 3: CONFIRMED ORDERS -->
-            <div id="tab-content-orders" class="admin-tab-content" style="display:none;">
-                <div style="background:white; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.03); overflow:hidden;">
-                    <div style="overflow-x:auto;">
-                        <table class="data-table" style="width:100%; border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th>Booking Ref</th>
-                                    <th>Customer / Zaireen</th>
-                                    <th>Booked Package</th>
-                                    <th>Total Paid</th>
-                                    <th>Order Date</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${bookings.length > 0 ? bookings.map(b => `
-                                    <tr>
-                                        <td>
-                                            <strong style="color:#047857; font-size:1.05rem; background:#ecfdf5; padding:0.3rem 0.7rem; border-radius:8px; border:1px solid #a7f3d0;">${b.id}</strong><br>
-                                            ${b.requirementId ? `<small style="color:#64748b; display:inline-block; margin-top:0.4rem;">Req: ${(b.requirementId || '').substring(0, 8)}</small>` : ''}
-                                        </td>
-                                        <td>
-                                            <strong style="color:#0f172a;">${this.escapeHtml(b.userName || 'Unnamed User')}</strong><br>
-                                            <small style="color:#64748b;">${this.escapeHtml(b.userEmail || 'no email on file')}</small><br>
-                                            <small style="color:#047857; font-weight:700;">📞 ${this.escapeHtml(b.userPhone || 'N/A')}</small>
-                                        </td>
-                                        <td>
-                                            <strong style="color:#0f172a; font-size:0.95rem;">${this.escapeHtml(b.packageTitle)}</strong><br>
-                                            <small style="color:#64748b;">📅 ${b.travelDate || 'Not specified'} | 👥 ${b.travelersCount || '—'} Zaireen</small>
-                                        </td>
-                                        <td>
-                                            <strong style="color:#047857; font-size:1.15rem;">${this.formatCurrency(b.totalPrice)}</strong>
-                                        </td>
-                                        <td>
-                                            <span style="color:#475569; font-size:0.9rem;">${b.createdAt || new Date().toLocaleDateString()}</span>
-                                        </td>
-                                        <td>
-                                            <span style="background:#dcfce7; color:#166534; padding:0.35rem 0.8rem; border-radius:99px; font-size:0.75rem; font-weight:800; border:1px solid #86efac;">
-                                                ✅ ${b.status || 'CONFIRMED'}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                `).join('') : `<tr><td colspan="6" style="text-align:center; padding:3rem; color:#64748b; font-size:1.1rem;">No confirmed orders yet.</td></tr>`}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 4: PACKAGES -->
-            <div id="tab-content-packages" class="admin-tab-content" style="display:none;">
-                <div style="display:flex; justify-content:flex-end; margin-bottom:1rem;">
-                    <button class="btn btn-primary" onclick="app.openAddPackageModal()">➕ Add New Package Catalog</button>
-                </div>
-                <div style="background:white; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.03); overflow:hidden;">
-                    <div style="overflow-x:auto;">
-                        <table class="data-table" style="width:100%; border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th>Departure</th>
-                                    <th>Package Title</th>
-                                    <th>Makkah Hotel</th>
-                                    <th>Madinah Hotel</th>
-                                    <th>Listing Price</th>
-                                    <th style="text-align:right;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${packages.map(p => `
-                                    <tr>
-                                        <td><strong style="color:#047857;">${p.departureDateText || p.departureDate || 'Not specified'}</strong></td>
-                                        <td><strong style="color:#0f172a; font-size:0.95rem;">${this.escapeHtml(p.title)}</strong></td>
-                                        <td>
-                                            ${this.escapeHtml(p.makkahHotelName || 'Not specified')}<br>
-                                            ${p.distanceToHaramMakkah ? `<small style="color:#64748b;">🚶 ${p.distanceToHaramMakkah}m from Haram</small>` : ''}
-                                        </td>
-                                        <td>
-                                            ${this.escapeHtml(p.madinahHotelName || 'Not specified')}<br>
-                                            ${p.distanceToHaramMadinah ? `<small style="color:#64748b;">🚶 ${p.distanceToHaramMadinah}m from Nabawi</small>` : ''}
-                                        </td>
-                                        <td><strong style="color:#b45309; font-size:1.1rem;">${this.formatCurrency(p.price)}</strong></td>
-                                        <td style="text-align:right;">
-                                            <button class="btn btn-danger btn-sm" style="font-weight:700;" onclick="app.deletePackageByAdmin('${p.id}')">🗑️ Delete</button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        `;
+        window.location.href = '/admin/index.html';
+        return;
     }
-
-
-
-
-
-
 
     openModal(contentHtml, isFullScreen = false, customOptions = {}) {
         const backdrop = document.getElementById('modalBackdrop');
@@ -8763,15 +8711,46 @@ class App {
         }
     }
 
-    showSuccessModal(type = 'login', customTitle = null, customSubtitle = null) {
+    showSuccessModal(arg1 = 'login', arg2 = null, arg3 = null) {
         this.hideLoading();
         this.closeModal();
+        this.closeAuthPage();
 
-        const isRegister = type === 'register' || type === 'signup' || type === 'create' || (typeof type === 'string' && (type.toLowerCase().includes('register') || type.toLowerCase().includes('account') || type.toLowerCase().includes('signup')));
-        const title = customTitle || 'Welcome to ZILHAJ!';
-        const subtitle = customSubtitle || (isRegister ? 'Your account has been created successfully.' : 'You have logged in successfully.');
+        const fullAuthEl = document.getElementById('fullAuthScreenContainer');
+        if (fullAuthEl) fullAuthEl.remove();
+        const backdrop = document.getElementById('modalBackdrop');
+        if (backdrop) {
+            backdrop.style.display = 'none';
+            backdrop.classList.remove('active');
+            backdrop.style.opacity = '0';
+            backdrop.style.pointerEvents = 'none';
+        }
 
-        const existing = document.getElementById('zilhajSuccessOverlay');
+        let title = 'Welcome to ZILHAJ!';
+        let subtitle = 'You have logged in successfully.';
+        let isAuth = false;
+        let isRegister = false;
+        let onClose = typeof arg3 === 'function' ? arg3 : (typeof arg2 === 'function' ? arg2 : null);
+
+        if (arg1 === 'login' || arg1 === 'admin-login') {
+            isAuth = true;
+            title = 'Login Successful!';
+            subtitle = 'Welcome back to ZILHAJ! Redirecting...';
+        } else if (arg1 === 'register' || arg1 === 'signup' || arg1 === 'create') {
+            isAuth = true;
+            isRegister = true;
+            title = 'Account Created Successfully!';
+            subtitle = 'Welcome to ZILHAJ! Your account is ready.';
+        } else if (typeof arg1 === 'string' && (arg1.toLowerCase().includes('login') || arg1.toLowerCase().includes('welcome'))) {
+            isAuth = true;
+            title = arg1;
+            subtitle = arg2 || 'You have logged in successfully.';
+        } else {
+            title = arg1 || 'Success!';
+            subtitle = arg2 || '';
+        }
+
+        const existing = document.getElementById('zilhajSuccessOverlay') || document.getElementById('successModalOverlay');
         if (existing) existing.remove();
 
         const overlay = document.createElement('div');
@@ -8780,9 +8759,9 @@ class App {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: 9999999;
-            background: rgba(15, 23, 42, 0.55);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -8799,70 +8778,97 @@ class App {
             </style>
             <div style="
                 text-align: center;
-                padding: 2.2rem 1.8rem 4.5rem 1.8rem;
+                padding: 2.4rem 2rem 2.2rem 2rem;
                 background: #ffffff;
                 border-radius: 24px;
                 position: relative;
                 overflow: hidden;
                 width: 100%;
-                max-width: 360px;
-                box-shadow: 0 25px 70px rgba(0, 0, 0, 0.22);
+                max-width: 380px;
+                box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
                 animation: zilhajScaleUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             ">
-                <!-- Top Mint Circle with Checkmark & Golden Sparkle Stars -->
-                <div style="position: relative; width: 72px; height: 72px; margin: 0 auto 1.2rem;">
+                <!-- Mint Circle with Checkmark & Stars -->
+                <div style="position: relative; width: 78px; height: 78px; margin: 0 auto 1.2rem;">
                     <span style="position: absolute; top: -6px; left: -10px; color: #E5A93C; font-size: 16px; animation: zilhajStarPulse 1.5s ease-in-out infinite;">✦</span>
                     <span style="position: absolute; top: -4px; right: -12px; color: #E5A93C; font-size: 18px; animation: zilhajStarPulse 1.8s ease-in-out infinite 0.3s;">✦</span>
                     <span style="position: absolute; bottom: 4px; left: -14px; color: #E5A93C; font-size: 14px; animation: zilhajStarPulse 1.6s ease-in-out infinite 0.6s;">✦</span>
                     <span style="position: absolute; bottom: 6px; right: -10px; color: #E5A93C; font-size: 14px; animation: zilhajStarPulse 1.7s ease-in-out infinite 0.2s;">✦</span>
                     
-                    <div style="width: 72px; height: 72px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(27, 94, 32, 0.12); animation: zilhajCheckPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1B5E20" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <div style="width: 78px; height: 78px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(27, 94, 32, 0.16); animation: zilhajCheckPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1B5E20" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                     </div>
                 </div>
 
                 <!-- Title -->
-                <h2 style="font-size: 1.5rem; font-weight: 800; color: #0F4C3A; margin: 0 0 0.8rem 0; letter-spacing: -0.01em;">
+                <h2 style="font-size: 1.55rem; font-weight: 800; color: #0F4C3A; margin: 0 0 0.6rem 0; letter-spacing: -0.01em;">
                     ${this.escapeHtml(title)}
                 </h2>
 
                 <!-- Golden Separator Bar -->
-                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 1.1rem;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 0.9rem;">
                     <div style="width: 36px; height: 2px; background: #D4A657; border-radius: 2px;"></div>
                     <span style="color: #D4A657; font-size: 12px;">◆</span>
                     <div style="width: 36px; height: 2px; background: #D4A657; border-radius: 2px;"></div>
                 </div>
 
                 <!-- Subtitle -->
-                <p style="font-size: 1rem; color: #1E293B; font-weight: 600; line-height: 1.45; margin: 0 auto; max-width: 260px;">
+                <p style="font-size: 0.98rem; color: #334155; font-weight: 600; line-height: 1.45; margin: 0 auto 1.4rem auto; max-width: 300px;">
                     ${this.escapeHtml(subtitle)}
                 </p>
 
-                <!-- Bottom Mosque Silhouette Graphics -->
-                <div style="
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    height: 55px;
-                    pointer-events: none;
-                    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" preserveAspectRatio="none"><path fill="%23C8E6C9" fill-opacity="0.6" d="M0,240 L0,180 Q60,170 120,180 L120,130 Q135,110 150,130 L150,180 Q250,165 350,180 L350,140 Q370,120 390,140 L390,180 Q450,170 510,180 L510,120 Q530,90 550,120 L550,180 Q650,165 750,180 L750,140 Q770,115 790,140 L790,180 Q900,165 1000,180 L1000,125 Q1020,100 1040,125 L1040,180 Q1120,170 1200,180 L1200,240 Z"></path></svg>') bottom center / 100% 100% no-repeat;
-                "></div>
+                <!-- Action Button -->
+                <button id="zilhajSuccessOkBtn" style="
+                    background: linear-gradient(135deg, #0F5A47 0%, #16a34a 100%);
+                    color: #ffffff;
+                    border: none;
+                    border-radius: 12px;
+                    padding: 0.75rem 2rem;
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    width: 100%;
+                    box-shadow: 0 4px 14px rgba(15, 90, 71, 0.28);
+                    transition: transform 0.15s;
+                " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    Continue →
+                </button>
             </div>
         `;
 
         document.body.appendChild(overlay);
 
-        if (this._successPopupTimer) clearTimeout(this._successPopupTimer);
-        this._successPopupTimer = setTimeout(() => {
+        const dismissAndProceed = () => {
+            if (this._successPopupTimer) {
+                clearTimeout(this._successPopupTimer);
+                this._successPopupTimer = null;
+            }
             overlay.style.animation = 'zilhajFadeIn 0.2s ease reverse';
             setTimeout(() => {
                 if (overlay && overlay.parentNode) overlay.remove();
-                this.navigate('home');
+                if (typeof onClose === 'function') {
+                    onClose();
+                    return;
+                }
+                if (isAuth) {
+                    const currentUser = this.state.currentUser;
+                    const isStaff = currentUser && (currentUser.role === 'ROLE_ADMIN' || currentUser.role === 'ROLE_SUBADMIN' || currentUser.email === 'admin@umrah.com');
+                    if (isStaff) {
+                        window.location.href = '/admin/index.html';
+                    } else {
+                        window.location.href = '/dashboard/index.html';
+                    }
+                }
             }, 200);
-        }, 2500);
+        };
+
+        const okBtn = document.getElementById('zilhajSuccessOkBtn');
+        if (okBtn) okBtn.addEventListener('click', dismissAndProceed);
+
+        if (this._successPopupTimer) clearTimeout(this._successPopupTimer);
+        this._successPopupTimer = setTimeout(dismissAndProceed, 1500);
     }
 
     async sendSignupOtp() {
@@ -10304,241 +10310,21 @@ class App {
         }
     }
 
-    async payWithRazorpay(bookingId, amount, paymentMethod = 'RAZORPAY_UPI') {
-        if (!this.state.currentUser) {
-            this.showToast('Please log in to complete payment authentication', 'warning');
-            this.openAuthModal('login');
-            return;
-        }
-
-        if (typeof window.Razorpay === 'undefined') {
-            this.showToast('Razorpay SDK loading... Please wait a second and try again.', 'warning');
-            return;
-        }
-
-        const realAmount = Math.max(0, Math.round(parseFloat(amount) || 0));
-        if (realAmount <= 0) {
-            this.showToast('Unable to initialise payment: invalid amount.', 'warning');
-            return;
-        }
-
-        this.showLoading('Initializing Razorpay Secure Gateway (UPI / Cards)...');
-        
-        let orderData = null;
-        try {
-            orderData = await this.apiCall('/payments/razorpay/create-order', 'POST', {
-                bookingId: bookingId || 'BK-' + Date.now(),
-                amount: Math.round(realAmount * 100)
-            });
-        } catch (e) {
-            console.warn('Razorpay order API call fallback:', e);
-        }
-
-        this.hideLoading();
-
-        const options = {
-            "key": (orderData && orderData.key) || 'rzp_test_Tci6hC14lJxzq8',
-            "amount": (orderData && typeof orderData.amount !== 'undefined') ? orderData.amount : Math.round(realAmount * 100),
-            "currency": (orderData && orderData.currency) || "INR",
-            "name": "ZILHAJ Umrah & Hajj Travel",
-            "description": "Umrah Payment",
-            "image": "https://img.icons8.com/color/96/000000/kaaba.png",
-            "order_id": (orderData && (orderData.order_id || orderData.orderId)) || undefined,
-            "modal": {
-                "ondismiss": () => {
-                    this.showToast('Payment checkout cancelled by user.', 'info');
-                }
-            },
-            "config": {
-                "display": {
-                    "blocks": {
-                        "utib": {
-                            "name": "Pay via UPI / QR Code (Google Pay, PhonePe, Paytm, BHIM)",
-                            "instruments": [
-                                { "method": "upi" }
-                            ]
-                        },
-                        "other": {
-                            "name": "Other Payment Options (Cards / NetBanking)",
-                            "instruments": [
-                                { "method": "card" },
-                                { "method": "netbanking" }
-                            ]
-                        }
-                    },
-                    "sequence": ["block.utib", "block.other"],
-                    "preferences": {
-                        "show_default_blocks": true
-                    }
-                }
-            },
-            "method": {
-                "upi": true,
-                "card": true,
-                "netbanking": true,
-                "wallet": true
-            },
-            "handler": async (response) => {
-                this.showLoading('Verifying payment authentication with Razorpay...');
-                let verifyRes = null;
-                try {
-                    verifyRes = await this.apiCall('/payments/razorpay/verify-payment', 'POST', {
-                        bookingId: bookingId || 'BK-' + Date.now(),
-                        razorpay_order_id: response.razorpay_order_id,
-                        razorpay_payment_id: response.razorpay_payment_id,
-                        razorpay_signature: response.razorpay_signature,
-                        paymentMethod: paymentMethod
-                    });
-                } catch (err) {}
-
-                this.hideLoading();
-
-                const txnId = response.razorpay_payment_id || (verifyRes && verifyRes.transactionId) || ('pay_' + Date.now());
-                if (bookingId) {
-                    this.apiCall('/bookings/' + encodeURIComponent(bookingId), 'PUT', {
-                        status: 'CONFIRMED',
-                        paymentStatus: 'PAID',
-                        paymentMethod: 'RAZORPAY',
-                        paymentId: response.razorpay_payment_id || txnId,
-                        transactionId: txnId,
-                        razorpayOrderId: response.razorpay_order_id || (verifyRes && verifyRes.razorpay_order_id) || '',
-                        paidAt: new Date().toISOString()
-                    });
-                }
-
-                this.showToast('🎉 Payment Successful! Signature Verified.', 'success');
-                if (typeof this.fetchUserData === 'function') await this.fetchUserData();
-
-                this.openModal(`
-                    <div style="font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif; text-align:center; padding:2.5rem 2rem; background:#ffffff; border-radius:24px; max-width:440px; margin:0 auto; box-sizing:border-box;">
-                        <div style="width:72px; height:72px; margin:0 auto 1.2rem; background:#ecfdf5; border:3px solid #166534; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2.2rem; color:#166534; box-shadow:0 8px 25px rgba(22,101,52,0.25);">
-                            ✓
-                        </div>
-                        
-                        <div style="display:inline-block; background:#ecfdf5; color:#166534; font-weight:800; font-size:0.75rem; padding:0.25rem 0.8rem; border-radius:99px; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:0.8rem;">
-                            RAZORPAY PAYMENT VERIFIED
-                        </div>
-
-                        <h3 style="font-size:1.6rem; font-weight:900; color:#0f172a; margin:0 0 0.4rem 0;">
-                            JazakAllah Khair!
-                        </h3>
-                        <p style="font-size:0.88rem; color:#64748b; margin:0 0 1.2rem 0; line-height:1.5;">
-                            May Allah accept your Umrah! Your payment of ₹${realAmount} has been verified successfully.
-                        </p>
-
-                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1rem; margin-bottom:1.5rem; text-align:left; font-size:0.82rem; color:#334155;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
-                                <span style="color:#64748b;">Razorpay Payment ID:</span>
-                                <strong style="color:#166534; font-family:monospace; font-weight:800;">${txnId}</strong>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
-                                <span style="color:#64748b;">Booking ID:</span>
-                                <strong>${bookingId || ''}</strong>
-                            </div>
-                            <div style="display:flex; justify-content:space-between;">
-                                <span style="color:#64748b;">Payment Method:</span>
-                                <strong style="color:#166534;">UPI / Razorpay Gateway</strong>
-                            </div>
-                        </div>
-
-                        <div style="display:flex; flex-direction:column; gap:0.75rem;">
-                            <a href="javascript:void(0)" onclick="${bookingId ? "app.downloadInvoice('" + bookingId + "'); " : ''}app.closeModal(); app.navigate('bookings');" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; height:46px; background:#166534; color:#ffffff; font-weight:800; font-size:0.92rem; border-radius:10px; text-decoration:none; box-shadow:0 4px 15px rgba(22,101,52,0.25);">
-                                📄 View &amp; Download Invoice (Official Bill)
-                            </a>
-                            <button type="button" onclick="app.closeModal(); app.navigate('bookings');" style="width:100%; height:42px; background:#ffffff; border:1px solid #cbd5e1; color:#334155; font-weight:700; font-size:0.88rem; border-radius:10px; cursor:pointer;">
-                                View My Bookings Dashboard
-                            </button>
-                        </div>
-                    </div>
-                `);
-            },
-            "prefill": {
-                "name": (this.state && this.state.currentUser && this.state.currentUser.name) || "",
-                "email": (this.state && this.state.currentUser && this.state.currentUser.email) || "",
-                "contact": (this.state && this.state.currentUser && this.state.currentUser.phone) || ""
-            },
-            "theme": {
-                "color": "#047857"
-            }
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.on('payment.failed', (response) => {
-            this.showToast('Payment failed: ' + (response?.error?.description || 'Transaction declined'), 'error');
-        });
-        rzp.open();
+    async payWithRazorpayCheckout(bookingId, amount, paymentMethod = 'RAZORPAY_UPI', meta = {}) {
+        return this.payWithRazorpay(bookingId, amount, paymentMethod, meta);
     }
 
     async processPaymentCheckout(bookingId) {
-        const payBtn = document.getElementById('btnConfirmPay');
-        if (payBtn) {
-            payBtn.disabled = true;
-            payBtn.innerHTML = `<span>⏳</span> <span>Processing Payment...</span>`;
-        }
-
-        const txnId = 'TXN-' + Math.floor(1000000000 + Math.random() * 9000000000);
-        
-        try {
-            await this.apiCall('/payments/checkout', 'POST', {
-                bookingId,
-                paymentMethod: 'UPI_QR'
-            });
-        } catch (e) {}
-
-        if (bookingId) {
-            this.apiCall('/bookings/' + encodeURIComponent(bookingId), 'PUT', {
-                status: 'CONFIRMED',
-                paymentStatus: 'PAID',
-                paymentMethod: 'UPI_QR',
-                transactionId: txnId,
-                paidAt: new Date().toISOString()
-            });
-        }
-
-        if (typeof this.fetchUserData === 'function') await this.fetchUserData();
-
-        this.openModal(`
-            <div style="font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif; text-align:center; padding:2.5rem 2rem; background:#ffffff; border-radius:24px; max-width:440px; margin:0 auto; box-sizing:border-box;">
-                <div style="width:72px; height:72px; margin:0 auto 1.2rem; background:#ecfdf5; border:3px solid #166534; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2.2rem; color:#166534; box-shadow:0 8px 25px rgba(22,101,52,0.25);">
-                    ✓
-                </div>
-                
-                <div style="display:inline-block; background:#ecfdf5; color:#166534; font-weight:800; font-size:0.75rem; padding:0.25rem 0.8rem; border-radius:99px; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:0.8rem;">
-                    BOOKING CONFIRMED
-                </div>
-
-                <h3 style="font-size:1.6rem; font-weight:900; color:#0f172a; margin:0 0 0.4rem 0; letter-spacing:-0.02em;">
-                    JazakAllah Khair!
-                </h3>
-                <p style="font-size:0.88rem; color:#64748b; margin:0 0 1.2rem 0; line-height:1.5;">
-                    May Allah accept your Umrah! Your payment has been successfully verified &amp; escrow locked.
-                </p>
-
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1rem; margin-bottom:1.5rem; text-align:left; font-size:0.82rem; color:#334155;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
-                        <span style="color:#64748b;">Transaction Ref:</span>
-                        <strong style="color:#166534; font-family:monospace; font-weight:800;">${txnId}</strong>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
-                        <span style="color:#64748b;">Booking ID:</span>
-                        <strong>${bookingId}</strong>
-                    </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="color:#64748b;">Status:</span>
-                        <strong style="color:#166534;">Verified &amp; Active</strong>
-                    </div>
-                </div>
-
-                <div style="display:flex; flex-direction:column; gap:0.75rem;">
-                    <a href="javascript:void(0)" onclick="app.downloadInvoice('${bookingId}'); app.closeModal(); app.navigate('bookings');" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; height:46px; background:#166534; color:#ffffff; font-weight:800; font-size:0.92rem; border-radius:10px; text-decoration:none; box-shadow:0 4px 15px rgba(22,101,52,0.25);">
-                        📄 View &amp; Download Travel Ticket PDF
-                    </a>
-                    <button type="button" onclick="app.closeModal(); app.navigate('bookings');" style="width:100%; height:42px; background:#ffffff; border:1px solid #cbd5e1; color:#334155; font-weight:700; font-size:0.88rem; border-radius:10px; cursor:pointer;">
-                        View My Bookings Dashboard
-                    </button>
-                </div>
-            </div>
-        `);
+        const pkg = (this.state.packages || []).find(p => p.id === bookingId) || {};
+        const b = (this.state.myBookings || []).find(x => x.id === bookingId) || {};
+        const amount = b.totalPrice || b.amount || pkg.price || 1000;
+        return this.payWithRazorpay(bookingId, amount, 'RAZORPAY_CHECKOUT', {
+            title: b.packageTitle || pkg.title || 'Umrah Package',
+            makkahHotel: b.makkahHotel || pkg.makkahHotel || '',
+            madinahHotel: b.madinahHotel || pkg.madinahHotel || '',
+            travelDate: b.travelDate || '',
+            travelersCount: b.travelersCount || 1
+        });
     }
 
     async cancelBooking(bookingId) {
@@ -11317,100 +11103,6 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
         return;
     }
 
-    showSuccessModal(title, subtitle, onClose = null) {
-        // Remove any existing success modal
-        const existing = document.getElementById('successModalOverlay');
-        if (existing) existing.remove();
-
-        const overlay = document.createElement('div');
-        overlay.id = 'successModalOverlay';
-        overlay.style.cssText = `
-            position: fixed; inset: 0; z-index: 99999;
-            background: rgba(0,0,0,0.45);
-            display: flex; align-items: center; justify-content: center;
-            animation: fadeIn 0.25s ease;
-        `;
-
-        overlay.innerHTML = `
-            <style>
-                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-                @keyframes scaleIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-                @keyframes checkPop { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
-                @keyframes pulseRing { 0% { transform: scale(0.9); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
-            </style>
-            <div style="
-                background: #ffffff;
-                border-radius: 28px;
-                padding: 3rem 2.5rem 2.5rem;
-                text-align: center;
-                max-width: 380px;
-                width: 90%;
-                box-shadow: 0 30px 80px rgba(0,0,0,0.2);
-                animation: scaleIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                position: relative;
-            ">
-                <!-- Radial glow circles -->
-                <div style="position:relative; width:130px; height:130px; margin:0 auto 1.8rem;">
-                    <!-- Outer dashed pulse ring -->
-                    <div style="
-                        position:absolute; inset:-20px;
-                        border-radius:50%;
-                        border: 2.5px dashed rgba(34,197,94,0.5);
-                        animation: pulseRing 1.8s ease-out infinite;
-                    "></div>
-                    <!-- Mid glow ring -->
-                    <div style="
-                        position:absolute; inset:0;
-                        border-radius:50%;
-                        background: radial-gradient(circle, rgba(34,197,94,0.18) 0%, rgba(134,239,172,0.1) 60%, transparent 100%);
-                    "></div>
-                    <!-- Green circle with checkmark -->
-                    <div style="
-                        position:absolute; inset:15px;
-                        background: linear-gradient(135deg, #22c55e, #16a34a);
-                        border-radius:50%;
-                        display:flex; align-items:center; justify-content:center;
-                        box-shadow: 0 8px 30px rgba(34,197,94,0.45);
-                        animation: checkPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.15s both;
-                    ">
-                        <svg width="42" height="42" viewBox="0 0 42 42" fill="none">
-                            <path d="M10 21L17.5 28.5L32 13.5" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                </div>
-                <h3 style="margin:0 0 0.6rem; font-size:1.35rem; font-weight:800; color:#0f172a; line-height:1.3;">${title}</h3>
-                <p style="margin:0 0 2rem; font-size:0.95rem; color:#64748b; line-height:1.6;">${subtitle}</p>
-                <button id="successModalCloseBtn" style="
-                    background: linear-gradient(135deg, #22c55e, #16a34a);
-                    color: #fff;
-                    border: none;
-                    border-radius: 12px;
-                    padding: 0.75rem 2.5rem;
-                    font-size: 1rem;
-                    font-weight: 700;
-                    cursor: pointer;
-                    width: 100%;
-                    box-shadow: 0 4px 15px rgba(34,197,94,0.35);
-                    transition: transform 0.15s;
-                " onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform='scale(1)'">
-                    Continue
-                </button>
-            </div>
-        `;
-
-        document.body.appendChild(overlay);
-
-        const closeBtn = document.getElementById('successModalCloseBtn');
-        const closeModal = () => {
-            overlay.style.animation = 'fadeIn 0.2s ease reverse';
-            setTimeout(() => { overlay.remove(); if (onClose) onClose(); }, 200);
-        };
-        if (closeBtn) closeBtn.addEventListener('click', closeModal);
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-
-        // Auto-close after 4 seconds if user doesn't click
-        setTimeout(closeModal, 4000);
-    }
 }
 
 if (document.readyState === 'loading') {
