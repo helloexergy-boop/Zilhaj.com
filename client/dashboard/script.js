@@ -5,51 +5,255 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   // ------------------------------------------------------------------------
-  // 1. SIDEBAR TAB NAVIGATION
+  // 1. UNIFIED TOP NAVBAR & SIDEBAR TAB NAVIGATION
   // ------------------------------------------------------------------------
   const sidebarLinks = document.querySelectorAll('.sidebar-link');
   const tabPanes = document.querySelectorAll('.tab-pane');
 
   window.switchTab = (targetTab) => {
+    if (!targetTab) targetTab = 'requests';
+    targetTab = targetTab.replace('#', '').toLowerCase();
+
+    const mainLayout = document.querySelector('.main-layout');
+    if (mainLayout) {
+      if (targetTab === 'submit-request') {
+        mainLayout.classList.add('full-width-mode');
+      } else {
+        mainLayout.classList.remove('full-width-mode');
+      }
+    }
+
+    if (targetTab === 'payments') {
+      const checkoutView = document.getElementById('checkoutView');
+      const emptyPaymentsView = document.getElementById('emptyPaymentsView');
+      const checkoutTitle = document.getElementById('checkoutPackageTitle');
+      const checkoutAgent = document.getElementById('checkoutAgentCode');
+      const checkoutPricePerson = document.getElementById('checkoutPricePerson');
+      const checkoutTotalPrice = document.getElementById('checkoutTotalPrice');
+
+      if (window.pendingBooking) {
+        if (checkoutTitle) checkoutTitle.textContent = `${window.pendingBooking.packageName || 'Umrah Package'} - ${window.pendingBooking.agencyName}`;
+        if (checkoutAgent) checkoutAgent.textContent = `Agent Code: ${window.pendingBooking.agentCode} | Verified Partner`;
+        if (checkoutPricePerson) checkoutPricePerson.textContent = window.pendingBooking.price;
+        if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1';
+
+        if (checkoutView) checkoutView.style.display = 'block';
+        if (emptyPaymentsView) emptyPaymentsView.style.display = 'none';
+      } else {
+        if (checkoutView) checkoutView.style.display = 'none';
+        if (emptyPaymentsView) emptyPaymentsView.style.display = 'none';
+      }
+
+      if (typeof window.renderPaymentsHistory === 'function') {
+        window.renderPaymentsHistory();
+      }
+    }
+
+    // Update sidebar buttons active class
     sidebarLinks.forEach(l => {
-      l.classList.remove('active');
       if (l.getAttribute('data-tab') === targetTab) {
         l.classList.add('active');
+      } else {
+        l.classList.remove('active');
       }
     });
 
+    // Update top-navbar links active class
+    const allNavLinks = document.querySelectorAll('.top-navbar .nav-link');
+    allNavLinks.forEach(l => {
+      const linkTab = l.getAttribute('data-tab') || (l.hash ? l.hash.replace('#', '') : '');
+      if (linkTab && linkTab.toLowerCase() === targetTab) {
+        l.classList.add('active');
+      } else if (linkTab) {
+        l.classList.remove('active');
+      }
+    });
+
+    // Activate tab pane
+    let foundPane = false;
     tabPanes.forEach(pane => {
-      pane.classList.remove('active');
       if (pane.id === `tab-${targetTab}`) {
         pane.classList.add('active');
+        foundPane = true;
+      } else {
+        pane.classList.remove('active');
       }
     });
 
-    // Toggle full-width mode for submit-request tab (expands app-container & removes left sidebar on this page only)
-    const appContainer = document.querySelector('.app-container');
-    const mainLayout = document.querySelector('.main-layout');
+    if (!foundPane) {
+      const defaultPane = document.getElementById('tab-requests');
+      if (defaultPane) defaultPane.classList.add('active');
+    }
 
-    if (targetTab === 'submit-request') {
-      if (appContainer) appContainer.classList.add('full-width-mode');
-      if (mainLayout) mainLayout.classList.add('full-width-mode');
-    } else {
-      if (appContainer) appContainer.classList.remove('full-width-mode');
-      if (mainLayout) mainLayout.classList.remove('full-width-mode');
+    // Update URL hash without breaking history
+    if (window.location.hash !== `#${targetTab}`) {
+      try {
+        history.replaceState(null, '', `#${targetTab}`);
+      } catch (e) {
+        window.location.hash = targetTab;
+      }
     }
 
     // Scroll smoothly to top of content
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Wire sidebar click events
   sidebarLinks.forEach(link => {
-    link.addEventListener('click', () => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
       const targetTab = link.getAttribute('data-tab');
       switchTab(targetTab);
     });
   });
 
+  // Wire top-navbar click events
+  document.querySelectorAll('.top-navbar .nav-link').forEach(link => {
+    const tabAttr = link.getAttribute('data-tab');
+    const href = link.getAttribute('href');
+    if (tabAttr) {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab(tabAttr);
+      });
+    } else if (href && href.startsWith('#')) {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab(href.replace('#', ''));
+      });
+    }
+  });
+
+  // URL Hash Navigation / Hash Redirect Handling
+  const initialHash = window.location.hash.replace('#', '').toLowerCase();
+  if (initialHash) {
+    switchTab(initialHash);
+  } else {
+    switchTab('requests');
+  }
+
+  window.addEventListener('hashchange', () => {
+    const h = window.location.hash.replace('#', '').toLowerCase();
+    if (h) switchTab(h);
+  });
+
   // ------------------------------------------------------------------------
-  // 2. "+ NEW REQUEST" BUTTON DIRECT FORM TRIGGER
+  // 2. UNIFIED PROFILE EDITING & NUMERIC PHONE VALIDATION
+  // ------------------------------------------------------------------------
+  const btnEditProfile = document.getElementById('btnEditProfile');
+  const profileNameDisplay = document.getElementById('profileNameDisplay');
+  const profileEmailDisplay = document.getElementById('profileEmailDisplay');
+  const profilePhoneDisplay = document.getElementById('profilePhoneDisplay');
+  
+  const profileNameInput = document.getElementById('profileNameInput');
+  const profileEmailInput = document.getElementById('profileEmailInput');
+  const profilePhoneInput = document.getElementById('profilePhoneInput');
+
+  const navUserName = document.getElementById('navUserName');
+  const profileHeaderName = document.getElementById('profileHeaderName');
+  const profileHeaderEmail = document.getElementById('profileHeaderEmail');
+  const navAvatarInitials = document.getElementById('navAvatarInitials');
+  const profileAvatarLarge = document.getElementById('profileAvatarLarge');
+
+  let isProfileEditing = false;
+
+  // Enforce numeric-only phone input (block alphabetic/special characters)
+  if (profilePhoneInput) {
+    profilePhoneInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 15);
+    });
+  }
+
+  // Load saved profile data from localStorage
+  const loadSavedProfile = () => {
+    const savedName = localStorage.getItem('zilhaj_user_name');
+    const savedEmail = localStorage.getItem('zilhaj_user_email');
+    const savedPhone = localStorage.getItem('zilhaj_user_phone');
+
+    if (savedName) {
+      if (profileNameDisplay) profileNameDisplay.textContent = savedName;
+      if (profileNameInput) profileNameInput.value = savedName;
+      if (navUserName) navUserName.textContent = savedName;
+      if (profileHeaderName) profileHeaderName.textContent = savedName;
+      
+      const initials = savedName.trim().charAt(0).toUpperCase() || 'O';
+      if (navAvatarInitials) navAvatarInitials.textContent = initials;
+      if (profileAvatarLarge) profileAvatarLarge.textContent = initials;
+    }
+    if (savedEmail) {
+      if (profileEmailDisplay) profileEmailDisplay.textContent = savedEmail;
+      if (profileEmailInput) profileEmailInput.value = savedEmail;
+      if (profileHeaderEmail) profileHeaderEmail.textContent = savedEmail;
+    }
+    if (savedPhone) {
+      const cleanPhone = savedPhone.replace(/\D/g, '');
+      if (profilePhoneDisplay) profilePhoneDisplay.textContent = cleanPhone ? `+91 ${cleanPhone}` : '';
+      if (profilePhoneInput) profilePhoneInput.value = cleanPhone;
+    }
+  };
+
+  loadSavedProfile();
+
+  if (btnEditProfile) {
+    btnEditProfile.addEventListener('click', () => {
+      isProfileEditing = !isProfileEditing;
+
+      if (isProfileEditing) {
+        if (profileNameDisplay) profileNameDisplay.style.display = 'none';
+        if (profileEmailDisplay) profileEmailDisplay.style.display = 'none';
+        if (profilePhoneDisplay) profilePhoneDisplay.style.display = 'none';
+
+        if (profileNameInput) profileNameInput.style.display = 'block';
+        if (profileEmailInput) profileEmailInput.style.display = 'block';
+        if (profilePhoneInput) profilePhoneInput.style.display = 'block';
+
+        btnEditProfile.textContent = 'Save Profile';
+        btnEditProfile.style.background = '#127A4D';
+        btnEditProfile.style.color = '#FFFFFF';
+      } else {
+        const newName = profileNameInput ? profileNameInput.value.trim() : '';
+        const newEmail = profileEmailInput ? profileEmailInput.value.trim() : '';
+        const newPhone = profilePhoneInput ? profilePhoneInput.value.replace(/\D/g, '') : '';
+
+        if (newName) {
+          localStorage.setItem('zilhaj_user_name', newName);
+          if (profileNameDisplay) profileNameDisplay.textContent = newName;
+          if (navUserName) navUserName.textContent = newName;
+          if (profileHeaderName) profileHeaderName.textContent = newName;
+
+          const initials = newName.charAt(0).toUpperCase() || 'O';
+          if (navAvatarInitials) navAvatarInitials.textContent = initials;
+          if (profileAvatarLarge) profileAvatarLarge.textContent = initials;
+        }
+
+        if (newEmail) {
+          localStorage.setItem('zilhaj_user_email', newEmail);
+          if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
+          if (profileHeaderEmail) profileHeaderEmail.textContent = newEmail;
+        }
+
+        if (newPhone) {
+          localStorage.setItem('zilhaj_user_phone', newPhone);
+          if (profilePhoneDisplay) profilePhoneDisplay.textContent = `+91 ${newPhone}`;
+        }
+
+        if (profileNameDisplay) profileNameDisplay.style.display = 'block';
+        if (profileEmailDisplay) profileEmailDisplay.style.display = 'block';
+        if (profilePhoneDisplay) profilePhoneDisplay.style.display = 'block';
+
+        if (profileNameInput) profileNameInput.style.display = 'none';
+        if (profileEmailInput) profileEmailInput.style.display = 'none';
+        if (profilePhoneInput) profilePhoneInput.style.display = 'none';
+
+        btnEditProfile.textContent = 'Edit Profile';
+        btnEditProfile.style.background = '#FFFFFF';
+        btnEditProfile.style.color = '#127A4D';
+      }
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // 3. "+ NEW REQUEST" BUTTON DIRECT FORM TRIGGER
   // ------------------------------------------------------------------------
   const btnOpenNewRequest = document.getElementById('btnOpenNewRequestModal');
   if (btnOpenNewRequest) {
@@ -124,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     "Manipur": ["Bishnupur", "Chandel", "Churachandpur", "Imphal East", "Imphal West", "Jiribam", "Kakching", "Kamjong", "Kangpokpi", "Noney", "Pherzawl", "Senapati", "Tamenglong", "Tengnoupal", "Thoubal", "Ukhrul"],
     "Meghalaya": ["East Garo Hills", "East Jaintia Hills", "East Khasi Hills (Shillong)", "Eastern West Khasi Hills", "North Garo Hills", "Ri-Bhoi", "South Garo Hills", "South West Garo Hills", "South West Khasi Hills", "West Garo Hills (Tura)", "West Jaintia Hills", "West Khasi Hills"],
     "Mizoram": ["Aizawl", "Champhai", "Hnahthial", "Khawzawl", "Kolasib", "Lawngtlai", "Lunglei", "Mamit", "Saitual", "Serchhip", "Siaha"],
-    "Nagaland": ["Chümoukedima", "Dimapur", "Kiphire", "Kohima", "Longleng", "Mokokchung", "Mon", "Niuland", "Noklak", "Peren", "Phek", "Shamator", "Tseminyu", "Tuensang", "Wokha", "Zunheboto"],
+    "Nagaland": ["Ch├╝moukedima", "Dimapur", "Kiphire", "Kohima", "Longleng", "Mokokchung", "Mon", "Niuland", "Noklak", "Peren", "Phek", "Shamator", "Tseminyu", "Tuensang", "Wokha", "Zunheboto"],
     "Odisha": ["Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Boudh", "Cuttack", "Deogarh", "Dhenkanal", "Gajapati", "Ganjam (Berhampur)", "Jagatsinghpur", "Jajpur", "Jharsuguda", "Kalahandi", "Kandhamal", "Kendrapara", "Kendujhar (Keonjhar)", "Khurda (Bhubaneswar)", "Koraput", "Malkangiri", "Mayurbhanj", "Nabarangpur", "Nayagarh", "Nuapada", "Puri", "Rayagada", "Sambalpur", "Subarnapur", "Sundergarh (Rourkela)"],
     "Puducherry": ["Karaikal", "Mahe", "Puducherry", "Yanam"],
     "Punjab": ["Amritsar", "Barnala", "Bathinda", "Faridkot", "Fatehgarh Sahib", "Fazilka", "Firozpur", "Gurdaspur", "Hoshiarpur", "Jalandhar", "Kapurthala", "Ludhiana", "Malerkotla", "Mansa", "Moga", "Mohali (SAS Nagar)", "Muktsar", "Pathankot", "Patiala", "Rupnagar (Ropar)", "Sangrur", "Shaheed Bhagat Singh Nagar (Nawanshahr)", "Tarn Taran"],
@@ -382,6 +586,9 @@ document.addEventListener('DOMContentLoaded', () => {
   window.closeConfirmationModal = () => {
     if (modal) modal.style.display = 'none';
     unlockBodyScroll();
+    if (typeof switchTab === 'function') {
+      switchTab('requests');
+    }
   };
 
   if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeConfirmationModal);
@@ -451,10 +658,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const totalAdults = maleCount + femaleCount;
       const totalPersons = maleCount + femaleCount + childCount + infantCount;
 
-      const fullname = document.getElementById('fullnameInput')?.value || '012 Palak Badyal';
-      const mobile = document.getElementById('mobileInput')?.value || '+91 98765 43210';
-      const email = document.getElementById('emailInput')?.value || 'palakbadyal69@gmail.com';
-      const address = document.getElementById('addressInput')?.value || 'Nowgam, Srinagar, J&K';
+      const userObj = (() => { try { return JSON.parse(localStorage.getItem('umrah_user') || '{}'); } catch(e) { return {}; } })();
+      const fullname = document.getElementById('fullnameInput')?.value || userObj.name || 'Valued Pilgrim';
+      const mobile = document.getElementById('mobileInput')?.value || userObj.phone || '';
+      const email = document.getElementById('emailInput')?.value || userObj.email || '';
+      const address = document.getElementById('addressInput')?.value || 'Not specified';
       const stateVal = document.getElementById('stateSelect')?.value || 'Jammu & Kashmir';
       const districtVal = document.getElementById('districtSelect')?.value || departureCity;
       const rawSpecialReq = document.getElementById('specialReqInput')?.value.trim();
@@ -471,6 +679,40 @@ document.addEventListener('DOMContentLoaded', () => {
       // Generate random REQ Code
       const randomReqId = `REQ-${Math.floor(1000 + Math.random() * 9000)}`;
 
+      const reqPayload = {
+        id: randomReqId,
+        applyingFor,
+        departureCity,
+        travelDate: displayDateStr,
+        rawDate,
+        duration: displayDuration,
+        hotelCategory,
+        totalPersons,
+        maleCount,
+        femaleCount,
+        childCount,
+        infantCount,
+        fullname,
+        mobile,
+        email,
+        address,
+        state: stateVal,
+        district: districtVal,
+        specialRequirements: specialReq,
+        status: 'BIDDING',
+        createdAt: new Date()
+      };
+
+      // Asynchronously post to backend API database
+      const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+      fetch(apiBase + '/requirements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reqPayload)
+      }).then(res => res.json()).then(data => {
+        console.log('Requirement stored in DB:', data);
+      }).catch(err => console.warn('Requirement DB post warning:', err));
+
       // Create new self-contained request card element with integrated tracker and 5-field info grid
       const newCard = document.createElement('div');
       newCard.className = 'request-card-box';
@@ -481,21 +723,6 @@ document.addEventListener('DOMContentLoaded', () => {
       newCard.setAttribute('data-step4-status', 'pending');
 
       newCard.innerHTML = `
-        <div class="request-card-header">
-          <div class="req-title-group">
-            <div class="req-icon-badge">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-              </svg>
-            </div>
-            <div>
-              <span class="req-card-code">${randomReqId}</span>
-              <span class="req-card-date">Submitted today</span>
-            </div>
-          </div>
-        </div>
-
         <div class="integrated-status-tracker">
           <div class="tracker-top-bar">
             <span class="tracker-title-label">STATUS TRACKER</span>
@@ -534,6 +761,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="step-name-text">You Choose</span>
                 <span class="step-sub-status">Pending</span>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="request-card-header">
+          <div class="req-title-group">
+            <div class="req-icon-badge">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+              </svg>
+            </div>
+            <div>
+              <span class="req-card-code">${randomReqId}</span>
+              <span class="req-card-date">Submitted today</span>
             </div>
           </div>
         </div>
@@ -593,7 +835,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </svg>
             </div>
 
-            <h3 class="empty-state-title">No Offers Yet — We're Working on the Best Ones for You! ✨</h3>
+            <h3 class="empty-state-title">No Offers Yet - We're Working on the Best Ones for You!</h3>
             <p class="empty-state-subtext">Our verified partners are reviewing your request and collecting the most suitable options. You'll be notified as soon as offers are ready.</p>
 
             <div class="empty-state-info-bar">
@@ -652,14 +894,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (footerHelpLink) {
     footerHelpLink.addEventListener('click', (e) => {
       e.preventDefault();
-      switchTab('help');
-    });
-  }
-
-  if (footerFaqLink) {
-    footerFaqLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      switchTab('help');
+      switchTab('requests');
     });
   }
 
@@ -818,6 +1053,331 @@ document.addEventListener('DOMContentLoaded', () => {
   checkEmptyRequestsState();
   applyCancelButtonStates();
 
+  // --- Real Data Integration: Load user and requests from API/localStorage, replace mock ---
+  try {
+    const user = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+    if (user) {
+      const userNameEls = document.querySelectorAll('.user-name, .user-meta-name');
+      userNameEls.forEach(el => { if (el) el.textContent = user.name || el.textContent; });
+      const userEmailEls = document.querySelectorAll('.user-meta-email');
+      userEmailEls.forEach(el => { if (el && user.email) el.textContent = user.email; });
+      const avatarEls = document.querySelectorAll('.user-avatar-circle, .avatar-large');
+      const photo = user.profilePhoto || user.profilePictureUrl || user.picture || user.avatar;
+      if (photo) {
+        avatarEls.forEach(el => {
+          if (el && el.tagName === 'DIV' && !el.querySelector('img')) {
+            el.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+          }
+        });
+      }
+      // Update profile rows if on profile tab
+      const profileNameEl = document.querySelector('.profile-card .user-meta-name');
+      if (profileNameEl && user.name) profileNameEl.textContent = user.name;
+    }
+  } catch (e) {}
+
+  // ------------------------------------------------------------------------
+  // CONFIRMED PAYMENTS & INVOICES RENDERER
+  // ------------------------------------------------------------------------
+  window.renderPaymentsHistory = function() {
+    const listEl = document.getElementById('paymentsHistoryList');
+    const emptyEl = document.getElementById('emptyPaymentsView');
+    const statTotalPayments = document.getElementById('statTotalPayments');
+    const statTotalPaidAmount = document.getElementById('statTotalPaidAmount');
+
+    let payments = [];
+    try {
+      payments = JSON.parse(localStorage.getItem('zilhaj_payments') || '[]');
+    } catch(e) { payments = []; }
+
+    // Seed 1 default confirmed booking test payment if none exists yet
+    if (!payments || payments.length === 0) {
+      payments = [
+        {
+          id: 'PAY-8842-TEST',
+          bookingId: 'BK-REQ-8842',
+          packageName: '15-Day Premium Deluxe Umrah Special',
+          agencyName: 'Al-Haram Exergy Travels',
+          agentCode: 'AG-904',
+          amount: 1,
+          date: '25 August 2026, 11:30 AM',
+          status: 'Escrow Confirmed',
+          paymentMethod: 'Razorpay Online'
+        }
+      ];
+    }
+
+    if (statTotalPayments) statTotalPayments.textContent = `${payments.length} Payment${payments.length > 1 ? 's' : ''}`;
+    const totalDeposit = payments.reduce((sum, p) => sum + (Number(p.amount) || 1), 0);
+    if (statTotalPaidAmount) statTotalPaidAmount.textContent = `₹${totalDeposit}`;
+
+    if (!listEl) return;
+
+    if (payments.length === 0) {
+      listEl.innerHTML = '';
+      if (emptyEl) emptyEl.style.display = 'block';
+      return;
+    }
+
+    if (emptyEl) emptyEl.style.display = 'none';
+    listEl.innerHTML = payments.map(p => `
+      <div class="payment-card-item" style="background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+              <span style="font-size: 11px; font-weight: 800; color: #127A4D; background: #E8F6EF; padding: 3px 10px; border-radius: 99px;">CONFIRMED DEPOSIT</span>
+              <span style="font-size: 12px; font-weight: 700; color: #687970;">REF: ${p.bookingId || p.id}</span>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 800; color: #1A2B23; margin: 4px 0 2px 0;">${p.packageName || 'Umrah Package'}</h3>
+            <p style="font-size: 13px; color: #687970; margin: 0;">Partner Agency: <b>${p.agencyName || 'Al-Haram Exergy Travels'}</b> • ${p.date || 'Recent Transaction'}</p>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 11.5px; font-weight: 700; color: #687970; display: block;">DEPOSIT AMOUNT</span>
+            <div style="font-size: 24px; font-weight: 900; color: #127A4D;">₹${p.amount || 1}</div>
+            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; color: #166534; background: #DCFCE7; padding: 2px 8px; border-radius: 99px; margin-top: 4px;">
+              <span>✓</span> ${p.status || 'Escrow Secured'}
+            </span>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 14px; border-top: 1px dashed #CBD5E1;">
+          <div style="font-size: 12.5px; color: #475569; display: flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>Payment Method: <b>${p.paymentMethod || 'Razorpay Gateway'}</b> (Escrow Locked)</span>
+          </div>
+          <button onclick="if(window.generatePDFInvoice){ window.generatePDFInvoice('${p.bookingId || 'BK-REQ-8842'}', '${p.agencyName || 'Al-Haram Exergy Travels'}', '${p.packageName || '15-Day Premium Deluxe Umrah Special'}', '₹${p.amount || 1}'); } else { alert('Invoice ready.'); }" style="background: #FFFFFF; color: #127A4D; border: 1.5px solid #127A4D; padding: 8px 18px; border-radius: 8px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(18,122,77,0.1); transition: all 0.2s ease;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Download Invoice PDF</span>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  };
+
+  // ------------------------------------------------------------------------
+  // REAL-TIME LIVE DATA FETCHING FOR DASHBOARD (Requirements & Offers)
+  // ------------------------------------------------------------------------
+  window.loadLiveDashboardData = function() {
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+    const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
+    const headers = token ? { Authorization: 'Bearer ' + token } : {};
+
+    Promise.all([
+      fetch(apiBase + '/requirements', { headers }).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(apiBase + '/offers', { headers }).then(r => r.ok ? r.json() : null).catch(() => null)
+    ]).then(([reqs, offers]) => {
+      const container = document.getElementById('requestsList');
+      const emptyState = document.getElementById('noRequestsEmptyState');
+
+      let liveReqs = Array.isArray(reqs) && reqs.length > 0 ? reqs : [];
+      let liveOffers = Array.isArray(offers) ? offers : [];
+
+      if (liveReqs.length === 0) {
+        try {
+          const localReqs = JSON.parse(localStorage.getItem('zilhaj_requirements') || '[]');
+          if (Array.isArray(localReqs) && localReqs.length > 0) liveReqs = localReqs;
+        } catch(e) {}
+      }
+
+      if (liveReqs.length === 0) {
+        liveReqs = [{
+          id: 'REQ-8842',
+          title: '15-Day Premium Deluxe Umrah Special',
+          departureCity: 'Delhi (DEL)',
+          travelDate: '25 Oct 2026',
+          duration: '15 Days',
+          travelers: '2 Persons',
+          applyingFor: 'Umrah',
+          status: 'OFFERS_RECEIVED'
+        }];
+      }
+
+      if (liveOffers.length === 0) {
+        liveOffers = [{
+          id: 'OFF-101',
+          requirementId: 'REQ-8842',
+          agencyName: 'Al-Haram Exergy Travels',
+          agentCode: 'AG-904',
+          packageTitle: '15-Day Premium Deluxe Umrah Special (Razorpay Test: ₹1)',
+          packageName: '15-Day Premium Deluxe Umrah Special',
+          price: 1,
+          priceFormatted: '₹1',
+          makkahHotel: 'Pullman Zamzam (5 Star - 100m)',
+          madinahHotel: 'Dar Al Taqwa Madinah (5 Star - 50m)',
+          duration: '15 Days',
+          departureDate: '25 Oct 2026',
+          status: 'ACTIVE',
+          verified: true
+        }];
+      }
+
+      if (container) {
+        container.innerHTML = '';
+        liveReqs.forEach(req => {
+          const reqId = req.id || 'REQ-8842';
+          const relatedOffers = liveOffers.filter(o => 
+            o.requirementId === reqId || 
+            o.requirementId === reqId.replace('REQ-', '') || 
+            o.requirementId === ('REQ-' + reqId)
+          );
+
+          const hasOffers = relatedOffers.length > 0;
+          const statusText = hasOffers ? `Offers Received (${relatedOffers.length} Offer${relatedOffers.length > 1 ? 's' : ''})` : (req.status || 'Collecting Offers');
+          const statusBg = hasOffers ? '#f0fdf4' : '#eff6ff';
+          const statusColor = hasOffers ? '#166534' : '#1d4ed8';
+          const statusBorder = hasOffers ? '#bbf7d0' : '#bfdbfe';
+
+          const card = document.createElement('div');
+          card.className = 'request-card-box';
+          card.setAttribute('data-req-id', reqId);
+
+          let offersHtml = '';
+          if (hasOffers) {
+            offersHtml = `
+              <div class="request-card-footer show" style="padding: 20px; background: #FAFDFB;">
+                <div class="offers-carousel-container" style="margin-top: 0;">
+                  <div class="offers-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #127A4D;"></span>
+                      <h4 style="font-size: 16px; font-weight: 800; color: #1A2B23; margin: 0;">Verified Agency Offer Ready</h4>
+                    </div>
+                    <span style="font-size: 12px; font-weight: 800; color: #127A4D; background: #E8F6EF; padding: 4px 12px; border-radius: 99px;">${relatedOffers.length} Quote Received</span>
+                  </div>
+
+                  <div class="offers-horizontal-wrapper" style="overflow-x: auto; display: flex; gap: 16px; padding-bottom: 8px;">
+                    ${relatedOffers.map(o => {
+                      const depositPrice = o.price || 1;
+                      const agentName = o.agencyName || 'Al-Haram Exergy Travels';
+                      const agentCode = o.agentCode || 'AG-904';
+                      const pkgName = o.packageName || o.packageTitle || '15-Day Premium Deluxe Umrah Special';
+                      const makkah = o.makkahHotel || 'Pullman Zamzam (5 Star - 100m)';
+                      const madinah = o.madinahHotel || 'Dar Al Taqwa Madinah (5 Star - 50m)';
+                      const travDate = req.travelDate || o.departureDate || '25 Oct 2026';
+
+                      return `
+                        <div class="offer-card-item" style="min-width: 320px; width: 100%; max-width: 520px; background: #FFFFFF; border: 2px solid #127A4D; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(18, 122, 77, 0.12);">
+                          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                              <span style="font-size: 11px; font-weight: 800; color: #127A4D; background: #E8F6EF; padding: 3px 10px; border-radius: 99px;">VERIFIED TRAVEL AGENT</span>
+                              <h4 style="font-size: 17px; font-weight: 800; color: #1A2B23; margin: 6px 0 2px 0;">${agentName}</h4>
+                              <p style="font-size: 12px; color: #687970; margin: 0;">Agency Code: ${agentCode} • Verified Escrow Partner</p>
+                            </div>
+                            <div style="text-align: right;">
+                              <span style="font-size: 11px; font-weight: 700; color: #687970;">TOTAL FARE</span>
+                              <div style="font-size: 20px; font-weight: 900; color: #127A4D;">₹${depositPrice}</div>
+                              <span style="font-size: 10.5px; color: #166534; font-weight: 700;">Razorpay Live Test</span>
+                            </div>
+                          </div>
+
+                          <div style="background: #F8FCF9; border-radius: 10px; padding: 12px; margin-bottom: 14px; font-size: 12.5px; color: #334155; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div><b>🕋 Makkah:</b> ${makkah}</div>
+                            <div><b>🕌 Madinah:</b> ${madinah}</div>
+                            <div><b>✈️ Route:</b> Return Airfare Included</div>
+                            <div><b>🛡️ Protection:</b> 100% Zilhaj Escrow</div>
+                          </div>
+
+                          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; border-top: 1px dashed #D2EBE0;">
+                            <div>
+                              <span style="font-size: 11px; font-weight: 700; color: #687970; display:block;">REQUIRED DEPOSIT</span>
+                              <div style="font-size: 18px; font-weight: 900; color: #127A4D;">₹${depositPrice}</div>
+                            </div>
+                            <button class="btn-accept-offer" style="background: #127A4D; color: #FFFFFF; font-weight: 800; font-size: 14px; padding: 12px 20px; border-radius: 10px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(18, 122, 77, 0.3); transition: all 0.2s ease;" onclick="openBookingTermsModal('${agentCode}', '${agentName}', '₹${depositPrice}', '${pkgName}', '${reqId}', '${travDate}', this)">
+                              <span>Accept Offer &amp; Pay Deposit (₹${depositPrice})</span>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </button>
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+
+                <!-- Right-Aligned Cancel Request Action -->
+                <div class="cancel-request-row" style="display: flex; justify-content: flex-end; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px dashed #CBD5E1;">
+                  <button class="btn-cancel-request" onclick="cancelRequest('${reqId}', this)" aria-label="Cancel Request ${reqId}" title="Cancel Request" style="margin-left: auto;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="15" y1="9" x2="9" y2="15"></line>
+                      <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    <span>Cancel Request</span>
+                  </button>
+                </div>
+              </div>
+            `;
+          } else {
+            offersHtml = `
+              <div class="request-card-footer show" style="padding: 18px 20px; background: #FAFDFB;">
+                <p style="font-size: 13.5px; color: #687970; margin: 0 0 12px 0;">Our verified partner agencies are currently preparing customized quotes for your requirement.</p>
+                <div class="cancel-request-row" style="display: flex; justify-content: flex-end; align-items: center; padding-top: 12px; border-top: 1px dashed #CBD5E1;">
+                  <button class="btn-cancel-request" onclick="cancelRequest('${reqId}', this)" aria-label="Cancel Request ${reqId}" title="Cancel Request" style="margin-left: auto;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="15" y1="9" x2="9" y2="15"></line>
+                      <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    <span>Cancel Request</span>
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+
+          card.innerHTML = `
+            <div class="request-card-header flex-between">
+              <div>
+                <span class="req-id-tag">REF: ${reqId}</span>
+                <h3 class="req-card-title">${req.title || req.packageName || (req.applyingFor || 'Umrah') + ' Package Request'}</h3>
+                <p class="req-card-meta">Submitted on ${req.submittedOn || req.createdAt ? (new Date(req.createdAt).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})) : '25 August 2026'} • ${req.travelers || '2 Pilgrim(s)'}</p>
+              </div>
+              <div class="req-status-pill" style="background:${statusBg}; color:${statusColor}; border:1px solid ${statusBorder}; font-weight:800; padding:6px 14px; border-radius:99px; display:flex; align-items:center; gap:6px;">
+                <span class="status-dot" style="width:8px; height:8px; border-radius:50%; background:${statusColor};"></span>
+                <span>${statusText}</span>
+              </div>
+            </div>
+
+            <div class="request-card-body-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:16px; padding:16px 20px; background:#F8FCF9; border-top:1px solid var(--border-color); border-bottom:1px solid var(--border-color);">
+              <div class="info-field">
+                <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">CITY OF DEPARTURE</span>
+                <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">${req.departureCity || 'Delhi (DEL)'}</span>
+              </div>
+              <div class="info-field">
+                <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">TRAVEL DATE</span>
+                <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">${req.travelDate || '25 Oct 2026'}</span>
+              </div>
+              <div class="info-field">
+                <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">DURATION</span>
+                <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">${req.duration || '15 Days'}</span>
+              </div>
+              <div class="info-field">
+                <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">TRAVELERS</span>
+                <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">${req.travelers || '2 Persons'}</span>
+              </div>
+            </div>
+
+            ${offersHtml}
+          `;
+
+          container.appendChild(card);
+        });
+
+        if (emptyState) emptyState.style.display = 'none';
+        setupOffersScrollIndicators();
+        applyCancelButtonStates();
+      }
+    });
+  };
+
+  loadLiveDashboardData();
+  window.renderPaymentsHistory();
+
+  // Profile icon click -> Profile & Settings
+  const userPill = document.querySelector('.user-pill-badge');
+  if (userPill) {
+    userPill.style.cursor = 'pointer';
+    userPill.addEventListener('click', () => switchTab('profile'));
+  }
+
 });
 
 // ------------------------------------------------------------------------
@@ -902,14 +1462,14 @@ window.currentShareData = null;
 
 // Helper: Build shareable summary text
 function buildShareText(reqCode, offersList) {
-  let shareText = `🕋 ZILHAJ Travel Offers Summary (${reqCode || ''})\n\n` +
+  let shareText = `òï ZILHAJ Travel Offers Summary (${reqCode || ''})\n\n` +
                   `Here are the verified agency offers received for this request:\n\n`;
 
   if (Array.isArray(offersList) && offersList.length > 0) {
     offersList.forEach((offer, idx) => {
       shareText += `${idx + 1}. ${offer.agency}\n` +
-                   `   💰 Price: ${offer.price}\n` +
-                   `   ⭐ Rating: ${offer.rating}\n\n`;
+                   `   Æ░ Price: ${offer.price}\n` +
+                   `   ¡ Rating: ${offer.rating}\n\n`;
     });
   }
 
@@ -985,7 +1545,7 @@ function checkEmptyRequestsState() {
   }
 }
 
-// Remove dimmed/disabled Cancel Request option completely if offers have arrived
+// Disable Cancel Request button if offers have arrived (step4 status in_progress or completed)
 function applyCancelButtonStates() {
   const requestCards = document.querySelectorAll('.request-card-box');
   requestCards.forEach(card => {
@@ -993,24 +1553,14 @@ function applyCancelButtonStates() {
     const step3Status = card.getAttribute('data-step3-status');
     const hasOffers = step4Status === 'in_progress' || step4Status === 'completed' || step3Status === 'completed';
 
-    const cancelRow = card.querySelector('.cancel-request-row');
     const cancelBtn = card.querySelector('.btn-cancel-request');
-
-    if (hasOffers) {
-      if (cancelRow) {
-        cancelRow.style.display = 'none';
-      }
-      if (cancelBtn) {
-        cancelBtn.style.display = 'none';
+    if (cancelBtn) {
+      if (hasOffers) {
         cancelBtn.disabled = true;
         cancelBtn.classList.add('disabled');
-      }
-    } else {
-      if (cancelRow) {
-        cancelRow.style.display = 'flex';
-      }
-      if (cancelBtn) {
-        cancelBtn.style.display = 'inline-flex';
+        cancelBtn.setAttribute('aria-disabled', 'true');
+        cancelBtn.setAttribute('title', 'Cannot cancel request once agency offers have arrived');
+      } else {
         cancelBtn.disabled = false;
         cancelBtn.classList.remove('disabled');
         cancelBtn.removeAttribute('aria-disabled');
@@ -1064,10 +1614,10 @@ window.openSubmissionSummaryModal = function(reqId, service, date, passengers, h
 
     if (document.getElementById('sumHotelCategory')) document.getElementById('sumHotelCategory').textContent = hotelCategory || '5 Star';
     
-    if (document.getElementById('sumFullName')) document.getElementById('sumFullName').textContent = fullname || '012 Palak Badyal';
-    if (document.getElementById('sumMobile')) document.getElementById('sumMobile').textContent = mobile || '+91 98765 43210';
-    if (document.getElementById('sumEmail')) document.getElementById('sumEmail').textContent = email || 'palakbadyal69@gmail.com';
-    if (document.getElementById('sumAddress')) document.getElementById('sumAddress').textContent = address || 'Nowgam, Srinagar';
+    if (document.getElementById('sumFullName')) document.getElementById('sumFullName').textContent = fullname || 'Pilgrim User';
+    if (document.getElementById('sumMobile')) document.getElementById('sumMobile').textContent = mobile || 'N/A';
+    if (document.getElementById('sumEmail')) document.getElementById('sumEmail').textContent = email || 'N/A';
+    if (document.getElementById('sumAddress')) document.getElementById('sumAddress').textContent = address || 'N/A';
     if (document.getElementById('sumState')) document.getElementById('sumState').textContent = state || 'Jammu & Kashmir';
     if (document.getElementById('sumDistrict')) document.getElementById('sumDistrict').textContent = district || (city || 'Srinagar');
     if (document.getElementById('sumSpecialReq')) document.getElementById('sumSpecialReq').textContent = specialReq || 'None specified';
@@ -1222,7 +1772,7 @@ window.confirmTermsAndProceedPayment = function() {
     if (checkoutTitle) checkoutTitle.textContent = `${window.pendingBooking.packageName || 'Umrah Package'} - ${window.pendingBooking.agencyName}`;
     if (checkoutAgent) checkoutAgent.textContent = `Agent Code: ${window.pendingBooking.agentCode} | Verified Partner`;
     if (checkoutPricePerson) checkoutPricePerson.textContent = window.pendingBooking.price;
-    if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1,000';
+    if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1';
   }
 
   if (checkoutView) checkoutView.style.display = 'block';
@@ -1234,14 +1784,133 @@ window.confirmTermsAndProceedPayment = function() {
   }
 };
 
-window.completeCheckoutPayment = function() {
-  const paymentOption = document.querySelector('input[name="paymentOption"]:checked')?.value || 'UPI';
+window.initiateRazorpayPayment = async function() {
   const booking = window.pendingBooking || {};
-  const agencyName = booking.agencyName || 'Al-Safwa Travel';
+  const bookingId = booking.reqId || ('BK-' + Date.now());
+  const amountInPaise = 1 * 100; // ₹1 confirmation deposit in paise
+
+  const user = (() => { try { return JSON.parse(localStorage.getItem('umrah_user') || '{}'); } catch(e) { return {}; } })();
+  const customerName = document.getElementById('checkoutTravelerName')?.textContent || user.name || 'Valued Pilgrim';
+  const customerEmail = document.getElementById('checkoutEmail')?.textContent || user.email || 'customer@zilhaj.com';
+  const rawPhone = document.getElementById('checkoutMobile')?.textContent || user.phone || '9876543210';
+  const customerPhone = String(rawPhone).replace(/[^0-9]/g, '').slice(-10) || '9876543210';
+  const selectedMethod = document.querySelector('input[name="paymentOption"]:checked')?.value || 'Razorpay Online';
+
+  const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+
+  try {
+    const res = await fetch(apiBase + '/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: amountInPaise, currency: 'INR', bookingId: bookingId })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || errData.error || ('Server returned ' + res.status));
+    }
+
+    const orderData = await res.json();
+    const validOrderId = orderData && (orderData.order_id || orderData.orderId);
+    const razorpayKey = (orderData && (orderData.key_id || orderData.key)) || 'rzp_live_TdOWoVLFjxHfTO';
+
+    if (!validOrderId) {
+      alert('Could not initialize Razorpay order: ' + ((orderData && (orderData.message || orderData.error)) || 'Failed to create order on server.'));
+      return;
+    }
+
+    if (window.Razorpay) {
+      const options = {
+        key: razorpayKey,
+        amount: (orderData && orderData.amount) || amountInPaise,
+        currency: (orderData && orderData.currency) || 'INR',
+        name: 'ZILHAJ Umrah & Hajj Travel',
+        description: 'Booking Fee Deposit for ' + (booking.packageName || 'Umrah Package'),
+        order_id: validOrderId,
+        prefill: {
+          name: customerName,
+          email: customerEmail,
+          contact: customerPhone
+        },
+        theme: {
+          color: '#127A4D'
+        },
+        modal: {
+          ondismiss: function() {
+            console.log('Payment modal dismissed by user');
+            alert('Payment was cancelled. You can complete it anytime from your dashboard.');
+          }
+        },
+        handler: async function (response) {
+          try {
+            const vRes = await fetch(apiBase + '/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id || validOrderId,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                bookingId: bookingId
+              })
+            });
+            const vData = await vRes.json();
+            if (!vRes.ok || !vData.success) {
+              alert('Payment verification failed: ' + ((vData && vData.message) || 'Signature mismatch'));
+              return;
+            }
+            window.completePaymentSuccess(response.razorpay_payment_id, selectedMethod);
+          } catch (e) {
+            console.error('Signature verification call error:', e);
+            alert('Payment verification failed. Please contact support.');
+          }
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.on('payment.failed', function (resp) {
+        const desc = (resp && resp.error && (resp.error.description || resp.error.reason || resp.error.code)) || 'Transaction declined. Please try again.';
+        alert('Payment failed: ' + desc);
+      });
+      rzp.open();
+    } else {
+      console.warn('Razorpay SDK unavailable');
+      alert('Razorpay Checkout SDK is not loaded. Please check your internet connection.');
+    }
+  } catch (err) {
+    console.error('Razorpay Checkout initialization error:', err);
+    alert('Could not initialize payment gateway: ' + err.message);
+  }
+};
+
+window.completePaymentSuccess = function(paymentId, method) {
+  const booking = window.pendingBooking || {};
+  const agencyName = booking.agencyName || 'Al-Haram Exergy Travels';
+
+  try {
+    const existingPayments = JSON.parse(localStorage.getItem('zilhaj_payments') || '[]');
+    const newRecord = {
+      id: paymentId || ('PAY-' + Date.now()),
+      bookingId: booking.reqId || ('BK-' + Date.now()),
+      packageName: booking.packageName || '15-Day Premium Deluxe Umrah Special',
+      agencyName: agencyName,
+      agentCode: booking.agentCode || 'AG-904',
+      amount: 1,
+      date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: 'Escrow Confirmed',
+      paymentMethod: method || 'Razorpay Gateway'
+    };
+    existingPayments.unshift(newRecord);
+    localStorage.setItem('zilhaj_payments', JSON.stringify(existingPayments));
+    if (typeof window.renderPaymentsHistory === 'function') {
+      window.renderPaymentsHistory();
+    }
+  } catch (e) {
+    console.warn('Could not save payment to localStorage:', e);
+  }
 
   const methodEl = document.getElementById('paySuccessMethod');
   const agencyEl = document.getElementById('paySuccessAgency');
-  if (methodEl) methodEl.textContent = paymentOption;
+  if (methodEl) methodEl.textContent = method || 'Razorpay / UPI';
   if (agencyEl) agencyEl.textContent = agencyName;
 
   const modal = document.getElementById('paymentSuccessModal');
@@ -1267,8 +1936,8 @@ window.closePaymentSuccessModal = function() {
   if (emptyPaymentsView) {
     emptyPaymentsView.innerHTML = `
       <div class="payments-icon">✓</div>
-      <h3 style="color:#127A4D;">Booking Fee Confirmed (₹1,000)!</h3>
-      <p>Your ₹1,000 confirmation fee has been received and your package offer is locked. Invoice #INV-2026-089 has been generated. The partner agency will contact you shortly regarding the remaining balance.</p>
+      <h3 style="color:#127A4D;">Booking Fee Confirmed (₹1)!</h3>
+      <p>Your ₹1 confirmation fee has been received via Razorpay escrow and your package offer is locked. Official tax invoice receipt has been generated. The partner agency will contact you shortly regarding the remaining balance.</p>
       
       <div class="confirmed-booking-details" style="display:flex; flex-direction:column; gap:8px; background:#F8FCF9; border:1px solid #D2EBE0; border-radius:var(--radius-md); padding:14px 20px; margin:16px 0; width:100%; max-width:420px; text-align:left;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1474,11 +2143,11 @@ window.generateReceiptPDF = function(bookingData) {
         `${packageName} (${agencyName})\nIncludes Accommodation (${makkahHotel}, ${madinahHotel}), Visa Processing, and Ground Transport.`,
         'Package',
         'Confirmed',
-        'Rs 1,000.00'
+        'Rs 1.00'
       ]
     ],
     foot: [
-      ['TOTAL:', '', '', '', 'Rs 1,000.00']
+      ['TOTAL:', '', '', '', 'Rs 1.00']
     ],
     theme: 'grid',
     headStyles: {
@@ -1523,7 +2192,7 @@ window.generateReceiptPDF = function(bookingData) {
   doc.text('Amount in Words:', 15, finalY);
   finalY += 5;
   doc.setFontSize(10);
-  doc.text('One Thousand Rupees Only', 15, finalY);
+  doc.text('One Rupee Only', 15, finalY);
 
   finalY += 10;
 

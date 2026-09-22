@@ -29,11 +29,13 @@
         </div>
       </div>
 
-      <nav class="nav-links">
-        <a href="/" class="nav-link">Home</a>
-        <a href="/#services" class="nav-link">Services</a>
-        <a href="#" class="nav-link active" onclick="if(typeof switchTab==='function') switchTab('requests'); return false;">My Requests</a>
-        <a href="/#about" class="nav-link">About Us</a>
+      <nav class="nav-links" id="dashboardNavLinks">
+        <a href="/" class="nav-link" title="Back to Homepage">Home</a>
+        <a href="#requests" class="nav-link active" data-tab="requests">My Requests</a>
+        <a href="#submit-request" class="nav-link" data-tab="submit-request">New Request</a>
+        <a href="#payments" class="nav-link" data-tab="payments">Payments</a>
+        <a href="#profile" class="nav-link" data-tab="profile">Profile</a>
+        <a href="#help" class="nav-link" data-tab="help">Help &amp; Support</a>
       </nav>
 
       <div class="nav-user-area">
@@ -235,10 +237,10 @@
                       <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; border-top: 1px dashed #D2EBE0;">
                         <div>
                           <span style="font-size: 11px; font-weight: 700; color: #687970; display:block;">REQUIRED DEPOSIT</span>
-                          <div style="font-size: 18px; font-weight: 900; color: #127A4D;">₹1,000</div>
+                          <div style="font-size: 18px; font-weight: 900; color: #127A4D;">₹1</div>
                         </div>
                         <button class="btn-accept-offer" style="background: #127A4D; color: #FFFFFF; font-weight: 800; font-size: 14px; padding: 12px 20px; border-radius: 10px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(18, 122, 77, 0.3); transition: all 0.2s ease;" onclick="openBookingTermsModal('AG-904', 'Al-Haram Exergy Travels', '₹72,000', '15-Day Premium Deluxe Umrah Special', 'REQ-8842', '25 Oct 2026', this)">
-                          <span>Accept Offer &amp; Pay Deposit (₹1,000)</span>
+                          <span>Accept Offer &amp; Pay Deposit (₹1)</span>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </button>
                       </div>
@@ -246,6 +248,18 @@
                     </div>
                   </div>
 
+                </div>
+
+                <!-- Right-Aligned Cancel Request Action -->
+                <div class="cancel-request-row" style="display: flex; justify-content: flex-end; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px dashed #CBD5E1;">
+                  <button class="btn-cancel-request" onclick="cancelRequest('REQ-8842', this)" aria-label="Cancel Request REQ-8842" title="Cancel Request" style="margin-left: auto;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="15" y1="9" x2="9" y2="15"></line>
+                      <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    <span>Cancel Request</span>
+                  </button>
                 </div>
 
               </div>
@@ -796,144 +810,55 @@
 
         <!-- TAB 5: PAYMENTS & BILLING VIEW -->
         <section id="tab-payments" class="tab-pane">
-          <div class="page-header">
+          <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
             <div>
-              <h1 class="page-title">Payments & Billing</h1>
-              <p class="page-subtitle">Complete your offer payment and manage invoice receipts.</p>
+              <h1 class="page-title">Payments &amp; Transaction History</h1>
+              <p class="page-subtitle">View your confirmed booking deposits, transaction records, and download official GST tax invoices.</p>
+            </div>
+            <div class="escrow-secure-badge" style="display: inline-flex; align-items: center; gap: 8px; background: #E8F6EF; border: 1.5px solid #D2EBE0; border-radius: 99px; padding: 8px 18px; font-size: 13px; font-weight: 700; color: #127A4D;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>100% Escrow Protected by ZILHAJ</span>
             </div>
           </div>
 
-          <!-- Active Booking Checkout Box (Shown when booking an offer) -->
-          <div id="checkoutView" class="checkout-container-box" style="display: none;">
-            <div class="checkout-card-header">
-              <div class="checkout-badge-pill">öÆ Secure Booking Checkout</div>
-              <h2 class="checkout-title" id="checkoutPackageTitle">Umrah Package - Al-Safwa Travel</h2>
-              <p class="checkout-sub" id="checkoutAgentCode">Agent Code: AGENT-1042 | Request ID: REQ-0517</p>
+          <!-- Payments Summary Metrics -->
+          <div class="payments-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 0 0 24px 0;">
+            <div class="stat-card" style="background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow-sm);">
+              <span style="font-size: 12px; font-weight: 700; color: #687970; text-transform: uppercase; letter-spacing: 0.05em;">Total Transactions</span>
+              <div id="statTotalPayments" style="font-size: 26px; font-weight: 800; color: #1A2B23; margin-top: 6px;">1 Payment</div>
+              <span style="font-size: 12px; color: #127A4D; font-weight: 600;">Booking Confirmation</span>
             </div>
-
-            <div class="checkout-grid-layout">
-              <!-- Left Column: Booking Summary & Payment Methods -->
-              <div class="checkout-main-column">
-                
-                <!-- Payment Gateway Selection -->
-                <div class="checkout-section-card">
-                  <h3 class="checkout-section-title">Select Payment Method</h3>
-                  <div class="payment-methods-list">
-                    
-                    <label class="payment-method-card active">
-                      <input type="radio" name="paymentOption" value="UPI" checked>
-                      <div class="method-info">
-                        <strong>UPI / QR Code</strong>
-                        <span>Instant payment via PhonePe, Google Pay, Paytm, BHIM</span>
-                      </div>
-                      <span class="pay-tag green">Popular</span>
-                    </label>
-
-                    <label class="payment-method-card">
-                      <input type="radio" name="paymentOption" value="Card">
-                      <div class="method-info">
-                        <strong>Credit / Debit Card</strong>
-                        <span>Visa, MasterCard, RuPay, Maestro, Amex</span>
-                      </div>
-                    </label>
-
-                    <label class="payment-method-card">
-                      <input type="radio" name="paymentOption" value="NetBanking">
-                      <div class="method-info">
-                        <strong>Net Banking</strong>
-                        <span>All major Indian banks supported (SBI, HDFC, ICICI, etc.)</span>
-                      </div>
-                    </label>
-
-                    <label class="payment-method-card">
-                      <input type="radio" name="paymentOption" value="Wallet">
-                      <div class="method-info">
-                        <strong>Mobile Wallets</strong>
-                        <span>PhonePe, Paytm, Mobikwik, Freecharge, Airtel Money</span>
-                      </div>
-                    </label>
-
-                    <label class="payment-method-card">
-                      <input type="radio" name="paymentOption" value="Razorpay Online">
-                      <div class="method-info">
-                        <strong>Razorpay Gateway (All Methods)</strong>
-                        <span>UPI, Cards, NetBanking, Wallets, EMI & Pay Later</span>
-                      </div>
-                      <span class="pay-tag blue">Verified</span>
-                    </label>
-
-                  </div>
-                </div>
-
-                <!-- Traveler Summary Box -->
-                <div class="checkout-section-card">
-                  <h3 class="checkout-section-title">Traveler & Contact Summary</h3>
-                  <div class="checkout-info-grid">
-                    <div>
-                      <span class="c-label">PRIMARY TRAVELER</span>
-                      <span class="c-val" id="checkoutTravelerName">--</span>
-                    </div>
-                    <div>
-                      <span class="c-label">MOBILE NUMBER</span>
-                      <span class="c-val" id="checkoutMobile">--</span>
-                    </div>
-                    <div>
-                      <span class="c-label">EMAIL ADDRESS</span>
-                      <span class="c-val" id="checkoutEmail">--</span>
-                    </div>
-                    <div>
-                      <span class="c-label">DEPARTURE CITY</span>
-                      <span class="c-val" id="checkoutCity">--</span>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
-              <!-- Right Column: Price Breakup & Pay Action -->
-              <div class="checkout-side-summary">
-                <div class="checkout-price-card">
-                  <h4 class="summary-head">Payment Breakdown</h4>
-                  
-                  <div class="summary-row">
-                    <span>Full Package Price (Per Person)</span>
-                    <strong id="checkoutPricePerson">$1,250</strong>
-                  </div>
-                  <div class="summary-row">
-                    <span>Booking Confirmation Fee</span>
-                    <strong style="color: #127A4D;">₹╣1,000</strong>
-                  </div>
-                  <div class="summary-row">
-                    <span>Remaining Balance</span>
-                    <strong style="color: #D97706;">Payable Later to Agency</strong>
-                  </div>
-                  
-                  <div class="summary-divider"></div>
-                  
-                  <div class="summary-total-row">
-                    <span>Amount Payable Now</span>
-                    <strong class="total-price" id="checkoutTotalPrice">₹1,000</strong>
-                  </div>
-
-                  <button class="btn-complete-payment" id="btnCompletePayment" onclick="initiateRazorpayPayment()">
-                    💳 Pay via Razorpay / UPI / Card (₹1,000)
-                  </button>
-                  <p class="pay-guarantee-note">256-Bit Encrypted Payment Gateway via Razorpay</p>
-                </div>
-              </div>
+            <div class="stat-card" style="background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow-sm);">
+              <span style="font-size: 12px; font-weight: 700; color: #687970; text-transform: uppercase; letter-spacing: 0.05em;">Total Deposit in Escrow</span>
+              <div id="statTotalPaidAmount" style="font-size: 26px; font-weight: 800; color: #127A4D; margin-top: 6px;">₹1</div>
+              <span style="font-size: 12px; color: #687970;">Protected by Zilhaj Escrow</span>
+            </div>
+            <div class="stat-card" style="background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow-sm);">
+              <span style="font-size: 12px; font-weight: 700; color: #687970; text-transform: uppercase; letter-spacing: 0.05em;">Invoice Status</span>
+              <div style="font-size: 26px; font-weight: 800; color: #127A4D; margin-top: 6px;">Official Tax Invoices</div>
+              <span style="font-size: 12px; color: #687970;">Instant PDF Download</span>
             </div>
           </div>
 
-          <!-- Empty State (Shown when no active booking) -->
-          <div class="empty-payments-box" id="emptyPaymentsView">
-            <div class="payments-icon">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="1.5">
+          <!-- Confirmed Payments Table / Card List -->
+          <div id="paymentsHistoryList" class="payments-history-list" style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Populated dynamically by script.js -->
+          </div>
+
+          <!-- Empty State (Shown only when zero payments have ever been made) -->
+          <div class="empty-payments-box" id="emptyPaymentsView" style="display: none; background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 16px; padding: 48px 24px; text-align: center; margin-top: 16px;">
+            <div class="payments-icon" style="width: 64px; height: 64px; border-radius: 50%; background: #E8F6EF; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
                 <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
                 <line x1="1" y1="10" x2="23" y2="10"></line>
               </svg>
             </div>
-            <h3>No Pending Payments</h3>
-            <p>Once you accept and book an offer, your payment checkout and receipts will appear here.</p>
+            <h3 style="font-size: 18px; font-weight: 800; color: #1A2B23; margin-bottom: 8px;">No Payment Records Found</h3>
+            <p style="font-size: 14px; color: #687970; max-width: 480px; margin: 0 auto 20px auto;">When you accept a verified travel agency offer and pay your booking confirmation deposit, your official payment receipts and GST invoices will be safely recorded here.</p>
+            <button onclick="window.switchTab('requests')" style="background: #127A4D; color: #FFFFFF; border: none; padding: 10px 24px; font-size: 14px; font-weight: 700; border-radius: 99px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+              <span>View My Requests</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
           </div>
         </section>
 
@@ -1194,7 +1119,7 @@
       </div>
 
       <h2 class="modal-title">Payment Successful!</h2>
-      <p class="modal-subtitle">Booking Confirmation Fee of ₹╣1,000 processed via <strong id="paySuccessMethod" style="color:var(--text-dark);">UPI</strong>. Your offer is locked & confirmed.</p>
+      <p class="modal-subtitle">Booking Confirmation Fee of ₹1 processed via <strong id="paySuccessMethod" style="color:var(--text-dark);">UPI</strong>. Your offer is locked & confirmed.</p>
 
       <div class="modal-info-box" style="margin-top:16px; text-align:left;">
         <div class="info-box-row" style="display:flex; justify-space-between; margin-bottom:8px;">
@@ -1203,7 +1128,7 @@
         </div>
         <div class="info-box-row" style="display:flex; justify-content:space-between; margin-bottom:12px;">
           <span style="font-size:12px; color:var(--text-muted); font-weight:600;">AMOUNT PAID</span>
-          <strong style="font-size:13px; color:var(--primary-green);">₹╣1,000</strong>
+          <strong style="font-size:13px; color:var(--primary-green);">₹1</strong>
         </div>
         <div class="info-box-note" style="margin-top:8px;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
@@ -1521,8 +1446,8 @@
       <!-- Booking Confirmation Fee Notice -->
       <div class="booking-fee-notice">
         <span class="fee-notice-label">Booking Confirmation Fee</span>
-        <div class="fee-notice-amount">₹╣1,000</div>
-        <p class="fee-notice-subtext">Pay ₹╣1,000 to lock and confirm this offer now. The remaining package balance is collected separately by the partner agency later.</p>
+        <div class="fee-notice-amount">₹1</div>
+        <p class="fee-notice-subtext">Pay ₹1 to lock and confirm this offer now. The remaining package balance is collected separately by the partner agency later.</p>
       </div>
 
       <div class="modal-actions-row stacked">

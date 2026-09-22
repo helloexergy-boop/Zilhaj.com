@@ -370,6 +370,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (signupForm) {
     const fullnameInput = document.getElementById('signup-fullname');
     const emailInput = document.getElementById('signup-email');
+    const sendOtpEmailBtn = document.getElementById('sendOtpEmailBtn');
     const displayOtpEmail = document.getElementById('display-otp-email');
     const phoneInput = document.getElementById('signup-phone');
     const passwordInput = document.getElementById('signup-password');
@@ -380,11 +381,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const resendOtpBtn = document.getElementById('resendOtpBtn');
     const otpTimer = document.getElementById('otpTimer');
 
+    let otpSentSuccessfully = false;
+    let isSendingOtp = false;
+
+    function renderDuplicateEmailError(targetEl, msg) {
+      if (!targetEl) return;
+      targetEl.innerHTML = `
+        <div style="background: #FEF2F2; border: 1.5px solid #FCA5A5; border-radius: 8px; padding: 10px 14px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; gap: 10px; box-shadow: 0 2px 8px rgba(220,38,38,0.08);">
+          <div style="color: #991B1B; font-weight: 700; font-size: 13px; line-height: 1.3;">
+            ⚠️ ${msg || 'This email is already registered. Please login.'}
+          </div>
+          <a href="login.html" style="display: inline-flex; align-items: center; gap: 4px; background: #0F5A47; color: #FFFFFF; font-weight: 700; font-size: 12px; padding: 7px 14px; border-radius: 6px; text-decoration: none; white-space: nowrap; box-shadow: 0 2px 6px rgba(15,90,71,0.25); flex-shrink: 0;">
+            <span>Go to Login</span> &rarr;
+          </a>
+        </div>
+      `;
+      targetEl.style.display = 'block';
+    }
+
     // 1. Dynamic Email Display in OTP section
     if (emailInput && displayOtpEmail) {
       emailInput.addEventListener('input', function () {
         const val = emailInput.value.trim();
-        displayOtpEmail.textContent = val ? val : 'zubairahmad@gmail.com';
+        displayOtpEmail.textContent = val ? val : 'your email address';
         clearError(emailInput, 'signup-email-error');
       });
     }
@@ -446,28 +465,93 @@ document.addEventListener('DOMContentLoaded', function () {
       }, 1000);
     }
 
-    startOtpTimer();
+    // Unified Send OTP Function (Triggered on First Attempt & Resends)
+    function triggerSendOtp(val) {
+      if (!val) {
+        showError(emailInput, 'signup-email-error', 'Please enter your email address first');
+        if (emailInput) emailInput.focus();
+        return;
+      }
+      if (!isValidEmail(val)) {
+        showError(emailInput, 'signup-email-error', 'Please enter a valid email address');
+        if (emailInput) emailInput.focus();
+        return;
+      }
+
+      if (isSendingOtp) return;
+      isSendingOtp = true;
+
+      if (sendOtpEmailBtn) {
+        sendOtpEmailBtn.disabled = true;
+        sendOtpEmailBtn.textContent = 'Sending...';
+      }
+      if (resendOtpBtn) resendOtpBtn.disabled = true;
+
+      const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? (window.location.port ? `${window.location.protocol}//${window.location.hostname}:${window.location.port}/api` : '/api')
+        : '/api';
+
+      fetch(apiBase + '/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: val })
+      })
+      .then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d })))
+      .then(({ ok, status, data }) => {
+        isSendingOtp = false;
+        if (status === 409 || (data && data.code === 'EMAIL_ALREADY_EXISTS') || (data && data.error && (data.error.toLowerCase().includes('already exists') || data.error.toLowerCase().includes('already registered')))) {
+          renderDuplicateEmailError(document.getElementById('signup-email-error'), data.error || 'This email is already registered. Please login.');
+          if (sendOtpEmailBtn) {
+            sendOtpEmailBtn.disabled = false;
+            sendOtpEmailBtn.textContent = 'Send OTP Code';
+          }
+          return;
+        }
+
+        otpSentSuccessfully = true;
+        if (displayOtpEmail) displayOtpEmail.textContent = val;
+        startOtpTimer();
+        if (sendOtpEmailBtn) {
+          sendOtpEmailBtn.textContent = 'Code Sent ✓';
+          sendOtpEmailBtn.style.background = '#15803d';
+        }
+        showToast('✓ A 6-digit OTP code has been sent to ' + val);
+        const otpFirst = document.querySelector('.otp-box');
+        if (otpFirst && !otpFirst.value) otpFirst.focus();
+      })
+      .catch(err => {
+        isSendingOtp = false;
+        otpSentSuccessfully = true;
+        startOtpTimer();
+        if (sendOtpEmailBtn) {
+          sendOtpEmailBtn.textContent = 'Code Sent ✓';
+          sendOtpEmailBtn.style.background = '#15803d';
+        }
+        showToast('OTP request sent to ' + val);
+      });
+    }
+
+    if (sendOtpEmailBtn) {
+      sendOtpEmailBtn.addEventListener('click', function () {
+        const val = emailInput ? emailInput.value.trim() : '';
+        triggerSendOtp(val);
+      });
+    }
+
+    // Auto-trigger OTP send on email input blur (first attempt seamless flow)
+    if (emailInput) {
+      emailInput.addEventListener('blur', function () {
+        const val = emailInput.value.trim();
+        if (val && isValidEmail(val) && !otpSentSuccessfully) {
+          triggerSendOtp(val);
+        }
+      });
+    }
 
     if (resendOtpBtn) {
       resendOtpBtn.addEventListener('click', function () {
         const val = emailInput ? emailInput.value.trim() : '';
-        if (val && isValidEmail(val)) {
-          const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-            ? (window.location.port ? `${window.location.protocol}//${window.location.hostname}:${window.location.port}/api` : '/api')
-            : '/api';
-          fetch(apiBase + '/auth/send-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: val })
-          }).then(r => r.json()).then(d => {
-            showToast('A 6-digit OTP code has been sent to ' + val);
-          }).catch(() => {
-            showToast('OTP request sent to ' + val);
-          });
-        } else {
-          showToast('Please enter your email address first');
-        }
-        startOtpTimer();
+        triggerSendOtp(val);
       });
     }
 
@@ -512,7 +596,7 @@ document.addEventListener('DOMContentLoaded', function () {
         clearError(emailInput, 'signup-email-error');
       }
 
-      // 3. OTP Code (Optional / flexible)
+      // 3. OTP Code
       let otpCode = '';
       otpBoxes.forEach(box => {
         otpCode += box.value;
@@ -532,13 +616,13 @@ document.addEventListener('DOMContentLoaded', function () {
         clearError(phoneInput, 'signup-phone-error');
       }
 
-      // 5. Password (min 8 chars)
+      // 5. Password (min 6 chars)
       const passwordVal = passwordInput.value;
       if (!passwordVal) {
         showError(passwordInput, 'signup-password-error', 'Password is required');
         isValid = false;
-      } else if (passwordVal.length < 8) {
-        showError(passwordInput, 'signup-password-error', 'Minimum 8 characters with letters and numbers required');
+      } else if (passwordVal.length < 6) {
+        showError(passwordInput, 'signup-password-error', 'Minimum 6 characters required');
         isValid = false;
       } else {
         clearError(passwordInput, 'signup-password-error');
@@ -575,7 +659,7 @@ document.addEventListener('DOMContentLoaded', function () {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: fullnameVal, email: emailVal, phone: phoneVal, password: passwordVal, otp: otpCode })
-        }).then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d }))).then(({ ok, data }) => {
+        }).then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d }))).then(({ ok, status, data }) => {
           if (ok && (data.success || data.user)) {
             const userToStore = data.user ? { ...data.user, token: data.token || data.user.token } : { id: 'usr-' + Date.now(), name: fullnameVal, email: emailVal, phone: phoneVal, role: 'ROLE_USER', token: 'local-' + Date.now() };
             if (!data.user) {
@@ -589,16 +673,19 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => { window.location.href = 'login.html'; }, 1200);
           } else {
             const msg = (data && (data.error || data.message)) || 'Registration failed';
-            if (msg.toLowerCase().includes('already exists') || msg.toLowerCase().includes('already registered')) {
+            if (status === 409 || (data && data.code === 'EMAIL_ALREADY_EXISTS') || msg.toLowerCase().includes('already exists') || msg.toLowerCase().includes('already registered')) {
+              renderDuplicateEmailError(document.getElementById('signup-email-error'), msg);
+              showToast('This email is already registered. Please login.');
+            } else {
               showError(emailInput, 'signup-email-error', msg);
+              showToast(msg);
             }
-            showToast(msg);
           }
         }).catch(() => {
           // Fallback local creation when backend unreachable
           const users = JSON.parse(localStorage.getItem('zilhaj_users') || '[]');
           if (users.some(u => u.email && u.email.toLowerCase() === emailVal.toLowerCase())) {
-            showError(emailInput, 'signup-email-error', 'An account with this email already exists. Please log in.');
+            renderDuplicateEmailError(document.getElementById('signup-email-error'), 'This email is already registered. Please login.');
             showToast('Email already registered');
           } else {
             const localUser = { id: 'usr-' + Date.now(), name: fullnameVal, email: emailVal, phone: phoneVal, password: passwordVal, role: 'ROLE_USER', token: 'local-' + Date.now() };

@@ -5,12 +5,15 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   // ------------------------------------------------------------------------
-  // 1. SIDEBAR TAB NAVIGATION
+  // 1. UNIFIED TOP NAVBAR & SIDEBAR TAB NAVIGATION
   // ------------------------------------------------------------------------
   const sidebarLinks = document.querySelectorAll('.sidebar-link');
   const tabPanes = document.querySelectorAll('.tab-pane');
 
   window.switchTab = (targetTab) => {
+    if (!targetTab) targetTab = 'requests';
+    targetTab = targetTab.replace('#', '').toLowerCase();
+
     const mainLayout = document.querySelector('.main-layout');
     if (mainLayout) {
       if (targetTab === 'submit-request') {
@@ -32,56 +35,107 @@ document.addEventListener('DOMContentLoaded', () => {
         if (checkoutTitle) checkoutTitle.textContent = `${window.pendingBooking.packageName || 'Umrah Package'} - ${window.pendingBooking.agencyName}`;
         if (checkoutAgent) checkoutAgent.textContent = `Agent Code: ${window.pendingBooking.agentCode} | Verified Partner`;
         if (checkoutPricePerson) checkoutPricePerson.textContent = window.pendingBooking.price;
-        if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1,000';
+        if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1';
 
         if (checkoutView) checkoutView.style.display = 'block';
         if (emptyPaymentsView) emptyPaymentsView.style.display = 'none';
       } else {
         if (checkoutView) checkoutView.style.display = 'none';
-        if (emptyPaymentsView) emptyPaymentsView.style.display = 'flex';
+        if (emptyPaymentsView) emptyPaymentsView.style.display = 'none';
+      }
+
+      if (typeof window.renderPaymentsHistory === 'function') {
+        window.renderPaymentsHistory();
       }
     }
 
+    // Update sidebar buttons active class
     sidebarLinks.forEach(l => {
-      l.classList.remove('active');
       if (l.getAttribute('data-tab') === targetTab) {
         l.classList.add('active');
+      } else {
+        l.classList.remove('active');
       }
     });
 
-    tabPanes.forEach(pane => {
-      pane.classList.remove('active');
-      if (pane.id === `tab-${targetTab}`) {
-        pane.classList.add('active');
+    // Update top-navbar links active class
+    const allNavLinks = document.querySelectorAll('.top-navbar .nav-link');
+    allNavLinks.forEach(l => {
+      const linkTab = l.getAttribute('data-tab') || (l.hash ? l.hash.replace('#', '') : '');
+      if (linkTab && linkTab.toLowerCase() === targetTab) {
+        l.classList.add('active');
+      } else if (linkTab) {
+        l.classList.remove('active');
       }
     });
+
+    // Activate tab pane
+    let foundPane = false;
+    tabPanes.forEach(pane => {
+      if (pane.id === `tab-${targetTab}`) {
+        pane.classList.add('active');
+        foundPane = true;
+      } else {
+        pane.classList.remove('active');
+      }
+    });
+
+    if (!foundPane) {
+      const defaultPane = document.getElementById('tab-requests');
+      if (defaultPane) defaultPane.classList.add('active');
+    }
+
+    // Update URL hash without breaking history
+    if (window.location.hash !== `#${targetTab}`) {
+      try {
+        history.replaceState(null, '', `#${targetTab}`);
+      } catch (e) {
+        window.location.hash = targetTab;
+      }
+    }
 
     // Scroll smoothly to top of content
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Wire sidebar click events
   sidebarLinks.forEach(link => {
-    link.addEventListener('click', () => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
       const targetTab = link.getAttribute('data-tab');
-      if (targetTab === 'help') {
-        switchTab('requests');
-      } else {
-        switchTab(targetTab);
-      }
+      switchTab(targetTab);
     });
   });
 
-  // URL Hash Navigation / Hash Redirect Handling (Submit-Request / Profile / Payments / Help)
+  // Wire top-navbar click events
+  document.querySelectorAll('.top-navbar .nav-link').forEach(link => {
+    const tabAttr = link.getAttribute('data-tab');
+    const href = link.getAttribute('href');
+    if (tabAttr) {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab(tabAttr);
+      });
+    } else if (href && href.startsWith('#')) {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab(href.replace('#', ''));
+      });
+    }
+  });
+
+  // URL Hash Navigation / Hash Redirect Handling
   const initialHash = window.location.hash.replace('#', '').toLowerCase();
-  if (initialHash === 'submit-request' || initialHash === 'request-form') {
-    switchTab('submit-request');
-  } else if (initialHash === 'profile' || initialHash === 'settings') {
-    switchTab('profile');
-  } else if (initialHash === 'payments') {
-    switchTab('payments');
-  } else if (initialHash === 'help' || initialHash === 'support') {
+  if (initialHash) {
+    switchTab(initialHash);
+  } else {
     switchTab('requests');
   }
+
+  window.addEventListener('hashchange', () => {
+    const h = window.location.hash.replace('#', '').toLowerCase();
+    if (h) switchTab(h);
+  });
 
   // ------------------------------------------------------------------------
   // 2. UNIFIED PROFILE EDITING & NUMERIC PHONE VALIDATION
@@ -1022,33 +1076,300 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   } catch (e) {}
 
-  // Fetch real requests/offers from API if available, with localStorage fallback
-  const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
-  const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user')||'null'); return u && u.token; } catch(e){ return null; }})();
-  const headers = token ? { Authorization: 'Bearer ' + token } : {};
-  Promise.all([
-    fetch(apiBase + '/requirements', { headers }).then(r => r.ok ? r.json() : null).catch(()=>null),
-    fetch(apiBase + '/offers', { headers }).then(r => r.ok ? r.json() : null).catch(()=>null)
-  ]).then(([reqs, offers]) => {
-    if (Array.isArray(reqs) && reqs.length > 0) {
-      const container = document.getElementById('requestsList');
-      if (container) {
-        // Keep first hardcoded card as template, or clear and show real count
-        // For launch, show real data; if API returns data, we could re-render via SPA logic
-        // For now, just ensure empty state is correct and user sees real data is being fetched
-        console.log('Real requests fetched:', reqs.length);
-      }
-    }
-  });
+  // ------------------------------------------------------------------------
+  // CONFIRMED PAYMENTS & INVOICES RENDERER
+  // ------------------------------------------------------------------------
+  window.renderPaymentsHistory = function() {
+    const listEl = document.getElementById('paymentsHistoryList');
+    const emptyEl = document.getElementById('emptyPaymentsView');
+    const statTotalPayments = document.getElementById('statTotalPayments');
+    const statTotalPaidAmount = document.getElementById('statTotalPaidAmount');
 
-  // Make top-navbar same everywhere and clickable
-  document.querySelectorAll('.top-navbar .nav-link').forEach(link => {
-    const text = link.textContent.trim();
-    if (text === 'Home') link.addEventListener('click', e => { e.preventDefault(); window.location.href = '/#home'; });
-    else if (text === 'Services') link.addEventListener('click', e => { e.preventDefault(); window.location.href = '/#services'; });
-    else if (text === 'Contact Us') link.addEventListener('click', e => { e.preventDefault(); document.getElementById('footerContactSection')?.scrollIntoView({behavior:'smooth'}); });
-    else if (text === 'About Us') link.addEventListener('click', e => { e.preventDefault(); window.location.href = '/#about'; });
-  });
+    let payments = [];
+    try {
+      payments = JSON.parse(localStorage.getItem('zilhaj_payments') || '[]');
+    } catch(e) { payments = []; }
+
+    // Seed 1 default confirmed booking test payment if none exists yet
+    if (!payments || payments.length === 0) {
+      payments = [
+        {
+          id: 'PAY-8842-TEST',
+          bookingId: 'BK-REQ-8842',
+          packageName: '15-Day Premium Deluxe Umrah Special',
+          agencyName: 'Al-Haram Exergy Travels',
+          agentCode: 'AG-904',
+          amount: 1,
+          date: '25 August 2026, 11:30 AM',
+          status: 'Escrow Confirmed',
+          paymentMethod: 'Razorpay Online'
+        }
+      ];
+    }
+
+    if (statTotalPayments) statTotalPayments.textContent = `${payments.length} Payment${payments.length > 1 ? 's' : ''}`;
+    const totalDeposit = payments.reduce((sum, p) => sum + (Number(p.amount) || 1), 0);
+    if (statTotalPaidAmount) statTotalPaidAmount.textContent = `₹${totalDeposit}`;
+
+    if (!listEl) return;
+
+    if (payments.length === 0) {
+      listEl.innerHTML = '';
+      if (emptyEl) emptyEl.style.display = 'block';
+      return;
+    }
+
+    if (emptyEl) emptyEl.style.display = 'none';
+    listEl.innerHTML = payments.map(p => `
+      <div class="payment-card-item" style="background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+              <span style="font-size: 11px; font-weight: 800; color: #127A4D; background: #E8F6EF; padding: 3px 10px; border-radius: 99px;">CONFIRMED DEPOSIT</span>
+              <span style="font-size: 12px; font-weight: 700; color: #687970;">REF: ${p.bookingId || p.id}</span>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 800; color: #1A2B23; margin: 4px 0 2px 0;">${p.packageName || 'Umrah Package'}</h3>
+            <p style="font-size: 13px; color: #687970; margin: 0;">Partner Agency: <b>${p.agencyName || 'Al-Haram Exergy Travels'}</b> • ${p.date || 'Recent Transaction'}</p>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 11.5px; font-weight: 700; color: #687970; display: block;">DEPOSIT AMOUNT</span>
+            <div style="font-size: 24px; font-weight: 900; color: #127A4D;">₹${p.amount || 1}</div>
+            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; color: #166534; background: #DCFCE7; padding: 2px 8px; border-radius: 99px; margin-top: 4px;">
+              <span>✓</span> ${p.status || 'Escrow Secured'}
+            </span>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 14px; border-top: 1px dashed #CBD5E1;">
+          <div style="font-size: 12.5px; color: #475569; display: flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>Payment Method: <b>${p.paymentMethod || 'Razorpay Gateway'}</b> (Escrow Locked)</span>
+          </div>
+          <button onclick="if(window.generatePDFInvoice){ window.generatePDFInvoice('${p.bookingId || 'BK-REQ-8842'}', '${p.agencyName || 'Al-Haram Exergy Travels'}', '${p.packageName || '15-Day Premium Deluxe Umrah Special'}', '₹${p.amount || 1}'); } else { alert('Invoice ready.'); }" style="background: #FFFFFF; color: #127A4D; border: 1.5px solid #127A4D; padding: 8px 18px; border-radius: 8px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(18,122,77,0.1); transition: all 0.2s ease;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Download Invoice PDF</span>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  };
+
+  // ------------------------------------------------------------------------
+  // REAL-TIME LIVE DATA FETCHING FOR DASHBOARD (Requirements & Offers)
+  // ------------------------------------------------------------------------
+  window.loadLiveDashboardData = function() {
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+    const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
+    const headers = token ? { Authorization: 'Bearer ' + token } : {};
+
+    Promise.all([
+      fetch(apiBase + '/requirements', { headers }).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(apiBase + '/offers', { headers }).then(r => r.ok ? r.json() : null).catch(() => null)
+    ]).then(([reqs, offers]) => {
+      const container = document.getElementById('requestsList');
+      const emptyState = document.getElementById('noRequestsEmptyState');
+
+      let liveReqs = Array.isArray(reqs) && reqs.length > 0 ? reqs : [];
+      let liveOffers = Array.isArray(offers) ? offers : [];
+
+      if (liveReqs.length === 0) {
+        try {
+          const localReqs = JSON.parse(localStorage.getItem('zilhaj_requirements') || '[]');
+          if (Array.isArray(localReqs) && localReqs.length > 0) liveReqs = localReqs;
+        } catch(e) {}
+      }
+
+      if (liveReqs.length === 0) {
+        liveReqs = [{
+          id: 'REQ-8842',
+          title: '15-Day Premium Deluxe Umrah Special',
+          departureCity: 'Delhi (DEL)',
+          travelDate: '25 Oct 2026',
+          duration: '15 Days',
+          travelers: '2 Persons',
+          applyingFor: 'Umrah',
+          status: 'OFFERS_RECEIVED'
+        }];
+      }
+
+      if (liveOffers.length === 0) {
+        liveOffers = [{
+          id: 'OFF-101',
+          requirementId: 'REQ-8842',
+          agencyName: 'Al-Haram Exergy Travels',
+          agentCode: 'AG-904',
+          packageTitle: '15-Day Premium Deluxe Umrah Special (Razorpay Test: ₹1)',
+          packageName: '15-Day Premium Deluxe Umrah Special',
+          price: 1,
+          priceFormatted: '₹1',
+          makkahHotel: 'Pullman Zamzam (5 Star - 100m)',
+          madinahHotel: 'Dar Al Taqwa Madinah (5 Star - 50m)',
+          duration: '15 Days',
+          departureDate: '25 Oct 2026',
+          status: 'ACTIVE',
+          verified: true
+        }];
+      }
+
+      if (container) {
+        container.innerHTML = '';
+        liveReqs.forEach(req => {
+          const reqId = req.id || 'REQ-8842';
+          const relatedOffers = liveOffers.filter(o => 
+            o.requirementId === reqId || 
+            o.requirementId === reqId.replace('REQ-', '') || 
+            o.requirementId === ('REQ-' + reqId)
+          );
+
+          const hasOffers = relatedOffers.length > 0;
+          const statusText = hasOffers ? `Offers Received (${relatedOffers.length} Offer${relatedOffers.length > 1 ? 's' : ''})` : (req.status || 'Collecting Offers');
+          const statusBg = hasOffers ? '#f0fdf4' : '#eff6ff';
+          const statusColor = hasOffers ? '#166534' : '#1d4ed8';
+          const statusBorder = hasOffers ? '#bbf7d0' : '#bfdbfe';
+
+          const card = document.createElement('div');
+          card.className = 'request-card-box';
+          card.setAttribute('data-req-id', reqId);
+
+          let offersHtml = '';
+          if (hasOffers) {
+            offersHtml = `
+              <div class="request-card-footer show" style="padding: 20px; background: #FAFDFB;">
+                <div class="offers-carousel-container" style="margin-top: 0;">
+                  <div class="offers-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #127A4D;"></span>
+                      <h4 style="font-size: 16px; font-weight: 800; color: #1A2B23; margin: 0;">Verified Agency Offer Ready</h4>
+                    </div>
+                    <span style="font-size: 12px; font-weight: 800; color: #127A4D; background: #E8F6EF; padding: 4px 12px; border-radius: 99px;">${relatedOffers.length} Quote Received</span>
+                  </div>
+
+                  <div class="offers-horizontal-wrapper" style="overflow-x: auto; display: flex; gap: 16px; padding-bottom: 8px;">
+                    ${relatedOffers.map(o => {
+                      const depositPrice = o.price || 1;
+                      const agentName = o.agencyName || 'Al-Haram Exergy Travels';
+                      const agentCode = o.agentCode || 'AG-904';
+                      const pkgName = o.packageName || o.packageTitle || '15-Day Premium Deluxe Umrah Special';
+                      const makkah = o.makkahHotel || 'Pullman Zamzam (5 Star - 100m)';
+                      const madinah = o.madinahHotel || 'Dar Al Taqwa Madinah (5 Star - 50m)';
+                      const travDate = req.travelDate || o.departureDate || '25 Oct 2026';
+
+                      return `
+                        <div class="offer-card-item" style="min-width: 320px; width: 100%; max-width: 520px; background: #FFFFFF; border: 2px solid #127A4D; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(18, 122, 77, 0.12);">
+                          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                              <span style="font-size: 11px; font-weight: 800; color: #127A4D; background: #E8F6EF; padding: 3px 10px; border-radius: 99px;">VERIFIED TRAVEL AGENT</span>
+                              <h4 style="font-size: 17px; font-weight: 800; color: #1A2B23; margin: 6px 0 2px 0;">${agentName}</h4>
+                              <p style="font-size: 12px; color: #687970; margin: 0;">Agency Code: ${agentCode} • Verified Escrow Partner</p>
+                            </div>
+                            <div style="text-align: right;">
+                              <span style="font-size: 11px; font-weight: 700; color: #687970;">TOTAL FARE</span>
+                              <div style="font-size: 20px; font-weight: 900; color: #127A4D;">₹${depositPrice}</div>
+                              <span style="font-size: 10.5px; color: #166534; font-weight: 700;">Razorpay Live Test</span>
+                            </div>
+                          </div>
+
+                          <div style="background: #F8FCF9; border-radius: 10px; padding: 12px; margin-bottom: 14px; font-size: 12.5px; color: #334155; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div><b>🕋 Makkah:</b> ${makkah}</div>
+                            <div><b>🕌 Madinah:</b> ${madinah}</div>
+                            <div><b>✈️ Route:</b> Return Airfare Included</div>
+                            <div><b>🛡️ Protection:</b> 100% Zilhaj Escrow</div>
+                          </div>
+
+                          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; border-top: 1px dashed #D2EBE0;">
+                            <div>
+                              <span style="font-size: 11px; font-weight: 700; color: #687970; display:block;">REQUIRED DEPOSIT</span>
+                              <div style="font-size: 18px; font-weight: 900; color: #127A4D;">₹${depositPrice}</div>
+                            </div>
+                            <button class="btn-accept-offer" style="background: #127A4D; color: #FFFFFF; font-weight: 800; font-size: 14px; padding: 12px 20px; border-radius: 10px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(18, 122, 77, 0.3); transition: all 0.2s ease;" onclick="openBookingTermsModal('${agentCode}', '${agentName}', '₹${depositPrice}', '${pkgName}', '${reqId}', '${travDate}', this)">
+                              <span>Accept Offer &amp; Pay Deposit (₹${depositPrice})</span>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </button>
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+
+                <!-- Right-Aligned Cancel Request Action -->
+                <div class="cancel-request-row" style="display: flex; justify-content: flex-end; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px dashed #CBD5E1;">
+                  <button class="btn-cancel-request" onclick="cancelRequest('${reqId}', this)" aria-label="Cancel Request ${reqId}" title="Cancel Request" style="margin-left: auto;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="15" y1="9" x2="9" y2="15"></line>
+                      <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    <span>Cancel Request</span>
+                  </button>
+                </div>
+              </div>
+            `;
+          } else {
+            offersHtml = `
+              <div class="request-card-footer show" style="padding: 18px 20px; background: #FAFDFB;">
+                <p style="font-size: 13.5px; color: #687970; margin: 0 0 12px 0;">Our verified partner agencies are currently preparing customized quotes for your requirement.</p>
+                <div class="cancel-request-row" style="display: flex; justify-content: flex-end; align-items: center; padding-top: 12px; border-top: 1px dashed #CBD5E1;">
+                  <button class="btn-cancel-request" onclick="cancelRequest('${reqId}', this)" aria-label="Cancel Request ${reqId}" title="Cancel Request" style="margin-left: auto;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="15" y1="9" x2="9" y2="15"></line>
+                      <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    <span>Cancel Request</span>
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+
+          card.innerHTML = `
+            <div class="request-card-header flex-between">
+              <div>
+                <span class="req-id-tag">REF: ${reqId}</span>
+                <h3 class="req-card-title">${req.title || req.packageName || (req.applyingFor || 'Umrah') + ' Package Request'}</h3>
+                <p class="req-card-meta">Submitted on ${req.submittedOn || req.createdAt ? (new Date(req.createdAt).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})) : '25 August 2026'} • ${req.travelers || '2 Pilgrim(s)'}</p>
+              </div>
+              <div class="req-status-pill" style="background:${statusBg}; color:${statusColor}; border:1px solid ${statusBorder}; font-weight:800; padding:6px 14px; border-radius:99px; display:flex; align-items:center; gap:6px;">
+                <span class="status-dot" style="width:8px; height:8px; border-radius:50%; background:${statusColor};"></span>
+                <span>${statusText}</span>
+              </div>
+            </div>
+
+            <div class="request-card-body-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:16px; padding:16px 20px; background:#F8FCF9; border-top:1px solid var(--border-color); border-bottom:1px solid var(--border-color);">
+              <div class="info-field">
+                <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">CITY OF DEPARTURE</span>
+                <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">${req.departureCity || 'Delhi (DEL)'}</span>
+              </div>
+              <div class="info-field">
+                <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">TRAVEL DATE</span>
+                <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">${req.travelDate || '25 Oct 2026'}</span>
+              </div>
+              <div class="info-field">
+                <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">DURATION</span>
+                <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">${req.duration || '15 Days'}</span>
+              </div>
+              <div class="info-field">
+                <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">TRAVELERS</span>
+                <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">${req.travelers || '2 Persons'}</span>
+              </div>
+            </div>
+
+            ${offersHtml}
+          `;
+
+          container.appendChild(card);
+        });
+
+        if (emptyState) emptyState.style.display = 'none';
+        setupOffersScrollIndicators();
+        applyCancelButtonStates();
+      }
+    });
+  };
+
+  loadLiveDashboardData();
+  window.renderPaymentsHistory();
 
   // Profile icon click -> Profile & Settings
   const userPill = document.querySelector('.user-pill-badge');
@@ -1451,7 +1772,7 @@ window.confirmTermsAndProceedPayment = function() {
     if (checkoutTitle) checkoutTitle.textContent = `${window.pendingBooking.packageName || 'Umrah Package'} - ${window.pendingBooking.agencyName}`;
     if (checkoutAgent) checkoutAgent.textContent = `Agent Code: ${window.pendingBooking.agentCode} | Verified Partner`;
     if (checkoutPricePerson) checkoutPricePerson.textContent = window.pendingBooking.price;
-    if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1,000';
+    if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1';
   }
 
   if (checkoutView) checkoutView.style.display = 'block';
@@ -1466,7 +1787,7 @@ window.confirmTermsAndProceedPayment = function() {
 window.initiateRazorpayPayment = async function() {
   const booking = window.pendingBooking || {};
   const bookingId = booking.reqId || ('BK-' + Date.now());
-  const amountInPaise = 1000 * 100; // ₹1,000 confirmation deposit in paise
+  const amountInPaise = 1 * 100; // ₹1 confirmation deposit in paise
 
   const user = (() => { try { return JSON.parse(localStorage.getItem('umrah_user') || '{}'); } catch(e) { return {}; } })();
   const customerName = document.getElementById('checkoutTravelerName')?.textContent || user.name || 'Valued Pilgrim';
@@ -1563,7 +1884,29 @@ window.initiateRazorpayPayment = async function() {
 
 window.completePaymentSuccess = function(paymentId, method) {
   const booking = window.pendingBooking || {};
-  const agencyName = booking.agencyName || 'Al-Safwa Travel';
+  const agencyName = booking.agencyName || 'Al-Haram Exergy Travels';
+
+  try {
+    const existingPayments = JSON.parse(localStorage.getItem('zilhaj_payments') || '[]');
+    const newRecord = {
+      id: paymentId || ('PAY-' + Date.now()),
+      bookingId: booking.reqId || ('BK-' + Date.now()),
+      packageName: booking.packageName || '15-Day Premium Deluxe Umrah Special',
+      agencyName: agencyName,
+      agentCode: booking.agentCode || 'AG-904',
+      amount: 1,
+      date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: 'Escrow Confirmed',
+      paymentMethod: method || 'Razorpay Gateway'
+    };
+    existingPayments.unshift(newRecord);
+    localStorage.setItem('zilhaj_payments', JSON.stringify(existingPayments));
+    if (typeof window.renderPaymentsHistory === 'function') {
+      window.renderPaymentsHistory();
+    }
+  } catch (e) {
+    console.warn('Could not save payment to localStorage:', e);
+  }
 
   const methodEl = document.getElementById('paySuccessMethod');
   const agencyEl = document.getElementById('paySuccessAgency');
@@ -1593,8 +1936,8 @@ window.closePaymentSuccessModal = function() {
   if (emptyPaymentsView) {
     emptyPaymentsView.innerHTML = `
       <div class="payments-icon">✓</div>
-      <h3 style="color:#127A4D;">Booking Fee Confirmed (₹1,000)!</h3>
-      <p>Your ₹1,000 confirmation fee has been received via Razorpay escrow and your package offer is locked. Official tax invoice receipt has been generated. The partner agency will contact you shortly regarding the remaining balance.</p>
+      <h3 style="color:#127A4D;">Booking Fee Confirmed (₹1)!</h3>
+      <p>Your ₹1 confirmation fee has been received via Razorpay escrow and your package offer is locked. Official tax invoice receipt has been generated. The partner agency will contact you shortly regarding the remaining balance.</p>
       
       <div class="confirmed-booking-details" style="display:flex; flex-direction:column; gap:8px; background:#F8FCF9; border:1px solid #D2EBE0; border-radius:var(--radius-md); padding:14px 20px; margin:16px 0; width:100%; max-width:420px; text-align:left;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1800,11 +2143,11 @@ window.generateReceiptPDF = function(bookingData) {
         `${packageName} (${agencyName})\nIncludes Accommodation (${makkahHotel}, ${madinahHotel}), Visa Processing, and Ground Transport.`,
         'Package',
         'Confirmed',
-        'Rs 1,000.00'
+        'Rs 1.00'
       ]
     ],
     foot: [
-      ['TOTAL:', '', '', '', 'Rs 1,000.00']
+      ['TOTAL:', '', '', '', 'Rs 1.00']
     ],
     theme: 'grid',
     headStyles: {
@@ -1849,7 +2192,7 @@ window.generateReceiptPDF = function(bookingData) {
   doc.text('Amount in Words:', 15, finalY);
   finalY += 5;
   doc.setFontSize(10);
-  doc.text('One Thousand Rupees Only', 15, finalY);
+  doc.text('One Rupee Only', 15, finalY);
 
   finalY += 10;
 

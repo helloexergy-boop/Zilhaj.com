@@ -10,16 +10,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
   <!-- CSS Stylesheet -->
   <link rel="stylesheet" href="styles.css">
+  <!-- Razorpay Checkout Script -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 
   <div class="app-container">
     
-    <!-- Top Navigation Header -->
+    <!-- Floating Pill Header Bar -->
     <header class="top-navbar">
-      <div class="nav-brand">
+      <div class="nav-brand" onclick="window.location.href='/'" style="cursor: pointer;">
         <div class="logo-gold-ring">
-          <img src="logo.jpg" alt="ZILHAJ Logo" class="brand-logo-img">
+          <img src="logo.jpg" onError="this.src='logo.png'" alt="ZILHAJ Logo" class="brand-logo-img">
         </div>
         <div class="brand-text">
           <span class="brand-name">Zilhaj.com</span>
@@ -27,18 +29,21 @@
         </div>
       </div>
 
-      <nav class="nav-links">
-        <a href="#" class="nav-link active">Home</a>
-        <a href="#" class="nav-link">Services</a>
-        <a href="#" class="nav-link">Contact Us</a>
-        <a href="#" class="nav-link">About Us</a>
+      <nav class="nav-links" id="dashboardNavLinks">
+        <a href="/" class="nav-link" title="Back to Homepage">Home</a>
+        <a href="#requests" class="nav-link active" data-tab="requests">My Requests</a>
+        <a href="#submit-request" class="nav-link" data-tab="submit-request">New Request</a>
+        <a href="#payments" class="nav-link" data-tab="payments">Payments</a>
+        <a href="#profile" class="nav-link" data-tab="profile">Profile</a>
+        <a href="#help" class="nav-link" data-tab="help">Help &amp; Support</a>
       </nav>
 
       <div class="nav-user-area">
-        <div class="user-pill-badge" onclick="switchTab('profile')" style="cursor: pointer;" title="Go to Profile & Settings">
-          <span class="user-avatar-circle" id="navAvatarInitials">O</span>
-          <span class="user-name" id="navUserName">012 Palak Badyal</span>
+        <div class="user-pill-badge" onclick="if(typeof switchTab==='function') switchTab('profile'); else window.location.href='/dashboard/index.html#profile';" style="cursor: pointer;" title="Go to Profile & Settings">
+          <span class="user-avatar-circle" id="navAvatarInitials">P</span>
+          <span class="user-name" id="navUserName">Pilgrim Profile</span>
         </div>
+        <button class="btn-logout-header" id="btnLogoutHeader" onclick="localStorage.removeItem('umrah_user'); window.location.href='/';">Logout</button>
       </div>
     </header>
 
@@ -160,387 +165,95 @@
 
           <!-- Full-Width Request Cards Container -->
           <div class="requests-cards-container" id="requestsList">
-
-            <!-- Request Card 1: REQ-5417 (0 Offers - Waiting) -->
-            <div class="request-card-box" data-req-id="REQ-5417" data-step1-status="completed" data-step2-status="in_progress" data-step3-status="pending" data-step4-status="pending">
+            <!-- Active Mock Request Card with Received Offer for Testing Payment -->
+            <div class="request-card-box" data-req-id="REQ-8842">
               
-              <!-- Full-Width Integrated Status Tracker -->
-              <div class="integrated-status-tracker">
-                <div class="tracker-top-bar">
-                  <span class="tracker-title-label">STATUS TRACKER</span>
-                  <span class="badge badge-waiting">Waiting for Offers</span>
+              <div class="request-card-header flex-between">
+                <div>
+                  <span class="req-id-tag">REF: REQ-8842</span>
+                  <h3 class="req-card-title">15-Day Premium Umrah Request</h3>
+                  <p class="req-card-meta">Submitted on 25 August 2026 • 2 Pilgrim(s)</p>
                 </div>
-                <div class="horizontal-timeline-steps">
-                  <div class="h-timeline-step step-completed">
-                    <div class="step-icon-circle">✓</div>
-                    <div class="step-label-group">
-                      <span class="step-name-text">Request Received</span>
-                      <span class="step-sub-status">Completed</span>
-                    </div>
-                  </div>
-                  <div class="h-timeline-line solid"></div>
-                  <div class="h-timeline-step step-active">
-                    <div class="step-icon-circle pulse">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    </div>
-                    <div class="step-label-group">
-                      <span class="step-name-text">Collecting Offers</span>
-                      <span class="step-sub-status active-text">In Progress</span>
-                    </div>
-                  </div>
-                  <div class="h-timeline-line dashed"></div>
-                  <div class="h-timeline-step step-pending">
-                    <div class="step-icon-circle">3</div>
-                    <div class="step-label-group">
-                      <span class="step-name-text">Offers Ready</span>
-                      <span class="step-sub-status">Pending</span>
-                    </div>
-                  </div>
-                  <div class="h-timeline-line dashed"></div>
-                  <div class="h-timeline-step step-pending">
-                    <div class="step-icon-circle">4</div>
-                    <div class="step-label-group">
-                      <span class="step-name-text">You Choose</span>
-                      <span class="step-sub-status">Pending</span>
-                    </div>
-                  </div>
+                <div class="req-status-pill status-offers" style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; font-weight:800; padding:6px 14px; border-radius:99px; display:flex; align-items:center; gap:6px;">
+                  <span class="status-dot" style="width:8px; height:8px; border-radius:50%; background:#166534;"></span>
+                  <span>Offers Received (1 Offer)</span>
                 </div>
               </div>
 
-              <!-- Request Card Header -->
-              <div class="request-card-header">
-                <div class="req-title-group">
-                  <div class="req-icon-badge">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
-                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <span class="req-card-code">REQ-5417</span>
-                    <span class="req-card-date">Submitted on 11 Aug 2026</span>
-                  </div>
+              <div class="request-card-body-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:16px; padding:16px 20px; background:#F8FCF9; border-top:1px solid var(--border-color); border-bottom:1px solid var(--border-color);">
+                <div class="info-field">
+                  <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">CITY OF DEPARTURE</span>
+                  <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">Delhi (DEL)</span>
+                </div>
+                <div class="info-field">
+                  <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">TRAVEL DATE</span>
+                  <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">25 Oct 2026</span>
+                </div>
+                <div class="info-field">
+                  <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">DURATION</span>
+                  <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">15 Days</span>
+                </div>
+                <div class="info-field">
+                  <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">TRAVELERS</span>
+                  <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">2 Persons</span>
                 </div>
               </div>
 
-              <!-- Labeled Details Grid (5 Columns including Hotel Type) -->
-              <div class="request-card-body">
-                <div class="info-field">
-                  <span class="field-label">NAME</span>
-                  <span class="field-value">012 Palak Badyal</span>
-                </div>
-                <div class="info-field">
-                  <span class="field-label">SERVICE</span>
-                  <span class="field-value">Umrah Package (25 Days)</span>
-                </div>
-                <div class="info-field">
-                  <span class="field-label">TRAVEL DATE</span>
-                  <span class="field-value">27 Apr 2026 <small>(Approx.)</small></span>
-                </div>
-                <div class="info-field">
-                  <span class="field-label">TOTAL PERSONS</span>
-                  <span class="field-value">10</span>
-                </div>
-                <div class="info-field">
-                  <span class="field-label">HOTEL TYPE</span>
-                  <span class="field-value">5 Star</span>
-                </div>
-              </div>
-
-              <!-- Repositioned View Details Row -->
-              <div class="request-card-view-details-row">
-                <button class="btn-open-full-summary" onclick="openSubmissionSummaryModal('REQ-5417', 'Umrah Package (25 Days)', '27 Apr 2026', '7 Adults, 3 Children', '5 Star', 'Srinagar', '012 Palak Badyal', '+91 98765 43210', 'palakbadyal69@gmail.com', 'House No. 12, Nowgam', 'Jammu & Kashmir', 'Srinagar', 'Umrah', '25 Days', '4 Male', '3 Female', '3 Children', '0 Infants', 'Wheelchair assistance required for 1 senior citizen.')">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                  </svg>
-                  <span>View Details</span>
-                </button>
-              </div>
-
-              <!-- Sub-content: Rich Empty State -->
-              <div class="request-card-footer show">
-                <div class="empty-state-card-container">
-                  <div class="empty-state-main-content">
-                    
-                    <div class="empty-state-illustration">
-                      <svg width="240" height="110" viewBox="0 0 240 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 95h200M40 95V68a14 14 0 0 1 28 0v27M172 95V64a12 12 0 0 1 24 0v31M30 95V42l10-5 10 5v53M200 95V45l8-4 8 4v50" stroke="#D2EBE0" stroke-width="2" stroke-linecap="round"/>
-                        <circle cx="54" cy="40" r="14" fill="#E8F6EF"/>
-                        <circle cx="184" cy="38" r="11" fill="#E8F6EF"/>
-                        <rect x="82" y="68" width="28" height="27" rx="3" fill="#1A2B23"/>
-                        <line x1="82" y1="76" x2="110" y2="76" stroke="#D97706" stroke-width="2.5"/>
-                        <rect x="114" y="16" width="46" height="76" rx="8" fill="#FFFFFF" stroke="#127A4D" stroke-width="2.5"/>
-                        <rect x="122" y="23" width="30" height="4" rx="2" fill="#E2E9E5"/>
-                        <line x1="122" y1="33" x2="148" y2="33" stroke="#127A4D" stroke-width="2" stroke-linecap="round"/>
-                        <line x1="122" y1="39" x2="142" y2="39" stroke="#E2E9E5" stroke-width="2" stroke-linecap="round"/>
-                        <line x1="122" y1="45" x2="145" y2="45" stroke="#E2E9E5" stroke-width="2" stroke-linecap="round"/>
-                        <circle cx="145" cy="54" r="14" fill="#FFFFFF" stroke="#127A4D" stroke-width="3"/>
-                        <line x1="155" y1="64" x2="167" y2="76" stroke="#127A4D" stroke-width="3.5" stroke-linecap="round"/>
-                        <path d="M165 35 Q 185 20 198 12" stroke="#127A4D" stroke-width="1.5" stroke-dasharray="3 3"/>
-                        <path d="M198 12l-14 3 6 4 8-7-4 9 4 1z" fill="#127A4D"/>
-                      </svg>
+              <div class="request-card-footer show" style="padding: 20px; background: #FAFDFB;">
+                
+                <div class="offers-carousel-container" style="margin-top: 0;">
+                  
+                  <div class="offers-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #127A4D;"></span>
+                      <h4 style="font-size: 16px; font-weight: 800; color: #1A2B23; margin: 0;">Verified Agency Offer Ready</h4>
                     </div>
-
-                    <h3 class="empty-state-title">No Offers Yet - We're Working on the Best Ones for You!</h3>
-                    <p class="empty-state-subtext">Our verified partners are reviewing your request and collecting the most suitable options. You'll be notified as soon as offers are ready.</p>
-
-                    <div class="empty-state-info-bar">
-                      <div class="info-bar-left">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <line x1="12" y1="16" x2="12" y2="12"></line>
-                          <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                        </svg>
-                        <span>Usually takes <strong>30 minutes to 6 hours</strong> depending on the request.</span>
-                      </div>
-                      <button class="btn-get-notified" onclick="handleGetNotified(this)">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                        </svg>
-                        <span>Get Notified</span>
-                      </button>
-                    </div>
-
-                    <div class="cancel-request-row">
-                      <button class="btn-cancel-request" onclick="cancelRequest('REQ-5417', this)" aria-label="Cancel Request REQ-5417" title="Cancel Request">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <line x1="15" y1="9" x2="9" y2="15"></line>
-                          <line x1="9" y1="9" x2="15" y2="15"></line>
-                        </svg>
-                        <span>Cancel Request</span>
-                      </button>
-                    </div>
-
+                    <span style="font-size: 12px; font-weight: 800; color: #127A4D; background: #E8F6EF; padding: 4px 12px; border-radius: 99px;">1 Quote Received</span>
                   </div>
-                </div>
-              </div>
-            </div>
 
-            <!-- Request Card 2: REQ-0517 (3 Offers Available) -->
-            <div class="request-card-box" data-req-id="REQ-0517" data-step1-status="completed" data-step2-status="completed" data-step3-status="completed" data-step4-status="in_progress">
-              
-              <!-- Full-Width Integrated Status Tracker -->
-              <div class="integrated-status-tracker">
-                <div class="tracker-top-bar">
-                  <span class="tracker-title-label">STATUS TRACKER</span>
-                  <span class="badge badge-available">Offers Available</span>
-                </div>
-                <div class="horizontal-timeline-steps">
-                  <div class="h-timeline-step step-completed">
-                    <div class="step-icon-circle">✓</div>
-                    <div class="step-label-group">
-                      <span class="step-name-text">Request Received</span>
-                      <span class="step-sub-status">Completed</span>
-                    </div>
-                  </div>
-                  <div class="h-timeline-line solid"></div>
-                  <div class="h-timeline-step step-completed">
-                    <div class="step-icon-circle">✓</div>
-                    <div class="step-label-group">
-                      <span class="step-name-text">Collecting Offers</span>
-                      <span class="step-sub-status">Completed</span>
-                    </div>
-                  </div>
-                  <div class="h-timeline-line solid"></div>
-                  <div class="h-timeline-step step-completed">
-                    <div class="step-icon-circle">✓</div>
-                    <div class="step-label-group">
-                      <span class="step-name-text">Offers Ready</span>
-                      <span class="step-sub-status">Completed</span>
-                    </div>
-                  </div>
-                  <div class="h-timeline-line solid"></div>
-                  <div class="h-timeline-step step-active">
-                    <div class="step-icon-circle pulse">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    </div>
-                    <div class="step-label-group">
-                      <span class="step-name-text">You Choose</span>
-                      <span class="step-sub-status active-text">In Progress</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Request Card Header -->
-              <div class="request-card-header">
-                <div class="req-title-group">
-                  <div class="req-icon-badge">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
-                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <span class="req-card-code">REQ-0517</span>
-                    <span class="req-card-date">Submitted on 11 Aug 2026</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Labeled Details Grid -->
-              <div class="request-card-body">
-                <div class="info-field">
-                  <span class="field-label">NAME</span>
-                  <span class="field-value">012 Palak Badyal</span>
-                </div>
-                <div class="info-field">
-                  <span class="field-label">SERVICE</span>
-                  <span class="field-value">Umrah Package (18 Days)</span>
-                </div>
-                <div class="info-field">
-                  <span class="field-label">TRAVEL DATE</span>
-                  <span class="field-value">22 Mar 2026 <small>(Approx.)</small></span>
-                </div>
-                <div class="info-field">
-                  <span class="field-label">TOTAL PERSONS</span>
-                  <span class="field-value">3</span>
-                </div>
-                <div class="info-field">
-                  <span class="field-label">HOTEL TYPE</span>
-                  <span class="field-value">5 Star</span>
-                </div>
-              </div>
-
-              <!-- Repositioned View Details Row -->
-              <div class="request-card-view-details-row">
-                <button class="btn-open-full-summary" onclick="openSubmissionSummaryModal('REQ-0517', 'Umrah Package (18 Days)', '22 Mar 2026', '3 Adults, 0 Children', '5 Star', 'Delhi', '012 Palak Badyal', '+91 98765 43210', 'palakbadyal69@gmail.com', 'House No. 12, Nowgam', 'Jammu & Kashmir', 'Srinagar', 'Umrah', '18 Days', '2 Male', '1 Female', '0 Children', '0 Infants', 'Near Masjid Al-Haram hotel preference.')">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                  </svg>
-                  <span>View Details</span>
-                </button>
-              </div>
-
-              <!-- Horizontally Scrollable Agency Offers Row -->
-              <div class="request-card-footer show">
-                <div class="offers-section-header">
-                  <div class="offers-section-title">Verified Agency Offers (3)</div>
-                </div>
-
-                <div class="offers-carousel-container">
-                  <button class="offers-scroll-btn scroll-left hidden" onclick="scrollOffersRow(this, -1)" aria-label="Previous offers" title="Previous offers">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                  </button>
-
-                  <div class="offers-horizontal-wrapper">
-                    <div class="offers-grid-scrollable">
+                  <div class="offers-horizontal-wrapper" style="overflow-x: auto; display: flex; gap: 16px; padding-bottom: 8px;">
+                    <div class="offer-card-item" style="min-width: 320px; width: 100%; max-width: 520px; background: #FFFFFF; border: 2px solid #127A4D; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(18, 122, 77, 0.12);">
                       
-                      <!-- Offer 1 -->
-                      <div class="offer-card-item">
-                        <div class="offer-card-top-bar">
-                          <span class="agent-code-tag">AGENT-1042</span>
-                          <span class="agency-title">Al-Safwa Travel</span>
+                      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div>
+                          <span style="font-size: 11px; font-weight: 800; color: #D97706; text-transform: uppercase; letter-spacing: 0.5px;">⭐ VERIFIED OPERATOR</span>
+                          <h4 style="font-size: 18px; font-weight: 900; color: #1A2B23; margin: 4px 0;">Al-Haram Exergy Travels</h4>
+                          <span style="font-size: 12px; color: #687970;">Agent Code: AG-904 | KSA Permit #UM-9841</span>
                         </div>
-                        <div class="offer-price-block">
-                          <span class="offer-price-val">$1,250</span>
-                          <span class="offer-price-sub">/ person</span>
-                        </div>
-                        <div class="offer-meta-row">
-                          <span class="meta-badge">18 Days</span>
-                          <span class="meta-badge flex-star">ÿà 5 Star Package</span>
-                        </div>
-                        <div class="offer-hotels-block">
-                          <div class="h-line"> <strong>Makkah:</strong> Al Safwa Royal Orchid</div>
-                          <div class="h-line"> <strong>Madinah:</strong> Dar Al-Taqwa Hotel</div>
-                        </div>
-                        <div class="offer-card-btns">
-                          <button class="btn-view-flyer-detail" onclick="openOfferFlyerModal('AGENT-1042', 'Al-Safwa Travel', '$1,250', '18 Days', 'Al Safwa Royal Orchid (50m from Haram)', 'Dar Al-Taqwa Hotel (100m from Nabawi)')">View in Detail</button>
-                          <button class="btn-book-now-primary" onclick="openBookingTermsModal('AGENT-1042', 'Al-Safwa Travel', '$1,250', 'Umrah Package (18 Days)')">Book Now</button>
+                        <div style="text-align: right;">
+                          <span style="font-size: 12px; color: #687970;">Package Price</span>
+                          <div style="font-size: 22px; font-weight: 900; color: #127A4D;">₹72,000</div>
+                          <span style="font-size: 11px; color: #687970;">Per Person</span>
                         </div>
                       </div>
 
-                      <!-- Offer 2 -->
-                      <div class="offer-card-item">
-                        <div class="offer-card-top-bar">
-                          <span class="agent-code-tag">AGENT-8091</span>
-                          <span class="agency-title">Makkah Tours</span>
-                        </div>
-                        <div class="offer-price-block">
-                          <span class="offer-price-val">$1,100</span>
-                          <span class="offer-price-sub">/ person</span>
-                        </div>
-                        <div class="offer-meta-row">
-                          <span class="meta-badge">18 Days</span>
-                          <span class="meta-badge flex-star">ÿà 4 Star Package</span>
-                        </div>
-                        <div class="offer-hotels-block">
-                          <div class="h-line"> <strong>Makkah:</strong> Anjum Hotel Makkah</div>
-                          <div class="h-line"> <strong>Madinah:</strong> Pullman Zamzam Madinah</div>
-                        </div>
-                        <div class="offer-card-btns">
-                          <button class="btn-view-flyer-detail" onclick="openOfferFlyerModal('AGENT-8091', 'Makkah Tours', '$1,100', '18 Days', 'Anjum Hotel Makkah (150m from Haram)', 'Pullman Zamzam Madinah (200m from Nabawi)')">View in Detail</button>
-                          <button class="btn-book-now-primary" onclick="openBookingTermsModal('AGENT-8091', 'Makkah Tours', '$1,100', 'Umrah Package (18 Days)')">Book Now</button>
-                        </div>
+                      <div style="background: #F4FAF7; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; border: 1px solid #D2EBE0; font-size: 13px; line-height: 1.7; color:#334155;">
+                        <div>🏢 <strong>Makkah Hotel:</strong> Swissotel Clock Tower (5 Star - 150m)</div>
+                        <div>🏢 <strong>Madinah Hotel:</strong> Pullman Zamzam (5 Star - 100m)</div>
+                        <div>✈️ <strong>Flight:</strong> Direct Saudi Airlines (DEL-JED-MED-DEL)</div>
+                        <div>📋 <strong>Includes:</strong> Saudi eVisa, 3x Meals, VIP Transport, Ziyarat</div>
                       </div>
 
-                      <!-- Offer 3 -->
-                      <div class="offer-card-item">
-                        <div class="offer-card-top-bar">
-                          <span class="agent-code-tag">AGENT-3310</span>
-                          <span class="agency-title">Haramain Express</span>
+                      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; border-top: 1px dashed #D2EBE0;">
+                        <div>
+                          <span style="font-size: 11px; font-weight: 700; color: #687970; display:block;">REQUIRED DEPOSIT</span>
+                          <div style="font-size: 18px; font-weight: 900; color: #127A4D;">₹1</div>
                         </div>
-                        <div class="offer-price-block">
-                          <span class="offer-price-val">$1,450</span>
-                          <span class="offer-price-sub">/ person</span>
-                        </div>
-                        <div class="offer-meta-row">
-                          <span class="meta-badge">18 Days</span>
-                          <span class="meta-badge flex-star">ÿà 5 Star VIP</span>
-                        </div>
-                        <div class="offer-hotels-block">
-                          <div class="h-line"> <strong>Makkah:</strong> Swissotel Makkah</div>
-                          <div class="h-line"> <strong>Madinah:</strong> The Oberoi Madinah</div>
-                        </div>
-                        <div class="offer-card-btns">
-                          <button class="btn-view-flyer-detail" onclick="openOfferFlyerModal('AGENT-3310', 'Haramain Express', '$1,450', '18 Days', 'Swissotel Makkah (Front Row Haram)', 'The Oberoi Madinah (50m from Nabawi)')">View in Detail</button>
-                          <button class="btn-book-now-primary" onclick="openBookingTermsModal('AGENT-3310', 'Haramain Express', '$1,450', 'Umrah Package (18 Days)')">Book Now</button>
-                        </div>
+                        <button class="btn-accept-offer" style="background: #127A4D; color: #FFFFFF; font-weight: 800; font-size: 14px; padding: 12px 20px; border-radius: 10px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(18, 122, 77, 0.3); transition: all 0.2s ease;" onclick="openBookingTermsModal('AG-904', 'Al-Haram Exergy Travels', '₹72,000', '15-Day Premium Deluxe Umrah Special', 'REQ-8842', '25 Oct 2026', this)">
+                          <span>Accept Offer &amp; Pay Deposit (₹1)</span>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
                       </div>
 
                     </div>
                   </div>
 
-                  <button class="offers-scroll-btn scroll-right" onclick="scrollOffersRow(this, 1)" aria-label="Next offers" title="Next offers">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                  </button>
                 </div>
 
-                <!-- Scroll Dots Indicator -->
-                <div class="scroll-dots-row">
-                  <span class="scroll-dot active"></span>
-                  <span class="scroll-dot"></span>
-                  <span class="scroll-dot"></span>
-                </div>
-
-                <!-- Share All Offers / Ask Opinion -->
-                <div class="share-all-offers-row">
-                  <button class="btn-share-all-offers" onclick="openAskOpinionModal('REQ-0517', [
-                    { agency: 'Al-Safwa Travel', price: '$1,250', rating: '5 Star' },
-                    { agency: 'Makkah Tours', price: '$1,100', rating: '4 Star' },
-                    { agency: 'Haramain Express', price: '$1,450', rating: '5 Star' }
-                  ])">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                    <span>Ask Opinion</span>
-                  </button>
-                </div>
-
-                <div class="cancel-request-row">
-                  <button class="btn-cancel-request" onclick="cancelRequest('REQ-0517', this)" aria-label="Cancel Request REQ-0517" title="Cancel Request">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <!-- Right-Aligned Cancel Request Action -->
+                <div class="cancel-request-row" style="display: flex; justify-content: flex-end; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px dashed #CBD5E1;">
+                  <button class="btn-cancel-request" onclick="cancelRequest('REQ-8842', this)" aria-label="Cancel Request REQ-8842" title="Cancel Request" style="margin-left: auto;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                       <circle cx="12" cy="12" r="10"></circle>
                       <line x1="15" y1="9" x2="9" y2="15"></line>
                       <line x1="9" y1="9" x2="15" y2="15"></line>
@@ -548,211 +261,10 @@
                     <span>Cancel Request</span>
                   </button>
                 </div>
+
               </div>
+
             </div>
-
-            <!-- Request Card 3: REQ-8550 (2 Offers Available) -->
-            <div class="request-card-box" data-req-id="REQ-8550" data-step1-status="completed" data-step2-status="completed" data-step3-status="completed" data-step4-status="in_progress">
-              
-              <!-- Full-Width Integrated Status Tracker -->
-              <div class="integrated-status-tracker">
-                <div class="tracker-top-bar">
-                  <span class="tracker-title-label">STATUS TRACKER</span>
-                  <span class="badge badge-available">Offers Available</span>
-                </div>
-                <div class="horizontal-timeline-steps">
-                  <div class="h-timeline-step step-completed">
-                    <div class="step-icon-circle">✓</div>
-                    <div class="step-label-group">
-                      <span class="step-name-text">Request Received</span>
-                      <span class="step-sub-status">Completed</span>
-                    </div>
-                  </div>
-                  <div class="h-timeline-line solid"></div>
-                  <div class="h-timeline-step step-completed">
-                    <div class="step-icon-circle">✓</div>
-                    <div class="step-label-group">
-                      <span class="step-name-text">Collecting Offers</span>
-                      <span class="step-sub-status">Completed</span>
-                    </div>
-                  </div>
-                  <div class="h-timeline-line solid"></div>
-                  <div class="h-timeline-step step-completed">
-                    <div class="step-icon-circle">✓</div>
-                    <div class="step-label-group">
-                      <span class="step-name-text">Offers Ready</span>
-                      <span class="step-sub-status">Completed</span>
-                    </div>
-                  </div>
-                  <div class="h-timeline-line solid"></div>
-                  <div class="h-timeline-step step-active">
-                    <div class="step-icon-circle pulse">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    </div>
-                    <div class="step-label-group">
-                      <span class="step-name-text">You Choose</span>
-                      <span class="step-sub-status active-text">In Progress</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Request Card Header -->
-              <div class="request-card-header">
-                <div class="req-title-group">
-                  <div class="req-icon-badge">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
-                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <span class="req-card-code">REQ-8550</span>
-                    <span class="req-card-date">Submitted on 13 Aug 2026</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Labeled Details Grid -->
-              <div class="request-card-body">
-                <div class="info-field">
-                  <span class="field-label">NAME</span>
-                  <span class="field-value">012 Palak Badyal</span>
-                </div>
-                <div class="info-field">
-                  <span class="field-label">SERVICE</span>
-                  <span class="field-value">Umrah Package (18 Days)</span>
-                </div>
-                <div class="info-field">
-                  <span class="field-label">TRAVEL DATE</span>
-                  <span class="field-value">13 Aug 2026 <small>(Approx.)</small></span>
-                </div>
-                <div class="info-field">
-                  <span class="field-label">TOTAL PERSONS</span>
-                  <span class="field-value">2</span>
-                </div>
-                <div class="info-field">
-                  <span class="field-label">HOTEL TYPE</span>
-                  <span class="field-value">4 Star</span>
-                </div>
-              </div>
-
-              <!-- Repositioned View Details Row -->
-              <div class="request-card-view-details-row">
-                <button class="btn-open-full-summary" onclick="openSubmissionSummaryModal('REQ-8550', 'Umrah Package (18 Days)', '13 Aug 2026', '2 Adults, 0 Children', '4 Star', 'Mumbai', '012 Palak Badyal', '+91 98765 43210', 'palakbadyal69@gmail.com', 'House No. 12, Nowgam', 'Jammu & Kashmir', 'Srinagar', 'Umrah', '18 Days', '1 Male', '1 Female', '0 Children', '0 Infants', 'None specified')">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                  </svg>
-                  <span>View Details</span>
-                </button>
-              </div>
-
-              <!-- Offers Grid -->
-              <div class="request-card-footer show">
-                <div class="offers-section-header">
-                  <div class="offers-section-title">Verified Agency Offers (2)</div>
-                </div>
-
-                <div class="offers-carousel-container">
-                  <button class="offers-scroll-btn scroll-left hidden" onclick="scrollOffersRow(this, -1)" aria-label="Previous offers" title="Previous offers">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                  </button>
-
-                  <div class="offers-horizontal-wrapper">
-                    <div class="offers-grid-scrollable">
-                      <div class="offer-card-item">
-                        <div class="offer-card-top-bar">
-                          <span class="agent-code-tag">AGENT-4490</span>
-                          <span class="agency-title">Badr Al-Madinah</span>
-                        </div>
-                        <div class="offer-price-block">
-                          <span class="offer-price-val">$1,300</span>
-                          <span class="offer-price-sub">/ person</span>
-                        </div>
-                        <div class="offer-meta-row">
-                          <span class="meta-badge">18 Days</span>
-                          <span class="meta-badge flex-star">ÿà 5 Star Package</span>
-                        </div>
-                        <div class="offer-hotels-block">
-                          <div class="h-line"> <strong>Makkah:</strong> Pullman Zamzam Makkah</div>
-                          <div class="h-line"> <strong>Madinah:</strong> Anwar Al Madinah Movenpick</div>
-                        </div>
-                        <div class="offer-card-btns">
-                          <button class="btn-view-flyer-detail" onclick="openOfferFlyerModal('AGENT-4490', 'Badr Al-Madinah', '$1,300', '18 Days', 'Pullman Zamzam Makkah (100m from Haram)', 'Anwar Al Madinah (Direct Access to Nabawi)')">View in Detail</button>
-                          <button class="btn-book-now-primary" onclick="openBookingTermsModal('AGENT-4490', 'Badr Al-Madinah', '$1,300', 'Umrah Package (18 Days)')">Book Now</button>
-                        </div>
-                      </div>
-
-                      <div class="offer-card-item">
-                        <div class="offer-card-top-bar">
-                          <span class="agent-code-tag">AGENT-7123</span>
-                          <span class="agency-title">Quba Express</span>
-                        </div>
-                        <div class="offer-price-block">
-                          <span class="offer-price-val">$1,150</span>
-                          <span class="offer-price-sub">/ person</span>
-                        </div>
-                        <div class="offer-meta-row">
-                          <span class="meta-badge">18 Days</span>
-                          <span class="meta-badge flex-star">ÿà 4 Star Package</span>
-                        </div>
-                        <div class="offer-hotels-block">
-                          <div class="h-line"> <strong>Makkah:</strong> Elaf Kinda Hotel</div>
-                          <div class="h-line"> <strong>Madinah:</strong> Frontel Al Harithia</div>
-                        </div>
-                        <div class="offer-card-btns">
-                          <button class="btn-view-flyer-detail" onclick="openOfferFlyerModal('AGENT-7123', 'Quba Express', '$1,150', '18 Days', 'Elaf Kinda Hotel (200m from Haram)', 'Frontel Al Harithia (150m from Nabawi)')">View in Detail</button>
-                          <button class="btn-book-now-primary" onclick="openBookingTermsModal('AGENT-7123', 'Quba Express', '$1,150', 'Umrah Package (18 Days)')">Book Now</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button class="offers-scroll-btn scroll-right" onclick="scrollOffersRow(this, 1)" aria-label="Next offers" title="Next offers">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                  </button>
-                </div>
-
-                <!-- Scroll Dots Indicator -->
-                <div class="scroll-dots-row">
-                  <span class="scroll-dot active"></span>
-                  <span class="scroll-dot"></span>
-                  <span class="scroll-dot"></span>
-                </div>
-
-                <!-- Share All Offers / Ask Opinion -->
-                <div class="share-all-offers-row">
-                  <button class="btn-share-all-offers" onclick="openAskOpinionModal('REQ-8550', [
-                    { agency: 'Badr Al-Madinah', price: '$1,300', rating: '5 Star' },
-                    { agency: 'Quba Express', price: '$1,150', rating: '4 Star' }
-                  ])">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                    <span>Ask Opinion</span>
-                  </button>
-                </div>
-
-                <div class="cancel-request-row">
-                  <button class="btn-cancel-request" onclick="cancelRequest('REQ-8550', this)" aria-label="Cancel Request REQ-8550" title="Cancel Request">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="15" y1="9" x2="9" y2="15"></line>
-                      <line x1="9" y1="9" x2="15" y2="15"></line>
-                    </svg>
-                    <span>Cancel Request</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
           </div>
 
             <!-- Standalone Empty State: Shown when no request cards exist -->
@@ -1159,75 +671,67 @@
           <div class="page-header">
             <div>
               <h1 class="page-title">Profile & Settings</h1>
-              <p class="page-subtitle">Manage your account details, preferences and security.</p>
+              <p class="page-subtitle">Manage your personal information and account preferences.</p>
             </div>
           </div>
 
-          <div class="profile-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
-              <h3 class="profile-card-title" style="margin:0;">Account Information</h3>
-              <button type="button" id="btnEditProfile" class="btn-action-link" style="font-weight:700; color:#127A4D; border:1px solid #D2EBE0; padding:8px 18px; border-radius:8px; background:#fff; cursor:pointer; transition:all 0.2s;">Edit Profile</button>
-            </div>
+          <div class="profile-card" style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 32px; box-shadow: var(--shadow-sm); max-width: 800px; margin: 0 auto;">
 
             <!-- User Header Block -->
-            <div class="user-profile-header">
-              <div class="avatar-large-wrapper">
-                <div class="avatar-large" id="profileAvatarLarge">O</div>
-                <button class="avatar-edit-badge" title="Change Photo" id="avatarCameraBtn">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A2B23" stroke-width="2">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                    <circle cx="12" cy="13" r="4"></circle>
-                  </svg>
-                </button>
-              </div>
-              <div class="user-meta-info">
-                <h2 class="user-meta-name" id="profileHeaderName">012 Palak Badyal</h2>
-                <p class="user-meta-email" id="profileHeaderEmail">palakbadyal69@gmail.com</p>
-                <span class="badge badge-verified">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  Verified Account
-                </span>
-              </div>
-            </div>
-
-            <!-- Profile Rows Grid -->
-            <div class="profile-rows-list">
-              <div class="profile-row">
-                <span class="row-label">Full Name</span>
-                <span class="row-value bold" id="profileNameDisplay">012 Palak Badyal</span>
-                <input type="text" id="profileNameInput" class="form-input" style="display:none; width:100%; max-width:280px; height:38px; font-size:14px;" value="012 Palak Badyal">
-              </div>
-              <div class="profile-row">
-                <span class="row-label">Email Address</span>
-                <span class="row-value bold" id="profileEmailDisplay">palakbadyal69@gmail.com</span>
-                <input type="email" id="profileEmailInput" class="form-input" style="display:none; width:100%; max-width:280px; height:38px; font-size:14px;" value="palakbadyal69@gmail.com">
-              </div>
-              <div class="profile-row" id="phoneProfileRow">
-                <span class="row-label">Phone Number</span>
-                <div class="row-value-container" id="phoneValueContainer" style="width:100%; max-width:280px;">
-                  <span class="row-value bold" id="profilePhoneDisplay">+91 98765 43210</span>
-                  <input type="tel" id="profilePhoneInput" class="form-input" style="display:none; width:100%; height:38px; font-size:14px;" placeholder="Numeric digits only (max 15)" inputmode="numeric" pattern="[0-9]*" maxlength="15" value="9876543210">
+            <div class="user-profile-header" style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 24px; margin-bottom: 28px; border-bottom: 1px solid var(--border-color);">
+              <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="avatar-large-wrapper" style="position: relative;">
+                  <div class="avatar-large" id="profileAvatarLarge" style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary-green); color: #FFFFFF; font-size: 32px; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(18,122,77,0.25);">P</div>
+                  <button class="avatar-edit-badge" title="Change Photo" id="avatarCameraBtn" style="position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; border-radius: 50%; background: #FFFFFF; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A2B23" stroke-width="2">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                      <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                  </button>
+                </div>
+                <div class="user-meta-info" style="display: flex; flex-direction: column; gap: 4px;">
+                  <h2 class="user-meta-name" id="profileHeaderName" style="font-size: 22px; font-weight: 800; color: var(--text-dark); margin: 0;">Pilgrim User</h2>
+                  <p class="user-meta-email" id="profileHeaderEmail" style="font-size: 14px; color: var(--text-muted); margin: 0;">user@example.com</p>
+                  <span class="badge badge-verified" style="display: inline-flex; align-items: center; gap: 6px; background: var(--primary-green-light); color: var(--primary-green); font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 99px; margin-top: 4px; width: fit-content;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Verified Account
+                  </span>
                 </div>
               </div>
-              <div class="profile-row">
-                <span class="row-label">Account Status</span>
-                <span class="row-value bold" style="color:#127A4D;">Active & Verified</span>
-              </div>
-              <div class="profile-row">
-                <span class="row-label">Member Since</span>
-                <span class="row-value bold">15-03-2025</span>
-              </div>
+              <button type="button" id="btnEditProfile" style="background: #FFFFFF; color: var(--primary-green); font-weight: 700; font-size: 14px; border: 1.5px solid #D2EBE0; padding: 10px 22px; border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s ease;">Edit Profile</button>
             </div>
 
-            <!-- Profile Action Buttons -->
-            <div class="profile-actions">
-              <button class="btn-change-photo" id="btnChangePhoto">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                  <circle cx="12" cy="13" r="4"></circle>
-                </svg>
-                Change Photo
-              </button>
+            <!-- Profile Rows Grid (Symmetrical) -->
+            <div class="profile-rows-list" style="display: flex; flex-direction: column; gap: 14px;">
+              <div class="profile-row" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #F8FCF9; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <span class="row-label" style="font-size: 14px; font-weight: 700; color: var(--text-muted); min-width: 140px;">Full Name</span>
+                <span class="row-value bold" id="profileNameDisplay" style="font-size: 15px; font-weight: 800; color: var(--text-dark);">Pilgrim User</span>
+                <input type="text" id="profileNameInput" class="form-input" style="display:none; width:100%; max-width:280px; height:38px; font-size:14px;" value="Pilgrim User">
+              </div>
+
+              <div class="profile-row" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #F8FCF9; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <span class="row-label" style="font-size: 14px; font-weight: 700; color: var(--text-muted); min-width: 140px;">Email Address</span>
+                <span class="row-value bold" id="profileEmailDisplay" style="font-size: 15px; font-weight: 800; color: var(--text-dark);">user@example.com</span>
+                <input type="email" id="profileEmailInput" class="form-input" style="display:none; width:100%; max-width:280px; height:38px; font-size:14px;" value="user@example.com">
+              </div>
+
+              <div class="profile-row" id="phoneProfileRow" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #F8FCF9; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <span class="row-label" style="font-size: 14px; font-weight: 700; color: var(--text-muted); min-width: 140px;">Phone Number</span>
+                <div class="row-value-container" id="phoneValueContainer" style="display:flex; justify-content:flex-end; width:100%; max-width:280px;">
+                  <span class="row-value bold" id="profilePhoneDisplay" style="font-size: 15px; font-weight: 800; color: var(--text-dark);">+91 --</span>
+                  <input type="tel" id="profilePhoneInput" class="form-input" style="display:none; width:100%; height:38px; font-size:14px;" placeholder="Numeric digits only (max 15)" inputmode="numeric" pattern="[0-9]*" maxlength="15" value="">
+                </div>
+              </div>
+
+              <div class="profile-row" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #F8FCF9; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <span class="row-label" style="font-size: 14px; font-weight: 700; color: var(--text-muted); min-width: 140px;">Account Status</span>
+                <span class="row-value bold" style="font-size: 15px; font-weight: 800; color: #127A4D;">Active & Verified</span>
+              </div>
+
+              <div class="profile-row" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #F8FCF9; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <span class="row-label" style="font-size: 14px; font-weight: 700; color: var(--text-muted); min-width: 140px;">Member Since</span>
+                <span class="row-value bold" style="font-size: 15px; font-weight: 800; color: var(--text-dark);">15-03-2025</span>
+              </div>
             </div>
 
           </div>
@@ -1239,54 +743,52 @@
           <div class="page-header">
             <div>
               <h1 class="page-title">Help & Support</h1>
-              <p class="page-subtitle">Find answers and connect with our support team.</p>
+              <p class="page-subtitle">Find answers and connect with our dedicated support team 24/7.</p>
             </div>
           </div>
 
-          <!-- Search Box -->
-          <div class="help-search-wrapper">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#687970" stroke-width="2">
+          <!-- Symmetrical Help Search Box -->
+          <div class="help-search-wrapper" style="position: relative; max-width: 600px; margin: 0 auto 32px auto;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#687970" stroke-width="2" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%);">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input type="text" id="helpSearchInput" class="help-search-input" placeholder="Search for help...">
+            <input type="text" id="helpSearchInput" class="help-search-input" placeholder="Search help topics or FAQs..." style="width: 100%; height: 50px; padding-left: 50px; padding-right: 20px; font-size: 15px; border-radius: 99px; border: 1.5px solid var(--border-color); background: #FFFFFF; box-shadow: var(--shadow-sm); outline: none;">
           </div>
 
-          <!-- Quick Contact Cards -->
-          <div class="contact-grid">
-            <div class="contact-card" onclick="alert('Opening Live Chat window...')">
-              <div class="contact-card-icon">
+          <!-- Symmetrical Contact Cards Grid -->
+          <div class="contact-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+            <div class="contact-card" onclick="alert('Connecting to Live Chat Support...')" style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
+              <div class="contact-card-icon" style="width: 52px; height: 52px; border-radius: 50%; background: var(--primary-green-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                  <circle cx="9" cy="10" r="1" fill="#127A4D"></circle>
-                  <circle cx="12" cy="10" r="1" fill="#127A4D"></circle>
-                  <circle cx="15" cy="10" r="1" fill="#127A4D"></circle>
                 </svg>
               </div>
-              <span class="contact-card-label">Live Chat</span>
+              <h4 style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Live Chat</h4>
+              <p style="font-size: 13px; color: var(--text-muted); margin: 0;">24/7 instant agent chat</p>
             </div>
 
-            <div class="contact-card" onclick="location.href='mailto:support@zilhaj.com'">
-              <div class="contact-card-icon">
+            <div class="contact-card" onclick="location.href='mailto:support@zilhaj.com'" style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
+              <div class="contact-card-icon" style="width: 52px; height: 52px; border-radius: 50%; background: var(--primary-green-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
               </div>
-              <span class="contact-card-label">Email Us</span>
+              <h4 style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Email Support</h4>
+              <p style="font-size: 13px; color: var(--text-muted); margin: 0;">support@zilhaj.com</p>
             </div>
 
-            <div class="contact-card" onclick="window.open('https://wa.me/1234567890', '_blank')">
-              <div class="contact-card-icon">
+            <div class="contact-card" onclick="window.open('https://wa.me/919541692891', '_blank')" style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
+              <div class="contact-card-icon" style="width: 52px; height: 52px; border-radius: 50%; background: var(--primary-green-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                 </svg>
               </div>
-              <span class="contact-card-label">WhatsApp</span>
+              <h4 style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">WhatsApp Help</h4>
+              <p style="font-size: 13px; color: var(--text-muted); margin: 0;">+91 95416 92891</p>
             </div>
           </div>
-
-
         </section>
 
 
@@ -1308,127 +810,55 @@
 
         <!-- TAB 5: PAYMENTS & BILLING VIEW -->
         <section id="tab-payments" class="tab-pane">
-          <div class="page-header">
+          <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
             <div>
-              <h1 class="page-title">Payments & Billing</h1>
-              <p class="page-subtitle">Complete your offer payment and manage invoice receipts.</p>
+              <h1 class="page-title">Payments &amp; Transaction History</h1>
+              <p class="page-subtitle">View your confirmed booking deposits, transaction records, and download official GST tax invoices.</p>
+            </div>
+            <div class="escrow-secure-badge" style="display: inline-flex; align-items: center; gap: 8px; background: #E8F6EF; border: 1.5px solid #D2EBE0; border-radius: 99px; padding: 8px 18px; font-size: 13px; font-weight: 700; color: #127A4D;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>100% Escrow Protected by ZILHAJ</span>
             </div>
           </div>
 
-          <!-- Active Booking Checkout Box (Shown when booking an offer) -->
-          <div id="checkoutView" class="checkout-container-box" style="display: none;">
-            <div class="checkout-card-header">
-              <div class="checkout-badge-pill">öÆ Secure Booking Checkout</div>
-              <h2 class="checkout-title" id="checkoutPackageTitle">Umrah Package - Al-Safwa Travel</h2>
-              <p class="checkout-sub" id="checkoutAgentCode">Agent Code: AGENT-1042 | Request ID: REQ-0517</p>
+          <!-- Payments Summary Metrics -->
+          <div class="payments-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 0 0 24px 0;">
+            <div class="stat-card" style="background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow-sm);">
+              <span style="font-size: 12px; font-weight: 700; color: #687970; text-transform: uppercase; letter-spacing: 0.05em;">Total Transactions</span>
+              <div id="statTotalPayments" style="font-size: 26px; font-weight: 800; color: #1A2B23; margin-top: 6px;">1 Payment</div>
+              <span style="font-size: 12px; color: #127A4D; font-weight: 600;">Booking Confirmation</span>
             </div>
-
-            <div class="checkout-grid-layout">
-              <!-- Left Column: Booking Summary & Payment Methods -->
-              <div class="checkout-main-column">
-                
-                <!-- Payment Gateway Selection -->
-                <div class="checkout-section-card">
-                  <h3 class="checkout-section-title">Select Payment Method</h3>
-                  <div class="payment-methods-list">
-                    
-                    <label class="payment-method-card active">
-                      <input type="radio" name="paymentOption" value="UPI" checked>
-                      <div class="method-info">
-                        <strong>UPI / QR Code</strong>
-                        <span>Instant payment via PhonePe, Google Pay, Paytm, BHIM</span>
-                      </div>
-                      <span class="pay-tag green">Popular</span>
-                    </label>
-
-                    <label class="payment-method-card">
-                      <input type="radio" name="paymentOption" value="Card">
-                      <div class="method-info">
-                        <strong>Credit / Debit Card</strong>
-                        <span>Visa, MasterCard, RuPay, Maestro</span>
-                      </div>
-                    </label>
-
-                    <label class="payment-method-card">
-                      <input type="radio" name="paymentOption" value="NetBanking">
-                      <div class="method-info">
-                        <strong>Net Banking</strong>
-                        <span>All major Indian banks supported</span>
-                      </div>
-                    </label>
-
-                  </div>
-                </div>
-
-                <!-- Traveler Summary Box -->
-                <div class="checkout-section-card">
-                  <h3 class="checkout-section-title">Traveler & Contact Summary</h3>
-                  <div class="checkout-info-grid">
-                    <div>
-                      <span class="c-label">PRIMARY TRAVELER</span>
-                      <span class="c-val" id="checkoutTravelerName">012 Palak Badyal</span>
-                    </div>
-                    <div>
-                      <span class="c-label">MOBILE NUMBER</span>
-                      <span class="c-val" id="checkoutMobile">+91 98765 43210</span>
-                    </div>
-                    <div>
-                      <span class="c-label">EMAIL ADDRESS</span>
-                      <span class="c-val" id="checkoutEmail">palakbadyal69@gmail.com</span>
-                    </div>
-                    <div>
-                      <span class="c-label">DEPARTURE CITY</span>
-                      <span class="c-val" id="checkoutCity">Delhi</span>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
-              <!-- Right Column: Price Breakup & Pay Action -->
-              <div class="checkout-side-summary">
-                <div class="checkout-price-card">
-                  <h4 class="summary-head">Payment Breakdown</h4>
-                  
-                  <div class="summary-row">
-                    <span>Full Package Price (Per Person)</span>
-                    <strong id="checkoutPricePerson">$1,250</strong>
-                  </div>
-                  <div class="summary-row">
-                    <span>Booking Confirmation Fee</span>
-                    <strong style="color: #127A4D;">₹╣1,000</strong>
-                  </div>
-                  <div class="summary-row">
-                    <span>Remaining Balance</span>
-                    <strong style="color: #D97706;">Payable Later to Agency</strong>
-                  </div>
-                  
-                  <div class="summary-divider"></div>
-                  
-                  <div class="summary-total-row">
-                    <span>Amount Payable Now</span>
-                    <strong class="total-price" id="checkoutTotalPrice">₹╣1,000</strong>
-                  </div>
-
-                  <button class="btn-complete-payment" id="btnCompletePayment" onclick="completeCheckoutPayment()">
-                    öÆ Complete Payment Now (₹╣1,000)
-                  </button>
-                  <p class="pay-guarantee-note">256-Bit Encrypted Payment Gateway via Razorpay</p>
-                </div>
-              </div>
+            <div class="stat-card" style="background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow-sm);">
+              <span style="font-size: 12px; font-weight: 700; color: #687970; text-transform: uppercase; letter-spacing: 0.05em;">Total Deposit in Escrow</span>
+              <div id="statTotalPaidAmount" style="font-size: 26px; font-weight: 800; color: #127A4D; margin-top: 6px;">₹1</div>
+              <span style="font-size: 12px; color: #687970;">Protected by Zilhaj Escrow</span>
+            </div>
+            <div class="stat-card" style="background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow-sm);">
+              <span style="font-size: 12px; font-weight: 700; color: #687970; text-transform: uppercase; letter-spacing: 0.05em;">Invoice Status</span>
+              <div style="font-size: 26px; font-weight: 800; color: #127A4D; margin-top: 6px;">Official Tax Invoices</div>
+              <span style="font-size: 12px; color: #687970;">Instant PDF Download</span>
             </div>
           </div>
 
-          <!-- Empty State (Shown when no active booking) -->
-          <div class="empty-payments-box" id="emptyPaymentsView">
-            <div class="payments-icon">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="1.5">
+          <!-- Confirmed Payments Table / Card List -->
+          <div id="paymentsHistoryList" class="payments-history-list" style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Populated dynamically by script.js -->
+          </div>
+
+          <!-- Empty State (Shown only when zero payments have ever been made) -->
+          <div class="empty-payments-box" id="emptyPaymentsView" style="display: none; background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 16px; padding: 48px 24px; text-align: center; margin-top: 16px;">
+            <div class="payments-icon" style="width: 64px; height: 64px; border-radius: 50%; background: #E8F6EF; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
                 <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
                 <line x1="1" y1="10" x2="23" y2="10"></line>
               </svg>
             </div>
-            <h3>No Pending Payments</h3>
-            <p>Once you accept and book an offer, your payment checkout and receipts will appear here.</p>
+            <h3 style="font-size: 18px; font-weight: 800; color: #1A2B23; margin-bottom: 8px;">No Payment Records Found</h3>
+            <p style="font-size: 14px; color: #687970; max-width: 480px; margin: 0 auto 20px auto;">When you accept a verified travel agency offer and pay your booking confirmation deposit, your official payment receipts and GST invoices will be safely recorded here.</p>
+            <button onclick="window.switchTab('requests')" style="background: #127A4D; color: #FFFFFF; border: none; padding: 10px 24px; font-size: 14px; font-weight: 700; border-radius: 99px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+              <span>View My Requests</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
           </div>
         </section>
 
@@ -1689,7 +1119,7 @@
       </div>
 
       <h2 class="modal-title">Payment Successful!</h2>
-      <p class="modal-subtitle">Booking Confirmation Fee of ₹╣1,000 processed via <strong id="paySuccessMethod" style="color:var(--text-dark);">UPI</strong>. Your offer is locked & confirmed.</p>
+      <p class="modal-subtitle">Booking Confirmation Fee of ₹1 processed via <strong id="paySuccessMethod" style="color:var(--text-dark);">UPI</strong>. Your offer is locked & confirmed.</p>
 
       <div class="modal-info-box" style="margin-top:16px; text-align:left;">
         <div class="info-box-row" style="display:flex; justify-space-between; margin-bottom:8px;">
@@ -1698,7 +1128,7 @@
         </div>
         <div class="info-box-row" style="display:flex; justify-content:space-between; margin-bottom:12px;">
           <span style="font-size:12px; color:var(--text-muted); font-weight:600;">AMOUNT PAID</span>
-          <strong style="font-size:13px; color:var(--primary-green);">₹╣1,000</strong>
+          <strong style="font-size:13px; color:var(--primary-green);">₹1</strong>
         </div>
         <div class="info-box-note" style="margin-top:8px;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
@@ -2016,8 +1446,8 @@
       <!-- Booking Confirmation Fee Notice -->
       <div class="booking-fee-notice">
         <span class="fee-notice-label">Booking Confirmation Fee</span>
-        <div class="fee-notice-amount">₹╣1,000</div>
-        <p class="fee-notice-subtext">Pay ₹╣1,000 to lock and confirm this offer now. The remaining package balance is collected separately by the partner agency later.</p>
+        <div class="fee-notice-amount">₹1</div>
+        <p class="fee-notice-subtext">Pay ₹1 to lock and confirm this offer now. The remaining package balance is collected separately by the partner agency later.</p>
       </div>
 
       <div class="modal-actions-row stacked">

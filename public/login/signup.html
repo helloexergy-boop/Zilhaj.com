@@ -163,7 +163,12 @@
 
             <!-- Full Width: Email for Login -->
             <div class="form-group full-width-col">
-              <label for="signup-email" class="form-label">Email for Login</label>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label for="signup-email" class="form-label" style="margin-bottom: 0;">Email for Login</label>
+                <button type="button" id="sendOtpEmailBtn" style="background: #0F5A47; color: #FFFFFF; border: none; border-radius: 6px; padding: 4px 12px; font-size: 11.5px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+                  Send OTP Code
+                </button>
+              </div>
               <div class="input-wrapper">
                 <input 
                   type="email" 
@@ -186,7 +191,7 @@
             <div class="form-group full-width-col">
               <label class="form-label">Verify Email</label>
               <div class="otp-container">
-                <p class="otp-subtext">Enter 6-digit code sent to <span id="display-otp-email" class="otp-email-highlight">zubairahmad@gmail.com</span></p>
+                <p class="otp-subtext">Enter 6-digit code sent to <span id="display-otp-email" class="otp-email-highlight">your email</span></p>
                 <div class="otp-inputs-grid" id="otp-inputs-group">
                   <input type="text" maxlength="1" class="otp-box" data-index="0" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 1">
                   <input type="text" maxlength="1" class="otp-box" data-index="1" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 2">
@@ -198,7 +203,7 @@
                 <div class="otp-resend-row">
                   <span>Didn't receive code? </span>
                   <button type="button" id="resendOtpBtn" class="resend-otp-btn">Resend OTP</button>
-                  <span id="otpTimer" class="otp-timer">(00:45)</span>
+                  <span id="otpTimer" class="otp-timer"></span>
                 </div>
               </div>
               <div class="error-msg-container" id="signup-otp-error"></div>

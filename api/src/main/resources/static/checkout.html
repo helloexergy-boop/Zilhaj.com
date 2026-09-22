@@ -3,411 +3,1167 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Razorpay Standard Web Checkout</title>
+  <title>Secure Booking Checkout | Zilhaj.com</title>
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
   <!-- Razorpay Checkout SDK -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <!-- jsPDF & AutoTable CDNs for Instant Invoice Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
   <style>
     :root {
-      --primary: #047857;
-      --primary-hover: #065f46;
-      --primary-light: #ecfdf5;
-      --accent: #d4af37;
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --border: #334155;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --danger: #ef4444;
-      --success: #10b981;
+      --primary-green: #127A4D;
+      --primary-green-hover: #0e633e;
+      --primary-green-light: #E8F6EF;
+      --primary-green-tint: #E6F5EC;
+      --bg-main: #F6F9F7;
+      --bg-card: #FFFFFF;
+      --border-color: #E2E9E5;
+      --text-dark: #1A2B23;
+      --text-muted: #687970;
+      --shadow-sm: 0 2px 8px rgba(18, 122, 77, 0.04);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-pill: 9999px;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     body {
-      background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
-      color: var(--text);
-      min-height: 100vh;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-dark);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      padding: 16px 24px 60px 24px;
+    }
+
+    .checkout-page-container {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    /* Top Navigation Header */
+    .top-navbar {
+      background-color: #E8F6EF;
+      border: 1.5px solid #D2EBE0;
+      border-radius: var(--radius-lg);
+      padding: 12px 24px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 10px rgba(18, 122, 77, 0.05);
     }
 
-    .checkout-wrapper {
-      width: 100%;
-      max-width: 520px;
-      background: rgba(30, 41, 59, 0.85);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 2.2rem;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      cursor: pointer;
     }
 
-    .brand-badge {
+    .logo-gold-ring {
+      padding: 2.5px;
+      background: linear-gradient(135deg, #DFB251 0%, #F5D77F 40%, #D4AF37 70%, #B8860B 100%);
+      border-radius: 50%;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      background: rgba(4, 120, 87, 0.2);
-      border: 1px solid rgba(4, 120, 87, 0.4);
-      color: #34d399;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 1rem;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+      flex-shrink: 0;
     }
 
-    h1 {
-      font-size: 1.6rem;
-      font-weight: 800;
-      margin-bottom: 0.4rem;
-      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    p.subtitle {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-bottom: 1.8rem;
-    }
-
-    .form-group {
-      margin-bottom: 1.2rem;
-    }
-
-    label {
+    .brand-logo-img {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 50%;
+      background-color: #FFFFFF;
       display: block;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #e2e8f0;
-      margin-bottom: 0.4rem;
     }
 
-    input, select {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      background: #0f172a;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: #fff;
-      font-size: 0.95rem;
-      outline: none;
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary-green);
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-sub {
+      font-size: 10px;
+      font-weight: 700;
+      color: #708077;
+      letter-spacing: 1px;
+    }
+
+    .nav-right-action {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-back-dashboard {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #FFFFFF;
+      color: var(--primary-green);
+      border: 1.5px solid #D2EBE0;
+      border-radius: var(--radius-pill);
+      padding: 8px 18px;
+      font-weight: 700;
+      font-size: 13px;
+      text-decoration: none;
       transition: all 0.2s ease;
     }
 
-    input:focus, select:focus {
-      border-color: #34d399;
-      box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.2);
+    .btn-back-dashboard:hover {
+      background: var(--primary-green-light);
+      transform: translateX(-2px);
     }
 
-    .price-box {
-      background: linear-gradient(135deg, rgba(4, 120, 87, 0.15) 0%, rgba(6, 95, 70, 0.05) 100%);
-      border: 1px solid rgba(52, 211, 153, 0.3);
-      border-radius: 12px;
-      padding: 1rem 1.2rem;
+    /* Page Header */
+    .checkout-head {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .checkout-head h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-dark);
+      letter-spacing: -0.5px;
+    }
+
+    .checkout-head p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .escrow-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #E8F6EF;
+      border: 1.5px solid #D2EBE0;
+      color: var(--primary-green);
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* Checkout Layout Grid */
+    .checkout-layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .checkout-layout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Cards */
+    .card-box {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-box-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #F0F4F2;
+      padding-bottom: 12px;
     }
 
-    .price-label {
-      font-size: 0.85rem;
+    .card-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: #E8F6EF;
+      color: var(--primary-green);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+    }
+
+    /* Package Details Display */
+    .package-title-display {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary-green);
+      margin-bottom: 6px;
+    }
+
+    .package-agency-display {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .package-details-bubble {
+      background: #F4FAF7;
+      border: 1px solid #D2EBE0;
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #334155;
+    }
+
+    /* Form Fields */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .form-group input, .form-group select {
+      padding: 11px 14px;
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      color: var(--text-dark);
+      background: #FAFCFB;
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--primary-green);
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(18, 122, 77, 0.12);
+    }
+
+    /* Payment Methods */
+    .payment-methods-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .payment-option-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #FAFCFB;
+    }
+
+    .payment-option-label:hover {
+      border-color: #B2D8C7;
+      background: #FFFFFF;
+    }
+
+    .payment-option-label.active {
+      border-color: var(--primary-green);
+      background: #F4FAF7;
+    }
+
+    .payment-option-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .payment-option-left input {
+      accent-color: var(--primary-green);
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .payment-option-info strong {
+      display: block;
+      font-size: 14px;
+      color: var(--text-dark);
+    }
+
+    .payment-option-info span {
+      display: block;
+      font-size: 12px;
       color: var(--text-muted);
     }
 
-    .price-val {
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #34d399;
+    .tag-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 99px;
     }
 
-    .pay-btn {
+    .tag-badge.green {
+      background: #E8F6EF;
+      color: var(--primary-green);
+    }
+
+    .tag-badge.blue {
+      background: #EFF6FF;
+      color: #2563EB;
+    }
+
+    /* Right Sticky Summary */
+    .summary-sticky-card {
+      position: sticky;
+      top: 24px;
+      background: #FFFFFF;
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .summary-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #F0F4F2;
+    }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 12px;
+      color: var(--text-muted);
+    }
+
+    .summary-line strong {
+      color: var(--text-dark);
+      font-weight: 700;
+    }
+
+    .summary-divider {
+      height: 1px;
+      background: #E2E9E5;
+      margin: 16px 0;
+    }
+
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 20px;
+    }
+
+    .summary-total span {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .summary-total .total-amount {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--primary-green);
+    }
+
+    .btn-pay-now {
       width: 100%;
-      padding: 0.95rem 1.5rem;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
-      color: #ffffff;
+      background: linear-gradient(135deg, #127A4D 0%, #0e633e 100%);
+      color: #FFFFFF;
       border: none;
       border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 700;
+      padding: 15px 20px;
+      font-size: 15px;
+      font-weight: 800;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      box-shadow: 0 10px 25px -5px rgba(4, 120, 87, 0.4);
+      box-shadow: 0 4px 16px rgba(18, 122, 77, 0.35);
       transition: all 0.2s ease;
     }
 
-    .pay-btn:hover {
+    .btn-pay-now:hover {
       transform: translateY(-2px);
-      box-shadow: 0 15px 30px -5px rgba(4, 120, 87, 0.5);
+      box-shadow: 0 6px 20px rgba(18, 122, 77, 0.45);
     }
 
-    .pay-btn:active {
-      transform: translateY(0);
-    }
-
-    .pay-btn:disabled {
+    .btn-pay-now:disabled {
       opacity: 0.6;
       cursor: not-allowed;
       transform: none;
     }
 
-    .alert {
-      margin-top: 1.2rem;
-      padding: 1rem;
-      border-radius: 10px;
-      font-size: 0.88rem;
+    .security-guarantee-box {
+      margin-top: 18px;
+      background: #F8FCF9;
+      border: 1px solid #D2EBE0;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #4A5A52;
+    }
+
+    .security-guarantee-box strong {
+      color: var(--primary-green);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* Success Screen Modal / Overlay */
+    .success-modal-overlay {
       display: none;
-      animation: fadeIn 0.3s ease;
+      position: fixed;
+      inset: 0;
+      background: rgba(18, 43, 30, 0.7);
+      backdrop-filter: blur(6px);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+    .success-modal-card {
+      background: #FFFFFF;
+      border-radius: 20px;
+      max-width: 520px;
+      width: 100%;
+      padding: 32px 28px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .alert-success {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #6ee7b7;
+    @keyframes modalPop {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
-    .alert-error {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #fca5a5;
+    .success-icon-circle {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: #E8F6EF;
+      color: var(--primary-green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px auto;
+      border: 3px solid #D2EBE0;
     }
 
-    .alert-info {
-      background: rgba(59, 130, 246, 0.15);
-      border: 1px solid rgba(59, 130, 246, 0.4);
-      color: #93c5fd;
+    .success-modal-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 8px;
     }
 
-    .security-badge {
+    .success-modal-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .txn-details-box {
+      background: #F6F9F7;
+      border: 1px solid #E2E9E5;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      text-align: left;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    .txn-details-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .txn-details-row strong {
+      color: var(--text-dark);
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-download-inv {
+      background: var(--primary-green);
+      color: #FFFFFF;
+      border: none;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      margin-top: 1.5rem;
-      font-size: 0.78rem;
-      color: var(--text-muted);
+      transition: all 0.2s ease;
     }
 
-    .security-badge svg {
-      width: 16px;
-      height: 16px;
-      fill: #34d399;
+    .btn-download-inv:hover {
+      background: var(--primary-green-hover);
     }
 
-    .details-box {
-      font-family: monospace;
-      font-size: 0.78rem;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 0.75rem;
-      border-radius: 6px;
-      margin-top: 0.5rem;
-      word-break: break-all;
+    .btn-view-payments {
+      background: #FFFFFF;
+      color: var(--primary-green);
+      border: 1.5px solid var(--primary-green);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-view-payments:hover {
+      background: var(--primary-green-light);
     }
   </style>
 </head>
 <body>
 
-  <div class="checkout-wrapper">
-    <div class="brand-badge">⚡ Razorpay Standard Checkout</div>
-    <h1>Secure Web Checkout</h1>
-    <p class="subtitle">Complete test payment via Razorpay Modal (UPI, Cards, NetBanking)</p>
+  <div class="checkout-page-container">
+    
+    <!-- TOP HEADER -->
+    <header class="top-navbar">
+      <div class="nav-brand" onclick="window.location.href='/dashboard/index.html#requests'">
+        <div class="logo-gold-ring">
+          <img src="dashboard/logo.jpg" onError="this.src='logo.png'" alt="ZILHAJ Logo" class="brand-logo-img">
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Zilhaj.com</span>
+          <span class="brand-sub">UMRAH &amp; HAJJ TRAVEL</span>
+        </div>
+      </div>
 
-    <div class="form-group">
-      <label for="travelerName">Customer Name</label>
-      <input type="text" id="travelerName" value="Test Pilgrim" placeholder="Your name">
+      <div class="nav-right-action">
+        <a href="/dashboard/index.html#requests" class="btn-back-dashboard">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span>Back to Requests</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- PAGE TITLE -->
+    <div class="checkout-head">
+      <div>
+        <h1>Secure Booking Checkout</h1>
+        <p>Lock and confirm your verified Umrah package with an escrow-protected booking deposit.</p>
+      </div>
+      <div class="escrow-pill-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>100% Escrow Protected</span>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="travelerEmail">Customer Email</label>
-      <input type="email" id="travelerEmail" value="pilgrim@example.com" placeholder="Your email">
+    <!-- MAIN TWO COLUMN GRID -->
+    <div class="checkout-layout-grid">
+      
+      <!-- LEFT COLUMN -->
+      <div class="checkout-main-col">
+        
+        <!-- CARD 1: PACKAGE SUMMARY -->
+        <div class="card-box">
+          <div class="card-box-header">
+            <span class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              Selected Umrah Package
+            </span>
+            <span class="card-badge" id="displayReqId">REQ-8842</span>
+          </div>
+
+          <div class="package-title-display" id="displayPackageTitle">15-Day Premium Deluxe Umrah Special</div>
+          <div class="package-agency-display">
+            <strong>Operator:</strong> <span id="displayAgencyName">Al-Haram Exergy Travels</span> &bull; 
+            <strong>Agent Code:</strong> <span id="displayAgentCode">AG-904</span> (Verified Partner)
+          </div>
+
+          <div class="package-details-bubble">
+            <div>🏢 <strong>Makkah Hotel:</strong> Swissotel Clock Tower (5 Star - 150m)</div>
+            <div>🏢 <strong>Madinah Hotel:</strong> Pullman Zamzam (5 Star - 100m)</div>
+            <div>✈️ <strong>Flight:</strong> Direct Saudi Airlines (DEL-JED-MED-DEL)</div>
+            <div>📋 <strong>Inclusions:</strong> Saudi eVisa, 3x Daily Meals, VIP Air-Conditioned Transport, Ziyarat</div>
+            <div>📅 <strong>Travel Date:</strong> <span id="displayTravelDate">25 Oct 2026</span> &bull; <strong>Duration:</strong> 15 Days</div>
+          </div>
+        </div>
+
+        <!-- CARD 2: PILGRIM DETAILS -->
+        <div class="card-box">
+          <div class="card-box-header">
+            <span class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              Primary Traveler &amp; Contact Details
+            </span>
+            <span class="card-badge">Pilgrim Record</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="travelerName">Full Name</label>
+              <input type="text" id="travelerName" placeholder="Primary traveler name" value="Valued Pilgrim">
+            </div>
+            <div class="form-group">
+              <label for="travelerMobile">Mobile Number</label>
+              <input type="tel" id="travelerMobile" placeholder="10-digit mobile" value="9876543210">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="travelerEmail">Email Address</label>
+              <input type="email" id="travelerEmail" placeholder="Email address" value="customer@zilhaj.com">
+            </div>
+            <div class="form-group">
+              <label for="departureCity">Departure City</label>
+              <input type="text" id="departureCity" placeholder="City of departure" value="Delhi (DEL)">
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 3: PAYMENT METHOD -->
+        <div class="card-box">
+          <div class="card-box-header">
+            <span class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2.2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+              Select Payment Method
+            </span>
+            <span class="card-badge">Instant Verification</span>
+          </div>
+
+          <div class="payment-methods-list">
+            <label class="payment-option-label active" onclick="selectPayOption(this)">
+              <div class="payment-option-left">
+                <input type="radio" name="payMethod" value="UPI / QR Code" checked>
+                <div class="payment-option-info">
+                  <strong>UPI / QR Code</strong>
+                  <span>Instant payment via PhonePe, Google Pay, Paytm, BHIM</span>
+                </div>
+              </div>
+              <span class="tag-badge green">Fastest</span>
+            </label>
+
+            <label class="payment-option-label" onclick="selectPayOption(this)">
+              <div class="payment-option-left">
+                <input type="radio" name="payMethod" value="Credit / Debit Card">
+                <div class="payment-option-info">
+                  <strong>Credit / Debit Card</strong>
+                  <span>Visa, MasterCard, RuPay, Maestro, Amex</span>
+                </div>
+              </div>
+            </label>
+
+            <label class="payment-option-label" onclick="selectPayOption(this)">
+              <div class="payment-option-left">
+                <input type="radio" name="payMethod" value="Net Banking">
+                <div class="payment-option-info">
+                  <strong>Net Banking</strong>
+                  <span>All major Indian banks supported (SBI, HDFC, ICICI, etc.)</span>
+                </div>
+              </div>
+            </label>
+
+            <label class="payment-option-label" onclick="selectPayOption(this)">
+              <div class="payment-option-left">
+                <input type="radio" name="payMethod" value="Razorpay Escrow Gateway">
+                <div class="payment-option-info">
+                  <strong>Razorpay Gateway (All Methods)</strong>
+                  <span>UPI, Cards, NetBanking, Wallets, EMI &amp; Pay Later</span>
+                </div>
+              </div>
+              <span class="tag-badge blue">Verified</span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: STICKY SUMMARY -->
+      <div class="checkout-side-col">
+        <div class="summary-sticky-card">
+          <h3 class="summary-title">Booking Fee Breakdown</h3>
+
+          <div class="summary-line">
+            <span>Package Price (Per Person)</span>
+            <strong id="displayPricePerPerson">₹72,000</strong>
+          </div>
+
+          <div class="summary-line">
+            <span>Booking Confirmation Fee</span>
+            <strong style="color: #127A4D;">₹1</strong>
+          </div>
+
+          <div class="summary-line">
+            <span>Remaining Package Balance</span>
+            <strong style="color: #D97706;">Payable Later to Agency</strong>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-total">
+            <span>Amount Due Now</span>
+            <span class="total-amount">₹1</span>
+          </div>
+
+          <button class="btn-pay-now" id="btnPayDeposit" onclick="startRazorpayPayment()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+            <span>Pay Booking Deposit (₹1)</span>
+          </button>
+
+          <div class="security-guarantee-box">
+            <strong>🔒 100% Escrow Protection</strong>
+            Your ₹1 confirmation fee is held securely in ZILHAJ escrow. It is only released after your package is confirmed and verified. Full refund guaranteed if not fulfilled.
+          </div>
+
+          <div style="text-align: center; margin-top: 14px; font-size: 11px; color: #8E9D95;">
+            256-Bit SSL Encrypted &bull; Razorpay Verified Escrow
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="form-group">
-      <label for="travelerPhone">Phone Number</label>
-      <input type="tel" id="travelerPhone" value="9876543210" placeholder="10-digit mobile">
-    </div>
+  </div>
 
-    <div class="form-group">
-      <label for="payAmount">Amount (₹ INR)</label>
-      <input type="number" id="payAmount" value="5" min="1" step="1" placeholder="Enter amount">
-    </div>
+  <!-- SUCCESS MODAL -->
+  <div class="success-modal-overlay" id="successModal">
+    <div class="success-modal-card">
+      <div class="success-icon-circle">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
 
-    <div class="price-box">
-      <span class="price-label">Total Payable</span>
-      <span class="price-val" id="displayAmount">₹5.00</span>
-    </div>
+      <h2 class="success-modal-title">Payment Confirmed!</h2>
+      <p class="success-modal-desc">Your booking confirmation deposit of <strong>₹1</strong> has been successfully received and placed in ZILHAJ escrow. Your verified offer is now locked.</p>
 
-    <button class="pay-btn" id="btnPay" onclick="startRazorpayCheckout()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-        <line x1="1" y1="10" x2="23" y2="10"></line>
-      </svg>
-      Pay with Razorpay
-    </button>
+      <div class="txn-details-box">
+        <div class="txn-details-row">
+          <span>Payment ID:</span>
+          <strong id="modalPaymentId">pay_live_xxxx</strong>
+        </div>
+        <div class="txn-details-row">
+          <span>Order ID:</span>
+          <strong id="modalOrderId">order_xxxx</strong>
+        </div>
+        <div class="txn-details-row">
+          <span>Amount Paid:</span>
+          <strong style="color:#127A4D;">₹1 (INR)</strong>
+        </div>
+        <div class="txn-details-row">
+          <span>Escrow Status:</span>
+          <strong style="color:#127A4D;">Protected &amp; Locked</strong>
+        </div>
+      </div>
 
-    <div id="statusAlert" class="alert"></div>
-
-    <div class="security-badge">
-      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 16l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></svg>
-      <span>256-Bit SSL Encrypted &bull; Razorpay Sandbox Test Mode</span>
+      <div class="modal-actions">
+        <button class="btn-download-inv" onclick="downloadTaxInvoicePDF()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Download Official Tax Invoice</span>
+        </button>
+        <a href="/dashboard/index.html#payments" class="btn-view-payments">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          <span>Go to Payment History</span>
+        </a>
+      </div>
     </div>
   </div>
 
   <script>
-    const amountInput = document.getElementById('payAmount');
-    const displayAmount = document.getElementById('displayAmount');
-    const statusAlert = document.getElementById('statusAlert');
-    const btnPay = document.getElementById('btnPay');
+    // 1. Parse Query Parameters or retrieve from localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const storedBooking = (() => {
+      try { return JSON.parse(localStorage.getItem('pending_checkout') || '{}'); }
+      catch(e) { return {}; }
+    })();
+    const storedUser = (() => {
+      try { return JSON.parse(localStorage.getItem('umrah_user') || '{}'); }
+      catch(e) { return {}; }
+    })();
 
-    amountInput.addEventListener('input', () => {
-      const val = parseFloat(amountInput.value) || 0;
-      displayAmount.textContent = '₹' + val.toFixed(2);
-    });
+    const bookingData = {
+      reqId: urlParams.get('reqId') || storedBooking.reqId || 'REQ-8842',
+      agentCode: urlParams.get('agentCode') || storedBooking.agentCode || 'AG-904',
+      agencyName: urlParams.get('agencyName') || storedBooking.agencyName || 'Al-Haram Exergy Travels',
+      price: urlParams.get('price') || storedBooking.price || '₹72,000',
+      packageName: urlParams.get('packageName') || storedBooking.packageName || '15-Day Premium Deluxe Umrah Special',
+      departureDate: urlParams.get('departureDate') || storedBooking.departureDate || '25 Oct 2026'
+    };
 
-    function showAlert(type, html) {
-      statusAlert.className = 'alert alert-' + type;
-      statusAlert.innerHTML = html;
-      statusAlert.style.display = 'block';
+    // Populate UI
+    document.getElementById('displayReqId').textContent = bookingData.reqId;
+    document.getElementById('displayPackageTitle').textContent = bookingData.packageName;
+    document.getElementById('displayAgencyName').textContent = bookingData.agencyName;
+    document.getElementById('displayAgentCode').textContent = bookingData.agentCode;
+    document.getElementById('displayTravelDate').textContent = bookingData.departureDate;
+    document.getElementById('displayPricePerPerson').textContent = bookingData.price;
+
+    if (storedUser.name) document.getElementById('travelerName').value = storedUser.name;
+    if (storedUser.email) document.getElementById('travelerEmail').value = storedUser.email;
+    if (storedUser.phone) document.getElementById('travelerMobile').value = storedUser.phone;
+
+    function selectPayOption(el) {
+      document.querySelectorAll('.payment-option-label').forEach(l => l.classList.remove('active'));
+      el.classList.add('active');
+      const radio = el.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
     }
 
-    async function startRazorpayCheckout() {
-      const val = parseFloat(amountInput.value);
-      if (!val || val < 1) {
-        showAlert('error', '⚠️ Minimum payment amount is ₹1 (100 paise).');
-        return;
-      }
+    let lastSuccessfulPayment = null;
 
-      const amountInPaise = Math.round(val * 100);
-      const name = document.getElementById('travelerName').value || 'Test Pilgrim';
-      const email = document.getElementById('travelerEmail').value || 'pilgrim@example.com';
-      const phone = document.getElementById('travelerPhone').value || '9876543210';
+    async function startRazorpayPayment() {
+      const btn = document.getElementById('btnPayDeposit');
+      btn.disabled = true;
+      btn.innerHTML = 'Connecting to Razorpay...';
 
-      btnPay.disabled = true;
-      btnPay.textContent = 'Creating Order...';
-      showAlert('info', 'Connecting to backend to generate Razorpay order...');
+      const customerName = document.getElementById('travelerName').value.trim() || 'Valued Pilgrim';
+      const customerEmail = document.getElementById('travelerEmail').value.trim() || 'customer@zilhaj.com';
+      const rawMobile = document.getElementById('travelerMobile').value.trim() || '9876543210';
+      const customerPhone = rawMobile.replace(/[^0-9]/g, '').slice(-10) || '9876543210';
+      const selectedMethod = document.querySelector('input[name="payMethod"]:checked')?.value || 'UPI / QR Code';
+
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
 
       try {
-        // STEP 1: BACKEND - Create Order
-        const orderRes = await fetch('/api/create-order', {
+        // STEP 1: CREATE ORDER (₹1 in paise = 100)
+        const orderRes = await fetch(apiBase + '/create-order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            amount: amountInPaise,
+            amount: 100,
             currency: 'INR',
-            receipt: 'rcpt_' + Date.now().toString().slice(-8)
+            bookingId: bookingData.reqId
           })
         });
 
-        const orderData = await orderRes.json();
-        if (!orderRes.ok || !orderData.order_id) {
-          throw new Error(orderData.message || orderData.error || 'Failed to create order');
+        if (!orderRes.ok) {
+          const err = await orderRes.json().catch(() => ({}));
+          throw new Error(err.message || err.error || 'Server error creating order');
         }
 
-        showAlert('info', `Order created successfully (ID: ${orderData.order_id}). Opening Razorpay Checkout modal...`);
+        const orderData = await orderRes.json();
+        const validOrderId = orderData.order_id || orderData.orderId;
+        const keyId = orderData.key_id || orderData.key || 'rzp_live_TdOWoVLFjxHfTO';
 
-        // STEP 2: FRONTEND - Checkout Modal
+        if (!validOrderId) {
+          throw new Error('Order creation did not return order_id');
+        }
+
+        // STEP 2: LAUNCH RAZORPAY MODAL
+        if (!window.Razorpay) {
+          throw new Error('Razorpay SDK not loaded. Please check your internet connection.');
+        }
+
         const options = {
-          key: orderData.key_id || orderData.key,
-          amount: orderData.amount,
+          key: keyId,
+          amount: orderData.amount || 100,
           currency: orderData.currency || 'INR',
-          name: 'GoExergy / ZILHAJ',
-          description: 'Standard Web Checkout Test',
-          order_id: orderData.order_id,
+          name: 'Zilhaj.com',
+          description: 'Booking Deposit: ' + bookingData.packageName,
+          order_id: validOrderId,
           prefill: {
-            name: name,
-            email: email,
-            contact: phone
+            name: customerName,
+            email: customerEmail,
+            contact: customerPhone
           },
           theme: {
-            color: '#047857'
+            color: '#127A4D'
           },
           modal: {
             ondismiss: function() {
-              btnPay.disabled = false;
-              btnPay.textContent = 'Pay with Razorpay';
-              showAlert('info', 'ℹ️ Checkout modal was dismissed. Payment was cancelled by user.');
+              btn.disabled = false;
+              btn.innerHTML = '💳 Pay Booking Deposit (₹1)';
             }
           },
           handler: async function(response) {
-            btnPay.textContent = 'Verifying Payment...';
-            showAlert('info', 'Payment authorized by Razorpay! Verifying HMAC-SHA256 signature on backend...');
-
+            btn.innerHTML = 'Verifying Payment...';
             try {
-              // STEP 3: BACKEND - Verify Signature
-              const verifyRes = await fetch('/api/verify-payment', {
+              // STEP 3: VERIFY SIGNATURE
+              const verifyRes = await fetch(apiBase + '/verify-payment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_order_id: response.razorpay_order_id || validOrderId,
                   razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature
+                  razorpay_signature: response.razorpay_signature,
+                  bookingId: bookingData.reqId
                 })
               });
 
               const verifyData = await verifyRes.json();
-
-              if (verifyRes.ok && verifyData.success) {
-                showAlert('success', `
-                  <strong>✅ Payment Successful & Verified!</strong><br>
-                  <div class="details-box">
-                    Payment ID: ${response.razorpay_payment_id}<br>
-                    Order ID: ${response.razorpay_order_id}<br>
-                    Status: Verified & Confirmed
-                  </div>
-                `);
-              } else {
-                showAlert('error', `
-                  <strong>❌ Payment Signature Verification Failed!</strong><br>
-                  ${verifyData.message || 'Signature mismatch. Payment was not authenticated.'}
-                `);
+              if (!verifyRes.ok || !verifyData.success) {
+                throw new Error(verifyData.message || 'Signature verification failed');
               }
-            } catch (err) {
-              showAlert('error', '⚠️ Network error while verifying signature: ' + err.message);
-            } finally {
-              btnPay.disabled = false;
-              btnPay.textContent = 'Pay with Razorpay';
+
+              // SUCCESS: SAVE TRANSACTION
+              lastSuccessfulPayment = {
+                paymentId: response.razorpay_payment_id,
+                orderId: response.razorpay_order_id || validOrderId,
+                reqId: bookingData.reqId,
+                packageName: bookingData.packageName,
+                agencyName: bookingData.agencyName,
+                agentCode: bookingData.agentCode,
+                departureDate: bookingData.departureDate,
+                amount: 1,
+                amountFormatted: '₹1',
+                dateStr: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+                timeStr: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                method: selectedMethod,
+                status: 'Confirmed & Escrowed',
+                invoiceNo: 'HYD8-' + Math.floor(100000 + Math.random() * 900000)
+              };
+
+              savePaymentToStorage(lastSuccessfulPayment);
+
+              // SHOW MODAL
+              document.getElementById('modalPaymentId').textContent = lastSuccessfulPayment.paymentId;
+              document.getElementById('modalOrderId').textContent = lastSuccessfulPayment.orderId;
+              document.getElementById('successModal').style.display = 'flex';
+
+            } catch (vErr) {
+              alert('Payment verification error: ' + vErr.message);
+              btn.disabled = false;
+              btn.innerHTML = '💳 Pay Booking Deposit (₹1)';
             }
           }
         };
 
-        const rzp = new window.Razorpay(options);
+        const rzp = new Razorpay(options);
         rzp.on('payment.failed', function(resp) {
-          btnPay.disabled = false;
-          btnPay.textContent = 'Pay with Razorpay';
-          showAlert('error', `
-            <strong>❌ Payment Failed:</strong><br>
-            ${resp.error?.description || 'Transaction declined by bank or gateway.'}
-          `);
+          btn.disabled = false;
+          btn.innerHTML = '💳 Pay Booking Deposit (₹1)';
+          alert('Payment Failed: ' + ((resp.error && resp.error.description) || 'Transaction declined by bank.'));
         });
-
         rzp.open();
+
       } catch (err) {
-        btnPay.disabled = false;
-        btnPay.textContent = 'Pay with Razorpay';
-        showAlert('error', '⚠️ Order creation error: ' + err.message);
+        alert('Could not start payment: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = '💳 Pay Booking Deposit (₹1)';
       }
+    }
+
+    function savePaymentToStorage(paymentObj) {
+      try {
+        let list = JSON.parse(localStorage.getItem('umrah_payments') || '[]');
+        if (!Array.isArray(list)) list = [];
+        list.unshift(paymentObj);
+        localStorage.setItem('umrah_payments', JSON.stringify(list));
+
+        // Mark request as accepted
+        let accepted = JSON.parse(localStorage.getItem('accepted_offers') || '[]');
+        if (!Array.isArray(accepted)) accepted = [];
+        accepted.push(paymentObj.reqId);
+        localStorage.setItem('accepted_offers', JSON.stringify(accepted));
+      } catch (e) {
+        console.error('Error saving payment to storage:', e);
+      }
+    }
+
+    // PDF RECEIPT GENERATOR (Tax Invoice / Bill of Supply)
+    function downloadTaxInvoicePDF() {
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert('PDF generator is initializing. Please try again.');
+        return;
+      }
+
+      const payment = lastSuccessfulPayment || {
+        paymentId: 'pay_live_demo',
+        orderId: 'order_live_demo',
+        packageName: bookingData.packageName,
+        agencyName: bookingData.agencyName,
+        departureDate: bookingData.departureDate,
+        amount: 1,
+        invoiceNo: 'HYD8-782910'
+      };
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+      const customerName = document.getElementById('travelerName').value || 'Valued Pilgrim';
+      const customerContact = document.getElementById('travelerMobile').value || '+91 98765 43210';
+      const customerEmail = document.getElementById('travelerEmail').value || 'customer@zilhaj.com';
+
+      // Header Banner
+      doc.setFillColor(18, 122, 77); // Emerald green
+      doc.rect(0, 0, 210, 28, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.text('ZILHAJ.COM', 15, 18);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text('OFFICIAL TAX INVOICE & RECEIPT', 200, 18, { align: 'right' });
+
+      // Info Block
+      doc.setTextColor(40, 40, 40);
+      doc.setFontSize(9);
+      let y = 38;
+
+      doc.text(`Invoice No: ${payment.invoiceNo}`, 15, y);
+      doc.text(`Date: ${payment.dateStr || new Date().toLocaleDateString()}`, 195, y, { align: 'right' });
+
+      y += 6;
+      doc.text(`Payment ID: ${payment.paymentId}`, 15, y);
+      doc.text(`Order ID: ${payment.orderId}`, 195, y, { align: 'right' });
+
+      y += 6;
+      doc.text(`Payment Method: ${payment.method || 'Razorpay Escrow'}`, 15, y);
+      doc.text(`Status: CONFIRMED & ESCROW PROTECTED`, 195, y, { align: 'right' });
+
+      // Divider
+      y += 6;
+      doc.setDrawColor(220, 220, 220);
+      doc.line(15, y, 195, y);
+
+      // Billed To & Booking Info
+      y += 8;
+      doc.setFont('helvetica', 'bold');
+      doc.text('BILLED TO (PILGRIM):', 15, y);
+      doc.text('BOOKING DETAILS:', 110, y);
+
+      doc.setFont('helvetica', 'normal');
+      let ly = y + 5;
+      doc.text(customerName, 15, ly);
+      ly += 5;
+      doc.text(`Mobile: ${customerContact}`, 15, ly);
+      ly += 5;
+      doc.text(`Email: ${customerEmail}`, 15, ly);
+
+      let ry = y + 5;
+      doc.text(`Booking Ref: ${payment.reqId || bookingData.reqId}`, 195, ry, { align: 'right' });
+      ry += 5;
+      doc.text(`Package: ${payment.packageName}`, 195, ry, { align: 'right' });
+      ry += 5;
+      doc.text(`Departure Date: ${payment.departureDate}`, 195, ry, { align: 'right' });
+      ry += 5;
+      doc.text(`Partner Agency: ${payment.agencyName}`, 195, ry, { align: 'right' });
+
+      // Table of Items
+      const startTableY = 70;
+      doc.autoTable({
+        startY: startTableY,
+        head: [['Sl', 'Description', 'HSN/SAC', 'Gross (INR)', 'Discount', 'Taxable', 'CGST (2.5%)', 'SGST (2.5%)', 'Total (INR)']],
+        body: [
+          ['1', `Booking Confirmation Fee Deposit\n${payment.packageName}`, '998553', '0.95', '0.00', '0.95', '0.02', '0.03', '1.00']
+        ],
+        theme: 'plain',
+        headStyles: {
+          fillColor: [240, 240, 240],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold',
+          fontSize: 8,
+          lineWidth: 0.2,
+          lineColor: [200, 200, 200]
+        },
+        bodyStyles: {
+          fontSize: 8,
+          textColor: [0, 0, 0],
+          lineWidth: 0.1,
+          lineColor: [220, 220, 220]
+        },
+        columnStyles: {
+          0: { cellWidth: 8, halign: 'center' },
+          1: { cellWidth: 58 },
+          2: { cellWidth: 16, halign: 'center' },
+          3: { cellWidth: 20, halign: 'right' },
+          4: { cellWidth: 14, halign: 'right' },
+          5: { cellWidth: 16, halign: 'right' },
+          6: { cellWidth: 16, halign: 'right' },
+          7: { cellWidth: 16, halign: 'right' },
+          8: { cellWidth: 18, halign: 'right', fontStyle: 'bold' }
+        },
+        margin: { left: 15, right: 15 }
+      });
+
+      const finalY = doc.lastAutoTable.finalY + 10;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('Total Amount Paid: INR 1.00 (One Rupee Only)', 15, finalY);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Payment processed via Razorpay Escrow. Official invoice generated by Zilhaj.com.', 15, finalY + 8);
+
+      doc.save(`Zilhaj_Invoice_${payment.paymentId || 'Booking'}.pdf`);
     }
   </script>
 </body>

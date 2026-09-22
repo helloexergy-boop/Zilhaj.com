@@ -667,7 +667,7 @@ class App {
                     <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">1. Platform Marketplace Services</h4>
                     <p>ZILHAJ operates as a verified travel marketplace connecting pilgrims with government-approved Saudi Umrah travel agencies.</p>
                     <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">2. Booking Confirmation & Escrow Protection</h4>
-                    <p>Initial booking deposits (₹1,000) are held securely until travel agency credentials and package details are verified.</p>
+                    <p>Initial booking deposits (₹1) are held securely until travel agency credentials and package details are verified.</p>
                     <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">3. Pilgrim Responsibilities</h4>
                     <p>Pilgrims must hold a passport valid for at least 6 months from the travel date. Rawdah visit permits must be requested via the official Nusuk application.</p>
                     <h4 style="color:#0f172a; margin:1.2rem 0 0.4rem;">4. Governing Law</h4>
@@ -5977,7 +5977,7 @@ class App {
             numAmount = packageItem.price || packageItem.discountedPrice || 0;
         }
         if (numAmount <= 0) {
-            numAmount = 1000;
+            numAmount = 1;
         }
         const finalAmount = Math.max(1, Math.round(numAmount));
         const amountInPaise = finalAmount * 100;
@@ -9051,7 +9051,18 @@ class App {
         if (backendReached && backendErrorMsg) {
             this.setAuthButtonLoading(false, 'register');
             this.hideLoading();
-            this.showFormError(`<b>MongoDB Signup Failed</b><br>${backendErrorMsg}`);
+            if (backendErrorMsg.toLowerCase().includes('already registered') || backendErrorMsg.toLowerCase().includes('already exists')) {
+                this.showFormError(`
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div>⚠️ ${backendErrorMsg}</div>
+                        <button type="button" onclick="if(window.app && app.switchAuthMode){ app.switchAuthMode('login'); } else { window.location.href='/login.html'; }" style="align-self:flex-start; background:#0F5A47; color:#FFFFFF; border:none; border-radius:6px; padding:6px 14px; font-weight:700; font-size:12px; cursor:pointer;">
+                            Go to Login &rarr;
+                        </button>
+                    </div>
+                `);
+            } else {
+                this.showFormError(`<b>Signup Failed</b><br>${backendErrorMsg}`);
+            }
             return;
         }
 
@@ -10317,7 +10328,7 @@ class App {
     async processPaymentCheckout(bookingId) {
         const pkg = (this.state.packages || []).find(p => p.id === bookingId) || {};
         const b = (this.state.myBookings || []).find(x => x.id === bookingId) || {};
-        const amount = b.totalPrice || b.amount || pkg.price || 1000;
+        const amount = b.totalPrice || b.amount || pkg.price || 1;
         return this.payWithRazorpay(bookingId, amount, 'RAZORPAY_CHECKOUT', {
             title: b.packageTitle || pkg.title || 'Umrah Package',
             makkahHotel: b.makkahHotel || pkg.makkahHotel || '',
