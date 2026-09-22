@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (checkoutTitle) checkoutTitle.textContent = `${window.pendingBooking.packageName || 'Umrah Package'} - ${window.pendingBooking.agencyName}`;
         if (checkoutAgent) checkoutAgent.textContent = `Agent Code: ${window.pendingBooking.agentCode} | Verified Partner`;
         if (checkoutPricePerson) checkoutPricePerson.textContent = window.pendingBooking.price;
-        if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1,000';
+        if (checkoutTotalPrice) checkoutTotalPrice.textContent = '₹1';
 
         if (checkoutView) checkoutView.style.display = 'block';
         if (emptyPaymentsView) emptyPaymentsView.style.display = 'none';
