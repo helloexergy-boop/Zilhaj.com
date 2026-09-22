@@ -4097,6 +4097,501 @@ body {
   transform: translateY(-1px);
 }
 
+/* ==========================================================================
+   PIXEL-PERFECT REQUEST CARDS & STEPPER (Screenshots 1 & 2)
+   ========================================================================== */
+
+.request-card-box {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+
+.request-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.req-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.req-icon-mint {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #E8F5E9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.req-id-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1A202C;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.req-date-sub {
+  font-size: 13px;
+  color: #718096;
+  margin: 3px 0 0 0;
+}
+
+.req-status-pill {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.req-status-pill.status-ready {
+  background: #E8F8EE;
+  color: #0F5A47;
+  border: 1px solid #C6EBD4;
+}
+
+.req-status-pill.status-ready .status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #0F5A47;
+}
+
+.req-status-pill.status-waiting {
+  background: #FFF7ED;
+  color: #C2410C;
+  border: 1px solid #FED7AA;
+}
+
+.req-status-pill.status-waiting .status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #EA580C;
+}
+
+/* 4-Step Progress Tracker */
+.req-progress-tracker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin: 20px 0 24px 0;
+  padding: 0 8px;
+}
+
+.tracker-step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.tracker-step-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  transition: all 0.2s ease;
+}
+
+.tracker-step-circle.done {
+  background: #0F5A47;
+  color: #FFFFFF;
+}
+
+.tracker-step-circle.active {
+  background: #0F5A47;
+  color: #FFFFFF;
+  box-shadow: 0 0 0 4px #D1E7DD;
+}
+
+.tracker-step-circle.pending {
+  background: #FFFFFF;
+  border: 2px solid #CBD5E1;
+  color: #94A3B8;
+}
+
+.tracker-step-label {
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 8px;
+  color: #64748B;
+  white-space: nowrap;
+}
+
+.tracker-step-item.done .tracker-step-label {
+  color: #1E293B;
+  font-weight: 800;
+}
+
+.tracker-step-item.active .tracker-step-label {
+  color: #0F5A47;
+  font-weight: 800;
+}
+
+.tracker-step-line {
+  flex: 1;
+  height: 2.5px;
+  margin: 0 6px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.tracker-step-line.done {
+  background: #0F5A47;
+}
+
+.tracker-step-line.pending {
+  background: #E2E8F0;
+}
+
+/* Metadata Strip */
+.req-metadata-strip {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.meta-fields-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 28px;
+}
+
+.meta-field-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.meta-field-col .meta-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.meta-field-col .meta-val {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1E293B;
+}
+
+.btn-view-details-pill {
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 7px 16px;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-view-details-pill:hover {
+  border-color: #0F5A47;
+  color: #0F5A47;
+  background: #F0FDF4;
+}
+
+/* Offers Section Title */
+.agency-offers-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1E293B;
+  margin: 18px 0 12px 0;
+}
+
+/* Agency Offer Card */
+.agency-offer-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.offer-card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.offer-agent-tag {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748B;
+}
+
+.offer-agency-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1E293B;
+  margin: 2px 0 0 0;
+}
+
+.offer-price-val {
+  font-size: 22px;
+  font-weight: 900;
+  color: #0F5A47;
+  line-height: 1;
+}
+
+.offer-price-unit {
+  font-size: 12px;
+  color: #64748B;
+}
+
+.offer-pill-badges {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0 12px 0;
+}
+
+.offer-pill-tag {
+  background: #E8F5E9;
+  color: #1B5E20;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+.offer-hotel-box {
+  background: #F0FDF4;
+  border: 1px solid #DCFCE7;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: #1E293B;
+  line-height: 1.6;
+}
+
+.offer-actions-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-offer-view-detail {
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  color: #334155;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-offer-view-detail:hover {
+  border-color: #0F5A47;
+  color: #0F5A47;
+  background: #F8FAFC;
+}
+
+.btn-offer-book-now {
+  background: #0F5A47;
+  color: #FFFFFF;
+  border: none;
+  padding: 9px 26px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 90, 71, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-offer-book-now:hover {
+  background: #0B4537;
+  transform: translateY(-1px);
+}
+
+.offer-dots-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 14px 0 0 0;
+}
+
+.offer-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.offer-dot.active {
+  background: #0F5A47;
+}
+
+.offer-dot.inactive {
+  border: 1.5px solid #CBD5E1;
+  background: transparent;
+}
+
+.ask-opinion-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.btn-ask-opinion {
+  background: #0F5A47;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 90, 71, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-ask-opinion:hover {
+  background: #0B4537;
+  transform: translateY(-1px);
+}
+
+/* Waiting State Card (Screenshot 2) */
+.waiting-offers-box {
+  border: 2px dashed #CBD5E1;
+  border-radius: 14px;
+  padding: 36px 20px;
+  text-align: center;
+  background: #FAFDFB;
+}
+
+.waiting-phone-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 12px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.waiting-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1E293B;
+  margin: 0 0 6px 0;
+}
+
+.waiting-subtext {
+  font-size: 13px;
+  color: #64748B;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.waiting-actions-row {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.btn-get-notified-pill {
+  background: #FFFFFF;
+  border: 1.5px solid #0F5A47;
+  color: #0F5A47;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 8px 22px;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-get-notified-pill:hover {
+  background: #F0FDF4;
+}
+
+.btn-cancel-request-pill {
+  background: #FFFFFF;
+  border: 1.5px solid #EF4444;
+  color: #DC2626;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel-request-pill:hover {
+  background: #FEF2F2;
+}
+
+@media (max-width: 768px) {
+  .req-progress-tracker {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .tracker-step-label {
+    font-size: 10.5px;
+  }
+  .meta-fields-group {
+    gap: 16px;
+  }
+}
+
+
 
 
 

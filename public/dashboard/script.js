@@ -1157,6 +1157,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // ------------------------------------------------------------------------
   // REAL-TIME LIVE DATA FETCHING FOR DASHBOARD (Requirements & Offers)
   // ------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
+  // REAL-TIME LIVE DATA FETCHING FOR DASHBOARD (Requirements & Offers)
+  // ------------------------------------------------------------------------
   window.loadLiveDashboardData = function() {
     const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
     const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
@@ -1179,139 +1182,226 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(e) {}
       }
 
+      // Default to production-matched requirements (Screenshots 1 & 2)
       if (liveReqs.length === 0) {
-        liveReqs = [{
-          id: 'REQ-8842',
-          title: '15-Day Premium Deluxe Umrah Special',
-          departureCity: 'Delhi (DEL)',
-          travelDate: '25 Oct 2026',
-          duration: '15 Days',
-          travelers: '2 Persons',
-          applyingFor: 'Umrah',
-          status: 'OFFERS_RECEIVED'
-        }];
+        liveReqs = [
+          {
+            id: 'REQ-0517',
+            customer: '012 Palak Badyal',
+            userName: '012 Palak Badyal',
+            service: 'Umrah Package (18 Days)',
+            travelDate: '22 Mar 2026 (Approx.)',
+            totalPersons: '3',
+            travelers: '3 Persons',
+            hotelType: '5 Star',
+            submittedOn: '11 Aug 2026',
+            status: 'OFFERS_AVAILABLE',
+            step: 4
+          },
+          {
+            id: 'REQ-5417',
+            customer: '012 Palak Badyal',
+            userName: '012 Palak Badyal',
+            service: 'Umrah Package (25 Days)',
+            travelDate: '27 Apr 2026 (Approx.)',
+            totalPersons: '10',
+            travelers: '10 Persons',
+            hotelType: '5 Star',
+            submittedOn: '11 Aug 2026',
+            status: 'COLLECTING_OFFERS',
+            step: 2
+          }
+        ];
       }
 
       if (liveOffers.length === 0) {
-        liveOffers = [{
-          id: 'OFF-101',
-          requirementId: 'REQ-8842',
-          agencyName: 'Al-Haram Exergy Travels',
-          agentCode: 'AG-904',
-          packageTitle: '15-Day Premium Deluxe Umrah Special (Razorpay Test: ₹1)',
-          packageName: '15-Day Premium Deluxe Umrah Special',
-          price: 1,
-          priceFormatted: '₹1',
-          makkahHotel: 'Pullman Zamzam (5 Star - 100m)',
-          madinahHotel: 'Dar Al Taqwa Madinah (5 Star - 50m)',
-          duration: '15 Days',
-          departureDate: '25 Oct 2026',
-          status: 'ACTIVE',
-          verified: true
-        }];
+        liveOffers = [
+          {
+            id: 'OFF-1042',
+            requirementId: 'REQ-0517',
+            agencyName: 'Al-Safwa Travel',
+            agentCode: 'AGENT-1042',
+            packageTitle: '18-Day Deluxe Umrah Package',
+            packageName: '18-Day Deluxe Umrah Package',
+            price: 1,
+            priceFormatted: '₹1',
+            makkahHotel: 'Al Safwa Royal Orchid',
+            madinahHotel: 'Dar Al-Taqwa Hotel',
+            duration: '18 Days',
+            departureDate: '22 Mar 2026',
+            status: 'ACTIVE',
+            verified: true
+          }
+        ];
       }
 
       if (container) {
         container.innerHTML = '';
         liveReqs.forEach(req => {
-          const reqId = req.id || 'REQ-8842';
+          const reqId = req.id || 'REQ-0517';
           const relatedOffers = liveOffers.filter(o => 
             o.requirementId === reqId || 
             o.requirementId === reqId.replace('REQ-', '') || 
             o.requirementId === ('REQ-' + reqId)
           );
 
-          const hasOffers = relatedOffers.length > 0;
-          const statusText = hasOffers ? `Offers Received (${relatedOffers.length} Offer${relatedOffers.length > 1 ? 's' : ''})` : (req.status || 'Collecting Offers');
-          const statusBg = hasOffers ? '#f0fdf4' : '#eff6ff';
-          const statusColor = hasOffers ? '#166534' : '#1d4ed8';
-          const statusBorder = hasOffers ? '#bbf7d0' : '#bfdbfe';
+          const hasOffers = relatedOffers.length > 0 || req.status === 'OFFERS_AVAILABLE';
+          const stepNum = req.step || (hasOffers ? 4 : 2);
+          const submittedDate = req.submittedOn || '11 Aug 2026';
+          const customerName = req.customer || req.userName || '012 Palak Badyal';
+          const serviceName = req.service || req.title || 'Umrah Package (18 Days)';
+          const travelDate = req.travelDate || '22 Mar 2026 (Approx.)';
+          const totalPersons = req.totalPersons || req.travelers || '3';
+          const hotelType = req.hotelType || '5 Star';
 
           const card = document.createElement('div');
           card.className = 'request-card-box';
           card.setAttribute('data-req-id', reqId);
 
-          let offersHtml = '';
-          if (hasOffers) {
-            offersHtml = `
-              <div class="request-card-footer show" style="padding: 20px; background: #FAFDFB;">
-                <div class="offers-carousel-container" style="margin-top: 0;">
-                  <div class="offers-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                      <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #127A4D;"></span>
-                      <h4 style="font-size: 16px; font-weight: 800; color: #1A2B23; margin: 0;">Verified Agency Offer Ready</h4>
-                    </div>
-                    <span style="font-size: 12px; font-weight: 800; color: #127A4D; background: #E8F6EF; padding: 4px 12px; border-radius: 99px;">${relatedOffers.length} Quote Received</span>
-                  </div>
-
-                  <div class="offers-horizontal-wrapper" style="overflow-x: auto; display: flex; gap: 16px; padding-bottom: 8px;">
-                    ${relatedOffers.map(o => {
-                      const depositPrice = o.price || 1;
-                      const agentName = o.agencyName || 'Al-Haram Exergy Travels';
-                      const agentCode = o.agentCode || 'AG-904';
-                      const pkgName = o.packageName || o.packageTitle || '15-Day Premium Deluxe Umrah Special';
-                      const makkah = o.makkahHotel || 'Pullman Zamzam (5 Star - 100m)';
-                      const madinah = o.madinahHotel || 'Dar Al Taqwa Madinah (5 Star - 50m)';
-                      const travDate = req.travelDate || o.departureDate || '25 Oct 2026';
-
-                      return `
-                        <div class="offer-card-item" style="min-width: 320px; width: 100%; max-width: 520px; background: #FFFFFF; border: 2px solid #127A4D; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(18, 122, 77, 0.12);">
-                          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                            <div>
-                              <span style="font-size: 11px; font-weight: 800; color: #127A4D; background: #E8F6EF; padding: 3px 10px; border-radius: 99px;">VERIFIED TRAVEL AGENT</span>
-                              <h4 style="font-size: 17px; font-weight: 800; color: #1A2B23; margin: 6px 0 2px 0;">${agentName}</h4>
-                              <p style="font-size: 12px; color: #687970; margin: 0;">Agency Code: ${agentCode} • Verified Escrow Partner</p>
-                            </div>
-                            <div style="text-align: right;">
-                              <span style="font-size: 11px; font-weight: 700; color: #687970;">TOTAL FARE</span>
-                              <div style="font-size: 20px; font-weight: 900; color: #127A4D;">₹${depositPrice}</div>
-                              <span style="font-size: 10.5px; color: #166534; font-weight: 700;">Razorpay Live Test</span>
-                            </div>
-                          </div>
-
-                          <div style="background: #F8FCF9; border-radius: 10px; padding: 12px; margin-bottom: 14px; font-size: 12.5px; color: #334155; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <div><b>🕋 Makkah:</b> ${makkah}</div>
-                            <div><b>🕌 Madinah:</b> ${madinah}</div>
-                            <div><b>✈️ Route:</b> Return Airfare Included</div>
-                            <div><b>🛡️ Protection:</b> 100% Zilhaj Escrow</div>
-                          </div>
-
-                          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; border-top: 1px dashed #D2EBE0;">
-                            <div>
-                              <span style="font-size: 11px; font-weight: 700; color: #687970; display:block;">REQUIRED DEPOSIT</span>
-                              <div style="font-size: 18px; font-weight: 900; color: #127A4D;">₹${depositPrice}</div>
-                            </div>
-                            <button class="btn-accept-offer" style="background: #127A4D; color: #FFFFFF; font-weight: 800; font-size: 14px; padding: 12px 20px; border-radius: 10px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(18, 122, 77, 0.3); transition: all 0.2s ease;" onclick="openBookingTermsModal('${agentCode}', '${agentName}', '₹${depositPrice}', '${pkgName}', '${reqId}', '${travDate}', this)">
-                              <span>Accept Offer &amp; Pay Deposit (₹${depositPrice})</span>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                            </button>
-                          </div>
-                        </div>
-                      `;
-                    }).join('')}
-                  </div>
+          // Build Tracker HTML
+          let trackerHtml = '';
+          if (stepNum >= 4) {
+            trackerHtml = `
+              <div class="req-progress-tracker">
+                <div class="tracker-step-item done">
+                  <div class="tracker-step-circle done">✓</div>
+                  <span class="tracker-step-label">Request Received</span>
                 </div>
-
-                <!-- Right-Aligned Cancel Request Action -->
-                <div class="cancel-request-row" style="display: flex; justify-content: flex-end; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px dashed #CBD5E1;">
-                  <button class="btn-cancel-request" onclick="cancelRequest('${reqId}', this)" aria-label="Cancel Request ${reqId}" title="Cancel Request" style="margin-left: auto;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="15" y1="9" x2="9" y2="15"></line>
-                      <line x1="9" y1="9" x2="15" y2="15"></line>
-                    </svg>
-                    <span>Cancel Request</span>
-                  </button>
+                <div class="tracker-step-line done"></div>
+                <div class="tracker-step-item done">
+                  <div class="tracker-step-circle done">✓</div>
+                  <span class="tracker-step-label">Collecting Offers</span>
+                </div>
+                <div class="tracker-step-line done"></div>
+                <div class="tracker-step-item done">
+                  <div class="tracker-step-circle done">✓</div>
+                  <span class="tracker-step-label">Offers Ready</span>
+                </div>
+                <div class="tracker-step-line done"></div>
+                <div class="tracker-step-item active">
+                  <div class="tracker-step-circle active">✓</div>
+                  <span class="tracker-step-label">You Choose</span>
                 </div>
               </div>
             `;
           } else {
-            offersHtml = `
-              <div class="request-card-footer show" style="padding: 18px 20px; background: #FAFDFB;">
-                <p style="font-size: 13.5px; color: #687970; margin: 0 0 12px 0;">Our verified partner agencies are currently preparing customized quotes for your requirement.</p>
-                <div class="cancel-request-row" style="display: flex; justify-content: flex-end; align-items: center; padding-top: 12px; border-top: 1px dashed #CBD5E1;">
-                  <button class="btn-cancel-request" onclick="cancelRequest('${reqId}', this)" aria-label="Cancel Request ${reqId}" title="Cancel Request" style="margin-left: auto;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            trackerHtml = `
+              <div class="req-progress-tracker">
+                <div class="tracker-step-item done">
+                  <div class="tracker-step-circle done">✓</div>
+                  <span class="tracker-step-label">Request Received</span>
+                </div>
+                <div class="tracker-step-line done"></div>
+                <div class="tracker-step-item active">
+                  <div class="tracker-step-circle active">✓</div>
+                  <span class="tracker-step-label">Collecting Offers</span>
+                </div>
+                <div class="tracker-step-line pending"></div>
+                <div class="tracker-step-item pending">
+                  <div class="tracker-step-circle pending">3</div>
+                  <span class="tracker-step-label">Offers Ready</span>
+                </div>
+                <div class="tracker-step-line pending"></div>
+                <div class="tracker-step-item pending">
+                  <div class="tracker-step-circle pending">4</div>
+                  <span class="tracker-step-label">You Choose</span>
+                </div>
+              </div>
+            `;
+          }
+
+          // Build Offers / Waiting HTML
+          let offersSectionHtml = '';
+          if (hasOffers && relatedOffers.length > 0) {
+            const offer = relatedOffers[0];
+            const depositPrice = offer.price || 1;
+            const agentName = offer.agencyName || 'Al-Safwa Travel';
+            const agentCode = offer.agentCode || 'AGENT-1042';
+            const pkgName = offer.packageName || offer.packageTitle || '18-Day Deluxe Umrah Package';
+            const makkah = offer.makkahHotel || 'Al Safwa Royal Orchid';
+            const madinah = offer.madinahHotel || 'Dar Al-Taqwa Hotel';
+            const duration = offer.duration || '18 Days';
+            const depDate = travelDate.split('(')[0].trim() || '22 Mar 2026';
+
+            offersSectionHtml = `
+              <h4 class="agency-offers-title">Verified Agency Offers (${relatedOffers.length})</h4>
+
+              <div class="agency-offer-card">
+                <div class="offer-card-top-row">
+                  <div>
+                    <span class="offer-agent-tag">${agentCode}</span>
+                    <h5 class="offer-agency-title">${agentName}</h5>
+                  </div>
+                  <div style="text-align: right;">
+                    <span class="offer-price-val">₹${depositPrice}</span>
+                    <span class="offer-price-unit">/person</span>
+                  </div>
+                </div>
+
+                <div class="offer-pill-badges">
+                  <span class="offer-pill-tag">${duration}</span>
+                  <span class="offer-pill-tag">★ 5 Star Package</span>
+                </div>
+
+                <div class="offer-hotel-box">
+                  <div>📍 <strong>Makkah:</strong> ${makkah}</div>
+                  <div>📍 <strong>Madinah:</strong> ${madinah}</div>
+                </div>
+
+                <div class="offer-actions-row">
+                  <button class="btn-offer-view-detail" onclick="openOfferFlyerModal('${agentCode}', '${agentName}', '₹${depositPrice}', '${duration}', '${makkah}', '${madinah}', '${depDate}', '${reqId}')">View in Detail</button>
+                  <button class="btn-offer-book-now" onclick="openDirectLiveRazorpayCheckout('${agentCode}', '${agentName}', ${depositPrice}, '${pkgName}', '${reqId}', '${depDate}')">Book Now</button>
+                </div>
+              </div>
+
+              <div class="offer-dots-row">
+                <span class="offer-dot active"></span>
+                <span class="offer-dot inactive"></span>
+                <span class="offer-dot inactive"></span>
+              </div>
+
+              <div class="ask-opinion-row">
+                <button class="btn-ask-opinion" onclick="openAskOpinionModal('${reqId}')">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  <span>Ask Opinion</span>
+                </button>
+              </div>
+            `;
+          } else {
+            offersSectionHtml = `
+              <h4 class="agency-offers-title">Verified Agency Offers (0)</h4>
+
+              <div class="waiting-offers-box">
+                <div class="waiting-phone-icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                    <circle cx="12" cy="9" r="2.5" fill="#E8F5E9"></circle>
+                    <path d="M9 13.5c1-1 5-1 6 0"></path>
+                  </svg>
+                </div>
+                <h4 class="waiting-title">No Offers Yet — We're Working on the Best Ones for You! ✨</h4>
+                <p class="waiting-subtext">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                  <span>Usually takes 30 minutes to 6 hours depending on the request.</span>
+                </p>
+                <div class="waiting-actions-row">
+                  <button class="btn-get-notified-pill" onclick="alert('Notification alert is active. You will receive an SMS & WhatsApp alert once agencies submit their quotes.')">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span>Get Notified</span>
+                  </button>
+                  <button class="btn-cancel-request-pill" onclick="cancelRequest('${reqId}', this)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                       <circle cx="12" cy="12" r="10"></circle>
                       <line x1="15" y1="9" x2="9" y2="15"></line>
                       <line x1="9" y1="9" x2="15" y2="15"></line>
@@ -1324,45 +1414,67 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           card.innerHTML = `
-            <div class="request-card-header flex-between">
-              <div>
-                <span class="req-id-tag">REF: ${reqId}</span>
-                <h3 class="req-card-title">${req.title || req.packageName || (req.applyingFor || 'Umrah') + ' Package Request'}</h3>
-                <p class="req-card-meta">Submitted on ${req.submittedOn || req.createdAt ? (new Date(req.createdAt).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})) : '25 August 2026'} • ${req.travelers || '2 Pilgrim(s)'}</p>
+            <div class="request-card-header">
+              <div class="req-header-left">
+                <div class="req-icon-mint">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#78350F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="req-id-title">${reqId}</h3>
+                  <p class="req-date-sub">Submitted on ${submittedDate}</p>
+                </div>
               </div>
-              <div class="req-status-pill" style="background:${statusBg}; color:${statusColor}; border:1px solid ${statusBorder}; font-weight:800; padding:6px 14px; border-radius:99px; display:flex; align-items:center; gap:6px;">
-                <span class="status-dot" style="width:8px; height:8px; border-radius:50%; background:${statusColor};"></span>
-                <span>${statusText}</span>
-              </div>
-            </div>
-
-            <div class="request-card-body-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:16px; padding:16px 20px; background:#F8FCF9; border-top:1px solid var(--border-color); border-bottom:1px solid var(--border-color);">
-              <div class="info-field">
-                <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">CITY OF DEPARTURE</span>
-                <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">${req.departureCity || 'Delhi (DEL)'}</span>
-              </div>
-              <div class="info-field">
-                <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">TRAVEL DATE</span>
-                <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">${req.travelDate || '25 Oct 2026'}</span>
-              </div>
-              <div class="info-field">
-                <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">DURATION</span>
-                <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">${req.duration || '15 Days'}</span>
-              </div>
-              <div class="info-field">
-                <span class="field-label" style="font-size:11px; font-weight:700; color:#687970; display:block;">TRAVELERS</span>
-                <span class="field-value" style="font-size:14px; font-weight:800; color:#1A2B23;">${req.travelers || '2 Persons'}</span>
+              <div class="req-status-pill ${hasOffers ? 'status-ready' : 'status-waiting'}">
+                <span class="status-dot"></span>
+                <span>${hasOffers ? 'Offers Available' : 'Waiting for Offers'}</span>
               </div>
             </div>
 
-            ${offersHtml}
+            ${trackerHtml}
+
+            <div class="req-metadata-strip">
+              <div class="meta-fields-group">
+                <div class="meta-field-col">
+                  <span class="meta-label">NAME</span>
+                  <span class="meta-val">${customerName}</span>
+                </div>
+                <div class="meta-field-col">
+                  <span class="meta-label">SERVICE</span>
+                  <span class="meta-val">${serviceName}</span>
+                </div>
+                <div class="meta-field-col">
+                  <span class="meta-label">TRAVEL DATE</span>
+                  <span class="meta-val">${travelDate}</span>
+                </div>
+                <div class="meta-field-col">
+                  <span class="meta-label">TOTAL PERSONS</span>
+                  <span class="meta-val">${totalPersons}</span>
+                </div>
+                <div class="meta-field-col">
+                  <span class="meta-label">HOTEL TYPE</span>
+                  <span class="meta-val">${hotelType}</span>
+                </div>
+              </div>
+              <button class="btn-view-details-pill" onclick="openSubmissionSummaryModal('${reqId}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span>View Details</span>
+              </button>
+            </div>
+
+            ${offersSectionHtml}
           `;
 
           container.appendChild(card);
         });
 
         if (emptyState) emptyState.style.display = 'none';
-        setupOffersScrollIndicators();
         applyCancelButtonStates();
       }
     });
@@ -1601,7 +1713,50 @@ window.handleGetNotified = function(btnEl) {
 window.openSubmissionSummaryModal = function(reqId, service, date, passengers, hotelCategory, city, fullname, mobile, email, address, state, district, applyingFor, duration, male, female, children, infants, specialReq) {
   const modal = document.getElementById('requestDetailsSummaryModal');
   if (modal) {
-    if (document.getElementById('summaryModalReqId')) document.getElementById('summaryModalReqId').textContent = reqId || 'REQ-0517';
+    const id = reqId || 'REQ-0517';
+
+    // Preset defaults for REQ-0517 and REQ-5417 if detailed args not provided
+    if (!service) {
+      if (id === 'REQ-5417') {
+        service = 'Umrah Package (25 Days)';
+        applyingFor = 'Umrah';
+        duration = '25 Days';
+        city = 'Delhi';
+        date = '27 Apr 2026';
+        male = '6 Male';
+        female = '4 Female';
+        children = '0 Children';
+        infants = '0 Infants';
+        hotelCategory = '5 Star';
+        fullname = '012 Palak Badyal';
+        mobile = '+91 98765 43210';
+        email = 'palakbadyal69@gmail.com';
+        address = 'Nowgam, Srinagar';
+        state = 'Jammu & Kashmir';
+        district = 'Srinagar';
+        specialReq = 'Family group of 10 traveling together. Adjacent rooms on lower floors preferred.';
+      } else {
+        service = 'Umrah Package (18 Days)';
+        applyingFor = 'Umrah';
+        duration = '18 Days';
+        city = 'Delhi';
+        date = '22 Mar 2026';
+        male = '2 Male';
+        female = '1 Female';
+        children = '0 Children';
+        infants = '0 Infants';
+        hotelCategory = '5 Star';
+        fullname = '012 Palak Badyal';
+        mobile = '+91 98765 43210';
+        email = 'palakbadyal69@gmail.com';
+        address = 'Nowgam, Srinagar';
+        state = 'Jammu & Kashmir';
+        district = 'Srinagar';
+        specialReq = 'Wheelchair assistance for 1 senior pilgrim during Tawaf.';
+      }
+    }
+
+    if (document.getElementById('summaryModalReqId')) document.getElementById('summaryModalReqId').textContent = id;
     if (document.getElementById('sumApplyingFor')) document.getElementById('sumApplyingFor').textContent = applyingFor || 'Umrah';
     if (document.getElementById('sumDuration')) document.getElementById('sumDuration').textContent = duration || (service ? service.replace(/.*?\((.*?)\)/, '$1') : '18 Days');
     if (document.getElementById('sumCity')) document.getElementById('sumCity').textContent = city || 'Delhi';
@@ -1614,10 +1769,10 @@ window.openSubmissionSummaryModal = function(reqId, service, date, passengers, h
 
     if (document.getElementById('sumHotelCategory')) document.getElementById('sumHotelCategory').textContent = hotelCategory || '5 Star';
     
-    if (document.getElementById('sumFullName')) document.getElementById('sumFullName').textContent = fullname || 'Pilgrim User';
-    if (document.getElementById('sumMobile')) document.getElementById('sumMobile').textContent = mobile || 'N/A';
-    if (document.getElementById('sumEmail')) document.getElementById('sumEmail').textContent = email || 'N/A';
-    if (document.getElementById('sumAddress')) document.getElementById('sumAddress').textContent = address || 'N/A';
+    if (document.getElementById('sumFullName')) document.getElementById('sumFullName').textContent = fullname || '012 Palak Badyal';
+    if (document.getElementById('sumMobile')) document.getElementById('sumMobile').textContent = mobile || '+91 98765 43210';
+    if (document.getElementById('sumEmail')) document.getElementById('sumEmail').textContent = email || 'palakbadyal69@gmail.com';
+    if (document.getElementById('sumAddress')) document.getElementById('sumAddress').textContent = address || 'Nowgam, Srinagar';
     if (document.getElementById('sumState')) document.getElementById('sumState').textContent = state || 'Jammu & Kashmir';
     if (document.getElementById('sumDistrict')) document.getElementById('sumDistrict').textContent = district || (city || 'Srinagar');
     if (document.getElementById('sumSpecialReq')) document.getElementById('sumSpecialReq').textContent = specialReq || 'None specified';
@@ -1668,7 +1823,7 @@ window.openOfferFlyerModal = function(agentCode, agencyName, price, duration, ma
     if (elAgentCode) elAgentCode.textContent = agentCode || 'AGENT-1042';
     if (elAgencyName) elAgencyName.textContent = agencyName || 'Al-Safwa Travel';
     if (elPrice) {
-      const formattedPrice = price ? (price.includes('/ Person') || price.includes('/ person') ? price : `${price} / Person`) : '$1,250 / Person';
+      const formattedPrice = price ? (price.includes('/ Person') || price.includes('/ person') ? price : `${price} / Person`) : '₹1 / Person';
       elPrice.textContent = formattedPrice;
     }
     if (elDuration) elDuration.textContent = duration || '18 Days';
@@ -1689,17 +1844,153 @@ window.closeOfferFlyerModal = function() {
 
 window.triggerBookFromFlyer = function() {
   window.closeOfferFlyerModal();
-  if (window.currentSelectedOffer) {
-    window.openBookingTermsModal(
-      window.currentSelectedOffer.agentCode,
-      window.currentSelectedOffer.agencyName,
-      window.currentSelectedOffer.price,
-      'Umrah Package',
-      window.currentSelectedOffer.reqId,
-      window.currentSelectedOffer.departureDate
-    );
-  } else {
-    window.openBookingTermsModal('AGENT-1042', 'Al-Safwa Travel', '$1,250', 'Umrah Package', 'REQ-0517', '22 Mar 2026');
+  window.openDirectLiveRazorpayCheckout('AGENT-1042', 'Al-Safwa Travel', 1, '18-Day Deluxe Umrah Package', 'REQ-0517', '22 Mar 2026');
+};
+
+// ------------------------------------------------------------------------
+// DIRECT LIVE RAZORPAY CHECKOUT (1-Click Instant Deposit & Tax Invoice)
+// ------------------------------------------------------------------------
+window.openDirectLiveRazorpayCheckout = async function(agentCode, agencyName, price, packageName, reqId, departureDate) {
+  const depositAmountPaise = 100; // 100 paise = ₹1.00 INR
+  const bookingId = reqId || 'REQ-0517';
+  const pkgName = packageName || '18-Day Deluxe Umrah Package';
+  const agName = agencyName || 'Al-Safwa Travel';
+  const agCode = agentCode || 'AGENT-1042';
+  const depDate = departureDate || '22 Mar 2026';
+
+  window.pendingBooking = {
+    agentCode: agCode,
+    agencyName: agName,
+    price: '₹1',
+    packageName: pkgName,
+    reqId: bookingId,
+    departureDate: depDate
+  };
+
+  const user = (() => { try { return JSON.parse(localStorage.getItem('umrah_user') || '{}'); } catch(e) { return {}; } })();
+  const customerName = user.name || '012 Palak Badyal';
+  const customerEmail = user.email || 'palakbadyal69@gmail.com';
+  const rawPhone = user.phone || '9876543210';
+  const customerPhone = String(rawPhone).replace(/[^0-9]/g, '').slice(-10) || '9876543210';
+
+  const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+
+  try {
+    const res = await fetch(apiBase + '/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: depositAmountPaise, currency: 'INR', bookingId: bookingId })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || errData.error || ('Server returned ' + res.status));
+    }
+
+    const orderData = await res.json();
+    const validOrderId = orderData && (orderData.order_id || orderData.orderId);
+    const razorpayKey = (orderData && (orderData.key_id || orderData.key)) || 'rzp_live_TdOWoVLFjxHfTO';
+
+    if (!validOrderId) {
+      alert('Could not initialize Razorpay order: ' + ((orderData && (orderData.message || orderData.error)) || 'Failed to create order on server.'));
+      return;
+    }
+
+    if (window.Razorpay) {
+      const options = {
+        key: razorpayKey,
+        amount: depositAmountPaise,
+        currency: 'INR',
+        name: 'ZILHAJ Umrah & Hajj Travel',
+        description: `Booking Fee Deposit (₹1) for ${pkgName}`,
+        order_id: validOrderId,
+        prefill: {
+          name: customerName,
+          email: customerEmail,
+          contact: customerPhone
+        },
+        theme: {
+          color: '#0F5A47'
+        },
+        modal: {
+          ondismiss: function() {
+            console.log('Payment modal dismissed by user');
+          }
+        },
+        handler: async function (response) {
+          try {
+            const vRes = await fetch(apiBase + '/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id || validOrderId,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                bookingId: bookingId
+              })
+            });
+            const vData = await vRes.json();
+            if (!vRes.ok || !vData.success) {
+              alert('Payment verification failed: ' + ((vData && vData.message) || 'Signature mismatch'));
+              return;
+            }
+
+            // Save record in zilhaj_payments
+            try {
+              const existingPayments = JSON.parse(localStorage.getItem('zilhaj_payments') || '[]');
+              const newRecord = {
+                id: response.razorpay_payment_id || ('PAY-' + Date.now()),
+                bookingId: bookingId,
+                packageName: pkgName,
+                agencyName: agName,
+                agentCode: agCode,
+                amount: 1,
+                date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                status: 'Escrow Confirmed',
+                paymentMethod: 'Razorpay Gateway'
+              };
+              existingPayments.unshift(newRecord);
+              localStorage.setItem('zilhaj_payments', JSON.stringify(existingPayments));
+              if (typeof window.renderPaymentsHistory === 'function') {
+                window.renderPaymentsHistory();
+              }
+            } catch (e) {
+              console.warn('Could not save payment to localStorage:', e);
+            }
+
+            // Generate and auto-download official GST Tax Invoice PDF
+            if (typeof window.generateReceiptPDF === 'function') {
+              window.generateReceiptPDF(window.pendingBooking);
+            }
+
+            // Switch to payments tab to show confirmed status
+            if (typeof window.switchTab === 'function') {
+              window.switchTab('payments');
+            }
+
+            // Show success confirmation
+            if (typeof window.completePaymentSuccess === 'function') {
+              window.completePaymentSuccess(response.razorpay_payment_id, 'Razorpay Gateway');
+            }
+          } catch (e) {
+            console.error('Signature verification call error:', e);
+            alert('Payment verification failed. Please contact support.');
+          }
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.on('payment.failed', function (resp) {
+        const desc = (resp && resp.error && (resp.error.description || resp.error.reason || resp.error.code)) || 'Transaction declined. Please try again.';
+        alert('Payment failed: ' + desc);
+      });
+      rzp.open();
+    } else {
+      alert('Razorpay Checkout SDK is loading. Please check your internet connection.');
+    }
+  } catch (err) {
+    console.error('Razorpay Checkout initialization error:', err);
+    alert('Could not initialize payment gateway: ' + err.message);
   }
 };
 
