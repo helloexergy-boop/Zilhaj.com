@@ -513,6 +513,7 @@ class App {
                 <a href="/" class="nav-link ${this.state.currentPage === 'home' ? 'active' : ''}">Home</a>
                 <a href="/services" class="nav-link ${this.state.currentPage === 'services' ? 'active' : ''}">Services</a>
                 <a href="/about" class="nav-link ${this.state.currentPage === 'about' ? 'active' : ''}">About Us</a>
+                <a href="/#footerContactSection" class="nav-link ${this.state.currentPage === 'contact' ? 'active' : ''}" onclick="app.scrollToContact(event)">Contact Us</a>
                 <div class="mobile-only-auth" style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid #e2e8f0; display:flex; flex-direction:column; gap:0.5rem; width:100%;">
                     ${!this.state.currentUser ? `
                         <button class="btn btn-outline" onclick="window.location.href='/login'" style="width:100%; border:1.5px solid #0f172a; color:#0f172a; font-weight:700; border-radius:10px; padding:0.65rem; font-size:0.9rem; background:transparent; cursor:pointer;">Login</button>
@@ -1135,13 +1136,7 @@ class App {
             main.innerHTML = this.renderHomePage();
             this.initHeroVideoPlaylist();
         } else if (page === 'request-form' || page === 'submit-request' || page === 'request') {
-            if (!this.state.currentUser) {
-                this.showToast('Please log in or sign up to submit your pilgrimage request', 'warning');
-                this.openAuthModal('login');
-                main.innerHTML = this.renderHomePage();
-                return;
-            }
-            window.location.href = '/dashboard/index.html#submit-request';
+            window.location.href = '/submit-request';
             return;
         } else if (page === 'services' || page === 'guides') {
             window.location.href = '/services';
@@ -1214,12 +1209,7 @@ class App {
     }
 
     handleStartJourneyClick() {
-        if (!this.state.currentUser) {
-            this.showToast('Please log in or sign up to start your journey & submit a request', 'warning');
-            this.openAuthModal('login');
-            return;
-        }
-        window.location.href = '/dashboard/index.html#submit-request';
+        window.location.href = '/submit-request';
     }
 
     setPilgrimageType(type) {
@@ -11241,7 +11231,7 @@ Provide a helpful, accurate, polite, and concise answer (2-3 sentences max) spec
             anchor.scrollIntoView({ behavior: 'smooth' });
             return;
         }
-        window.location.href = '/dashboard/index.html#submit-request';
+        window.location.href = '/submit-request';
     }
 
 
