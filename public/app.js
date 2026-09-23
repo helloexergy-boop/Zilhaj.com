@@ -3037,331 +3037,461 @@ class App {
 
     renderAboutPage() {
         return `
-            <div class="main-container" style="max-width: 100%; width: 100%; box-sizing: border-box; margin: 6.5rem auto 4rem; padding: 0 3.5rem; color: #0f172a; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;">
+            <div class="main-container" style="max-width: 1320px; width: 100%; box-sizing: border-box; margin: 6.5rem auto 4rem; padding: 0 2rem; color: #0f172a; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;">
                 
-                <!-- BLOCK 1: Hero Section (2-Column Layout) -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center; margin-bottom: 3.5rem;">
-                    
-                    <!-- Left Hero Content -->
+                <!-- SECTION 1: HERO -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center; margin-bottom: 4rem;">
                     <div>
-                        <!-- Pill Badge -->
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #15803d; border: 1px solid #bbf7d0; padding: 0.35rem 1rem; border-radius: 99px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.2rem;">
-                            <span>ABOUT US</span>
+                            <span style="width: 7px; height: 7px; background: #15803d; border-radius: 50%;"></span>
+                            <span>ABOUT ZILHAJ</span>
                         </div>
 
-                        <!-- Heading -->
-                        <h1 style="font-size: clamp(1.45rem, 2.8vw, 1.85rem); font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 1rem 0; letter-spacing: -0.01em;">
-                            Your Trusted Companion<br>
-                            <span style="color: #15803d;">for Sacred Journeys</span>
+                        <h1 style="font-size: clamp(1.8rem, 3.2vw, 2.6rem); font-weight: 900; color: #0f172a; line-height: 1.15; margin: 0 0 1.2rem 0; letter-spacing: -0.02em;">
+                            Making Hajj &amp; Umrah Planning <span style="color: #15803d;">Simpler.</span>
                         </h1>
 
-                        <!-- Description -->
-                        <p style="font-size: 1.05rem; color: #475569; line-height: 1.68; margin: 0 0 1.8rem 0; font-weight: 400; max-width: 580px;">
-                            We make your Umrah and Hajj journey simple and stress-free. With trusted partners, clear information, and dedicated support, you can travel with peace of mind and focus on what truly matters.
+                        <p style="font-size: 1.05rem; color: #475569; line-height: 1.7; margin: 0 0 1.8rem 0; font-weight: 400; max-width: 600px;">
+                            Your trusted companion for sacred journeys. ZILHAJ is building a simpler, more transparent way to plan your pilgrimage &mdash; one request, multiple verified offers, and the freedom to choose what works best for you with complete peace of mind.
                         </p>
 
-                        <!-- Inline Feature Pills -->
-                        <div style="display: flex; align-items: center; gap: 1.8rem; flex-wrap: wrap;">
-                            <div style="display: flex; align-items: center; gap: 0.55rem; font-size: 0.92rem; font-weight: 700; color: #0f172a;">
-                                <div style="width: 24px; height: 24px; border-radius: 50%; background: #15803d; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
-                                </div>
-                                <span>Trusted &amp; Verified</span>
-                            </div>
+                        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 2rem;">
+                            <button onclick="app.openRequirementModal ? app.openRequirementModal() : (app.navigate('home'), setTimeout(() => app.scrollToRequirementForm(), 200))" style="background: #15803d; color: #ffffff; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 1.8rem; border-radius: 10px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 14px rgba(21,128,61,0.3); transition: all 0.2s;" onmouseover="this.style.background='#166534';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#15803d';this.style.transform=''">
+                                <span>Submit a Request</span>
+                                <span>→</span>
+                            </button>
+                            <a href="services-tawseef/services.html" style="background: #ffffff; color: #0f172a; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 1.8rem; border-radius: 10px; border: 1.5px solid #e2e8f0; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#15803d';this.style.color='#15803d'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#0f172a'">
+                                <span>Explore Services</span>
+                                <span>→</span>
+                            </a>
+                        </div>
 
-                            <div style="display: flex; align-items: center; gap: 0.55rem; font-size: 0.92rem; font-weight: 700; color: #0f172a;">
-                                <div style="width: 24px; height: 24px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
-                                        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
-                                    </svg>
-                                </div>
-                                <span>24/7 Support</span>
+                        <!-- Trust Bar -->
+                        <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.85rem; font-weight: 700; color: #0f172a;">
+                                <span style="color: #15803d;">✓</span> Single Request
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.85rem; font-weight: 700; color: #0f172a;">
+                                <span style="color: #15803d;">✓</span> Verified Partners
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.85rem; font-weight: 700; color: #0f172a;">
+                                <span style="color: #15803d;">✓</span> Transparent Choices
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.85rem; font-weight: 700; color: #0f172a;">
+                                <span style="color: #15803d;">✓</span> 24/7 Dedicated Support
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right Hero Image -->
-                    <div style="position: relative; border-radius: 24px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.10); border: 1px solid #f1f5f9;">
-                        <img src="https://images.pexels.com/photos/18996760/pexels-photo-18996760.jpeg" alt="Holy Kaaba Makkah Pilgrimage" style="width: 100%; height: 380px; object-fit: cover; display: block;">
+                    <!-- Hero Visual Card -->
+                    <div style="position: relative; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 45px rgba(0,0,0,0.12); border: 2px solid #f1f5f9;">
+                        <img src="https://images.pexels.com/photos/18996760/pexels-photo-18996760.jpeg" onerror="this.onerror=null;this.src='about bubble/assets/images/hero-makkah.svg';" alt="Holy Kaaba Makkah Pilgrimage" style="width: 100%; height: 380px; object-fit: cover; display: block;">
+                        <div style="position: absolute; bottom: 20px; left: 20px; right: 20px; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-radius: 14px; padding: 0.9rem 1.2rem; display: flex; align-items: center; gap: 0.8rem; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border: 1px solid rgba(255,255,255,0.8);">
+                            <span style="font-size: 1.6rem;">🕋</span>
+                            <div>
+                                <div style="font-weight: 800; font-size: 0.92rem; color: #0f172a;">Pilgrim-First Platform</div>
+                                <div style="font-size: 0.78rem; color: #15803d; font-weight: 600;">100% Verified Hajj &amp; Umrah Offers</div>
+                            </div>
+                        </div>
                     </div>
-
                 </div>
 
-
-                <!-- BLOCK 2: Two Cards Row (Our Mission & Why We Are Different) -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.8rem; margin-bottom: 3.5rem;">
-                    
-                    <!-- Mission Card -->
-                    <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: transform 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-                        <div style="width: 58px; height: 58px; border-radius: 50%; background: #ecfdf5; border: 1.5.px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem;">
-                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <circle cx="12" cy="12" r="6"></circle>
-                                <circle cx="12" cy="12" r="2"></circle>
-                            </svg>
+                <!-- SECTION 2: THE IDEA BEHIND ZILHAJ & 5 PILLARS -->
+                <div style="background: #f8faf9; border-radius: 24px; padding: 3rem 2.5rem; margin-bottom: 4rem; border: 1.5px solid #edf2f0;">
+                    <div style="text-align: center; max-width: 820px; margin: 0 auto 2.5rem;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #15803d; border: 1px solid #bbf7d0; padding: 0.3rem 0.9rem; border-radius: 99px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.8rem;">
+                            <span>THE ESSENCE</span>
                         </div>
-                        <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Our Mission</h2>
-                        <p style="color: #475569; font-size: 0.95rem; line-height: 1.65; margin: 0;">
-                            To make Umrah and Hajj planning simple, honest, and stress-free by offering verified options, clear details, and complete support.
+                        <h2 style="font-size: clamp(1.5rem, 2.5vw, 2.1rem); font-weight: 900; color: #0f172a; margin-bottom: 1rem; letter-spacing: -0.01em;">The Idea Behind ZILHAJ</h2>
+                        <p style="color: #475569; font-size: 0.98rem; line-height: 1.7; margin-bottom: 0.8rem;">
+                            Planning a pilgrimage should be an inspiring, peaceful experience. Yet for many pilgrims, the planning phase feels stressful &mdash; spending hours reaching out to multiple travel agencies, comparing unclear package details, and navigating fragmented information.
+                        </p>
+                        <p style="color: #475569; font-size: 0.98rem; line-height: 1.7;">
+                            ZILHAJ was built to change that. Instead of spending days calling providers, you submit your requirements once, and verified providers send you suitable, transparent offers to review side-by-side.
                         </p>
                     </div>
 
-                    <!-- Why We Are Different Card -->
-                    <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: transform 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-                        <div style="width: 58px; height: 58px; border-radius: 50%; background: #ecfdf5; border: 1.5px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem;">
-                            <svg width="26" height="26" viewBox="0 0 24 24" fill="#15803d" stroke="#15803d" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                            </svg>
-                        </div>
-                        <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Why We Are Different</h2>
-                        <p style="color: #475569; font-size: 0.95rem; line-height: 1.65; margin: 0;">
-                            We compare many options from trusted partners so you can choose the best one. Clear pricing, honest information, and support you can count on.
-                        </p>
-                    </div>
-
-                </div>
-
-
-                <!-- BLOCK 3: Why Choose Zilhaj.com? (5 Grid Cards) -->
-                <div style="margin-bottom: 3.8rem;">
-                    
-                    <!-- Section Header with Divider -->
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 0.8rem; margin-bottom: 2.5rem;">
-                        <div style="height: 1.5px; width: 80px; background: linear-gradient(to right, transparent, #86efac);"></div>
-                        <span style="width: 7px; height: 7px; background: #15803d; border-radius: 50%; display: inline-block;"></span>
-                        <h2 style="font-size: 1.6rem; font-weight: 900; color: #15803d; margin: 0; letter-spacing: -0.01em;">Why Choose Zilhaj.com?</h2>
-                        <span style="width: 7px; height: 7px; background: #15803d; border-radius: 50%; display: inline-block;"></span>
-                        <div style="height: 1.5px; width: 80px; background: linear-gradient(to left, transparent, #86efac);"></div>
-                    </div>
-
-                    <!-- 5 Cards Row -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.2rem;">
-                        
-                        <!-- Card 1: Easy Comparison -->
-                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
-                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.1rem; flex-shrink: 0;">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                </svg>
+                    <!-- 5 Pillars Row -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem;">
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.1rem;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                             </div>
                             <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Easy Comparison</h3>
-                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">
-                                Compare packages from multiple trusted travel partners in one place.
-                            </p>
+                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">Compare packages from multiple trusted travel partners in one place.</p>
                         </div>
 
-                        <!-- Card 2: Best Prices -->
-                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
-                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.1rem; flex-shrink: 0;">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
-                                </svg>
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.1rem;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
                             </div>
                             <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Best Prices</h3>
-                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">
-                                Get the best value for your money with no hidden charges.
-                            </p>
+                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">Get the best value for your money with no hidden charges.</p>
                         </div>
 
-                        <!-- Card 3: Clear Information -->
-                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
-                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.1rem; flex-shrink: 0;">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                                </svg>
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.1rem;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                             </div>
                             <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Clear Information</h3>
-                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">
-                                All details are shared clearly so you can decide with confidence.
-                            </p>
+                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">All details shared clearly so you can decide with confidence.</p>
                         </div>
 
-                        <!-- Card 4: Time Saving -->
-                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
-                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.1rem; flex-shrink: 0;">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 6 12 12 16 14"></polyline>
-                                </svg>
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.1rem;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                             </div>
                             <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Time Saving</h3>
-                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">
-                                Save time by viewing and comparing the best options quickly.
-                            </p>
+                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">Save time by viewing and comparing the best options quickly.</p>
                         </div>
 
-                        <!-- Card 5: Safe & Secure -->
-                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
-                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.1rem; flex-shrink: 0;">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                                </svg>
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 1.8rem 1.2rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#bbf7d0';" onmouseout="this.style.transform='';this.style.borderColor='#f1f5f9';">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.1rem;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                             </div>
                             <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Safe &amp; Secure</h3>
-                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">
-                                Your information and bookings are always safe with us.
-                            </p>
+                            <p style="color: #64748b; font-size: 0.85rem; line-height: 1.55; margin: 0;">Your information and bookings are always safe with us.</p>
                         </div>
-
                     </div>
                 </div>
 
-
-                <!-- BLOCK 4: "Our Approach" & "What Drives Us" Grid Block -->
-                <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 24px; padding: 2.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 3.5rem;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem; align-items: center;">
-                        
-                        <!-- Left Side: Founder Profile + Approach List -->
-                        <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
-                            
-                            <!-- Founder Profile Card -->
-                            <div style="text-align: center; flex-shrink: 0; min-width: 170px; margin: 0 auto;">
-                                <div style="width: 110px; height: 110px; border-radius: 50%; overflow: hidden; margin: 0 auto 0.9rem; border: 3px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.08); background: #f8fafc;">
-                                    <img src="images/founder.jpg" onerror="this.onerror=null;this.src='founder.jpg';" alt="Tawseef Assadullah H" style="width: 100%; height: 100%; object-fit: cover;">
-                                </div>
-                                <h3 style="font-size: 1.08rem; font-weight: 800; color: #15803d; margin: 0 0 0.25rem 0;">Tawseef Assadullah H</h3>
-                                <div style="font-size: 0.82rem; font-weight: 700; color: #64748b; margin-bottom: 0.35rem;">Founder &amp; CEO</div>
-                                <div style="font-size: 0.72rem; color: #94a3b8; line-height: 1.35; max-width: 170px; margin: 0 auto 0.7rem;">
-                                    B.Tech – National Institute of Technology Srinagar
-                                </div>
-                                <!-- LinkedIn Icon -->
-                                <a href="https://linkedin.com" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 5px; background: #0077b5; color: #ffffff; text-decoration: none;">
-                                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
-                                </a>
-                            </div>
-
-                            <!-- Approach List -->
-                            <div style="flex: 1; min-width: 240px;">
-                                <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0 0 1.2rem 0;">Our Approach</h2>
-                                
-                                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                                    
-                                    <!-- Point 1 -->
-                                    <div style="display: flex; align-items: flex-start; gap: 0.8rem;">
-                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                                                <polyline points="9 12 11 14 15 10"></polyline>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 0.15rem;">Verified Partners</div>
-                                            <div style="font-size: 0.82rem; color: #64748b; line-height: 1.45;">We work only with trusted and verified travel partners to ensure a safe and reliable journey.</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Point 2 -->
-                                    <div style="display: flex; align-items: flex-start; gap: 0.8rem;">
-                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                                <polyline points="14 2 14 8 20 8"></polyline>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 0.15rem;">Transparent Process</div>
-                                            <div style="font-size: 0.82rem; color: #64748b; line-height: 1.45;">From comparison to booking, everything is clear and straightforward.</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Point 3 -->
-                                    <div style="display: flex; align-items: flex-start; gap: 0.8rem;">
-                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                                <circle cx="9" cy="7" r="4"></circle>
-                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 0.15rem;">Customer First</div>
-                                            <div style="font-size: 0.82rem; color: #64748b; line-height: 1.45;">We are always here to help you before, during, and after your journey.</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Point 4 -->
-                                    <div style="display: flex; align-items: flex-start; gap: 0.8rem;">
-                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                                <line x1="18" y1="20" x2="18" y2="10"></line>
-                                                <line x1="12" y1="20" x2="12" y2="4"></line>
-                                                <line x1="6" y1="20" x2="6" y2="14"></line>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 0.15rem;">Continuous Improvement</div>
-                                            <div style="font-size: 0.82rem; color: #64748b; line-height: 1.45;">We keep improving our platform and services based on your feedback.</div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <!-- Right Side Box: What Drives Us -->
-                        <div style="background: #f4fbf7; border: 1px solid #d1fae5; border-radius: 20px; padding: 2.2rem 2rem; display: flex; flex-direction: column; justify-content: center; height: 100%; box-sizing: border-box;">
-                            <h3 style="font-size: 1.25rem; font-weight: 800; color: #15803d; margin: 0 0 0.8rem 0;">What Drives Us</h3>
-                            
-                            <div style="font-size: 3.2rem; color: #16a34a; line-height: 0.8; font-family: Georgia, serif; margin-bottom: 0.5rem; user-select: none;">“</div>
-                            
-                            <p style="font-size: 1rem; color: #334155; line-height: 1.65; font-weight: 500; margin: 0 0 1.4rem 0;">
-                                Our goal is simple:<br>
-                                To provide honest service, clear information, and peace of mind to every traveler.
-                            </p>
-                            
-                            <div style="font-size: 0.9rem; font-weight: 800; color: #15803d;">
-                                – Tawseef Assadullah H
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-
-                <!-- BLOCK 5: Bottom CTA Banner (Ready to Start Your Blessed Journey?) -->
-                <div style="background: linear-gradient(135deg, #15803d 0%, #065f46 100%); border-radius: 20px; padding: 3.2rem 2rem; text-align: center; color: #ffffff; box-shadow: 0 12px 32px rgba(21, 128, 61, 0.22); position: relative; overflow: hidden;">
-                    
-                    <!-- Faded Mosque Background Overlay -->
-                    <div style="position: absolute; inset: 0; pointer-events: none; opacity: 0.12; overflow: hidden;">
-                        <svg viewBox="0 0 800 200" width="100%" height="100%" fill="#ffffff" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="50" y="80" width="20" height="120"/>
-                            <path d="M50 80 Q60 40 70 80Z"/>
-                            <rect x="100" y="50" width="120" height="150" rx="10"/>
-                            <path d="M100 50 Q160 -30 220 50Z"/>
-                            <rect x="250" y="80" width="20" height="120"/>
-                            <path d="M250 80 Q260 40 270 80Z"/>
-                            <rect x="550" y="80" width="20" height="120"/>
-                            <path d="M550 80 Q560 40 570 80Z"/>
-                            <rect x="600" y="50" width="120" height="150" rx="10"/>
-                            <path d="M600 50 Q660 -30 720 50Z"/>
-                            <rect x="750" y="80" width="20" height="120"/>
-                            <path d="M750 80 Q760 40 770 80Z"/>
-                        </svg>
-                    </div>
-
-                    <div style="position: relative; z-index: 2; max-width: 650px; margin: 0 auto;">
-                        <h2 style="font-size: clamp(1.25rem, 2.2vw, 1.5rem); font-weight: 800; color: #ffffff; margin: 0 0 0.75rem 0; letter-spacing: -0.01em;">
-                            Ready to Start Your Blessed Journey?
+                <!-- SECTION 4: BRAND STATEMENT BANNER -->
+                <div style="background: linear-gradient(135deg, #0b3b2c 0%, #041b13 100%); border-radius: 20px; padding: 3rem 2rem; text-align: center; color: #ffffff; margin-bottom: 4rem; position: relative; overflow: hidden; box-shadow: 0 16px 36px rgba(8,51,36,0.18);">
+                    <div style="max-width: 760px; margin: 0 auto; position: relative; z-index: 2;">
+                        <div style="font-size: 0.85rem; font-weight: 800; letter-spacing: 0.1em; color: #f59e0b; text-transform: uppercase; margin-bottom: 0.8rem;">THE ZILHAJ PROMISE</div>
+                        <h2 style="font-size: clamp(1.6rem, 3vw, 2.3rem); font-weight: 900; line-height: 1.25; margin: 0 0 1rem 0; color: #ffffff;">
+                            &ldquo;One Request. Multiple Verified Offers.&rdquo;
                         </h2>
-                        <p style="font-size: 1rem; color: rgba(255,255,255,0.92); margin: 0 auto 1.8rem; line-height: 1.6; font-weight: 400;">
-                            Find the best Umrah and Hajj options from trusted travel partners.
+                        <p style="color: rgba(255,255,255,0.88); font-size: 1rem; line-height: 1.6; margin: 0 auto 1.8rem;">
+                            Connecting pilgrims directly with certified, verified pilgrimage organizers across India and Saudi Arabia.
                         </p>
-                        <button onclick="app.navigate('home'); setTimeout(() => app.scrollToRequirementForm(), 200);" style="background: #f59e0b; color: #0a1a12; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 2.2rem; border-radius: 10px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4); transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(245, 158, 11, 0.5)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(245, 158, 11, 0.4)'">
-                            <span>Explore Packages</span>
-                            <span>→</span>
-                        </button>
+                        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                            <span style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 99px; font-size: 0.82rem; font-weight: 700; color: #ffffff;">✓ Submit Once</span>
+                            <span style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 99px; font-size: 0.82rem; font-weight: 700; color: #ffffff;">✓ Compare Verified Options</span>
+                            <span style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 99px; font-size: 0.82rem; font-weight: 700; color: #ffffff;">✓ Choose with Confidence</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 5: WHY WE STARTED & NARRATIVE -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; align-items: center; margin-bottom: 4rem;">
+                    <div>
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #15803d; border: 1px solid #bbf7d0; padding: 0.3rem 0.9rem; border-radius: 99px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.8rem;">
+                            <span>ORIGIN &amp; PURPOSE</span>
+                        </div>
+                        <h2 style="font-size: clamp(1.5rem, 2.5vw, 2.1rem); font-weight: 900; color: #0f172a; margin-bottom: 1.2rem; letter-spacing: -0.01em;">Why We Started</h2>
+                        <p style="color: #475569; font-size: 0.96rem; line-height: 1.7; margin-bottom: 1rem;">
+                            ZILHAJ was founded after observing how difficult it can be for pilgrims to compare services across multiple providers. Pricing is often inconsistent, information is scattered, and customers are frequently unsure which offer is truly the best.
+                        </p>
+                        <p style="color: #475569; font-size: 0.96rem; line-height: 1.7; margin-bottom: 1.4rem;">
+                            While exploring Hajj &amp; Umrah services, it became clear that pilgrims were spending significant time contacting different providers just to find reliable options. This led to a simple but powerful idea: instead of pilgrims searching across many providers, providers should compete to offer the best service to the pilgrim.
+                        </p>
+                        <blockquote style="margin: 0; padding: 1rem 1.4rem; background: #f0fdf4; border-left: 4px solid #15803d; border-radius: 0 12px 12px 0;">
+                            <p style="margin: 0; color: #166534; font-size: 1.05rem; font-style: italic; font-weight: 600;">
+                                “Let the pilgrim focus on the journey, not the search.”
+                            </p>
+                        </blockquote>
                     </div>
 
+                    <!-- Right Column: Pilgrim-Centered Clarity Card -->
+                    <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 20px; padding: 2.2rem; box-shadow: 0 8px 30px rgba(0,0,0,0.04);">
+                        <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem;">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><circle cx="12" cy="11" r="3"></circle></svg>
+                        </div>
+                        <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0 0 0.8rem 0;">Pilgrim-Centered Clarity</h3>
+                        <p style="color: #64748b; font-size: 0.92rem; line-height: 1.65; margin-bottom: 1.4rem;">
+                            Planning a sacred journey should be peaceful and transparent. ZILHAJ connects your specific requirements with accredited Hajj &amp; Umrah providers so you receive clear, organized offers without the noise.
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 0.7rem;">
+                            <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; font-weight: 700; color: #0f172a;">
+                                <span style="color: #15803d;">✓</span> Focused exclusively on Hajj &amp; Umrah
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; font-weight: 700; color: #0f172a;">
+                                <span style="color: #15803d;">✓</span> Multiple verified providers compete for you
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; font-weight: 700; color: #0f172a;">
+                                <span style="color: #15803d;">✓</span> Side-by-side transparent package comparison
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 6: FOUNDER SECTION -->
+                <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 24px; padding: 2.8rem 2.4rem; box-shadow: 0 8px 30px rgba(0,0,0,0.03); margin-bottom: 4rem;">
+                    <div style="text-align: center; margin-bottom: 2.2rem;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 0.3rem 0.9rem; border-radius: 99px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
+                            <span>LEADERSHIP</span>
+                        </div>
+                        <h2 style="font-size: clamp(1.5rem, 2.5vw, 2.1rem); font-weight: 900; color: #0f172a; margin: 0 0 0.5rem 0;">The Founder Behind ZILHAJ</h2>
+                        <p style="color: #64748b; font-size: 0.95rem; margin: 0;">Authentic leadership committed to simplifying pilgrimage planning.</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5rem; align-items: center;">
+                        <!-- Founder Image & Role -->
+                        <div style="text-align: center;">
+                            <div style="width: 170px; height: 170px; border-radius: 50%; overflow: hidden; margin: 0 auto 1.2rem; border: 4px solid #ffffff; box-shadow: 0 12px 32px rgba(0,0,0,0.12); background: #f8fafc;">
+                                <img src="founder.jpg" onerror="this.onerror=null;this.src='about bubble/assets/images/founder.jpg';" alt="Tawseef Assadullah H" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                            </div>
+                            <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #15803d; border: 1px solid #bbf7d0; padding: 0.25rem 0.85rem; border-radius: 99px; font-size: 0.8rem; font-weight: 800;">
+                                <span style="width: 6px; height: 6px; background: #15803d; border-radius: 50%;"></span>
+                                <span>Founder &amp; CEO</span>
+                            </div>
+                        </div>
+
+                        <!-- Founder Details & Bio -->
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
+                                <h3 style="font-size: 1.45rem; font-weight: 900; color: #0f172a; margin: 0;">Tawseef Assadullah H</h3>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="#15803d"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                            </div>
+                            <div style="display: inline-flex; align-items: center; gap: 0.4rem; color: #15803d; font-size: 0.86rem; font-weight: 700; margin-bottom: 1.2rem; background: #f0fdf4; padding: 0.3rem 0.8rem; border-radius: 8px; border: 1px solid #dcfce7;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+                                <span>B.Tech &ndash; National Institute of Technology Srinagar (NIT Srinagar)</span>
+                            </div>
+
+                            <p style="color: #475569; font-size: 0.94rem; line-height: 1.68; margin-bottom: 1rem;">
+                                ZILHAJ was born from a simple observation: planning Hajj and Umrah can become unnecessarily complicated when pilgrims have to contact multiple providers just to understand their options.
+                            </p>
+                            <p style="color: #475569; font-size: 0.94rem; line-height: 1.68; margin-bottom: 1.4rem;">
+                                The vision behind ZILHAJ is to simplify this process by allowing pilgrims to submit their requirements once and receive suitable verified offers from service providers.
+                            </p>
+
+                            <!-- Quote Box -->
+                            <div style="background: #f4fbf7; border: 1px solid #d1fae5; border-radius: 14px; padding: 1.1rem 1.4rem; margin-bottom: 1.2rem;">
+                                <div style="font-size: 0.92rem; font-style: italic; color: #166534; line-height: 1.6; margin-bottom: 0.5rem;">
+                                    “Our goal is simple: To provide honest service, clear information, and peace of mind to every traveler.”
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                                    <span style="font-size: 0.84rem; font-weight: 800; color: #15803d;">– Tawseef Assadullah H</span>
+                                    <a href="https://www.linkedin.com/in/goexergy-private-limited-775874428/" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; font-weight: 700; color: #ffffff; background: #0077b5; padding: 0.3rem 0.75rem; border-radius: 6px; text-decoration: none;">
+                                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+                                        <span>LinkedIn</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 7: HOW ZILHAJ WORKS (4 STEPS) -->
+                <div style="margin-bottom: 4rem;">
+                    <div style="text-align: center; margin-bottom: 2.5rem;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 0.3rem 0.9rem; border-radius: 99px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
+                            <span>TRANSPARENT 4-STEP JOURNEY</span>
+                        </div>
+                        <h2 style="font-size: clamp(1.5rem, 2.5vw, 2.1rem); font-weight: 900; color: #0f172a; margin: 0 0 0.5rem 0;">How ZILHAJ Works</h2>
+                        <p style="color: #64748b; font-size: 0.95rem; margin: 0;">Four simple steps to compare verified offers and plan your sacred journey.</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                                <div style="width: 44px; height: 44px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                </div>
+                                <span style="font-size: 0.75rem; font-weight: 800; color: #15803d; background: #f0fdf4; padding: 0.2rem 0.6rem; border-radius: 6px;">STEP 1</span>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Submit Your Request</h3>
+                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.6; margin: 0;">Tell us your Hajj or Umrah requirements, preferred dates, number of travelers, budget and specific preferences.</p>
+                        </div>
+
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                                <div style="width: 44px; height: 44px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                                </div>
+                                <span style="font-size: 0.75rem; font-weight: 800; color: #15803d; background: #f0fdf4; padding: 0.2rem 0.6rem; border-radius: 6px;">STEP 2</span>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Connect With Providers</h3>
+                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.6; margin: 0;">Your request is routed directly to relevant, verified Hajj &amp; Umrah service partners.</p>
+                        </div>
+
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                                <div style="width: 44px; height: 44px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                </div>
+                                <span style="font-size: 0.75rem; font-weight: 800; color: #15803d; background: #f0fdf4; padding: 0.2rem 0.6rem; border-radius: 6px;">STEP 3</span>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Receive &amp; Review Offers</h3>
+                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.6; margin: 0;">Verified providers submit competitive offers. You review prices, hotels, and inclusions side-by-side.</p>
+                        </div>
+
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                                <div style="width: 44px; height: 44px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                </div>
+                                <span style="font-size: 0.75rem; font-weight: 800; color: #15803d; background: #f0fdf4; padding: 0.2rem 0.6rem; border-radius: 6px;">STEP 4</span>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Choose with Confidence</h3>
+                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.6; margin: 0;">Compare transparent offers with zero pressure and select the one that fits your journey best.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 8: WHAT MAKES OUR APPROACH DIFFERENT -->
+                <div style="background: #f8faf9; border-radius: 24px; padding: 3rem 2.5rem; margin-bottom: 4rem; border: 1.5px solid #edf2f0;">
+                    <div style="text-align: center; max-width: 820px; margin: 0 auto 2.5rem;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #15803d; border: 1px solid #bbf7d0; padding: 0.3rem 0.9rem; border-radius: 99px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.8rem;">
+                            <span>PILGRIM-FIRST ADVANTAGE</span>
+                        </div>
+                        <h2 style="font-size: clamp(1.5rem, 2.5vw, 2.1rem); font-weight: 900; color: #0f172a; margin: 0 0 0.5rem 0;">What Makes Our Approach Different</h2>
+                        <p style="color: #64748b; font-size: 0.95rem; margin: 0;">Designed around making the planning process simpler, clearer and more convenient for pilgrims.</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Verified Partners</h3>
+                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.6; margin: 0;">We work only with trusted and verified travel partners to ensure a safe and reliable journey.</p>
+                        </div>
+
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Transparent Process</h3>
+                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.6; margin: 0;">From comparison to booking, every package inclusion and hotel detail is clear and straightforward.</p>
+                        </div>
+
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Customer First</h3>
+                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.6; margin: 0;">We are always here to help before, during, and after your journey with dedicated assistance.</p>
+                        </div>
+
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Continuous Improvement</h3>
+                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.6; margin: 0;">We keep refining our technology and verified network based on authentic pilgrim feedback.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 9: OUR VALUES -->
+                <div style="margin-bottom: 4rem;">
+                    <div style="text-align: center; margin-bottom: 2.5rem;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 0.3rem 0.9rem; border-radius: 99px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
+                            <span>CORE VALUES</span>
+                        </div>
+                        <h2 style="font-size: clamp(1.5rem, 2.5vw, 2.1rem); font-weight: 900; color: #0f172a; margin: 0 0 0.5rem 0;">Our Values</h2>
+                        <p style="color: #64748b; font-size: 0.95rem; margin: 0;">The foundational principles that guide every decision on the ZILHAJ platform.</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.4rem 0;">Trust</h3>
+                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.55; margin: 0;">Building confidence through verified providers and transparent processes.</p>
+                        </div>
+
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.4rem 0;">Transparency</h3>
+                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.55; margin: 0;">Providing clear information so pilgrims can make informed decisions.</p>
+                        </div>
+
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.4rem 0;">Simplicity</h3>
+                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.55; margin: 0;">Removing the friction and confusion from pilgrimage planning.</p>
+                        </div>
+
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.4rem 0;">Pilgrim First</h3>
+                            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.55; margin: 0;">Designing every feature around the needs of the pilgrim.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 10: OUR VISION -->
+                <div style="background: linear-gradient(135deg, #0b3b2c 0%, #041b13 100%); border-radius: 20px; padding: 3rem 2.5rem; text-align: center; color: #ffffff; margin-bottom: 4rem; box-shadow: 0 16px 36px rgba(8,51,36,0.18);">
+                    <div style="max-width: 780px; margin: 0 auto;">
+                        <div style="font-size: 0.82rem; font-weight: 800; letter-spacing: 0.1em; color: #f59e0b; text-transform: uppercase; margin-bottom: 0.8rem;">LOOKING FORWARD</div>
+                        <h2 style="font-size: clamp(1.6rem, 2.8vw, 2.2rem); font-weight: 900; color: #ffffff; margin: 0 0 1.2rem 0;">Our Vision</h2>
+                        <p style="font-size: 1.15rem; font-style: italic; color: #fef08a; line-height: 1.6; margin-bottom: 1rem; font-weight: 600;">
+                            “To make Hajj &amp; Umrah planning simpler, more transparent and more accessible for every pilgrim.”
+                        </p>
+                        <p style="color: rgba(255,255,255,0.85); font-size: 0.95rem; line-height: 1.7; margin: 0 auto;">
+                            We envision a future where pilgrims do not have to spend countless hours searching for providers and comparing scattered information. ZILHAJ aims to bring suitable verified options together through one simple request, giving pilgrims greater clarity and confidence when choosing their journey.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SECTION 11: OUR COMMITMENT TO PILGRIMS -->
+                <div style="margin-bottom: 4rem;">
+                    <div style="text-align: center; margin-bottom: 2.5rem;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #15803d; border: 1px solid #bbf7d0; padding: 0.3rem 0.9rem; border-radius: 99px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem;">
+                            <span>OUR DEDICATION</span>
+                        </div>
+                        <h2 style="font-size: clamp(1.5rem, 2.5vw, 2.1rem); font-weight: 900; color: #0f172a; margin: 0 0 0.5rem 0;">Our Commitment to Pilgrims</h2>
+                        <p style="color: #64748b; font-size: 0.95rem; margin: 0;">Realistic, reliable standards focused on transparency, trust, and continuous support.</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Transparency</h3>
+                            <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">Clear information about packages, inclusions, hotel ratings, and offers with zero surprise fees.</p>
+                        </div>
+
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Trust</h3>
+                            <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">Approaching only verified and suitable service providers with proper accreditation.</p>
+                        </div>
+
+                        <div style="background: #ffffff; border: 1.5px solid #f1f5f9; border-radius: 18px; padding: 2rem 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: #ecfdf5; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem 0;">Support</h3>
+                            <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">Helping pilgrims navigate their options with prompt, compassionate guidance 24 hours a day.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 12: FINAL CTA BANNER -->
+                <div style="background: linear-gradient(135deg, #15803d 0%, #065f46 100%); border-radius: 20px; padding: 3.5rem 2rem; text-align: center; color: #ffffff; box-shadow: 0 12px 32px rgba(21, 128, 61, 0.22); position: relative; overflow: hidden;">
+                    <div style="position: relative; z-index: 2; max-width: 680px; margin: 0 auto;">
+                        <div style="font-size: 0.82rem; font-weight: 800; letter-spacing: 0.1em; color: #fde68a; text-transform: uppercase; margin-bottom: 0.8rem;">BEGIN YOUR PLANNING</div>
+                        <h2 style="font-size: clamp(1.5rem, 2.6vw, 2.2rem); font-weight: 900; color: #ffffff; margin: 0 0 0.8rem 0; letter-spacing: -0.01em;">
+                            Your Journey Deserves a Simpler Start.
+                        </h2>
+                        <p style="font-size: 1rem; color: rgba(255,255,255,0.92); margin: 0 auto 2rem; line-height: 1.6; font-weight: 400;">
+                            Submit your Hajj or Umrah request and let verified service providers send you competitive, personalized offers.
+                        </p>
+                        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                            <button onclick="app.openRequirementModal ? app.openRequirementModal() : (app.navigate('home'), setTimeout(() => app.scrollToRequirementForm(), 200))" style="background: #f59e0b; color: #0a1a12; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 2.2rem; border-radius: 10px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4); transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+                                <span>Submit a Request</span>
+                                <span>→</span>
+                            </button>
+                            <a href="services-tawseef/services.html" style="background: rgba(255,255,255,0.12); color: #ffffff; font-weight: 800; font-size: 0.95rem; padding: 0.85rem 2.2rem; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.4); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.25s ease;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+                                <span>Explore Services</span>
+                                <span>→</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
             </div>
