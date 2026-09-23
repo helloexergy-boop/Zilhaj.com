@@ -211,79 +211,21 @@ function initNoorChatbot() {
 }
 
 /* --------------------------------------------------------------------------
-   5. Interactive Request Modal & Dynamic Journey Preselection
+   5. Interactive Request Trigger - Direct Route to Original Form Page
    -------------------------------------------------------------------------- */
 function initRequestModal() {
   const openButtons = document.querySelectorAll('[data-open-request-modal]');
-  const modal = document.querySelector('.request-modal');
-  const backdrop = document.querySelector('.modal-backdrop');
-  const closeBtn = document.querySelector('.modal-close');
-  const form = document.getElementById('pilgrimRequestForm');
-  const journeySelect = document.getElementById('journeyType');
-
-  if (!modal || !backdrop) return;
-
-  function openModal(journeyType = null) {
-    if (journeyType && journeySelect) {
-      journeySelect.value = journeyType;
-    }
-    backdrop.classList.add('active');
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeModal() {
-    backdrop.classList.remove('active');
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
-  }
-
   openButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       const journey = btn.getAttribute('data-journey');
-      openModal(journey);
+      if (journey) {
+        window.location.href = `/submit-request?type=${encodeURIComponent(journey)}`;
+      } else {
+        window.location.href = '/submit-request';
+      }
     });
   });
-
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
-  backdrop.addEventListener('click', closeModal);
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('active')) {
-      closeModal();
-    }
-  });
-
-  if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const submitBtn = form.querySelector('button[type="submit"]');
-      const originalText = submitBtn.innerHTML;
-
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>Processing Request...</span>';
-
-      setTimeout(() => {
-        form.innerHTML = `
-          <div style="text-align: center; padding: 24px 8px;">
-            <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--color-primary-subtle); color: var(--color-primary-emerald); display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px;">✓</div>
-            <h4 style="font-family: var(--font-family-display); font-size: 20px; font-weight: 700; color: var(--color-text-title); margin-bottom: 8px;">Request Successfully Submitted!</h4>
-            <p style="font-size: 14px; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 20px;">
-              Thank you for choosing ZILHAJ. Your pilgrimage requirements have been securely forwarded to verified service providers. You will receive suitable offers shortly.
-            </p>
-            <button type="button" class="btn btn-primary" id="closeSuccessBtn">Done</button>
-          </div>
-        `;
-
-        document.getElementById('closeSuccessBtn').addEventListener('click', () => {
-          closeModal();
-          // Reset form reload after closing
-          setTimeout(() => window.location.reload(), 300);
-        });
-      }, 1000);
-    });
-  }
 }
 
 /* --------------------------------------------------------------------------

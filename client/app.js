@@ -512,9 +512,7 @@ class App {
             navMenu.innerHTML = `
                 <a href="/" class="nav-link ${this.state.currentPage === 'home' ? 'active' : ''}">Home</a>
                 <a href="/services" class="nav-link ${this.state.currentPage === 'services' ? 'active' : ''}">Services</a>
-                <a href="/#packages" class="nav-link">Packages</a>
                 <a href="/about" class="nav-link ${this.state.currentPage === 'about' ? 'active' : ''}">About Us</a>
-                <a href="/#contact" class="nav-link ${this.state.currentPage === 'contact' ? 'active' : ''}" onclick="app.scrollToContact(event)">Contact Us</a>
                 <div class="mobile-only-auth" style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid #e2e8f0; display:flex; flex-direction:column; gap:0.5rem; width:100%;">
                     ${!this.state.currentUser ? `
                         <button class="btn btn-outline" onclick="window.location.href='/login'" style="width:100%; border:1.5px solid #0f172a; color:#0f172a; font-weight:700; border-radius:10px; padding:0.65rem; font-size:0.9rem; background:transparent; cursor:pointer;">Login</button>

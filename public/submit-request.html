@@ -299,6 +299,18 @@
         if (u.phone) document.getElementById('mobileInput').value = u.phone;
       } catch(e) {}
 
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const typeParam = urlParams.get('type') || urlParams.get('journey');
+        if (typeParam) {
+          const applyingSelect = document.getElementById('applyingForSelect');
+          if (applyingSelect) {
+            if (typeParam.toLowerCase().includes('hajj')) applyingSelect.value = 'Hajj';
+            else if (typeParam.toLowerCase().includes('umrah')) applyingSelect.value = 'Umrah';
+          }
+        }
+      } catch(e) {}
+
       const form = document.getElementById('fullRequestFormStandalone');
       if (form) {
         form.addEventListener('submit', async (e) => {

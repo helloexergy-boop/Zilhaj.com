@@ -219,72 +219,19 @@ function initNoorChatbot() {
 }
 
 /* --------------------------------------------------------------------------
-   5. Interactive Request Modal System
+   5. Interactive Request Trigger - Direct Route to Original Form Page
    -------------------------------------------------------------------------- */
 function initRequestModal() {
-  const modal = document.querySelector('.request-modal');
-  const backdrop = document.querySelector('.modal-backdrop');
-  const closeBtn = document.querySelector('.modal-close');
   const triggerBtns = document.querySelectorAll('[data-open-request-modal]');
-  const requestForm = document.querySelector('#pilgrimRequestForm');
-
-  if (!modal || !backdrop) return;
-
-  function openModal(journeyType = 'Umrah') {
-    modal.classList.add('active');
-    backdrop.classList.add('active');
-    document.body.style.overflow = 'hidden';
-
-    const journeySelect = modal.querySelector('#journeyType');
-    if (journeySelect && journeyType) {
-      journeySelect.value = journeyType;
-    }
-  }
-
-  function closeModal() {
-    modal.classList.remove('active');
-    backdrop.classList.remove('active');
-    document.body.style.overflow = '';
-  }
-
   triggerBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      const journey = btn.getAttribute('data-journey') || 'Umrah';
-      openModal(journey);
+      const journey = btn.getAttribute('data-journey');
+      if (journey) {
+        window.location.href = `/submit-request?type=${encodeURIComponent(journey)}`;
+      } else {
+        window.location.href = '/submit-request';
+      }
     });
   });
-
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
-  backdrop.addEventListener('click', closeModal);
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('active')) {
-      closeModal();
-    }
-  });
-
-  if (requestForm) {
-    requestForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const submitBtn = requestForm.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
-      submitBtn.textContent = 'Connecting with Verified Providers...';
-      submitBtn.disabled = true;
-
-      setTimeout(() => {
-        const modalBody = modal.querySelector('.modal-body');
-        modalBody.innerHTML = `
-          <div style="text-align: center; padding: 24px 12px;">
-            <div style="width: 56px; height: 56px; background: #D1FAE5; color: #065F46; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;">✓</div>
-            <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 700; color: #083324; margin-bottom: 8px;">Request Submitted Successfully</h3>
-            <p style="font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 20px;">
-              Your pilgrimage requirements have been received. We are connecting your request with relevant verified Hajj &amp; Umrah service providers. Suitable offers will be prepared for you to compare.
-            </p>
-            <button class="btn btn-primary" onclick="location.reload()" style="width: 100%;">Done</button>
-          </div>
-        `;
-      }, 900);
-    });
-  }
 }

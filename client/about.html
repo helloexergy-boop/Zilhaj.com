@@ -21,6 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <!-- Stylesheets -->
+  <link rel="stylesheet" href="/index.css">
   <link rel="stylesheet" href="/css/variables.css">
   <link rel="stylesheet" href="/css/about.css">
   <link rel="icon" type="image/png" href="/logo.png">
@@ -28,93 +29,50 @@
 <body>
 
   <!-- ==========================================================================
-       HEADER & NAVIGATION
+       ORIGINAL SITE NAVBAR (FLOATING DYNAMIC ISLAND)
        ========================================================================== -->
-  <header class="site-header" id="siteHeader">
-    <div class="container header-container">
-      <!-- Logo -->
-      <a href="/" class="brand-logo" aria-label="ZILHAJ Home" style="display:flex;align-items:center;gap:0.75rem;text-decoration:none;">
-        <div style="width:44px;height:44px;border-radius:50%;overflow:hidden;background:#ffffff;border:1.5px solid #e2e8f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-          <img src="logo.png" onerror="this.onerror=null;this.src='assets/images/logo.svg';" alt="ZILHAJ" style="width:100%;height:100%;object-fit:cover;">
+  <div class="navbar-wrapper" id="navbarWrapper">
+    <header class="navbar" id="navbar">
+      <div class="nav-container" style="max-width: 100%; margin: 0 auto; width: 100%; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+        <!-- Logo Left -->
+        <div class="nav-brand" onclick="window.location.href='/'" style="cursor: pointer; display: flex; align-items: center; gap: 0.65rem;">
+          <div style="width: 44px; height: 44px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); flex-shrink: 0;">
+            <img src="logo.png" onerror="this.onerror=null;this.src='images/logo.png';" alt="Zilhaj.com Logo" style="width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%;">
+          </div>
+          <div style="display: flex; flex-direction: column; line-height: 1.05;">
+            <span class="brand-name" style="font-size: 1.3rem; font-weight: 900; color: #0f172a; letter-spacing: 0.5px;">Zilhaj.com</span>
+            <span style="font-size: 0.55rem; font-weight: 800; color: #2b5e48; letter-spacing: 0.8px; margin-top: 2px; text-transform: uppercase;">UMRAH &amp; HAJJ TRAVEL</span>
+          </div>
         </div>
-        <div style="display:flex;flex-direction:column;line-height:1.1;">
-          <span style="font-weight:900;font-size:1.3rem;color:#0f172a;letter-spacing:0.5px;">Zilhaj.com</span>
-          <span style="font-size:0.55rem;font-weight:800;color:#15803d;letter-spacing:0.8px;text-transform:uppercase;">UMRAH &amp; HAJJ TRAVEL</span>
-        </div>
-      </a>
 
-      <!-- Desktop Navigation Links -->
-      <nav class="nav-menu" aria-label="Main Navigation">
-        <a href="/" class="nav-link">Home</a>
-        <a href="/services" class="nav-link">Services</a>
-        <a href="/#packages" class="nav-link">Packages</a>
-        <a href="/about" class="nav-link active" aria-current="page">About Us</a>
-        <a href="/#contact" class="nav-link">Contact Us</a>
-      </nav>
+        <!-- Nav Links Middle: Only Home, Services, About Us -->
+        <nav class="nav-menu" id="navMenu">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/services" class="nav-link">Services</a>
+          <a href="/about" class="nav-link active">About Us</a>
+          <div class="mobile-only-auth" style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid #e2e8f0; display:flex; flex-direction:column; gap:0.5rem; width:100%;">
+            <button class="btn btn-outline" onclick="window.location.href='/login'" style="width:100%; border:1.5px solid #0f172a; color:#0f172a; font-weight:700; border-radius:10px; padding:0.65rem; font-size:0.9rem; background:transparent; cursor:pointer;">Login</button>
+            <button class="btn btn-primary" onclick="window.location.href='/signup'" style="width:100%; background:#047857; color:white; font-weight:700; border-radius:10px; padding:0.65rem; border:none; font-size:0.9rem; cursor:pointer;">Sign Up</button>
+          </div>
+        </nav>
 
-      <!-- Header Actions -->
-      <div class="header-actions">
-        <div class="user-status" title="Ecosystem Status: Active">
-          <span class="user-status-dot" aria-hidden="true"></span>
-          <span>Verified Network</span>
-        </div>
-        <button class="btn btn-primary" data-open-request-modal>
-          <span>Submit a Request</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-        </button>
-        <button class="mobile-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobileDrawer">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
-    </div>
-  </header>
+        <!-- Right Controls Group -->
+        <div class="nav-right-group" style="display: flex; align-items: center; gap: 1rem;">
+          <div class="nav-actions" id="navAuthActions">
+            <button class="nav-btn btn-login" onclick="window.location.href='/login'">Login</button>
+            <button class="nav-btn btn-signup" onclick="window.location.href='/signup'">Sign Up</button>
+          </div>
 
-  <!-- Mobile Drawer & Backdrop -->
-  <div class="drawer-backdrop" aria-hidden="true"></div>
-  <aside class="mobile-drawer" id="mobileDrawer" aria-label="Mobile Navigation Menu">
-    <div>
-      <div style="margin-bottom: 24px; display:flex; align-items:center; gap:0.65rem;">
-        <img src="logo.png" onerror="this.onerror=null;this.src='assets/images/logo.svg';" alt="ZILHAJ" width="40" height="40" style="border-radius:50%;">
-        <div style="display:flex;flex-direction:column;line-height:1.1;">
-          <span style="font-weight:900; font-size:1.2rem; color:#0f172a;">Zilhaj.com</span>
-          <span style="font-size:0.5rem; font-weight:800; color:#15803d; letter-spacing:0.8px;">UMRAH &amp; HAJJ</span>
+          <!-- Mobile Menu Hamburger -->
+          <button class="mobile-toggle" onclick="var m=document.getElementById('navMenu');if(m)m.classList.toggle('open');this.classList.toggle('active');" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </div>
       </div>
-      <nav class="mobile-nav-list">
-        <a href="/" class="mobile-nav-link">
-          <span>Home</span>
-          <span aria-hidden="true">&rarr;</span>
-        </a>
-        <a href="/services" class="mobile-nav-link">
-          <span>Services</span>
-          <span aria-hidden="true">&rarr;</span>
-        </a>
-        <a href="/#packages" class="mobile-nav-link">
-          <span>Packages</span>
-          <span aria-hidden="true">&rarr;</span>
-        </a>
-        <a href="/about" class="mobile-nav-link active">
-          <span>About Us</span>
-          <span aria-hidden="true">&check;</span>
-        </a>
-        <a href="/#contact" class="mobile-nav-link">
-          <span>Contact Us</span>
-          <span aria-hidden="true">&rarr;</span>
-        </a>
-      </nav>
-    </div>
-
-    <div>
-      <button class="btn btn-primary" style="width: 100%; margin-bottom: 12px;" data-open-request-modal>
-        Submit a Request &rarr;
-      </button>
-      <p style="font-size: 11px; text-align: center; color: var(--color-text-subtle);">
-        One Request. Multiple Verified Offers.
-      </p>
-    </div>
-  </aside>
+    </header>
+  </div>
 
   <!-- ==========================================================================
        MAIN CONTENT
@@ -144,10 +102,10 @@
             </p>
 
             <div class="hero-cta-group">
-              <button class="btn btn-primary" data-open-request-modal>
+              <button class="btn btn-primary" onclick="window.location.href='/submit-request'">
                 <span>Submit a Request &rarr;</span>
               </button>
-              <a href="../services-tawseef/services.html" class="btn btn-secondary">
+              <a href="/services" class="btn btn-secondary">
                 <span>Explore Services &rarr;</span>
               </a>
             </div>
@@ -787,10 +745,10 @@
             </p>
 
             <div class="final-cta-buttons">
-              <button class="btn btn-gold" data-open-request-modal>
+              <button class="btn btn-gold" onclick="window.location.href='/submit-request'">
                 <span>Submit a Request &rarr;</span>
               </button>
-              <a href="../services-tawseef/services.html" class="btn btn-outline-white">
+              <a href="/services" class="btn btn-outline-white">
                 <span>Explore Services &rarr;</span>
               </a>
             </div>
@@ -804,83 +762,148 @@
   </main>
 
   <!-- ==========================================================================
-       FOOTER
+       ORIGINAL ZILHAJ FOOTER (PIXEL-PERFECT FROM INDEX.HTML)
        ========================================================================== -->
-  <footer class="site-footer" id="footer">
-    <div class="container">
-      
-      <!-- Footer Columns Grid -->
-      <div class="footer-top-grid">
-        
-        <!-- Brand Info -->
-        <div class="footer-brand">
-          <div class="footer-logo" style="display:flex;align-items:center;gap:0.6rem;margin-bottom:12px;">
-            <img src="../logo.png" onerror="this.onerror=null;this.src='assets/images/logo.svg';" alt="ZILHAJ Logo" width="36" height="36" style="border-radius:50%;">
-            <span style="font-weight:900;font-size:1.3rem;color:#ffffff;">Zilhaj.com</span>
+  <footer style="width:100%;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;margin:0;padding:0;box-sizing:border-box;">
+
+      <!-- SECTION 1: Main 4-column grid -->
+      <div style="background:#ffffff;border-top:1.5px solid #e8ede9;padding:3.5rem 0 3rem;width:100%;box-sizing:border-box;">
+          <div style="width:100%;margin:0;padding:0 3.5rem;display:grid;grid-template-columns:1.5fr 1fr 1fr 1.3fr;gap:3rem;align-items:start;box-sizing:border-box;">
+
+              <!-- Col 1: BRAND -->
+              <div>
+                  <div style="display:flex;align-items:center;gap:0.55rem;margin-bottom:0.75rem;">
+                      <img src="logo.png" onerror="this.onerror=null;this.src='images/logo.png';" alt="ZILHAJ" style="width:52px;height:52px;object-fit:cover;border-radius:50%;border:1.5px solid #e2e8f0;">
+                      <span style="font-size:1.9rem;font-weight:900;color:#1a3a2a;letter-spacing:1.5px;font-style:italic;">ZILHAJ</span>
+                  </div>
+                  <div style="font-size:1rem;font-weight:800;color:#0f172a;line-height:1.35;margin-bottom:0.4rem;">One Request.<br>Multiple Verified Offers.</div>
+                  <div style="width:36px;height:3px;background:#c8831a;border-radius:2px;margin-bottom:0.9rem;"></div>
+                  <p style="font-size:0.82rem;color:#6b7280;line-height:1.68;margin:0;max-width:280px;">ZILHAJ is your trusted platform for Umrah packages, flights, trains and more. One request gets you multiple verified offers&#8212;so you can choose with confidence.</p>
+              </div>
+
+              <!-- Col 2: COMPANY -->
+              <div>
+                  <div style="font-size:0.78rem;font-weight:800;color:#c8831a;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:0.3rem;">COMPANY</div>
+                  <div style="width:26px;height:2.5px;background:#c8831a;border-radius:2px;margin-bottom:1.1rem;"></div>
+                  <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.6rem;">
+                      <li><a href="/about" style="color:#374151;font-size:0.86rem;font-weight:400;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#c8831a'" onmouseout="this.style.color='#374151'">About Us</a></li>
+                      <li><a href="/services" style="color:#374151;font-size:0.86rem;font-weight:400;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#c8831a'" onmouseout="this.style.color='#374151'">Services</a></li>
+                      <li><a href="/" style="color:#374151;font-size:0.86rem;font-weight:400;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#c8831a'" onmouseout="this.style.color='#374151'">Blog</a></li>
+                  </ul>
+              </div>
+
+              <!-- Col 3: SUPPORT -->
+              <div>
+                  <div style="font-size:0.78rem;font-weight:800;color:#c8831a;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:0.3rem;">SUPPORT</div>
+                  <div style="width:26px;height:2.5px;background:#c8831a;border-radius:2px;margin-bottom:1.1rem;"></div>
+                  <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.6rem;">
+                      <li><a href="/submit-request" style="color:#374151;font-size:0.86rem;font-weight:400;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#c8831a'" onmouseout="this.style.color='#374151'">Submit a Request</a></li>
+                      <li><a href="/" style="color:#374151;font-size:0.86rem;font-weight:400;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#c8831a'" onmouseout="this.style.color='#374151'">Help &amp; Support</a></li>
+                      <li><a href="/" style="color:#374151;font-size:0.86rem;font-weight:400;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#c8831a'" onmouseout="this.style.color='#374151'">FAQs</a></li>
+                  </ul>
+              </div>
+
+              <!-- Col 4: STAY UPDATED & FOLLOW US -->
+              <div>
+                  <div style="font-size:0.78rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.7rem;">STAY UPDATED</div>
+                  <p style="font-size:0.81rem;color:#6b7280;line-height:1.55;margin:0 0 0.85rem 0;">Subscribe to get the latest offers, travel tips and important updates.</p>
+                  <div style="display:flex;">
+                      <input type="email" placeholder="Enter your email" style="flex:1;padding:0.6rem 0.75rem;border:1.5px solid #d1d5db;border-right:none;border-radius:8px 0 0 8px;font-size:0.81rem;outline:none;font-family:inherit;color:#374151;background:#fff;min-width:0;">
+                      <button type="button" style="background:#0f172a;color:#fff;border:none;padding:0.6rem 0.85rem;border-radius:0 8px 8px 0;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      </button>
+                  </div>
+
+                  <!-- Follow Us Social Media Section -->
+                  <div style="margin-top:1.4rem;">
+                      <div style="font-size:0.75rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.65rem;">FOLLOW US</div>
+                      <div style="display:flex;gap:0.55rem;align-items:center;">
+                          <a href="https://www.facebook.com/officialonerequest/?rdid=au27BcMhnxYx5fI6" target="_blank" rel="noopener" title="Facebook" style="width:34px;height:34px;border-radius:50%;background:#1877F2;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;flex-shrink:0;"><svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.374 14.5 5 15.5 5H18V0h-3.808C10.592 0 9 1.583 9 4.615V8z"/></svg></a>
+                          <a href="https://www.instagram.com/onerequest_/" target="_blank" rel="noopener" title="Instagram" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;flex-shrink:0;"><svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                          <a href="https://www.linkedin.com/in/goexergy-private-limited-775874428/" target="_blank" rel="noopener" title="LinkedIn" style="width:34px;height:34px;border-radius:50%;background:#0A66C2;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;flex-shrink:0;"> <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V8.999h3.414v1.561h.046c.476-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.287zM5.337 7.433a2.062 2.062 0 1 1 0-4.123 2.062 2.062 0 0 1 0 4.123zM7.114 20.452H3.56V8.999h3.554v11.453zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/> </svg></a>
+                          <a href="https://www.youtube.com/@officialonerequest" target="_blank" rel="noopener" title="YouTube" style="width:34px;height:34px;border-radius:50%;background:#FF0000;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;flex-shrink:0;">
+                              <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                              </svg>
+                          </a>
+                          <a href="https://wa.me/919541692891" target="_blank" rel="noopener" title="WhatsApp" style="width:34px;height:34px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;flex-shrink:0;"><svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338-11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg></a>
+                      </div>
+                  </div>
+              </div>
+
           </div>
-          <p class="footer-tagline">&ldquo;One Request. Multiple Verified Offers.&rdquo;</p>
-          <p class="footer-desc">
-            ZILHAJ helps pilgrims simplify Hajj and Umrah planning by connecting their requirements with suitable verified service providers.
-          </p>
-        </div>
-
-        <!-- Column 1: SERVICES -->
-        <div class="footer-col">
-          <h4 class="footer-col-title">Services</h4>
-          <ul class="footer-links">
-            <li><a href="/services" class="footer-link">All Services</a></li>
-            <li><a href="#" class="footer-link" data-open-request-modal data-journey="Hajj">Hajj Packages</a></li>
-            <li><a href="#" class="footer-link" data-open-request-modal data-journey="Umrah">Umrah Packages</a></li>
-            <li><a href="#" class="footer-link" data-open-request-modal>Submit a Request</a></li>
-          </ul>
-        </div>
-
-        <!-- Column 2: COMPANY -->
-        <div class="footer-col">
-          <h4 class="footer-col-title">Company</h4>
-          <ul class="footer-links">
-            <li><a href="/about" class="footer-link">About Us</a></li>
-            <li><a href="#how-it-works" class="footer-link">How It Works</a></li>
-            <li><a href="#founder" class="footer-link">Leadership</a></li>
-            <li><a href="/#contact" class="footer-link">Contact</a></li>
-          </ul>
-        </div>
-
-        <!-- Column 3: SUPPORT -->
-        <div class="footer-col">
-          <h4 class="footer-col-title">Support</h4>
-          <ul class="footer-links">
-            <li><a href="#commitment" class="footer-link">Help &amp; Support</a></li>
-            <li><a href="/#faqs" class="footer-link">FAQs</a></li>
-            <li><a href="mailto:support@zilhaj.com" class="footer-link">support@zilhaj.com</a></li>
-            <li><a href="https://wa.me/919541692891?text=Salam%20ZILHAJ%20Team%2C%20I%20have%20an%20inquiry%20about%20pilgrimage%20planning." target="_blank" rel="noopener noreferrer" class="footer-link">WhatsApp Support</a></li>
-          </ul>
-        </div>
-
-        <!-- Column 4: LEGAL -->
-        <div class="footer-col">
-          <h4 class="footer-col-title">Legal</h4>
-          <ul class="footer-links">
-            <li><a href="/privacy" class="footer-link">Privacy Policy</a></li>
-            <li><a href="/terms" class="footer-link">Terms &amp; Conditions</a></li>
-            <li><a href="/refund" class="footer-link">Refund Policy</a></li>
-          </ul>
-        </div>
       </div>
 
-      <!-- Footer Bottom Legal & Attribution -->
-      <div class="footer-bottom">
-        <div>
-          <p>&copy; 2026 ZILHAJ. All rights reserved.</p>
-          <p class="footer-attribution">Developed &amp; Maintained by <strong>GOEXERGY PRIVATE LIMITED</strong></p>
-        </div>
-        <nav class="footer-legal-links" aria-label="Legal Navigation">
-          <a href="/privacy" class="footer-legal-link">Privacy Policy</a>
-          <a href="/terms" class="footer-legal-link">Terms &amp; Conditions</a>
-          <a href="/#trust" class="footer-legal-link">Escrow Safe</a>
-        </nav>
+      <!-- SECTION 2: Contact Info (3 cards) -->
+      <div id="footerContactSection" style="background:#f8fafb;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:1.6rem 0;width:100%;box-sizing:border-box;">
+          <div style="width:100%;margin:0;padding:0 3.5rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1.8rem;box-sizing:border-box;">
+
+              <!-- Head Office -->
+              <div style="display:flex;align-items:flex-start;gap:0.85rem;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem 1.2rem;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+                  <div style="width:46px;height:46px;border-radius:50%;background:#f3f4f6;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                      <svg width="20" height="20" fill="none" stroke="#6b7280" stroke-width="1.7" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                  </div>
+                  <div>
+                      <div style="font-size:0.72rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:0.3rem;">HEAD OFFICE</div>
+                      <div style="font-size:0.82rem;color:#6b7280;line-height:1.55;">ZILHAJ Private Limited<br>Nowgam, Srinagar,<br>Jammu &amp; Kashmir, India - 190015</div>
+                  </div>
+              </div>
+
+              <!-- Call Us -->
+              <div style="display:flex;align-items:flex-start;gap:0.85rem;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem 1.2rem;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+                  <div style="width:46px;height:46px;border-radius:50%;background:#f3f4f6;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                      <svg width="20" height="20" fill="none" stroke="#6b7280" stroke-width="1.7" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.49a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                  </div>
+                  <div>
+                      <div style="font-size:0.72rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:0.3rem;">CALL US</div>
+                      <div style="font-size:0.82rem;color:#6b7280;line-height:1.55;">
+                          <a href="tel:+919876543210" style="color:#0f172a;font-weight:700;text-decoration:none;">+91 98765 43210</a><br>
+                          <span>(Mon - Sat | 10AM - 7PM)</span>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Email Us -->
+              <div style="display:flex;align-items:flex-start;gap:0.85rem;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:1.1rem 1.2rem;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+                  <div style="width:46px;height:46px;border-radius:50%;background:#f3f4f6;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                      <svg width="20" height="20" fill="none" stroke="#6b7280" stroke-width="1.7" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  </div>
+                  <div>
+                      <div style="font-size:0.72rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:0.3rem;">EMAIL US</div>
+                      <div style="font-size:0.82rem;color:#6b7280;line-height:1.55;">
+                          <a href="mailto:hello@zilhaj.com" style="color:#374151;text-decoration:none;">hello@zilhaj.com</a><br>
+                          <a href="mailto:support@zilhaj.com" style="color:#374151;text-decoration:none;">support@zilhaj.com</a>
+                      </div>
+                  </div>
+              </div>
+
+          </div>
       </div>
-    </div>
+      
+      <!-- SECTION 4: Copyright Bar -->
+      <div style="background:#ffffff;border-top:1px solid #e5e7eb;padding:1.1rem 0;width:100%;box-sizing:border-box;">
+          <div style="width:100%;margin:0;padding:0 3.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;font-size:0.82rem;color:#6b7280;box-sizing:border-box;">
+              <span>&#169; 2025 ZILHAJ Private Limited. All rights reserved.</span>
+              <div style="display:flex;align-items:center;gap:0.85rem;">
+                  <a href="/privacy" style="color:#6b7280;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#0f172a'" onmouseout="this.style.color='#6b7280'">Privacy Policy</a>
+                  <span style="color:#d1d5db;">|</span>
+                  <a href="/terms" style="color:#6b7280;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#0f172a'" onmouseout="this.style.color='#6b7280'">Terms &amp; Conditions</a>
+                  <span style="color:#d1d5db;">|</span>
+                  <a href="/refund" style="color:#6b7280;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#0f172a'" onmouseout="this.style.color='#6b7280'">Refund Policy</a>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.5rem;">
+                  <span style="font-size:0.8rem;">We accept</span>
+                  <span style="background:#1434cb;color:#fff;font-size:0.62rem;font-weight:900;padding:0.18rem 0.45rem;border-radius:3px;letter-spacing:0.8px;font-style:italic;">VISA</span>
+                  <span style="display:inline-flex;align-items:center;">
+                      <span style="width:18px;height:18px;background:#eb001b;border-radius:50%;display:inline-block;"></span>
+                      <span style="width:18px;height:18px;background:#f79e1b;border-radius:50%;display:inline-block;margin-left:-7px;"></span>
+                  </span>
+                  <span style="font-weight:700;color:#6b7280;font-size:0.8rem;">UPI</span>
+                  <span style="font-size:0.7rem;color:#6b7280;font-weight:600;line-height:1.1;text-align:center;">NET<br>BANKING</span>
+              </div>
+          </div>
+      </div>
+
   </footer>
 
   <!-- ==========================================================================
@@ -971,79 +994,6 @@
                   style="background:#047857; color:white; border:none; border-radius:10px; padding:0.6rem 1.1rem; font-weight:700; font-size:0.84rem; cursor:pointer;">Send</button>
           </div>
       </div>
-  </div>
-
-  <!-- ==========================================================================
-       INTERACTIVE REQUEST MODAL
-       ========================================================================== -->
-  <div class="modal-backdrop" aria-hidden="true"></div>
-  <div class="request-modal" role="dialog" aria-modal="true" aria-labelledby="modalHeading">
-    <div class="modal-header">
-      <h3 class="modal-title" id="modalHeading">Submit Your Pilgrimage Request</h3>
-      <button class="modal-close" aria-label="Close request modal">&times;</button>
-    </div>
-
-    <div class="modal-body">
-      <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 16px;">
-        Submit your requirements once. Relevant verified Hajj &amp; Umrah service providers will submit suitable offers for you to compare.
-      </p>
-
-      <form id="pilgrimRequestForm" class="modal-form">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="journeyType">Journey Type *</label>
-            <select id="journeyType" class="form-select" required>
-              <option value="Umrah">Umrah Pilgrimage</option>
-              <option value="Hajj">Hajj Pilgrimage</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="groupSize">Number of Pilgrims *</label>
-            <select id="groupSize" class="form-select" required>
-              <option value="1">Individual (1 Person)</option>
-              <option value="2">Couple (2 Persons)</option>
-              <option value="family" selected>Family (3-5 Persons)</option>
-              <option value="group">Group (6+ Persons)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="travelWindow">Preferred Travel Month *</label>
-            <input type="text" id="travelWindow" class="form-input" placeholder="e.g. Ramadan / October 2026" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="durationDays">Preferred Duration</label>
-            <input type="text" id="durationDays" class="form-input" placeholder="e.g. 10 Days / 14 Days">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="contactName">Your Full Name *</label>
-            <input type="text" id="contactName" class="form-input" placeholder="Enter your name" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="contactPhone">Phone / WhatsApp *</label>
-            <input type="tel" id="contactPhone" class="form-input" placeholder="+91 / +966 / +1..." required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="specificNotes">Specific Preferences &amp; Accommodation Requirements</label>
-          <textarea id="specificNotes" class="form-textarea" rows="3" placeholder="Specify hotel distance preferences, elderly support, meal preferences, or budget considerations..."></textarea>
-        </div>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
-          Submit Request &amp; Receive Verified Offers &rarr;
-        </button>
-
-        <p style="font-size: 11px; text-align: center; color: var(--color-text-subtle); margin-top: 4px;">
-          &#128274; Your privacy is respected. No spam. Only verified providers receive your request.
-        </p>
-      </form>
-    </div>
   </div>
 
   <!-- JavaScript -->
