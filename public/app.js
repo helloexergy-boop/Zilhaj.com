@@ -510,16 +510,17 @@ class App {
 
         if (navMenu) {
             navMenu.innerHTML = `
-                <a href="/home" class="nav-link ${this.state.currentPage === 'home' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('home')">Home</a>
-                <a href="/services" class="nav-link ${this.state.currentPage === 'services' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('services')">Services</a>
-                <a href="/contact" class="nav-link ${this.state.currentPage === 'contact' ? 'active' : ''}" onclick="app.scrollToContact(event)">Contact Us</a>
-                <a href="/about" class="nav-link ${this.state.currentPage === 'about' ? 'active' : ''}" onclick="event.preventDefault(); app.navigate('about')">About Us</a>
+                <a href="/" class="nav-link ${this.state.currentPage === 'home' ? 'active' : ''}">Home</a>
+                <a href="/services" class="nav-link ${this.state.currentPage === 'services' ? 'active' : ''}">Services</a>
+                <a href="/#packages" class="nav-link">Packages</a>
+                <a href="/about" class="nav-link ${this.state.currentPage === 'about' ? 'active' : ''}">About Us</a>
+                <a href="/#contact" class="nav-link ${this.state.currentPage === 'contact' ? 'active' : ''}" onclick="app.scrollToContact(event)">Contact Us</a>
                 <div class="mobile-only-auth" style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid #e2e8f0; display:flex; flex-direction:column; gap:0.5rem; width:100%;">
                     ${!this.state.currentUser ? `
-                        <button class="btn btn-outline" onclick="app.openAuthModal('login')" style="width:100%; border:1.5px solid #0f172a; color:#0f172a; font-weight:700; border-radius:10px; padding:0.65rem; font-size:0.9rem; background:transparent; cursor:pointer;">Login</button>
-                        <button class="btn btn-primary" onclick="app.openAuthModal('register')" style="width:100%; background:#047857; color:white; font-weight:700; border-radius:10px; padding:0.65rem; border:none; font-size:0.9rem; cursor:pointer;">Sign Up</button>
+                        <button class="btn btn-outline" onclick="window.location.href='/login'" style="width:100%; border:1.5px solid #0f172a; color:#0f172a; font-weight:700; border-radius:10px; padding:0.65rem; font-size:0.9rem; background:transparent; cursor:pointer;">Login</button>
+                        <button class="btn btn-primary" onclick="window.location.href='/signup'" style="width:100%; background:#047857; color:white; font-weight:700; border-radius:10px; padding:0.65rem; border:none; font-size:0.9rem; cursor:pointer;">Sign Up</button>
                     ` : `
-                        <button class="btn btn-black-pill" onclick="app.navigate('${this.state.currentUser.role === 'ROLE_ADMIN' ? 'admin' : 'dashboard'}')" style="width:100%; background:#0f172a; color:#fff; font-weight:700; padding:0.65rem; border-radius:10px; border:none; cursor:pointer;">
+                        <button class="btn btn-black-pill" onclick="window.location.href='${this.state.currentUser.role === 'ROLE_ADMIN' ? '/admin/index.html' : '/dashboard/index.html'}'" style="width:100%; background:#0f172a; color:#fff; font-weight:700; padding:0.65rem; border-radius:10px; border:none; cursor:pointer;">
                             ${this.state.currentUser.role === 'ROLE_ADMIN' ? '🔑 Admin Control Panel' : '👤 ' + this.escapeHtml(displayName)}
                         </button>
                         <button class="nav-text-btn" onclick="app.logout()" style="width:100%; padding:0.5rem; color:#dc2626; font-weight:700; background:none; border:none; cursor:pointer;">Logout</button>
@@ -588,16 +589,6 @@ class App {
         }
         document.getElementById('navMenu')?.classList.remove('open');
         document.querySelector('.mobile-toggle')?.classList.remove('active');
-    }
-
-    navigate(page) {
-        if (!page) page = 'home';
-        this.state.currentPage = page;
-        if (page === 'privacy' || page === 'terms' || page === 'refund' || page === 'contact') {
-            this.openPolicyModal(page);
-            return;
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     openPolicyModal(type = 'terms') {
@@ -1059,9 +1050,39 @@ class App {
     }
 
     navigate(page) {
-        if (page === 'login' || page === 'signup' || page === 'register') {
-            this.openAuthModal(page === 'signup' || page === 'register' ? 'register' : 'login');
-            this.updatePageSEO(page);
+        if (!page || page === 'home') {
+            if (this.getCurrentPage() !== 'home') {
+                try { history.pushState({ page: 'home' }, '', '/'); } catch (e) {}
+            }
+            this.renderPage('home');
+            return;
+        }
+        if (page === 'services') {
+            window.location.href = '/services';
+            return;
+        }
+        if (page === 'about') {
+            window.location.href = '/about';
+            return;
+        }
+        if (page === 'login') {
+            window.location.href = '/login';
+            return;
+        }
+        if (page === 'signup' || page === 'register') {
+            window.location.href = '/signup';
+            return;
+        }
+        if (page === 'dashboard' || page === '/dashboard') {
+            window.location.href = '/dashboard/index.html';
+            return;
+        }
+        if (page === 'admin' || page === '/admin') {
+            window.location.href = '/admin/index.html';
+            return;
+        }
+        if (page === 'privacy' || page === 'terms' || page === 'refund') {
+            this.openPolicyModal(page);
             return;
         }
 
@@ -1125,7 +1146,8 @@ class App {
             window.location.href = '/dashboard/index.html#submit-request';
             return;
         } else if (page === 'services' || page === 'guides') {
-            main.innerHTML = this.renderServicesPage();
+            window.location.href = '/services';
+            return;
         } else if (page === 'faqs') {
             main.innerHTML = this.renderFaqsPage();
         } else if (page === 'terms') {
@@ -1133,7 +1155,8 @@ class App {
         } else if (page === 'privacy') {
             main.innerHTML = this.renderPrivacyPage();
         } else if (page === 'about') {
-            main.innerHTML = this.renderAboutPage();
+            window.location.href = '/about';
+            return;
         } else if (page === 'trust') {
             main.innerHTML = this.renderTrustPage();
         } else if (page === 'bookings') {

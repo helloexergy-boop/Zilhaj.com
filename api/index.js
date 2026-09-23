@@ -32,10 +32,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from /public, /client, and /login directories
+// Serve static files from /public and /client directories
 const publicDir = path.join(__dirname, '../public');
 const clientDir = path.join(__dirname, '../client');
-const loginDir = path.join(__dirname, '../login');
 const staticOptions = {
     setHeaders: (res, filePath) => {
         const ext = path.extname(filePath).toLowerCase();
@@ -53,10 +52,30 @@ const staticOptions = {
         }
     }
 };
-app.use(express.static(publicDir, staticOptions));
-app.use(express.static(clientDir, staticOptions));
-app.use('/login', express.static(loginDir, staticOptions));
-app.use(express.static(loginDir, staticOptions));
+// Explicit Canonical Page Routes (Evaluated first to guarantee exact page delivery)
+app.get(['/services', '/services.html'], (req, res) => {
+    res.sendFile(path.join(publicDir, 'services.html'));
+});
+
+app.get(['/about', '/about.html'], (req, res) => {
+    res.sendFile(path.join(publicDir, 'about.html'));
+});
+
+app.get(['/login', '/login.html'], (req, res) => {
+    res.sendFile(path.join(publicDir, 'login.html'));
+});
+
+app.get(['/signup', '/signup.html', '/register'], (req, res) => {
+    res.sendFile(path.join(publicDir, 'signup.html'));
+});
+
+app.get(['/submit-request', '/submit-request.html'], (req, res) => {
+    res.sendFile(path.join(publicDir, 'submit-request.html'));
+});
+
+app.get(['/dashboard', '/dashboard/', '/dashboard/index.html'], (req, res) => {
+    res.sendFile(path.join(publicDir, 'dashboard', 'index.html'));
+});
 
 app.get(['/admin', '/admin/', '/admin/dashboard', '/admin/index.html'], (req, res) => {
     res.sendFile(path.join(publicDir, 'admin', 'index.html'));
@@ -65,6 +84,9 @@ app.get(['/admin', '/admin/', '/admin/dashboard', '/admin/index.html'], (req, re
 app.get(['/checkout', '/checkout.html'], (req, res) => {
     res.sendFile(path.join(publicDir, 'checkout.html'));
 });
+
+app.use(express.static(publicDir, staticOptions));
+app.use(express.static(clientDir, staticOptions));
 
 
 // ============================================================================

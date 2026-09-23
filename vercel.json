@@ -20,6 +20,42 @@
       "dest": "/api/index.js"
     },
     {
+      "src": "/services",
+      "dest": "/client/services.html"
+    },
+    {
+      "src": "/about",
+      "dest": "/client/about.html"
+    },
+    {
+      "src": "/login",
+      "dest": "/client/login.html"
+    },
+    {
+      "src": "/signup",
+      "dest": "/client/signup.html"
+    },
+    {
+      "src": "/register",
+      "dest": "/client/signup.html"
+    },
+    {
+      "src": "/submit-request",
+      "dest": "/client/submit-request.html"
+    },
+    {
+      "src": "/checkout",
+      "dest": "/client/checkout.html"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/client/dashboard/index.html"
+    },
+    {
+      "src": "/admin",
+      "dest": "/client/admin/index.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/client/$1"
     }
