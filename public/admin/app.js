@@ -26,6 +26,18 @@ const state = {
   subAdmins: [], // Live from /api/admin/subadmins
   bookings: [], // Live from /api/bookings
   stats: null, // Live from /api/admin/stats
+  // Customer Care Support State
+  supportTickets: [],
+  selectedIssueId: null,
+  selectedTicketDetails: null,
+  supportFilterStatus: 'All',
+  supportFilterPriority: 'All',
+  supportFilterCategory: 'All',
+  supportFilterSort: 'newest',
+  supportSearchQuery: '',
+  adminReplyMode: 'CUSTOMER_REPLY',
+  supportStats: { pendingIssues: 0, solvedIssues: 0, urgentIssues: 0, totalTickets: 0 },
+  supportNotifications: [],
   agents: [
     { id: "AGENT-1042", name: "Al-Safwa Travel & Tours", contact: "Sheikh Mansoor", city: "Makkah / Srinagar", verified: true, rating: 4.9, packages: 12, offers: 248, bookings: 184 },
     { id: "AGENT-8091", name: "Makkah Tours & Services", contact: "Dr. Bilal Qureshi", city: "Jeddah / Srinagar", verified: true, rating: 4.8, packages: 8, offers: 196, bookings: 140 },
@@ -124,8 +136,8 @@ async function refreshAllData(showNotification = false) {
       state.bookings = bookRes;
     }
 
-    // Build notifications from latest inquiries
-    generateLiveNotifications();
+    // Load Live Support System data and notifications
+    await loadAdminSupportData(false);
 
     // Update Header Badges
     const badgeEl = document.getElementById('nav-req-count-badge');
@@ -146,40 +158,64 @@ async function refreshAllData(showNotification = false) {
   }
 }
 
-function generateLiveNotifications() {
-  const notifs = [];
-  state.requests.slice(0, 4).forEach((r, idx) => {
-    notifs.push({
-      id: idx + 1,
-      title: r.status === 'Completed' ? 'Booking Completed' : (r.offers && r.offers.length > 0 ? 'Offer Received' : 'New Request Submitted'),
-      msg: `${r.customer} submitted ${r.service} request (${r.id}).`,
-      time: r.submittedOn || 'Recently',
-      unread: idx < 2
-    });
-  });
-  state.notifications = notifs;
-
+function renderAdminNotifications(notifs, unreadCount) {
   const notifsContainer = document.getElementById('notifs-container-list');
   const dot = document.getElementById('header-notif-dot');
-  if (dot) dot.textContent = notifs.filter(n => n.unread).length || '0';
+  if (dot) {
+    dot.textContent = unreadCount || '0';
+    dot.style.display = unreadCount > 0 ? 'flex' : 'none';
+  }
+
   if (notifsContainer) {
+    if (!notifs || notifs.length === 0) {
+      notifsContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px;">No new alerts at this time.</div>';
+      return;
+    }
+
     notifsContainer.innerHTML = notifs.map(n => `
-      <div style="padding: 12px; background: ${n.unread ? '#ecfdf5' : '#f8fafc'}; border-radius: var(--radius-md); font-size: 12px; border: 1px solid ${n.unread ? '#a7f3d0' : '#e2e8f0'};">
-        <div style="font-weight: 800; color: ${n.unread ? '#065f46' : 'var(--text-main)'};">${n.title}</div>
-        <div style="color: var(--text-body); margin-top: 2px;">${n.msg}</div>
-        <div style="font-size: 10px; color: var(--text-light); margin-top: 4px;">${n.time}</div>
+      <div onclick="openSupportFromNotification('${n.issue_id || ''}', '${n.id}')" style="padding: 12px; background: ${n.is_read ? '#f8fafc' : '#ecfdf5'}; border-radius: var(--radius-md); font-size: 12px; border: 1px solid ${n.is_read ? '#e2e8f0' : '#a7f3d0'}; cursor: pointer; transition: background 0.15s ease;" onmouseover="this.style.background='#e0f2fe'" onmouseout="this.style.background='${n.is_read ? '#f8fafc' : '#ecfdf5'}'">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong style="color: ${n.is_read ? 'var(--text-main)' : '#065f46'}; font-weight: 800;">${escapeHtml(n.title)}</strong>
+          ${n.issue_id ? `<span style="font-family: monospace; font-size: 10px; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: 700;">${n.issue_id}</span>` : ''}
+        </div>
+        <div style="color: var(--text-body); margin-top: 4px; font-size: 11.5px;">${escapeHtml(n.message)}</div>
+        <div style="font-size: 10px; color: var(--text-light); margin-top: 6px;">${new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
       </div>
     `).join('');
   }
 }
 
-function markAllNotifsRead() {
-  state.notifications.forEach(n => n.unread = false);
+async function markAllNotifsRead() {
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+  try {
+    await fetch(`${apiBase}/admin/support/notifications/read-all`, { method: 'PATCH', headers });
+  } catch (e) {}
+
+  state.supportNotifications.forEach(n => n.is_read = true);
   const dot = document.getElementById('header-notif-dot');
-  if (dot) dot.textContent = '0';
-  generateLiveNotifications();
+  if (dot) {
+    dot.textContent = '0';
+    dot.style.display = 'none';
+  }
+  renderAdminNotifications(state.supportNotifications, 0);
   closeModal('notifications-modal');
   showToast('All notifications marked as read', 'info');
+}
+
+async function openSupportFromNotification(issueId, notifId) {
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+  if (notifId) {
+    try {
+      await fetch(`${apiBase}/admin/support/notifications/${notifId}/read`, { method: 'PATCH', headers });
+    } catch (e) {}
+  }
+  closeModal('notifications-modal');
+  navigateToTab('support');
+  if (issueId) {
+    await openAdminTicket(issueId);
+  }
 }
 
 // ==========================================
@@ -221,6 +257,10 @@ function renderCurrentTab() {
   else if (tabId === 'sub-admins') renderSubAdminsList();
   else if (tabId === 'agents') renderAgentsList();
   else if (tabId === 'reports') renderReportsView();
+  else if (tabId === 'support') {
+    renderAdminSupportTickets();
+    loadAdminSupportData(false);
+  }
 }
 
 function viewRequest(reqId) {
@@ -1379,3 +1419,677 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshAllData(false);
   }, 10000);
 });
+
+// ============================================================================
+// 9. CUSTOMER CARE / SUPPORT PORTAL CONTROLLER (EXECUTIVE DESK)
+// ============================================================================
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function getSupportStatusBadgeClass(status) {
+  const s = (status || '').toLowerCase();
+  if (s === 'open' || s === 'pending') return 'badge-open';
+  if (s === 'in progress') return 'badge-in-progress';
+  if (s === 'waiting for customer') return 'badge-waiting';
+  if (s === 'resolved') return 'badge-offers-ready';
+  if (s === 'closed') return 'badge-completed';
+  if (s === 'reopened') return 'badge-reopened';
+  if (s.includes('invalid') || s.includes('wrong')) return 'badge-invalid';
+  return 'badge-pending';
+}
+
+async function loadAdminSupportData(showNotification = false) {
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+
+  try {
+    // 1. Fetch Stats
+    const statsRes = await fetch(`${apiBase}/admin/support/stats`, { headers }).then(r => r.ok ? r.json() : null).catch(() => null);
+    if (statsRes && statsRes.success && statsRes.stats) {
+      state.supportStats = statsRes.stats;
+      setElementText('support-kpi-pending', statsRes.stats.pendingIssues || '0');
+      setElementText('support-kpi-solved', statsRes.stats.solvedIssues || '0');
+      setElementText('support-kpi-urgent', statsRes.stats.urgentIssues || '0');
+      setElementText('support-kpi-total', statsRes.stats.totalTickets || '0');
+
+      const pendingCount = statsRes.stats.pendingIssues || 0;
+      const navBadge = document.getElementById('nav-support-badge');
+      const sideBadge = document.getElementById('sidebar-support-badge');
+      if (navBadge) {
+        navBadge.textContent = pendingCount;
+        navBadge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+      }
+      if (sideBadge) {
+        sideBadge.textContent = pendingCount;
+        sideBadge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+      }
+    }
+
+    // 2. Fetch Notifications
+    const notifsRes = await fetch(`${apiBase}/admin/support/notifications`, { headers }).then(r => r.ok ? r.json() : null).catch(() => null);
+    if (notifsRes && notifsRes.success) {
+      state.supportNotifications = notifsRes.notifications || [];
+      renderAdminNotifications(state.supportNotifications, notifsRes.unreadCount || 0);
+    }
+
+    // 3. Fetch Tickets
+    const query = encodeURIComponent(state.supportSearchQuery || '');
+    const url = `${apiBase}/admin/support/tickets?query=${query}&status=${state.supportFilterStatus}&priority=${state.supportFilterPriority}&category=${state.supportFilterCategory}&sort=${state.supportFilterSort}`;
+    const ticketsRes = await fetch(url, { headers }).then(r => r.ok ? r.json() : null).catch(() => null);
+
+    if (ticketsRes && ticketsRes.success && Array.isArray(ticketsRes.tickets)) {
+      state.supportTickets = ticketsRes.tickets;
+      renderAdminSupportTickets();
+
+      if (state.selectedIssueId) {
+        await refreshActiveTicketSilently(state.selectedIssueId);
+      } else if (state.supportTickets.length > 0) {
+        await openAdminTicket(state.supportTickets[0].issue_id);
+      }
+    }
+
+    if (showNotification) {
+      showToast('Support Portal synchronized with live database', 'success');
+    }
+  } catch (err) {
+    console.error('Error loading admin support data:', err);
+    if (showNotification) showToast('Failed to load support data', 'danger');
+  }
+}
+
+function renderAdminSupportTickets() {
+  const tbody = document.getElementById('support-tickets-tbody');
+  if (!tbody) return;
+
+  const countPill = document.getElementById('support-count-pill');
+  if (countPill) countPill.textContent = `${state.supportTickets.length} Tickets`;
+
+  if (state.supportTickets.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 48px;">
+          <div style="font-size: 28px; margin-bottom: 8px;">📭</div>
+          <div style="font-weight: 700; font-size: 14px; color: var(--text-main);">No support tickets found</div>
+          <div style="font-size: 12px; margin-top: 4px;">Try adjusting your search query or filter options.</div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = state.supportTickets.map(t => {
+    const isSelected = state.selectedIssueId === t.issue_id;
+    const isUrgent = t.priority === 'Urgent';
+    const dateFormatted = new Date(t.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    return `
+      <tr style="${isSelected ? 'background: #f0fdf4;' : ''} ${isUrgent ? 'border-left: 3px solid #dc2626;' : ''}">
+        <td>
+          <span style="font-family: monospace; font-weight: 800; color: var(--primary); font-size: 13px;">${t.issue_id}</span>
+        </td>
+        <td>
+          <span style="font-size: 11px; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 99px;">
+            ${t.request_id || 'GENERAL'}
+          </span>
+        </td>
+        <td>
+          <div style="font-weight: 800; color: var(--text-main); font-size: 13px;">${escapeHtml(t.customer_name)}</div>
+          <div style="font-size: 11px; color: var(--text-muted);">${escapeHtml(t.customer_phone || t.customer_email || '')}</div>
+        </td>
+        <td>
+          <span style="font-size: 12px; font-weight: 600; color: var(--text-body);">${escapeHtml(t.category)}</span>
+        </td>
+        <td>
+          <span class="badge ${isUrgent ? 'badge-urgent' : (t.priority === 'High' ? 'badge-offers-ready' : 'badge-pending')}">
+            ${t.priority}
+          </span>
+        </td>
+        <td>
+          <span class="badge ${getSupportStatusBadgeClass(t.status)}">
+            ${t.status}
+          </span>
+        </td>
+        <td style="font-size: 12px; color: var(--text-muted);">
+          ${dateFormatted}
+        </td>
+        <td style="text-align: right;">
+          <button onclick="openAdminTicket('${t.issue_id}')" class="btn btn-secondary btn-sm" style="font-weight: 800; color: var(--primary); padding: 4px 12px;">
+            View Issue
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function openAdminTicket(issueId) {
+  state.selectedIssueId = issueId;
+  const workspace = document.getElementById('support-issue-workspace');
+  if (workspace) workspace.style.display = 'grid';
+
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+
+  try {
+    const res = await fetch(`${apiBase}/admin/support/tickets/${issueId}`, { headers });
+    if (!res.ok) throw new Error('Failed to fetch ticket');
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Error');
+
+    state.selectedTicketDetails = data;
+    const t = data.ticket;
+
+    // 1. Header Information
+    setElementText('detail-issue-id', t.issue_id);
+    setElementText('detail-req-id-badge', t.request_id || 'GENERAL');
+    setElementText('detail-subject', t.subject);
+
+    const prioBadge = document.getElementById('detail-priority-badge');
+    if (prioBadge) {
+      prioBadge.className = `badge ${t.priority === 'Urgent' ? 'badge-urgent' : (t.priority === 'High' ? 'badge-offers-ready' : 'badge-pending')}`;
+      prioBadge.textContent = t.priority;
+    }
+
+    const statBadge = document.getElementById('detail-status-badge');
+    if (statBadge) {
+      statBadge.className = `badge ${getSupportStatusBadgeClass(t.status)}`;
+      statBadge.textContent = t.status;
+    }
+
+    const createdStr = new Date(t.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    const updatedStr = new Date(t.updated_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    setElementText('detail-created-at', createdStr);
+    setElementText('detail-updated-at', updatedStr);
+
+    // 2. Original Description
+    setElementText('detail-description', t.description);
+
+    // Initial attachment preview
+    const attachPreview = document.getElementById('detail-attachment-preview');
+    if (attachPreview) {
+      const initialMsgWithAttach = (data.messages || []).find(m => m.attachment_url);
+      if (initialMsgWithAttach) {
+        attachPreview.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 8px 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span>📎</span>
+              <div>
+                <strong style="font-size: 11px; color: var(--text-main);">${escapeHtml(initialMsgWithAttach.attachment_name || 'Attachment')}</strong>
+                <span style="font-size: 10px; color: var(--text-muted); margin-left: 6px;">(${initialMsgWithAttach.attachment_size || 'File'})</span>
+              </div>
+            </div>
+            <a href="${initialMsgWithAttach.attachment_url}" target="_blank" download="${initialMsgWithAttach.attachment_name || 'file'}" class="btn btn-secondary btn-sm" style="font-size: 11px;">
+              View File
+            </a>
+          </div>
+        `;
+      } else {
+        attachPreview.innerHTML = '';
+      }
+    }
+
+    // 3. Conversation Thread
+    renderAdminChatThread(data.messages || []);
+
+    // 4. Update Dropdown Controls
+    const statusSelect = document.getElementById('admin-action-status');
+    if (statusSelect) statusSelect.value = t.status;
+
+    const prioSelect = document.getElementById('admin-action-priority');
+    if (prioSelect) prioSelect.value = t.priority;
+
+    const assignSelect = document.getElementById('admin-action-assign');
+    if (assignSelect) assignSelect.value = t.assigned_admin_name || 'Aman Khan';
+
+    // 5. Customer Information Card
+    const initials = (t.customer_name || 'AD').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    setElementText('support-cust-avatar', initials);
+    setElementText('support-cust-name', t.customer_name);
+    setElementText('support-cust-phone', t.customer_phone || '+91 98765 43210');
+    setElementText('support-cust-email', t.customer_email || 'customer@gmail.com');
+    setElementText('support-cust-loc', (data.requestContext && data.requestContext.location) || 'Srinagar, Jammu & Kashmir');
+    setElementText('support-cust-since', (data.requestContext && data.requestContext.customerSince) || 'Jan 2025');
+    setElementText('support-cust-total-reqs', `${(data.previousIssues ? data.previousIssues.length + 1 : 1)} Support Interactions`);
+
+    // 6. Request Context Card
+    const reqCard = document.getElementById('support-req-context-card');
+    if (reqCard) {
+      if (data.requestContext) {
+        reqCard.style.display = 'block';
+        const r = data.requestContext;
+        setElementText('support-req-id-tag', r.request_id || r.id);
+        setElementText('support-req-service', r.service || r.serviceType || 'Umrah Package');
+        setElementText('support-req-travel-date', r.travelDate || '15 Feb 2026');
+        setElementText('support-req-pilgrims', r.travelers || `${r.totalPersons || 4} Pilgrims`);
+        setElementText('support-req-hotel', r.hotelPreference || r.hotelType || '3 Star (Near Haram)');
+        setElementText('support-req-room', r.roomPreference || 'Quad Sharing');
+        setElementText('support-req-duration', r.duration || '18 Days');
+        setElementText('support-req-budget', r.budget || '₹1,20,000 - ₹1,50,000');
+        setElementText('support-req-notes', r.otherRequirements || r.specialRequests || 'Standard pilgrim service.');
+
+        const reqStatusBadge = document.getElementById('support-req-status-badge');
+        if (reqStatusBadge) {
+          reqStatusBadge.textContent = r.status || r.bookingStatus || 'Active';
+          reqStatusBadge.className = `badge ${getBadgeHtml(r.status || r.bookingStatus)}`;
+        }
+      } else {
+        setElementText('support-req-id-tag', 'GENERAL');
+        setElementText('support-req-service', 'General Support Request (No Booking Attached)');
+        setElementText('support-req-travel-date', '--');
+        setElementText('support-req-pilgrims', '--');
+        setElementText('support-req-hotel', '--');
+        setElementText('support-req-room', '--');
+        setElementText('support-req-duration', '--');
+        setElementText('support-req-budget', '--');
+        setElementText('support-req-notes', 'General customer support inquiry.');
+      }
+    }
+
+    // 7. Issue History (Previous Calls & Issues)
+    renderAdminIssueHistory(data.previousIssues || [], data.callResolutions || [], t);
+
+    // Scroll workspace into view smoothly
+    workspace.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    renderAdminSupportTickets();
+  } catch (err) {
+    console.error('Error opening ticket:', err);
+    showToast('Failed to open issue details', 'danger');
+  }
+}
+
+async function refreshActiveTicketSilently(issueId) {
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+  try {
+    const res = await fetch(`${apiBase}/admin/support/tickets/${issueId}`, { headers });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.success) return;
+
+    state.selectedTicketDetails = data;
+    renderAdminChatThread(data.messages || []);
+    renderAdminIssueHistory(data.previousIssues || [], data.callResolutions || [], data.ticket);
+  } catch (e) {}
+}
+
+function renderAdminChatThread(messages) {
+  const thread = document.getElementById('admin-chat-thread');
+  if (!thread) return;
+
+  if (messages.length === 0) {
+    thread.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 24px; font-size: 12px;">No messages recorded in this conversation yet.</div>';
+    return;
+  }
+
+  thread.innerHTML = messages.map(m => {
+    const isCustomer = m.sender_role === 'CUSTOMER';
+    const isInternal = m.message_type === 'INTERNAL_NOTE';
+    const timeStr = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dateStr = new Date(m.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+    let bubbleClass = isCustomer ? 'chat-bubble-customer' : 'chat-bubble-admin';
+    if (isInternal) bubbleClass = 'chat-bubble-internal';
+
+    let senderDisplay = isCustomer ? escapeHtml(m.sender_name || 'Customer') : 'Customer Care';
+    if (isInternal) senderDisplay = '🔒 Internal Note (Only Visible to Staff)';
+
+    return `
+      <div class="chat-bubble ${bubbleClass}">
+        <div class="chat-sender">
+          <span>${senderDisplay}</span>
+          <span class="chat-time">${dateStr} · ${timeStr}</span>
+        </div>
+        <div style="font-size: 13px; line-height: 1.45; white-space: pre-wrap;">${escapeHtml(m.message)}</div>
+        ${m.attachment_url ? `
+          <div style="margin-top: 8px; padding-top: 6px; border-top: 1px dashed rgba(0,0,0,0.15); font-size: 11px;">
+            <a href="${m.attachment_url}" target="_blank" download="${escapeHtml(m.attachment_name || 'attachment')}" style="color: inherit; text-decoration: underline; font-weight: 700;">
+              📎 ${escapeHtml(m.attachment_name || 'View Attachment')}
+            </a>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+
+  // Scroll to bottom
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function renderAdminIssueHistory(prevIssues, callResolutions, currentTicket) {
+  const container = document.getElementById('admin-issue-history-list');
+  if (!container) return;
+
+  const items = [];
+
+  // Add previous issues
+  prevIssues.forEach(t => {
+    const dStr = new Date(t.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    items.push({
+      type: 'TICKET',
+      id: t.issue_id,
+      title: t.subject,
+      status: t.status,
+      date: dStr,
+      isCurrent: false,
+      onClick: `openAdminTicket('${t.issue_id}')`
+    });
+  });
+
+  // Add current issue
+  if (currentTicket) {
+    const dStr = new Date(currentTicket.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    items.push({
+      type: 'CURRENT',
+      id: currentTicket.issue_id,
+      title: `${currentTicket.subject} (Current Issue)`,
+      status: currentTicket.status,
+      date: dStr,
+      isCurrent: true,
+      onClick: `openAdminTicket('${currentTicket.issue_id}')`
+    });
+  }
+
+  // Add call resolutions
+  callResolutions.forEach(c => {
+    const dStr = new Date(c.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    items.push({
+      type: 'CALL',
+      id: 'Phone Call',
+      title: c.call_notes.length > 50 ? c.call_notes.slice(0, 48) + '...' : c.call_notes,
+      status: c.call_status,
+      date: dStr,
+      isCurrent: false,
+      onClick: `showToast('Call note: ${escapeHtml(c.call_notes.replace(/'/g, ''))}', 'info')`
+    });
+  });
+
+  if (items.length === 0) {
+    container.innerHTML = '<div style="font-size: 11px; color: var(--text-muted); padding: 12px; text-align: center;">No previous issues or call records.</div>';
+    return;
+  }
+
+  container.innerHTML = items.map(item => `
+    <div class="history-card-item" onclick="${item.onClick}" style="${item.isCurrent ? 'border-color: #10b981; background: #ecfdf5;' : ''}">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-family: monospace; font-size: 12px; font-weight: 800; color: ${item.type === 'CALL' ? '#b45309' : 'var(--primary)'};">
+          ${item.type === 'CALL' ? '📞 ' + item.id : item.id}
+        </span>
+        <span class="badge ${getSupportStatusBadgeClass(item.status)}" style="font-size: 10px; padding: 2px 8px;">
+          ${item.status}
+        </span>
+      </div>
+      <div style="font-size: 12px; font-weight: 700; color: var(--text-main); margin-top: 4px;">
+        ${escapeHtml(item.title)}
+      </div>
+      <div style="font-size: 10px; color: var(--text-light); margin-top: 4px;">
+        ${item.date}
+      </div>
+    </div>
+  `).join('');
+}
+
+function setAdminReplyMode(mode) {
+  state.adminReplyMode = mode;
+  const replyBtn = document.getElementById('btn-mode-reply');
+  const internalBtn = document.getElementById('btn-mode-internal');
+  const textarea = document.getElementById('admin-reply-textarea');
+  const submitBtn = document.getElementById('btn-admin-submit-reply');
+
+  if (mode === 'INTERNAL_NOTE') {
+    if (replyBtn) replyBtn.classList.remove('active');
+    if (internalBtn) internalBtn.classList.add('active');
+    if (textarea) textarea.placeholder = 'Write confidential internal note (only visible to staff members)...';
+    if (submitBtn) {
+      submitBtn.innerHTML = '<span>Save Internal Note</span> <span>🔒</span>';
+      submitBtn.style.background = '#d97706';
+    }
+  } else {
+    if (replyBtn) replyBtn.classList.add('active');
+    if (internalBtn) internalBtn.classList.remove('active');
+    if (textarea) textarea.placeholder = 'Thank you for contacting ZILHAJ support. Our team is checking the details...';
+    if (submitBtn) {
+      submitBtn.innerHTML = '<span>Send Reply</span> <span>➤</span>';
+      submitBtn.style.background = '';
+    }
+  }
+}
+
+async function submitAdminReply() {
+  if (!state.selectedIssueId) {
+    showToast('Please select a support ticket first.', 'warning');
+    return;
+  }
+
+  const textarea = document.getElementById('admin-reply-textarea');
+  const message = textarea ? textarea.value.trim() : '';
+
+  if (!message) {
+    showToast('Please type a message before sending.', 'warning');
+    return;
+  }
+
+  const submitBtn = document.getElementById('btn-admin-submit-reply');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+  }
+
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+
+  try {
+    const res = await fetch(`${apiBase}/admin/support/tickets/${state.selectedIssueId}/messages`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        message,
+        message_type: state.adminReplyMode,
+        admin_name: 'Aman Khan (Customer Care)',
+        admin_id: 'admin_aman'
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to send message');
+    }
+
+    if (textarea) textarea.value = '';
+    showToast(state.adminReplyMode === 'INTERNAL_NOTE' ? 'Internal note recorded' : 'Reply sent to customer successfully', 'success');
+
+    // Refresh details and ticket list
+    await openAdminTicket(state.selectedIssueId);
+    await loadAdminSupportData(false);
+  } catch (err) {
+    console.error('Error sending reply:', err);
+    showToast(err.message || 'Could not send reply', 'danger');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      setAdminReplyMode(state.adminReplyMode);
+    }
+  }
+}
+
+async function handleAdminStatusSelect(newStatus) {
+  if (!state.selectedIssueId) return;
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+
+  try {
+    const res = await fetch(`${apiBase}/admin/support/tickets/${state.selectedIssueId}/status`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ status: newStatus, changed_by: 'Aman Khan (Customer Care)' })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.message);
+
+    showToast(`Ticket status updated to ${newStatus}`, 'success');
+    await openAdminTicket(state.selectedIssueId);
+    await loadAdminSupportData(false);
+  } catch (err) {
+    showToast(err.message || 'Failed to update status', 'danger');
+  }
+}
+
+async function quickUpdateStatus(newStatus) {
+  await handleAdminStatusSelect(newStatus);
+}
+
+async function handleAdminPrioritySelect(priority) {
+  if (!state.selectedIssueId) return;
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+
+  try {
+    const res = await fetch(`${apiBase}/admin/support/tickets/${state.selectedIssueId}/priority`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ priority, changed_by: 'Aman Khan (Customer Care)' })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.message);
+
+    showToast(`Priority updated to ${priority}`, 'success');
+    await openAdminTicket(state.selectedIssueId);
+  } catch (err) {
+    showToast(err.message || 'Failed to update priority', 'danger');
+  }
+}
+
+async function handleAdminAssignSelect(adminName) {
+  if (!state.selectedIssueId) return;
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+
+  try {
+    const res = await fetch(`${apiBase}/admin/support/tickets/${state.selectedIssueId}/assign`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ admin_id: 'admin_' + adminName.split(' ')[0].toLowerCase(), admin_name: adminName })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.message);
+
+    showToast(`Ticket assigned to ${adminName}`, 'success');
+    await openAdminTicket(state.selectedIssueId);
+  } catch (err) {
+    showToast(err.message || 'Failed to assign executive', 'danger');
+  }
+}
+
+async function handleOnCallSubmit(e) {
+  e.preventDefault();
+  const category = document.getElementById('oncall-category')?.value || 'Hotel Related';
+  const call_status = document.getElementById('oncall-status')?.value || 'Resolved';
+  const notesText = document.getElementById('oncall-notes');
+  const call_notes = notesText ? notesText.value.trim() : '';
+
+  if (!call_notes || call_notes.length < 5) {
+    showToast('Please enter detailed call notes (min 5 characters).', 'warning');
+    return;
+  }
+
+  const custName = document.getElementById('support-cust-name')?.textContent || 'Ahmed Dar';
+  const custPhone = document.getElementById('support-cust-phone')?.textContent || '+91 98765 43210';
+  const reqId = document.getElementById('support-req-id-tag')?.textContent || 'REQ_1048';
+
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+
+  try {
+    const res = await fetch(`${apiBase}/admin/support/on-call-resolution`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        ticket_id: state.selectedIssueId || null,
+        request_id: reqId,
+        customer_name: custName,
+        customer_phone: custPhone,
+        category,
+        call_status,
+        call_notes,
+        admin_name: 'Aman Khan (Customer Care)',
+        admin_id: 'admin_aman'
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.message);
+
+    showToast('On-call resolution saved & logged in history', 'success');
+    if (notesText) notesText.value = '';
+
+    if (state.selectedIssueId) {
+      await openAdminTicket(state.selectedIssueId);
+    }
+    await loadAdminSupportData(false);
+  } catch (err) {
+    showToast(err.message || 'Failed to save call resolution', 'danger');
+  }
+}
+
+let supportSearchTimeout = null;
+function handleSupportSearch(val) {
+  state.supportSearchQuery = val;
+  clearTimeout(supportSearchTimeout);
+  supportSearchTimeout = setTimeout(() => {
+    loadAdminSupportData(false);
+  }, 300);
+}
+
+function handleSupportFilterChange() {
+  state.supportFilterStatus = document.getElementById('support-filter-status')?.value || 'All';
+  state.supportFilterPriority = document.getElementById('support-filter-priority')?.value || 'All';
+  state.supportFilterCategory = document.getElementById('support-filter-category')?.value || 'All';
+  state.supportFilterSort = document.getElementById('support-filter-sort')?.value || 'newest';
+  loadAdminSupportData(false);
+}
+
+function resetSupportFilters() {
+  state.supportSearchQuery = '';
+  state.supportFilterStatus = 'All';
+  state.supportFilterPriority = 'All';
+  state.supportFilterCategory = 'All';
+  state.supportFilterSort = 'newest';
+
+  const sInput = document.getElementById('support-search-input');
+  if (sInput) sInput.value = '';
+  const statSelect = document.getElementById('support-filter-status');
+  if (statSelect) statSelect.value = 'All';
+  const prioSelect = document.getElementById('support-filter-priority');
+  if (prioSelect) prioSelect.value = 'All';
+  const catSelect = document.getElementById('support-filter-category');
+  if (catSelect) catSelect.value = 'All';
+  const sortSelect = document.getElementById('support-filter-sort');
+  if (sortSelect) sortSelect.value = 'newest';
+
+  loadAdminSupportData(false);
+  showToast('Filters reset', 'info');
+}
+
+function filterSupportByStatus(status) {
+  state.supportFilterStatus = status;
+  const statSelect = document.getElementById('support-filter-status');
+  if (statSelect) statSelect.value = status;
+  loadAdminSupportData(false);
+  showToast(`Filtering by ${status} issues`, 'info');
+}
+
+function filterSupportByPriority(priority) {
+  state.supportFilterPriority = priority;
+  const prioSelect = document.getElementById('support-filter-priority');
+  if (prioSelect) prioSelect.value = priority;
+  loadAdminSupportData(false);
+  showToast(`Filtering by ${priority} priority`, 'info');
+}
+

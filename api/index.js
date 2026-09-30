@@ -30,7 +30,9 @@ function getRazorpayConfig() {
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+const supportService = require('./supportService');
 
 // Serve static files from /public and /client directories
 const publicDir = path.join(__dirname, '../public');
@@ -83,6 +85,10 @@ app.get(['/admin', '/admin/', '/admin/dashboard', '/admin/index.html'], (req, re
 
 app.get(['/checkout', '/checkout.html'], (req, res) => {
     res.sendFile(path.join(publicDir, 'checkout.html'));
+});
+
+app.get(['/support', '/support.html', '/help', '/help-and-support'], (req, res) => {
+    res.redirect('/dashboard?tab=help');
 });
 
 app.use(express.static(publicDir, staticOptions));
@@ -882,6 +888,259 @@ app.get('/api/admin/stats', async (req, res) => {
         console.error('Error fetching admin stats:', err);
         res.status(500).json({ error: 'Failed to fetch stats' });
     }
+});
+
+// ============================================================================
+// CUSTOMER & ADMIN SUPPORT TICKET SYSTEM (ZILHAJ CARE)
+// ============================================================================
+
+// Sync MongoDB when DB connects
+getFastDb().then(db => {
+    if (db) supportService.syncToMongo(db);
+}).catch(() => {});
+
+// 1. CUSTOMER: Create Ticket
+app.post('/api/support/tickets', async (req, res) => {
+    try {
+        const user = supportService.resolveUser(req);
+        if (!user.email) {
+            return res.status(400).json({ success: false, message: 'Customer email is required.' });
+        }
+        const db = await getFastDb();
+        const result = await supportService.createTicket(req.body, user, db);
+        res.status(201).json({
+            success: true,
+            message: 'Your issue has been submitted successfully.',
+            issue_id: result.issue_id,
+            request_id: result.request_id,
+            ticket: result.ticket
+        });
+    } catch (err) {
+        console.error('Error creating support ticket:', err.message);
+        if (err.code === 'DUPLICATE_TICKET') {
+            return res.status(409).json({
+                success: false,
+                code: 'DUPLICATE_TICKET',
+                message: 'A similar issue was recently submitted. Please view your existing ticket.',
+                existingIssueId: err.existingIssueId
+            });
+        }
+        res.status(400).json({ success: false, message: err.message || 'We couldn\'t submit your issue. Please try again.' });
+    }
+});
+
+// 2. CUSTOMER: List My Tickets
+app.get('/api/support/tickets', async (req, res) => {
+    try {
+        const user = supportService.resolveUser(req);
+        if (!user.email) {
+            return res.status(400).json({ success: false, message: 'User identification required.' });
+        }
+        const tickets = supportService.getCustomerTickets(user);
+        res.json({ success: true, tickets });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Failed to fetch support tickets.' });
+    }
+});
+
+// 3. CUSTOMER: Get Ticket Details (INTERNAL NOTES STRIPPED)
+app.get('/api/support/tickets/:issueId', async (req, res) => {
+    try {
+        const user = supportService.resolveUser(req);
+        const details = supportService.getTicketDetails(req.params.issueId, user, false);
+        if (!details) {
+            return res.status(404).json({ success: false, message: 'Support ticket not found.' });
+        }
+        res.json({ success: true, ...details });
+    } catch (err) {
+        const status = err.status || 500;
+        res.status(status).json({ success: false, message: err.message });
+    }
+});
+
+// 4. CUSTOMER: Send Message Reply
+app.post('/api/support/tickets/:issueId/messages', async (req, res) => {
+    try {
+        const user = supportService.resolveUser(req);
+        const details = supportService.getTicketDetails(req.params.issueId, user, false);
+        if (!details) return res.status(404).json({ success: false, message: 'Support ticket not found.' });
+
+        const messageRecord = await supportService.addMessage(req.params.issueId, req.body, user);
+        res.status(201).json({ success: true, message: 'Reply sent successfully.', data: messageRecord });
+    } catch (err) {
+        const status = err.status || 400;
+        res.status(status).json({ success: false, message: err.message });
+    }
+});
+
+// 5. CUSTOMER: Reopen Ticket
+app.post('/api/support/tickets/:issueId/reopen', async (req, res) => {
+    try {
+        const user = supportService.resolveUser(req);
+        const ticket = await supportService.reopenTicket(req.params.issueId, req.body.reason, user);
+        res.json({ success: true, message: 'Ticket reopened successfully.', ticket });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+});
+
+// 6. CUSTOMER: Get Notifications
+app.get('/api/support/notifications', async (req, res) => {
+    try {
+        const user = supportService.resolveUser(req);
+        const notifs = supportService.getNotifications(user, false);
+        res.json({ success: true, ...notifs });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Failed to fetch notifications.' });
+    }
+});
+
+// 7. CUSTOMER: Mark Notification Read
+app.patch('/api/support/notifications/:id/read', (req, res) => {
+    supportService.markNotificationRead(req.params.id);
+    res.json({ success: true });
+});
+
+// 8. CUSTOMER: Mark All Notifications Read
+app.patch('/api/support/notifications/read-all', (req, res) => {
+    const user = supportService.resolveUser(req);
+    supportService.markAllNotificationsRead(user, false);
+    res.json({ success: true });
+});
+
+// 9. CUSTOMER: FAQs
+app.get('/api/support/faqs', (req, res) => {
+    const faqs = supportService.searchFaqs(req.query.q || '');
+    res.json({ success: true, faqs });
+});
+
+// 10. CUSTOMER: Get User Requests for Dropdown
+app.get('/api/support/user-requests', (req, res) => {
+    const user = supportService.resolveUser(req);
+    const requests = supportService.getUserRequests(user);
+    res.json({ success: true, requests });
+});
+
+// ----------------------------------------------------------------------------
+// ADMIN SUPPORT ENDPOINTS
+// ----------------------------------------------------------------------------
+
+// 11. ADMIN: Search & Filter Tickets
+app.get('/api/admin/support/tickets', (req, res) => {
+    try {
+        const tickets = supportService.searchTickets(req.query);
+        res.json({ success: true, tickets });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Failed to search tickets.' });
+    }
+});
+
+app.get('/api/admin/support/search', (req, res) => {
+    try {
+        const tickets = supportService.searchTickets(req.query);
+        res.json({ success: true, tickets });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Search failed.' });
+    }
+});
+
+// 12. ADMIN: Get Ticket Details (Includes Internal Notes, Customer Profile, Request Context, History)
+app.get('/api/admin/support/tickets/:issueId', (req, res) => {
+    try {
+        const adminUser = { role: 'ADMIN', name: 'Palak Badyal (Admin)' };
+        const details = supportService.getTicketDetails(req.params.issueId, adminUser, true);
+        if (!details) {
+            return res.status(404).json({ success: false, message: 'Ticket not found.' });
+        }
+        res.json({ success: true, ...details });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 13. ADMIN: Reply or Internal Note
+app.post('/api/admin/support/tickets/:issueId/messages', async (req, res) => {
+    try {
+        const adminSender = {
+            role: 'ADMIN',
+            email: req.body.admin_email || 'admin@umrah.com',
+            name: req.body.admin_name || 'Aman Khan (Customer Care)',
+            id: req.body.admin_id || 'admin_aman'
+        };
+        const msg = await supportService.addMessage(req.params.issueId, req.body, adminSender);
+        res.status(201).json({ success: true, message: 'Message recorded successfully.', data: msg });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+});
+
+// 14. ADMIN: Update Status
+app.patch('/api/admin/support/tickets/:issueId/status', async (req, res) => {
+    try {
+        const { status, reason, changed_by } = req.body;
+        const ticket = await supportService.updateStatus(req.params.issueId, status, reason, changed_by || 'Aman Khan (Customer Care)');
+        res.json({ success: true, message: `Ticket status updated to ${ticket.status}.`, ticket });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+});
+
+// 15. ADMIN: Change Priority
+app.patch('/api/admin/support/tickets/:issueId/priority', (req, res) => {
+    try {
+        const { priority, changed_by } = req.body;
+        const ticket = supportService.changePriority(req.params.issueId, priority, changed_by || 'Admin');
+        res.json({ success: true, message: `Ticket priority updated to ${ticket.priority}.`, ticket });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+});
+
+// 16. ADMIN: Assign Executive
+app.patch('/api/admin/support/tickets/:issueId/assign', (req, res) => {
+    try {
+        const { admin_id, admin_name } = req.body;
+        const ticket = supportService.assignExecutive(req.params.issueId, admin_id, admin_name);
+        res.json({ success: true, message: `Ticket assigned to ${admin_name}.`, ticket });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+});
+
+// 17. ADMIN: On-Call Resolution
+app.post('/api/admin/support/on-call-resolution', (req, res) => {
+    try {
+        const admin = {
+            id: req.body.admin_id || 'admin_aman',
+            name: req.body.admin_name || 'Aman Khan (Customer Care)'
+        };
+        const record = supportService.recordCallResolution(req.body, admin);
+        res.status(201).json({ success: true, message: 'On-call resolution logged successfully.', record });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+});
+
+// 18. ADMIN: Stats
+app.get('/api/admin/support/stats', (req, res) => {
+    const stats = supportService.getStats();
+    res.json({ success: true, stats });
+});
+
+// 19. ADMIN: Notifications
+app.get('/api/admin/support/notifications', (req, res) => {
+    const notifs = supportService.getNotifications(null, true);
+    res.json({ success: true, ...notifs });
+});
+
+app.patch('/api/admin/support/notifications/:id/read', (req, res) => {
+    supportService.markNotificationRead(req.params.id);
+    res.json({ success: true });
+});
+
+app.patch('/api/admin/support/notifications/read-all', (req, res) => {
+    supportService.markAllNotificationsRead(null, true);
+    res.json({ success: true });
 });
 
 // BOOKINGS ENDPOINTS

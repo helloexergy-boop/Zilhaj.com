@@ -52,6 +52,10 @@
           <button class="nav-tab-btn" data-tab="reports">
             <span>Reports</span>
           </button>
+          <button class="nav-tab-btn" data-tab="support" id="nav-tab-support">
+            <span>Customer Care</span>
+            <span class="tab-badge" id="nav-support-badge" style="background: #ef4444; color: #fff; display: inline-block;">0</span>
+          </button>
         </nav>
 
         <!-- Right: Notifications & Profile -->
@@ -132,6 +136,14 @@
               <span>📊</span>
               <span>Reports</span>
             </div>
+          </button>
+
+          <button class="sidebar-btn" data-tab="support" id="sidebar-tab-support">
+            <div class="sidebar-btn-left">
+              <span>🎧</span>
+              <span>Customer Care</span>
+            </div>
+            <span class="tab-badge" id="sidebar-support-badge" style="background: #ef4444; color: #fff; display: inline-block;">0</span>
           </button>
         </div>
 
@@ -1069,6 +1081,445 @@
               </table>
             </div>
           </div>
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 8. CUSTOMER CARE / SUPPORT PORTAL VIEW (Executive Desk) -->
+        <!-- ======================================================= -->
+        <section id="support-view" class="view-panel">
+
+          <!-- Executive Desk Header -->
+          <div class="page-header" style="align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <h1 class="page-title" style="margin-bottom: 0;">ZILHAJ Support Portal</h1>
+                <div class="live-line-indicator">
+                  <span class="pulse-dot"></span>
+                  <span>Line Active</span>
+                </div>
+              </div>
+              <p class="page-subtitle" style="margin-top: 4px;">Executive Desk — 24/7 Pilgrim Inquiries, Live Ticketing & On-Call Issue Resolution</p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <!-- Customer Care Executive Profile Badge -->
+              <div style="display: flex; align-items: center; gap: 10px; background: #ffffff; border: 1px solid var(--border-light); padding: 6px 14px; border-radius: var(--radius-pill); box-shadow: var(--shadow-xs);">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: #0d5c3a; color: #ffffff; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center;">
+                  AK
+                </div>
+                <div>
+                  <div style="font-size: 12px; font-weight: 800; color: var(--text-main);" id="admin-exec-name">Aman Khan</div>
+                  <div style="font-size: 10px; color: var(--text-muted);">Customer Care Executive</div>
+                </div>
+              </div>
+
+              <button onclick="loadAdminSupportData(true)" class="btn btn-secondary btn-sm" title="Refresh Live Support Data">
+                <span>🔄</span>
+                <span>Refresh Desk</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 Dynamic KPI Summary Counters -->
+          <div class="kpi-grid-4">
+            <div class="kpi-card" onclick="filterSupportByStatus('Open')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">PENDING ISSUES</div>
+                <div class="kpi-value" id="support-kpi-pending" style="color: #b45309;">0</div>
+                <div class="kpi-trend" style="color: #b45309;">Open & In-Progress Tickets</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-amber">⏳</div>
+            </div>
+
+            <div class="kpi-card" onclick="filterSupportByStatus('Resolved')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">SOLVED ISSUES (ON CALL)</div>
+                <div class="kpi-value" id="support-kpi-solved" style="color: #047857;">0</div>
+                <div class="kpi-trend" style="color: #047857;">Resolved via Desk & Phone</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-green">✓</div>
+            </div>
+
+            <div class="kpi-card" onclick="filterSupportByPriority('Urgent')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">URGENT INQUIRIES</div>
+                <div class="kpi-value" id="support-kpi-urgent" style="color: #dc2626;">0</div>
+                <div class="kpi-trend" style="color: #dc2626;">High Priority Pilgrims</div>
+              </div>
+              <div class="kpi-icon-wrap" style="background: #fee2e2; color: #dc2626;">🚨</div>
+            </div>
+
+            <div class="kpi-card" onclick="resetSupportFilters()" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">TOTAL INQUIRIES</div>
+                <div class="kpi-value" id="support-kpi-total">0</div>
+                <div class="kpi-trend">All Logged Records</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-teal">🎧</div>
+            </div>
+          </div>
+
+          <!-- Customer / Request Search & Filter Bar -->
+          <div class="card" style="margin-top: 20px;">
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <!-- Main Search Input -->
+                <div style="flex: 1; min-width: 280px; position: relative;">
+                  <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--text-light);">🔍</span>
+                  <input type="text" id="support-search-input" class="form-input" placeholder="Search by Request ID, Issue ID, customer name, phone, email or issue..." style="padding-left: 40px; height: 44px; border-radius: var(--radius-md);" oninput="handleSupportSearch(this.value)">
+                </div>
+
+                <!-- Status Filter -->
+                <select id="support-filter-status" class="form-select" style="width: auto; min-width: 140px; height: 44px;" onchange="handleSupportFilterChange()">
+                  <option value="All">All Statuses</option>
+                  <option value="Open">Open</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Waiting for Customer">Waiting for Customer</option>
+                  <option value="Resolved">Resolved</option>
+                  <option value="Closed">Closed</option>
+                  <option value="Reopened">Reopened</option>
+                </select>
+
+                <!-- Priority Filter -->
+                <select id="support-filter-priority" class="form-select" style="width: auto; min-width: 130px; height: 44px;" onchange="handleSupportFilterChange()">
+                  <option value="All">All Priorities</option>
+                  <option value="Urgent">Urgent</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+
+                <!-- Category Filter -->
+                <select id="support-filter-category" class="form-select" style="width: auto; min-width: 160px; height: 44px;" onchange="handleSupportFilterChange()">
+                  <option value="All">All Categories</option>
+                  <option value="Package Information">Package Information</option>
+                  <option value="Hotel Related">Hotel Related</option>
+                  <option value="Payment">Payment</option>
+                  <option value="Travel Date Change">Travel Date Change</option>
+                  <option value="Visa & Passport">Visa & Passport</option>
+                  <option value="Transport / Ziyarat">Transport / Ziyarat</option>
+                  <option value="Booking">Booking</option>
+                  <option value="Cancellation">Cancellation</option>
+                  <option value="Refund">Refund</option>
+                  <option value="Document Related">Document Related</option>
+                  <option value="Technical Problem">Technical Problem</option>
+                  <option value="General Inquiry">General Inquiry</option>
+                  <option value="Other">Other</option>
+                </select>
+
+                <!-- Sort Filter -->
+                <select id="support-filter-sort" class="form-select" style="width: auto; min-width: 140px; height: 44px;" onchange="handleSupportFilterChange()">
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="priority">Priority First</option>
+                  <option value="updated">Recently Updated</option>
+                </select>
+
+                <button onclick="resetSupportFilters()" class="btn btn-secondary btn-sm" style="height: 44px; padding: 0 16px;">
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Support Tickets Queue Table -->
+          <div class="card" style="margin-top: 20px;">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Customer Care Inquiries & Tickets</h3>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;" id="support-table-subtitle">Live real-time feed of pilgrim issues</p>
+              </div>
+              <div id="support-count-pill" style="font-size: 12px; font-weight: 800; background: #e8f5ee; color: #0d5c3a; padding: 4px 12px; border-radius: var(--radius-pill);">
+                3 Tickets
+              </div>
+            </div>
+
+            <div class="table-container" style="border: none; box-shadow: none;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Issue ID</th>
+                    <th>Request ID</th>
+                    <th>Customer Name</th>
+                    <th>Issue Type</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Raised On</th>
+                    <th style="text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="support-tickets-tbody">
+                  <!-- Dynamic Ticket Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Detailed Issue & Resolution Workspace (Split Two-Column Grid) -->
+          <div class="support-workspace-grid" id="support-issue-workspace" style="display: none;">
+            
+            <!-- Left Column: Active Issue & Full Conversation -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              
+              <!-- Active Issue Details Card -->
+              <div class="card">
+                <div class="card-header" style="align-items: flex-start;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                      <span id="detail-issue-id" style="font-size: 20px; font-weight: 900; color: var(--text-main); font-family: monospace;">ISS_0021</span>
+                      <span id="detail-req-id-badge" style="font-size: 12px; font-weight: 800; background: #e0f2fe; color: #0369a1; padding: 3px 10px; border-radius: var(--radius-pill);">REQ_1048</span>
+                      <span id="detail-priority-badge" class="badge">Medium</span>
+                      <span id="detail-status-badge" class="badge">In Progress</span>
+                    </div>
+                    <h3 id="detail-subject" style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 8px;">Hotel distance clarification</h3>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                      Raised on <span id="detail-created-at" style="font-weight: 700; color: var(--text-body);">--</span> · Last updated <span id="detail-updated-at" style="font-weight: 700; color: var(--text-body);">--</span>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; gap: 8px;">
+                    <button onclick="quickUpdateStatus('Resolved')" class="btn btn-primary btn-sm" title="Mark Resolved">
+                      ✓ Resolve
+                    </button>
+                    <button onclick="quickUpdateStatus('Closed')" class="btn btn-secondary btn-sm" title="Close Ticket">
+                      Close
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Original Description Block -->
+                <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 14px; margin-top: 14px;">
+                  <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">Original Issue Description</div>
+                  <div id="detail-description" style="font-size: 13px; color: var(--text-body); line-height: 1.5; white-space: pre-wrap;">--</div>
+                  <div id="detail-attachment-preview" style="margin-top: 10px;"></div>
+                </div>
+
+                <!-- Full Conversation Thread -->
+                <div style="margin-top: 20px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-size: 13px; font-weight: 800; color: var(--text-main);">Full Conversation</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">Real-time synchronized history</div>
+                  </div>
+
+                  <div class="chat-thread-container" id="admin-chat-thread">
+                    <!-- Dynamic Messages -->
+                  </div>
+                </div>
+
+                <!-- Reply & Action Control Section -->
+                <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+                  
+                  <!-- Reply Mode Toggles -->
+                  <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                    <button type="button" id="btn-mode-reply" class="pill-btn active" onclick="setAdminReplyMode('CUSTOMER_REPLY')">
+                      💬 Reply to Customer
+                    </button>
+                    <button type="button" id="btn-mode-internal" class="pill-btn" onclick="setAdminReplyMode('INTERNAL_NOTE')" style="background: #fffbeb; color: #92400e; border-color: #fde68a;">
+                      🔒 Internal Note (Staff Only)
+                    </button>
+                  </div>
+
+                  <!-- Text Input Area -->
+                  <div class="form-group" style="margin-bottom: 12px;">
+                    <textarea id="admin-reply-textarea" class="form-input" rows="3" placeholder="Thank you for contacting ZILHAJ support. Our team is checking the details..." style="resize: vertical; font-size: 13px;"></textarea>
+                  </div>
+
+                  <!-- Bottom Toolbar: Status change, priority, assigned exec & send button -->
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                      
+                      <!-- Status Dropdown -->
+                      <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Status:</span>
+                        <select id="admin-action-status" class="form-select" style="font-size: 12px; padding: 6px 10px; width: auto;" onchange="handleAdminStatusSelect(this.value)">
+                          <option value="Open">Open</option>
+                          <option value="In Progress">In Progress</option>
+                          <option value="Waiting for Customer">Waiting for Customer</option>
+                          <option value="Resolved">Resolved</option>
+                          <option value="Closed">Closed</option>
+                          <option value="Reopened">Reopened</option>
+                          <option value="Wrong Request / Invalid">Wrong Request / Invalid</option>
+                        </select>
+                      </div>
+
+                      <!-- Priority Dropdown -->
+                      <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Priority:</span>
+                        <select id="admin-action-priority" class="form-select" style="font-size: 12px; padding: 6px 10px; width: auto;" onchange="handleAdminPrioritySelect(this.value)">
+                          <option value="Low">Low</option>
+                          <option value="Medium">Medium</option>
+                          <option value="High">High</option>
+                          <option value="Urgent">Urgent</option>
+                        </select>
+                      </div>
+
+                      <!-- Assigned Executive Dropdown -->
+                      <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Assigned To:</span>
+                        <select id="admin-action-assign" class="form-select" style="font-size: 12px; padding: 6px 10px; width: auto;" onchange="handleAdminAssignSelect(this.value)">
+                          <option value="Aman Khan">Aman Khan (Customer Care)</option>
+                          <option value="Palak Badyal">Palak Badyal (Admin)</option>
+                          <option value="Tariq Ahmad">Tariq Ahmad (Sub Admin)</option>
+                        </select>
+                      </div>
+
+                    </div>
+
+                    <button type="button" id="btn-admin-submit-reply" onclick="submitAdminReply()" class="btn btn-primary" style="padding: 8px 20px;">
+                      <span>Send Reply</span>
+                      <span>➤</span>
+                    </button>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- Right Column: Customer Info, Request Context, Issue History & On-Call Resolution -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              
+              <!-- 1. Customer Information Card -->
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Customer Information</h3>
+                </div>
+
+                <div style="display: flex; gap: 14px; margin-top: 10px; align-items: center;">
+                  <div class="avatar-circle" id="support-cust-avatar" style="width: 48px; height: 48px; font-size: 16px; background: #d1fae5; color: #065f46;">
+                    AD
+                  </div>
+                  <div style="font-size: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <h4 id="support-cust-name" style="font-size: 15px; font-weight: 800;">Ahmed Dar</h4>
+                    <div style="color: var(--text-muted);">📞 <span id="support-cust-phone">+91 98765 43210</span></div>
+                    <div style="color: var(--text-muted);">📧 <span id="support-cust-email">ahmed@example.com</span></div>
+                    <div style="color: var(--text-muted);">📍 <span id="support-cust-loc">Srinagar, Jammu & Kashmir</span></div>
+                  </div>
+                </div>
+
+                <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 10px 14px; margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px;">
+                  <div>
+                    <span style="color: var(--text-muted);">Customer Since:</span>
+                    <strong style="display: block; color: var(--text-main);" id="support-cust-since">Jan 2025</strong>
+                  </div>
+                  <div>
+                    <span style="color: var(--text-muted);">Verified Requests:</span>
+                    <strong style="display: block; color: var(--text-main);" id="support-cust-total-reqs">3 Requests</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Request Information Card -->
+              <div class="card" id="support-req-context-card">
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Request Information</h3>
+                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; margin-top: 2px;" id="support-req-id-tag">REQ_1048</div>
+                  </div>
+                  <span class="badge badge-offers-ready" id="support-req-status-badge">Offers Ready</span>
+                </div>
+
+                <div style="font-size: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Service Type:</span>
+                    <strong id="support-req-service">Umrah Package</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Travel Date:</span>
+                    <strong id="support-req-travel-date">15 Feb 2026</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">No. of Pilgrims:</span>
+                    <strong id="support-req-pilgrims">4 Pilgrims</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Hotel Preference:</span>
+                    <strong id="support-req-hotel">3 Star (Near Haram)</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Room Preference:</span>
+                    <strong id="support-req-room">Quad Sharing</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Duration:</span>
+                    <strong id="support-req-duration">18 Days</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Budget:</span>
+                    <strong id="support-req-budget" style="color: var(--primary);">₹1,20,000 - ₹1,50,000</strong>
+                  </div>
+                  <div style="padding-top: 8px; border-top: 1px solid var(--border-subtle); margin-top: 4px;">
+                    <span style="color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 2px;">Special Requirements:</span>
+                    <span style="color: var(--text-body);" id="support-req-notes">Ground shuttle transport needed for elderly parents.</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Issue History (Previous Calls & Issues) -->
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Issue History (Previous Calls)</h3>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">All past support requests & on-call records</p>
+                  </div>
+                </div>
+
+                <div id="admin-issue-history-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                  <!-- Dynamic Previous Issues / Calls -->
+                </div>
+              </div>
+
+              <!-- 4. On-Call Resolution Section -->
+              <div class="card" style="background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); border: 1.5px solid #bbf0d6;">
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title" style="color: #065f46;">On-Call Resolution</h3>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Log telephonic resolution with pilgrim</p>
+                  </div>
+                  <span style="font-size: 18px;">📞</span>
+                </div>
+
+                <form onsubmit="handleOnCallSubmit(event)" style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                  <div class="form-group">
+                    <label class="form-label" style="font-size: 11px;">Issue Category</label>
+                    <select id="oncall-category" class="form-select" style="font-size: 12px;">
+                      <option value="Hotel Related">Hotel Related</option>
+                      <option value="Package Information">Package Information</option>
+                      <option value="Payment">Payment</option>
+                      <option value="Travel Date Change">Travel Date Change</option>
+                      <option value="Visa & Passport">Visa & Passport</option>
+                      <option value="Transport / Ziyarat">Transport / Ziyarat</option>
+                      <option value="General Inquiry">General Inquiry</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" style="font-size: 11px;">Call Status</label>
+                    <select id="oncall-status" class="form-select" style="font-size: 12px; font-weight: 700;">
+                      <option value="Resolved">Resolved</option>
+                      <option value="Follow Up Required">Follow Up Required</option>
+                      <option value="Not Resolved">Not Resolved</option>
+                      <option value="Wrong Request / Invalid">Wrong Request / Invalid</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" style="font-size: 11px;">Call Notes *</label>
+                    <textarea id="oncall-notes" required class="form-input" rows="3" placeholder="Enter notes discussed with the pilgrim on the phone..." style="font-size: 12px; resize: vertical;"></textarea>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 800; justify-content: center;">
+                    <span>Update Resolution & History</span>
+                  </button>
+                </form>
+              </div>
+
+            </div>
+
+          </div>
+
         </section>
 
         <!-- Footer matching screenshot -->

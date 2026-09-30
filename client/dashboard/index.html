@@ -33,10 +33,15 @@
         <a href="/" class="nav-link">Home</a>
         <a href="/services" class="nav-link">Services</a>
         <a href="/about" class="nav-link">About Us</a>
-        <a href="/#contact" class="nav-link">Contact Us</a>
+        <a href="#" onclick="window.switchTab('help'); return false;" class="nav-link">Contact Us</a>
       </nav>
 
-      <div class="nav-user-area">
+      <div class="nav-user-area" style="display: flex; align-items: center; gap: 10px;">
+        <button type="button" class="icon-btn-notif" onclick="toggleCustomerNotifsModal()" title="Support Alerts" style="position: relative; background: #FFFFFF; border: 1.5px solid var(--border-color); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease;">
+          <span style="font-size: 16px;">🔔</span>
+          <span class="customer-notif-dot" id="headerCustomerNotifDot" style="display: none; position: absolute; top: -3px; right: -3px; background: #DC2626; color: #FFFFFF; font-size: 10px; font-weight: 800; border-radius: 99px; padding: 1px 5px; min-width: 16px; height: 16px; align-items: center; justify-content: center;">0</span>
+        </button>
+
         <div class="user-pill-badge" onclick="switchTab('profile')" style="cursor: pointer;" title="Pilgrim Profile">
           <span class="user-avatar-circle" id="navAvatarInitials">P</span>
           <span class="user-name" id="navUserName">012 Palak Badyal</span>
@@ -89,13 +94,14 @@
             <span>Profile & Settings</span>
           </button>
 
-          <button class="sidebar-link" data-tab="help">
+          <button class="sidebar-link" data-tab="help" id="sidebarHelpBtn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
               <line x1="12" y1="17" x2="12.01" y2="17"></line>
             </svg>
             <span>Help & Support</span>
+            <span class="support-notif-badge" id="customerHelpBadge" style="display: none;">🔔 0</span>
           </button>
         </nav>
 
@@ -890,25 +896,34 @@
 
         <!-- TAB 3: HELP & SUPPORT -->
         <section id="tab-help" class="tab-pane">
-          <div class="page-header">
+          <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
             <div>
               <h1 class="page-title">Help & Support</h1>
               <p class="page-subtitle">Find answers and connect with our dedicated support team 24/7.</p>
             </div>
+            <button type="button" onclick="openReportIssueModal()" class="btn-new-request" style="background: #127A4D; color: #FFFFFF; font-weight: 700; border: none; border-radius: 99px; padding: 10px 22px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+              <span>🚨</span>
+              <span>Report an Issue</span>
+            </button>
           </div>
 
           <!-- Symmetrical Help Search Box -->
-          <div class="help-search-wrapper" style="position: relative; max-width: 600px; margin: 0 auto 32px auto;">
+          <div class="help-search-wrapper" style="position: relative; max-width: 650px; margin: 0 auto 24px auto;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#687970" stroke-width="2" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%);">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input type="text" id="helpSearchInput" class="help-search-input" placeholder="Search help topics or FAQs..." style="width: 100%; height: 50px; padding-left: 50px; padding-right: 20px; font-size: 15px; border-radius: 99px; border: 1.5px solid var(--border-color); background: #FFFFFF; box-shadow: var(--shadow-sm); outline: none;">
+            <input type="text" id="helpSearchInput" class="help-search-input" placeholder="Search help topics or FAQs..." style="width: 100%; height: 50px; padding-left: 50px; padding-right: 20px; font-size: 15px; border-radius: 99px; border: 1.5px solid var(--border-color); background: #FFFFFF; box-shadow: var(--shadow-sm); outline: none;" oninput="handleFaqSearch(this.value)">
+          </div>
+
+          <!-- FAQ Search Results / Accordion Container -->
+          <div id="helpFaqResultsContainer" style="max-width: 650px; margin: 0 auto 32px auto; display: none;">
+            <!-- Dynamically populated FAQ articles -->
           </div>
 
           <!-- Symmetrical Contact Cards Grid -->
           <div class="contact-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
-            <div class="contact-card" onclick="alert('Connecting to Live Chat Support...')" style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
+            <div class="contact-card" onclick="openReportIssueModal('Live Chat Inquiry')" style="background: #FFFFFF; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
               <div class="contact-card-icon" style="width: 52px; height: 52px; border-radius: 50%; background: var(--primary-green-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -918,7 +933,7 @@
               <p style="font-size: 13px; color: var(--text-muted); margin: 0;">24/7 instant agent chat</p>
             </div>
 
-            <div class="contact-card" onclick="location.href='mailto:support@zilhaj.com'" style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
+            <div class="contact-card" onclick="location.href='mailto:support@zilhaj.com'" style="background: #FFFFFF; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
               <div class="contact-card-icon" style="width: 52px; height: 52px; border-radius: 50%; background: var(--primary-green-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -929,7 +944,7 @@
               <p style="font-size: 13px; color: var(--text-muted); margin: 0;">support@zilhaj.com</p>
             </div>
 
-            <div class="contact-card" onclick="window.open('https://wa.me/919541692891', '_blank')" style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
+            <div class="contact-card" onclick="window.open('https://wa.me/919541692891', '_blank')" style="background: #FFFFFF; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
               <div class="contact-card-icon" style="width: 52px; height: 52px; border-radius: 50%; background: var(--primary-green-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2">
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
@@ -939,7 +954,67 @@
               <p style="font-size: 13px; color: var(--text-muted); margin: 0;">+91 95416 92891</p>
             </div>
           </div>
+
+          <!-- "REPORT AN ISSUE" SECTION CARD -->
+          <div class="report-issue-promo-card" style="background: linear-gradient(135deg, #0d5c3a 0%, #063823 100%); border-radius: 16px; padding: 28px; color: #FFFFFF; margin-top: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; box-shadow: 0 10px 25px -5px rgba(13, 92, 58, 0.25);">
+            <div style="max-width: 600px;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="font-size: 24px;">🛡️</span>
+                <h3 style="font-size: 20px; font-weight: 800; color: #FFFFFF; margin: 0;">Report an Issue</h3>
+              </div>
+              <p style="font-size: 14px; color: #D1FAE5; line-height: 1.5; margin: 0;">
+                Facing a problem with your request, booking, payment or travel service? Submit an issue and our dedicated customer care team will review and resolve it.
+              </p>
+            </div>
+            <button type="button" onclick="openReportIssueModal()" style="background: #F59E0B; color: #061F17; font-weight: 800; font-size: 14px; border: none; border-radius: 99px; padding: 14px 28px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35); transition: transform 0.15s, background 0.15s;">
+              <span>Report an Issue</span>
+              <span>➤</span>
+            </button>
+          </div>
+
+          <!-- "MY SUPPORT REQUESTS" / PREVIOUS SUPPORT REQUESTS SECTION -->
+          <div id="section-my-support-requests" style="margin-top: 36px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h3 style="font-size: 18px; font-weight: 800; color: #1A2B23; margin: 0;">My Support Requests</h3>
+                <p style="font-size: 13px; color: #687970; margin-top: 2px;">Track the status of tickets you have submitted to customer care.</p>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <button type="button" onclick="loadCustomerTickets(true)" class="btn-refresh-subtle" style="background: #FFFFFF; border: 1.5px solid var(--border-color); border-radius: 99px; padding: 6px 14px; font-size: 12px; font-weight: 700; color: var(--text-dark); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                  <span>🔄</span>
+                  <span>Refresh</span>
+                </button>
+                <button type="button" onclick="openReportIssueModal()" style="background: #E8F6EF; color: #127A4D; border: 1.5px solid #A7F3D0; border-radius: 99px; padding: 8px 18px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                  <span>+</span>
+                  <span>New Issue</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Table of Tickets -->
+            <div class="table-container" style="background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+              <table class="data-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                  <tr style="background: #F8FCF9; border-bottom: 1.5px solid #E2E9E5; font-size: 12px; font-weight: 800; color: #64748B; text-transform: uppercase;">
+                    <th style="padding: 14px 18px;">Issue ID</th>
+                    <th style="padding: 14px 18px;">Request ID</th>
+                    <th style="padding: 14px 18px;">Subject</th>
+                    <th style="padding: 14px 18px;">Category</th>
+                    <th style="padding: 14px 18px;">Priority</th>
+                    <th style="padding: 14px 18px;">Status</th>
+                    <th style="padding: 14px 18px;">Created</th>
+                    <th style="padding: 14px 18px; text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="customer-support-tickets-tbody">
+                  <!-- Dynamically populated from /api/support/tickets -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </section>
+
 
 
         <!-- TAB 4: OFFER UNAVAILABLE VIEW -->
@@ -1060,7 +1135,11 @@
             <div class="underline-accent"></div>
           </div>
           <ul class="footer-links-list">
-            <li><a href="#" class="footer-link" id="footerHelpLink">Help & Support</a></li>
+            <li><a href="javascript:void(0)" onclick="openHelpSupportTab()" class="footer-link" id="footerHelpLink">Help &amp; Support</a></li>
+            <li><a href="javascript:void(0)" onclick="openReportIssueModal()" class="footer-link">Report an Issue</a></li>
+            <li><a href="javascript:void(0)" onclick="openMySupportRequestsSection()" class="footer-link">My Support Requests</a></li>
+            <li><a href="mailto:support@zilhaj.com" class="footer-link">Contact Customer Care</a></li>
+            <li><a href="javascript:void(0)" onclick="focusFaqSearch()" class="footer-link">FAQs</a></li>
           </ul>
         </div>
 
@@ -1607,6 +1686,356 @@
         <button class="btn-modal-outlined" onclick="closeBookingTermsModal()">Cancel</button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: REPORT AN ISSUE (CUSTOMER CARE) -->
+  <!-- ======================================================== -->
+  <div class="modal-backdrop" id="modal-report-issue" style="display: none;">
+    <div class="modal-card wide-modal" style="max-width: 680px; padding: 0; border-radius: 20px; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column;">
+      
+      <!-- Modal Header -->
+      <div style="background: linear-gradient(135deg, #0A432C 0%, #127A4D 100%); color: #FFFFFF; padding: 22px 28px; position: relative;">
+        <button type="button" class="modal-close-btn" onclick="closeReportIssueModal()" style="color: #FFFFFF; opacity: 0.8; font-size: 26px; top: 18px; right: 20px; background: none; border: none; cursor: pointer;">&times;</button>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+          <span style="font-size: 22px;">🛡️</span>
+          <h2 style="font-size: 20px; font-weight: 800; margin: 0; color: #FFFFFF;">Report an Issue</h2>
+        </div>
+        <p style="font-size: 13px; color: #D1FAE5; margin: 0; line-height: 1.4;">
+          Tell us what happened and our customer care team will assist you.
+        </p>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div style="padding: 24px 28px; overflow-y: auto; flex: 1;">
+        
+        <!-- Success State Container (Shown upon submission) -->
+        <div id="report-issue-success-view" style="display: none; text-align: center; padding: 28px 10px;">
+          <div style="width: 72px; height: 72px; background: #E8F6EF; color: #127A4D; font-size: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 2px solid #A7F3D0;">
+            ✓
+          </div>
+          <h3 style="font-size: 22px; font-weight: 800; color: #1A2B23; margin: 0 0 6px;">Issue Submitted Successfully</h3>
+          <p style="font-size: 14px; color: #687970; margin: 0 0 20px;">
+            Your issue has been received by our customer care team. A support representative will review it shortly.
+          </p>
+
+          <div style="background: #F8FCF9; border: 1.5px solid #E2E9E5; border-radius: 12px; padding: 16px 20px; max-width: 420px; margin: 0 auto 24px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 13px; color: #64748B;">Issue ID:</span>
+              <strong id="success-issue-id" style="font-size: 13px; color: #127A4D; font-family: monospace;">ISS_0000</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 13px; color: #64748B;">Request ID:</span>
+              <strong id="success-request-id" style="font-size: 13px; color: #1E293B; font-family: monospace;">REQ_1048</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 13px; color: #64748B;">Status:</span>
+              <span id="success-status-pill" class="badge-status-pill badge-open">Open</span>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: center; gap: 12px;">
+            <button type="button" id="btnSuccessViewTicket" class="btn-primary-action" style="padding: 10px 24px;">View Ticket</button>
+            <button type="button" onclick="closeReportIssueModal()" class="btn-secondary-action" style="padding: 10px 20px;">Back to Help &amp; Support</button>
+          </div>
+        </div>
+
+        <!-- Form View -->
+        <form id="form-report-issue" onsubmit="handleReportIssueSubmit(event)">
+          
+          <!-- A. Customer Information (Read-Only) -->
+          <div style="background: #F8FCF9; border: 1px solid #E2E9E5; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px;">
+            <div style="font-size: 12px; font-weight: 800; color: #127A4D; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+              Customer Information
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+              <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748B; margin-bottom: 4px;">Name</label>
+                <input type="text" id="report-customer-name" class="styled-input-readonly" readonly value="Ahmed Dar">
+              </div>
+              <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748B; margin-bottom: 4px;">Email</label>
+                <input type="email" id="report-customer-email" class="styled-input-readonly" readonly value="ahmed@example.com">
+              </div>
+              <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748B; margin-bottom: 4px;">Phone Number</label>
+                <input type="text" id="report-customer-phone" class="styled-input-readonly" readonly value="+91 98765 43210">
+              </div>
+            </div>
+          </div>
+
+          <!-- B. Request Information -->
+          <div style="margin-bottom: 20px;">
+            <label for="report-request-select" style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">
+              Select Request <span style="color: #EF4444;">*</span>
+            </label>
+            <select id="report-request-select" onchange="handleReportRequestChange(this.value)" required style="width: 100%; padding: 11px 14px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 13px; font-family: inherit; background: #FFFFFF;">
+              <option value="">-- Choose Booking / Request --</option>
+              <option value="REQ_1048" selected>REQ_1048 — Umrah Package — 15 Feb 2026</option>
+              <option value="REQ_1042">REQ_1042 — Hajj Package — 20 Jun 2026</option>
+              <option value="REQ_1037">REQ_1037 — Ziyarat Package — 05 Mar 2026</option>
+              <option value="GENERAL">General Support Request (No specific booking)</option>
+            </select>
+
+            <!-- Auto-Loaded Request Context Preview -->
+            <div id="report-request-details-card" style="margin-top: 10px; background: #F1F5F9; border-radius: 10px; padding: 10px 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-size: 12px;">
+              <div>
+                <span style="color: #64748B; display: block;">Request ID</span>
+                <strong id="preview-req-id" style="color: #127A4D; font-family: monospace;">REQ_1048</strong>
+              </div>
+              <div>
+                <span style="color: #64748B; display: block;">Service</span>
+                <strong id="preview-req-service" style="color: #1E293B;">Umrah Package</strong>
+              </div>
+              <div>
+                <span style="color: #64748B; display: block;">Travel Date</span>
+                <strong id="preview-req-date" style="color: #1E293B;">15 Feb 2026</strong>
+              </div>
+              <div>
+                <span style="color: #64748B; display: block;">Booking Status</span>
+                <span id="preview-req-status" class="badge-status-pill badge-open" style="font-size: 10px; padding: 2px 8px;">Active</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- C. Issue Information -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+            <div>
+              <label for="report-issue-category" style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">
+                Issue Category <span style="color: #EF4444;">*</span>
+              </label>
+              <select id="report-issue-category" required style="width: 100%; padding: 11px 14px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 13px; font-family: inherit; background: #FFFFFF;">
+                <option value="Hotel Related" selected>Hotel Related</option>
+                <option value="Package Information">Package Information</option>
+                <option value="Payment">Payment</option>
+                <option value="Travel Date Change">Travel Date Change</option>
+                <option value="Visa & Passport">Visa &amp; Passport</option>
+                <option value="Transport / Ziyarat">Transport / Ziyarat</option>
+                <option value="Booking">Booking</option>
+                <option value="Cancellation">Cancellation</option>
+                <option value="Refund">Refund</option>
+                <option value="Document Related">Document Related</option>
+                <option value="Technical Problem">Technical Problem</option>
+                <option value="General Inquiry">General Inquiry</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="report-issue-priority" style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">
+                Priority <span style="color: #EF4444;">*</span>
+              </label>
+              <select id="report-issue-priority" required style="width: 100%; padding: 11px 14px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 13px; font-family: inherit; background: #FFFFFF;">
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Subject -->
+          <div style="margin-bottom: 16px;">
+            <label for="report-issue-subject" style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">
+              Issue Subject <span style="color: #EF4444;">*</span>
+            </label>
+            <input type="text" id="report-issue-subject" required minlength="5" placeholder="Briefly describe your issue (e.g., Hotel distance clarification)" style="width: 100%; padding: 11px 14px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 13px; font-family: inherit; box-sizing: border-box;">
+          </div>
+
+          <!-- Details -->
+          <div style="margin-bottom: 18px;">
+            <label for="report-issue-description" style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">
+              Issue Details <span style="color: #EF4444;">*</span>
+            </label>
+            <textarea id="report-issue-description" required minlength="10" rows="4" placeholder="Explain your issue in detail. The more details you provide, the faster our team can assist..." style="width: 100%; padding: 12px 14px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 13px; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
+          </div>
+
+          <!-- D. Attachment Section -->
+          <div style="margin-bottom: 22px;">
+            <label style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">
+              Attachment <span style="font-weight: 400; color: #64748B;">(Optional — PDF, JPG, PNG, DOC up to 10MB)</span>
+            </label>
+            
+            <div id="dropzone-report-issue" onclick="document.getElementById('report-file-input').click()" style="border: 2px dashed #CBD5E1; border-radius: 12px; padding: 18px; text-align: center; cursor: pointer; background: #F8FAFC; transition: border-color 0.2s, background 0.2s;">
+              <input type="file" id="report-file-input" onchange="handleReportFileSelect(this)" style="display: none;" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx">
+              <span style="font-size: 24px; display: block; margin-bottom: 4px;">📎</span>
+              <div style="font-size: 13px; font-weight: 600; color: #127A4D;">Click to upload a file or drag and drop</div>
+              <div style="font-size: 11px; color: #64748B; margin-top: 2px;">PDF, PNG, JPG, JPEG, DOC, DOCX (Max 10 MB)</div>
+            </div>
+
+            <!-- Attachment Preview Box -->
+            <div id="report-file-preview" style="display: none; margin-top: 10px; background: #F1F5F9; border-radius: 8px; padding: 8px 14px; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <span>📄</span>
+                <span id="report-file-name" style="font-weight: 600; color: #1E293B;">file.pdf</span>
+                <span id="report-file-size" style="color: #64748B;">(120 KB)</span>
+              </div>
+              <button type="button" onclick="removeReportFile()" style="background: none; border: none; color: #EF4444; font-weight: 700; cursor: pointer; font-size: 14px;">✕</button>
+            </div>
+          </div>
+
+          <!-- Error Alert Banner -->
+          <div id="report-issue-error" style="display: none; background: #FEF2F2; border: 1.5px solid #FECACA; color: #991B1B; padding: 10px 14px; border-radius: 8px; font-size: 12px; margin-bottom: 16px;"></div>
+
+          <!-- E. Submit Button & Actions -->
+          <div style="display: flex; justify-content: flex-end; gap: 12px; align-items: center; border-top: 1.5px solid #F1F5F9; padding-top: 16px;">
+            <button type="button" onclick="closeReportIssueModal()" class="btn-modal-outlined" style="padding: 10px 20px;">Cancel</button>
+            <button type="submit" id="btnSubmitReportIssue" class="btn-primary-action" style="padding: 11px 28px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px;">
+              <span id="btnSubmitReportText">Submit Issue</span>
+              <span id="btnSubmitReportSpinner" style="display: none;">⏳</span>
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- MODAL: SUPPORT TICKET DETAILS & REAL-TIME CONVERSATION -->
+  <!-- ======================================================== -->
+  <div class="modal-backdrop" id="modal-ticket-details" style="display: none;">
+    <div class="modal-card wide-modal" style="max-width: 820px; padding: 0; border-radius: 20px; overflow: hidden; height: 88vh; display: flex; flex-direction: column;">
+      
+      <!-- Ticket Header -->
+      <div style="background: #FFFFFF; border-bottom: 1.5px solid #E2E9E5; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h2 id="modal-ticket-id" style="font-size: 20px; font-weight: 800; color: #127A4D; margin: 0; font-family: monospace;">ISS_0021</h2>
+              <span id="modal-ticket-status-pill" class="badge-status-pill badge-in-progress">In Progress</span>
+            </div>
+            <div style="font-size: 12px; color: #64748B; margin-top: 2px;">
+              Request: <strong id="modal-ticket-req-id" style="color: #1E293B; font-family: monospace;">REQ_1048</strong> &bull;
+              Category: <strong id="modal-ticket-category" style="color: #1E293B;">Hotel Related</strong> &bull;
+              Priority: <strong id="modal-ticket-priority" style="color: #1E293B;">Medium</strong>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button type="button" onclick="refreshCurrentTicketModal()" title="Refresh Conversation" style="background: #F1F5F9; border: none; border-radius: 8px; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px;">🔄</button>
+          <button type="button" onclick="closeCustomerTicketDetails()" style="background: none; border: none; font-size: 24px; color: #64748B; cursor: pointer; padding: 0 4px;">&times;</button>
+        </div>
+      </div>
+
+      <!-- Ticket Main Content Area (Two parts: Ticket Overview & Conversation Thread) -->
+      <div style="flex: 1; overflow-y: auto; padding: 20px 24px; background: #F8FAFC;">
+        
+        <!-- Original Issue Box -->
+        <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <h3 id="modal-ticket-subject" style="font-size: 16px; font-weight: 800; color: #1A2B23; margin: 0;">Hotel distance clarification</h3>
+            <span id="modal-ticket-created" style="font-size: 12px; color: #94A3B8;">30 Sep 2026, 5:20 PM</span>
+          </div>
+          <p id="modal-ticket-description" style="font-size: 13.5px; color: #334155; line-height: 1.55; margin: 0 0 10px; white-space: pre-wrap;">
+            I want to know how far the hotel is from Haram and whether shuttle service is available.
+          </p>
+          <div id="modal-ticket-attachment-box" style="display: none;">
+            <!-- Rendered if ticket has an initial attachment -->
+          </div>
+        </div>
+
+        <!-- Conversation Timeline Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+          <h4 style="font-size: 13px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; margin: 0;">
+            Support Conversation
+          </h4>
+          <span style="font-size: 11px; color: #94A3B8;">Chronological Thread</span>
+        </div>
+
+        <!-- Conversation Chat Bubbles -->
+        <div id="modal-ticket-messages-list" style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
+          <!-- Dynamically populated messages -->
+        </div>
+
+      </div>
+
+      <!-- Footer Action Area (Reply Box or Closed/Reopen Banner) -->
+      <div id="modal-ticket-reply-container" style="background: #FFFFFF; border-top: 1.5px solid #E2E9E5; padding: 16px 24px;">
+        
+        <!-- Active Ticket Reply Form -->
+        <div id="box-active-reply" style="display: block;">
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <textarea id="customer-reply-message" rows="2" placeholder="Write your reply to customer care..." style="flex: 1; padding: 12px 14px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 13px; font-family: inherit; resize: none;"></textarea>
+            <button type="button" onclick="sendCustomerReply()" id="btnSendCustomerReply" class="btn-primary-action" style="padding: 12px 20px; font-weight: 800; white-space: nowrap; height: 46px;">
+              Send Reply
+            </button>
+          </div>
+          <div style="font-size: 11px; color: #94A3B8; margin-top: 6px;">
+            Our support team typically replies within minutes during active hours.
+          </div>
+        </div>
+
+        <!-- Resolved Banner with Reopen Option -->
+        <div id="box-resolved-ticket" style="display: none; background: #ECFDF5; border: 1.5px solid #A7F3D0; border-radius: 12px; padding: 14px 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <strong style="color: #065F46; font-size: 14px; display: block;">This ticket has been marked as Resolved.</strong>
+              <span style="color: #047857; font-size: 12px;">If you are still experiencing issues or have further questions, you can reopen it.</span>
+            </div>
+            <button type="button" onclick="promptReopenTicket()" style="background: #127A4D; color: #FFFFFF; font-weight: 700; border: none; border-radius: 8px; padding: 8px 16px; font-size: 12px; cursor: pointer;">
+              Reopen Issue
+            </button>
+          </div>
+        </div>
+
+        <!-- Closed Banner with Create New Issue Option -->
+        <div id="box-closed-ticket" style="display: none; background: #F1F5F9; border: 1.5px solid #CBD5E1; border-radius: 12px; padding: 14px 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <strong style="color: #334155; font-size: 14px; display: block;">This support request has been closed.</strong>
+              <span style="color: #64748B; font-size: 12px;">No further replies can be sent. If you need additional help, please report a new issue.</span>
+            </div>
+            <button type="button" onclick="closeCustomerTicketDetails(); openReportIssueModal();" style="background: #127A4D; color: #FFFFFF; font-weight: 700; border: none; border-radius: 8px; padding: 8px 16px; font-size: 12px; cursor: pointer;">
+              Create New Issue
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- MODAL: REOPEN TICKET DIALOG -->
+  <!-- ======================================================== -->
+  <div class="modal-backdrop" id="modal-reopen-ticket" style="display: none; z-index: 9999;">
+    <div class="modal-card" style="max-width: 480px; padding: 24px; border-radius: 16px;">
+      <h3 style="font-size: 18px; font-weight: 800; color: #1A2B23; margin: 0 0 8px;">Reopen Support Request</h3>
+      <p style="font-size: 13px; color: #64748B; margin: 0 0 16px;">
+        Please tell our customer care team why you are reopening this issue:
+      </p>
+      <textarea id="reopen-ticket-reason" rows="3" placeholder="Why are you reopening this issue? (e.g. Issue not fully resolved...)" style="width: 100%; padding: 10px 12px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-size: 13px; font-family: inherit; margin-bottom: 16px; box-sizing: border-box;"></textarea>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" onclick="document.getElementById('modal-reopen-ticket').style.display='none'" class="btn-modal-outlined" style="padding: 8px 16px;">Cancel</button>
+        <button type="button" onclick="confirmReopenTicket()" class="btn-primary-action" style="padding: 8px 20px; font-weight: 700;">Submit &amp; Reopen</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- CUSTOMER NOTIFICATIONS DROPDOWN / MODAL -->
+  <!-- ======================================================== -->
+  <div class="modal-backdrop" id="modal-customer-notifications" style="display: none; background: rgba(0,0,0,0.3);" onclick="if(event.target===this) toggleCustomerNotifsModal();">
+    <div class="modal-card" style="max-width: 440px; margin-top: 60px; margin-right: 40px; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,0.18);">
+      <div style="background: #127A4D; color: #FFFFFF; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>🔔</span>
+          <strong style="font-size: 15px;">Support Notifications</strong>
+        </div>
+        <button type="button" onclick="markAllCustomerNotifsRead()" style="background: rgba(255,255,255,0.15); border: none; color: #FFFFFF; font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-weight: 700;">
+          Mark all as read
+        </button>
+      </div>
+      <div id="customer-notifs-list" style="max-height: 380px; overflow-y: auto; padding: 8px 0; background: #FFFFFF;">
+        <!-- Dynamically populated notifications -->
+      </div>
     </div>
   </div>
 

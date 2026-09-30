@@ -2533,3 +2533,819 @@ window.generateReceiptPDF = function(bookingData) {
   // Save PDF Download
   doc.save(`zilhaj-receipt-${bookingNo}.pdf`);
 };
+
+// ==========================================================================
+// ZILHAJ SUPPORT & CUSTOMER CARE CLIENT-SIDE ENGINE
+// ==========================================================================
+
+window.customerSupportState = {
+  tickets: [],
+  activeTicket: null,
+  pendingAttachment: null,
+  unreadCount: 0,
+  pollTimer: null,
+  requests: [
+    { id: 'REQ_1048', service: 'Umrah Package', travelDate: '15 Feb 2026', status: 'Active' },
+    { id: 'REQ_1042', service: 'Hajj Package', travelDate: '20 Jun 2026', status: 'Active' },
+    { id: 'REQ_1037', service: 'Ziyarat Package', travelDate: '05 Mar 2026', status: 'Confirmed' }
+  ]
+};
+
+// Helper: Get active authenticated customer profile
+window.getCurrentSupportUser = function() {
+  let name = localStorage.getItem('zilhaj_user_name') || 'Ahmed Dar';
+  let email = localStorage.getItem('zilhaj_user_email') || 'ahmed@example.com';
+  let phone = localStorage.getItem('zilhaj_user_phone') || '+91 98765 43210';
+
+  try {
+    const rawUmrah = localStorage.getItem('umrah_user');
+    if (rawUmrah) {
+      const u = JSON.parse(rawUmrah);
+      if (u.name) name = u.name;
+      if (u.email) email = u.email;
+      if (u.phone) phone = u.phone;
+    }
+  } catch (e) {}
+
+  return { name, email, phone };
+};
+
+// Open Help & Support Tab smoothly
+window.openHelpSupportTab = function() {
+  if (typeof window.switchTab === 'function') {
+    window.switchTab('help');
+  }
+};
+
+window.openMySupportRequestsSection = function() {
+  window.openHelpSupportTab();
+  setTimeout(() => {
+    const sec = document.getElementById('section-my-support-requests');
+    if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+  }, 150);
+};
+
+window.focusFaqSearch = function() {
+  window.openHelpSupportTab();
+  setTimeout(() => {
+    const inp = document.getElementById('faqSearchInput');
+    if (inp) {
+      inp.focus();
+      inp.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, 150);
+};
+
+// Open Report an Issue Modal
+window.openReportIssueModal = function(prefillCategory) {
+  const user = window.getCurrentSupportUser();
+  const nameEl = document.getElementById('report-customer-name');
+  const emailEl = document.getElementById('report-customer-email');
+  const phoneEl = document.getElementById('report-customer-phone');
+  
+  if (nameEl) nameEl.value = user.name;
+  if (emailEl) emailEl.value = user.email;
+  if (phoneEl) phoneEl.value = user.phone;
+
+  // Reset form views
+  const successView = document.getElementById('report-issue-success-view');
+  const formEl = document.getElementById('form-report-issue');
+  const errEl = document.getElementById('report-issue-error');
+
+  if (successView) successView.style.display = 'none';
+  if (formEl) {
+    formEl.style.display = 'block';
+    formEl.reset();
+  }
+  if (errEl) errEl.style.display = 'none';
+  window.removeReportFile();
+
+  if (prefillCategory) {
+    const catSelect = document.getElementById('report-issue-category');
+    if (catSelect) catSelect.value = prefillCategory;
+  }
+
+  // Preload selected request details
+  const reqSelect = document.getElementById('report-request-select');
+  if (reqSelect) {
+    reqSelect.value = 'REQ_1048';
+    window.handleReportRequestChange('REQ_1048');
+  }
+
+  const modal = document.getElementById('modal-report-issue');
+  if (modal) modal.style.display = 'flex';
+};
+
+window.closeReportIssueModal = function() {
+  const modal = document.getElementById('modal-report-issue');
+  if (modal) modal.style.display = 'none';
+};
+
+// Handle Request Dropdown Selection Change
+window.handleReportRequestChange = function(selectedReqId) {
+  const previewBox = document.getElementById('report-request-details-card');
+  const pReqId = document.getElementById('preview-req-id');
+  const pService = document.getElementById('preview-req-service');
+  const pDate = document.getElementById('preview-req-date');
+  const pStatus = document.getElementById('preview-req-status');
+
+  if (!selectedReqId || selectedReqId === 'GENERAL') {
+    if (previewBox) {
+      previewBox.style.display = 'block';
+      if (pReqId) pReqId.textContent = 'None';
+      if (pService) pService.textContent = 'General Support Inquiry';
+      if (pDate) pDate.textContent = 'N/A';
+      if (pStatus) {
+        pStatus.textContent = 'Standard';
+        pStatus.className = 'badge-status-pill badge-resolved';
+      }
+    }
+    return;
+  }
+
+  const found = window.customerSupportState.requests.find(r => r.id === selectedReqId);
+  if (found && previewBox) {
+    previewBox.style.display = 'grid';
+    if (pReqId) pReqId.textContent = found.id;
+    if (pService) pService.textContent = found.service;
+    if (pDate) pDate.textContent = found.travelDate;
+    if (pStatus) {
+      pStatus.textContent = found.status;
+      pStatus.className = 'badge-status-pill badge-open';
+    }
+  }
+};
+
+// Handle File Dropzone & Selection
+window.handleReportFileSelect = function(fileInput) {
+  if (!fileInput.files || !fileInput.files[0]) return;
+  const file = fileInput.files[0];
+
+  // Size limit: 10MB
+  if (file.size > 10 * 1024 * 1024) {
+    alert('File size exceeds the 10 MB limit. Please select a smaller document or image.');
+    fileInput.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    window.customerSupportState.pendingAttachment = {
+      name: file.name,
+      size: `${(file.size / 1024).toFixed(1)} KB`,
+      type: file.type || 'application/octet-stream',
+      dataUrl: e.target.result
+    };
+
+    const preview = document.getElementById('report-file-preview');
+    const nameSpan = document.getElementById('report-file-name');
+    const sizeSpan = document.getElementById('report-file-size');
+
+    if (preview && nameSpan && sizeSpan) {
+      nameSpan.textContent = file.name;
+      sizeSpan.textContent = `(${(file.size / 1024).toFixed(1)} KB)`;
+      preview.style.display = 'flex';
+    }
+  };
+  reader.readAsDataURL(file);
+};
+
+window.removeReportFile = function() {
+  window.customerSupportState.pendingAttachment = null;
+  const fileInput = document.getElementById('report-file-input');
+  if (fileInput) fileInput.value = '';
+  const preview = document.getElementById('report-file-preview');
+  if (preview) preview.style.display = 'none';
+};
+
+// Submit Report Issue Form
+window.handleReportIssueSubmit = async function(event) {
+  event.preventDefault();
+  const user = window.getCurrentSupportUser();
+  const reqSelect = document.getElementById('report-request-select');
+  const catSelect = document.getElementById('report-issue-category');
+  const prioSelect = document.getElementById('report-issue-priority');
+  const subjInput = document.getElementById('report-issue-subject');
+  const descInput = document.getElementById('report-issue-description');
+  const btnSubmit = document.getElementById('btnSubmitReportIssue');
+  const btnText = document.getElementById('btnSubmitReportText');
+  const btnSpinner = document.getElementById('btnSubmitReportSpinner');
+  const errEl = document.getElementById('report-issue-error');
+
+  const subject = subjInput ? subjInput.value.trim() : '';
+  const description = descInput ? descInput.value.trim() : '';
+
+  if (subject.length < 5) {
+    if (errEl) {
+      errEl.textContent = 'Subject must be at least 5 characters long.';
+      errEl.style.display = 'block';
+    }
+    return;
+  }
+
+  if (description.length < 10) {
+    if (errEl) {
+      errEl.textContent = 'Issue details must be at least 10 characters long.';
+      errEl.style.display = 'block';
+    }
+    return;
+  }
+
+  // Loading state
+  if (btnSubmit) btnSubmit.disabled = true;
+  if (btnText) btnText.textContent = 'Submitting issue...';
+  if (btnSpinner) btnSpinner.style.display = 'inline-block';
+  if (errEl) errEl.style.display = 'none';
+
+  const payload = {
+    customerName: user.name,
+    customerEmail: user.email,
+    customerPhone: user.phone,
+    requestId: reqSelect ? reqSelect.value : 'REQ_1048',
+    category: catSelect ? catSelect.value : 'Hotel Related',
+    priority: prioSelect ? prioSelect.value : 'Medium',
+    subject: subject,
+    description: description,
+    attachment: window.customerSupportState.pendingAttachment
+  };
+
+  try {
+    const res = await fetch('/api/support/tickets', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-email': user.email,
+        'x-user-name': user.name,
+        'x-user-phone': user.phone
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Unable to submit issue. Please try again.');
+    }
+
+    // Success screen
+    const formEl = document.getElementById('form-report-issue');
+    const successView = document.getElementById('report-issue-success-view');
+    const sIssueId = document.getElementById('success-issue-id');
+    const sReqId = document.getElementById('success-request-id');
+    const sStatus = document.getElementById('success-status-pill');
+    const btnView = document.getElementById('btnSuccessViewTicket');
+
+    if (formEl) formEl.style.display = 'none';
+    if (successView) successView.style.display = 'block';
+    if (sIssueId) sIssueId.textContent = data.ticket.issueId;
+    if (sReqId) sReqId.textContent = data.ticket.requestId || 'General';
+    if (sStatus) {
+      sStatus.textContent = data.ticket.status;
+      sStatus.className = 'badge-status-pill badge-open';
+    }
+
+    if (btnView) {
+      btnView.onclick = () => {
+        window.closeReportIssueModal();
+        window.openCustomerTicketDetails(data.ticket.issueId);
+      };
+    }
+
+    // Refresh tickets table in background
+    window.loadCustomerTickets(false);
+
+  } catch (err) {
+    if (errEl) {
+      errEl.textContent = err.message || 'Failed to submit issue. Please check your network and try again.';
+      errEl.style.display = 'block';
+    }
+  } finally {
+    if (btnSubmit) btnSubmit.disabled = false;
+    if (btnText) btnText.textContent = 'Submit Issue';
+    if (btnSpinner) btnSpinner.style.display = 'none';
+  }
+};
+
+// Fetch & Render Customer's Tickets
+window.loadCustomerTickets = async function(showFeedback = false) {
+  const user = window.getCurrentSupportUser();
+  const tbody = document.getElementById('customer-support-tickets-tbody');
+  if (!tbody) return;
+
+  try {
+    const res = await fetch(`/api/support/tickets?email=${encodeURIComponent(user.email)}`, {
+      headers: {
+        'x-user-email': user.email,
+        'x-user-name': user.name,
+        'x-user-phone': user.phone
+      }
+    });
+
+    const data = await res.json();
+    if (data && data.success && Array.isArray(data.tickets)) {
+      window.customerSupportState.tickets = data.tickets;
+      window.renderCustomerTicketsTable(data.tickets);
+    }
+  } catch (err) {
+    console.warn('Could not load customer tickets:', err);
+  }
+};
+
+window.renderCustomerTicketsTable = function(tickets) {
+  const tbody = document.getElementById('customer-support-tickets-tbody');
+  if (!tbody) return;
+
+  if (!tickets || tickets.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; padding: 36px 20px; color: #64748B;">
+          <div style="font-size: 32px; margin-bottom: 8px;">📂</div>
+          <strong style="display: block; font-size: 15px; color: #1E293B;">No support requests yet</strong>
+          <p style="font-size: 13px; margin: 4px 0 16px;">Have questions about your package, travel or hotel? We're here to help 24/7.</p>
+          <button type="button" onclick="openReportIssueModal()" class="btn-primary-action" style="padding: 8px 20px; font-size: 13px;">Report an Issue</button>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = tickets.map(t => {
+    const statusClass = t.status.toLowerCase().replace(/\s+/g, '-');
+    const priorityClass = t.priority ? t.priority.toLowerCase() : 'medium';
+    return `
+      <tr style="border-bottom: 1px solid #F1F5F9; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
+        <td style="padding: 14px 18px; font-weight: 700; color: #127A4D; font-family: monospace;">${t.issueId}</td>
+        <td style="padding: 14px 18px; font-family: monospace; color: #1E293B;">${t.requestId || 'General'}</td>
+        <td style="padding: 14px 18px;">
+          <strong style="display: block; color: #0F172A; font-size: 13.5px;">${escapeHtml(t.subject)}</strong>
+          <span style="font-size: 11px; color: #94A3B8;">${t.lastUpdated ? timeAgo(t.lastUpdated) : ''}</span>
+        </td>
+        <td style="padding: 14px 18px; font-size: 13px; color: #475569;">${t.category}</td>
+        <td style="padding: 14px 18px;">
+          <span class="badge-priority badge-${priorityClass}">${t.priority || 'Medium'}</span>
+        </td>
+        <td style="padding: 14px 18px;">
+          <span class="badge-status-pill badge-${statusClass}">${t.status}</span>
+        </td>
+        <td style="padding: 14px 18px; font-size: 12px; color: #64748B;">${formatDateClean(t.createdAt)}</td>
+        <td style="padding: 14px 18px; text-align: right;">
+          <button type="button" onclick="openCustomerTicketDetails('${t.issueId}')" style="background: #127A4D; color: #FFFFFF; font-weight: 700; border: none; border-radius: 8px; padding: 7px 16px; font-size: 12px; cursor: pointer; transition: background 0.15s;">
+            View
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+// Open Ticket Details & Conversation Modal
+window.openCustomerTicketDetails = async function(issueId) {
+  const user = window.getCurrentSupportUser();
+  const modal = document.getElementById('modal-ticket-details');
+  if (modal) modal.style.display = 'flex';
+
+  // Set loading placeholder in messages
+  const msgList = document.getElementById('modal-ticket-messages-list');
+  if (msgList) {
+    msgList.innerHTML = '<div style="text-align: center; padding: 30px; color: #64748B;">Loading conversation...</div>';
+  }
+
+  try {
+    const res = await fetch(`/api/support/tickets/${issueId}?email=${encodeURIComponent(user.email)}`, {
+      headers: {
+        'x-user-email': user.email,
+        'x-user-name': user.name,
+        'x-user-phone': user.phone
+      }
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success || !data.ticket) {
+      throw new Error(data.message || 'Ticket not found.');
+    }
+
+    const t = data.ticket;
+    window.customerSupportState.activeTicket = t;
+
+    // Header values
+    document.getElementById('modal-ticket-id').textContent = t.issueId;
+    document.getElementById('modal-ticket-req-id').textContent = t.requestId || 'General';
+    document.getElementById('modal-ticket-category').textContent = t.category;
+    document.getElementById('modal-ticket-priority').textContent = t.priority || 'Medium';
+
+    const statusPill = document.getElementById('modal-ticket-status-pill');
+    if (statusPill) {
+      statusPill.textContent = t.status;
+      statusPill.className = `badge-status-pill badge-${t.status.toLowerCase().replace(/\s+/g, '-')}`;
+    }
+
+    // Original issue overview
+    document.getElementById('modal-ticket-subject').textContent = t.subject;
+    document.getElementById('modal-ticket-created').textContent = formatDateClean(t.createdAt);
+    document.getElementById('modal-ticket-description').textContent = t.description;
+
+    // Attachment box
+    const attBox = document.getElementById('modal-ticket-attachment-box');
+    if (attBox) {
+      if (t.attachment && t.attachment.name) {
+        attBox.style.display = 'block';
+        attBox.innerHTML = `
+          <div style="display: inline-flex; align-items: center; gap: 8px; background: #F1F5F9; border-radius: 8px; padding: 6px 12px; font-size: 12px; margin-top: 6px;">
+            <span>📎</span>
+            <strong style="color: #1E293B;">${t.attachment.name}</strong>
+            <span style="color: #64748B;">(${t.attachment.size || ''})</span>
+            ${t.attachment.dataUrl ? `<a href="${t.attachment.dataUrl}" download="${t.attachment.name}" style="color: #127A4D; font-weight: 700; margin-left: 8px; text-decoration: underline;">Download</a>` : ''}
+          </div>
+        `;
+      } else {
+        attBox.style.display = 'none';
+      }
+    }
+
+    // Render messages thread
+    window.renderCustomerMessages(data.messages || []);
+
+    // Toggle reply / resolved / closed container
+    const boxReply = document.getElementById('box-active-reply');
+    const boxResolved = document.getElementById('box-resolved-ticket');
+    const boxClosed = document.getElementById('box-closed-ticket');
+
+    if (t.status === 'Resolved') {
+      if (boxReply) boxReply.style.display = 'none';
+      if (boxResolved) boxResolved.style.display = 'block';
+      if (boxClosed) boxClosed.style.display = 'none';
+    } else if (t.status === 'Closed') {
+      if (boxReply) boxReply.style.display = 'none';
+      if (boxResolved) boxResolved.style.display = 'none';
+      if (boxClosed) boxClosed.style.display = 'block';
+    } else {
+      if (boxReply) boxReply.style.display = 'block';
+      if (boxResolved) boxResolved.style.display = 'none';
+      if (boxClosed) boxClosed.style.display = 'none';
+    }
+
+    // Mark notifications related to this ticket as read
+    window.markTicketNotificationsAsRead(t.issueId);
+
+  } catch (err) {
+    if (msgList) {
+      msgList.innerHTML = `<div style="text-align: center; color: #EF4444; padding: 20px;">${err.message || 'Error loading ticket.'}</div>`;
+    }
+  }
+};
+
+window.refreshCurrentTicketModal = function() {
+  if (window.customerSupportState.activeTicket) {
+    window.openCustomerTicketDetails(window.customerSupportState.activeTicket.issueId);
+  }
+};
+
+window.closeCustomerTicketDetails = function() {
+  const modal = document.getElementById('modal-ticket-details');
+  if (modal) modal.style.display = 'none';
+  window.customerSupportState.activeTicket = null;
+  window.loadCustomerTickets(false);
+};
+
+// Render Conversation Thread
+window.renderCustomerMessages = function(messages) {
+  const container = document.getElementById('modal-ticket-messages-list');
+  if (!container) return;
+
+  if (!messages || messages.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 24px; color: #94A3B8; font-size: 13px;">
+        No replies yet. A Customer Care Executive will review your ticket and respond soon.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = messages.map(m => {
+    const isCustomer = m.senderRole === 'CUSTOMER';
+    const senderTitle = isCustomer ? 'You (Customer)' : (m.senderName || 'Customer Care');
+    const alignStyle = isCustomer ? 'align-self: flex-end; max-width: 82%;' : 'align-self: flex-start; max-width: 82%;';
+    const bgStyle = isCustomer ? 'background: #127A4D; color: #FFFFFF; border-radius: 16px 16px 4px 16px;' : 'background: #FFFFFF; color: #1E293B; border: 1.5px solid #E2E8F0; border-radius: 16px 16px 16px 4px;';
+    const metaColor = isCustomer ? '#D1FAE5' : '#64748B';
+
+    return `
+      <div style="${alignStyle} ${bgStyle} padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 6px;">
+          <strong style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">${senderTitle}</strong>
+          <span style="font-size: 11px; color: ${metaColor};">${formatDateClean(m.createdAt)}</span>
+        </div>
+        <div style="font-size: 13.5px; line-height: 1.5; white-space: pre-wrap;">${escapeHtml(m.message)}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Scroll to latest message
+  container.scrollTop = container.scrollHeight;
+};
+
+// Send Reply from Customer
+window.sendCustomerReply = async function() {
+  const ticket = window.customerSupportState.activeTicket;
+  if (!ticket) return;
+
+  const user = window.getCurrentSupportUser();
+  const replyInput = document.getElementById('customer-reply-message');
+  const btn = document.getElementById('btnSendCustomerReply');
+  const message = replyInput ? replyInput.value.trim() : '';
+
+  if (!message) {
+    alert('Please enter your reply message.');
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+  }
+
+  try {
+    const res = await fetch(`/api/support/tickets/${ticket.issueId}/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-email': user.email,
+        'x-user-name': user.name,
+        'x-user-phone': user.phone
+      },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Unable to send reply.');
+    }
+
+    if (replyInput) replyInput.value = '';
+    // Reload ticket details
+    await window.openCustomerTicketDetails(ticket.issueId);
+
+  } catch (err) {
+    alert(err.message || 'Failed to send reply. Please try again.');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Send Reply';
+    }
+  }
+};
+
+// Reopen Ticket Flow
+window.promptReopenTicket = function() {
+  const modal = document.getElementById('modal-reopen-ticket');
+  if (modal) {
+    modal.style.display = 'flex';
+    const reasonEl = document.getElementById('reopen-ticket-reason');
+    if (reasonEl) reasonEl.value = '';
+  }
+};
+
+window.confirmReopenTicket = async function() {
+  const ticket = window.customerSupportState.activeTicket;
+  if (!ticket) return;
+
+  const user = window.getCurrentSupportUser();
+  const reasonEl = document.getElementById('reopen-ticket-reason');
+  const reason = reasonEl ? reasonEl.value.trim() : '';
+
+  if (!reason) {
+    alert('Please provide a reason for reopening this ticket.');
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/support/tickets/${ticket.issueId}/reopen`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-email': user.email,
+        'x-user-name': user.name,
+        'x-user-phone': user.phone
+      },
+      body: JSON.stringify({ reason })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Unable to reopen ticket.');
+    }
+
+    document.getElementById('modal-reopen-ticket').style.display = 'none';
+    await window.openCustomerTicketDetails(ticket.issueId);
+    alert('Your ticket has been reopened. A Customer Care Executive has been notified.');
+
+  } catch (err) {
+    alert(err.message || 'Failed to reopen ticket.');
+  }
+};
+
+// Real-Time Notification Poller
+window.startSupportNotificationsPoller = function() {
+  window.checkCustomerNotifications();
+  if (window.customerSupportState.pollTimer) clearInterval(window.customerSupportState.pollTimer);
+  window.customerSupportState.pollTimer = setInterval(window.checkCustomerNotifications, 12000);
+};
+
+window.checkCustomerNotifications = async function() {
+  const user = window.getCurrentSupportUser();
+  try {
+    const res = await fetch(`/api/support/notifications?email=${encodeURIComponent(user.email)}`, {
+      headers: {
+        'x-user-email': user.email,
+        'x-user-name': user.name,
+        'x-user-phone': user.phone
+      }
+    });
+
+    const data = await res.json();
+    if (data && data.success) {
+      const count = data.unreadCount || 0;
+      window.updateCustomerNotificationBadges(count, data.notifications || []);
+    }
+  } catch (e) {}
+};
+
+window.updateCustomerNotificationBadges = function(count, notifs) {
+  window.customerSupportState.unreadCount = count;
+
+  // Sidebar badge: Help & Support 🔔 2
+  const sidebarBadge = document.getElementById('customerHelpBadge');
+  if (sidebarBadge) {
+    if (count > 0) {
+      sidebarBadge.textContent = `🔔 ${count}`;
+      sidebarBadge.style.display = 'inline-block';
+    } else {
+      sidebarBadge.style.display = 'none';
+    }
+  }
+
+  // Header Bell Dot
+  const headerDot = document.getElementById('headerCustomerNotifDot');
+  if (headerDot) {
+    headerDot.style.display = count > 0 ? 'block' : 'none';
+  }
+
+  // Render notifications in dropdown modal
+  const notifList = document.getElementById('customer-notifs-list');
+  if (notifList) {
+    if (!notifs || notifs.length === 0) {
+      notifList.innerHTML = '<div style="padding: 24px; text-align: center; color: #94A3B8; font-size: 13px;">No notifications yet.</div>';
+    } else {
+      notifList.innerHTML = notifs.map(n => `
+        <div onclick="handleCustomerNotificationClick('${n.id}', '${n.ticketId}')" style="padding: 12px 18px; border-bottom: 1px solid #F1F5F9; cursor: pointer; background: ${n.isRead ? '#FFFFFF' : '#F0FDF4'}; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='${n.isRead ? '#FFFFFF' : '#F0FDF4'}'">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <strong style="font-size: 13px; color: ${n.isRead ? '#475569' : '#127A4D'};">${n.title}</strong>
+            <span style="font-size: 11px; color: #94A3B8;">${timeAgo(n.createdAt)}</span>
+          </div>
+          <p style="font-size: 12.5px; color: #334155; margin: 0; line-height: 1.4;">${n.message}</p>
+        </div>
+      `).join('');
+    }
+  }
+};
+
+window.toggleCustomerNotifsModal = function() {
+  const modal = document.getElementById('modal-customer-notifications');
+  if (modal) {
+    modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+  }
+};
+
+window.handleCustomerNotificationClick = async function(notifId, ticketId) {
+  try {
+    await fetch(`/api/support/notifications/${notifId}/read`, { method: 'PATCH' });
+  } catch (e) {}
+  window.toggleCustomerNotifsModal();
+  if (ticketId) {
+    window.openCustomerTicketDetails(ticketId);
+  }
+};
+
+window.markAllCustomerNotifsRead = async function() {
+  const user = window.getCurrentSupportUser();
+  try {
+    await fetch('/api/support/notifications/read-all', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-email': user.email
+      }
+    });
+    window.checkCustomerNotifications();
+  } catch (e) {}
+};
+
+window.markTicketNotificationsAsRead = async function(ticketId) {
+  const user = window.getCurrentSupportUser();
+  try {
+    await fetch(`/api/support/notifications/read-ticket/${ticketId}`, {
+      method: 'PATCH',
+      headers: { 'x-user-email': user.email }
+    });
+    window.checkCustomerNotifications();
+  } catch (e) {}
+};
+
+// FAQ Real-Time Search Engine
+window.handleFaqSearch = async function(query) {
+  const container = document.getElementById('faqSearchResultsContainer');
+  if (!container) return;
+
+  const q = (query || '').trim();
+  if (!q) {
+    container.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/support/faqs?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    container.style.display = 'block';
+
+    if (!data.results || data.results.length === 0) {
+      container.innerHTML = `
+        <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 24px; text-align: center;">
+          <p style="color: #64748B; font-size: 14px; margin: 0 0 12px;">No help articles found matching "<strong>${escapeHtml(q)}</strong>".</p>
+          <div style="font-size: 13px; color: #1E293B; margin-bottom: 12px;">Still need help with your issue?</div>
+          <button type="button" onclick="openReportIssueModal()" class="btn-primary-action" style="padding: 9px 22px; font-size: 13px;">Report an Issue</button>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 18px 24px; box-shadow: 0 4px 14px rgba(0,0,0,0.04);">
+        <h4 style="font-size: 14px; font-weight: 800; color: #127A4D; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.5px;">Matching FAQs (${data.results.length})</h4>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          ${data.results.map(f => `
+            <details style="background: #F8FCF9; border: 1px solid #E2E9E5; border-radius: 10px; padding: 10px 14px; cursor: pointer;">
+              <summary style="font-weight: 700; color: #1A2B23; font-size: 13.5px;">${f.question}</summary>
+              <div style="margin-top: 8px; font-size: 13px; color: #475569; line-height: 1.5;">${f.answer}</div>
+            </details>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } catch (e) {
+    container.style.display = 'none';
+  }
+};
+
+// Helper: Escape HTML string
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+}
+
+function formatDateClean(d) {
+  if (!d) return '';
+  try {
+    const dt = new Date(d);
+    return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch (e) {
+    return String(d);
+  }
+}
+
+function timeAgo(dateString) {
+  if (!dateString) return '';
+  try {
+    const diff = (Date.now() - new Date(dateString).getTime()) / 1000;
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+  } catch (e) {
+    return '';
+  }
+}
+
+// Auto-boot customer support logic on load
+window.addEventListener('load', () => {
+  window.loadCustomerTickets(false);
+  window.startSupportNotificationsPoller();
+
+  // Check URL parameters for direct deep-linking
+  const urlParams = new URLSearchParams(window.location.search);
+  const action = urlParams.get('action');
+  const tab = urlParams.get('tab');
+
+  if (tab === 'help') {
+    window.openHelpSupportTab();
+  }
+  if (action === 'report') {
+    setTimeout(window.openReportIssueModal, 200);
+  } else if (action === 'requests') {
+    setTimeout(window.openMySupportRequestsSection, 200);
+  }
+});
+
