@@ -94,6 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    // Refresh quick stats
+    if (typeof window.updateDashboardSummaryCards === 'function') {
+      window.updateDashboardSummaryCards();
+    }
+
     // Scroll smoothly to top of content
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -167,11 +172,55 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Dynamic Quick Summary Cards Counter
+  window.updateDashboardSummaryCards = () => {
+    const reqCards = document.querySelectorAll('#requestsList .request-card-box');
+    const activeCount = reqCards.length;
+    const offersCount = document.querySelectorAll('#requestsList .agency-offer-card').length;
+    
+    let confirmedCount = 0;
+    try {
+      const bookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
+      confirmedCount = Array.isArray(bookings) ? bookings.length : 0;
+    } catch(e) {}
+
+    let supportCount = 0;
+    try {
+      if (window.customerSupportState && Array.isArray(window.customerSupportState.tickets)) {
+        supportCount = window.customerSupportState.tickets.length;
+      } else {
+        const raw = localStorage.getItem('zilhaj_support_tickets_v1');
+        if (raw) supportCount = JSON.parse(raw).length;
+      }
+    } catch(e) {}
+
+    const elActive = document.getElementById('dashStatActiveRequests');
+    if (elActive) elActive.textContent = activeCount;
+
+    const elOffers = document.getElementById('dashStatOffersReceived');
+    if (elOffers) elOffers.textContent = offersCount;
+
+    const elConfirmed = document.getElementById('dashStatConfirmedTrips');
+    if (elConfirmed) elConfirmed.textContent = confirmedCount;
+
+    const elSupport = document.getElementById('dashStatSupportInquiries');
+    if (elSupport) elSupport.textContent = supportCount;
+  };
+
   // Load saved profile data from localStorage
   const loadSavedProfile = () => {
-    const savedName = localStorage.getItem('zilhaj_user_name');
-    const savedEmail = localStorage.getItem('zilhaj_user_email');
-    const savedPhone = localStorage.getItem('zilhaj_user_phone');
+    let savedName = localStorage.getItem('zilhaj_user_name');
+    let savedEmail = localStorage.getItem('zilhaj_user_email');
+    let savedPhone = localStorage.getItem('zilhaj_user_phone');
+
+    if (!savedName || !savedEmail) {
+      try {
+        const u = JSON.parse(localStorage.getItem('umrah_user') || '{}');
+        if (u && (u.name || u.fullName)) savedName = savedName || u.name || u.fullName;
+        if (u && u.email) savedEmail = savedEmail || u.email;
+        if (u && (u.phone || u.mobile)) savedPhone = savedPhone || u.phone || u.mobile;
+      } catch(e) {}
+    }
 
     if (savedName) {
       if (profileNameDisplay) profileNameDisplay.textContent = savedName;
@@ -179,7 +228,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (navUserName) navUserName.textContent = savedName;
       if (profileHeaderName) profileHeaderName.textContent = savedName;
       
-      const initials = savedName.trim().charAt(0).toUpperCase() || 'O';
+      const welcomeNameEl = document.getElementById('dashWelcomeUserName');
+      if (welcomeNameEl) welcomeNameEl.textContent = savedName;
+
+      const initials = savedName.trim().charAt(0).toUpperCase() || 'P';
       if (navAvatarInitials) navAvatarInitials.textContent = initials;
       if (profileAvatarLarge) profileAvatarLarge.textContent = initials;
     }
@@ -192,6 +244,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const cleanPhone = savedPhone.replace(/\D/g, '');
       if (profilePhoneDisplay) profilePhoneDisplay.textContent = cleanPhone ? `+91 ${cleanPhone}` : '';
       if (profilePhoneInput) profilePhoneInput.value = cleanPhone;
+    }
+
+    if (typeof window.updateDashboardSummaryCards === 'function') {
+      window.updateDashboardSummaryCards();
     }
   };
 
@@ -879,6 +935,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       checkEmptyRequestsState();
       applyCancelButtonStates();
+      if (typeof window.updateDashboardSummaryCards === 'function') {
+        window.updateDashboardSummaryCards();
+      }
 
       // Reset form
       fullRequestForm.reset();
@@ -1479,6 +1538,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (emptyState) emptyState.style.display = 'none';
         applyCancelButtonStates();
+        if (typeof window.updateDashboardSummaryCards === 'function') {
+          window.updateDashboardSummaryCards();
+        }
       }
     });
   };
@@ -1566,6 +1628,9 @@ window.confirmCancelRequest = function() {
       cardBox.remove();
       if (typeof checkEmptyRequestsState === 'function') {
         checkEmptyRequestsState();
+      }
+      if (typeof window.updateDashboardSummaryCards === 'function') {
+        window.updateDashboardSummaryCards();
       }
     }, 300);
   }
@@ -2837,6 +2902,9 @@ window.loadCustomerTickets = async function(showFeedback = false) {
     if (data && data.success && Array.isArray(data.tickets)) {
       window.customerSupportState.tickets = data.tickets;
       window.renderCustomerTicketsTable(data.tickets);
+      if (typeof window.updateDashboardSummaryCards === 'function') {
+        window.updateDashboardSummaryCards();
+      }
     }
   } catch (err) {
     console.warn('Could not load customer tickets:', err);
