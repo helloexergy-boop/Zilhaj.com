@@ -1693,120 +1693,106 @@
   <!-- ======================================================== -->
   <!-- MODAL: REPORT AN ISSUE (CUSTOMER CARE) -->
   <!-- ======================================================== -->
-  <div class="modal-backdrop" id="modal-report-issue" style="display: none;">
-    <div class="modal-card wide-modal" style="max-width: 680px; padding: 0; border-radius: 20px; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column;">
+  <div class="modal-backdrop" id="modal-report-issue" style="display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(6px); background: rgba(8, 28, 18, 0.65);">
+    <div class="modern-report-modal">
       
-      <!-- Modal Header -->
-      <div style="background: linear-gradient(135deg, #0A432C 0%, #127A4D 100%); color: #FFFFFF; padding: 22px 28px; position: relative;">
-        <button type="button" class="modal-close-btn" onclick="closeReportIssueModal()" style="color: #FFFFFF; opacity: 0.8; font-size: 26px; top: 18px; right: 20px; background: none; border: none; cursor: pointer;">&times;</button>
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-          <span style="font-size: 22px;">🛡️</span>
-          <h2 style="font-size: 20px; font-weight: 800; margin: 0; color: #FFFFFF;">Report an Issue</h2>
-        </div>
-        <p style="font-size: 13px; color: #D1FAE5; margin: 0; line-height: 1.4;">
-          Tell us what happened and our customer care team will assist you.
+      <!-- Modern Modal Header -->
+      <div class="modern-report-header">
+        <button type="button" class="modal-close-btn" onclick="closeReportIssueModal()" style="color: #FFFFFF; opacity: 0.85; font-size: 24px; top: 20px; right: 22px; background: rgba(255,255,255,0.12); border: none; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">&times;</button>
+        <h2 class="modern-report-title">
+          <span>🛡️</span>
+          <span>Report an Issue</span>
+        </h2>
+        <p class="modern-report-subtitle">
+          Submit your query or issue directly to our customer care desk for rapid resolution.
         </p>
       </div>
 
-      <!-- Modal Body (Scrollable) -->
-      <div style="padding: 24px 28px; overflow-y: auto; flex: 1;">
+      <!-- Modern Modal Body -->
+      <div class="modern-report-body" style="max-height: 80vh; overflow-y: auto;">
         
-        <!-- Success State Container (Shown upon submission) -->
-        <div id="report-issue-success-view" style="display: none; text-align: center; padding: 28px 10px;">
-          <div style="width: 72px; height: 72px; background: #E8F6EF; color: #127A4D; font-size: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 2px solid #A7F3D0;">
+        <!-- Success State Container -->
+        <div id="report-issue-success-view" style="display: none; text-align: center; padding: 24px 12px;">
+          <div style="width: 68px; height: 68px; background: #E8F6EF; color: #127A4D; font-size: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 2px solid #A7F3D0; box-shadow: 0 4px 12px rgba(18, 122, 77, 0.15);">
             ✓
           </div>
-          <h3 style="font-size: 22px; font-weight: 800; color: #1A2B23; margin: 0 0 6px;">Issue Submitted Successfully</h3>
-          <p style="font-size: 14px; color: #687970; margin: 0 0 20px;">
-            Your issue has been received by our customer care team. A support representative will review it shortly.
+          <h3 style="font-size: 21px; font-weight: 800; color: #1A2B23; margin: 0 0 6px;">Issue Submitted Successfully</h3>
+          <p style="font-size: 13.5px; color: #64748B; margin: 0 0 20px; line-height: 1.5;">
+            Your issue has been assigned to our customer care team. An executive will review and reply shortly.
           </p>
 
-          <div style="background: #F8FCF9; border: 1.5px solid #E2E9E5; border-radius: 12px; padding: 16px 20px; max-width: 420px; margin: 0 auto 24px; text-align: left;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="font-size: 13px; color: #64748B;">Issue ID:</span>
+          <div style="background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 14px; padding: 18px 22px; max-width: 440px; margin: 0 auto 24px; text-align: left; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <span style="font-size: 13px; color: #64748B; font-weight: 600;">Issue ID:</span>
               <strong id="success-issue-id" style="font-size: 13px; color: #127A4D; font-family: monospace;">ISS_0000</strong>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="font-size: 13px; color: #64748B;">Request ID:</span>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <span style="font-size: 13px; color: #64748B; font-weight: 600;">Request Reference:</span>
               <strong id="success-request-id" style="font-size: 13px; color: #1E293B; font-family: monospace;">REQ_1048</strong>
             </div>
             <div style="display: flex; justify-content: space-between;">
-              <span style="font-size: 13px; color: #64748B;">Status:</span>
-              <span id="success-status-pill" class="badge-status-pill badge-open">Open</span>
+              <span style="font-size: 13px; color: #64748B; font-weight: 600;">Current Status:</span>
+              <span id="success-status-pill" class="badge-status-pill badge-open" style="font-size: 11px; padding: 3px 10px;">Open</span>
             </div>
           </div>
 
           <div style="display: flex; justify-content: center; gap: 12px;">
-            <button type="button" id="btnSuccessViewTicket" class="btn-primary-action" style="padding: 10px 24px;">View Ticket</button>
-            <button type="button" onclick="closeReportIssueModal()" class="btn-secondary-action" style="padding: 10px 20px;">Back to Help &amp; Support</button>
+            <button type="button" id="btnSuccessViewTicket" class="modern-btn-submit" style="padding: 11px 26px;">View Ticket</button>
+            <button type="button" onclick="closeReportIssueModal()" class="btn-modal-outlined" style="padding: 11px 22px; border-radius: 12px;">Back to Help &amp; Support</button>
           </div>
         </div>
 
-        <!-- Form View -->
+        <!-- Clean Modern Form View -->
         <form id="form-report-issue" onsubmit="handleReportIssueSubmit(event)">
           
-          <!-- A. Customer Information (Read-Only) -->
-          <div style="background: #F8FCF9; border: 1px solid #E2E9E5; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px;">
-            <div style="font-size: 12px; font-weight: 800; color: #127A4D; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
-              Customer Information
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
-              <div>
-                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748B; margin-bottom: 4px;">Name</label>
-                <input type="text" id="report-customer-name" class="styled-input-readonly" readonly value="Ahmed Dar">
+          <!-- Pilgrim Profile Chip (Auto-filled) -->
+          <div class="modern-user-chip">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 38px; height: 38px; border-radius: 50%; background: #127A4D; color: #FFFFFF; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center;">
+                P
               </div>
               <div>
-                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748B; margin-bottom: 4px;">Email</label>
-                <input type="email" id="report-customer-email" class="styled-input-readonly" readonly value="ahmed@example.com">
-              </div>
-              <div>
-                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748B; margin-bottom: 4px;">Phone Number</label>
-                <input type="text" id="report-customer-phone" class="styled-input-readonly" readonly value="+91 98765 43210">
+                <strong id="report-customer-name-display" style="display: block; font-size: 13.5px; color: #1A2B23;">Ahmed Dar</strong>
+                <span id="report-customer-email-display" style="font-size: 11.5px; color: #64748B;">ahmed@example.com</span>
               </div>
             </div>
+            <span style="font-size: 11px; font-weight: 700; background: #DCFCE7; color: #15803D; padding: 3px 10px; border-radius: 99px;">Verified Pilgrim</span>
           </div>
 
-          <!-- B. Request Information -->
-          <div style="margin-bottom: 20px;">
-            <label for="report-request-select" style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">
-              Select Request <span style="color: #EF4444;">*</span>
+          <!-- Hidden Customer Inputs for Payload -->
+          <input type="hidden" id="report-customer-name" value="Ahmed Dar">
+          <input type="hidden" id="report-customer-email" value="ahmed@example.com">
+          <input type="hidden" id="report-customer-phone" value="+91 98765 43210">
+
+          <!-- 1. Heading of the Report (Subject) -->
+          <div class="modern-input-group">
+            <label for="report-issue-subject" class="modern-label">
+              <span>Heading of the Report <span style="color: #EF4444;">*</span></span>
+              <span class="modern-label-sub">Clear &amp; brief title</span>
             </label>
-            <select id="report-request-select" onchange="handleReportRequestChange(this.value)" required style="width: 100%; padding: 11px 14px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 13px; font-family: inherit; background: #FFFFFF;">
-              <option value="">-- Choose Booking / Request --</option>
-              <option value="REQ_1048" selected>REQ_1048 — Umrah Package — 15 Feb 2026</option>
-              <option value="REQ_1042">REQ_1042 — Hajj Package — 20 Jun 2026</option>
-              <option value="REQ_1037">REQ_1037 — Ziyarat Package — 05 Mar 2026</option>
-              <option value="GENERAL">General Support Request (No specific booking)</option>
-            </select>
-
-            <!-- Auto-Loaded Request Context Preview -->
-            <div id="report-request-details-card" style="margin-top: 10px; background: #F1F5F9; border-radius: 10px; padding: 10px 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-size: 12px;">
-              <div>
-                <span style="color: #64748B; display: block;">Request ID</span>
-                <strong id="preview-req-id" style="color: #127A4D; font-family: monospace;">REQ_1048</strong>
-              </div>
-              <div>
-                <span style="color: #64748B; display: block;">Service</span>
-                <strong id="preview-req-service" style="color: #1E293B;">Umrah Package</strong>
-              </div>
-              <div>
-                <span style="color: #64748B; display: block;">Travel Date</span>
-                <strong id="preview-req-date" style="color: #1E293B;">15 Feb 2026</strong>
-              </div>
-              <div>
-                <span style="color: #64748B; display: block;">Booking Status</span>
-                <span id="preview-req-status" class="badge-status-pill badge-open" style="font-size: 10px; padding: 2px 8px;">Active</span>
-              </div>
-            </div>
+            <input type="text" id="report-issue-subject" required minlength="5" placeholder="e.g. Hotel distance from Haram clarification" class="modern-input">
           </div>
 
-          <!-- C. Issue Information -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+          <!-- 2. Relevant Booking / Request & Category (2-Column) -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
             <div>
-              <label for="report-issue-category" style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">
-                Issue Category <span style="color: #EF4444;">*</span>
+              <label for="report-request-select" class="modern-label">
+                <span>Select Request <span style="color: #EF4444;">*</span></span>
               </label>
-              <select id="report-issue-category" required style="width: 100%; padding: 11px 14px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 13px; font-family: inherit; background: #FFFFFF;">
+              <select id="report-request-select" onchange="handleReportRequestChange(this.value)" required class="modern-select">
+                <option value="">-- Choose Booking --</option>
+                <option value="REQ_1048" selected>REQ_1048 (Umrah Package)</option>
+                <option value="REQ_1042">REQ_1042 (Hajj Package)</option>
+                <option value="REQ_1037">REQ_1037 (Ziyarat Package)</option>
+                <option value="GENERAL">General Support Query</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="report-issue-category" class="modern-label">
+                <span>Issue Category <span style="color: #EF4444;">*</span></span>
+              </label>
+              <select id="report-issue-category" required class="modern-select">
                 <option value="Hotel Related" selected>Hotel Related</option>
                 <option value="Package Information">Package Information</option>
                 <option value="Payment">Payment</option>
@@ -1816,72 +1802,45 @@
                 <option value="Booking">Booking</option>
                 <option value="Cancellation">Cancellation</option>
                 <option value="Refund">Refund</option>
-                <option value="Document Related">Document Related</option>
                 <option value="Technical Problem">Technical Problem</option>
                 <option value="General Inquiry">General Inquiry</option>
                 <option value="Other">Other</option>
               </select>
             </div>
+          </div>
+
+          <!-- Auto-Loaded Booking Mini-Context -->
+          <div id="report-request-details-card" style="margin-bottom: 20px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 12px 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 12px;">
             <div>
-              <label for="report-issue-priority" style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">
-                Priority <span style="color: #EF4444;">*</span>
-              </label>
-              <select id="report-issue-priority" required style="width: 100%; padding: 11px 14px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 13px; font-family: inherit; background: #FFFFFF;">
-                <option value="Low">Low</option>
-                <option value="Medium" selected>Medium</option>
-                <option value="High">High</option>
-                <option value="Urgent">Urgent</option>
-              </select>
+              <span style="color: #64748B; display: block; font-size: 11px;">Request ID:</span>
+              <strong id="preview-req-id" style="color: #127A4D; font-family: monospace;">REQ_1048</strong>
+            </div>
+            <div>
+              <span style="color: #64748B; display: block; font-size: 11px;">Service:</span>
+              <strong id="preview-req-service" style="color: #1E293B;">Umrah Package</strong>
+            </div>
+            <div>
+              <span style="color: #64748B; display: block; font-size: 11px;">Travel Date:</span>
+              <strong id="preview-req-date" style="color: #1E293B;">15 Feb 2026</strong>
             </div>
           </div>
 
-          <!-- Subject -->
-          <div style="margin-bottom: 16px;">
-            <label for="report-issue-subject" style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">
-              Issue Subject <span style="color: #EF4444;">*</span>
+          <!-- 3. Description (Detailed explanation) -->
+          <div class="modern-input-group">
+            <label for="report-issue-description" class="modern-label">
+              <span>Description <span style="color: #EF4444;">*</span></span>
+              <span class="modern-label-sub">Explain in detail</span>
             </label>
-            <input type="text" id="report-issue-subject" required minlength="5" placeholder="Briefly describe your issue (e.g., Hotel distance clarification)" style="width: 100%; padding: 11px 14px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 13px; font-family: inherit; box-sizing: border-box;">
-          </div>
-
-          <!-- Details -->
-          <div style="margin-bottom: 18px;">
-            <label for="report-issue-description" style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">
-              Issue Details <span style="color: #EF4444;">*</span>
-            </label>
-            <textarea id="report-issue-description" required minlength="10" rows="4" placeholder="Explain your issue in detail. The more details you provide, the faster our team can assist..." style="width: 100%; padding: 12px 14px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 13px; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
-          </div>
-
-          <!-- D. Attachment Section -->
-          <div style="margin-bottom: 22px;">
-            <label style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">
-              Attachment <span style="font-weight: 400; color: #64748B;">(Optional — PDF, JPG, PNG, DOC up to 10MB)</span>
-            </label>
-            
-            <div id="dropzone-report-issue" onclick="document.getElementById('report-file-input').click()" style="border: 2px dashed #CBD5E1; border-radius: 12px; padding: 18px; text-align: center; cursor: pointer; background: #F8FAFC; transition: border-color 0.2s, background 0.2s;">
-              <input type="file" id="report-file-input" onchange="handleReportFileSelect(this)" style="display: none;" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx">
-              <span style="font-size: 24px; display: block; margin-bottom: 4px;">📎</span>
-              <div style="font-size: 13px; font-weight: 600; color: #127A4D;">Click to upload a file or drag and drop</div>
-              <div style="font-size: 11px; color: #64748B; margin-top: 2px;">PDF, PNG, JPG, JPEG, DOC, DOCX (Max 10 MB)</div>
-            </div>
-
-            <!-- Attachment Preview Box -->
-            <div id="report-file-preview" style="display: none; margin-top: 10px; background: #F1F5F9; border-radius: 8px; padding: 8px 14px; align-items: center; justify-content: space-between;">
-              <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                <span>📄</span>
-                <span id="report-file-name" style="font-weight: 600; color: #1E293B;">file.pdf</span>
-                <span id="report-file-size" style="color: #64748B;">(120 KB)</span>
-              </div>
-              <button type="button" onclick="removeReportFile()" style="background: none; border: none; color: #EF4444; font-weight: 700; cursor: pointer; font-size: 14px;">✕</button>
-            </div>
+            <textarea id="report-issue-description" required minlength="10" rows="5" placeholder="Explain your issue in detail. Our team will review your concern and provide full assistance..." class="modern-textarea"></textarea>
           </div>
 
           <!-- Error Alert Banner -->
-          <div id="report-issue-error" style="display: none; background: #FEF2F2; border: 1.5px solid #FECACA; color: #991B1B; padding: 10px 14px; border-radius: 8px; font-size: 12px; margin-bottom: 16px;"></div>
+          <div id="report-issue-error" style="display: none; background: #FEF2F2; border: 1.5px solid #FECACA; color: #991B1B; padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 18px;"></div>
 
-          <!-- E. Submit Button & Actions -->
-          <div style="display: flex; justify-content: flex-end; gap: 12px; align-items: center; border-top: 1.5px solid #F1F5F9; padding-top: 16px;">
-            <button type="button" onclick="closeReportIssueModal()" class="btn-modal-outlined" style="padding: 10px 20px;">Cancel</button>
-            <button type="submit" id="btnSubmitReportIssue" class="btn-primary-action" style="padding: 11px 28px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px;">
+          <!-- Actions -->
+          <div style="display: flex; justify-content: flex-end; gap: 12px; align-items: center; border-top: 1.5px solid #E2E9E5; padding-top: 18px;">
+            <button type="button" onclick="closeReportIssueModal()" class="btn-modal-outlined" style="padding: 12px 22px; border-radius: 12px; font-size: 13.5px;">Cancel</button>
+            <button type="submit" id="btnSubmitReportIssue" class="modern-btn-submit">
               <span id="btnSubmitReportText">Submit Issue</span>
               <span id="btnSubmitReportSpinner" style="display: none;">⏳</span>
             </button>

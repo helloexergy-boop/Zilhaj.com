@@ -2610,6 +2610,11 @@ window.openReportIssueModal = function(prefillCategory) {
   if (emailEl) emailEl.value = user.email;
   if (phoneEl) phoneEl.value = user.phone;
 
+  const nameDisplay = document.getElementById('report-customer-name-display');
+  const emailDisplay = document.getElementById('report-customer-email-display');
+  if (nameDisplay) nameDisplay.textContent = user.name;
+  if (emailDisplay) emailDisplay.textContent = user.email;
+
   // Reset form views
   const successView = document.getElementById('report-issue-success-view');
   const formEl = document.getElementById('form-report-issue');
@@ -2621,7 +2626,7 @@ window.openReportIssueModal = function(prefillCategory) {
     formEl.reset();
   }
   if (errEl) errEl.style.display = 'none';
-  window.removeReportFile();
+  if (typeof window.removeReportFile === 'function') window.removeReportFile();
 
   if (prefillCategory) {
     const catSelect = document.getElementById('report-issue-category');
@@ -2654,7 +2659,7 @@ window.handleReportRequestChange = function(selectedReqId) {
 
   if (!selectedReqId || selectedReqId === 'GENERAL') {
     if (previewBox) {
-      previewBox.style.display = 'block';
+      previewBox.style.display = 'grid';
       if (pReqId) pReqId.textContent = 'None';
       if (pService) pService.textContent = 'General Support Inquiry';
       if (pDate) pDate.textContent = 'N/A';
@@ -2679,18 +2684,15 @@ window.handleReportRequestChange = function(selectedReqId) {
   }
 };
 
-// Handle File Dropzone & Selection
+// Handle File Dropzone & Selection (Kept as optional fallback helper)
 window.handleReportFileSelect = function(fileInput) {
   if (!fileInput.files || !fileInput.files[0]) return;
   const file = fileInput.files[0];
-
-  // Size limit: 10MB
   if (file.size > 10 * 1024 * 1024) {
-    alert('File size exceeds the 10 MB limit. Please select a smaller document or image.');
+    alert('File size exceeds the 10 MB limit.');
     fileInput.value = '';
     return;
   }
-
   const reader = new FileReader();
   reader.onload = function(e) {
     window.customerSupportState.pendingAttachment = {
@@ -2699,16 +2701,6 @@ window.handleReportFileSelect = function(fileInput) {
       type: file.type || 'application/octet-stream',
       dataUrl: e.target.result
     };
-
-    const preview = document.getElementById('report-file-preview');
-    const nameSpan = document.getElementById('report-file-name');
-    const sizeSpan = document.getElementById('report-file-size');
-
-    if (preview && nameSpan && sizeSpan) {
-      nameSpan.textContent = file.name;
-      sizeSpan.textContent = `(${(file.size / 1024).toFixed(1)} KB)`;
-      preview.style.display = 'flex';
-    }
   };
   reader.readAsDataURL(file);
 };
@@ -2717,8 +2709,6 @@ window.removeReportFile = function() {
   window.customerSupportState.pendingAttachment = null;
   const fileInput = document.getElementById('report-file-input');
   if (fileInput) fileInput.value = '';
-  const preview = document.getElementById('report-file-preview');
-  if (preview) preview.style.display = 'none';
 };
 
 // Submit Report Issue Form
@@ -2727,7 +2717,6 @@ window.handleReportIssueSubmit = async function(event) {
   const user = window.getCurrentSupportUser();
   const reqSelect = document.getElementById('report-request-select');
   const catSelect = document.getElementById('report-issue-category');
-  const prioSelect = document.getElementById('report-issue-priority');
   const subjInput = document.getElementById('report-issue-subject');
   const descInput = document.getElementById('report-issue-description');
   const btnSubmit = document.getElementById('btnSubmitReportIssue');
@@ -2740,7 +2729,7 @@ window.handleReportIssueSubmit = async function(event) {
 
   if (subject.length < 5) {
     if (errEl) {
-      errEl.textContent = 'Subject must be at least 5 characters long.';
+      errEl.textContent = 'Heading of the report must be at least 5 characters long.';
       errEl.style.display = 'block';
     }
     return;
@@ -2748,7 +2737,7 @@ window.handleReportIssueSubmit = async function(event) {
 
   if (description.length < 10) {
     if (errEl) {
-      errEl.textContent = 'Issue details must be at least 10 characters long.';
+      errEl.textContent = 'Description must be at least 10 characters long.';
       errEl.style.display = 'block';
     }
     return;
@@ -2766,10 +2755,10 @@ window.handleReportIssueSubmit = async function(event) {
     customerPhone: user.phone,
     requestId: reqSelect ? reqSelect.value : 'REQ_1048',
     category: catSelect ? catSelect.value : 'Hotel Related',
-    priority: prioSelect ? prioSelect.value : 'Medium',
+    priority: 'Medium',
     subject: subject,
     description: description,
-    attachment: window.customerSupportState.pendingAttachment
+    attachment: null
   };
 
   try {

@@ -107,6 +107,24 @@
   ],
   "tickets": [
     {
+      "id": "ticket_1790779194062_8u41z",
+      "issue_id": "ISS_0024",
+      "request_id": "REQ_1048",
+      "user_id": "user_palak_example_com",
+      "customer_name": "012 Palak Badyal",
+      "customer_email": "palak@example.com",
+      "customer_phone": "+91 95416 92891",
+      "category": "Hotel Related",
+      "priority": "Medium",
+      "subject": "Modernized Report: Distance to Haram test",
+      "description": "Testing the modernized issue reporting flow without priority and attachment sections.",
+      "status": "In Progress",
+      "assigned_admin_id": "admin_aman",
+      "assigned_admin_name": "Aman Khan",
+      "created_at": "2026-09-30T14:39:54.062Z",
+      "updated_at": "2026-09-30T14:39:54.064Z"
+    },
+    {
       "id": "ticket_1790774543985_0xslf",
       "issue_id": "ISS_0023",
       "request_id": "REQ_1048",
@@ -407,9 +425,47 @@
       "attachment_type": null,
       "created_at": "2026-09-30T13:22:23.988Z",
       "is_read": false
+    },
+    {
+      "id": "msg_1790779194062",
+      "ticket_id": "ticket_1790779194062_8u41z",
+      "issue_id": "ISS_0024",
+      "sender_id": "user_palak_example_com",
+      "sender_name": "012 Palak Badyal",
+      "sender_role": "CUSTOMER",
+      "message_type": "CUSTOMER_MESSAGE",
+      "message": "Testing the modernized issue reporting flow without priority and attachment sections.",
+      "attachment_url": null,
+      "attachment_name": null,
+      "attachment_size": null,
+      "attachment_type": null,
+      "created_at": "2026-09-30T14:39:54.062Z",
+      "is_read": false
     }
   ],
   "notifications": [
+    {
+      "id": "notif_1790779194064_vciqt",
+      "user_id": "palak@example.com",
+      "ticket_id": "ticket_1790779194062_8u41z",
+      "issue_id": "ISS_0024",
+      "type": "STATUS_CHANGE",
+      "title": "Support request updated — ISS_0024",
+      "message": "Your support request ISS_0024 is now marked as In Progress.",
+      "is_read": true,
+      "created_at": "2026-09-30T14:39:54.064Z"
+    },
+    {
+      "id": "notif_1790779194062_ss97e",
+      "user_id": "ADMIN",
+      "ticket_id": "ticket_1790779194062_8u41z",
+      "issue_id": "ISS_0024",
+      "type": "NEW_TICKET",
+      "title": "New support issue received — ISS_0024",
+      "message": "ISS_0024 · Hotel Related · REQ_1048 · 012 Palak Badyal",
+      "is_read": false,
+      "created_at": "2026-09-30T14:39:54.062Z"
+    },
     {
       "id": "notif_1790774543988_fs1tw",
       "user_id": "ADMIN",
@@ -533,6 +589,26 @@
     }
   ],
   "status_history": [
+    {
+      "id": "hist_1790779194064",
+      "ticket_id": "ticket_1790779194062_8u41z",
+      "issue_id": "ISS_0024",
+      "old_status": "Open",
+      "new_status": "In Progress",
+      "changed_by": "Aman Khan (Customer Care)",
+      "reason": "Assigned to executive desk",
+      "created_at": "2026-09-30T14:39:54.064Z"
+    },
+    {
+      "id": "hist_1790779194062",
+      "ticket_id": "ticket_1790779194062_8u41z",
+      "issue_id": "ISS_0024",
+      "old_status": null,
+      "new_status": "Open",
+      "changed_by": "012 Palak Badyal (Customer)",
+      "reason": "Issue initially reported",
+      "created_at": "2026-09-30T14:39:54.062Z"
+    },
     {
       "id": "hist_1790774543988",
       "ticket_id": "ticket_1790774543985_0xslf",
