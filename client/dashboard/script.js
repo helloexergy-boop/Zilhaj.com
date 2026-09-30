@@ -124,9 +124,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // URL Hash Navigation / Hash Redirect Handling
+  // URL Hash & Query Param Navigation / Redirect Handling
+  const urlQueryTab = new URLSearchParams(window.location.search).get('tab');
   const initialHash = window.location.hash.replace('#', '').toLowerCase();
-  if (initialHash) {
+  if (urlQueryTab) {
+    switchTab(urlQueryTab.toLowerCase());
+  } else if (initialHash) {
     switchTab(initialHash);
   } else {
     switchTab('requests');

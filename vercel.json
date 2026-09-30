@@ -48,8 +48,16 @@
       "dest": "/client/checkout.html"
     },
     {
+      "src": "/dashboard/(.*)",
+      "dest": "/client/dashboard/$1"
+    },
+    {
       "src": "/dashboard",
       "dest": "/client/dashboard/index.html"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "/client/admin/$1"
     },
     {
       "src": "/admin",
