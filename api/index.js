@@ -1588,7 +1588,7 @@ app.post('/api/auth/verify-otp', async (req, res) => {
 // 1. Generate Google OAuth Authorization Consent URL
 app.get('/api/auth/google/url', (req, res) => {
     const clientId = process.env.GOOGLE_CLIENT_ID || '97842936166-bno7lqs6skfqccej1kfg9mg2s47sm2ik.apps.googleusercontent.com';
-    const redirectUri = process.env.GOOGLE_CALLBACK_URL || 'https://onerequest.in/oauth2/callback';
+    const redirectUri = process.env.GOOGLE_CALLBACK_URL || 'https://zilhaj.com/oauth2/callback';
     
     const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
     const options = {
@@ -1612,7 +1612,7 @@ const handleGoogleCallback = async (req, res) => {
     const code = req.query.code;
     const clientId = process.env.GOOGLE_CLIENT_ID || '97842936166-bno7lqs6skfqccej1kfg9mg2s47sm2ik.apps.googleusercontent.com';
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET || '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';
-    const redirectUri = process.env.GOOGLE_CALLBACK_URL || 'https://onerequest.in/oauth2/callback';
+    const redirectUri = process.env.GOOGLE_CALLBACK_URL || 'https://zilhaj.com/oauth2/callback';
 
     if (!code) {
         return res.redirect('/?google_auth_error=1&error=missing_code');
