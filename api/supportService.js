@@ -495,9 +495,10 @@ class SupportService {
             attachment = null
         } = ticketData;
 
-        // Validation
-        if (!subject || subject.trim().length < 5) {
-            throw new Error('Subject must be at least 5 characters long.');
+        // Subject fallback if omitted
+        let finalSubject = subject ? subject.trim() : '';
+        if (finalSubject.length < 5) {
+            finalSubject = (category || 'General Support') + (request_id ? ' - ' + request_id : ' Request');
         }
         if (!description || description.trim().length < 10) {
             throw new Error('Issue details must be at least 10 characters long.');
@@ -545,7 +546,7 @@ class SupportService {
             customer_phone: user.phone || '+91 98765 43210',
             category: category,
             priority: priority,
-            subject: subject.trim(),
+            subject: finalSubject,
             description: description.trim(),
             status: 'Open',
             assigned_admin_id: 'admin_aman',

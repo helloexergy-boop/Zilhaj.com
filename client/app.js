@@ -533,8 +533,8 @@ class App {
             if (authContainer) {
                 authContainer.innerHTML = `
                     <div style="display:flex; align-items:center; gap:0.6rem;">
-                        <button class="btn btn-outline" onclick="app.openLoginModal()" style="border:1.5px solid #0f172a; color:#0f172a; font-weight:700; border-radius:8px; padding:0.45rem 1.1rem; font-size:0.88rem; background:transparent; cursor:pointer;">Login</button>
-                        <button class="btn btn-primary" onclick="app.openRegisterModal()" style="background:#2e7d32; color:white; font-weight:700; border-radius:8px; padding:0.45rem 1.1rem; border:none; font-size:0.88rem; cursor:pointer;">Sign Up</button>
+                        <button class="nav-btn btn-login" onclick="app.openLoginModal()">Login</button>
+                        <button class="nav-btn btn-signup" onclick="app.openRegisterModal()">Sign Up</button>
                     </div>
                 `;
             }
@@ -1110,6 +1110,14 @@ class App {
         if (page === 'pricing') page = 'home';
 
         this.closeAuthPage();
+        if (typeof window.showLoadingProgress === 'function') {
+            window.showLoadingProgress();
+            setTimeout(() => {
+                if (typeof window.hideLoadingProgress === 'function') {
+                    window.hideLoadingProgress();
+                }
+            }, 180);
+        }
         this.state.currentPage = page;
         this.updatePageSEO(rawPage);
         const main = document.getElementById('mainContainer');

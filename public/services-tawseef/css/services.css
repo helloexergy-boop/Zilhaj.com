@@ -314,16 +314,7 @@ ul, ol {
   color: var(--color-primary-deep);
 }
 
-.nav-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: var(--color-primary-emerald);
-  border-radius: var(--radius-full);
-}
+.nav-link.active::after { display: none !important; content: none !important; }
 
 .header-actions {
   display: flex;

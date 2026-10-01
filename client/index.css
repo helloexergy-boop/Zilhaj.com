@@ -468,48 +468,87 @@ a:hover {
     flex-shrink: 0;
 }
 
-/* Login — plain text button */
+/* Universal Navbar Auth Actions Styling */
+.nav-actions,
+#navAuthActions,
+.nav-auth-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+    flex-shrink: 0;
+}
+
+/* Login Button — Refined Modern Outline */
+.btn-login,
+.nav-btn.btn-login,
+.nav-actions .btn-login,
+#navAuthActions .btn-login,
 .nav-auth-actions .btn-outline,
 .nav-auth-actions .btn.btn-outline {
     background: transparent !important;
-    border: none !important;
-    color: #374151 !important;
+    border: 1.5px solid #0f172a !important;
+    color: #0f172a !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 0.88rem !important;
-    font-weight: 500 !important;
-    padding: 0.42rem 0.85rem !important;
+    font-weight: 700 !important;
+    padding: 0.45rem 1.15rem !important;
     border-radius: 8px !important;
     cursor: pointer !important;
-    transition: all 0.15s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.18s ease !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
 }
 
+.btn-login:hover,
+.nav-btn.btn-login:hover,
+.nav-actions .btn-login:hover,
+#navAuthActions .btn-login:hover,
 .nav-auth-actions .btn-outline:hover,
 .nav-auth-actions .btn.btn-outline:hover {
-    background: #f3f4f6 !important;
-    color: #111827 !important;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: #0f172a !important;
 }
 
-/* Sign Up — dark rounded pill */
+/* Sign Up Button — Official Emerald Green Pill */
+.btn-signup,
+.nav-btn.btn-signup,
+.nav-actions .btn-signup,
+#navAuthActions .btn-signup,
 .nav-auth-actions .btn-primary,
 .nav-auth-actions .btn.btn-primary {
-    background: #111827 !important;
+    background: #1b633e !important;
     color: #ffffff !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 0.88rem !important;
-    font-weight: 600 !important;
-    padding: 0.42rem 1.1rem !important;
-    border-radius: 10px !important;
-    border: none !important;
+    font-weight: 700 !important;
+    padding: 0.45rem 1.15rem !important;
+    border-radius: 8px !important;
+    border: 1.5px solid #1b633e !important;
     cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     transition: all 0.2s ease !important;
-    box-shadow: none !important;
+    box-shadow: 0 2px 8px rgba(27, 99, 62, 0.25) !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
 }
 
+.btn-signup:hover,
+.nav-btn.btn-signup:hover,
+.nav-actions .btn-signup:hover,
+#navAuthActions .btn-signup:hover,
 .nav-auth-actions .btn-primary:hover,
 .nav-auth-actions .btn.btn-primary:hover {
-    background: #1f2937 !important;
+    background: #145032 !important;
+    border-color: #145032 !important;
+    color: #ffffff !important;
     transform: translateY(-1px) !important;
-    box-shadow: 0 4px 12px rgba(17,24,39,0.25) !important;
+    box-shadow: 0 4px 12px rgba(27, 99, 62, 0.35) !important;
 }
 
 /* Dropdown (unchanged behavior) */
@@ -3701,23 +3740,11 @@ p, body {
     position: relative;
 }
 
-.nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 50%;
-    transform: translateX(-50%) scaleX(0);
-    width: 75%;
-    height: 3px;
-    background: #047857 !important;
-    transform-origin: center;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 99px;
-}
-
-.nav-link:hover::after, .nav-link.active::after {
-    transform: translateX(-50%) scaleX(1);
-    background: #047857 !important;
+.nav-link::after,
+.nav-link:hover::after,
+.nav-link.active::after {
+    display: none !important;
+    content: none !important;
 }
 
 .navbar.scrolled {

@@ -282,16 +282,7 @@ ul, ol {
   font-weight: 700;
 }
 
-.nav-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2.5px;
-  background: linear-gradient(90deg, var(--color-primary-deep) 0%, var(--color-gold) 100%);
-  border-radius: var(--radius-full);
-}
+.nav-link.active::after { display: none !important; content: none !important; }
 
 .header-actions {
   display: flex;

@@ -62,17 +62,17 @@ body {
 }
 
 .app-container {
-  max-width: 1280px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 16px 24px 40px;
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 14px 28px 40px !important;
   box-sizing: border-box;
 }
 
 .app-container.full-width-mode {
-  max-width: 1280px;
-  padding-left: 24px;
-  padding-right: 24px;
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 14px 28px 40px !important;
 }
 
 /* ==========================================================================
@@ -98,23 +98,23 @@ body {
 }
 
 .logo-gold-ring {
-  padding: 2.5px;
-  background: linear-gradient(135deg, #DFB251 0%, #F5D77F 40%, #D4AF37 70%, #B8860B 100%);
+  padding: 0;
+  background: transparent;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+  box-shadow: none;
   flex-shrink: 0;
 }
 
 .logo-gold-ring.sm {
-  padding: 2px;
+  padding: 0;
 }
 
 .brand-logo-img, .sidebar-logo-img, .footer-logo-img {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   object-fit: cover;
   border-radius: 50%;
   background-color: #FFFFFF;
@@ -169,25 +169,19 @@ body {
 }
 
 .nav-link:hover {
-  color: #0D3D2E;
+  color: #047857;
   background-color: #F0FDF4;
 }
 
 .nav-link.active {
-  color: #0D3D2E;
+  color: #047857;
   background-color: #EBF5F0;
   font-weight: 700;
 }
 
-.nav-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 20%;
-  right: 20%;
-  height: 2.5px;
-  background-color: #0D3D2E;
-  border-radius: 99px;
+.nav-link.active::after,
+.nav-link::after {
+  display: none !important;
 }
 
 .nav-user-area {

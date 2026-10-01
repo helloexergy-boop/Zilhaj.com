@@ -91,6 +91,10 @@ app.get(['/support', '/support.html', '/help', '/help-and-support'], (req, res) 
     res.redirect('/dashboard?tab=help');
 });
 
+app.get(['/contact', '/contact.html'], (req, res) => {
+    res.redirect('/#footerContactSection');
+});
+
 app.use(express.static(publicDir, staticOptions));
 app.use(express.static(clientDir, staticOptions));
 

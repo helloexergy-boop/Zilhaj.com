@@ -14,6 +14,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!targetTab) targetTab = 'requests';
     targetTab = targetTab.replace('#', '').toLowerCase();
 
+    if (typeof window.showLoadingProgress === 'function') {
+      window.showLoadingProgress();
+      setTimeout(() => {
+        if (typeof window.hideLoadingProgress === 'function') {
+          window.hideLoadingProgress();
+        }
+      }, 200);
+    }
+
     const mainLayout = document.querySelector('.main-layout');
     if (mainLayout) {
       if (targetTab === 'submit-request') {
@@ -2782,27 +2791,30 @@ window.handleReportIssueSubmit = async function(event) {
   const user = window.getCurrentSupportUser();
   const reqSelect = document.getElementById('report-request-select');
   const catSelect = document.getElementById('report-issue-category');
-  const subjInput = document.getElementById('report-issue-subject');
   const descInput = document.getElementById('report-issue-description');
   const btnSubmit = document.getElementById('btnSubmitReportIssue');
   const btnText = document.getElementById('btnSubmitReportText');
   const btnSpinner = document.getElementById('btnSubmitReportSpinner');
   const errEl = document.getElementById('report-issue-error');
 
-  const subject = subjInput ? subjInput.value.trim() : '';
   const description = descInput ? descInput.value.trim() : '';
+  const category = catSelect ? catSelect.value : 'General Query';
+  const reqId = reqSelect ? reqSelect.value : 'GENERAL';
 
-  if (subject.length < 5) {
-    if (errEl) {
-      errEl.textContent = 'Heading of the report must be at least 5 characters long.';
-      errEl.style.display = 'block';
+  // Auto-generate clean issue subject from Category and Description
+  let subject = `${category} Inquiry`;
+  if (description) {
+    const cleanFirstLine = description.split('\n')[0].replace(/[^\w\s-]/g, '').trim();
+    if (cleanFirstLine.length >= 5) {
+      subject = `${category}: ${cleanFirstLine.substring(0, 45)}`;
+    } else {
+      subject = `${category} - ${reqId}`;
     }
-    return;
   }
 
   if (description.length < 10) {
     if (errEl) {
-      errEl.textContent = 'Description must be at least 10 characters long.';
+      errEl.textContent = 'Please describe the issue in at least 10 characters so our care team can help.';
       errEl.style.display = 'block';
     }
     return;
@@ -2819,7 +2831,7 @@ window.handleReportIssueSubmit = async function(event) {
     customerEmail: user.email,
     customerPhone: user.phone,
     requestId: reqSelect ? reqSelect.value : 'REQ_1048',
-    category: catSelect ? catSelect.value : 'Hotel Related',
+    category: category,
     priority: 'Medium',
     subject: subject,
     description: description,
