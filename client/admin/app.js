@@ -218,11 +218,26 @@ async function openSupportFromNotification(issueId, notifId) {
   }
 }
 
-// ==========================================
-// 5. Navigation & Tab Switcher
-// ==========================================
+let adminSupportPollInterval = null;
+
 function navigateToTab(tabId) {
   state.currentTab = tabId;
+
+  // Manage real-time polling for Customer Support tab
+  if (tabId === 'support') {
+    if (!adminSupportPollInterval) {
+      adminSupportPollInterval = setInterval(() => {
+        if (state.currentTab === 'support') {
+          loadAdminSupportData(false);
+        }
+      }, 4000);
+    }
+  } else {
+    if (adminSupportPollInterval) {
+      clearInterval(adminSupportPollInterval);
+      adminSupportPollInterval = null;
+    }
+  }
   
   // Update Navbar tabs
   document.querySelectorAll('.nav-tab-btn').forEach(btn => {
@@ -1513,12 +1528,15 @@ function renderAdminSupportTickets() {
   if (countPill) countPill.textContent = `${state.supportTickets.length} Tickets`;
 
   if (state.supportTickets.length === 0) {
+    const workspace = document.getElementById('support-issue-workspace');
+    if (workspace) workspace.style.display = 'none';
+    state.selectedIssueId = null;
     tbody.innerHTML = `
       <tr>
         <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 48px;">
           <div style="font-size: 28px; margin-bottom: 8px;">📭</div>
           <div style="font-weight: 700; font-size: 14px; color: var(--text-main);">No support tickets found</div>
-          <div style="font-size: 12px; margin-top: 4px;">Try adjusting your search query or filter options.</div>
+          <div style="font-size: 12px; margin-top: 4px;">When customers submit an inquiry or report, their tickets will appear here in real time.</div>
         </td>
       </tr>
     `;
@@ -1650,13 +1668,14 @@ async function openAdminTicket(issueId) {
     if (assignSelect) assignSelect.value = t.assigned_admin_name || 'Aman Khan';
 
     // 5. Customer Information Card
-    const initials = (t.customer_name || 'AD').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    const cName = t.customer_name || 'Customer';
+    const initials = cName.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'CU';
     setElementText('support-cust-avatar', initials);
-    setElementText('support-cust-name', t.customer_name);
-    setElementText('support-cust-phone', t.customer_phone || '+91 98765 43210');
-    setElementText('support-cust-email', t.customer_email || 'customer@gmail.com');
-    setElementText('support-cust-loc', (data.requestContext && data.requestContext.location) || 'Srinagar, Jammu & Kashmir');
-    setElementText('support-cust-since', (data.requestContext && data.requestContext.customerSince) || 'Jan 2025');
+    setElementText('support-cust-name', cName);
+    setElementText('support-cust-phone', t.customer_phone || '--');
+    setElementText('support-cust-email', t.customer_email || '--');
+    setElementText('support-cust-loc', (data.requestContext && data.requestContext.location) || '--');
+    setElementText('support-cust-since', (data.requestContext && data.requestContext.customerSince) || '--');
     setElementText('support-cust-total-reqs', `${(data.previousIssues ? data.previousIssues.length + 1 : 1)} Support Interactions`);
 
     // 6. Request Context Card
@@ -1999,9 +2018,9 @@ async function handleOnCallSubmit(e) {
     return;
   }
 
-  const custName = document.getElementById('support-cust-name')?.textContent || 'Ahmed Dar';
-  const custPhone = document.getElementById('support-cust-phone')?.textContent || '+91 98765 43210';
-  const reqId = document.getElementById('support-req-id-tag')?.textContent || 'REQ_1048';
+  const custName = document.getElementById('support-cust-name')?.textContent || 'Customer';
+  const custPhone = document.getElementById('support-cust-phone')?.textContent || '--';
+  const reqId = document.getElementById('support-req-id-tag')?.textContent || 'GENERAL';
 
   const apiBase = getApiBase();
   const headers = getAuthHeaders();

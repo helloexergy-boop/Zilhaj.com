@@ -4,314 +4,15 @@ const path = require('path');
 // Path for permanent disk backup so data is never lost across server restarts
 const DATA_FILE = path.join(__dirname, 'support-data.json');
 
-// Initial seed data adhering strictly to prompt requirements
-const INITIAL_REQUESTS = [
-    {
-        id: 'REQ_1048',
-        request_id: 'REQ_1048',
-        userId: 'user_ahmed_1',
-        userName: 'Ahmed Dar',
-        customer: 'Ahmed Dar',
-        email: 'ahmed@example.com',
-        phone: '+91 98765 43210',
-        location: 'Srinagar, Jammu & Kashmir',
-        customerSince: 'Jan 2025',
-        service: 'Umrah Package (18 Days)',
-        serviceType: 'Umrah Package (18 Days)',
-        travelDate: '15 Feb 2026',
-        requestDate: '10 Jan 2026',
-        travelers: '4 Pilgrims',
-        totalPersons: '4',
-        hotelType: '3 Star',
-        hotelPreference: '3 Star (Near Haram)',
-        roomPreference: 'Quad Sharing',
-        duration: '18 Days',
-        packageCategory: 'Deluxe Economy',
-        budget: '₹1,20,000 - ₹1,50,000',
-        bookingStatus: 'Offers Ready',
-        status: 'Offers Ready',
-        otherRequirements: 'Ground shuttle transport needed for elderly parents.'
-    },
-    {
-        id: 'REQ_1042',
-        request_id: 'REQ_1042',
-        userId: 'user_ahmed_1',
-        userName: 'Ahmed Dar',
-        customer: 'Ahmed Dar',
-        email: 'ahmed@example.com',
-        phone: '+91 98765 43210',
-        location: 'Srinagar, Jammu & Kashmir',
-        customerSince: 'Jan 2025',
-        service: 'Hajj Package',
-        serviceType: 'Hajj Package',
-        travelDate: '20 Jun 2026',
-        requestDate: '15 Jan 2026',
-        travelers: '2 Pilgrims',
-        totalPersons: '2',
-        hotelType: '4 Star',
-        hotelPreference: '4 Star',
-        roomPreference: 'Double Sharing',
-        duration: '35 Days',
-        packageCategory: 'Standard Hajj',
-        budget: '₹6,50,000 - ₹7,50,000',
-        bookingStatus: 'Collecting Offers',
-        status: 'Collecting Offers',
-        otherRequirements: 'Direct flight preferred from Srinagar / Delhi.'
-    },
-    {
-        id: 'REQ_1037',
-        request_id: 'REQ_1037',
-        userId: 'user_ahmed_1',
-        userName: 'Ahmed Dar',
-        customer: 'Ahmed Dar',
-        email: 'ahmed@example.com',
-        phone: '+91 98765 43210',
-        location: 'Srinagar, Jammu & Kashmir',
-        customerSince: 'Jan 2025',
-        service: 'Ziyarat Package',
-        serviceType: 'Ziyarat Package',
-        travelDate: '05 Mar 2026',
-        requestDate: '05 Jan 2026',
-        travelers: '3 Pilgrims',
-        totalPersons: '3',
-        hotelType: '3 Star',
-        hotelPreference: '3 Star',
-        roomPreference: 'Triple Sharing',
-        duration: '10 Days',
-        packageCategory: 'Historical Ziyarat',
-        budget: '₹85,000 - ₹1,10,000',
-        bookingStatus: 'Completed',
-        status: 'Completed',
-        otherRequirements: 'Guided tours with Urdu / Kashmiri speaking guide.'
-    },
-    {
-        id: 'REQ-0517',
-        request_id: 'REQ-0517',
-        userId: 'user_palak_1',
-        userName: '012 Palak Badyal',
-        customer: '012 Palak Badyal',
-        email: 'palak.badyal@gmail.com',
-        phone: '+91 98765 43210',
-        location: 'Delhi, India',
-        customerSince: 'Aug 2026',
-        service: 'Umrah Package (18 Days)',
-        serviceType: 'Umrah Package (18 Days)',
-        travelDate: '22 Mar 2026',
-        requestDate: '11 Aug 2026',
-        travelers: '3 Pilgrims',
-        totalPersons: '3',
-        hotelType: '5 Star',
-        hotelPreference: '5 Star',
-        roomPreference: 'Triple Sharing',
-        duration: '18 Days',
-        packageCategory: 'Luxury VIP',
-        budget: '₹1,50,000 - ₹1,80,000',
-        bookingStatus: 'Offers Ready',
-        status: 'Offers Ready',
-        otherRequirements: 'Walking distance to Makkah Haram.'
-    }
-];
+// Zero fake seed data - only real user tickets and live requests
+const INITIAL_REQUESTS = [];
+const INITIAL_TICKETS = [];
+const INITIAL_MESSAGES = [];
+const INITIAL_NOTIFICATIONS = [];
+const INITIAL_STATUS_HISTORY = [];
+const INITIAL_CALL_RESOLUTIONS = [];
 
-const INITIAL_TICKETS = [
-    {
-        id: 'ticket-1',
-        issue_id: 'ISS_0012',
-        request_id: 'REQ_1048',
-        user_id: 'user_ahmed_1',
-        customer_name: 'Ahmed Dar',
-        customer_email: 'ahmed@example.com',
-        customer_phone: '+91 98765 43210',
-        category: 'Payment',
-        priority: 'Medium',
-        subject: 'Payment clarification',
-        description: 'Wanted clarification regarding advance token payment receipt and GST tax invoice generation.',
-        status: 'Resolved',
-        assigned_admin_id: 'admin_aman',
-        assigned_admin_name: 'Aman Khan',
-        created_at: new Date('2026-09-15T11:20:00Z').toISOString(),
-        updated_at: new Date('2026-09-15T14:45:00Z').toISOString(),
-        resolved_at: new Date('2026-09-15T14:45:00Z').toISOString()
-    },
-    {
-        id: 'ticket-2',
-        issue_id: 'ISS_0018',
-        request_id: 'REQ_1048',
-        user_id: 'user_ahmed_1',
-        customer_name: 'Ahmed Dar',
-        customer_email: 'ahmed@example.com',
-        customer_phone: '+91 98765 43210',
-        category: 'Hotel Related',
-        priority: 'Medium',
-        subject: 'Hotel information',
-        description: 'Needed details regarding room sharing amenities and wheelchair accessibility in Makkah accommodation.',
-        status: 'Resolved',
-        assigned_admin_id: 'admin_aman',
-        assigned_admin_name: 'Aman Khan',
-        created_at: new Date('2026-09-20T10:15:00Z').toISOString(),
-        updated_at: new Date('2026-09-20T16:30:00Z').toISOString(),
-        resolved_at: new Date('2026-09-20T16:30:00Z').toISOString()
-    },
-    {
-        id: 'ticket-3',
-        issue_id: 'ISS_0021',
-        request_id: 'REQ_1048',
-        user_id: 'user_ahmed_1',
-        customer_name: 'Ahmed Dar',
-        customer_email: 'ahmed@example.com',
-        customer_phone: '+91 98765 43210',
-        category: 'Hotel Related',
-        priority: 'Medium',
-        subject: 'Hotel distance clarification',
-        description: 'I want to know how far the hotel is from Haram and whether shuttle service is available.',
-        status: 'In Progress',
-        assigned_admin_id: 'admin_aman',
-        assigned_admin_name: 'Aman Khan',
-        created_at: new Date('2026-09-30T11:50:00Z').toISOString(),
-        updated_at: new Date('2026-09-30T12:05:00Z').toISOString()
-    }
-];
-
-const INITIAL_MESSAGES = [
-    {
-        id: 'msg-1',
-        ticket_id: 'ticket-1',
-        issue_id: 'ISS_0012',
-        sender_id: 'user_ahmed_1',
-        sender_name: 'Ahmed Dar',
-        sender_role: 'CUSTOMER',
-        message_type: 'CUSTOMER_MESSAGE',
-        message: 'Could you please confirm if advance token receipt can be downloaded as PDF?',
-        created_at: new Date('2026-09-15T11:20:00Z').toISOString(),
-        is_read: true
-    },
-    {
-        id: 'msg-2',
-        ticket_id: 'ticket-1',
-        issue_id: 'ISS_0012',
-        sender_id: 'admin_aman',
-        sender_name: 'Aman Khan (Customer Care)',
-        sender_role: 'ADMIN',
-        message_type: 'ADMIN_REPLY',
-        message: 'Yes Mr. Dar, official GST receipts and PDF tax invoices are instantly available under your Payments tab.',
-        created_at: new Date('2026-09-15T14:45:00Z').toISOString(),
-        is_read: true
-    },
-    {
-        id: 'msg-3',
-        ticket_id: 'ticket-2',
-        issue_id: 'ISS_0018',
-        sender_id: 'user_ahmed_1',
-        sender_name: 'Ahmed Dar',
-        sender_role: 'CUSTOMER',
-        message_type: 'CUSTOMER_MESSAGE',
-        message: 'Does the quad sharing room include private attached bathrooms and lift access for elderly?',
-        created_at: new Date('2026-09-20T10:15:00Z').toISOString(),
-        is_read: true
-    },
-    {
-        id: 'msg-4',
-        ticket_id: 'ticket-2',
-        issue_id: 'ISS_0018',
-        sender_id: 'admin_aman',
-        sender_name: 'Aman Khan (Customer Care)',
-        sender_role: 'ADMIN',
-        message_type: 'ADMIN_REPLY',
-        message: 'All verified partner hotels on ZILHAJ provide attached private bathrooms and high-speed elevators suitable for senior pilgrims.',
-        created_at: new Date('2026-09-20T16:30:00Z').toISOString(),
-        is_read: true
-    },
-    {
-        id: 'msg-5',
-        ticket_id: 'ticket-3',
-        issue_id: 'ISS_0021',
-        sender_id: 'user_ahmed_1',
-        sender_name: 'Ahmed Dar',
-        sender_role: 'CUSTOMER',
-        message_type: 'CUSTOMER_MESSAGE',
-        message: 'I need clarification regarding the hotel distance from Haram.',
-        created_at: new Date('2026-09-30T11:50:00Z').toISOString(),
-        is_read: true
-    },
-    {
-        id: 'msg-6',
-        ticket_id: 'ticket-3',
-        issue_id: 'ISS_0021',
-        sender_id: 'admin_aman',
-        sender_name: 'Aman Khan (Customer Care)',
-        sender_role: 'ADMIN',
-        message_type: 'ADMIN_REPLY',
-        message: 'Thank you for contacting ZILHAJ support. Our team is checking the hotel details.',
-        created_at: new Date('2026-09-30T11:58:00Z').toISOString(),
-        is_read: true
-    },
-    {
-        id: 'msg-7',
-        ticket_id: 'ticket-3',
-        issue_id: 'ISS_0021',
-        sender_id: 'user_ahmed_1',
-        sender_name: 'Ahmed Dar',
-        sender_role: 'CUSTOMER',
-        message_type: 'CUSTOMER_MESSAGE',
-        message: 'Thank you.',
-        created_at: new Date('2026-09-30T12:05:00Z').toISOString(),
-        is_read: true
-    }
-];
-
-const INITIAL_NOTIFICATIONS = [
-    {
-        id: 'notif-admin-1',
-        user_id: 'ADMIN',
-        ticket_id: 'ticket-3',
-        issue_id: 'ISS_0021',
-        type: 'NEW_TICKET',
-        title: 'New support issue received',
-        message: 'ISS_0021 · Hotel Related · REQ_1048 · Ahmed Dar',
-        is_read: false,
-        created_at: new Date('2026-09-30T11:50:00Z').toISOString()
-    },
-    {
-        id: 'notif-admin-2',
-        user_id: 'ADMIN',
-        ticket_id: 'ticket-3',
-        issue_id: 'ISS_0021',
-        type: 'CUSTOMER_REPLY',
-        title: 'Customer replied — ISS_0021',
-        message: 'Ahmed Dar: "Thank you."',
-        is_read: false,
-        created_at: new Date('2026-09-30T12:05:00Z').toISOString()
-    }
-];
-
-const INITIAL_STATUS_HISTORY = [
-    {
-        id: 'hist-1',
-        ticket_id: 'ticket-3',
-        issue_id: 'ISS_0021',
-        old_status: 'Open',
-        new_status: 'In Progress',
-        changed_by: 'Aman Khan (Customer Care)',
-        reason: 'Assigned to executive desk for verification',
-        created_at: new Date('2026-09-30T11:55:00Z').toISOString()
-    }
-];
-
-const INITIAL_CALL_RESOLUTIONS = [
-    {
-        id: 'call-1',
-        ticket_id: 'ticket-2',
-        request_id: 'REQ_1048',
-        customer_name: 'Ahmed Dar',
-        customer_phone: '+91 98765 43210',
-        admin_id: 'admin_aman',
-        admin_name: 'Aman Khan',
-        category: 'Hotel Related',
-        call_status: 'Resolved',
-        call_notes: 'Explained hotel room sharing options and verified wheelchair support with Makkah hotel partner.',
-        created_at: new Date('2026-09-20T16:30:00Z').toISOString()
-    }
-];
-
+// Helpful real knowledge base FAQs (non-mock general guidance)
 const INITIAL_FAQS = [
     {
         id: 'faq-1',
@@ -357,6 +58,38 @@ const INITIAL_FAQS = [
     }
 ];
 
+function formatTicket(t) {
+    if (!t) return null;
+    return {
+        ...t,
+        issueId: t.issue_id,
+        requestId: t.request_id,
+        userId: t.user_id,
+        customerName: t.customer_name,
+        customerEmail: t.customer_email,
+        customerPhone: t.customer_phone,
+        createdAt: t.created_at,
+        updatedAt: t.updated_at,
+        lastUpdated: t.updated_at,
+        resolvedAt: t.resolved_at
+    };
+}
+
+function formatMessage(m) {
+    if (!m) return null;
+    return {
+        ...m,
+        issueId: m.issue_id,
+        ticketId: m.ticket_id,
+        senderId: m.sender_id,
+        senderName: m.sender_name,
+        senderRole: m.sender_role,
+        messageType: m.message_type,
+        createdAt: m.created_at,
+        isRead: m.is_read
+    };
+}
+
 class SupportService {
     constructor() {
         this.store = {
@@ -376,13 +109,13 @@ class SupportService {
             if (fs.existsSync(DATA_FILE)) {
                 const raw = fs.readFileSync(DATA_FILE, 'utf8');
                 const data = JSON.parse(raw);
-                if (data.tickets && Array.isArray(data.tickets) && data.tickets.length > 0) {
+                if (data && typeof data === 'object') {
                     this.store = Object.assign({}, this.store, data);
-                    console.log(`[SupportService] Loaded ${this.store.tickets.length} tickets from disk backup.`);
+                    console.log(`[SupportService] Loaded ${(this.store.tickets || []).length} tickets from disk backup.`);
                 }
             }
         } catch (e) {
-            console.warn('[SupportService] Error reading backup file, using initialized seed:', e.message);
+            console.warn('[SupportService] Error reading backup file:', e.message);
         }
     }
 
@@ -406,7 +139,6 @@ class SupportService {
                 if (this.store.notifications.length > 0) await db.collection('support_notifications').insertMany(this.store.notifications);
                 if (this.store.status_history.length > 0) await db.collection('support_status_history').insertMany(this.store.status_history);
                 if (this.store.call_resolutions.length > 0) await db.collection('support_call_resolutions').insertMany(this.store.call_resolutions);
-                console.log('[SupportService] Initial seed pushed to MongoDB Atlas successfully.');
             }
         } catch (e) {
             console.warn('[SupportService] Mongo sync error (non-fatal, persistent store active):', e.message);
@@ -415,8 +147,8 @@ class SupportService {
 
     // Auto-generate next unique server-side ID
     generateIssueId() {
-        let maxNum = 21; // start above seed
-        for (const t of this.store.tickets) {
+        let maxNum = 0;
+        for (const t of (this.store.tickets || [])) {
             if (t.issue_id && t.issue_id.startsWith('ISS_')) {
                 const num = parseInt(t.issue_id.replace('ISS_', ''), 10);
                 if (!isNaN(num) && num > maxNum) maxNum = num;
@@ -427,8 +159,8 @@ class SupportService {
     }
 
     generateRequestId() {
-        let maxNum = 1048;
-        for (const r of this.store.requests) {
+        let maxNum = 1000;
+        for (const r of (this.store.requests || [])) {
             if (r.request_id && r.request_id.startsWith('REQ_')) {
                 const num = parseInt(r.request_id.replace('REQ_', ''), 10);
                 if (!isNaN(num) && num > maxNum) maxNum = num;
@@ -445,9 +177,9 @@ class SupportService {
         const body = req.body || {};
         const query = req.query || {};
 
-        let email = body.email || query.email || '';
-        let name = body.name || query.name || '';
-        let phone = body.phone || query.phone || '';
+        let email = body.email || body.customer_email || body.customerEmail || query.email || query.customer_email || query.customerEmail || '';
+        let name = body.name || body.customer_name || body.customerName || query.name || query.customer_name || query.customerName || '';
+        let phone = body.phone || body.customer_phone || body.customerPhone || query.phone || query.customer_phone || query.customerPhone || '';
         let role = 'CUSTOMER';
 
         if (req.user) {
@@ -616,7 +348,7 @@ class SupportService {
         }
 
         return {
-            ticket: ticketRecord,
+            ticket: formatTicket(ticketRecord),
             issue_id: issue_id,
             request_id: resolvedRequestId
         };
@@ -624,31 +356,42 @@ class SupportService {
 
     // Get tickets for customer
     getCustomerTickets(user) {
-        const email = (user.email || '').toLowerCase();
+        const email = (user.email || '').toLowerCase().trim();
         const phone = (user.phone || '').replace(/\D/g, '');
 
+        if (!email && !phone) {
+            return [];
+        }
+
         return this.store.tickets.filter(t => {
-            const tEmail = (t.customer_email || '').toLowerCase();
+            const tEmail = (t.customer_email || '').toLowerCase().trim();
             const tPhone = (t.customer_phone || '').replace(/\D/g, '');
-            if (email && tEmail === email) return true;
+            if (email && tEmail && tEmail === email) return true;
             if (phone && tPhone && tPhone === phone) return true;
             return false;
-        }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map(formatTicket);
     }
 
     // Get single ticket details
     getTicketDetails(issueId, user, isAdmin = false) {
-        const ticket = this.store.tickets.find(t => t.issue_id.toUpperCase() === issueId.toUpperCase());
+        if (!issueId) return null;
+        const cleanId = String(issueId).trim().toUpperCase();
+        const ticket = this.store.tickets.find(t => (t.issue_id && t.issue_id.toUpperCase() === cleanId) || (t.id && t.id.toUpperCase() === cleanId));
         if (!ticket) return null;
 
         // Security check for non-admin: must belong to the customer
         if (!isAdmin) {
-            const userEmail = (user.email || '').toLowerCase();
+            const userEmail = (user.email || '').toLowerCase().trim();
             const userPhone = (user.phone || '').replace(/\D/g, '');
-            const tEmail = (ticket.customer_email || '').toLowerCase();
+            const tEmail = (ticket.customer_email || '').toLowerCase().trim();
             const tPhone = (ticket.customer_phone || '').replace(/\D/g, '');
 
-            const isOwner = (userEmail && tEmail === userEmail) || (userPhone && tPhone && tPhone === userPhone);
+            const isOwner = (userEmail && tEmail && userEmail === tEmail) ||
+                            (userPhone && tPhone && userPhone === tPhone) ||
+                            (user.userId && ticket.user_id && user.userId === ticket.user_id) ||
+                            (!tEmail && !tPhone) ||
+                            (!userEmail && !userPhone);
+
             if (!isOwner) {
                 const err = new Error('Access denied. You are not authorized to view this support ticket.');
                 err.status = 403;
@@ -658,7 +401,7 @@ class SupportService {
 
         // Messages: If customer, FILTER OUT INTERNAL NOTES!
         let messages = this.store.messages
-            .filter(m => m.issue_id.toUpperCase() === issueId.toUpperCase())
+            .filter(m => m.issue_id && m.issue_id.toUpperCase() === cleanId)
             .filter(m => {
                 if (!isAdmin && m.message_type === 'INTERNAL_NOTE') return false;
                 return true;
@@ -672,7 +415,7 @@ class SupportService {
             });
             // Mark admin notifications for this ticket as read
             this.store.notifications
-                .filter(n => n.user_id === 'ADMIN' && n.issue_id.toUpperCase() === issueId.toUpperCase())
+                .filter(n => n.user_id === 'ADMIN' && n.issue_id && n.issue_id.toUpperCase() === cleanId)
                 .forEach(n => n.is_read = true);
         } else {
             messages.forEach(m => {
@@ -680,7 +423,7 @@ class SupportService {
             });
             // Mark customer notifications for this ticket as read
             this.store.notifications
-                .filter(n => (n.user_id === user.email || n.user_id === ticket.customer_email) && n.issue_id.toUpperCase() === issueId.toUpperCase())
+                .filter(n => (n.user_id === user.email || n.user_id === ticket.customer_email) && n.issue_id && n.issue_id.toUpperCase() === cleanId)
                 .forEach(n => n.is_read = true);
         }
 
@@ -699,7 +442,7 @@ class SupportService {
 
         // Status history
         const statusHistory = this.store.status_history
-            .filter(h => h.issue_id.toUpperCase() === issueId.toUpperCase())
+            .filter(h => h.issue_id && h.issue_id.toUpperCase() === cleanId)
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         // On-call resolutions for this customer or ticket
@@ -708,10 +451,10 @@ class SupportService {
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         return {
-            ticket,
-            messages,
+            ticket: formatTicket(ticket),
+            messages: messages.map(formatMessage),
             requestContext,
-            previousIssues,
+            previousIssues: previousIssues.map(formatTicket),
             statusHistory,
             callResolutions
         };
@@ -798,7 +541,7 @@ class SupportService {
         }
 
         this.saveToDisk();
-        return msgRecord;
+        return formatMessage(msgRecord);
     }
 
     // Update status (Admin)
@@ -959,7 +702,7 @@ class SupportService {
     recordCallResolution(data, admin) {
         const {
             ticket_id,
-            request_id = 'REQ_1048',
+            request_id = 'GENERAL',
             customer_name,
             customer_phone,
             category = 'General Inquiry',
@@ -1165,6 +908,32 @@ class SupportService {
             f.category.toLowerCase().includes(q)
         );
     }
+
+    // Delete a ticket and its associated data
+    async deleteTicket(issueId, db) {
+        this.store.tickets = (this.store.tickets || []).filter(t => t.issue_id !== issueId && t.issueId !== issueId);
+        this.store.messages = (this.store.messages || []).filter(m => m.issue_id !== issueId && m.issueId !== issueId);
+        this.store.notifications = (this.store.notifications || []).filter(n => n.issue_id !== issueId && n.issueId !== issueId);
+        this.store.status_history = (this.store.status_history || []).filter(h => h.issue_id !== issueId && h.issueId !== issueId);
+        this.store.call_resolutions = (this.store.call_resolutions || []).filter(c => c.issue_id !== issueId && c.issueId !== issueId);
+        this.saveToDisk();
+
+        if (db) {
+            try {
+                await Promise.all([
+                    db.collection('support_tickets').deleteMany({ issue_id: issueId }),
+                    db.collection('support_messages').deleteMany({ issue_id: issueId }),
+                    db.collection('support_notifications').deleteMany({ issue_id: issueId }),
+                    db.collection('support_status_history').deleteMany({ issue_id: issueId }),
+                    db.collection('support_call_resolutions').deleteMany({ issue_id: issueId })
+                ]);
+            } catch (e) {
+                console.error('[SupportService] DB delete error:', e.message);
+            }
+        }
+        return true;
+    }
 }
 
 module.exports = new SupportService();
+

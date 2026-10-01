@@ -1062,6 +1062,17 @@ app.get('/api/admin/support/tickets/:issueId', (req, res) => {
     }
 });
 
+// ADMIN: Delete Ticket
+app.delete('/api/admin/support/tickets/:issueId', async (req, res) => {
+    try {
+        const db = await getFastDb();
+        await supportService.deleteTicket(req.params.issueId, db);
+        res.json({ success: true, message: 'Ticket deleted successfully.' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 // 13. ADMIN: Reply or Internal Note
 app.post('/api/admin/support/tickets/:issueId/messages', async (req, res) => {
     try {

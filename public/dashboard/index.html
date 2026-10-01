@@ -1733,11 +1733,11 @@
           <div style="background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 14px; padding: 18px 22px; max-width: 440px; margin: 0 auto 24px; text-align: left; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
               <span style="font-size: 13px; color: #64748B; font-weight: 600;">Issue ID:</span>
-              <strong id="success-issue-id" style="font-size: 13px; color: #127A4D; font-family: monospace;">ISS_0000</strong>
+              <strong id="success-issue-id" style="font-size: 13px; color: #127A4D; font-family: monospace;">--</strong>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
               <span style="font-size: 13px; color: #64748B; font-weight: 600;">Request Reference:</span>
-              <strong id="success-request-id" style="font-size: 13px; color: #1E293B; font-family: monospace;">REQ_1048</strong>
+              <strong id="success-request-id" style="font-size: 13px; color: #1E293B; font-family: monospace;">--</strong>
             </div>
             <div style="display: flex; justify-content: space-between;">
               <span style="font-size: 13px; color: #64748B; font-weight: 600;">Current Status:</span>
@@ -1752,26 +1752,27 @@
         </div>
 
         <!-- Clean Modern Form View -->
+        <!-- Clean Modern Form View -->
         <form id="form-report-issue" onsubmit="handleReportIssueSubmit(event)">
           
           <!-- Pilgrim Profile Chip (Auto-filled) -->
           <div class="modern-user-chip">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="width: 38px; height: 38px; border-radius: 50%; background: #127A4D; color: #FFFFFF; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center;">
+              <div id="report-customer-avatar" style="width: 38px; height: 38px; border-radius: 50%; background: #127A4D; color: #FFFFFF; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center;">
                 P
               </div>
               <div>
-                <strong id="report-customer-name-display" style="display: block; font-size: 13.5px; color: #1A2B23;">Ahmed Dar</strong>
-                <span id="report-customer-email-display" style="font-size: 11.5px; color: #64748B;">ahmed@example.com</span>
+                <strong id="report-customer-name-display" style="display: block; font-size: 13.5px; color: #1A2B23;">Valued Pilgrim</strong>
+                <span id="report-customer-email-display" style="font-size: 11.5px; color: #64748B;">Loading profile...</span>
               </div>
             </div>
             <span style="font-size: 11px; font-weight: 700; background: #DCFCE7; color: #15803D; padding: 3px 10px; border-radius: 99px;">Verified Pilgrim</span>
           </div>
 
           <!-- Hidden Customer Inputs for Payload -->
-          <input type="hidden" id="report-customer-name" value="Ahmed Dar">
-          <input type="hidden" id="report-customer-email" value="ahmed@example.com">
-          <input type="hidden" id="report-customer-phone" value="+91 98765 43210">
+          <input type="hidden" id="report-customer-name" value="">
+          <input type="hidden" id="report-customer-email" value="">
+          <input type="hidden" id="report-customer-phone" value="">
 
 
           <!-- 2. Relevant Booking / Request & Category (2-Column) -->
@@ -1780,12 +1781,8 @@
               <label for="report-request-select" class="modern-label">
                 <span>Select Request <span style="color: #EF4444;">*</span></span>
               </label>
-              <select id="report-request-select" onchange="handleReportRequestChange(this.value)" required class="modern-select">
-                <option value="">-- Choose Booking --</option>
-                <option value="REQ_1048" selected>REQ_1048 (Umrah Package)</option>
-                <option value="REQ_1042">REQ_1042 (Hajj Package)</option>
-                <option value="REQ_1037">REQ_1037 (Ziyarat Package)</option>
-                <option value="GENERAL">General Support Query</option>
+              <select id="report-request-select" onchange="handleReportRequestChange(this.value)" class="modern-select">
+                <option value="GENERAL" selected>General Support Query (No Specific Booking)</option>
               </select>
             </div>
 
@@ -1814,15 +1811,15 @@
           <div id="report-request-details-card" style="margin-bottom: 20px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 12px 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 12px;">
             <div>
               <span style="color: #64748B; display: block; font-size: 11px;">Request ID:</span>
-              <strong id="preview-req-id" style="color: #127A4D; font-family: monospace;">REQ_1048</strong>
+              <strong id="preview-req-id" style="color: #127A4D; font-family: monospace;">General</strong>
             </div>
             <div>
               <span style="color: #64748B; display: block; font-size: 11px;">Service:</span>
-              <strong id="preview-req-service" style="color: #1E293B;">Umrah Package</strong>
+              <strong id="preview-req-service" style="color: #1E293B;">General Support Query</strong>
             </div>
             <div>
               <span style="color: #64748B; display: block; font-size: 11px;">Travel Date:</span>
-              <strong id="preview-req-date" style="color: #1E293B;">15 Feb 2026</strong>
+              <strong id="preview-req-date" style="color: #1E293B;">--</strong>
             </div>
           </div>
 
@@ -1865,13 +1862,13 @@
         <div style="display: flex; align-items: center; gap: 12px;">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <h2 id="modal-ticket-id" style="font-size: 20px; font-weight: 800; color: #127A4D; margin: 0; font-family: monospace;">ISS_0021</h2>
-              <span id="modal-ticket-status-pill" class="badge-status-pill badge-in-progress">In Progress</span>
+              <h2 id="modal-ticket-id" style="font-size: 20px; font-weight: 800; color: #127A4D; margin: 0; font-family: monospace;">--</h2>
+              <span id="modal-ticket-status-pill" class="badge-status-pill badge-open">Open</span>
             </div>
             <div style="font-size: 12px; color: #64748B; margin-top: 2px;">
-              Request: <strong id="modal-ticket-req-id" style="color: #1E293B; font-family: monospace;">REQ_1048</strong> &bull;
-              Category: <strong id="modal-ticket-category" style="color: #1E293B;">Hotel Related</strong> &bull;
-              Priority: <strong id="modal-ticket-priority" style="color: #1E293B;">Medium</strong>
+              Request: <strong id="modal-ticket-req-id" style="color: #1E293B; font-family: monospace;">--</strong> &bull;
+              Category: <strong id="modal-ticket-category" style="color: #1E293B;">--</strong> &bull;
+              Priority: <strong id="modal-ticket-priority" style="color: #1E293B;">--</strong>
             </div>
           </div>
         </div>
@@ -1888,11 +1885,11 @@
         <!-- Original Issue Box -->
         <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-            <h3 id="modal-ticket-subject" style="font-size: 16px; font-weight: 800; color: #1A2B23; margin: 0;">Hotel distance clarification</h3>
-            <span id="modal-ticket-created" style="font-size: 12px; color: #94A3B8;">30 Sep 2026, 5:20 PM</span>
+            <h3 id="modal-ticket-subject" style="font-size: 16px; font-weight: 800; color: #1A2B23; margin: 0;">Loading issue details...</h3>
+            <span id="modal-ticket-created" style="font-size: 12px; color: #94A3B8;">--</span>
           </div>
           <p id="modal-ticket-description" style="font-size: 13.5px; color: #334155; line-height: 1.55; margin: 0 0 10px; white-space: pre-wrap;">
-            I want to know how far the hotel is from Haram and whether shuttle service is available.
+            Please wait while ticket details are loaded...
           </p>
           <div id="modal-ticket-attachment-box" style="display: none;">
             <!-- Rendered if ticket has an initial attachment -->

@@ -2621,28 +2621,39 @@ window.customerSupportState = {
   pendingAttachment: null,
   unreadCount: 0,
   pollTimer: null,
-  requests: [
-    { id: 'REQ_1048', service: 'Umrah Package', travelDate: '15 Feb 2026', status: 'Active' },
-    { id: 'REQ_1042', service: 'Hajj Package', travelDate: '20 Jun 2026', status: 'Active' },
-    { id: 'REQ_1037', service: 'Ziyarat Package', travelDate: '05 Mar 2026', status: 'Confirmed' }
-  ]
+  ticketPollInterval: null,
+  requests: []
 };
 
 // Helper: Get active authenticated customer profile
 window.getCurrentSupportUser = function() {
-  let name = localStorage.getItem('zilhaj_user_name') || 'Ahmed Dar';
-  let email = localStorage.getItem('zilhaj_user_email') || 'ahmed@example.com';
-  let phone = localStorage.getItem('zilhaj_user_phone') || '+91 98765 43210';
+  let name = '';
+  let email = '';
+  let phone = '';
 
   try {
     const rawUmrah = localStorage.getItem('umrah_user');
     if (rawUmrah) {
       const u = JSON.parse(rawUmrah);
-      if (u.name) name = u.name;
+      if (u.name || u.fullName) name = u.name || u.fullName;
       if (u.email) email = u.email;
-      if (u.phone) phone = u.phone;
+      if (u.phone || u.mobile) phone = u.phone || u.mobile;
     }
   } catch (e) {}
+
+  if (!name) name = localStorage.getItem('zilhaj_user_name') || '';
+  if (!email) email = localStorage.getItem('zilhaj_user_email') || '';
+  if (!phone) phone = localStorage.getItem('zilhaj_user_phone') || '';
+
+  if (!name) name = 'Valued Pilgrim';
+  if (!email) {
+    let guestId = localStorage.getItem('zilhaj_guest_id');
+    if (!guestId) {
+      guestId = 'user_' + Math.random().toString(36).substring(2, 9);
+      localStorage.setItem('zilhaj_guest_id', guestId);
+    }
+    email = `${guestId}@zilhaj.com`;
+  }
 
   return { name, email, phone };
 };
@@ -2686,8 +2697,10 @@ window.openReportIssueModal = function(prefillCategory) {
 
   const nameDisplay = document.getElementById('report-customer-name-display');
   const emailDisplay = document.getElementById('report-customer-email-display');
+  const avatarEl = document.getElementById('report-customer-avatar');
   if (nameDisplay) nameDisplay.textContent = user.name;
   if (emailDisplay) emailDisplay.textContent = user.email;
+  if (avatarEl) avatarEl.textContent = (user.name.charAt(0) || 'P').toUpperCase();
 
   // Reset form views
   const successView = document.getElementById('report-issue-success-view');
@@ -2707,11 +2720,28 @@ window.openReportIssueModal = function(prefillCategory) {
     if (catSelect) catSelect.value = prefillCategory;
   }
 
-  // Preload selected request details
+  // Dynamically populate actual user requests
   const reqSelect = document.getElementById('report-request-select');
   if (reqSelect) {
-    reqSelect.value = 'REQ_1048';
-    window.handleReportRequestChange('REQ_1048');
+    reqSelect.innerHTML = '<option value="GENERAL" selected>General Support Query (No Specific Booking)</option>';
+    
+    // Find all real request cards on the dashboard
+    const realCards = document.querySelectorAll('#requestsList .request-card-box');
+    const seenReqs = new Set();
+    realCards.forEach(card => {
+      const rid = card.getAttribute('data-req-id') || card.querySelector('.req-id-title')?.textContent?.trim();
+      const service = card.querySelector('.meta-field-col:nth-child(2) .meta-val')?.textContent?.trim() || 'Custom Package';
+      if (rid && !seenReqs.has(rid)) {
+        seenReqs.add(rid);
+        const opt = document.createElement('option');
+        opt.value = rid;
+        opt.textContent = `${rid} (${service})`;
+        reqSelect.appendChild(opt);
+      }
+    });
+
+    reqSelect.value = 'GENERAL';
+    window.handleReportRequestChange('GENERAL');
   }
 
   const modal = document.getElementById('modal-report-issue');
@@ -2729,7 +2759,6 @@ window.handleReportRequestChange = function(selectedReqId) {
   const pReqId = document.getElementById('preview-req-id');
   const pService = document.getElementById('preview-req-service');
   const pDate = document.getElementById('preview-req-date');
-  const pStatus = document.getElementById('preview-req-status');
 
   if (!selectedReqId || selectedReqId === 'GENERAL') {
     if (previewBox) {
@@ -2737,24 +2766,23 @@ window.handleReportRequestChange = function(selectedReqId) {
       if (pReqId) pReqId.textContent = 'None';
       if (pService) pService.textContent = 'General Support Inquiry';
       if (pDate) pDate.textContent = 'N/A';
-      if (pStatus) {
-        pStatus.textContent = 'Standard';
-        pStatus.className = 'badge-status-pill badge-resolved';
-      }
     }
     return;
   }
 
-  const found = window.customerSupportState.requests.find(r => r.id === selectedReqId);
-  if (found && previewBox) {
+  const card = document.querySelector(`.request-card-box[data-req-id="${selectedReqId}"]`);
+  if (card && previewBox) {
     previewBox.style.display = 'grid';
-    if (pReqId) pReqId.textContent = found.id;
-    if (pService) pService.textContent = found.service;
-    if (pDate) pDate.textContent = found.travelDate;
-    if (pStatus) {
-      pStatus.textContent = found.status;
-      pStatus.className = 'badge-status-pill badge-open';
-    }
+    if (pReqId) pReqId.textContent = selectedReqId;
+    const sEl = card.querySelector('.meta-field-col:nth-child(2) .meta-val');
+    const dEl = card.querySelector('.meta-field-col:nth-child(3) .meta-val');
+    if (pService) pService.textContent = sEl ? sEl.textContent.trim() : 'Active Request';
+    if (pDate) pDate.textContent = dEl ? dEl.textContent.trim() : 'Scheduled';
+  } else if (previewBox) {
+    previewBox.style.display = 'grid';
+    if (pReqId) pReqId.textContent = selectedReqId;
+    if (pService) pService.textContent = 'Active Service Request';
+    if (pDate) pDate.textContent = 'Scheduled';
   }
 };
 
@@ -2830,7 +2858,7 @@ window.handleReportIssueSubmit = async function(event) {
     customerName: user.name,
     customerEmail: user.email,
     customerPhone: user.phone,
-    requestId: reqSelect ? reqSelect.value : 'REQ_1048',
+    requestId: reqId || 'GENERAL',
     category: category,
     priority: 'Medium',
     subject: subject,
@@ -2856,6 +2884,10 @@ window.handleReportIssueSubmit = async function(event) {
       throw new Error(data.message || 'Unable to submit issue. Please try again.');
     }
 
+    const tId = data.ticket?.issueId || data.ticket?.issue_id || data.issue_id;
+    const rId = data.ticket?.requestId || data.ticket?.request_id || data.request_id || 'General';
+    const statusVal = data.ticket?.status || 'Open';
+
     // Success screen
     const formEl = document.getElementById('form-report-issue');
     const successView = document.getElementById('report-issue-success-view');
@@ -2866,17 +2898,17 @@ window.handleReportIssueSubmit = async function(event) {
 
     if (formEl) formEl.style.display = 'none';
     if (successView) successView.style.display = 'block';
-    if (sIssueId) sIssueId.textContent = data.ticket.issueId;
-    if (sReqId) sReqId.textContent = data.ticket.requestId || 'General';
+    if (sIssueId) sIssueId.textContent = tId;
+    if (sReqId) sReqId.textContent = rId;
     if (sStatus) {
-      sStatus.textContent = data.ticket.status;
+      sStatus.textContent = statusVal;
       sStatus.className = 'badge-status-pill badge-open';
     }
 
     if (btnView) {
       btnView.onclick = () => {
         window.closeReportIssueModal();
-        window.openCustomerTicketDetails(data.ticket.issueId);
+        window.openCustomerTicketDetails(tId);
       };
     }
 
@@ -2942,26 +2974,35 @@ window.renderCustomerTicketsTable = function(tickets) {
   }
 
   tbody.innerHTML = tickets.map(t => {
-    const statusClass = t.status.toLowerCase().replace(/\s+/g, '-');
-    const priorityClass = t.priority ? t.priority.toLowerCase() : 'medium';
+    const tId = t.issueId || t.issue_id;
+    const rId = t.requestId || t.request_id || 'General';
+    const subj = t.subject || 'Support Ticket';
+    const cat = t.category || 'General';
+    const prio = t.priority || 'Medium';
+    const stat = t.status || 'Open';
+    const created = t.createdAt || t.created_at;
+    const updated = t.updatedAt || t.updated_at || t.lastUpdated;
+
+    const statusClass = stat.toLowerCase().replace(/\s+/g, '-');
+    const priorityClass = prio.toLowerCase();
     return `
       <tr style="border-bottom: 1px solid #F1F5F9; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
-        <td style="padding: 14px 18px; font-weight: 700; color: #127A4D; font-family: monospace;">${t.issueId}</td>
-        <td style="padding: 14px 18px; font-family: monospace; color: #1E293B;">${t.requestId || 'General'}</td>
+        <td style="padding: 14px 18px; font-weight: 700; color: #127A4D; font-family: monospace;">${tId}</td>
+        <td style="padding: 14px 18px; font-family: monospace; color: #1E293B;">${rId}</td>
         <td style="padding: 14px 18px;">
-          <strong style="display: block; color: #0F172A; font-size: 13.5px;">${escapeHtml(t.subject)}</strong>
-          <span style="font-size: 11px; color: #94A3B8;">${t.lastUpdated ? timeAgo(t.lastUpdated) : ''}</span>
+          <strong style="display: block; color: #0F172A; font-size: 13.5px;">${escapeHtml(subj)}</strong>
+          <span style="font-size: 11px; color: #94A3B8;">${updated ? timeAgo(updated) : ''}</span>
         </td>
-        <td style="padding: 14px 18px; font-size: 13px; color: #475569;">${t.category}</td>
+        <td style="padding: 14px 18px; font-size: 13px; color: #475569;">${cat}</td>
         <td style="padding: 14px 18px;">
-          <span class="badge-priority badge-${priorityClass}">${t.priority || 'Medium'}</span>
+          <span class="badge-priority badge-${priorityClass}">${prio}</span>
         </td>
         <td style="padding: 14px 18px;">
-          <span class="badge-status-pill badge-${statusClass}">${t.status}</span>
+          <span class="badge-status-pill badge-${statusClass}">${stat}</span>
         </td>
-        <td style="padding: 14px 18px; font-size: 12px; color: #64748B;">${formatDateClean(t.createdAt)}</td>
+        <td style="padding: 14px 18px; font-size: 12px; color: #64748B;">${formatDateClean(created)}</td>
         <td style="padding: 14px 18px; text-align: right;">
-          <button type="button" onclick="openCustomerTicketDetails('${t.issueId}')" style="background: #127A4D; color: #FFFFFF; font-weight: 700; border: none; border-radius: 8px; padding: 7px 16px; font-size: 12px; cursor: pointer; transition: background 0.15s;">
+          <button type="button" onclick="openCustomerTicketDetails('${tId}')" style="background: #127A4D; color: #FFFFFF; font-weight: 700; border: none; border-radius: 8px; padding: 7px 16px; font-size: 12px; cursor: pointer; transition: background 0.15s;">
             View
           </button>
         </td>
@@ -2972,17 +3013,38 @@ window.renderCustomerTicketsTable = function(tickets) {
 
 // Open Ticket Details & Conversation Modal
 window.openCustomerTicketDetails = async function(issueId) {
+  if (!issueId) return;
   const user = window.getCurrentSupportUser();
   const modal = document.getElementById('modal-ticket-details');
   if (modal) modal.style.display = 'flex';
 
-  // Set loading placeholder in messages
+  // Immediately clear old/mock text
+  const idEl = document.getElementById('modal-ticket-id');
+  const reqEl = document.getElementById('modal-ticket-req-id');
+  const catEl = document.getElementById('modal-ticket-category');
+  const prioEl = document.getElementById('modal-ticket-priority');
+  const statEl = document.getElementById('modal-ticket-status-pill');
+  const subEl = document.getElementById('modal-ticket-subject');
+  const dateEl = document.getElementById('modal-ticket-created');
+  const descEl = document.getElementById('modal-ticket-description');
   const msgList = document.getElementById('modal-ticket-messages-list');
+
+  if (idEl) idEl.textContent = issueId;
+  if (reqEl) reqEl.textContent = '--';
+  if (catEl) catEl.textContent = '--';
+  if (prioEl) prioEl.textContent = '--';
+  if (statEl) {
+    statEl.textContent = 'Loading...';
+    statEl.className = 'badge-status-pill badge-open';
+  }
+  if (subEl) subEl.textContent = 'Loading issue details...';
+  if (dateEl) dateEl.textContent = '--';
+  if (descEl) descEl.textContent = 'Please wait while ticket details are loaded...';
   if (msgList) {
     msgList.innerHTML = '<div style="text-align: center; padding: 30px; color: #64748B;">Loading conversation...</div>';
   }
 
-  try {
+  const fetchTicket = async () => {
     const res = await fetch(`/api/support/tickets/${issueId}?email=${encodeURIComponent(user.email)}`, {
       headers: {
         'x-user-email': user.email,
@@ -2993,28 +3055,34 @@ window.openCustomerTicketDetails = async function(issueId) {
 
     const data = await res.json();
     if (!res.ok || !data.success || !data.ticket) {
-      throw new Error(data.message || 'Ticket not found.');
+      throw new Error(data.message || 'Support ticket not found.');
     }
 
     const t = data.ticket;
     window.customerSupportState.activeTicket = t;
 
-    // Header values
-    document.getElementById('modal-ticket-id').textContent = t.issueId;
-    document.getElementById('modal-ticket-req-id').textContent = t.requestId || 'General';
-    document.getElementById('modal-ticket-category').textContent = t.category;
-    document.getElementById('modal-ticket-priority').textContent = t.priority || 'Medium';
+    const tId = t.issueId || t.issue_id || issueId;
+    const rId = t.requestId || t.request_id || 'General';
+    const cat = t.category || 'General';
+    const prio = t.priority || 'Medium';
+    const stat = t.status || 'Open';
+    const sub = t.subject || 'Support Ticket';
+    const created = t.createdAt || t.created_at;
+    const desc = t.description || '';
 
-    const statusPill = document.getElementById('modal-ticket-status-pill');
-    if (statusPill) {
-      statusPill.textContent = t.status;
-      statusPill.className = `badge-status-pill badge-${t.status.toLowerCase().replace(/\s+/g, '-')}`;
+    if (idEl) idEl.textContent = tId;
+    if (reqEl) reqEl.textContent = rId;
+    if (catEl) catEl.textContent = cat;
+    if (prioEl) prioEl.textContent = prio;
+
+    if (statEl) {
+      statEl.textContent = stat;
+      statEl.className = `badge-status-pill badge-${stat.toLowerCase().replace(/\s+/g, '-')}`;
     }
 
-    // Original issue overview
-    document.getElementById('modal-ticket-subject').textContent = t.subject;
-    document.getElementById('modal-ticket-created').textContent = formatDateClean(t.createdAt);
-    document.getElementById('modal-ticket-description').textContent = t.description;
+    if (subEl) subEl.textContent = sub;
+    if (dateEl) dateEl.textContent = formatDateClean(created);
+    if (descEl) descEl.textContent = desc;
 
     // Attachment box
     const attBox = document.getElementById('modal-ticket-attachment-box');
@@ -3024,9 +3092,9 @@ window.openCustomerTicketDetails = async function(issueId) {
         attBox.innerHTML = `
           <div style="display: inline-flex; align-items: center; gap: 8px; background: #F1F5F9; border-radius: 8px; padding: 6px 12px; font-size: 12px; margin-top: 6px;">
             <span>📎</span>
-            <strong style="color: #1E293B;">${t.attachment.name}</strong>
-            <span style="color: #64748B;">(${t.attachment.size || ''})</span>
-            ${t.attachment.dataUrl ? `<a href="${t.attachment.dataUrl}" download="${t.attachment.name}" style="color: #127A4D; font-weight: 700; margin-left: 8px; text-decoration: underline;">Download</a>` : ''}
+            <strong style="color: #1E293B;">${escapeHtml(t.attachment.name)}</strong>
+            <span style="color: #64748B;">(${escapeHtml(t.attachment.size || '')})</span>
+            ${t.attachment.dataUrl ? `<a href="${t.attachment.dataUrl}" download="${escapeHtml(t.attachment.name)}" style="color: #127A4D; font-weight: 700; margin-left: 8px; text-decoration: underline;">Download</a>` : ''}
           </div>
         `;
       } else {
@@ -3042,11 +3110,11 @@ window.openCustomerTicketDetails = async function(issueId) {
     const boxResolved = document.getElementById('box-resolved-ticket');
     const boxClosed = document.getElementById('box-closed-ticket');
 
-    if (t.status === 'Resolved') {
+    if (stat === 'Resolved') {
       if (boxReply) boxReply.style.display = 'none';
       if (boxResolved) boxResolved.style.display = 'block';
       if (boxClosed) boxClosed.style.display = 'none';
-    } else if (t.status === 'Closed') {
+    } else if (stat === 'Closed') {
       if (boxReply) boxReply.style.display = 'none';
       if (boxResolved) boxResolved.style.display = 'none';
       if (boxClosed) boxClosed.style.display = 'block';
@@ -3056,25 +3124,49 @@ window.openCustomerTicketDetails = async function(issueId) {
       if (boxClosed) boxClosed.style.display = 'none';
     }
 
-    // Mark notifications related to this ticket as read
-    window.markTicketNotificationsAsRead(t.issueId);
+    if (typeof window.markTicketNotificationsAsRead === 'function') {
+      window.markTicketNotificationsAsRead(tId);
+    }
+  };
+
+  try {
+    await fetchTicket();
+
+    // Start Real-Time polling (every 3 seconds) for live chat updates
+    if (window.customerSupportState.ticketPollInterval) {
+      clearInterval(window.customerSupportState.ticketPollInterval);
+    }
+    window.customerSupportState.ticketPollInterval = setInterval(async () => {
+      const curModal = document.getElementById('modal-ticket-details');
+      if (curModal && curModal.style.display !== 'none' && window.customerSupportState.activeTicket) {
+        try {
+          await fetchTicket();
+        } catch (e) {}
+      }
+    }, 3000);
 
   } catch (err) {
     if (msgList) {
-      msgList.innerHTML = `<div style="text-align: center; color: #EF4444; padding: 20px;">${err.message || 'Error loading ticket.'}</div>`;
+      msgList.innerHTML = `<div style="text-align: center; color: #EF4444; padding: 20px;">${err.message || 'Support ticket not found.'}</div>`;
     }
+    if (descEl) descEl.textContent = 'Ticket information is not available.';
   }
 };
 
 window.refreshCurrentTicketModal = function() {
   if (window.customerSupportState.activeTicket) {
-    window.openCustomerTicketDetails(window.customerSupportState.activeTicket.issueId);
+    const tId = window.customerSupportState.activeTicket.issueId || window.customerSupportState.activeTicket.issue_id;
+    window.openCustomerTicketDetails(tId);
   }
 };
 
 window.closeCustomerTicketDetails = function() {
   const modal = document.getElementById('modal-ticket-details');
   if (modal) modal.style.display = 'none';
+  if (window.customerSupportState.ticketPollInterval) {
+    clearInterval(window.customerSupportState.ticketPollInterval);
+    window.customerSupportState.ticketPollInterval = null;
+  }
   window.customerSupportState.activeTicket = null;
   window.loadCustomerTickets(false);
 };
@@ -3094,17 +3186,18 @@ window.renderCustomerMessages = function(messages) {
   }
 
   container.innerHTML = messages.map(m => {
-    const isCustomer = m.senderRole === 'CUSTOMER';
-    const senderTitle = isCustomer ? 'You (Customer)' : (m.senderName || 'Customer Care');
+    const isCustomer = (m.senderRole === 'CUSTOMER' || m.sender_role === 'CUSTOMER');
+    const senderTitle = isCustomer ? 'You (Customer)' : (m.senderName || m.sender_name || 'Customer Care');
     const alignStyle = isCustomer ? 'align-self: flex-end; max-width: 82%;' : 'align-self: flex-start; max-width: 82%;';
     const bgStyle = isCustomer ? 'background: #127A4D; color: #FFFFFF; border-radius: 16px 16px 4px 16px;' : 'background: #FFFFFF; color: #1E293B; border: 1.5px solid #E2E8F0; border-radius: 16px 16px 16px 4px;';
     const metaColor = isCustomer ? '#D1FAE5' : '#64748B';
+    const dateStr = formatDateClean(m.createdAt || m.created_at);
 
     return `
       <div style="${alignStyle} ${bgStyle} padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 6px;">
           <strong style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">${senderTitle}</strong>
-          <span style="font-size: 11px; color: ${metaColor};">${formatDateClean(m.createdAt)}</span>
+          <span style="font-size: 11px; color: ${metaColor};">${dateStr}</span>
         </div>
         <div style="font-size: 13.5px; line-height: 1.5; white-space: pre-wrap;">${escapeHtml(m.message)}</div>
       </div>
@@ -3120,6 +3213,7 @@ window.sendCustomerReply = async function() {
   const ticket = window.customerSupportState.activeTicket;
   if (!ticket) return;
 
+  const tId = ticket.issueId || ticket.issue_id;
   const user = window.getCurrentSupportUser();
   const replyInput = document.getElementById('customer-reply-message');
   const btn = document.getElementById('btnSendCustomerReply');
@@ -3136,7 +3230,7 @@ window.sendCustomerReply = async function() {
   }
 
   try {
-    const res = await fetch(`/api/support/tickets/${ticket.issueId}/messages`, {
+    const res = await fetch(`/api/support/tickets/${tId}/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -3154,7 +3248,7 @@ window.sendCustomerReply = async function() {
 
     if (replyInput) replyInput.value = '';
     // Reload ticket details
-    await window.openCustomerTicketDetails(ticket.issueId);
+    await window.openCustomerTicketDetails(tId);
 
   } catch (err) {
     alert(err.message || 'Failed to send reply. Please try again.');
