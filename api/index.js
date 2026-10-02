@@ -258,10 +258,10 @@ const inMemoryStore = {
     requirements: [
         {
             id: 'REQ-0517',
-            customer: '012 Palak Badyal',
-            userName: '012 Palak Badyal',
+            customer: 'Tariq Ahmed',
+            userName: 'Tariq Ahmed',
             phone: '+91 98765 43210',
-            email: 'palak.badyal@gmail.com',
+            email: 'tariq.ahmed@example.com',
             service: 'Umrah Package (18 Days)',
             serviceType: 'Umrah Package (18 Days)',
             travelers: '3',
@@ -279,10 +279,10 @@ const inMemoryStore = {
         },
         {
             id: 'REQ-5417',
-            customer: '012 Palak Badyal',
-            userName: '012 Palak Badyal',
+            customer: 'Tariq Ahmed',
+            userName: 'Tariq Ahmed',
             phone: '+91 98765 43210',
-            email: 'palak.badyal@gmail.com',
+            email: 'tariq.ahmed@example.com',
             service: 'Umrah Package (25 Days)',
             serviceType: 'Umrah Package (25 Days)',
             travelers: '10',
@@ -502,7 +502,7 @@ app.get('/api/admin/requirements', async (req, res) => {
             return {
                 id: reqId,
                 rawId: r.id || (r._id ? r._id.toString() : reqId),
-                customer: r.userName || r.customer || 'Palak Badyal',
+                customer: r.userName || r.customer || 'Pilgrim',
                 phone: r.userPhone || r.phone || '+91 98765 43210',
                 email: r.userEmail || r.email || `${(r.userName || 'customer').toLowerCase().replace(/\s+/g, '')}@gmail.com`,
                 address: r.fullAddress || r.address || (r.departureCity ? `${r.departureCity}, India` : 'Nowgam, Srinagar, Jammu & Kashmir, India - 190015'),
@@ -1334,7 +1334,7 @@ app.get('/api/admin/support/search', (req, res) => {
 // 12. ADMIN: Get Ticket Details (Includes Internal Notes, Customer Profile, Request Context, History)
 app.get('/api/admin/support/tickets/:issueId', (req, res) => {
     try {
-        const adminUser = { role: 'ADMIN', name: 'Palak Badyal (Admin)' };
+        const adminUser = { role: 'ADMIN', name: 'Administrator' };
         const details = supportService.getTicketDetails(req.params.issueId, adminUser, true);
         if (!details) {
             return res.status(404).json({ success: false, message: 'Ticket not found.' });

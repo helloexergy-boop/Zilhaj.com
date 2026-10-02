@@ -6541,10 +6541,10 @@ class App {
     <div class="details-grid">
         <div class="col-left">
             <div class="sec-title">Lead Pilgrim Information :</div>
-            <div class="info-item"><strong>${this.escapeHtml(userName || '012 Palak Badyal')}</strong></div>
+            <div class="info-item"><strong>${this.escapeHtml(userName || 'Tariq Ahmed')}</strong></div>
             <div class="info-item">ID/Passport: [Redacted]</div>
             <div class="info-item">Contact: ${this.escapeHtml(userPhone || '+91 98765 43210')}</div>
-            <div class="info-item">Email: ${this.escapeHtml(userEmail || 'palakbadyal69@gmail.com')}</div>
+            <div class="info-item">Email: ${this.escapeHtml(userEmail || 'tariq.ahmed@example.com')}</div>
             <br>
             <div class="info-item"><strong>Escrow Account No:</strong> ${this.escapeHtml(b.escrowNo || 'ESC-ZHJ-60324')}</div>
             <div class="info-item"><strong>Verification Status:</strong> Verified & Secured</div>

@@ -3,13 +3,13 @@
    ========================================================================== */
 
 :root {
-  --primary: #0d5c3a;
-  --primary-hover: #0a492e;
-  --primary-dark: #063823;
-  --primary-light: #e8f5ee;
-  --primary-border: #bbf0d6;
+  --primary: #047857;
+  --primary-hover: #065f46;
+  --primary-dark: #064e3b;
+  --primary-light: #ecfdf5;
+  --primary-border: #a7f3d0;
   
-  --accent-gold: #c2881a;
+  --accent-gold: #d97706;
   --accent-gold-light: #fef3c7;
   
   --bg-page: #f8fafc;

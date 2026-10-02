@@ -1187,8 +1187,8 @@ document.addEventListener('DOMContentLoaded', () => {
         liveReqs = [
           {
             id: 'REQ-0517',
-            customer: '012 Palak Badyal',
-            userName: '012 Palak Badyal',
+            customer: 'Tariq Ahmed',
+            userName: 'Tariq Ahmed',
             service: 'Umrah Package (18 Days)',
             travelDate: '22 Mar 2026 (Approx.)',
             totalPersons: '3',
@@ -1200,8 +1200,8 @@ document.addEventListener('DOMContentLoaded', () => {
           },
           {
             id: 'REQ-5417',
-            customer: '012 Palak Badyal',
-            userName: '012 Palak Badyal',
+            customer: 'Tariq Ahmed',
+            userName: 'Tariq Ahmed',
             service: 'Umrah Package (25 Days)',
             travelDate: '27 Apr 2026 (Approx.)',
             totalPersons: '10',
@@ -1248,7 +1248,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const hasOffers = relatedOffers.length > 0 || req.status === 'OFFERS_AVAILABLE';
           const stepNum = req.step || (hasOffers ? 4 : 2);
           const submittedDate = req.submittedOn || '11 Aug 2026';
-          const customerName = req.customer || req.userName || '012 Palak Badyal';
+          const customerName = req.customer || req.userName || 'Tariq Ahmed';
           const serviceName = req.service || req.title || 'Umrah Package (18 Days)';
           const travelDate = req.travelDate || '22 Mar 2026 (Approx.)';
           const totalPersons = req.totalPersons || req.travelers || '3';
@@ -1728,9 +1728,9 @@ window.openSubmissionSummaryModal = function(reqId, service, date, passengers, h
         children = '0 Children';
         infants = '0 Infants';
         hotelCategory = '5 Star';
-        fullname = '012 Palak Badyal';
+        fullname = 'Tariq Ahmed';
         mobile = '+91 98765 43210';
-        email = 'palakbadyal69@gmail.com';
+        email = 'tariq.ahmed@example.com';
         address = 'Nowgam, Srinagar';
         state = 'Jammu & Kashmir';
         district = 'Srinagar';
@@ -1746,9 +1746,9 @@ window.openSubmissionSummaryModal = function(reqId, service, date, passengers, h
         children = '0 Children';
         infants = '0 Infants';
         hotelCategory = '5 Star';
-        fullname = '012 Palak Badyal';
+        fullname = 'Tariq Ahmed';
         mobile = '+91 98765 43210';
-        email = 'palakbadyal69@gmail.com';
+        email = 'tariq.ahmed@example.com';
         address = 'Nowgam, Srinagar';
         state = 'Jammu & Kashmir';
         district = 'Srinagar';
@@ -1769,9 +1769,9 @@ window.openSubmissionSummaryModal = function(reqId, service, date, passengers, h
 
     if (document.getElementById('sumHotelCategory')) document.getElementById('sumHotelCategory').textContent = hotelCategory || '5 Star';
     
-    if (document.getElementById('sumFullName')) document.getElementById('sumFullName').textContent = fullname || '012 Palak Badyal';
+    if (document.getElementById('sumFullName')) document.getElementById('sumFullName').textContent = fullname || 'Tariq Ahmed';
     if (document.getElementById('sumMobile')) document.getElementById('sumMobile').textContent = mobile || '+91 98765 43210';
-    if (document.getElementById('sumEmail')) document.getElementById('sumEmail').textContent = email || 'palakbadyal69@gmail.com';
+    if (document.getElementById('sumEmail')) document.getElementById('sumEmail').textContent = email || 'tariq.ahmed@example.com';
     if (document.getElementById('sumAddress')) document.getElementById('sumAddress').textContent = address || 'Nowgam, Srinagar';
     if (document.getElementById('sumState')) document.getElementById('sumState').textContent = state || 'Jammu & Kashmir';
     if (document.getElementById('sumDistrict')) document.getElementById('sumDistrict').textContent = district || (city || 'Srinagar');
@@ -1868,8 +1868,8 @@ window.openDirectLiveRazorpayCheckout = async function(agentCode, agencyName, pr
   };
 
   const user = (() => { try { return JSON.parse(localStorage.getItem('umrah_user') || '{}'); } catch(e) { return {}; } })();
-  const customerName = user.name || '012 Palak Badyal';
-  const customerEmail = user.email || 'palakbadyal69@gmail.com';
+  const customerName = user.name || 'Tariq Ahmed';
+  const customerEmail = user.email || 'tariq.ahmed@example.com';
   const rawPhone = user.phone || '9876543210';
   const customerPhone = String(rawPhone).replace(/[^0-9]/g, '').slice(-10) || '9876543210';
 
@@ -2283,9 +2283,9 @@ window.generateReceiptPDF = function(bookingData) {
 
   const agencyName = data.agencyName || offer.agencyName || 'Al-Safwa Travel';
   const packageName = data.packageName || 'Umrah Package 2026';
-  const customerName = document.getElementById('sumFullName')?.textContent || '012 Palak Badyal';
+  const customerName = document.getElementById('sumFullName')?.textContent || 'Tariq Ahmed';
   const customerContact = document.getElementById('sumMobile')?.textContent || '+91 98765 43210';
-  const customerEmail = document.getElementById('sumEmail')?.textContent || 'palakbadyal69@gmail.com';
+  const customerEmail = document.getElementById('sumEmail')?.textContent || 'tariq.ahmed@example.com';
   const makkahHotel = offer.makkahHotel || 'Al Safwa Royal Orchid';
   const madinahHotel = offer.madinahHotel || 'Dar Al-Taqwa Hotel';
 

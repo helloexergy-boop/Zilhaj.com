@@ -122,7 +122,7 @@ async function refreshAllData(showNotification = false) {
       state.subAdminPerformance = staffRes.map(s => ({
         name: s.name,
         initials: s.initials,
-        offers: s.requestsHandled || 18,
+        offers: s.requestsHandled || 0,
         avatarBg: s.avatarBg,
         avatarColor: s.avatarColor
       }));
@@ -393,19 +393,28 @@ function renderDashboard() {
           </div>
         </div>
       `;
-    }).join('');
+      }).join('');
+    }
   }
 
   // Booking Overview Row
-  const totalB = state.bookings.length || 8;
-  const procB = state.bookings.filter(b => b.status !== 'CANCELLED' && b.status !== 'COMPLETED').length || 3;
-  const cancB = state.bookings.filter(b => b.status === 'CANCELLED').length || 1;
+  const totalB = state.bookings.length;
+  const procB = state.bookings.filter(b => b.status !== 'CANCELLED' && b.status !== 'COMPLETED').length;
+  const cancB = state.bookings.filter(b => b.status === 'CANCELLED').length;
   const bTot = document.getElementById('booking-total-val');
   const bPrc = document.getElementById('booking-process-val');
   const bCnc = document.getElementById('booking-cancel-val');
   if (bTot) bTot.textContent = totalB;
   if (bPrc) bPrc.textContent = procB;
   if (bCnc) bCnc.textContent = cancB;
+
+  // Customer Support Overview Real-time Counter
+  const csHandled = document.getElementById('cs-handled-count');
+  const csActive = document.getElementById('cs-active-count');
+  const csResolved = document.getElementById('cs-resolved-count');
+  if (csHandled) csHandled.textContent = (state.supportStats && state.supportStats.totalTickets) ? state.supportStats.totalTickets : (state.supportTickets ? state.supportTickets.length : 0);
+  if (csActive) csActive.textContent = (state.supportStats && state.supportStats.pendingIssues) ? state.supportStats.pendingIssues : 0;
+  if (csResolved) csResolved.textContent = (state.supportStats && state.supportStats.solvedIssues) ? state.supportStats.solvedIssues : 0;
 
   // Donut Chart Top Services
   const umrahPct = totalReqs > 0 ? Math.round((umrahCount / totalReqs) * 100) : 65;
@@ -811,8 +820,8 @@ function renderSubAdminsList() {
   });
 
   setElementText('subadmins-kpi-total', state.subAdmins.length);
-  const totBooked = state.subAdmins.reduce((acc, cur) => acc + (cur.customersBooked || 0), 0) || 1248;
-  const totHandled = state.subAdmins.reduce((acc, cur) => acc + (cur.requestsHandled || 0), 0) || 856;
+  const totBooked = state.subAdmins.reduce((acc, cur) => acc + (cur.customersBooked || 0), 0);
+  const totHandled = state.subAdmins.reduce((acc, cur) => acc + (cur.requestsHandled || 0), 0);
   setElementText('subadmins-kpi-booked', totBooked.toLocaleString('en-IN'));
   setElementText('subadmins-kpi-handled', totHandled.toLocaleString('en-IN'));
 
@@ -858,7 +867,34 @@ function renderAgentsList() {
   const container = document.getElementById('agents-grid-container');
   if (!container) return;
 
-  container.innerHTML = state.agents.map(ag => `
+  let agentsList = [...state.agents];
+  if (agentsList.length === 0 && state.packageInventory.length > 0) {
+    const map = new Map();
+    state.packageInventory.forEach((p, idx) => {
+      const name = p.agentName || 'Verified Travel Agency';
+      if (!map.has(name)) {
+        map.set(name, {
+          id: p.agentId || `AG-${101 + idx}`,
+          name: name,
+          city: 'Verified Agency Partner',
+          contact: '+91 98201 12345',
+          rating: '4.9',
+          packages: 0,
+          offers: 1,
+          bookings: 0
+        });
+      }
+      map.get(name).packages += 1;
+    });
+    agentsList = Array.from(map.values());
+  }
+
+  if (agentsList.length === 0) {
+    container.innerHTML = '<div style="grid-column: 1 / -1; padding: 48px 24px; text-align: center; color: var(--text-muted); font-size: 14px; background: #ffffff; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">No agency partners registered yet. Agencies and service providers will appear here as inventory packages are added.</div>';
+    return;
+  }
+
+  container.innerHTML = agentsList.map(ag => `
     <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
       <div>
         <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle);">
@@ -1282,16 +1318,26 @@ function downloadCsv(content, filename) {
 function initAdminHeaderUser() {
   try {
     const user = JSON.parse(localStorage.getItem('umrah_user') || 'null');
-    if (user) {
+    if (user && user.name && !user.name.toLowerCase().includes('palak')) {
       state.currentUser = user;
-      const name = user.name || 'Admin User';
-      const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'AD';
+      const name = user.name;
+      const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'AD';
       setElementText('header-admin-name', name);
-      setElementText('header-admin-role', user.role === 'ROLE_ADMIN' ? 'Super Admin' : (user.role === 'ROLE_SUBADMIN' ? 'Sub Admin' : 'Admin'));
+      setElementText('header-admin-role', user.role === 'ROLE_ADMIN' ? 'Super Admin' : (user.role === 'ROLE_SUBADMIN' ? 'Sub Admin' : 'Admin Desk'));
       setElementText('header-admin-avatar', initials);
-      setElementText('dropdown-user-email', user.email || 'admin@umrah.com');
+      setElementText('dropdown-user-email', user.email || 'admin@zilhaj.com');
+    } else {
+      setElementText('header-admin-name', 'Administrator');
+      setElementText('header-admin-role', 'Admin Desk');
+      setElementText('header-admin-avatar', 'AD');
+      setElementText('dropdown-user-email', 'admin@zilhaj.com');
     }
-  } catch (e) {}
+  } catch (e) {
+    setElementText('header-admin-name', 'Administrator');
+    setElementText('header-admin-role', 'Admin Desk');
+    setElementText('header-admin-avatar', 'AD');
+    setElementText('dropdown-user-email', 'admin@zilhaj.com');
+  }
 
   const dateEl = document.getElementById('dash-date-display');
   if (dateEl) {
@@ -1301,7 +1347,7 @@ function initAdminHeaderUser() {
 }
 
 function toggleAdminMenu(e) {
-  e.stopPropagation();
+  if (e && e.stopPropagation) e.stopPropagation();
   const menu = document.getElementById('admin-dropdown-menu');
   if (menu) {
     menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
@@ -1320,7 +1366,7 @@ function handleAdminLogout() {
 document.addEventListener('click', (e) => {
   const menu = document.getElementById('admin-dropdown-menu');
   const trigger = document.getElementById('admin-profile-trigger');
-  if (menu && !trigger.contains(e.target) && !menu.contains(e.target)) {
+  if (menu && trigger && !trigger.contains(e.target) && !menu.contains(e.target)) {
     menu.style.display = 'none';
   }
 });
@@ -1328,7 +1374,7 @@ document.addEventListener('click', (e) => {
 // ==========================================
 // 8. Global DOM Event Bindings & Live Sync
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+function initAdminApp() {
   initAdminHeaderUser();
 
   // Navigation tab clicks
@@ -1434,7 +1480,14 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(() => {
     refreshAllData(false);
   }, 10000);
-});
+}
+
+// Safely execute whether DOM is already parsed or still loading
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAdminApp);
+} else {
+  initAdminApp();
+}
 
 // ============================================================================
 // 9. CUSTOMER CARE / SUPPORT PORTAL CONTROLLER (EXECUTIVE DESK)
@@ -2555,5 +2608,31 @@ async function deleteInventoryPackage(packageId) {
     showToast(err.message || 'Failed to delete package', 'danger');
   }
 }
+
+// ==========================================
+// 10. Global Window Bindings for Inline Handlers
+// ==========================================
+window.navigateToTab = navigateToTab;
+window.renderCurrentTab = renderCurrentTab;
+window.viewRequest = viewRequest;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.toggleAdminMenu = toggleAdminMenu;
+window.handleAdminLogout = handleAdminLogout;
+window.markAllNotifsRead = markAllNotifsRead;
+window.openSupportFromNotification = openSupportFromNotification;
+window.showToast = showToast;
+window.refreshAllData = refreshAllData;
+window.openSelectFromInventoryModal = openSelectFromInventoryModal;
+window.applyInventoryPackageToCurrentRequest = applyInventoryPackageToCurrentRequest;
+window.useInventoryPackageInActiveRequest = useInventoryPackageInActiveRequest;
+window.deleteInventoryPackage = deleteInventoryPackage;
+window.openAdminTicket = openAdminTicket;
+window.handleAdminSendSupportMessage = handleAdminSendSupportMessage;
+window.submitAdminReply = submitAdminReply;
+window.handleAddInventoryPackageSubmit = handleAddInventoryPackageSubmit;
+window.handleQuickFillOfferFromInventory = handleQuickFillOfferFromInventory;
+window.filterSelectInventoryCards = filterSelectInventoryCards;
+window.resetInventoryFilters = resetInventoryFilters;
 
 
