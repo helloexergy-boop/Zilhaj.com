@@ -702,6 +702,289 @@ app.delete('/api/admin/offers/:id', async (req, res) => {
     }
 });
 
+// ==========================================
+// PACKAGE INVENTORY MANAGEMENT (CENTRAL REPOSITORY)
+// ==========================================
+const DEFAULT_INVENTORY_PACKAGES = [
+    {
+        id: 'PKG-1001',
+        agentId: 'AGENT-1042',
+        agentName: 'Al-Safwa Travel & Tours',
+        packageTitle: '18 Days Premium Umrah Package',
+        serviceType: 'Umrah',
+        duration: '18 Days',
+        durationDays: 18,
+        pricePerPerson: 85000,
+        makkahHotel: 'Fairmont Clock Tower',
+        makkahDistance: '50m from Haram',
+        madinahHotel: 'Oberoi Madinah',
+        madinahDistance: '100m from Haram',
+        transport: 'VIP AC Luxury Coach',
+        mealPlan: 'Full Board (Indian & Continental Buffet)',
+        ziyarat: 'Historical Ziyarat in Makkah & Madinah with Scholar',
+        status: 'Active',
+        seatsAvailable: 14,
+        rating: 4.9,
+        createdAt: new Date().toISOString()
+    },
+    {
+        id: 'PKG-1002',
+        agentId: 'AGENT-8091',
+        agentName: 'Makkah Tours & Services',
+        packageTitle: '20 Days Deluxe Umrah Experience',
+        serviceType: 'Umrah',
+        duration: '20 Days',
+        durationDays: 20,
+        pricePerPerson: 90000,
+        makkahHotel: 'Swissotel Makkah',
+        makkahDistance: '20m from Clock Tower',
+        madinahHotel: 'Anwar Al Madinah Movenpick',
+        madinahDistance: '50m from Markazia',
+        transport: 'Direct AC Bus & High-Speed Train',
+        mealPlan: 'Buffet Breakfast & Dinner',
+        ziyarat: 'Comprehensive Ziyarat + Cave of Hira Tour',
+        status: 'Active',
+        seatsAvailable: 20,
+        rating: 4.85,
+        createdAt: new Date().toISOString()
+    },
+    {
+        id: 'PKG-1003',
+        agentId: 'AGENT-3310',
+        agentName: 'Haramain Express Travel',
+        packageTitle: '14 Days Express Family Umrah',
+        serviceType: 'Umrah',
+        duration: '14 Days',
+        durationDays: 14,
+        pricePerPerson: 78000,
+        makkahHotel: 'Pullman Zamzam Makkah',
+        makkahDistance: '150m from Haram',
+        madinahHotel: 'Dallah Taibah',
+        madinahDistance: '200m from Haram',
+        transport: 'Dedicated AC Fleet',
+        mealPlan: '3 Times Kashmiri & Indian Meals',
+        ziyarat: 'Masjid Quba & Mount Uhud Ziyarat',
+        status: 'Active',
+        seatsAvailable: 12,
+        rating: 4.92,
+        createdAt: new Date().toISOString()
+    },
+    {
+        id: 'PKG-1004',
+        agentId: 'AGENT-7720',
+        agentName: 'Rawdah Holidays Pvt Ltd',
+        packageTitle: '21 Days Deluxe Non-Shifting Hajj Package',
+        serviceType: 'Hajj',
+        duration: '21 Days',
+        durationDays: 21,
+        pricePerPerson: 375000,
+        makkahHotel: 'Swissotel Al Maqam Makkah',
+        makkahDistance: 'Direct front of Haram courtyard',
+        madinahHotel: 'Oberoi Madinah',
+        madinahDistance: '50m from Gate 25',
+        transport: 'Haramain Bullet Train & Private VIP Buses',
+        mealPlan: '5-Star Full Board Buffet with 24/7 Hot Beverages',
+        ziyarat: 'Complete Nusuk Ritual Guidance with Veteran Moallim',
+        status: 'Active',
+        seatsAvailable: 8,
+        rating: 4.95,
+        createdAt: new Date().toISOString()
+    },
+    {
+        id: 'PKG-1005',
+        agentId: 'AGENT-4501',
+        agentName: 'Al-Haramain Group Int.',
+        packageTitle: '15 Days Budget Saver Umrah',
+        serviceType: 'Umrah',
+        duration: '15 Days',
+        durationDays: 15,
+        pricePerPerson: 68000,
+        makkahHotel: 'Al Shohada Hotel',
+        makkahDistance: '350m from Haram',
+        madinahHotel: 'Emaar Taiba',
+        madinahDistance: '250m from Haram',
+        transport: 'Standard AC Bus',
+        mealPlan: 'Breakfast & Dinner Included',
+        ziyarat: 'Key Islamic Landmarks Tour',
+        status: 'Active',
+        seatsAvailable: 16,
+        rating: 4.75,
+        createdAt: new Date().toISOString()
+    }
+];
+
+// In-memory cache for fast responsive returns
+let inMemoryInventory = [...DEFAULT_INVENTORY_PACKAGES];
+
+// 1. GET ALL INVENTORY PACKAGES
+app.get('/api/admin/inventory', async (req, res) => {
+    try {
+        const db = await connectToDatabase();
+        if (db) {
+            const count = await db.collection('package_inventory').countDocuments();
+            if (count === 0) {
+                await db.collection('package_inventory').insertMany(DEFAULT_INVENTORY_PACKAGES);
+            }
+            const items = await db.collection('package_inventory').find({}).sort({ createdAt: -1 }).toArray();
+            if (items && items.length > 0) {
+                inMemoryInventory = items;
+                return res.json({ success: true, packages: items });
+            }
+        }
+        res.json({ success: true, packages: inMemoryInventory });
+    } catch (err) {
+        console.warn('Inventory DB query error, using cache:', err.message);
+        res.json({ success: true, packages: inMemoryInventory });
+    }
+});
+
+// 2. CREATE NEW PACKAGE IN INVENTORY
+app.post('/api/admin/inventory', async (req, res) => {
+    try {
+        const b = req.body;
+        const priceNum = Number(String(b.pricePerPerson || '').replace(/\D/g, '')) || 85000;
+        const durDays = Number(String(b.duration || '').replace(/\D/g, '')) || 18;
+        const newPkg = {
+            id: `PKG-${Date.now().toString().slice(-4)}`,
+            agentId: b.agentId || `AGENT-${Math.floor(1000 + Math.random() * 9000)}`,
+            agentName: b.agentName || 'Verified Partner Agency',
+            packageTitle: b.packageTitle || b.packageName || 'Umrah Special Package',
+            serviceType: b.serviceType || 'Umrah',
+            duration: b.duration || `${durDays} Days`,
+            durationDays: durDays,
+            pricePerPerson: priceNum,
+            makkahHotel: b.makkahHotel || 'Standard 4-Star Hotel',
+            makkahDistance: b.makkahDistance || '300m from Haram',
+            madinahHotel: b.madinahHotel || 'Standard 4-Star Hotel',
+            madinahDistance: b.madinahDistance || '250m from Haram',
+            transport: b.transport || 'AC Bus Transfers',
+            mealPlan: b.mealPlan || 'Full Board Meals',
+            ziyarat: b.ziyarat || 'Historical Ziyarat Included',
+            status: b.status || 'Active',
+            seatsAvailable: Number(b.seatsAvailable) || 20,
+            rating: Number(b.rating) || 4.8,
+            createdAt: new Date().toISOString()
+        };
+
+        const db = await connectToDatabase();
+        if (db) {
+            await db.collection('package_inventory').insertOne(newPkg);
+        }
+        inMemoryInventory.unshift(newPkg);
+        res.status(201).json({ success: true, message: 'Package added to central inventory successfully!', package: newPkg });
+    } catch (err) {
+        console.error('Error adding inventory package:', err);
+        res.status(500).json({ success: false, message: 'Failed to create inventory package: ' + err.message });
+    }
+});
+
+// 3. UPDATE INVENTORY PACKAGE
+app.put('/api/admin/inventory/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const updates = req.body;
+        const db = await connectToDatabase();
+        if (db) {
+            await db.collection('package_inventory').updateOne(
+                { $or: [{ id: id }, { _id: id }] },
+                { $set: updates }
+            );
+        }
+        const idx = inMemoryInventory.findIndex(p => p.id === id);
+        if (idx !== -1) inMemoryInventory[idx] = { ...inMemoryInventory[idx], ...updates };
+        res.json({ success: true, message: 'Inventory package updated successfully.', package: inMemoryInventory[idx] });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 4. DELETE INVENTORY PACKAGE
+app.delete('/api/admin/inventory/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const db = await connectToDatabase();
+        if (db) {
+            await db.collection('package_inventory').deleteOne({ $or: [{ id: id }, { _id: id }] });
+        }
+        inMemoryInventory = inMemoryInventory.filter(p => p.id !== id);
+        res.json({ success: true, message: 'Package removed from inventory.' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 5. ATTACH/DISPATCH INVENTORY PACKAGE TO A USER REQUEST
+app.post('/api/admin/requirements/:id/apply-inventory-offer', async (req, res) => {
+    try {
+        const reqId = req.params.id;
+        const { packageId, customPrice, status = 'Published' } = req.body;
+
+        const db = await connectToDatabase();
+        let requirement = null;
+        if (db) {
+            requirement = await db.collection('requirements').findOne({ $or: [{ id: reqId }, { _id: reqId }] });
+        }
+        if (!requirement) {
+            requirement = (inMemoryStore.requirements || []).find(r => r.id === reqId);
+        }
+
+        const pkg = inMemoryInventory.find(p => p.id === packageId) || DEFAULT_INVENTORY_PACKAGES.find(p => p.id === packageId);
+        if (!pkg) {
+            return res.status(404).json({ success: false, message: 'Inventory package not found.' });
+        }
+
+        const travelers = requirement ? (Number(requirement.travelers) || (Number(requirement.adults || 0) + Number(requirement.children || 0)) || 4) : 4;
+        const unitPrice = customPrice ? Number(customPrice) : pkg.pricePerPerson;
+        const total = unitPrice * travelers;
+
+        const offerId = `OFF-${Date.now().toString().slice(-4)}`;
+        const attachedOffer = {
+            id: offerId,
+            requirementId: reqId,
+            packageInventoryId: pkg.id,
+            agentId: pkg.agentId,
+            agentName: pkg.agentName,
+            packageTitle: pkg.packageTitle,
+            packageName: pkg.packageTitle,
+            durationDays: pkg.durationDays,
+            duration: pkg.duration,
+            pricePerPerson: `₹${unitPrice.toLocaleString('en-IN')}`,
+            totalPrice: `₹${total.toLocaleString('en-IN')}`,
+            status: status,
+            makkahHotelName: pkg.makkahHotel,
+            makkahHotel: pkg.makkahHotel,
+            makkahDistance: pkg.makkahDistance,
+            madinahHotelName: pkg.madinahHotel,
+            madinahHotel: pkg.madinahHotel,
+            madinahDistance: pkg.madinahDistance,
+            transport: pkg.transport,
+            mealPlan: pkg.mealPlan,
+            ziyarat: pkg.ziyarat,
+            rating: pkg.rating || 4.9,
+            receivedOn: 'Just now (From Inventory)',
+            createdAt: new Date()
+        };
+
+        if (db) {
+            await db.collection('offers').insertOne(attachedOffer);
+            await db.collection('requirements').updateOne(
+                { $or: [{ id: reqId }, { _id: reqId }] },
+                { $set: { status: 'Offers Ready', updatedAt: new Date() } }
+            );
+        }
+        inMemoryStore.offers.push(attachedOffer);
+
+        res.status(201).json({
+            success: true,
+            message: `Offer "${pkg.packageTitle}" from ${pkg.agentName} attached to ${reqId}!`,
+            offer: attachedOffer
+        });
+    } catch (err) {
+        console.error('Error applying inventory offer:', err);
+        res.status(500).json({ success: false, message: 'Failed to apply inventory offer: ' + err.message });
+    }
+});
+
 app.get('/api/admin/users', async (req, res) => {
     try {
         const db = await connectToDatabase();

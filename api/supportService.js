@@ -130,15 +130,41 @@ class SupportService {
     async syncToMongo(db) {
         if (!db) return;
         try {
-            // Check if tickets collection has items
-            const count = await db.collection('support_tickets').countDocuments();
-            if (count === 0) {
-                // Seed initial data to MongoDB
-                if (this.store.tickets.length > 0) await db.collection('support_tickets').insertMany(this.store.tickets);
+            // Load existing tickets from MongoDB Atlas into memory store
+            const mongoTickets = await db.collection('support_tickets').find({}).sort({ created_at: -1 }).toArray();
+            if (mongoTickets && mongoTickets.length > 0) {
+                const existingMap = new Map();
+                for (const t of this.store.tickets) {
+                    const id = (t.issue_id || t.issueId || '').toUpperCase();
+                    if (id) existingMap.set(id, t);
+                }
+                for (const mt of mongoTickets) {
+                    const id = (mt.issue_id || mt.issueId || '').toUpperCase();
+                    if (id && !existingMap.has(id)) {
+                        this.store.tickets.unshift(formatTicket(mt));
+                        existingMap.set(id, mt);
+                    }
+                }
+
+                // Also load messages
+                const mongoMessages = await db.collection('support_messages').find({}).sort({ created_at: 1 }).toArray();
+                if (mongoMessages && mongoMessages.length > 0) {
+                    const msgMap = new Set(this.store.messages.map(m => m.id || String(m._id)));
+                    for (const mm of mongoMessages) {
+                        const mId = mm.id || String(mm._id);
+                        if (!msgMap.has(mId)) {
+                            this.store.messages.push(formatMessage(mm));
+                            msgMap.add(mId);
+                        }
+                    }
+                }
+                this.saveToDisk();
+                console.log(`[SupportService] Synced with MongoDB Atlas: ${this.store.tickets.length} tickets, ${this.store.messages.length} messages.`);
+            } else if (this.store.tickets.length > 0) {
+                // If MongoDB collection is empty but local store has tickets, push to MongoDB
+                await db.collection('support_tickets').insertMany(this.store.tickets);
                 if (this.store.messages.length > 0) await db.collection('support_messages').insertMany(this.store.messages);
                 if (this.store.notifications.length > 0) await db.collection('support_notifications').insertMany(this.store.notifications);
-                if (this.store.status_history.length > 0) await db.collection('support_status_history').insertMany(this.store.status_history);
-                if (this.store.call_resolutions.length > 0) await db.collection('support_call_resolutions').insertMany(this.store.call_resolutions);
             }
         } catch (e) {
             console.warn('[SupportService] Mongo sync error (non-fatal, persistent store active):', e.message);
@@ -218,14 +244,12 @@ class SupportService {
 
     // Create a new support ticket (Customer)
     async createTicket(ticketData, user, db) {
-        const {
-            request_id,
-            category,
-            priority = 'Medium',
-            subject,
-            description,
-            attachment = null
-        } = ticketData;
+        const request_id = ticketData.request_id || ticketData.requestId || 'GENERAL';
+        const category = ticketData.category || 'General Inquiry';
+        const priority = ticketData.priority || 'Medium';
+        const subject = ticketData.subject;
+        const description = ticketData.description;
+        const attachment = ticketData.attachment || null;
 
         // Subject fallback if omitted
         let finalSubject = subject ? subject.trim() : '';

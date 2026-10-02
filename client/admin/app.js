@@ -26,6 +26,11 @@ const state = {
   subAdmins: [], // Live from /api/admin/subadmins
   bookings: [], // Live from /api/bookings
   stats: null, // Live from /api/admin/stats
+  // Central Package Inventory State
+  packageInventory: [],
+  inventorySearchQuery: '',
+  inventoryServiceFilter: 'All',
+  inventoryStatusFilter: 'All',
   // Customer Care Support State
   supportTickets: [],
   selectedIssueId: null,
@@ -38,14 +43,7 @@ const state = {
   adminReplyMode: 'CUSTOMER_REPLY',
   supportStats: { pendingIssues: 0, solvedIssues: 0, urgentIssues: 0, totalTickets: 0 },
   supportNotifications: [],
-  agents: [
-    { id: "AGENT-1042", name: "Al-Safwa Travel & Tours", contact: "Sheikh Mansoor", city: "Makkah / Srinagar", verified: true, rating: 4.9, packages: 12, offers: 248, bookings: 184 },
-    { id: "AGENT-8091", name: "Makkah Tours & Services", contact: "Dr. Bilal Qureshi", city: "Jeddah / Srinagar", verified: true, rating: 4.8, packages: 8, offers: 196, bookings: 140 },
-    { id: "AGENT-3310", name: "Haramain Express Travel", contact: "Haji Ghulam Rasool", city: "Srinagar / Riyadh", verified: true, rating: 4.95, packages: 15, offers: 312, bookings: 260 },
-    { id: "AGENT-7720", name: "Rawdah Holidays Pvt Ltd", contact: "Faheem Akhtar", city: "Mumbai / Madinah", verified: true, rating: 4.85, packages: 6, offers: 145, bookings: 110 },
-    { id: "AGENT-4501", name: "Al-Haramain Group Int.", contact: "Mustafa Kamal", city: "New Delhi / Makkah", verified: true, rating: 4.75, packages: 5, offers: 112, bookings: 84 },
-    { id: "AGENT-9912", name: "Noor Al Huda Pilgrimages", contact: "Molvi Shabir", city: "Srinagar / Madinah", verified: true, rating: 4.9, packages: 9, offers: 180, bookings: 146 }
-  ],
+  agents: [],
   subAdminPerformance: []
 };
 
@@ -136,8 +134,11 @@ async function refreshAllData(showNotification = false) {
       state.bookings = bookRes;
     }
 
-    // Load Live Support System data and notifications
-    await loadAdminSupportData(false);
+    // Load Live Support System data, inventory, and notifications
+    await Promise.all([
+      loadAdminSupportData(false),
+      loadInventoryData(false)
+    ]);
 
     // Update Header Badges
     const badgeEl = document.getElementById('nav-req-count-badge');
@@ -271,6 +272,10 @@ function renderCurrentTab() {
   else if (tabId === 'users') renderUsersList();
   else if (tabId === 'sub-admins') renderSubAdminsList();
   else if (tabId === 'agents') renderAgentsList();
+  else if (tabId === 'inventory') {
+    renderInventoryList();
+    loadInventoryData(false);
+  }
   else if (tabId === 'reports') renderReportsView();
   else if (tabId === 'support') {
     renderAdminSupportTickets();
@@ -309,7 +314,7 @@ function getBadgeHtml(status) {
 function renderDashboard() {
   const totalReqs = state.requests.length;
   const totalUsers = state.users.length;
-  const totalBookings = state.bookings.length || 8;
+  const totalBookings = state.bookings.length;
   const totalCustomers = state.users.filter(u => u.role !== 'Sub Admin').length || totalUsers;
 
   // KPI cards
@@ -369,15 +374,11 @@ function renderDashboard() {
   // Render Sub Admins Chart
   const chartContainer = document.getElementById('subadmins-chart-container');
   if (chartContainer) {
-    const list = state.subAdminPerformance.length > 0 ? state.subAdminPerformance.slice(0, 5) : [
-      { name: "Palak Badyal", initials: "PB", offers: 48, avatarBg: "#d1fae5", avatarColor: "#065f46" },
-      { name: "Arslan Ahmed", initials: "AA", offers: 36, avatarBg: "#ccfbf1", avatarColor: "#115e59" },
-      { name: "Irfan Fayaz", initials: "IF", offers: 28, avatarBg: "#e0f2fe", avatarColor: "#0369a1" },
-      { name: "Tawseef Ahmad", initials: "TA", offers: 22, avatarBg: "#e0e7ff", avatarColor: "#3730a3" },
-      { name: "Samiullah Mir", initials: "SM", offers: 18, avatarBg: "#fef3c7", avatarColor: "#92400e" }
-    ];
-
-    chartContainer.innerHTML = list.map(admin => {
+    const list = state.subAdminPerformance.slice(0, 5);
+    if (list.length === 0) {
+      chartContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 24px; font-size: 13px;">No active sub-admin assignments yet.</div>';
+    } else {
+      chartContainer.innerHTML = list.map(admin => {
       const maxVal = 50;
       const pct = Math.min(100, Math.max(10, (admin.offers / maxVal) * 100));
       return `
@@ -1895,11 +1896,27 @@ async function submitAdminReply() {
     return;
   }
 
-  const submitBtn = document.getElementById('btn-admin-submit-reply');
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Sending...';
+  // 1. Instant Optimistic Render (0ms lag, no wiping thread)
+  const thread = document.getElementById('admin-chat-thread');
+  if (thread) {
+    const isInternal = state.adminReplyMode === 'INTERNAL_NOTE';
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const bubbleClass = isInternal ? 'chat-bubble-internal' : 'chat-bubble-admin';
+    const senderDisplay = isInternal ? '🔒 Internal Note (Only Visible to Staff)' : 'Customer Care (You)';
+    const tempHtml = `
+      <div class="chat-bubble ${bubbleClass}">
+        <div class="chat-sender">
+          <span>${senderDisplay}</span>
+          <span class="chat-time">Today · ${nowTime}</span>
+        </div>
+        <div style="font-size: 13px; line-height: 1.45; white-space: pre-wrap;">${escapeHtml(message)}</div>
+      </div>
+    `;
+    thread.insertAdjacentHTML('beforeend', tempHtml);
+    thread.scrollTop = thread.scrollHeight;
   }
+
+  if (textarea) textarea.value = '';
 
   const apiBase = getApiBase();
   const headers = getAuthHeaders();
@@ -1921,20 +1938,13 @@ async function submitAdminReply() {
       throw new Error(data.message || 'Failed to send message');
     }
 
-    if (textarea) textarea.value = '';
-    showToast(state.adminReplyMode === 'INTERNAL_NOTE' ? 'Internal note recorded' : 'Reply sent to customer successfully', 'success');
+    showToast(state.adminReplyMode === 'INTERNAL_NOTE' ? 'Internal note recorded' : 'Reply sent to customer', 'success');
 
-    // Refresh details and ticket list
-    await openAdminTicket(state.selectedIssueId);
-    await loadAdminSupportData(false);
+    // Silently refresh active ticket details in background (no flicker)
+    await refreshActiveTicketSilently(state.selectedIssueId);
   } catch (err) {
     console.error('Error sending reply:', err);
     showToast(err.message || 'Could not send reply', 'danger');
-  } finally {
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      setAdminReplyMode(state.adminReplyMode);
-    }
   }
 }
 
@@ -2111,4 +2121,439 @@ function filterSupportByPriority(priority) {
   loadAdminSupportData(false);
   showToast(`Filtering by ${priority} priority`, 'info');
 }
+
+// ============================================================================
+// 10. PACKAGE INVENTORY ENGINE (CENTRAL REPOSITORY & 1-CLICK ATTACH)
+// ============================================================================
+
+async function loadInventoryData(showNotification = false) {
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+  try {
+    const res = await fetch(`${apiBase}/admin/inventory`, { headers });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.success && Array.isArray(data.packages)) {
+      state.packageInventory = data.packages;
+
+      // Update badges
+      const totalCount = state.packageInventory.length;
+      const navBadge = document.getElementById('nav-inventory-badge');
+      const sideBadge = document.getElementById('sidebar-inventory-badge');
+      const totalBadge = document.getElementById('inventory-total-badge');
+      if (navBadge) navBadge.textContent = totalCount;
+      if (sideBadge) sideBadge.textContent = totalCount;
+      if (totalBadge) totalBadge.textContent = `${totalCount} Packages`;
+
+      // Populate Quick-Fill Dropdown in Custom Offer Modal
+      populateInventoryQuickFillOptions();
+
+      // Render if on inventory tab
+      if (state.currentTab === 'inventory') {
+        renderInventoryList();
+      }
+
+      if (showNotification) {
+        showToast('Package inventory synchronized with live database!', 'success');
+      }
+    }
+  } catch (err) {
+    console.warn('Error loading inventory data:', err.message);
+  }
+}
+
+function refreshInventoryData(showToastNotice = true) {
+  loadInventoryData(showToastNotice);
+}
+
+function renderInventoryList() {
+  const grid = document.getElementById('inventory-cards-grid');
+  if (!grid) return;
+
+  let list = [...state.packageInventory];
+
+  // Search filter
+  if (state.inventorySearchQuery && state.inventorySearchQuery.trim()) {
+    const q = state.inventorySearchQuery.trim().toLowerCase();
+    list = list.filter(p => {
+      const title = (p.packageTitle || '').toLowerCase();
+      const agent = (p.agentName || '').toLowerCase();
+      const makkah = (p.makkahHotel || '').toLowerCase();
+      const madinah = (p.madinahHotel || '').toLowerCase();
+      const duration = (p.duration || '').toLowerCase();
+      const price = String(p.pricePerPerson || '');
+      return title.includes(q) || agent.includes(q) || makkah.includes(q) || madinah.includes(q) || duration.includes(q) || price.includes(q);
+    });
+  }
+
+  // Service filter
+  if (state.inventoryServiceFilter && state.inventoryServiceFilter !== 'All') {
+    list = list.filter(p => (p.serviceType || '').toLowerCase() === state.inventoryServiceFilter.toLowerCase());
+  }
+
+  // Status filter
+  if (state.inventoryStatusFilter && state.inventoryStatusFilter !== 'All') {
+    list = list.filter(p => (p.status || '').toLowerCase() === state.inventoryStatusFilter.toLowerCase());
+  }
+
+  if (list.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; padding: 48px; text-align: center; background: #ffffff; border: 2px dashed #cbd5e1; border-radius: var(--radius-xl);">
+        <div style="font-size: 36px; margin-bottom: 8px;">📦</div>
+        <h4 style="font-size: 16px; font-weight: 800; color: var(--text-main);">No inventory packages match your filter</h4>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Click '+ Add Package to Inventory' to add verified packages to the repository.</p>
+        <button onclick="resetInventoryFilters()" class="btn btn-secondary btn-sm" style="margin-top: 14px;">Reset Filters</button>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = list.map(p => {
+    const isUmrah = (p.serviceType || '').toLowerCase() === 'umrah';
+    const priceFormatted = Number(p.pricePerPerson || 0).toLocaleString('en-IN');
+    return `
+      <div class="offer-card" style="display: flex; flex-direction: column; justify-content: space-between; border: 1.5px solid var(--border-light); border-radius: var(--radius-xl); padding: 18px; background: #ffffff; box-shadow: var(--shadow-sm);">
+        <div>
+          <!-- Header -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle);">
+            <div>
+              <span class="badge ${isUmrah ? 'badge-service-umrah' : 'badge-service-hajj'}" style="font-size: 10px; padding: 2px 8px;">
+                ${isUmrah ? '🕋 Umrah' : '🏛️ Hajj'}
+              </span>
+              <span style="font-size: 11px; font-weight: 800; color: var(--text-light); margin-left: 6px;">${escapeHtml(p.agentId || 'AGENT')}</span>
+              <h4 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin-top: 4px;">${escapeHtml(p.packageTitle)}</h4>
+              <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">${escapeHtml(p.agentName)}</div>
+            </div>
+            <div>
+              <span class="badge ${p.status === 'Active' ? 'badge-active' : 'badge-pending'}" style="font-size: 11px;">
+                ${escapeHtml(p.status || 'Active')}
+              </span>
+            </div>
+          </div>
+
+          <!-- Price & Duration -->
+          <div style="margin: 12px 0; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: baseline;">
+            <div>
+              <span class="offer-price-large" style="font-size: 20px; font-weight: 900; color: var(--primary);">₹${priceFormatted}</span>
+              <span style="font-size: 11px; color: var(--text-muted);"> / person</span>
+            </div>
+            <div style="text-align: right;">
+              <span style="font-size: 10px; color: var(--text-light); font-weight: 700;">Duration</span>
+              <div style="font-size: 13px; font-weight: 800; color: var(--text-main);">${escapeHtml(p.duration || '18 Days')}</div>
+            </div>
+          </div>
+
+          <!-- Hotels & Amenities Grid -->
+          <div class="offer-amenity-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
+            <div class="amenity-box" style="background: #f8fafc; padding: 8px 10px; border-radius: var(--radius-sm);">
+              <div class="amenity-label" style="font-weight: 800; color: var(--primary);">🏢 Makkah Hotel</div>
+              <div class="amenity-val" style="font-weight: 700; color: var(--text-main);">${escapeHtml(p.makkahHotel || '--')}</div>
+              <div class="amenity-dist" style="font-size: 10px; color: var(--text-muted);">${escapeHtml(p.makkahDistance || '')}</div>
+            </div>
+
+            <div class="amenity-box" style="background: #f8fafc; padding: 8px 10px; border-radius: var(--radius-sm);">
+              <div class="amenity-label" style="font-weight: 800; color: #b45309;">🏢 Madinah Hotel</div>
+              <div class="amenity-val" style="font-weight: 700; color: var(--text-main);">${escapeHtml(p.madinahHotel || '--')}</div>
+              <div class="amenity-dist" style="font-size: 10px; color: var(--text-muted);">${escapeHtml(p.madinahDistance || '')}</div>
+            </div>
+
+            <div class="amenity-box" style="background: #f8fafc; padding: 8px 10px; border-radius: var(--radius-sm);">
+              <div class="amenity-label" style="font-weight: 700; color: var(--text-light);">🚌 Transport</div>
+              <div class="amenity-val">${escapeHtml(p.transport || 'AC Bus')}</div>
+            </div>
+
+            <div class="amenity-box" style="background: #f8fafc; padding: 8px 10px; border-radius: var(--radius-sm);">
+              <div class="amenity-label" style="font-weight: 700; color: var(--text-light);">🍽️ Meals</div>
+              <div class="amenity-val">${escapeHtml(p.mealPlan || 'Included')}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div style="padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--border-subtle); display: flex; gap: 8px;">
+          <button onclick="useInventoryPackageInActiveRequest('${p.id}')" class="btn btn-primary btn-sm" style="flex: 2; font-weight: 800; background: #047857;">
+            <span>⚡ Attach to Request</span>
+          </button>
+          <button onclick="deleteInventoryPackage('${p.id}')" class="btn btn-danger btn-sm" title="Delete from Inventory" style="font-weight: 800; padding: 4px 10px;">
+            ✕
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function handleInventorySearch(val) {
+  state.inventorySearchQuery = val;
+  renderInventoryList();
+}
+
+function handleInventoryFilterChange() {
+  state.inventoryServiceFilter = document.getElementById('inventory-filter-service')?.value || 'All';
+  state.inventoryStatusFilter = document.getElementById('inventory-filter-status')?.value || 'All';
+  renderInventoryList();
+}
+
+function resetInventoryFilters() {
+  state.inventorySearchQuery = '';
+  state.inventoryServiceFilter = 'All';
+  state.inventoryStatusFilter = 'All';
+  const sInput = document.getElementById('inventory-search-input');
+  if (sInput) sInput.value = '';
+  const sSvc = document.getElementById('inventory-filter-service');
+  if (sSvc) sSvc.value = 'All';
+  const sStat = document.getElementById('inventory-filter-status');
+  if (sStat) sStat.value = 'All';
+  renderInventoryList();
+  showToast('Inventory filters reset', 'info');
+}
+
+// Populate Quick-fill in Add Offer modal
+function populateInventoryQuickFillOptions() {
+  const select = document.getElementById('add-offer-inventory-quickfill');
+  if (!select) return;
+
+  const currentVal = select.value;
+  select.innerHTML = '<option value="">-- Choose package from inventory to auto-fill details --</option>' +
+    state.packageInventory.map(p => `
+      <option value="${p.id}">${escapeHtml(p.packageTitle)} (${p.serviceType}) — ₹${Number(p.pricePerPerson || 0).toLocaleString('en-IN')} by ${escapeHtml(p.agentName)}</option>
+    `).join('');
+
+  if (currentVal) select.value = currentVal;
+}
+
+function handleQuickFillOfferFromInventory(packageId) {
+  if (!packageId) return;
+  const p = state.packageInventory.find(item => item.id === packageId);
+  if (!p) return;
+
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+  setVal('add-offer-pkg-title', p.packageTitle);
+  setVal('add-offer-agent-name', p.agentName);
+  setVal('add-offer-duration', p.duration);
+  setVal('add-offer-price', p.pricePerPerson);
+  setVal('add-offer-makkah-hotel', p.makkahHotel);
+  setVal('add-offer-makkah-dist', p.makkahDistance);
+  setVal('add-offer-madinah-hotel', p.madinahHotel);
+  setVal('add-offer-madinah-dist', p.madinahDistance);
+  setVal('add-offer-transport', p.transport);
+  setVal('add-offer-meal', p.mealPlan);
+  setVal('add-offer-ziyarat', p.ziyarat);
+
+  showToast(`Fields auto-filled from "${p.packageTitle}"`, 'success');
+}
+
+// Open Select From Inventory Modal for active request
+function openSelectFromInventoryModal() {
+  const req = state.requests.find(r => r.id === state.selectedRequestId) || state.requests[0];
+  if (!req) {
+    showToast('Please select a customer request first.', 'warning');
+    return;
+  }
+  state.selectedRequestId = req.id;
+
+  setElementText('select-modal-req-id', req.id);
+  setElementText('select-modal-req-service', req.service || req.serviceType || 'Umrah');
+  setElementText('select-modal-req-pilgrims', `${req.travelers || 4} Pilgrims`);
+
+  const searchInput = document.getElementById('select-inventory-search');
+  if (searchInput) searchInput.value = '';
+
+  filterSelectInventoryCards('');
+  openModal('select-inventory-offer-modal');
+}
+
+function filterSelectInventoryCards(query = '') {
+  const listContainer = document.getElementById('select-inventory-cards-list');
+  if (!listContainer) return;
+
+  const req = state.requests.find(r => r.id === state.selectedRequestId);
+  const reqService = req ? (req.service || req.serviceType || '').toLowerCase() : '';
+  const q = query.trim().toLowerCase();
+
+  let packages = [...state.packageInventory];
+  if (q) {
+    packages = packages.filter(p => {
+      return (p.packageTitle || '').toLowerCase().includes(q) ||
+             (p.agentName || '').toLowerCase().includes(q) ||
+             (p.makkahHotel || '').toLowerCase().includes(q) ||
+             (p.madinahHotel || '').toLowerCase().includes(q);
+    });
+  }
+
+  // Sort so matching service type appears first
+  packages.sort((a, b) => {
+    const aMatch = reqService && (a.serviceType || '').toLowerCase().includes(reqService) ? 1 : 0;
+    const bMatch = reqService && (b.serviceType || '').toLowerCase().includes(reqService) ? 1 : 0;
+    return bMatch - aMatch;
+  });
+
+  if (packages.length === 0) {
+    listContainer.innerHTML = '<div style="grid-column: 1 / -1; padding: 32px; text-align: center; color: var(--text-muted);">No inventory packages match search.</div>';
+    return;
+  }
+
+  listContainer.innerHTML = packages.map(p => {
+    const isMatched = reqService && (p.serviceType || '').toLowerCase().includes(reqService);
+    const travelers = req ? (Number(req.travelers) || 4) : 4;
+    const totalPrice = (Number(p.pricePerPerson || 0) * travelers).toLocaleString('en-IN');
+
+    return `
+      <div style="background: #ffffff; border: 1.5px solid ${isMatched ? '#86efac' : 'var(--border-light)'}; border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow-sm);">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <div>
+              <span class="badge ${p.serviceType === 'Umrah' ? 'badge-service-umrah' : 'badge-service-hajj'}" style="font-size: 10px; padding: 2px 8px;">
+                ${p.serviceType === 'Umrah' ? '🕋 Umrah' : '🏛️ Hajj'}
+              </span>
+              ${isMatched ? '<span style="font-size: 10px; font-weight: 800; background: #dcfce7; color: #047857; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Recommended Match</span>' : ''}
+              <h4 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin-top: 4px;">${escapeHtml(p.packageTitle)}</h4>
+              <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">${escapeHtml(p.agentName)}</div>
+            </div>
+            <div style="text-align: right;">
+              <span style="font-size: 18px; font-weight: 900; color: var(--primary);">₹${Number(p.pricePerPerson || 0).toLocaleString('en-IN')}</span>
+              <div style="font-size: 11px; color: var(--text-muted);">Total ₹${totalPrice} (${travelers} pers)</div>
+            </div>
+          </div>
+
+          <div style="background: #f8fafc; border-radius: var(--radius-sm); padding: 8px 10px; font-size: 11px; margin-bottom: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            <div><strong>Makkah:</strong> ${escapeHtml(p.makkahHotel)} (${escapeHtml(p.makkahDistance)})</div>
+            <div><strong>Madinah:</strong> ${escapeHtml(p.madinahHotel)} (${escapeHtml(p.madinahDistance)})</div>
+            <div><strong>Duration:</strong> ${escapeHtml(p.duration)}</div>
+            <div><strong>Meals:</strong> ${escapeHtml(p.mealPlan)}</div>
+          </div>
+        </div>
+
+        <button onclick="applyInventoryPackageToCurrentRequest('${p.id}')" class="btn btn-primary" style="width: 100%; font-weight: 800; background: #047857;">
+          ✓ Attach this Offer to ${req ? req.id : 'Request'}
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+async function applyInventoryPackageToCurrentRequest(packageId) {
+  if (!state.selectedRequestId) {
+    showToast('Please select a customer request first.', 'warning');
+    return;
+  }
+
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+
+  try {
+    const res = await fetch(`${apiBase}/admin/requirements/${state.selectedRequestId}/apply-inventory-offer`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ packageId, status: 'Published' })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to apply inventory offer');
+    }
+
+    closeModal('select-inventory-offer-modal');
+    showToast(`Inventory offer attached to ${state.selectedRequestId} successfully!`, 'success');
+
+    // Refresh request and database
+    await refreshAllData(false);
+    renderRequestDetails();
+  } catch (err) {
+    console.error('Error applying inventory offer:', err);
+    showToast(err.message || 'Could not attach offer', 'danger');
+  }
+}
+
+function useInventoryPackageInActiveRequest(packageId) {
+  const req = state.requests.find(r => r.id === state.selectedRequestId) || state.requests[0];
+  if (!req) {
+    showToast('No customer requests available to attach this package.', 'warning');
+    return;
+  }
+  state.selectedRequestId = req.id;
+  applyInventoryPackageToCurrentRequest(packageId);
+}
+
+// Add New Package to Inventory Form Submit
+async function handleAddInventoryPackageSubmit(e) {
+  e.preventDefault();
+  const title = document.getElementById('inv-pkg-title')?.value.trim();
+  const service = document.getElementById('inv-pkg-service')?.value || 'Umrah';
+  const agentName = document.getElementById('inv-pkg-agent-name')?.value.trim();
+  const agentId = document.getElementById('inv-pkg-agent-id')?.value.trim() || `AGENT-${Math.floor(1000 + Math.random() * 9000)}`;
+  const duration = document.getElementById('inv-pkg-duration')?.value.trim() || '18 Days';
+  const price = Number(document.getElementById('inv-pkg-price')?.value) || 85000;
+  const seats = Number(document.getElementById('inv-pkg-seats')?.value) || 20;
+  const makkahHotel = document.getElementById('inv-pkg-makkah-hotel')?.value.trim() || 'Standard Hotel';
+  const makkahDist = document.getElementById('inv-pkg-makkah-dist')?.value.trim() || '300m from Haram';
+  const madinahHotel = document.getElementById('inv-pkg-madinah-hotel')?.value.trim() || 'Standard Hotel';
+  const madinahDist = document.getElementById('inv-pkg-madinah-dist')?.value.trim() || '200m from Haram';
+  const transport = document.getElementById('inv-pkg-transport')?.value.trim() || 'AC Bus Transfers';
+  const meals = document.getElementById('inv-pkg-meals')?.value.trim() || 'Full Board Meals';
+  const ziyarat = document.getElementById('inv-pkg-ziyarat')?.value.trim() || 'Historical Ziyarat Included';
+  const status = document.getElementById('inv-pkg-status')?.value || 'Active';
+
+  const newPkg = {
+    packageTitle: title,
+    serviceType: service,
+    agentName: agentName,
+    agentId: agentId,
+    duration: duration,
+    pricePerPerson: price,
+    seatsAvailable: seats,
+    makkahHotel: makkahHotel,
+    makkahDistance: makkahDist,
+    madinahHotel: madinahHotel,
+    madinahDistance: madinahDist,
+    transport: transport,
+    mealPlan: meals,
+    ziyarat: ziyarat,
+    status: status
+  };
+
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+
+  try {
+    const res = await fetch(`${apiBase}/admin/inventory`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(newPkg)
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to save inventory package');
+    }
+
+    closeModal('add-inventory-pkg-modal');
+    showToast(`Package "${title}" added to inventory!`, 'success');
+    await loadInventoryData(false);
+  } catch (err) {
+    showToast(err.message || 'Error saving package to inventory', 'danger');
+  }
+}
+
+async function deleteInventoryPackage(packageId) {
+  if (!confirm('Are you sure you want to remove this package from the central inventory?')) return;
+
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+
+  try {
+    const res = await fetch(`${apiBase}/admin/inventory/${packageId}`, {
+      method: 'DELETE',
+      headers
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.message || 'Failed to delete');
+
+    showToast('Package removed from inventory', 'info');
+    await loadInventoryData(false);
+  } catch (err) {
+    showToast(err.message || 'Failed to delete package', 'danger');
+  }
+}
+
 

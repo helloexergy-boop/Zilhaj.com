@@ -3012,13 +3012,13 @@ window.renderCustomerTicketsTable = function(tickets) {
 };
 
 // Open Ticket Details & Conversation Modal
-window.openCustomerTicketDetails = async function(issueId) {
+window.openCustomerTicketDetails = async function(issueId, isSilent = false) {
   if (!issueId) return;
   const user = window.getCurrentSupportUser();
   const modal = document.getElementById('modal-ticket-details');
   if (modal) modal.style.display = 'flex';
 
-  // Immediately clear old/mock text
+  // Immediately clear old/mock text only when freshly opened (not on silent refresh)
   const idEl = document.getElementById('modal-ticket-id');
   const reqEl = document.getElementById('modal-ticket-req-id');
   const catEl = document.getElementById('modal-ticket-category');
@@ -3029,19 +3029,21 @@ window.openCustomerTicketDetails = async function(issueId) {
   const descEl = document.getElementById('modal-ticket-description');
   const msgList = document.getElementById('modal-ticket-messages-list');
 
-  if (idEl) idEl.textContent = issueId;
-  if (reqEl) reqEl.textContent = '--';
-  if (catEl) catEl.textContent = '--';
-  if (prioEl) prioEl.textContent = '--';
-  if (statEl) {
-    statEl.textContent = 'Loading...';
-    statEl.className = 'badge-status-pill badge-open';
-  }
-  if (subEl) subEl.textContent = 'Loading issue details...';
-  if (dateEl) dateEl.textContent = '--';
-  if (descEl) descEl.textContent = 'Please wait while ticket details are loaded...';
-  if (msgList) {
-    msgList.innerHTML = '<div style="text-align: center; padding: 30px; color: #64748B;">Loading conversation...</div>';
+  if (!isSilent) {
+    if (idEl) idEl.textContent = issueId;
+    if (reqEl) reqEl.textContent = '--';
+    if (catEl) catEl.textContent = '--';
+    if (prioEl) prioEl.textContent = '--';
+    if (statEl) {
+      statEl.textContent = 'Loading...';
+      statEl.className = 'badge-status-pill badge-open';
+    }
+    if (subEl) subEl.textContent = 'Loading issue details...';
+    if (dateEl) dateEl.textContent = '--';
+    if (descEl) descEl.textContent = 'Please wait while ticket details are loaded...';
+    if (msgList) {
+      msgList.innerHTML = '<div style="text-align: center; padding: 30px; color: #64748B;">Loading conversation...</div>';
+    }
   }
 
   const fetchTicket = async () => {
@@ -3224,10 +3226,24 @@ window.sendCustomerReply = async function() {
     return;
   }
 
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = 'Sending...';
+  // 1. Optimistic append: render immediately in chat thread in 0ms!
+  const container = document.getElementById('modal-ticket-messages-list');
+  if (container) {
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const tempHtml = `
+      <div class="chat-bubble-customer" style="margin-bottom: 12px; background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 12px; padding: 10px 14px; max-width: 80%; align-self: flex-end; margin-left: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px;">
+          <strong style="font-size: 12px; color: #0369a1;">You (Customer)</strong>
+          <span style="font-size: 10px; color: #64748b;">${nowTime} · Sent</span>
+        </div>
+        <div style="font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; color: #0f172a;">${escapeHtml(message)}</div>
+      </div>
+    `;
+    container.insertAdjacentHTML('beforeend', tempHtml);
+    container.scrollTop = container.scrollHeight;
   }
+
+  if (replyInput) replyInput.value = '';
 
   try {
     const res = await fetch(`/api/support/tickets/${tId}/messages`, {
@@ -3246,9 +3262,8 @@ window.sendCustomerReply = async function() {
       throw new Error(data.message || 'Unable to send reply.');
     }
 
-    if (replyInput) replyInput.value = '';
-    // Reload ticket details
-    await window.openCustomerTicketDetails(tId);
+    // Background silent refresh (no wiping out the conversation)
+    await window.openCustomerTicketDetails(tId, true);
 
   } catch (err) {
     alert(err.message || 'Failed to send reply. Please try again.');
