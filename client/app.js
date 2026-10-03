@@ -1891,7 +1891,7 @@ class App {
                             <h3 style="font-size:0.88rem; font-weight:800; color:#FFFFFF; margin:0; text-shadow:0 1px 4px rgba(0,0,0,0.95); white-space:nowrap;">24/7 Support</h3>
                         </div>
 
-                        <!-- Square Block 3: Your Data is Safe -->
+                        <!-- Square Block 3: Your Data Is Safe -->
                         <div style="display:inline-flex; align-items:center; gap:0.55rem; background:rgba(255,255,255,0.10); backdrop-filter:blur(22px) saturate(190%); -webkit-backdrop-filter:blur(22px) saturate(190%); border:1px solid rgba(255,255,255,0.38); border-radius:12px; padding:0.65rem 1.1rem; box-shadow:0 8px 24px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.65); transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.background='rgba(255,255,255,0.18)';" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.10)';">
                             <div style="width:28px; height:28px; border-radius:8px; background:rgba(147,51,234,0.25); border:1px solid rgba(147,51,234,0.5); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -1899,7 +1899,7 @@ class App {
                                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                                 </svg>
                             </div>
-                            <h3 style="font-size:0.88rem; font-weight:800; color:#FFFFFF; margin:0; text-shadow:0 1px 4px rgba(0,0,0,0.95); white-space:nowrap;">Your Data is Safe</h3>
+                            <h3 style="font-size:0.88rem; font-weight:800; color:#FFFFFF; margin:0; text-shadow:0 1px 4px rgba(0,0,0,0.95); white-space:nowrap;">Your Data Is Safe</h3>
                         </div>
 
                     </div>
@@ -1939,7 +1939,7 @@ class App {
                             <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Verified Providers</h3>
                             <div style="width: 32px; height: 3px; background: #16a34a; border-radius: 2px; margin: 0.4rem 0 1.2rem 0;"></div>
                             <p style="color: #64748b; font-size: 0.9rem; line-height: 1.65; margin: 0; font-weight: 400;">
-                                We work only with trusted and verified travel providers to ensure a safe and reliable Umrah experience.
+                                We work only with trusted and verified providers to ensure a safe and reliable Umrah experience.
                             </p>
                         </div>
 
@@ -1953,7 +1953,7 @@ class App {
                             <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Multiple Options</h3>
                             <div style="width: 32px; height: 3px; background: #16a34a; border-radius: 2px; margin: 0.4rem 0 1.2rem 0;"></div>
                             <p style="color: #64748b; font-size: 0.9rem; line-height: 1.65; margin: 0; font-weight: 400;">
-                                Get multiple suitable options based on your requirements and preferences to choose what suits you best.
+                                Receive multiple suitable options based on your requirements and preferences, so you can choose what suits you best.
                             </p>
                         </div>
 
@@ -1968,7 +1968,7 @@ class App {
                             <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Compare Before You Choose</h3>
                             <div style="width: 32px; height: 3px; background: #16a34a; border-radius: 2px; margin: 0.4rem 0 1.2rem 0;"></div>
                             <p style="color: #64748b; font-size: 0.9rem; line-height: 1.65; margin: 0; font-weight: 400;">
-                                Easily compare options, prices, and inclusions before making the right decision with complete clarity.
+                                Easily compare options, prices, and inclusions before making the right decision-with complete clarity.
                             </p>
                         </div>
 
@@ -1983,7 +1983,7 @@ class App {
                             <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0 0 0.6rem 0;">Transparent Process</h3>
                             <div style="width: 32px; height: 3px; background: #16a34a; border-radius: 2px; margin: 0.4rem 0 1.2rem 0;"></div>
                             <p style="color: #64748b; font-size: 0.9rem; line-height: 1.65; margin: 0; font-weight: 400;">
-                                A simple, secure, and transparent process from request to final selection – no hidden surprises.
+                                A simple, secure, and transparent process from request to final selection—with no hidden surprises.
                             </p>
                         </div>
 
@@ -2051,7 +2051,7 @@ class App {
                     <h2 style="font-size:1.35rem;font-weight:800;color:#0f172a;margin:0 0 0.5rem;letter-spacing:-0.2px;">
                         <span style="color:#1a6b3c;">✦</span> How It Works <span style="color:#1a6b3c;">✦</span>
                     </h2>
-                    <p style="font-size:0.95rem;color:#6b7280;margin:0;">Three simple steps to plan your Umrah with confidence</p>
+                    <p style="font-size:0.95rem;color:#6b7280;margin:0;">Three simple steps to plan your Umrah & Hajj with confidence</p>
                 </div>
 
                 <!-- Dashed connector row with icon nodes -->
@@ -2088,7 +2088,7 @@ class App {
                             <svg width="32" height="32" fill="none" stroke="#2d8c55" stroke-width="1.7" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
                         </div>
                         <h3 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 0.7rem;">Submit Request</h3>
-                        <p style="font-size:0.88rem;color:#6b7280;line-height:1.65;margin:0 0 2rem;">Tell us your travel dates, group size, budget, and preferences. Your details stay private and secure.</p>
+                        <p style="font-size:0.88rem;color:#6b7280;line-height:1.65;margin:0 0 2rem;">Tell us your preferred dates, group size, budget, and preferences. Your details stay private and secure.</p>
                         <!-- Faded mosque bottom decoration -->
                         <div style="width:100%;height:70px;overflow:hidden;flex-shrink:0;margin-top:auto;opacity:0.12;">
                             <svg viewBox="0 0 300 70" width="100%" height="70" fill="#1a6b3c" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="20" width="15" height="50"/><path d="M20 20 Q27 2 35 20Z"/><rect x="55" y="10" width="60" height="60"/><path d="M55 10 Q85 -18 115 10Z"/><rect x="120" y="20" width="15" height="50"/><path d="M120 20 Q127 2 135 20Z"/><rect x="160" y="25" width="15" height="45"/><path d="M160 25 Q167 7 175 25Z"/><rect x="195" y="10" width="60" height="60"/><path d="M195 10 Q225 -18 255 10Z"/><rect x="265" y="20" width="15" height="50"/><path d="M265 20 Q272 2 280 20Z"/><rect x="0" y="65" width="300" height="5"/></svg>
@@ -2102,7 +2102,7 @@ class App {
                             <svg width="32" height="32" fill="none" stroke="#b45309" stroke-width="1.7" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                         </div>
                         <h3 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 0.7rem;">Receive Offers</h3>
-                        <p style="font-size:0.88rem;color:#6b7280;line-height:1.65;margin:0 0 2rem;">Verified travel agents review your request and send tailored offers that match your needs and budget.</p>
+                        <p style="font-size:0.88rem;color:#6b7280;line-height:1.65;margin:0 0 2rem;"> Verified providers review your request and send tailored offers that match your needs and budget.</p>
                         <!-- Faded mosque bottom decoration (amber tint) -->
                         <div style="width:100%;height:70px;overflow:hidden;flex-shrink:0;margin-top:auto;opacity:0.13;">
                             <svg viewBox="0 0 300 70" width="100%" height="70" fill="#b45309" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="20" width="15" height="50"/><path d="M20 20 Q27 2 35 20Z"/><rect x="55" y="10" width="60" height="60"/><path d="M55 10 Q85 -18 115 10Z"/><rect x="120" y="20" width="15" height="50"/><path d="M120 20 Q127 2 135 20Z"/><rect x="160" y="25" width="15" height="45"/><path d="M160 25 Q167 7 175 25Z"/><rect x="195" y="10" width="60" height="60"/><path d="M195 10 Q225 -18 255 10Z"/><rect x="265" y="20" width="15" height="50"/><path d="M265 20 Q272 2 280 20Z"/><rect x="0" y="65" width="300" height="5"/></svg>
@@ -2116,7 +2116,7 @@ class App {
                             <svg width="32" height="32" fill="none" stroke="#ffffff" stroke-width="1.7" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
                         </div>
                         <h3 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 0.7rem;">Choose Package</h3>
-                        <p style="font-size:0.88rem;color:#6b7280;line-height:1.65;margin:0 0 2rem;">Compare offers, check details, and confidently select the option that fits your journey perfectly.</p>
+                        <p style="font-size:0.88rem;color:#6b7280;line-height:1.65;margin:0 0 2rem;">Compare offers, check details, and confidently select the option that best fits your needs and budget.</p>
                         <!-- Faded mosque bottom decoration -->
                         <div style="width:100%;height:70px;overflow:hidden;flex-shrink:0;margin-top:auto;opacity:0.12;">
                             <svg viewBox="0 0 300 70" width="100%" height="70" fill="#1a6b3c" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="20" width="15" height="50"/><path d="M20 20 Q27 2 35 20Z"/><rect x="55" y="10" width="60" height="60"/><path d="M55 10 Q85 -18 115 10Z"/><rect x="120" y="20" width="15" height="50"/><path d="M120 20 Q127 2 135 20Z"/><rect x="160" y="25" width="15" height="45"/><path d="M160 25 Q167 7 175 25Z"/><rect x="195" y="10" width="60" height="60"/><path d="M195 10 Q225 -18 255 10Z"/><rect x="265" y="20" width="15" height="50"/><path d="M265 20 Q272 2 280 20Z"/><rect x="0" y="65" width="300" height="5"/></svg>
@@ -2132,12 +2132,12 @@ class App {
 
     renderLiquidGlassFeedbackSection() {
         return `
-            <!-- Modern & Aesthetic Liquid Glass Zaireen Review Carousel Slider -->
+            <!-- Modern & Aesthetic Liquid Glass Customer Review Carousel Slider -->
             <section style="background: #ffffff; padding: 5rem 2.5rem 4.5rem; border-bottom: 1px solid #f1f5f9; position: relative; width: 100%; box-sizing: border-box;" id="liquidFeedbackSection">
                 <div class="liquid-glass-wrapper" style="max-width: 1320px; margin: 0 auto; padding: 0; width: 100%;">
                     <div class="reviews-section-header" style="margin-bottom: 3rem;">
-                        <h2 class="reviews-section-title">Read reviews from <span>Zaireen</span></h2>
-                        <p class="reviews-section-subtitle">Real experiences from Zaireen who posted their Umrah requirements and saved on reverse bidding</p>
+                        <h2 class="reviews-section-title">What Our <span>Customers</span>Say</h2>
+                        <p class="reviews-section-subtitle">Real experiences from customers who posted their Hajj and Umrah requirements and received competitive offers.</p>
                     </div>
 
                     <div class="liquid-carousel-outer">
