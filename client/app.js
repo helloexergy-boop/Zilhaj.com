@@ -1269,7 +1269,7 @@ class App {
                 btnHajj.classList.remove('active');
             }
             if (titleEl) titleEl.innerText = 'Submit Umrah Request';
-            if (subTitleEl) subTitleEl.innerText = 'Fill out the details below to receive personalized Umrah package quotes. Our partner agencies will craft itineraries tailored specifically to your group\'s needs and preferences.';
+            if (subTitleEl) subTitleEl.innerText = 'Fill out the details below to receive personalized Hajj and Umrah offers. Our verified providers will send options tailored to your group’s needs and preferences.';
             if (durationSelect) {
                 durationSelect.innerHTML = `
                     <option value="">Select Umrah Duration</option>
