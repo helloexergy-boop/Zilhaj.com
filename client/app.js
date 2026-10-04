@@ -8083,7 +8083,7 @@ class App {
 
                     <!-- 3. DESCRIPTION (Matching Reference Image 2) -->
                     <p class="description-text" style="font-size:14.5px; line-height:1.55; color:rgba(255, 255, 255, 0.92); font-weight:400; margin:0; max-width:370px; text-shadow:0 2px 8px rgba(0,0,0,0.85);">
-                      Post one request and receive transparent offers from verified Umrah travel providers. Compare, choose, and save—without sharing your personal details.
+                      Post one and receive transparent offers from verified Umrah travel providers. Compare, choose, and save—without sharing your personal details.
                     </p>
 
                     <!-- 4. FEATURE LIST (Sleek Compact Rows) -->
