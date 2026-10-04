@@ -165,7 +165,7 @@
           <div class="page-header">
             <div>
               <h1 class="page-title">My Requests</h1>
-              <p class="page-subtitle">Track your submitted Umrah requests and review offers collected by our team on your behalf.</p>
+              <p class="page-subtitle">Track your requests, follow their progress, and review offers collected by our team.</p>
             </div>
             <button class="btn-new-request" id="btnOpenNewRequestModal">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -205,7 +205,7 @@
               <div class="req-progress-tracker">
                 <div class="tracker-step-item done">
                   <div class="tracker-step-circle done">✓</div>
-                  <span class="tracker-step-label">Request Received</span>
+                  <span class="tracker-step-label">Request Submitted</span>
                 </div>
                 <div class="tracker-step-line done"></div>
                 <div class="tracker-step-item done">
@@ -244,7 +244,7 @@
                     <span class="meta-val">3</span>
                   </div>
                   <div class="meta-field-col">
-                    <span class="meta-label">HOTEL TYPE</span>
+                    <span class="meta-label">HOTEL CATEGORY</span>
                     <span class="meta-val">5 Star</span>
                   </div>
                 </div>
@@ -304,7 +304,7 @@
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                   </svg>
-                  <span>Ask Opinion</span>
+                  <span>Help me Choose</span>
                 </button>
               </div>
             </div>
@@ -328,7 +328,7 @@
                 </div>
                 <div class="req-status-pill status-waiting">
                   <span class="status-dot"></span>
-                  <span>Waiting for Offers</span>
+                  <span>Collecting Offers</span>
                 </div>
               </div>
 
@@ -367,7 +367,7 @@
                     <span class="meta-val">Umrah Package (25 Days)</span>
                   </div>
                   <div class="meta-field-col">
-                    <span class="meta-label">TRAVEL DATE</span>
+                    <span class="meta-label">DATE</span>
                     <span class="meta-val">27 Apr 2026 (Approx.)</span>
                   </div>
                   <div class="meta-field-col">
@@ -375,7 +375,7 @@
                     <span class="meta-val">10</span>
                   </div>
                   <div class="meta-field-col">
-                    <span class="meta-label">HOTEL TYPE</span>
+                    <span class="meta-label">HOTEL CATEGORY</span>
                     <span class="meta-val">5 Star</span>
                   </div>
                 </div>
@@ -390,7 +390,7 @@
               </div>
 
               <!-- Offers Section Header -->
-              <h4 class="agency-offers-title">Verified Agency Offers (0)</h4>
+              <h4 class="agency-offers-title">Offers For You (0)</h4>
 
               <!-- Waiting Box -->
               <div class="waiting-offers-box">
@@ -402,17 +402,17 @@
                     <path d="M9 13.5c1-1 5-1 6 0"></path>
                   </svg>
                 </div>
-                <h4 class="waiting-title">No Offers Yet — We're Working on the Best Ones for You! ✨</h4>
+                <h4 class="waiting-title">No Offers Yet — We're Collecting Offers for You</h4>
                 <p class="waiting-subtext">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="12" y1="16" x2="12" y2="12"></line>
                     <line x1="12" y1="8" x2="12.01" y2="8"></line>
                   </svg>
-                  <span>Usually takes 30 minutes to 6 hours depending on the request.</span>
+                  <span>Usually takes 10 minutes to 1 hour depending on the request.</span>
                 </p>
                 <div class="waiting-actions-row">
-                  <button class="btn-get-notified-pill" onclick="alert('Notification alert is active. You will receive an SMS & WhatsApp alert once agencies submit their quotes.')">
+                  <button class="btn-get-notified-pill" onclick="alert('Notification alert is active. You will receive an Email & WhatsApp alert once agencies submit their quotes.')">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                       <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -468,8 +468,8 @@
               </svg>
             </div>
             <div>
-              <h1 class="page-title" id="submitFormHeading">Submit Umrah Request</h1>
-              <p class="page-subtitle" id="submitFormSub">Fill out the details below to receive personalized Umrah package quotes. Our partner agencies will craft itineraries tailored specifically to your group's needs and preferences.</p>
+              <h1 class="page-title" id="submitFormHeading">Submit  Umrah Request</h1>
+              <p class="page-subtitle" id="submitFormSub">Fill out the details below to receive personalized offers. Our verified providers will send options tailored to your group’s needs and preferences..</p>
             </div>
           </div>
 
@@ -487,7 +487,7 @@
                       <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path>
                     </svg>
                   </div>
-                  <h3 class="section-title">Trip Details</h3>
+                  <h3 class="section-title">Enter Your Pilgrimage Details</h3>
                 </div>
 
                 <div class="form-grid-3">
@@ -502,7 +502,7 @@
 
                   <!-- Departure City -->
                   <div class="form-field-group">
-                    <label class="form-label required">CITY OF DEPARTURE</label>
+                    <label class="form-label required">DEPARTURE CITY</label>
                     <select id="cityDepartureSelect" class="form-select" required>
                       <option value="" disabled selected>Select Departure City</option>
                       <option value="Agartala">Agartala</option>
@@ -613,7 +613,7 @@
                       <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
                   </div>
-                  <h3 class="section-title">Traveler Details</h3>
+                  <h3 class="section-title">Group Details</h3>
                 </div>
 
                 <div class="traveler-counters-grid">
@@ -661,7 +661,7 @@
                   <div class="counter-box">
                     <div class="counter-label-block">
                       <span class="counter-title">Infants</span>
-                      <span class="counter-sub">Below 2 years</span>
+                      <span class="counter-sub">Under 2 years</span>
                     </div>
                     <div class="counter-controls">
                       <button type="button" class="btn-counter" onclick="adjustCounter('infantCount', -1)">-</button>
@@ -685,7 +685,7 @@
                       <path d="M9 7h6M9 11h6M9 15h6"></path>
                     </svg>
                   </div>
-                  <h3 class="section-title">Hotel Preference</h3>
+                  <h3 class="section-title">Hotel Preferences</h3>
                 </div>
 
                 <div class="form-field-group">
@@ -694,7 +694,7 @@
                     <label class="hotel-radio-card">
                       <input type="radio" name="hotelCategory" value="3 Star" checked>
                       <span class="hotel-radio-text">
-                        <strong>3 Star</strong> (Best value package with essential services)
+                        <strong>3 Star</strong> (Best value with essential services)
                       </span>
                     </label>
                     <label class="hotel-radio-card">
@@ -706,7 +706,7 @@
                     <label class="hotel-radio-card">
                       <input type="radio" name="hotelCategory" value="5 Star">
                       <span class="hotel-radio-text">
-                        <strong>5 Star</strong> (High-quality hotels and premium travel experience)
+                        <strong>5 Star</strong> (High-quality hotels and premium experience)
                       </span>
                     </label>
                   </div>
@@ -735,18 +735,18 @@
                   </div>
                   <div class="form-field-group">
                     <label class="form-label required">MOBILE NUMBER</label>
-                    <input type="tel" id="mobileInput" placeholder="10-digit mobile number" class="form-input" maxlength="10" required>
+                    <input type="tel" id="mobileInput" placeholder="enter 10-digit mobile number" class="form-input" maxlength="10" required>
                     <span class="form-field-error" id="mobileError" style="display:none; color:#DC2626; font-size:11px; font-weight:600; margin-top:4px;">Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.</span>
                   </div>
                   <div class="form-field-group">
                     <label class="form-label">EMAIL ADDRESS</label>
-                    <input type="email" id="emailInput" placeholder="Enter email address" class="form-input">
+                    <input type="email" id="emailInput" placeholder="Enter your email address" class="form-input">
                   </div>
                 </div>
 
                 <div class="form-field-group">
                   <label class="form-label required">FULL ADDRESS</label>
-                  <input type="text" id="addressInput" placeholder="House No., Street, Locality, Landmark." class="form-input" required>
+                  <input type="text" id="addressInput" placeholder="House No., Street, Locality, Landmark" class="form-input" required>
                 </div>
 
                 <div class="form-grid-2">
@@ -802,7 +802,7 @@
 
                 <div class="form-field-group">
                   <label class="form-label">SPECIAL REQUIREMENTS <small>(Optional)</small></label>
-                  <textarea id="specialReqInput" rows="3" placeholder="e.g. Wheelchair assistance, specific flight preferences, elderly care needed..." class="form-textarea"></textarea>
+                  <textarea id="specialReqInput" rows="3" placeholder="e.g. wheelchair assistance, specific preferences, elderly care needs, etc" class="form-textarea"></textarea>
                 </div>
 
               </div>
