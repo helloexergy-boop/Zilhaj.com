@@ -1859,7 +1859,7 @@ class App {
 
                     <!-- Sub Text -->
                     <p class="hero-subtext-anim" style="font-size:1.08rem !important; color:rgba(255,255,255,0.95) !important; max-width:680px !important; margin:0 auto 2.1rem !important; line-height:1.75 !important; font-weight:400 !important; text-shadow:0 1px 4px rgba(0,0,0,1), 0 2px 20px rgba(0,0,0,0.9);">
-                        Post one request and receive transparent offers from verified Hajj and Umrah providers. Compare, choose, and save—without sharing your personal details.
+                        Post one  and receive transparent offers from verified Hajj and Umrah providers. Compare, choose, and save—without sharing your personal details.
                     <!-- CTA Buttons -->
                     <div class="hero-cta-anim" style="display:flex; justify-content:center; align-items:center; gap:1rem; flex-wrap:wrap;">
                         <button onclick="app.handleStartJourneyClick()" style="background:linear-gradient(135deg,#E8B84B 0%,#C9953A 100%); color:#0A1A12; font-weight:800; font-size:0.95rem; padding:14px 32px; border-radius:10px; border:none; cursor:pointer; letter-spacing:0.02em; box-shadow:0 6px 28px rgba(232,184,75,0.55), 0 2px 8px rgba(0,0,0,0.3); transition:all 0.25s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 36px rgba(232,184,75,0.65),0 3px 12px rgba(0,0,0,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(232,184,75,0.55),0 2px 8px rgba(0,0,0,0.3)'">✦ Start Your Journey</button>
