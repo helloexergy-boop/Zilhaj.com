@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Offer & Package | ZILHAJ Partner Operations</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans & Playfair Display for Arabic/Luxury Package styling -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Top App Navigation / Global Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="header-left">
+        <h1 class="page-title">Add Offer & Package</h1>
+        <p class="page-subtitle">Add verified Hajj &amp; Umrah offers to the ZILHAJ offer inventory.</p>
+      </div>
+
+      <div class="header-right">
+        <!-- Quick View Inventory Button -->
+        <button class="header-action-btn" id="viewInventoryBtn" title="View Central Package Inventory">
+          <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+          <span>Package Inventory</span>
+          <span class="inventory-count-pill" id="inventoryCountBadge">0</span>
+        </button>
+
+        <!-- Notification Bell with Dropdown -->
+        <div class="notification-dropdown-wrapper">
+          <button class="icon-btn notif-btn" id="notifBtn" aria-label="Notifications" aria-expanded="false">
+            <svg class="icon-bell" viewBox="0 0 24 24" fill="none" stroke="#0d8048" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="notification-badge" id="notifBadge">3</span>
+          </button>
+
+          <!-- Notification Dropdown Menu -->
+          <div class="dropdown-menu notif-menu" id="notifMenu" hidden>
+            <div class="notif-menu-header">
+              <h3>Partner Operations Alerts</h3>
+              <span class="badge badge-sm badge-green">3 New</span>
+            </div>
+            <div class="notif-list">
+              <div class="notif-item unread">
+                <div class="notif-icon notif-icon-emerald">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"></path></svg>
+                </div>
+                <div class="notif-content">
+                  <p class="notif-title">Agent AGENT-1042 submitted 2 new Umrah packages</p>
+                  <span class="notif-time">12 mins ago</span>
+                </div>
+              </div>
+              <div class="notif-item unread">
+                <div class="notif-icon notif-icon-gold">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                </div>
+                <div class="notif-content">
+                  <p class="notif-title">Ramadan Hajj inventory quota updated</p>
+                  <span class="notif-time">45 mins ago</span>
+                </div>
+              </div>
+              <div class="notif-item unread">
+                <div class="notif-icon notif-icon-blue">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                </div>
+                <div class="notif-content">
+                  <p class="notif-title">Contract renewed with Oberoi Madinah partners</p>
+                  <span class="notif-time">3 hours ago</span>
+                </div>
+              </div>
+            </div>
+            <div class="notif-footer">
+              <button type="button" class="link-btn" id="markAllReadBtn">Mark all as read</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Profile Dropdown -->
+        <div class="user-profile-wrapper">
+          <button class="user-profile-btn" id="profileBtn" aria-label="User menu" aria-expanded="false">
+            <div class="avatar-circle">PO</div>
+            <div class="user-info-text">
+              <span class="user-name">Partner Operations</span>
+              <span class="user-role">Partner Operations Specialist</span>
+            </div>
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <!-- Profile Menu -->
+          <div class="dropdown-menu profile-menu" id="profileMenu" hidden>
+            <div class="profile-menu-header">
+              <div class="avatar-circle avatar-large">PO</div>
+              <div class="profile-menu-info">
+                <span class="profile-name">Partner Operations</span>
+                <span class="profile-email">operations@zilhaj.com</span>
+                <span class="profile-badge">Specialist Access</span>
+              </div>
+            </div>
+            <div class="profile-menu-body">
+              <button type="button" class="menu-item" id="userProfileBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span>Profile</span>
+              </button>
+              <button type="button" class="menu-item" id="userSettingsBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>Settings</span>
+              </button>
+              <div class="menu-divider"></div>
+              <button type="button" class="menu-item menu-item-logout" id="userLogoutBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Main Work Area (Two Columns) -->
+  <main class="main-container">
+    <div class="workspace-grid">
+      
+      <!-- ========================================== -->
+      <!-- LEFT COLUMN: PACKAGE ENTRY FORM            -->
+      <!-- ========================================== -->
+      <section class="form-column" aria-labelledby="formSectionHeading">
+        <h2 id="formSectionHeading" class="sr-only">Package Entry Form</h2>
+        
+        <form id="packageForm" class="package-form" novalidate>
+          
+          <!-- Hidden input for edit mode package ID -->
+          <input type="hidden" id="editPackageId" value="" />
+
+          <!-- Form Edit Banner (Visible only in edit mode) -->
+          <div class="edit-mode-banner" id="editModeBanner" hidden>
+            <div class="edit-mode-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              <span>Editing package: <strong id="editBannerPkgId">PKG-0001</strong></span>
+            </div>
+            <button type="button" class="btn-cancel-edit" id="cancelEditModeBtn">Exit Edit Mode</button>
+          </div>
+
+          <!-- 1. SERVICE TYPE (MUST COME FIRST) -->
+          <div class="form-card" id="serviceTypeCard">
+            <div class="card-header-clean">
+              <div class="header-icon-title">
+                <span class="section-icon green-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                  </svg>
+                </span>
+                <label class="section-label">Service Type <span class="required-star">*</span></label>
+              </div>
+            </div>
+
+            <div class="service-type-selector" role="radiogroup" aria-label="Service Type Selection">
+              <!-- HAJJ BUTTON -->
+              <button type="button" class="service-btn" id="btnHajj" data-type="Hajj" role="radio" aria-checked="false">
+                <span class="radio-indicator"></span>
+                <span class="service-icon-wrapper">
+                  <!-- Kaaba SVG Icon -->
+                  <svg class="kaaba-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="4" y="5" width="16" height="15" rx="2" fill="#1e293b"/>
+                    <rect x="4" y="7" width="16" height="3" fill="#eab308"/>
+                    <rect x="10" y="12" width="4" height="8" fill="#d97706" rx="1"/>
+                  </svg>
+                </span>
+                <span class="service-text">Hajj</span>
+              </button>
+
+              <!-- UMRAH BUTTON (DEFAULT ACTIVE) -->
+              <button type="button" class="service-btn active" id="btnUmrah" data-type="Umrah" role="radio" aria-checked="true">
+                <span class="radio-indicator"></span>
+                <span class="service-icon-wrapper">
+                  <!-- Mosque SVG Icon -->
+                  <svg class="mosque-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2c-.6 1.4-2 3.1-2 5.5V10h4V7.5c0-2.4-1.4-4.1-2-5.5z" fill="#0d8048"/>
+                    <rect x="3" y="10" width="18" height="11" rx="1" fill="#1e293b"/>
+                    <path d="M9 21v-5a3 3 0 0 1 6 0v5" fill="#eab308"/>
+                    <circle cx="5.5" cy="7" r="1.5" fill="#eab308"/>
+                    <circle cx="18.5" cy="7" r="1.5" fill="#eab308"/>
+                  </svg>
+                </span>
+                <span class="service-text">Umrah</span>
+              </button>
+            </div>
+            <div class="field-error-msg" id="serviceTypeError" role="alert">Please select Hajj or Umrah.</div>
+          </div>
+
+          <!-- 2. BASIC INFORMATION -->
+          <div class="form-card">
+            <div class="card-header-clean">
+              <div class="header-icon-title">
+                <span class="section-icon dark-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                </span>
+                <span class="section-title">Basic Information</span>
+              </div>
+            </div>
+
+            <!-- Agent ID & Package Title -->
+            <div class="form-grid grid-2">
+              <div class="form-group">
+                <label for="agentIdInput" class="input-label">Agent ID <span class="required-star">*</span></label>
+                <div class="input-with-autocomplete">
+                  <input type="text" id="agentIdInput" class="form-control" placeholder="e.g. AGENT-1042" list="agentList" autocomplete="off" />
+                  <datalist id="agentList">
+                    <option value="AGENT-1042">AGENT-1042 (Verified)</option>
+                    <option value="AGENT-1087">AGENT-1087 (Verified)</option>
+                    <option value="AGENT-1015">AGENT-1015 (Verified)</option>
+                    <option value="AGENT-1020">AGENT-1020 (Verified)</option>
+                    <option value="AGENT-1099">AGENT-1099 (Verified)</option>
+                  </datalist>
+                </div>
+                <div class="field-error-msg" id="agentIdError" role="alert">Please enter or select an Agent ID.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="packageTitleInput" class="input-label">Package Title <span class="required-star">*</span></label>
+                <input type="text" id="packageTitleInput" class="form-control" placeholder="e.g. 18 Days Umrah Package" />
+                <div class="field-error-msg" id="packageTitleError" role="alert">Please enter the package title.</div>
+              </div>
+            </div>
+
+            <!-- Departure Date, Duration, Price Per Person, Seats Left (Optional) -->
+            <div class="form-grid grid-4-basic">
+              <div class="form-group">
+                <label for="departureDateInput" class="input-label">Departure Date <span class="required-star">*</span></label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon green-tint">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                  </span>
+                  <input type="date" id="departureDateInput" class="form-control with-icon" />
+                </div>
+                <div class="field-error-msg" id="departureDateError" role="alert">Please select departure date.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="durationInput" class="input-label">Duration <span class="required-star">*</span></label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon green-tint">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M5 22h14"></path>
+                      <path d="M5 2h14"></path>
+                      <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path>
+                      <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
+                    </svg>
+                  </span>
+                  <input type="text" id="durationInput" class="form-control with-icon" placeholder="e.g. 18 Days" />
+                </div>
+                <div class="field-error-msg" id="durationError" role="alert">Please enter duration (e.g. 18 Days).</div>
+              </div>
+
+              <div class="form-group">
+                <label for="priceInput" class="input-label">Price Per Person <span class="required-star">*</span></label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon rupee-prefix">₹</span>
+                  <input type="number" id="priceInput" class="form-control with-icon" placeholder="e.g. 85000" min="1" step="500" />
+                </div>
+                <div class="field-error-msg" id="priceError" role="alert">Please enter valid numeric price.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="seatsLeftInput" class="input-label">Seats Left (Optional)</label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon dark-tint">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                  </span>
+                  <input type="text" id="seatsLeftInput" class="form-control with-icon" placeholder="e.g. 4 seats left" />
+                </div>
+            </div>
+          </div>
+
+          <!-- 3. HOTELS -->
+          <div class="form-card">
+            <div class="card-header-clean">
+              <div class="header-icon-title">
+                <span class="section-icon dark-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 21h18"></path>
+                    <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+                    <path d="M9 9h1"></path>
+                    <path d="M9 13h1"></path>
+                    <path d="M9 17h1"></path>
+                    <path d="M14 9h1"></path>
+                    <path d="M14 13h1"></path>
+                    <path d="M14 17h1"></path>
+                  </svg>
+                </span>
+                <span class="section-title">Hotels</span>
+              </div>
+            </div>
+
+            <!-- Hotel Names -->
+            <div class="form-grid grid-2">
+              <div class="form-group">
+                <label for="makkahHotelInput" class="input-label">Makkah Hotel <span class="required-star">*</span></label>
+                <input type="text" id="makkahHotelInput" class="form-control" placeholder="e.g. Fairmont Clock Tower" />
+                <div class="field-error-msg" id="makkahHotelError" role="alert">Please enter Makkah hotel name.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="madinahHotelInput" class="input-label">Madinah Hotel <span class="required-star">*</span></label>
+                <input type="text" id="madinahHotelInput" class="form-control" placeholder="e.g. Oberoi Madinah" />
+                <div class="field-error-msg" id="madinahHotelError" role="alert">Please enter Madinah hotel name.</div>
+              </div>
+            </div>
+
+            <!-- Hotel Distances -->
+            <div class="form-grid grid-2">
+              <div class="form-group">
+                <label for="makkahDistInput" class="input-label">Distance from Masjid al-Haram <span class="required-star">*</span></label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon dark-tint">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                  </span>
+                  <input type="text" id="makkahDistInput" class="form-control with-icon" placeholder="e.g. 50 meters" />
+                </div>
+                <div class="field-error-msg" id="makkahDistError" role="alert">Please specify Makkah distance.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="madinahDistInput" class="input-label">Distance from Masjid an-Nabawi <span class="required-star">*</span></label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon dark-tint">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                  </span>
+                  <input type="text" id="madinahDistInput" class="form-control with-icon" placeholder="e.g. 100 meters" />
+                </div>
+                <div class="field-error-msg" id="madinahDistError" role="alert">Please specify Madinah distance.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. PACKAGE INCLUDES -->
+          <div class="form-card">
+            <div class="card-header-clean">
+              <div class="header-icon-title">
+                <span class="section-icon dark-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                  </svg>
+                </span>
+                <span class="section-title">Package Includes</span>
+              </div>
+            </div>
+
+            <div class="checkbox-grid-2">
+              <label class="custom-checkbox-label">
+                <input type="checkbox" class="package-include-chk" value="Return Flights" checked />
+                <span class="checkbox-box"></span>
+                <span class="checkbox-text">Return Flights</span>
+              </label>
+
+              <label class="custom-checkbox-label">
+                <input type="checkbox" class="package-include-chk" value="Sharing Accommodation" checked />
+                <span class="checkbox-box"></span>
+                <span class="checkbox-text">Sharing Accommodation</span>
+              </label>
+
+              <label class="custom-checkbox-label">
+                <input type="checkbox" class="package-include-chk" value="Daily Meals" checked />
+                <span class="checkbox-box"></span>
+                <span class="checkbox-text">Daily Meals</span>
+              </label>
+
+              <label class="custom-checkbox-label">
+                <input type="checkbox" class="package-include-chk" value="Guided Ziyarat in Makkah" checked />
+                <span class="checkbox-box"></span>
+                <span class="checkbox-text">Guided Ziyarat in Makkah</span>
+              </label>
+
+              <label class="custom-checkbox-label">
+                <input type="checkbox" class="package-include-chk" value="Guided Ziyarat in Madinah" checked />
+                <span class="checkbox-box"></span>
+                <span class="checkbox-text">Guided Ziyarat in Madinah</span>
+              </label>
+
+              <label class="custom-checkbox-label">
+                <input type="checkbox" class="package-include-chk" value="Airport & Intercity Transfers" checked />
+                <span class="checkbox-box"></span>
+                <span class="checkbox-text">Airport & Intercity Transfers</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 5. COMPLIMENTARY SERVICES -->
+          <div class="form-card">
+            <div class="card-header-clean">
+              <div class="header-icon-title">
+                <span class="section-icon dark-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                    <rect x="2" y="7" width="20" height="5"></rect>
+                    <line x1="12" y1="22" x2="12" y2="7"></line>
+                    <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                    <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+                  </svg>
+                </span>
+                <span class="section-title">Complimentary Services</span>
+              </div>
+            </div>
+
+            <div class="complimentary-pills-row">
+              <!-- Ihram Kit Pill -->
+              <label class="complimentary-pill-card">
+                <input type="checkbox" class="complimentary-chk" value="Ihram Kit" checked />
+                <span class="pill-card-inner">
+                  <span class="checkbox-box"></span>
+                  <span class="service-pill-icon suitcase-icon">
+                    <svg viewBox="0 0 24 24" fill="#d97706">
+                      <path d="M19 6h-3V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-9-2h4v2h-4V4z"/>
+                    </svg>
+                  </span>
+                  <span class="pill-label">Ihram Kit</span>
+                </span>
+              </label>
+
+              <!-- Laundry Service Pill -->
+              <label class="complimentary-pill-card">
+                <input type="checkbox" class="complimentary-chk" value="Laundry Service" checked />
+                <span class="pill-card-inner">
+                  <span class="checkbox-box"></span>
+                  <span class="service-pill-icon laundry-icon">
+                    <svg viewBox="0 0 24 24" fill="#0d9488">
+                      <rect x="4" y="2" width="16" height="20" rx="2" fill="#0f766e"/>
+                      <circle cx="12" cy="13" r="5" fill="#f59e0b"/>
+                      <circle cx="12" cy="13" r="3" fill="#ffffff"/>
+                      <circle cx="8" cy="5" r="1" fill="#ffffff"/>
+                    </svg>
+                  </span>
+                  <span class="pill-label">Laundry Service</span>
+                </span>
+              </label>
+
+              <!-- Zamzam Water Pill -->
+              <label class="complimentary-pill-card">
+                <input type="checkbox" class="complimentary-chk" value="Zamzam Water" checked />
+                <span class="pill-card-inner">
+                  <span class="checkbox-box"></span>
+                  <span class="service-pill-icon drop-icon">
+                    <svg viewBox="0 0 24 24" fill="#0284c7">
+                      <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                    </svg>
+                  </span>
+                  <span class="pill-label">Zamzam Water</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 6. ADDITIONAL INFORMATION (Important Note & Package Image) -->
+          <div class="form-card">
+            <div class="form-grid grid-split-note-image">
+              
+              <!-- Left: Important Note -->
+              <div class="form-group note-group">
+                <div class="card-header-clean mini-header">
+                  <div class="header-icon-title">
+                    <span class="section-icon dark-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                      </svg>
+                    </span>
+                    <label for="importantNoteInput" class="input-label mb-0">Important Note <span class="required-star">*</span></label>
+                  </div>
+                </div>
+                <textarea id="importantNoteInput" class="form-control note-textarea" rows="4" placeholder="Enter important note for this package..."></textarea>
+                <div class="field-error-msg" id="importantNoteError" role="alert">Please enter important note.</div>
+              </div>
+
+              <!-- Right: Package Image Upload (Optional) -->
+              <div class="form-group image-group">
+                <div class="card-header-clean mini-header">
+                  <div class="header-icon-title">
+                    <span class="section-icon dark-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                      </svg>
+                    </span>
+                    <span class="input-label mb-0">Package Image (Optional)</span>
+                  </div>
+                </div>
+
+                <div class="image-upload-zone" id="imageUploadZone" tabindex="0" role="button" aria-label="Upload package image">
+                  <input type="file" id="packageImageInput" accept="image/jpeg,image/png,image/jpg" class="sr-only" />
+                  
+                  <div class="upload-placeholder-content" id="uploadPlaceholder">
+                    <svg class="upload-cloud-icon" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                      <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    <span class="upload-primary-text">Upload package image</span>
+                    <span class="upload-sub-text">JPG, PNG (Max 5MB)</span>
+                  </div>
+
+                  <!-- Uploaded Image Preview Overlay -->
+                  <div class="uploaded-image-preview" id="imagePreviewContainer" hidden>
+                    <img id="uploadedImageDisplay" src="" alt="Package banner preview" />
+                    <button type="button" class="btn-remove-image" id="removeImageBtn" title="Remove image" aria-label="Remove image">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="field-error-msg" id="packageImageError" role="alert">Invalid image file (Max 5MB JPG/PNG).</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 7. CONTACT INFORMATION -->
+          <div class="form-card">
+            <div class="card-header-clean">
+              <div class="header-icon-title">
+                <span class="section-icon dark-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                  </svg>
+                </span>
+                <span class="section-title">Contact Information</span>
+              </div>
+            </div>
+
+            <div class="form-grid grid-2">
+              <div class="form-group">
+                <label for="bookingHelplineInput" class="input-label">Booking Helpline <span class="required-star">*</span></label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon dark-tint">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                  </span>
+                  <input type="text" id="bookingHelplineInput" class="form-control with-icon" placeholder="e.g. +91 98765 43210" value="+91 98765 43210" />
+                </div>
+                <div class="field-error-msg" id="bookingHelplineError" role="alert">Please enter valid helpline number.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="supportEmailInput" class="input-label">Support Email <span class="required-star">*</span></label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon dark-tint">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                      <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                  </span>
+                  <input type="email" id="supportEmailInput" class="form-control with-icon" placeholder="e.g. support@zilhaj.com" value="support@zilhaj.com" />
+                </div>
+                <div class="field-error-msg" id="supportEmailError" role="alert">Please enter valid email address.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8. FORM BOTTOM ACTIONS -->
+          <div class="form-actions-row">
+            <button type="button" class="btn-action-cancel" id="btnCancelForm">Cancel</button>
+            <button type="submit" class="btn-action-save" id="btnSavePackage" disabled>
+              <svg class="save-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span id="saveButtonLabel">Upload Package</span>
+            </button>
+          </div>
+
+        </form>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- RIGHT COLUMN: LIVE CUSTOMER PREVIEW        -->
+      <!-- ========================================== -->
+      <section class="preview-column" aria-labelledby="previewSectionHeading">
+        <div class="preview-sticky-container">
+          
+          <!-- Column Header with Eye Icon -->
+          <div class="preview-column-header">
+            <div class="preview-heading-wrapper">
+              <span class="eye-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#0d8048" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </span>
+              <div>
+                <h2 id="previewSectionHeading" class="preview-title">Package Preview</h2>
+                <p class="preview-subtitle">This is how the package will appear to customers on ZILHAJ.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- THE LUXURY GOLD-BORDER CUSTOMER PREVIEW CARD -->
+          <div class="customer-preview-card" id="customerPreviewCard">
+            
+            <!-- Optional custom banner image injected on upload -->
+            <div class="preview-custom-image-wrapper" id="previewCustomImageWrap" hidden>
+              <img id="previewCustomImg" src="" alt="Package Banner" />
+            </div>
+
+            <!-- Card Top Header -->
+            <div class="card-top-header">
+              <!-- Left side: Golden Mosque Emblem + Agent Pill -->
+              <div class="header-left-emblem">
+                <div class="gold-emblem-badge">
+                  <!-- Mosque minarets graphic -->
+                  <svg class="emblem-svg" viewBox="0 0 64 64" fill="none">
+                    <circle cx="32" cy="32" r="30" stroke="#f59e0b" stroke-width="2" fill="#fffdf7"/>
+                    <!-- Mosque Domes and Minarets -->
+                    <path d="M32 16c-3 4-6 7.5-6 12h12c0-4.5-3-8-6-12z" fill="#0d8048"/>
+                    <rect x="23" y="28" width="18" height="18" fill="#1e293b" rx="1"/>
+                    <path d="M28 46v-7a4 4 0 0 1 8 0v7" fill="#f59e0b"/>
+                    <!-- Left Minaret -->
+                    <rect x="15" y="24" width="4" height="22" fill="#0d8048" rx="1"/>
+                    <path d="M17 19l-3 5h6l-3-5z" fill="#f59e0b"/>
+                    <!-- Right Minaret -->
+                    <rect x="45" y="24" width="4" height="22" fill="#0d8048" rx="1"/>
+                    <path d="M47 19l-3 5h6l-3-5z" fill="#f59e0b"/>
+                    <!-- Base arc -->
+                    <path d="M12 48h40" stroke="#0d8048" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+
+                <div class="agent-code-badge-wrap">
+                  <div class="agent-code-badge" id="previewAgentId">AGENT-XXXX</div>
+                  <span class="preview-seats-badge" id="previewSeatsBadge" hidden>4 Seats Left</span>
+                </div>
+              </div>
+
+              <!-- Right side: Package Title & Verified tag -->
+              <div class="header-right-title">
+                <h3 class="preview-service-type-title" id="previewServiceTypeTitle">UMRAH PACKAGE</h3>
+                <span class="preview-verified-tag">VERIFIED PARTNER ITINERARY</span>
+                <div class="preview-custom-package-title" id="previewCustomPackageTitle" hidden></div>
+              </div>
+            </div>
+
+            <!-- Quick Trip Parameters Bar (Departure Date, Duration, Price) -->
+            <div class="preview-quick-parameters">
+              <!-- Departure Date -->
+              <div class="param-item">
+                <div class="param-icon-label">
+                  <svg class="param-icon green-stroke" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                  <span class="param-label">Departure Date</span>
+                </div>
+                <div class="param-value" id="previewDepartureDate">--</div>
+              </div>
+
+              <div class="param-divider"></div>
+
+              <!-- Duration -->
+              <div class="param-item">
+                <div class="param-icon-label">
+                  <svg class="param-icon gold-stroke" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2">
+                    <path d="M5 22h14M5 2h14M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
+                  </svg>
+                  <span class="param-label">Duration</span>
+                </div>
+                <div class="param-value" id="previewDuration">--</div>
+              </div>
+
+              <div class="param-divider"></div>
+
+              <!-- Price Per Person -->
+              <div class="param-item price-item">
+                <div class="param-icon-label">
+                  <span class="param-icon rupee-gold-icon">₹</span>
+                  <span class="param-label">Price Per Person</span>
+                </div>
+                <div class="param-price-value" id="previewPricePerPerson">
+                  <span class="rupee-char">₹</span> <span id="previewPriceAmount">--</span> <span class="per-person-text">/ Person</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- HOTELS SECTION -->
+            <div class="preview-section hotels-section">
+              <div class="preview-section-title-bar">
+                <span class="section-emoji">🏨</span>
+                <span class="section-title-text">HOTELS</span>
+              </div>
+
+              <div class="preview-hotels-grid">
+                <!-- Makkah Hotel Card -->
+                <div class="hotel-card makkah-card">
+                  <div class="hotel-badge-circle green-ring">
+                    <!-- Kaaba icon in badge -->
+                    <svg class="badge-inner-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="4" y="5" width="16" height="15" rx="1.5" fill="#0f172a"/>
+                      <rect x="4" y="7" width="16" height="3" fill="#eab308"/>
+                      <rect x="10" y="12" width="4" height="8" fill="#d97706" rx="0.5"/>
+                    </svg>
+                  </div>
+                  <div class="hotel-details">
+                    <span class="hotel-city-label">Makkah Hotel</span>
+                    <strong class="hotel-name-text" id="previewMakkahHotel">--</strong>
+                    <span class="hotel-distance-sub" id="previewMakkahDist">-- meters from Masjid al-Haram</span>
+                  </div>
+                </div>
+
+                <!-- Madinah Hotel Card -->
+                <div class="hotel-card madinah-card">
+                  <div class="hotel-badge-circle gold-ring">
+                    <!-- Dome icon in badge -->
+                    <svg class="badge-inner-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2c-.6 1.4-2 3.1-2 5.5V10h4V7.5c0-2.4-1.4-4.1-2-5.5z" fill="#0d8048"/>
+                      <rect x="4" y="10" width="16" height="11" rx="1" fill="#0f172a"/>
+                      <path d="M9.5 21v-5a2.5 2.5 0 0 1 5 0v5" fill="#f59e0b"/>
+                      <circle cx="6" cy="7" r="1.5" fill="#f59e0b"/>
+                      <circle cx="18" cy="7" r="1.5" fill="#f59e0b"/>
+                    </svg>
+                  </div>
+                  <div class="hotel-details">
+                    <span class="hotel-city-label">Madinah Hotel</span>
+                    <strong class="hotel-name-text" id="previewMadinahHotel">--</strong>
+                    <span class="hotel-distance-sub" id="previewMadinahDist">-- meters from Masjid an-Nabawi</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PACKAGE INCLUDES SECTION -->
+            <div class="preview-section" id="previewIncludesSection">
+              <div class="preview-section-title-bar">
+                <span class="section-emoji">🎁</span>
+                <span class="section-title-text">PACKAGE INCLUDES</span>
+              </div>
+
+              <div class="preview-includes-grid" id="previewIncludesGrid">
+                <!-- Dynamically populated selected items -->
+              </div>
+            </div>
+
+            <!-- COMPLIMENTARY SERVICES SECTION -->
+            <div class="preview-section" id="previewComplimentarySection">
+              <div class="preview-section-title-bar">
+                <span class="section-emoji">🎁</span>
+                <span class="section-title-text">COMPLIMENTARY SERVICES</span>
+              </div>
+
+              <div class="preview-complimentary-pills-row" id="previewComplimentaryRow">
+                <!-- Dynamically populated pills -->
+              </div>
+            </div>
+
+            <!-- IMPORTANT NOTE BANNER -->
+            <div class="preview-important-note-box" id="previewNoteBox">
+              <div class="note-box-header">
+                <svg class="note-info-icon" viewBox="0 0 24 24" fill="#0284c7">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                <span class="note-box-title">Important Note:</span>
+              </div>
+              <p class="note-box-content" id="previewImportantNote">--</p>
+            </div>
+
+            <!-- CONTACT STRIP (Helpline & Support) -->
+            <div class="preview-contact-strip">
+              <div class="contact-strip-item">
+                <svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
+                </svg>
+                <span>Booking Helpline: <strong id="previewHelpline">+91 98765 43210</strong></span>
+              </div>
+
+              <div class="contact-strip-divider">|</div>
+
+              <div class="contact-strip-item">
+                <svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                </svg>
+                <strong id="previewEmail">support@zilhaj.com</strong>
+              </div>
+            </div>
+
+            <!-- PREVIEW CTA BUTTON -->
+            <button type="button" class="preview-book-offer-btn" id="previewCtaBtn" title="Customer preview booking action">
+              <span id="previewCtaLabel">Book This Offer (₹ --)</span>
+            </button>
+
+          </div>
+          <!-- END PREVIEW CARD -->
+
+          <!-- VERIFICATION CONFIRMATION AREA BELOW PREVIEW CARD -->
+          <div class="verification-card-box" id="verificationCardBox">
+            <label class="custom-checkbox-label verification-checkbox-label">
+              <input type="checkbox" id="verifyPackageCheckbox" />
+              <span class="checkbox-box verification-chk-box"></span>
+              <span class="verification-text">I have checked and verified all package details before uploading.</span>
+            </label>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL: LOGOUT CONFIRMATION                 -->
+  <!-- ========================================== -->
+  <div class="modal-backdrop" id="logoutConfirmModal" hidden>
+    <div class="modal-card logout-modal-card" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle">
+      <div class="modal-icon-header logout-bg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+      </div>
+      <h3 id="logoutModalTitle" class="modal-title">Confirm Logout</h3>
+      <p class="modal-description">Are you sure you want to logout?</p>
+
+      <div class="modal-actions-row">
+        <button type="button" class="btn-action-cancel" id="btnCancelLogout">Cancel</button>
+        <button type="button" class="btn-action-save btn-danger-action" id="btnConfirmLogout">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: CENTRAL PACKAGE INVENTORY DRAWER    -->
+  <!-- ========================================== -->
+  <div class="inventory-modal-backdrop" id="inventoryModal" hidden>
+    <div class="inventory-modal-content" role="dialog" aria-modal="true" aria-labelledby="inventoryModalTitle">
+      
+      <div class="inventory-modal-header">
+        <div class="inventory-modal-title-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#0d8048" stroke-width="2.2">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+          <div>
+            <h3 id="inventoryModalTitle">ZILHAJ Central Package Inventory</h3>
+            <p>Active verified packages ready for Customer Solutions matching</p>
+          </div>
+        </div>
+        
+        <button type="button" class="modal-close-btn" id="closeInventoryModalBtn" aria-label="Close inventory">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <!-- Filters & Search Bar -->
+      <div class="inventory-controls-bar">
+        <div class="search-input-wrapper">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="inventorySearchInput" placeholder="Search by Package ID, Agent ID, Title, Hotel..." />
+        </div>
+
+        <div class="inventory-filter-group">
+          <select id="inventoryServiceFilter" class="filter-select">
+            <option value="ALL">All Services</option>
+            <option value="Umrah">Umrah Only</option>
+            <option value="Hajj">Hajj Only</option>
+          </select>
+
+          <select id="inventoryStatusFilter" class="filter-select">
+            <option value="ALL">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Inventory Table / Cards Container -->
+      <div class="inventory-list-container" id="inventoryListContainer">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="inventory-modal-footer">
+        <span class="inventory-summary-text" id="inventorySummaryCount">Showing 0 packages</span>
+        <button type="button" class="btn-action-cancel" id="btnNewPackageFromModal">+ Add New Package</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: DUPLICATE PACKAGE WARNING           -->
+  <!-- ========================================== -->
+  <div class="modal-backdrop" id="duplicateWarningModal" hidden>
+    <div class="modal-card warning-modal-card" role="dialog" aria-modal="true" aria-labelledby="dupModalTitle">
+      <div class="modal-icon-header warning-bg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </div>
+      <h3 id="dupModalTitle" class="modal-title">Similar Package Detected</h3>
+      <p class="modal-description">
+        A similar package with identical <strong>Agent ID</strong>, <strong>Service Type</strong>, <strong>Departure Date</strong>, and <strong>Title</strong> already exists in the central inventory.
+      </p>
+      
+      <div class="duplicate-details-card" id="duplicateDetailsBox">
+        <!-- Injected by JS -->
+      </div>
+
+      <div class="modal-actions-row">
+        <button type="button" class="btn-action-cancel" id="btnCancelDuplicate">Review &amp; Edit Form</button>
+        <button type="button" class="btn-action-save btn-warning-override" id="btnProceedDuplicate">Save Anyway (Create Clone)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Modules -->
+  <script src="script.js"></script>
+</body>
+</html>
