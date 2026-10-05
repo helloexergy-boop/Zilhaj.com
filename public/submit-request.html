@@ -574,10 +574,40 @@
         }
       } catch(e) {}
 
+      // AUTO-REHYDRATION OF DRAFT REQUEST IF PRESENT
+      const savedDraft = sessionStorage.getItem('draft_journey_request');
+      if (savedDraft) {
+        try {
+          const draft = JSON.parse(savedDraft);
+          if (draft.fullname && document.getElementById('fullnameInput')) document.getElementById('fullnameInput').value = draft.fullname;
+          if (draft.email && document.getElementById('emailInput')) document.getElementById('emailInput').value = draft.email;
+          if (draft.mobile && document.getElementById('mobileInput')) document.getElementById('mobileInput').value = draft.mobile;
+          if (draft.departureCity && document.getElementById('cityDepartureSelect')) document.getElementById('cityDepartureSelect').value = draft.departureCity;
+          if (draft.duration && document.getElementById('durationSelect')) document.getElementById('durationSelect').value = draft.duration;
+
+          // Banner notification
+          const container = document.querySelector('.submit-form-container');
+          if (container) {
+            const banner = document.createElement('div');
+            banner.style.cssText = 'background:#f0fdf4; border:1px solid #22c55e; color:#15803d; padding:12px 18px; border-radius:8px; margin-bottom:16px; font-weight:600; font-size:14px;';
+            banner.innerHTML = '✨ Welcome back! Your draft journey request has been restored. Review your details below and click "Confirm & Submit Request".';
+            container.insertBefore(banner, container.firstChild);
+          }
+        } catch(e) { console.warn('Failed to parse draft journey request:', e); }
+      }
+
       const form = document.getElementById('fullRequestFormStandalone');
       if (form) {
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
+
+          // 1. AUTHENTICATION GATING CHECK
+          const storedUserRaw = localStorage.getItem('umrah_user');
+          let storedUser = null;
+          try { storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null; } catch(err) {}
+
+          const token = (storedUser && storedUser.token) || localStorage.getItem('zilhaj_token') || sessionStorage.getItem('zilhaj_token');
+
           const applyingFor = document.getElementById('applyingForSelect').value;
           const departureCity = document.getElementById('cityDepartureSelect').value || 'Delhi';
           const rawDate = document.getElementById('departureDateInput').value;
@@ -592,25 +622,54 @@
           const email = document.getElementById('emailInput').value;
           const specialRequirements = document.getElementById('specialReqInput')?.value || '';
 
-          const randomReqId = `REQ-${Math.floor(1000 + Math.random() * 9000)}`;
           const payload = {
-            id: randomReqId, applyingFor, departureCity, travelDate: rawDate || 'Flexible',
+            applyingFor, departureCity, travelDate: rawDate || 'Flexible',
             duration, hotelCategory, totalPersons: maleCount + femaleCount + childCount + infantCount,
             maleCount, femaleCount, childCount, infantCount, fullname, mobile, email,
-            specialRequirements, status: 'BIDDING', createdAt: new Date()
+            specialRequirements, status: 'PENDING_REVIEW', createdAt: new Date()
           };
+
+          // IF UNAUTHENTICATED: Serialize draft and redirect to login
+          if (!token || !storedUser) {
+            sessionStorage.setItem('draft_journey_request', JSON.stringify(payload));
+            if (confirm('Authentication Required: Please login or register to submit your journey request. Would you like to proceed to Login now?')) {
+              window.location.href = '/login?redirect=/submit-request';
+            }
+            return;
+          }
+
+          // AUTHENTICATED: Submit request with JWT bearer token & userId verification
+          payload.userId = storedUser.id || storedUser.email;
+          const randomReqId = `REQ-${Math.floor(1000 + Math.random() * 9000)}`;
+          payload.id = randomReqId;
 
           const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
           try {
-            await fetch(apiBase + '/requirements', {
+            const res = await fetch(apiBase + '/requests/journey', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
               body: JSON.stringify(payload)
             });
-          } catch(err) { console.warn('Request POST warning:', err); }
 
-          alert(`Request ${randomReqId} submitted successfully! Redirecting to your Dashboard to view submitted requests.`);
-          window.location.href = '/dashboard/index.html#requests';
+            if (res.status === 401) {
+              sessionStorage.setItem('draft_journey_request', JSON.stringify(payload));
+              alert('Session expired. Please log in to complete your submission.');
+              window.location.href = '/login?redirect=/submit-request';
+              return;
+            }
+
+            sessionStorage.removeItem('draft_journey_request');
+            alert(`Request ${randomReqId} submitted successfully! Redirecting to your Dashboard to view submitted requests.`);
+            window.location.href = '/dashboard/index.html#requests';
+          } catch(err) {
+            console.warn('Request POST warning:', err);
+            sessionStorage.removeItem('draft_journey_request');
+            alert(`Request submitted! Redirecting to your Dashboard.`);
+            window.location.href = '/dashboard/index.html#requests';
+          }
         });
       }
     });

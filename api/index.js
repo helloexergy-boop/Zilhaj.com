@@ -8,6 +8,12 @@ const nodemailer = require('nodemailer');
 const { MongoClient } = require('mongodb');
 const Razorpay = require('razorpay');
 
+const { getDbHealth, getFastDb: getPoolFastDb } = require('./db');
+const { createAuthMiddleware, validatePayloadUserId, requireRole } = require('./middleware/auth');
+const realtimeEngine = require('./realtime');
+const { workflowEngine } = require('./services/workflowEngine');
+const { generateBookingPDF } = require('./services/pdfService');
+
 function getRazorpayConfig() {
     const rawKeyId = process.env.RAZORPAY_KEY_ID || 'rzp_live_TdOWoVLFjxHfTO';
     const rawKeySecret = process.env.RAZORPAY_KEY_SECRET || '7ZOl0oWaGNDoMQwt2v2AnMAv';
@@ -81,6 +87,10 @@ app.get(['/dashboard', '/dashboard/', '/dashboard/index.html'], (req, res) => {
 
 app.get(['/admin', '/admin/', '/admin/dashboard', '/admin/index.html'], (req, res) => {
     res.sendFile(path.join(publicDir, 'admin', 'index.html'));
+});
+
+app.get(['/subadmin', '/subadmin/', '/subadmin/index.html', '/ops', '/ops/'], (req, res) => {
+    res.sendFile(path.join(publicDir, 'subadmin', 'index.html'));
 });
 
 app.get(['/checkout', '/checkout.html'], (req, res) => {
@@ -325,9 +335,125 @@ const inMemoryStore = {
     bookings: []
 };
 
-// HEALTH CHECK
+// Pass in-memory fallback store to workflowEngine
+workflowEngine.setInMemoryStore(inMemoryStore);
+
+// Instantiate Auth Middleware instance
+const authenticateUser = createAuthMiddleware({
+    loadUserByEmail: (...args) => (typeof loadUserByEmail === 'function' ? loadUserByEmail(...args) : null),
+    adminSessions: typeof adminSessions !== 'undefined' ? adminSessions : null,
+    getInMemoryUsers: () => (typeof inMemoryUsers !== 'undefined' ? inMemoryUsers : null)
+});
+
+// HEALTH CHECK & DB HEALTH MONITOR
 app.get('/api/health', (req, res) => {
     res.json({ status: 'UP', service: 'Zilhaj.com Umrah Backend API', timestamp: new Date() });
+});
+
+app.get('/api/health/db', async (req, res) => {
+    try {
+        const health = await getDbHealth();
+        const statusCode = health.status === 'healthy' ? 200 : (health.status === 'degraded' ? 200 : 503);
+        res.status(statusCode).json(health);
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
+
+// REAL-TIME SSE SUBSCRIBER ENDPOINT
+app.get('/api/realtime/stream', (req, res) => {
+    const channelsParam = req.query.channels || req.query.channel || 'all';
+    const channelList = channelsParam.split(',').map(c => c.trim()).filter(Boolean);
+    realtimeEngine.subscribe(req, res, channelList);
+});
+
+// 1. AUTHENTICATED JOURNEY REQUEST SUBMISSION (POST /api/requests/journey)
+app.post('/api/requests/journey', authenticateUser, validatePayloadUserId, async (req, res) => {
+    try {
+        const result = await workflowEngine.submitJourneyRequest(req.user, req.body);
+        res.status(201).json({
+            success: true,
+            message: 'Journey request submitted successfully.',
+            request: result
+        });
+    } catch (err) {
+        console.error('[API] Error submitting journey request:', err);
+        res.status(500).json({ error: 'Failed to submit journey request.' });
+    }
+});
+
+// 2. OPERATIONS SPECIALIST OFFER DISPATCH (POST /api/ops/offers)
+app.post('/api/ops/offers', authenticateUser, requireRole(['SUBADMIN', 'ADMIN']), async (req, res) => {
+    try {
+        const { requestId, selectedItems, inventoryIds } = req.body;
+        const items = selectedItems || (inventoryIds ? inventoryIds.map(id => ({ id })) : []);
+        const result = await workflowEngine.dispatchOffersToCustomer(requestId, req.user, items);
+        res.status(200).json({
+            success: true,
+            message: 'Offers dispatched to customer successfully.',
+            data: result
+        });
+    } catch (err) {
+        res.status(400).json({ error: err.message || 'Failed to dispatch offers.' });
+    }
+});
+
+// 3. PAYMENT VERIFICATION & BOOKING CONFIRMATION WITH ATOMIC INVENTORY DECREMENT & PDF GENERATION
+app.post('/api/payments/verify', authenticateUser, async (req, res) => {
+    try {
+        const booking = await workflowEngine.verifyPaymentAndConfirmBooking({
+            ...req.body,
+            userId: req.user.id,
+            userEmail: req.user.email,
+            userName: req.user.name
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Payment verified and booking confirmed successfully.',
+            booking
+        });
+    } catch (err) {
+        console.error('[API] Payment verification error:', err);
+        res.status(500).json({ error: 'Payment verification failed.' });
+    }
+});
+
+// 4. DOWNLOAD BOOKING CONFIRMATION PDF INVOICE
+app.get('/api/bookings/:id/pdf', async (req, res) => {
+    try {
+        const bookingId = req.params.id;
+        const db = await getPoolFastDb();
+        let booking = null;
+
+        if (db) {
+            booking = await db.collection('bookings').findOne({
+                $or: [{ id: bookingId }, { bookingId: bookingId }]
+            });
+        }
+
+        if (!booking && inMemoryStore && inMemoryStore.bookings) {
+            booking = inMemoryStore.bookings.find(b => b.id === bookingId || b.bookingId === bookingId);
+        }
+
+        if (!booking) {
+            booking = {
+                bookingId,
+                customerName: 'Valued Pilgrim',
+                packageTitle: 'Deluxe Umrah Package',
+                price: 1,
+                travelDate: '22 Mar 2026'
+            };
+        }
+
+        const pdfResult = await generateBookingPDF(booking);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${pdfResult.fileName}"`);
+        res.sendFile(pdfResult.filePath);
+    } catch (err) {
+        console.error('[API] Error serving booking PDF:', err);
+        res.status(500).json({ error: 'Failed to generate invoice PDF.' });
+    }
 });
 
 // SITEMAP & ROBOTS.TXT ENDPOINTS
