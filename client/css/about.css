@@ -409,7 +409,7 @@ ul, ol {
    SECTION 1 — HERO
    ========================================================================== */
 .hero-section {
-  padding-top: var(--space-16);
+  padding-top: 120px;
   padding-bottom: var(--space-16);
   background: linear-gradient(180deg, #F8FAF9 0%, #FFFFFF 100%);
   position: relative;
