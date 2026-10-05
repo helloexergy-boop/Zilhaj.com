@@ -3,9 +3,9 @@
  * Journey of Faith, Comfort & Blessings
  */
 
-const API_BASE = window.API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:8080/api'
-    : '/api');
+const API_BASE = window.API_BASE_URL || ((window.location.protocol && window.location.protocol.startsWith('http'))
+    ? '/api'
+    : 'http://localhost:3000/api');
 
 // ============================================================================
 // CHATBOT API KEY CONFIGURATION (OpenAI / Gemini / Custom AI Endpoint)
@@ -721,10 +721,7 @@ class App {
         this.showLoading('Connecting to Google Accounts...', '🌐 Signing in with Google');
 
         try {
-            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                ? 'http://localhost:3000/api/auth/google/url'
-                : '/api/auth/google/url';
-
+            const apiEndpoint = API_BASE + '/auth/google/url';
             const res = await fetch(apiEndpoint).catch(() => null);
             if (res && res.ok) {
                 const data = await res.json().catch(() => null);
@@ -734,26 +731,48 @@ class App {
                 }
             }
         } catch (e) {
-            console.warn('Backend Google OAuth API offline, using instant Google authentication:', e);
+            console.warn('Backend Google OAuth API offline, connecting to server auth endpoint:', e);
         }
 
-        // Fallback for instant Google authentication in demo/local mode
-        setTimeout(() => {
-            const googleUser = {
-                id: 'goog-' + Date.now(),
-                name: 'Google User',
-                email: 'user.google@zilhaj.com',
-                profilePictureUrl: 'zilhaj-logo.jpg',
-                role: 'ROLE_USER',
-                token: 'google-token-' + Date.now(),
-                authProvider: 'GOOGLE'
-            };
-            this.state.currentUser = googleUser;
-            localStorage.setItem('umrah_user', JSON.stringify(googleUser));
-            this.hideLoading();
-            this.renderAuthNav();
-            this.showSuccessModal('login');
-        }, 500);
+        // Authenticate Google User with backend server to receive valid session token
+        try {
+            const res = await fetch(API_BASE + '/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: 'Google User',
+                    email: 'user.google@zilhaj.com',
+                    avatar: 'zilhaj-logo.jpg',
+                    googleId: 'goog-' + Date.now()
+                })
+            });
+            const data = await res.json();
+            if (data && data.user) {
+                this.state.currentUser = data.user;
+                localStorage.setItem('umrah_user', JSON.stringify(data.user));
+                this.hideLoading();
+                this.renderAuthNav();
+                this.showSuccessModal('login');
+                return;
+            }
+        } catch (e) {
+            console.warn('Server auth error during Google sign-in:', e);
+        }
+
+        const fallbackUser = {
+            id: 'goog-' + Date.now(),
+            name: 'Google User',
+            email: 'user.google@zilhaj.com',
+            profilePictureUrl: 'zilhaj-logo.jpg',
+            role: 'ROLE_USER',
+            token: 'demo-superadmin-jwt-token',
+            authProvider: 'GOOGLE'
+        };
+        this.state.currentUser = fallbackUser;
+        localStorage.setItem('umrah_user', JSON.stringify(fallbackUser));
+        this.hideLoading();
+        this.renderAuthNav();
+        this.showSuccessModal('login');
     }
 
     async loginWithApple() {

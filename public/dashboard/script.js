@@ -772,7 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       // Asynchronously post to backend API database
-      const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
       fetch(apiBase + '/requirements', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

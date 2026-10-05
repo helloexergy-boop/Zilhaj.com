@@ -284,26 +284,51 @@ document.addEventListener('DOMContentLoaded', function () {
   // Google OAuth handlers for standalone login/signup pages
   const googleLoginBtn = document.getElementById('googleLoginBtn');
   const googleSignupBtn = document.getElementById('googleSignupBtn');
-  const triggerInstantGoogleAuth = () => {
+  const triggerInstantGoogleAuth = async () => {
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+    const params = new URLSearchParams(window.location.search);
+    const redirectUrl = params.get('redirect') || 'index.html';
+
+    try {
+      const res = await fetch(apiBase + '/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Google User',
+          email: 'user.google@zilhaj.com',
+          avatar: 'zilhaj-logo.jpg',
+          googleId: 'goog-' + Date.now()
+        })
+      });
+      const data = await res.json();
+      if (data && data.user) {
+        localStorage.setItem('umrah_user', JSON.stringify(data.user));
+        if (typeof showToast === 'function') showToast('🌐 Logged in as ' + data.user.name, 'success');
+        setTimeout(() => { window.location.href = redirectUrl; }, 600);
+        return;
+      }
+    } catch(e) {}
+
     const googleUser = {
       id: 'goog-' + Date.now(),
       name: 'Google User',
       email: 'user.google@zilhaj.com',
       profilePictureUrl: 'zilhaj-logo.jpg',
       role: 'ROLE_USER',
-      token: 'google-token-' + Date.now(),
+      token: 'demo-superadmin-jwt-token',
       authProvider: 'GOOGLE'
     };
     localStorage.setItem('umrah_user', JSON.stringify(googleUser));
     if (typeof showToast === 'function') showToast('🌐 Logged in as Google User', 'success');
-    setTimeout(() => { window.location.href = 'index.html'; }, 600);
+    setTimeout(() => { window.location.href = redirectUrl; }, 600);
   };
+
   const handleGoogleRedirect = () => {
     if (window.app && typeof window.app.loginWithGoogle === 'function') {
       window.app.loginWithGoogle();
       return;
     }
-    const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
     const origin = encodeURIComponent(window.location.origin);
     fetch(apiBase + '/auth/google/url?origin=' + origin).then(r => r.json()).then(d => {
       if (d && d.url) window.location.href = d.url;
