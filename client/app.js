@@ -2136,7 +2136,7 @@ class App {
             <section style="background: #ffffff; padding: 5rem 2.5rem 4.5rem; border-bottom: 1px solid #f1f5f9; position: relative; width: 100%; box-sizing: border-box;" id="liquidFeedbackSection">
                 <div class="liquid-glass-wrapper" style="max-width: 1320px; margin: 0 auto; padding: 0; width: 100%;">
                     <div class="reviews-section-header" style="margin-bottom: 3rem;">
-                        <h2 class="reviews-section-title">What Our <span>Customers</span>Say</h2>
+                        <h2 class="reviews-section-title">What Our <span>Customers</span> Say</h2>
                         <p class="reviews-section-subtitle">Real experiences from customers who posted their Hajj and Umrah requirements and received competitive offers.</p>
                     </div>
 
