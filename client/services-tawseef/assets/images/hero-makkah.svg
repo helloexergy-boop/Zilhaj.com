@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500" width="100%" height="100%" fill="none">
+  <defs>
+    <!-- Background Sky Gradient -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#041F16"/>
+      <stop offset="40%" stop-color="#083324"/>
+      <stop offset="75%" stop-color="#0E4A35"/>
+      <stop offset="100%" stop-color="#145E44"/>
+    </linearGradient>
+
+    <!-- Gold Accent Gradient -->
+    <linearGradient id="heroGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCEBA6"/>
+      <stop offset="40%" stop-color="#E5C158"/>
+      <stop offset="100%" stop-color="#C5A059"/>
+    </linearGradient>
+
+    <!-- Mataaf / Floor Gradient -->
+    <radialGradient id="mataafLight" cx="50%" cy="65%" r="55%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="45%" stop-color="#A7F3D0" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#083324" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Glow Effect -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Base Canvas / Night/Dawn Atmosphere -->
+  <rect width="600" height="500" rx="24" fill="url(#skyGrad)"/>
+
+  <!-- Subtle Geometric Pattern Overlay -->
+  <g opacity="0.08">
+    <circle cx="300" cy="220" r="180" stroke="#D4AF37" stroke-width="1.5" stroke-dasharray="6 6"/>
+    <circle cx="300" cy="220" r="140" stroke="#FFFFFF" stroke-width="1"/>
+    <circle cx="300" cy="220" r="100" stroke="#D4AF37" stroke-width="1"/>
+    <polygon points="300,60 340,160 440,180 360,250 380,350 300,290 220,350 240,250 160,180 260,160" stroke="#D4AF37" stroke-width="0.8" fill="none"/>
+  </g>
+
+  <!-- Divine Serene Crescent & Star in Sky -->
+  <g transform="translate(480, 50)" filter="url(#softGlow)">
+    <path d="M25 8 C16 10 12 18 15 26 C17 30 22 32 27 30 C19 32 12 24 16 16 C18 12 21 9 25 8 Z" fill="url(#heroGold)"/>
+    <polygon points="12,14 13.5,17.5 17,17.5 14,19.5 15,23 12,21 9,23 10,19.5 7,17.5 10.5,17.5" fill="url(#heroGold)"/>
+  </g>
+
+  <!-- Mosque Architectural Arches & Minarets Silhouette (Background) -->
+  <!-- Left Minaret -->
+  <g opacity="0.65">
+    <rect x="70" y="140" width="14" height="230" fill="#05251B"/>
+    <path d="M67 140 L77 90 L87 140 Z" fill="#05251B"/>
+    <circle cx="77" cy="85" r="4" fill="url(#heroGold)"/>
+    <rect x="65" y="200" width="24" height="6" rx="2" fill="#0F5132"/>
+    <rect x="65" y="270" width="24" height="6" rx="2" fill="#0F5132"/>
+  </g>
+
+  <!-- Right Minaret -->
+  <g opacity="0.65">
+    <rect x="516" y="140" width="14" height="230" fill="#05251B"/>
+    <path d="M513 140 L523 90 L533 140 Z" fill="#05251B"/>
+    <circle cx="523" cy="85" r="4" fill="url(#heroGold)"/>
+    <rect x="511" y="200" width="24" height="6" rx="2" fill="#0F5132"/>
+    <rect x="511" y="270" width="24" height="6" rx="2" fill="#0F5132"/>
+  </g>
+
+  <!-- Background Mosque Colonades / Arches -->
+  <g opacity="0.3" stroke="#A7F3D0" stroke-width="1.5" fill="none">
+    <path d="M120 360 L120 280 Q140 250 160 280 L160 360"/>
+    <path d="M160 360 L160 280 Q180 250 200 280 L200 360"/>
+    <path d="M200 360 L200 280 Q220 250 240 280 L240 360"/>
+    <path d="M360 360 L360 280 Q380 250 400 280 L400 360"/>
+    <path d="M400 360 L400 280 Q420 250 440 280 L440 360"/>
+    <path d="M440 360 L440 280 Q460 250 480 280 L480 360"/>
+  </g>
+
+  <!-- Mataaf Floor Light Beam -->
+  <ellipse cx="300" cy="380" rx="220" ry="85" fill="url(#mataafLight)"/>
+
+  <!-- Holy Kaaba Illustration (Centerpiece) -->
+  <g transform="translate(230, 240)">
+    <!-- Kaaba Shadow -->
+    <ellipse cx="70" cy="140" rx="90" ry="25" fill="#02130D" opacity="0.7"/>
+    
+    <!-- Left Face (Shadowed) -->
+    <polygon points="10,60 70,85 70,145 10,120" fill="#0F172A"/>
+    <!-- Kiswah Gold Band (Left) -->
+    <polygon points="10,72 70,97 70,103 10,78" fill="url(#heroGold)"/>
+
+    <!-- Right Face (Lit) -->
+    <polygon points="70,85 130,55 130,115 70,145" fill="#1E293B"/>
+    <!-- Kiswah Gold Band (Right) -->
+    <polygon points="70,97 130,67 130,73 70,103" fill="url(#heroGold)"/>
+
+    <!-- Kaaba Door (Bab al-Kaaba) Gold -->
+    <polygon points="85,92 105,82 105,122 85,132" fill="url(#heroGold)"/>
+    <line x1="95" y1="87" x2="95" y2="127" stroke="#9A7B2C" stroke-width="1"/>
+
+    <!-- Kaaba Roof (Top Face) -->
+    <polygon points="70,25 130,55 70,85 10,60" fill="#293548"/>
+    <!-- Mizab al-Rahmah (Gold Water Spout) -->
+    <path d="M40 70 L30 75" stroke="url(#heroGold)" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Shadhrawan (Marble Base) -->
+    <polygon points="5,121 70,147 70,152 5,126" fill="#E2E8F0" opacity="0.9"/>
+    <polygon points="70,147 135,116 135,121 70,152" fill="#CBD5E1" opacity="0.9"/>
+  </g>
+
+  <!-- Pilgrims in Ihram (Circumambulating the Mataaf) -->
+  <g opacity="0.85">
+    <!-- Inner Rings of Pilgrims (White dots / soft silhouettes in circular flow) -->
+    <ellipse cx="300" cy="385" rx="140" ry="50" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="3 7" opacity="0.6"/>
+    <ellipse cx="300" cy="395" rx="175" ry="60" stroke="#E2E8F0" stroke-width="2.5" stroke-dasharray="4 9" opacity="0.5"/>
+    <ellipse cx="300" cy="405" rx="210" ry="70" stroke="#CBD5E1" stroke-width="3" stroke-dasharray="5 11" opacity="0.4"/>
+  </g>
+
+  <!-- Floating Trust Badge: 100% Verified Pilgrimage Providers -->
+  <g transform="translate(30, 390)">
+    <rect width="210" height="74" rx="14" fill="#FFFFFF" fill-opacity="0.95" filter="url(#softGlow)"/>
+    <rect width="210" height="74" rx="14" stroke="#E5C158" stroke-width="1.2"/>
+    
+    <!-- Shield Icon -->
+    <circle cx="34" cy="37" r="18" fill="#083324"/>
+    <path d="M34 27 L42 30 V37 C42 42 34 46 34 46 C34 46 26 42 26 37 V30 Z" fill="none" stroke="#E5C158" stroke-width="1.8"/>
+    <path d="M31 37 L33.5 39.5 L37.5 34.5" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Text -->
+    <text x="62" y="32" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="12" fill="#083324">Verified Ecosystem</text>
+    <text x="62" y="47" font-family="'Inter', sans-serif" font-weight="500" font-size="10" fill="#0F766E">Hajj &amp; Umrah Providers</text>
+    <text x="62" y="60" font-family="'Inter', sans-serif" font-weight="600" font-size="9" fill="#D4AF37">★ Trusted &amp; Transparent</text>
+  </g>
+
+  <!-- Floating Badge: One Request. Multiple Offers -->
+  <g transform="translate(370, 30)">
+    <rect width="195" height="54" rx="12" fill="#083324" fill-opacity="0.9" stroke="url(#heroGold)" stroke-width="1"/>
+    <circle cx="28" cy="27" r="12" fill="#10B981" fill-opacity="0.2"/>
+    <!-- Zap/Layer icon -->
+    <path d="M28 20 L23 27 H28 L27 34 L33 26 H28 Z" fill="#E5C158"/>
+    <text x="48" y="24" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="11" fill="#FFFFFF">1 Simple Request</text>
+    <text x="48" y="40" font-family="'Inter', sans-serif" font-weight="500" font-size="9.5" fill="#A7F3D0">Multiple Verified Offers</text>
+  </g>
+</svg>

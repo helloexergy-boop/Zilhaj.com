@@ -1236,7 +1236,17 @@ class App {
     }
 
     handleStartJourneyClick() {
-        window.location.href = '/submit-request';
+        let user = null;
+        try {
+            const raw = localStorage.getItem('umrah_user');
+            if (raw) user = JSON.parse(raw);
+        } catch (e) {}
+
+        if (!user || (!user.token && !user.email)) {
+            window.location.href = '/login?redirect=/submit-request';
+        } else {
+            window.location.href = '/submit-request';
+        }
     }
 
     setPilgrimageType(type) {

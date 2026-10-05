@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Operations Portal | ZILHAJ</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ops-bg: #0f172a;
+            --ops-card-bg: #1e293b;
+            --ops-border: #334155;
+            --ops-accent: #38bdf8;
+            --ops-green: #22c55e;
+            --ops-amber: #f59e0b;
+        }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--ops-bg);
+            color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .ops-header {
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid var(--ops-border);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .ops-brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ops-badge {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--ops-accent);
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+        .ops-container {
+            max-width: 1400px;
+            margin: 32px auto;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 24px;
+        }
+        .ops-panel {
+            background: var(--ops-card-bg);
+            border: 1px solid var(--ops-border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .request-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--ops-border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .request-item:hover, .request-item.active {
+            border-color: var(--ops-accent);
+            background: rgba(56, 189, 248, 0.05);
+        }
+        .status-pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: var(--ops-amber); }
+        .status-offers { background: rgba(56, 189, 248, 0.2); color: var(--ops-accent); }
+        .status-confirmed { background: rgba(34, 197, 94, 0.2); color: var(--ops-green); }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .inventory-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--ops-border);
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+        }
+        .inventory-card.selected {
+            border-color: var(--ops-green);
+            background: rgba(34, 197, 94, 0.05);
+        }
+        .btn-push {
+            background: var(--ops-accent);
+            color: #0f172a;
+            font-weight: 700;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .btn-push:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <header class="ops-header">
+        <div class="ops-brand">
+            <span>ZILHAJ</span>
+            <span class="ops-badge">Customer Operations Specialist Portal</span>
+        </div>
+        <div id="userInfo" style="font-size: 14px; color: #94a3b8;">
+            Logged in as: <strong id="userEmail" style="color:#fff;">specialist@zilhaj.com</strong>
+        </div>
+    </header>
+
+    <main class="ops-container">
+        <!-- LEFT COLUMN: Live Queue of Journey Requests -->
+        <section class="ops-panel">
+            <h3 style="margin-top:0; border-bottom: 1px solid var(--ops-border); padding-bottom: 12px; display:flex; justify-between; align-items:center;">
+                <span>Incoming Queue</span>
+                <span id="liveQueueDot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#22c55e;"></span>
+            </h3>
+            <div id="requestQueue">
+                <!-- Dynamic Request List -->
+            </div>
+        </section>
+
+        <!-- RIGHT COLUMN: Specialist Review & Offer Bundle Generator -->
+        <section class="ops-panel" id="detailPanel">
+            <div id="noSelectionState">
+                <p style="color: #94a3b8; text-align: center; margin-top: 60px;">Select a journey request from the left queue to review customer preferences and dispatch inventory offers.</p>
+            </div>
+            <div id="activeRequestDetail" style="display: none;">
+                <h2 id="reqTitle" style="margin-top: 0; color: var(--ops-accent);">Umrah Custom Journey</h2>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                    <div><span style="color:#94a3b8; font-size:12px;">Customer:</span> <br><strong id="reqCustomer">Tariq Ahmed</strong></div>
+                    <div><span style="color:#94a3b8; font-size:12px;">Departure City:</span> <br><strong id="reqCity">Delhi (DEL)</strong></div>
+                    <div><span style="color:#94a3b8; font-size:12px;">Travelers:</span> <br><strong id="reqTravelers">3 Persons</strong></div>
+                    <div><span style="color:#94a3b8; font-size:12px;">Duration:</span> <br><strong id="reqDuration">18 Days</strong></div>
+                    <div><span style="color:#94a3b8; font-size:12px;">Hotel Pref:</span> <br><strong id="reqHotel">5 Star Deluxe</strong></div>
+                    <div><span style="color:#94a3b8; font-size:12px;">Status:</span> <br><span id="reqStatusPill" class="status-pill status-pending">PENDING_REVIEW</span></div>
+                </div>
+
+                <h3>Available Inventory Options (Select 1 to 4 to Bundle)</h3>
+                <p style="font-size: 13px; color: #94a3b8;">Click on inventory packages below to attach them as verified options for this pilgrim.</p>
+                <div id="inventoryContainer" class="inventory-grid">
+                    <!-- Dynamic Inventory Items -->
+                </div>
+
+                <button id="btnDispatchOffers" class="btn-push" disabled>Dispatch Selected Offers to Customer (0 selected)</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="/js/realtime-client.js"></script>
+    <script>
+        let currentRequests = [];
+        let activeRequest = null;
+        let selectedInventory = new Set();
+        let availableInventory = [];
+
+        // Check authentication token
+        const token = localStorage.getItem('zilhaj_token') || sessionStorage.getItem('zilhaj_token');
+        if (!token) {
+            window.location.href = '/login?redirect=/subadmin';
+        }
+
+        async function fetchRequests() {
+            try {
+                const res = await fetch('/api/admin/requirements', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = '/login?redirect=/subadmin';
+                    return;
+                }
+                const data = await res.json();
+                currentRequests = data.requirements || data || [];
+                renderQueue();
+            } catch (err) {
+                console.error('Failed to fetch requests:', err);
+            }
+        }
+
+        async function fetchInventory() {
+            try {
+                const res = await fetch('/api/admin/inventory', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                availableInventory = data.inventory || data.packages || [];
+            } catch (err) {
+                console.error('Failed to fetch inventory:', err);
+            }
+        }
+
+        function renderQueue() {
+            const container = document.getElementById('requestQueue');
+            if (currentRequests.length === 0) {
+                container.innerHTML = '<p style="color:#94a3b8; font-size:13px;">No active journey requests in queue.</p>';
+                return;
+            }
+
+            container.innerHTML = currentRequests.map(r => `
+                <div class="request-item ${activeRequest && activeRequest.id === r.id ? 'active' : ''}" onclick="selectRequest('${r.id}')">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+                        <strong style="font-size:14px;">${r.id}</strong>
+                        <span class="status-pill status-${(r.status || 'pending').toLowerCase().includes('confirm') ? 'confirmed' : ((r.status || '').includes('OFFER') ? 'offers' : 'pending')}">${r.status || 'PENDING'}</span>
+                    </div>
+                    <div style="font-size:13px; color:#e2e8f0;">${r.customer || r.userName || 'Pilgrim'}</div>
+                    <div style="font-size:12px; color:#94a3b8;">${r.service || 'Umrah Journey'} (${r.travelers || 1} Travelers)</div>
+                </div>
+            `).join('');
+        }
+
+        function selectRequest(id) {
+            activeRequest = currentRequests.find(r => r.id === id);
+            selectedInventory.clear();
+            renderQueue();
+            renderDetail();
+        }
+
+        function renderDetail() {
+            if (!activeRequest) {
+                document.getElementById('noSelectionState').style.display = 'block';
+                document.getElementById('activeRequestDetail').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('noSelectionState').style.display = 'none';
+            document.getElementById('activeRequestDetail').style.display = 'block';
+
+            document.getElementById('reqTitle').textContent = `${activeRequest.id}: ${activeRequest.service || 'Umrah Journey'}`;
+            document.getElementById('reqCustomer').textContent = activeRequest.customer || activeRequest.userName;
+            document.getElementById('reqCity').textContent = activeRequest.departureCity || 'Delhi (DEL)';
+            document.getElementById('reqTravelers').textContent = `${activeRequest.travelers || 1} Persons`;
+            document.getElementById('reqDuration').textContent = activeRequest.duration || '18 Days';
+            document.getElementById('reqHotel').textContent = activeRequest.hotelType || '5 Star';
+
+            const pill = document.getElementById('reqStatusPill');
+            pill.textContent = activeRequest.status || 'PENDING_REVIEW';
+            pill.className = `status-pill status-${(activeRequest.status || '').toLowerCase().includes('confirm') ? 'confirmed' : ((activeRequest.status || '').includes('OFFER') ? 'offers' : 'pending')}`;
+
+            renderInventory();
+        }
+
+        function renderInventory() {
+            const container = document.getElementById('inventoryContainer');
+            if (availableInventory.length === 0) {
+                container.innerHTML = '<p style="color:#94a3b8; font-size:13px;">No inventory items found.</p>';
+                return;
+            }
+
+            container.innerHTML = availableInventory.map(item => {
+                const isSelected = selectedInventory.has(item.id || item._id);
+                return `
+                    <div class="inventory-card ${isSelected ? 'selected' : ''}" onclick="toggleInventory('${item.id || item._id}')">
+                        <strong style="color:#fff; font-size:14px; display:block;">${item.title || item.packageName}</strong>
+                        <span style="color:var(--ops-accent); font-weight:700;">₹${(item.price || 1).toLocaleString('en-IN')}</span>
+                        <div style="font-size:12px; color:#94a3b8; margin-top:8px;">
+                            <div>Seats Left: <strong>${item.availableSeats || 30}</strong></div>
+                            <div>Makkah: ${item.makkahHotelName || 'Al Safwa'}</div>
+                            <div>Madinah: ${item.madinahHotelName || 'Dar Al-Taqwa'}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const btn = document.getElementById('btnDispatchOffers');
+            btn.disabled = selectedInventory.size < 1 || selectedInventory.size > 4;
+            btn.textContent = `Dispatch Selected Offers to Customer (${selectedInventory.size} selected)`;
+        }
+
+        function toggleInventory(itemId) {
+            if (selectedInventory.has(itemId)) {
+                selectedInventory.delete(itemId);
+            } else {
+                if (selectedInventory.size >= 4) {
+                    alert('You can select a maximum of 4 inventory package options.');
+                    return;
+                }
+                selectedInventory.add(itemId);
+            }
+            renderInventory();
+        }
+
+        document.getElementById('btnDispatchOffers').addEventListener('click', async () => {
+            if (!activeRequest || selectedInventory.size === 0) return;
+
+            const selectedItems = availableInventory.filter(i => selectedInventory.has(i.id || i._id));
+            const btn = document.getElementById('btnDispatchOffers');
+            btn.disabled = true;
+            btn.textContent = 'Dispatching Offers...';
+
+            try {
+                const res = await fetch(`/api/admin/requirements/${activeRequest.id}/apply-inventory-offer`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        inventoryIds: Array.from(selectedInventory),
+                        selectedItems
+                    })
+                });
+
+                if (res.ok) {
+                    alert('Successfully pushed package offers to customer!');
+                    activeRequest.status = 'OFFERS_PROVIDED';
+                    renderQueue();
+                    renderDetail();
+                } else {
+                    const err = await res.json();
+                    alert('Failed to dispatch offers: ' + (err.error || 'Server error'));
+                }
+            } catch (e) {
+                alert('Connection error pushing offers.');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // Initialize Realtime Listener for Operations Queue
+        const realtime = new RealtimeSyncClient();
+        realtime.subscribe(['ops:queue']);
+        realtime.on('NEW_JOURNEY_REQUEST', (newReq) => {
+            console.log('[OPS PORTAL] Real-time request received:', newReq);
+            currentRequests.unshift(newReq);
+            renderQueue();
+        });
+
+        // Load data
+        fetchRequests();
+        fetchInventory();
+    </script>
+</body>
+</html>

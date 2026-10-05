@@ -1386,6 +1386,20 @@ app.post('/api/support/tickets/:issueId/messages', async (req, res) => {
     }
 });
 
+// 4b. CUSTOMER: Get Messages for Ticket
+app.get('/api/support/tickets/:issueId/messages', async (req, res) => {
+    try {
+        const user = supportService.resolveUser(req);
+        const details = supportService.getTicketDetails(req.params.issueId, user, true);
+        if (!details) {
+            return res.status(404).json({ success: false, message: 'Support ticket not found.' });
+        }
+        res.json({ success: true, messages: details.messages || [] });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Failed to fetch messages.' });
+    }
+});
+
 // 5. CUSTOMER: Reopen Ticket
 app.post('/api/support/tickets/:issueId/reopen', async (req, res) => {
     try {
@@ -1495,6 +1509,17 @@ app.post('/api/admin/support/tickets/:issueId/messages', async (req, res) => {
         res.status(201).json({ success: true, message: 'Message recorded successfully.', data: msg });
     } catch (err) {
         res.status(400).json({ success: false, message: err.message });
+    }
+});
+
+// 13b. ADMIN: Get Messages for Ticket
+app.get('/api/admin/support/tickets/:issueId/messages', async (req, res) => {
+    try {
+        const details = supportService.getTicketDetails(req.params.issueId, null, true);
+        if (!details) return res.status(404).json({ success: false, message: 'Ticket not found.' });
+        res.json({ success: true, messages: details.messages || [] });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Failed to fetch messages.' });
     }
 });
 
