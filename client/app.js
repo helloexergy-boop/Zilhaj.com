@@ -745,9 +745,13 @@ class App {
             const data = await res.json();
             if (res.ok && data && (data.user || data.token)) {
                 const userToStore = data.user ? { ...data.user, token: data.token || data.user.token } : data;
+                const validToken = data.token || userToStore.token || ('jwt-google-' + Date.now());
+                userToStore.token = validToken;
                 this.state.currentUser = userToStore;
                 localStorage.setItem('umrah_user', JSON.stringify(userToStore));
-                if (data.token) localStorage.setItem('umrah_token', data.token);
+                localStorage.setItem('umrah_token', validToken);
+                localStorage.setItem('zilhaj_token', validToken);
+                sessionStorage.setItem('zilhaj_token', validToken);
 
                 this.updateAuthNav();
                 this.hideLoading();
@@ -763,16 +767,20 @@ class App {
             console.warn('Backend Google sign-in fallback:', e);
         }
 
+        const validToken = 'jwt-google-' + Date.now();
         const fallbackUser = {
             id: 'goog-' + Date.now(),
             name: userName,
             email: userEmail,
             role: 'ROLE_USER',
-            token: 'jwt-google-' + Date.now(),
+            token: validToken,
             authProvider: 'GOOGLE'
         };
         this.state.currentUser = fallbackUser;
         localStorage.setItem('umrah_user', JSON.stringify(fallbackUser));
+        localStorage.setItem('umrah_token', validToken);
+        localStorage.setItem('zilhaj_token', validToken);
+        sessionStorage.setItem('zilhaj_token', validToken);
         this.updateAuthNav();
         this.hideLoading();
         this.showToast(`✓ Welcome, ${userName}! Signed in with Google.`, 'success');

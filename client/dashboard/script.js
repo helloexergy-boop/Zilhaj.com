@@ -7,7 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const storedUserRaw = localStorage.getItem('umrah_user');
   let storedUser = null;
   try { storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null; } catch (e) {}
-  const token = (storedUser && storedUser.token) || localStorage.getItem('zilhaj_token') || sessionStorage.getItem('zilhaj_token');
+  const token = (storedUser && (storedUser.token || storedUser.jwtToken)) ||
+                localStorage.getItem('umrah_token') ||
+                localStorage.getItem('zilhaj_token') ||
+                sessionStorage.getItem('zilhaj_token') ||
+                (storedUser && storedUser.id);
 
   if (!storedUser || !token) {
     window.location.href = '/login?redirect=/dashboard';

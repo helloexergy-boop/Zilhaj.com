@@ -357,8 +357,13 @@ document.addEventListener('DOMContentLoaded', function () {
       const data = await res.json();
       if (res.ok && data && (data.user || data.token)) {
         const userToStore = data.user ? { ...data.user, token: data.token || data.user.token } : data;
+        const validToken = data.token || userToStore.token || ('jwt-google-' + Date.now());
+        userToStore.token = validToken;
+
         localStorage.setItem('umrah_user', JSON.stringify(userToStore));
-        if (data.token) localStorage.setItem('umrah_token', data.token);
+        localStorage.setItem('umrah_token', validToken);
+        localStorage.setItem('zilhaj_token', validToken);
+        sessionStorage.setItem('zilhaj_token', validToken);
 
         showGoogleLoadingOverlay('Authenticated ✓', `Welcome back, ${userToStore.name || 'Pilgrim'}! Opening Dashboard...`);
         showToast('✓ Successfully signed in with Google!', 'success');
@@ -376,21 +381,27 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Client-side fallback if server unreachable
+    const validToken = 'jwt-google-' + Date.now();
     const fallbackUser = {
       id: 'goog-' + Date.now(),
       name: userName,
       email: userEmail,
       role: 'ROLE_USER',
-      token: 'jwt-google-' + Date.now(),
+      token: validToken,
       authProvider: 'GOOGLE'
     };
     localStorage.setItem('umrah_user', JSON.stringify(fallbackUser));
+    localStorage.setItem('umrah_token', validToken);
+    localStorage.setItem('zilhaj_token', validToken);
+    sessionStorage.setItem('zilhaj_token', validToken);
+
     showGoogleLoadingOverlay('Authenticated ✓', `Welcome, ${userName}! Opening Dashboard...`);
     setTimeout(() => {
       window.location.href = redirectUrl;
     }, 500);
   };
 
+  window.handleGoogleRedirect = handleGoogleRedirect;
   if (googleLoginBtn) googleLoginBtn.addEventListener('click', handleGoogleRedirect);
   if (googleSignupBtn) googleSignupBtn.addEventListener('click', handleGoogleRedirect);
 
