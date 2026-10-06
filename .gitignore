@@ -6,4 +6,6 @@ api/target/
 .vscode/
 .env
 test-results/
-
+client/invoices/
+public/invoices/
+*.pdf
