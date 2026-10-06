@@ -1192,17 +1192,163 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
+// Google OAuth Credentials
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '494454822164-fucbkt6r86f3k89m9r209dirh5ca8f1q.apps.googleusercontent.com';
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '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';
+
 // Google OAuth URL endpoint
 app.get('/api/auth/google/url', (req, res) => {
     const origin = req.query.origin || (req.headers.referer ? new URL(req.headers.referer).origin : 'http://localhost:3000');
-    if (process.env.GOOGLE_CLIENT_ID) {
-        const redirectUri = encodeURIComponent(`${origin}/api/auth/google/callback`);
-        const scope = encodeURIComponent('openid email profile');
-        const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&prompt=select_account`;
-        return res.json({ success: true, url, clientConfigured: true });
-    }
-    res.json({ success: true, url: null, clientConfigured: false, message: 'Google Client ID not configured in .env' });
+    const redirectPath = req.query.path || '/api/auth/google/callback';
+    const redirectUri = encodeURIComponent(`${origin}${redirectPath}`);
+    const scope = encodeURIComponent('openid email profile');
+    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&prompt=select_account`;
+    res.json({ success: true, url, clientId: GOOGLE_CLIENT_ID, clientConfigured: true });
 });
+
+// Google OAuth Callback Handler (Handles code exchange, MongoDB sync, and instant session establishment)
+const handleGoogleCallback = async (req, res) => {
+    const { code, error } = req.query;
+    if (error || !code) {
+        return res.redirect(`/login.html?error=${encodeURIComponent(error || 'Google login cancelled')}`);
+    }
+    try {
+        const origin = `${req.protocol}://${req.get('host')}`;
+        const redirectUri = `${origin}${req.path}`;
+
+        // 1. Exchange authorization code for Google access token
+        const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                code,
+                client_id: GOOGLE_CLIENT_ID,
+                client_secret: GOOGLE_CLIENT_SECRET,
+                redirect_uri: redirectUri,
+                grant_type: 'authorization_code'
+            })
+        });
+
+        const tokenData = await tokenRes.json();
+        let profile = null;
+
+        if (tokenData.access_token) {
+            const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                headers: { Authorization: `Bearer ${tokenData.access_token}` }
+            });
+            profile = await userRes.json();
+        } else if (tokenData.id_token) {
+            const parts = tokenData.id_token.split('.');
+            profile = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+        }
+
+        if (!profile || !profile.email) {
+            console.error('Google token exchange error:', tokenData);
+            return res.redirect(`/login.html?error=${encodeURIComponent(tokenData.error_description || 'Unable to retrieve Google profile')}`);
+        }
+
+        const cleanEmail = profile.email.toLowerCase().trim();
+        const db = await connectToDatabase();
+        let user = null;
+
+        if (db) {
+            user = await db.collection('users').findOne({ email: cleanEmail });
+            if (!user) {
+                user = {
+                    id: 'usr-' + Date.now(),
+                    name: profile.name || cleanEmail.split('@')[0],
+                    email: cleanEmail,
+                    googleId: profile.id || profile.sub || '',
+                    role: 'ROLE_USER',
+                    picture: profile.picture || '',
+                    isVerified: true,
+                    isStaffEnabled: true,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                };
+                await db.collection('users').insertOne(user);
+            } else {
+                const updateFields = { isVerified: true, isStaffEnabled: true, updatedAt: new Date() };
+                if (profile.picture) updateFields.picture = profile.picture;
+                if (profile.name && (!user.name || user.name === cleanEmail.split('@')[0])) updateFields.name = profile.name;
+                await db.collection('users').updateOne({ _id: user._id }, { $set: updateFields });
+            }
+        }
+
+        const userObj = user || { id: 'usr-' + Date.now(), email: cleanEmail, name: profile.name, role: 'ROLE_USER' };
+        const token = generateAuthToken(userObj);
+        adminSessions.set(token, cleanEmail);
+
+        const userDto = { ...toUserDTO(userObj), token };
+        const isStaff = userObj.role === 'ROLE_ADMIN' || userObj.role === 'ROLE_SUBADMIN' || userObj.email === 'admin@umrah.com';
+        const targetUrl = isStaff ? '/admin/index.html' : '/dashboard/index.html';
+
+        res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <title>Authenticating with Google - ZILHAJ</title>
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+                <style>
+                    body {
+                        margin: 0;
+                        height: 100vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: #0B1E17;
+                        color: #ffffff;
+                        font-family: 'Plus Jakarta Sans', sans-serif;
+                    }
+                    .loader-card {
+                        background: #ffffff;
+                        color: #0F172A;
+                        padding: 40px 36px;
+                        border-radius: 24px;
+                        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+                        text-align: center;
+                        max-width: 380px;
+                        width: 90%;
+                    }
+                    .spinner {
+                        width: 52px;
+                        height: 52px;
+                        border: 4px solid #E2E8F0;
+                        border-top-color: #0F5A47;
+                        border-right-color: #F59E0B;
+                        border-radius: 50%;
+                        animation: spin 0.8s linear infinite;
+                        margin: 0 auto 20px;
+                    }
+                    @keyframes spin { to { transform: rotate(360deg); } }
+                </style>
+            </head>
+            <body>
+                <div class="loader-card">
+                    <div class="spinner"></div>
+                    <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 800; color: #0F5A47;">Authentication Verified!</h2>
+                    <p style="margin: 0; font-size: 14px; color: #64748B;">Welcome to ZILHAJ, ${userObj.name || 'Pilgrim'}. Opening Dashboard...</p>
+                </div>
+                <script>
+                    localStorage.setItem('umrah_user', ${JSON.stringify(JSON.stringify(userDto))});
+                    setTimeout(function() {
+                        window.location.href = '${targetUrl}';
+                    }, 400);
+                </script>
+            </body>
+            </html>
+        `);
+    } catch (err) {
+        console.error('Google callback error:', err);
+        res.redirect(`/login.html?error=${encodeURIComponent('Google login error: ' + err.message)}`);
+    }
+};
+
+app.get('/api/auth/google/callback', handleGoogleCallback);
+app.get('/login/oauth2/code/google', handleGoogleCallback);
 
 app.post('/api/auth/google', async (req, res) => {
     try {
