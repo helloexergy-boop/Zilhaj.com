@@ -1,0 +1,26 @@
+# Zilhaj.com Robots.txt File
+# Allow all search engine crawlers (Googlebot, Bingbot, Slurp, DuckDuckBot, Yandex, etc.)
+
+User-agent: *
+Allow: /
+Allow: /umrah-packages
+Allow: /hajj-packages
+Allow: /mecca-medina-guide
+Allow: /pricing
+Allow: /login
+Allow: /signup
+Allow: /dashboard
+Allow: /about
+Allow: /contact
+Allow: /faqs
+Allow: /blog
+Allow: /blog/*
+Allow: /terms
+Allow: /privacy
+Allow: /support
+
+# Disallow private internal admin endpoints
+Disallow: /api/admin/
+
+# Sitemap Location
+Sitemap: https://onerequest.in/sitemap.xml
