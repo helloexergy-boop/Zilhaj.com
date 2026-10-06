@@ -269,9 +269,9 @@ document.addEventListener('DOMContentLoaded', function () {
       const found = users.find(u => (u.email && u.email.toLowerCase() === cleanEmail) || u.phone === cleanEmail);
       if (found && (found.password === passwordVal || passwordVal.length >= 6)) {
         localStorage.setItem('umrah_user', JSON.stringify(found));
-        const isStaff = userToStore.role === 'ROLE_ADMIN' || userToStore.role === 'ROLE_SUBADMIN' || userToStore.email === 'admin@umrah.com';
-            const dest = isStaff ? '/admin/index.html' : '/dashboard/index.html';
-            showLoginSuccessPopup('Login Successful!', isStaff ? 'Welcome Admin! Opening Admin Panel...' : 'Welcome back to ZILHAJ! Opening Dashboard...', dest);
+        const isStaff = found.role === 'ROLE_ADMIN' || found.role === 'ROLE_SUBADMIN' || found.email === 'admin@umrah.com';
+        const dest = isStaff ? '/admin/index.html' : '/dashboard/index.html';
+        showLoginSuccessPopup('Login Successful!', isStaff ? 'Welcome Admin! Opening Admin Panel...' : 'Welcome back to ZILHAJ! Opening Dashboard...', dest);
         return;
       }
     } catch (e) {}
@@ -284,44 +284,113 @@ document.addEventListener('DOMContentLoaded', function () {
   // Google OAuth handlers for standalone login/signup pages
   const googleLoginBtn = document.getElementById('googleLoginBtn');
   const googleSignupBtn = document.getElementById('googleSignupBtn');
-  const triggerInstantGoogleAuth = async () => {
+
+  const triggerInstantGoogleAuth = async (customEmail, customName) => {
     const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
     const params = new URLSearchParams(window.location.search);
-    const redirectUrl = params.get('redirect') || 'index.html';
+    const redirectUrl = params.get('redirect') || '/dashboard/index.html';
+
+    const emailToUse = customEmail || 'user.google@zilhaj.com';
+    const nameToUse = customName || (emailToUse.includes('@') ? emailToUse.split('@')[0] : 'Google User');
 
     try {
       const res = await fetch(apiBase + '/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: 'Google User',
-          email: 'user.google@zilhaj.com',
+          name: nameToUse,
+          email: emailToUse,
           avatar: 'zilhaj-logo.jpg',
           googleId: 'goog-' + Date.now()
         })
       });
       const data = await res.json();
-      if (data && data.user) {
-        localStorage.setItem('umrah_user', JSON.stringify(data.user));
-        if (typeof showToast === 'function') showToast('🌐 Logged in as ' + data.user.name, 'success');
-        setTimeout(() => { window.location.href = redirectUrl; }, 600);
+      if (data && (data.user || data.token)) {
+        const u = data.user || { name: nameToUse, email: emailToUse, role: 'ROLE_USER', token: data.token };
+        localStorage.setItem('umrah_user', JSON.stringify(u));
+        showLoginSuccessPopup('Google Login Successful!', 'Welcome to ZILHAJ! Opening Dashboard...', redirectUrl);
         return;
       }
-    } catch(e) {}
+    } catch(e) {
+      console.warn('Google server auth fallback:', e);
+    }
 
-    const googleUser = {
+    const fallbackUser = {
       id: 'goog-' + Date.now(),
-      name: 'Google User',
-      email: 'user.google@zilhaj.com',
+      name: nameToUse,
+      email: emailToUse,
       profilePictureUrl: 'zilhaj-logo.jpg',
       role: 'ROLE_USER',
-      token: 'demo-superadmin-jwt-token',
+      token: 'demo-google-jwt-token',
       authProvider: 'GOOGLE'
     };
-    localStorage.setItem('umrah_user', JSON.stringify(googleUser));
-    if (typeof showToast === 'function') showToast('🌐 Logged in as Google User', 'success');
-    setTimeout(() => { window.location.href = redirectUrl; }, 600);
+    localStorage.setItem('umrah_user', JSON.stringify(fallbackUser));
+    showLoginSuccessPopup('Google Login Successful!', 'Welcome to ZILHAJ! Opening Dashboard...', redirectUrl);
   };
+
+  function showGoogleAccountModal() {
+    const existing = document.getElementById('googleAuthModalOverlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'googleAuthModalOverlay';
+    overlay.style.cssText = 'position:fixed; inset:0; z-index:999999; background:rgba(15,23,42,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; padding:16px;';
+    overlay.innerHTML = `
+      <div style="background:#ffffff; border-radius:20px; width:100%; max-width:440px; padding:32px 28px; box-shadow:0 25px 60px rgba(0,0,0,0.25); text-align:center; font-family:'Plus Jakarta Sans',sans-serif; position:relative;">
+        <button id="closeGoogleModalBtn" style="position:absolute; top:18px; right:18px; background:none; border:none; font-size:22px; cursor:pointer; color:#64748B;">&times;</button>
+        <div style="width:56px; height:56px; border-radius:50%; background:#F8FAFC; border:1.5px solid #E2E8F0; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+          <svg style="width:28px; height:28px;" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+        </div>
+        <h3 style="font-size:20px; font-weight:800; color:#0F172A; margin:0 0 6px;">Sign in with Google</h3>
+        <p style="font-size:13.5px; color:#64748B; margin:0 0 20px;">Choose an account to continue to ZILHAJ</p>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;">
+          <button id="googleQuickBtn" style="display:flex; align-items:center; gap:12px; padding:12px 16px; border:1.5px solid #E2E8F0; border-radius:12px; background:#F8FAFC; cursor:pointer; text-align:left; transition:all 0.2s;">
+            <div style="width:36px; height:36px; border-radius:50%; background:#0F5A47; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700;">G</div>
+            <div style="flex:1;">
+              <div style="font-weight:700; font-size:14px; color:#0F172A;">Google User</div>
+              <div style="font-size:12px; color:#64748B;">user.google@zilhaj.com</div>
+            </div>
+            <span style="color:#0F5A47; font-weight:700; font-size:13px;">Select →</span>
+          </button>
+        </div>
+        <div style="display:flex; align-items:center; margin:16px 0; gap:8px;">
+          <div style="flex:1; height:1px; background:#E2E8F0;"></div>
+          <span style="font-size:11.5px; color:#94A3B8; font-weight:600;">or use another Gmail</span>
+          <div style="flex:1; height:1px; background:#E2E8F0;"></div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <input type="email" id="googleCustomEmailInput" placeholder="your.name@gmail.com" style="flex:1; height:44px; border:1.5px solid #CBD5E1; border-radius:10px; padding:0 14px; font-size:13.5px; outline:none;">
+          <button id="googleCustomSubmitBtn" style="height:44px; padding:0 18px; background:#0F5A47; color:#fff; border:none; border-radius:10px; font-weight:700; font-size:13.5px; cursor:pointer;">Continue</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const closeBtn = document.getElementById('closeGoogleModalBtn');
+    if (closeBtn) closeBtn.addEventListener('click', () => overlay.remove());
+
+    const quickBtn = document.getElementById('googleQuickBtn');
+    if (quickBtn) quickBtn.addEventListener('click', () => {
+      overlay.remove();
+      triggerInstantGoogleAuth('user.google@zilhaj.com', 'Google User');
+    });
+
+    const submitBtn = document.getElementById('googleCustomSubmitBtn');
+    if (submitBtn) submitBtn.addEventListener('click', () => {
+      const email = document.getElementById('googleCustomEmailInput').value.trim();
+      if (!email || !isValidEmail(email)) {
+        showToast('Please enter a valid Gmail / Google email address');
+        return;
+      }
+      overlay.remove();
+      triggerInstantGoogleAuth(email, email.split('@')[0]);
+    });
+  }
 
   const handleGoogleRedirect = () => {
     if (window.app && typeof window.app.loginWithGoogle === 'function') {
@@ -330,10 +399,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
     const origin = encodeURIComponent(window.location.origin);
-    fetch(apiBase + '/auth/google/url?origin=' + origin).then(r => r.json()).then(d => {
+    fetch(apiBase + '/auth/google/url?origin=' + origin).then(r => {
+      if (!r.ok) throw new Error('Not configured');
+      return r.json();
+    }).then(d => {
       if (d && d.url) window.location.href = d.url;
-      else triggerInstantGoogleAuth();
-    }).catch(() => triggerInstantGoogleAuth());
+      else showGoogleAccountModal();
+    }).catch(() => showGoogleAccountModal());
   };
   if (googleLoginBtn) googleLoginBtn.addEventListener('click', handleGoogleRedirect);
   if (googleSignupBtn) googleSignupBtn.addEventListener('click', handleGoogleRedirect);
