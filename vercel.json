@@ -1,0 +1,87 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "client/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/oauth2/callback(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/services",
+      "dest": "/client/services.html"
+    },
+    {
+      "src": "/about",
+      "dest": "/client/about.html"
+    },
+    {
+      "src": "/login",
+      "dest": "/client/login.html"
+    },
+    {
+      "src": "/signup",
+      "dest": "/client/signup.html"
+    },
+    {
+      "src": "/register",
+      "dest": "/client/signup.html"
+    },
+    {
+      "src": "/submit-request",
+      "dest": "/client/submit-request.html"
+    },
+    {
+      "src": "/checkout",
+      "dest": "/client/checkout.html"
+    },
+    {
+      "src": "/dashboard/(.*)",
+      "dest": "/client/dashboard/$1"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/client/dashboard/index.html"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "/client/admin/$1"
+    },
+    {
+      "src": "/admin",
+      "dest": "/client/admin/index.html"
+    },
+    {
+      "src": "/subadmin/(.*)",
+      "dest": "/client/subadmin/$1"
+    },
+    {
+      "src": "/subadmin",
+      "dest": "/client/subadmin/index.html"
+    },
+    {
+      "src": "/ops/(.*)",
+      "dest": "/client/subadmin/$1"
+    },
+    {
+      "src": "/ops",
+      "dest": "/client/subadmin/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/client/$1"
+    }
+  ]
+}

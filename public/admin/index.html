@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZILHAJ Admin Panel - One Request. Multiple Verified Offers.</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Amiri:wght@700&display=swap" rel="stylesheet">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/admin/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Top Navbar -->
+    <header class="navbar">
+      <div class="navbar-inner">
+        
+        <!-- Left: Logo & Tagline -->
+        <div class="brand-section" onclick="navigateToTab('dashboard')" style="cursor: pointer; display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); flex-shrink: 0;">
+            <img src="/logo.png" onerror="this.onerror=null;this.src='/images/logo.png';" alt="Zilhaj.com Logo" style="width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%;">
+          </div>
+          <div style="display: flex; flex-direction: column; line-height: 1.1;">
+            <span class="brand-name" style="font-size: 1.3rem; font-weight: 900; color: #0f172a; letter-spacing: 0.5px;">Zilhaj.com</span>
+            <span style="font-size: 0.65rem; font-weight: 800; color: #047857; letter-spacing: 0.8px; text-transform: uppercase;">ADMIN PORTAL</span>
+          </div>
+          <span class="brand-tagline">One Request. Multiple Verified Offers.</span>
+        </div>
+
+        <!-- Right: Notifications & Profile -->
+        <div class="navbar-right">
+          <button class="icon-btn" onclick="openModal('notifications-modal')" title="Notifications">
+            <span>🔔</span>
+            <span class="badge-dot" id="header-notif-dot">0</span>
+          </button>
+
+          <div class="admin-profile-pill" id="admin-profile-trigger" onclick="toggleAdminMenu(event)">
+            <div class="admin-avatar" id="header-admin-avatar">AD</div>
+            <div>
+              <div class="admin-role" id="header-admin-role">Admin Desk</div>
+              <div class="admin-name" id="header-admin-name">Administrator</div>
+            </div>
+            <span style="font-size: 10px; color: var(--text-light); margin-left: 2px;">▼</span>
+          </div>
+
+          <!-- Dropdown menu for Admin -->
+          <div id="admin-dropdown-menu" style="display: none; position: absolute; top: 68px; right: 24px; background: #fff; border: 1px solid var(--border-light); border-radius: var(--radius-md); box-shadow: var(--shadow-xl); padding: 8px; z-index: 100; min-width: 180px;">
+            <div style="padding: 8px 12px; font-size: 12px; font-weight: 700; color: var(--text-main); border-bottom: 1px solid var(--border-subtle);" id="dropdown-user-email">admin@zilhaj.com</div>
+            <button onclick="window.location.href='/dashboard/index.html'" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; font-size: 12px; color: var(--text-body); text-align: left; border-radius: var(--radius-sm); transition: background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
+              <span>👤</span> User Portal
+            </button>
+            <button onclick="handleAdminLogout()" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; font-size: 12px; color: #dc2626; text-align: left; border-radius: var(--radius-sm); transition: background 0.15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">
+              <span>🚪</span> Sign Out
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Layout Body: Sidebar + Views -->
+    <div class="main-layout">
+      
+      <!-- Left Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-menu">
+          <button class="sidebar-btn active" data-tab="dashboard" onclick="navigateToTab('dashboard')">
+            <div class="sidebar-btn-left">
+              <span>🏠</span>
+              <span>Dashboard</span>
+            </div>
+          </button>
+
+          <button class="sidebar-btn" data-tab="requests" onclick="navigateToTab('requests')">
+            <div class="sidebar-btn-left">
+              <span>📋</span>
+              <span>Requests</span>
+            </div>
+            <span class="tab-badge" id="sidebar-req-count-badge">0</span>
+          </button>
+
+          <button class="sidebar-btn" data-tab="inventory" id="sidebar-tab-inventory" onclick="navigateToTab('inventory')">
+            <div class="sidebar-btn-left">
+              <span>📦</span>
+              <span>Package Inventory</span>
+            </div>
+            <span class="tab-badge" id="sidebar-inventory-badge" style="background: #047857; color: #fff; display: inline-block;">0</span>
+          </button>
+
+          <button class="sidebar-btn" data-tab="users" onclick="navigateToTab('users')">
+            <div class="sidebar-btn-left">
+              <span>👥</span>
+              <span>Users</span>
+            </div>
+          </button>
+
+          <button class="sidebar-btn" data-tab="sub-admins" onclick="navigateToTab('sub-admins')">
+            <div class="sidebar-btn-left">
+              <span>🛡️</span>
+              <span>Sub Admins</span>
+            </div>
+          </button>
+
+          <button class="sidebar-btn" data-tab="agents" onclick="navigateToTab('agents')">
+            <div class="sidebar-btn-left">
+              <span>🏢</span>
+              <span>Agents / Providers</span>
+            </div>
+          </button>
+
+          <button class="sidebar-btn" data-tab="reports" onclick="navigateToTab('reports')">
+            <div class="sidebar-btn-left">
+              <span>📊</span>
+              <span>Reports</span>
+            </div>
+          </button>
+
+          <button class="sidebar-btn" data-tab="support" id="sidebar-tab-support" onclick="navigateToTab('support')">
+            <div class="sidebar-btn-left">
+              <span>🎧</span>
+              <span>Customer Care</span>
+            </div>
+            <span class="tab-badge" id="sidebar-support-badge" style="background: #ef4444; color: #fff; display: inline-block;">0</span>
+          </button>
+        </div>
+
+        <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-light);">
+          <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md); padding: 12px; font-size: 11px; color: #065f46;">
+            <div style="display: flex; align-items: center; gap: 6px; font-weight: 800;">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+              <span>Live Database Connected</span>
+            </div>
+            <div style="font-size: 10px; color: #047857; margin-top: 4px;">Real-time sync active (MongoDB Atlas)</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content Area with View Panels -->
+      <main class="content-area">
+
+        <!-- ======================================================= -->
+        <!-- 1. DASHBOARD VIEW (Screenshot 1) -->
+        <!-- ======================================================= -->
+        <section id="dashboard-view" class="view-panel active">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Admin Dashboard</h1>
+              <p class="page-subtitle">Welcome back! Live real-time operations across pilgrimage requests and agency offers.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button onclick="refreshAllData(true)" class="btn btn-secondary btn-sm" title="Refresh Live Data">
+                <span>🔄</span>
+                <span>Refresh Live</span>
+              </button>
+              <div class="date-badge">
+                <span>📅</span>
+                <span id="dash-date-display">Today</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Stat Cards -->
+          <div class="kpi-grid-4">
+            <div class="kpi-card" onclick="navigateToTab('requests')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Total Requests</div>
+                <div class="kpi-value" id="dash-kpi-requests">0</div>
+                <div class="kpi-trend">↑ Live in database</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-green">📄</div>
+            </div>
+
+            <div class="kpi-card" onclick="navigateToTab('users')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Total Users</div>
+                <div class="kpi-value" id="dash-kpi-users">0</div>
+                <div class="kpi-trend">↑ Registered pilgrims</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-blue">👥</div>
+            </div>
+
+            <div class="kpi-card" onclick="navigateToTab('reports')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Bookings</div>
+                <div class="kpi-value" id="dash-kpi-bookings">0</div>
+                <div class="kpi-trend">↑ Confirmed orders</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-amber">🛡️</div>
+            </div>
+
+            <div class="kpi-card" onclick="navigateToTab('users')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Total Customers</div>
+                <div class="kpi-value" id="dash-kpi-customers">0</div>
+                <div class="kpi-trend">↑ Active accounts</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-teal">📅</div>
+            </div>
+          </div>
+
+          <!-- Row 1: Recent Requests + Sub Admins Performance -->
+          <div class="dash-row-main">
+            
+            <!-- Recent Requests Table -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Recent Requests</h3>
+                  <div class="filter-pills" style="margin-top: 8px;">
+                    <button class="pill-btn dash-filter-pill active" data-filter="All" id="dash-pill-all">All</button>
+                    <button class="pill-btn dash-filter-pill" data-filter="Hajj" id="dash-pill-hajj">Hajj</button>
+                    <button class="pill-btn dash-filter-pill" data-filter="Umrah" id="dash-pill-umrah">Umrah</button>
+                  </div>
+                </div>
+                <button onclick="navigateToTab('requests')" class="btn btn-secondary btn-sm" style="font-weight: 700; color: var(--primary);">
+                  View All →
+                </button>
+              </div>
+
+              <div class="table-container" style="border: none; box-shadow: none;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Customer</th>
+                      <th>Service</th>
+                      <th>Travel Date</th>
+                      <th>Status</th>
+                      <th style="text-align: center;">Offers</th>
+                      <th style="text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-recent-requests-tbody">
+                    <!-- Dynamic Live Rows -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Sub Admins Performance -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Sub Admins Performance</h3>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">By offers sent to customers</p>
+                  </div>
+                  <button onclick="navigateToTab('sub-admins')" class="btn btn-secondary btn-sm" style="color: var(--primary);">
+                    View All →
+                  </button>
+                </div>
+
+                <div style="text-align: right; font-size: 10px; font-weight: 700; color: var(--text-light); margin-bottom: 8px;">Offers Sent</div>
+                <div id="subadmins-chart-container">
+                  <!-- Dynamic Bar Chart Rows -->
+                </div>
+
+                <!-- X Axis Scale -->
+                <div style="display: flex; justify-content: space-between; padding-left: 140px; font-size: 10px; color: var(--text-light); font-family: monospace; margin-top: 6px;">
+                  <span>0</span>
+                  <span>10</span>
+                  <span>20</span>
+                  <span>30</span>
+                  <span>40</span>
+                  <span>50+</span>
+                </div>
+              </div>
+
+              <div style="padding-top: 14px; border-top: 1px solid var(--border-subtle); text-align: center; font-size: 11px; color: var(--text-muted);">
+                Total offers sent by sub admins in selected period
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Row 2: Customer Support + Booking Overview + Top Services -->
+          <div class="dash-row-bottom">
+            
+            <!-- Customer Support Overview -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-header">
+                  <h3 class="card-title">Customer Support Overview</h3>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0;">
+                  <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 12px 6px; text-align: center;">
+                    <div style="font-size: 14px;">👥</div>
+                    <div style="font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="cs-handled-count">0</div>
+                    <div style="font-size: 9px; color: var(--text-muted); line-height: 1.1; margin-top: 2px;">Handled</div>
+                  </div>
+
+                  <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 12px 6px; text-align: center;">
+                    <div style="font-size: 14px;">💬</div>
+                    <div style="font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="cs-active-count">0</div>
+                    <div style="font-size: 9px; color: var(--text-muted); line-height: 1.1; margin-top: 2px;">Active</div>
+                  </div>
+
+                  <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 12px 6px; text-align: center;">
+                    <div style="font-size: 14px;">✓</div>
+                    <div style="font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="cs-resolved-count">0</div>
+                    <div style="font-size: 9px; color: var(--text-muted); line-height: 1.1; margin-top: 2px;">Resolved</div>
+                  </div>
+
+                  <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-md); padding: 12px 6px; text-align: center;">
+                    <div style="font-size: 14px;">⭐</div>
+                    <div style="font-size: 18px; font-weight: 800; color: #b45309; margin-top: 2px;">5.0 <span style="font-size: 10px; font-weight: normal;">/5</span></div>
+                    <div style="font-size: 9px; color: #b45309; line-height: 1.1; margin-top: 2px;">Rating</div>
+                  </div>
+                </div>
+              </div>
+
+              <button onclick="navigateToTab('support')" class="btn btn-secondary" style="width: 100%;">
+                <span>💬</span>
+                <span>View All Inquiries</span>
+              </button>
+            </div>
+
+            <!-- Booking Overview -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-header">
+                  <h3 class="card-title">Booking Overview</h3>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0;">
+                  <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md); padding: 14px 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 900; color: #065f46;" id="booking-total-val">0</div>
+                    <div style="font-size: 11px; font-weight: 700; color: #047857; margin-top: 2px;">Total Bookings</div>
+                  </div>
+
+                  <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-md); padding: 14px 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 900; color: #b45309;" id="booking-process-val">0</div>
+                    <div style="font-size: 11px; font-weight: 700; color: #b45309; margin-top: 2px;">In Process</div>
+                  </div>
+
+                  <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-md); padding: 14px 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 900; color: #dc2626;" id="booking-cancel-val">0</div>
+                    <div style="font-size: 11px; font-weight: 700; color: #dc2626; margin-top: 2px;">Cancelled</div>
+                  </div>
+                </div>
+              </div>
+
+              <button onclick="navigateToTab('reports')" class="btn btn-secondary" style="width: 100%;">
+                <span>📅</span>
+                <span>View All Bookings</span>
+              </button>
+            </div>
+
+            <!-- Top Services Donut Chart -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-header">
+                  <h3 class="card-title">Top Services</h3>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin: 12px 0;">
+                  <!-- Custom SVG Donut -->
+                  <div class="donut-wrap">
+                    <svg viewBox="0 0 36 36" style="width: 120px; height: 120px; transform: rotate(-90deg);">
+                      <path stroke="#a7f3d0" stroke-width="4.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                      <path id="donut-stroke-fill" stroke="#0d5c3a" stroke-dasharray="63, 100" stroke-width="4.5" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    </svg>
+                    <div class="donut-label-center" id="donut-percent-label">63%</div>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; color: var(--text-main);">
+                        <span style="width: 10px; height: 10px; border-radius: 3px; background: var(--primary);"></span>
+                        <span>Umrah Packages</span>
+                      </div>
+                      <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); padding-left: 16px;" id="donut-umrah-legend">0 (0%)</div>
+                    </div>
+
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; color: var(--text-main);">
+                        <span style="width: 10px; height: 10px; border-radius: 3px; background: #a7f3d0;"></span>
+                        <span>Hajj Packages</span>
+                      </div>
+                      <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); padding-left: 16px;" id="donut-hajj-legend">0 (0%)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="text-align: center; font-size: 11px; color: var(--text-light); padding-top: 8px;">
+                Verified pilgrim demand index
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 2. REQUESTS VIEW (Screenshot 4) -->
+        <!-- ======================================================= -->
+        <section id="requests-view" class="view-panel">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Requests</h1>
+              <p class="page-subtitle">Manage all service requests submitted by customers.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button onclick="exportRequestsCsv()" class="btn btn-secondary">
+                <span>⬇️</span>
+                <span>Export</span>
+              </button>
+              <button onclick="openModal('new-request-modal')" class="btn btn-primary">
+                <span>+</span>
+                <span>New Request</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Category Selector Tabs -->
+          <div class="filter-pills" style="margin-bottom: 20px;">
+            <button class="pill-btn req-tab-pill active" data-filter="All" id="req-pill-all">All Requests</button>
+            <button class="pill-btn req-tab-pill" data-filter="Umrah" id="req-pill-umrah">Umrah</button>
+            <button class="pill-btn req-tab-pill" data-filter="Hajj" id="req-pill-hajj">Hajj</button>
+          </div>
+
+          <!-- 5 Status Metric Cards -->
+          <div class="kpi-grid-5">
+            <div class="kpi-card" onclick="setStatusFilter('In Progress')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">In Progress</div>
+                <div class="kpi-value" style="color: #b45309;" id="req-kpi-inprogress">0</div>
+                <div class="kpi-subtext" id="req-kpi-inprogress-pct">--</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-amber">🛡️</div>
+            </div>
+
+            <div class="kpi-card" onclick="setStatusFilter('Offers Ready')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Offers Ready</div>
+                <div class="kpi-value" style="color: #2563eb;" id="req-kpi-offersready">0</div>
+                <div class="kpi-subtext" id="req-kpi-offersready-pct">--</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-blue">👥</div>
+            </div>
+
+            <div class="kpi-card" onclick="setStatusFilter('Pending')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Pending</div>
+                <div class="kpi-value" style="color: #475569;" id="req-kpi-pending">0</div>
+                <div class="kpi-subtext" id="req-kpi-pending-pct">--</div>
+              </div>
+              <div class="kpi-icon-wrap" style="background: #f1f5f9; color: #475569;">📥</div>
+            </div>
+
+            <div class="kpi-card" onclick="setStatusFilter('Selected')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Selected</div>
+                <div class="kpi-value" style="color: #0f766e;" id="req-kpi-selected">0</div>
+                <div class="kpi-subtext" id="req-kpi-selected-pct">--</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-teal">✓</div>
+            </div>
+
+            <div class="kpi-card" onclick="setStatusFilter('Completed')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">Completed</div>
+                <div class="kpi-value" style="color: #047857;" id="req-kpi-completed">0</div>
+                <div class="kpi-subtext" id="req-kpi-completed-pct">--</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-green">🏆</div>
+            </div>
+          </div>
+
+          <!-- Filter Controls Bar -->
+          <div class="filter-bar">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="requests-search-input" class="search-input" placeholder="Search request ID, customer, phone...">
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <select id="requests-service-select" class="select-control" onchange="state.requestsFilter = this.value; renderRequestsList();">
+                <option value="All">Service Type: All</option>
+                <option value="Umrah">Umrah</option>
+                <option value="Hajj">Hajj</option>
+              </select>
+
+              <select id="requests-status-select" class="select-control">
+                <option value="All">Status: All</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Offers Ready">Offers Ready</option>
+                <option value="Pending">Pending</option>
+                <option value="Selected">Selected</option>
+                <option value="Completed">Completed</option>
+              </select>
+
+              <button onclick="clearRequestsFilters()" class="btn btn-secondary btn-sm" style="font-weight: 700;">
+                Clear Filters
+              </button>
+            </div>
+          </div>
+
+          <!-- Requests Table Container -->
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Customer</th>
+                  <th>Service</th>
+                  <th>Travel Date</th>
+                  <th>Travelers</th>
+                  <th>Status</th>
+                  <th style="text-align: center;">Offers</th>
+                  <th>Submitted On</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="requests-list-tbody">
+                <!-- Dynamic Live Requests Rows -->
+              </tbody>
+            </table>
+
+            <div class="pagination-bar">
+              <span id="requests-showing-count">Showing 0 requests</span>
+              <div class="page-numbers" id="requests-pagination-btns">
+                <!-- Page buttons -->
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 3. REQUEST DETAILS VIEW (Screenshot 3) -->
+        <!-- ======================================================= -->
+        <section id="request-details-view" class="view-panel">
+          
+          <div style="margin-bottom: 16px;">
+            <button onclick="navigateToTab('requests')" class="btn btn-secondary btn-sm" style="color: var(--primary); font-weight: 700;">
+              ← Back to Requests
+            </button>
+          </div>
+
+          <div class="page-header">
+            <div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <h1 class="page-title" id="req-detail-title-h1">Request Details</h1>
+                <div id="req-detail-badge-slot"></div>
+              </div>
+              <p id="req-detail-subtitle" class="page-subtitle">Submitted recently</p>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+              <button onclick="copyRequestInfo()" class="btn btn-secondary">
+                <span>📋</span>
+                <span>Copy Request Info</span>
+              </button>
+              <button onclick="openSelectFromInventoryModal()" class="btn btn-primary" style="background: #047857; font-weight: 800;">
+                <span>📦</span>
+                <span>Select from Inventory</span>
+              </button>
+              <button onclick="openModal('add-offer-modal')" class="btn btn-secondary">
+                <span>+</span>
+                <span>Custom Offer</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3 Info Cards Grid -->
+          <div class="req-details-grid">
+            
+            <!-- 1. Customer Information -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-header">
+                  <h3 class="card-title">Customer Information</h3>
+                </div>
+
+                <div style="display: flex; gap: 16px; margin-top: 12px;">
+                  <div class="avatar-circle" id="req-detail-cust-avatar" style="width: 48px; height: 48px; font-size: 16px; background: #d1fae5; color: #065f46;">
+                    PB
+                  </div>
+                  <div style="font-size: 12px; display: flex; flex-direction: column; gap: 6px;">
+                    <h4 id="req-detail-cust-name" style="font-size: 16px; font-weight: 800;">Customer</h4>
+                    <div style="color: var(--text-muted);">📧 <span id="req-detail-cust-email">customer@gmail.com</span></div>
+                    <div style="color: var(--text-muted);">📞 <span id="req-detail-cust-phone1">+91 98765 43210</span></div>
+                    <div style="color: var(--text-muted); line-height: 1.3; margin-top: 4px;">
+                      📍 <span id="req-detail-cust-address">India</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button onclick="openModal('payment-proof-modal')" class="btn btn-secondary" style="width: 100%; margin-top: 20px;">
+                <span>📄</span>
+                <span>View Payment Proof</span>
+              </button>
+            </div>
+
+            <!-- 2. Request Information -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Request Information</h3>
+              </div>
+
+              <div style="font-size: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Service Type</span>
+                  <span id="req-detail-service" style="font-weight: 800;">Umrah Package</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Travel Date</span>
+                  <span id="req-detail-date" style="font-weight: 800;">--</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Travelers</span>
+                  <span id="req-detail-travelers" style="font-weight: 800;">--</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Hotel Type</span>
+                  <span id="req-detail-hotel" style="font-weight: 800;">5 Star</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Duration</span>
+                  <span id="req-detail-duration" style="font-weight: 800;">25 Days</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Budget</span>
+                  <span id="req-detail-budget" style="font-weight: 800; color: var(--primary);">--</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Purpose of Travel</span>
+                  <span id="req-detail-purpose" style="font-weight: 800;">Family</span>
+                </div>
+
+                <div style="padding-top: 8px; border-top: 1px solid var(--border-subtle);">
+                  <span style="color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 4px;">Special Requests</span>
+                  <div id="req-detail-special-list" style="display: flex; flex-direction: column; gap: 2px;">
+                    <!-- Special Requests List -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Request Status & Workflow Stepper -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-header">
+                  <h3 class="card-title">Request Status</h3>
+                </div>
+
+                <!-- 5-Stage Workflow Stepper -->
+                <div id="req-stepper-container" class="stepper-wrap">
+                  <!-- Dynamic Stepper Nodes -->
+                </div>
+
+                <!-- Payment Proof Preview Card -->
+                <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 12px; display: flex; align-items: center; justify-content: space-between; margin-top: 16px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 36px; height: 36px; border-radius: var(--radius-md); background: #d1fae5; color: #065f46; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                      📄
+                    </div>
+                    <div>
+                      <div style="font-size: 12px; font-weight: 800; color: var(--text-main);">Payment Proof</div>
+                      <div style="font-size: 10px; color: var(--text-muted);" id="req-detail-proof-name">Receipt.jpg</div>
+                      <div style="font-size: 9px; color: var(--text-light);" id="req-detail-proof-time">Uploaded recently</div>
+                    </div>
+                  </div>
+
+                  <button onclick="openModal('payment-proof-modal')" class="btn btn-secondary btn-sm" style="font-weight: 800;">
+                    View
+                  </button>
+                </div>
+              </div>
+
+              <!-- Status Dropdown Selector -->
+              <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--border-subtle); margin-top: 14px;">
+                <span style="font-size: 12px; font-weight: 700; color: var(--text-body);">Request Status</span>
+                <select id="req-status-select" class="select-control" style="background: #fffbeb; border-color: #fde68a; color: #b45309; font-weight: 800;" onchange="handleStatusChange(this.value)">
+                  <option value="Pending">Pending</option>
+                  <option value="Collecting Offers">Collecting Offers</option>
+                  <option value="Offers Ready">Offers Ready</option>
+                  <option value="Selected">Selected</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Offers Section -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 id="req-offers-count-header" class="card-title">Offers (0)</h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Offers collected from verified agents for this request.</p>
+              </div>
+
+              <div style="display: flex; gap: 10px;">
+                <button onclick="openSelectFromInventoryModal()" class="btn btn-primary btn-sm" style="background: #047857; font-weight: 800;">
+                  <span>📦</span>
+                  <span>Select from Inventory</span>
+                </button>
+                <button onclick="openModal('add-offer-modal')" class="btn btn-secondary btn-sm">
+                  <span>+</span>
+                  <span>Custom Offer</span>
+                </button>
+                <button onclick="refreshAllData(true)" class="btn btn-secondary btn-sm">
+                  <span>🔄</span>
+                  <span>Refresh</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Offers 3-Col Grid -->
+            <div id="req-offers-grid" class="offers-grid">
+              <!-- Dynamic Offer Cards -->
+            </div>
+
+            <div class="info-banner" style="margin-top: 20px;">
+              <span>ℹ️</span>
+              <span>Customer will be able to see published offers only after status is changed to 'Offers Ready'.</span>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 3B. PACKAGE INVENTORY VIEW (CENTRAL REPOSITORY) -->
+        <!-- ======================================================= -->
+        <section id="inventory-view" class="view-panel">
+          <div class="page-header">
+            <div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <h1 class="page-title">Package Inventory</h1>
+                <span class="badge badge-active" id="inventory-total-badge" style="background: #dcfce7; color: #047857; font-weight: 800; font-size: 12px; padding: 4px 10px;">5 Packages</span>
+              </div>
+              <p class="page-subtitle">Central repository of pre-created agency packages. Easily attach pre-stored offers to customer requests with 1 click.</p>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+              <button onclick="refreshInventoryData(true)" class="btn btn-secondary">
+                <span>🔄</span>
+                <span>Refresh</span>
+              </button>
+              <button onclick="openModal('add-inventory-pkg-modal')" class="btn btn-primary" style="background: #047857; font-weight: 800;">
+                <span>+</span>
+                <span>Add Package to Inventory</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Inventory Filter Toolbar -->
+          <div class="card" style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 280px;">
+                <div style="position: relative; width: 100%;">
+                  <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light);">🔍</span>
+                  <input type="text" id="inventory-search-input" oninput="handleInventorySearch(this.value)" placeholder="Search inventory by title, agency, hotels, duration, price..." class="form-input" style="padding-left: 36px;">
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <select id="inventory-filter-service" onchange="handleInventoryFilterChange()" class="select-control">
+                  <option value="All">All Services</option>
+                  <option value="Umrah">Umrah Packages</option>
+                  <option value="Hajj">Hajj Packages</option>
+                </select>
+
+                <select id="inventory-filter-status" onchange="handleInventoryFilterChange()" class="select-control">
+                  <option value="All">All Status</option>
+                  <option value="Active">Active / Available</option>
+                  <option value="Inactive">Inactive / Draft</option>
+                </select>
+
+                <button onclick="resetInventoryFilters()" class="btn btn-secondary btn-sm">Reset</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inventory Cards Grid -->
+          <div id="inventory-cards-grid" class="offers-grid" style="grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));">
+            <!-- Dynamically Rendered Inventory Packages -->
+          </div>
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 4. USERS VIEW (Screenshot 2) -->
+        <!-- ======================================================= -->
+        <section id="users-view" class="view-panel">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Users</h1>
+              <p class="page-subtitle">Manage all registered users on the platform.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button onclick="exportUsersCsv()" class="btn btn-secondary">
+                <span>⬇️</span>
+                <span>Export Users</span>
+              </button>
+              <button onclick="openModal('add-subadmin-modal')" class="btn btn-primary">
+                <span>+</span>
+                <span>Add Sub Admin</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 5 User Metric Cards -->
+          <div class="kpi-grid-5">
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Total Customers</div>
+                <div id="users-kpi-total" class="kpi-value">0</div>
+                <div class="kpi-subtext">Registered customers</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-green">👥</div>
+            </div>
+
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">New This Month</div>
+                <div id="users-kpi-new" class="kpi-value" style="color: #2563eb;">0</div>
+                <div class="kpi-subtext">Recent registrations</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-blue">➕</div>
+            </div>
+
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Requested Users</div>
+                <div id="users-kpi-requested" class="kpi-value" style="color: #b45309;">0</div>
+                <div class="kpi-subtext">Users who made requests</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-amber">📄</div>
+            </div>
+
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Active Users</div>
+                <div id="users-kpi-active" class="kpi-value" style="color: #7c3aed;">0</div>
+                <div class="kpi-subtext">Active accounts</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-purple">👤</div>
+            </div>
+
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Pending Inquiries</div>
+                <div id="users-kpi-inactive" class="kpi-value" style="color: #dc2626;">0</div>
+                <div class="kpi-subtext">Not requested yet</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-rose">🚫</div>
+            </div>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="filter-bar">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="users-search-input" class="search-input" placeholder="Search by name, email or phone...">
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <select id="users-role-select" class="select-control">
+                <option value="All">All Roles</option>
+                <option value="Customer">Customer</option>
+              </select>
+
+              <select id="users-status-select" class="select-control">
+                <option value="All">All Status</option>
+                <option value="Request Submitted">Request Submitted</option>
+                <option value="Not Requested Yet">Not Requested Yet</option>
+              </select>
+
+              <button onclick="refreshAllData(true)" class="btn btn-secondary btn-sm">
+                <span>🔄</span>
+                <span>Refresh</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Users Table -->
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th>User Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Role</th>
+                  <th style="text-align: center;">Requests</th>
+                  <th>Joined On</th>
+                  <th>Last Active</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="users-list-tbody">
+                <!-- Dynamic Customer Rows -->
+              </tbody>
+            </table>
+
+            <div class="pagination-bar">
+              <span id="users-pagination-count">Showing 0 customers</span>
+              <div style="display: flex; align-items: center; gap: 16px;">
+                <div class="page-numbers" id="users-pagination-btns">
+                  <!-- Dynamic page buttons -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 5. SUB ADMINS VIEW (Screenshot 5) -->
+        <!-- ======================================================= -->
+        <section id="sub-admins-view" class="view-panel">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Sub Admins</h1>
+              <p class="page-subtitle">Manage and monitor sub admin members and their performance.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button onclick="exportSubAdminsCsv()" class="btn btn-secondary">
+                <span>⬇️</span>
+                <span>Export Sub Admins</span>
+              </button>
+              <button onclick="openModal('add-subadmin-modal')" class="btn btn-primary">
+                <span>+</span>
+                <span>Add Sub Admin</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3 Sub Admin Metric Cards -->
+          <div class="kpi-grid-3">
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Total Sub Admins</div>
+                <div class="kpi-value" style="color: #7c3aed;" id="subadmins-kpi-total">0</div>
+                <div class="kpi-subtext">All staff team members</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-purple">👥</div>
+            </div>
+
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Total Customers Booked</div>
+                <div class="kpi-value" style="color: #047857;" id="subadmins-kpi-booked">0</div>
+                <div class="kpi-subtext">By sub admin members</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-green">🏆</div>
+            </div>
+
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Total Customers Handled</div>
+                <div class="kpi-value" style="color: #2563eb;" id="subadmins-kpi-handled">0</div>
+                <div class="kpi-subtext">Requests processed</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-blue">👥</div>
+            </div>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="filter-bar">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="subadmins-search-input" class="search-input" placeholder="Search by name, email or phone...">
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <select id="subadmins-status-select" class="select-control">
+                <option value="All">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+
+              <select id="subadmins-role-select" class="select-control">
+                <option value="All">All Roles</option>
+                <option value="Senior Sub Admin">Senior Sub Admin</option>
+                <option value="Sub Admin">Sub Admin</option>
+              </select>
+
+              <button onclick="refreshAllData(true)" class="btn btn-secondary btn-sm">
+                <span>🔄</span>
+                <span>Refresh</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Sub Admins Table -->
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th>Sub Admin Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Role</th>
+                  <th style="text-align: center;">Customers Booked ⓘ</th>
+                  <th style="text-align: center;">Requests Handled</th>
+                  <th>Joined On</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="subadmins-list-tbody">
+                <!-- Dynamic Live Sub Admin Rows -->
+              </tbody>
+            </table>
+
+            <div class="info-banner" style="margin: 16px;">
+              <span>ℹ️</span>
+              <span>Sub admins can collect offers from agents and send them to customers. Performance is updated in real-time.</span>
+            </div>
+
+            <div class="pagination-bar">
+              <span id="subadmins-count-span">Showing sub admins</span>
+              <div class="page-numbers">
+                <button class="page-btn active">1</button>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 6. AGENTS & PROVIDERS VIEW -->
+        <!-- ======================================================= -->
+        <section id="agents-view" class="view-panel">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Agents & Providers</h1>
+              <p class="page-subtitle">Verified Umrah and Hajj agency partners delivering authentic packages.</p>
+            </div>
+            <button onclick="showToast('Agency registration verification active', 'info')" class="btn btn-primary">
+              <span>+</span>
+              <span>Register New Agent</span>
+            </button>
+          </div>
+
+          <div id="agents-grid-container" class="offers-grid">
+            <!-- Dynamic Agent Cards -->
+          </div>
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 7. REPORTS VIEW -->
+        <!-- ======================================================= -->
+        <section id="reports-view" class="view-panel">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Reports & Business Analytics</h1>
+              <p class="page-subtitle">Detailed metrics on pilgrim requests, agency turnaround, and booking conversions.</p>
+            </div>
+            <button onclick="exportReportsCsv()" class="btn btn-primary">
+              <span>⬇️</span>
+              <span>Download Executive Summary</span>
+            </button>
+          </div>
+
+          <div class="kpi-grid-4">
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Gross Bookings</div>
+                <div class="kpi-value" id="rep-gross-val">₹1.84 Cr</div>
+                <div class="kpi-trend">↑ Live platform aggregate</div>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Commission (5%)</div>
+                <div class="kpi-value" id="rep-comm-val">₹9.20 Lakh</div>
+                <div class="kpi-trend">↑ Service fee earnings</div>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Conversion Rate</div>
+                <div class="kpi-value" id="rep-conv-val">68.4%</div>
+                <div class="kpi-trend">↑ Request to book ratio</div>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Avg. Turnaround</div>
+                <div class="kpi-value">2.4 Hrs</div>
+                <div class="kpi-trend">↓ Faster agent response</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+              <h3 class="card-title">Completed Orders & Payment Transactions</h3>
+              <button onclick="refreshAllData(true)" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+            </div>
+            <div class="table-container" style="border: none;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Booking ID</th>
+                    <th>Package Title</th>
+                    <th>Agency</th>
+                    <th>Travelers</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="reports-bookings-tbody">
+                  <!-- Populated from DB bookings -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- 8. CUSTOMER CARE / SUPPORT PORTAL VIEW (Executive Desk) -->
+        <!-- ======================================================= -->
+        <section id="support-view" class="view-panel">
+
+          <!-- Executive Desk Header -->
+          <div class="page-header" style="align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <h1 class="page-title" style="margin-bottom: 0;">ZILHAJ Support Portal</h1>
+                <div class="live-line-indicator">
+                  <span class="pulse-dot"></span>
+                  <span>Line Active</span>
+                </div>
+              </div>
+              <p class="page-subtitle" style="margin-top: 4px;">Executive Desk — 24/7 Pilgrim Inquiries, Live Ticketing & On-Call Issue Resolution</p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <!-- Customer Care Executive Profile Badge -->
+              <div style="display: flex; align-items: center; gap: 10px; background: #ffffff; border: 1px solid var(--border-light); padding: 6px 14px; border-radius: var(--radius-pill); box-shadow: var(--shadow-xs);">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: #0d5c3a; color: #ffffff; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center;">
+                  AK
+                </div>
+                <div>
+                  <div style="font-size: 12px; font-weight: 800; color: var(--text-main);" id="admin-exec-name">Aman Khan</div>
+                  <div style="font-size: 10px; color: var(--text-muted);">Customer Care Executive</div>
+                </div>
+              </div>
+
+              <button onclick="loadAdminSupportData(true)" class="btn btn-secondary btn-sm" title="Refresh Live Support Data">
+                <span>🔄</span>
+                <span>Refresh Desk</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 Dynamic KPI Summary Counters -->
+          <div class="kpi-grid-4">
+            <div class="kpi-card" onclick="filterSupportByStatus('Open')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">PENDING ISSUES</div>
+                <div class="kpi-value" id="support-kpi-pending" style="color: #b45309;">0</div>
+                <div class="kpi-trend" style="color: #b45309;">Open & In-Progress Tickets</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-amber">⏳</div>
+            </div>
+
+            <div class="kpi-card" onclick="filterSupportByStatus('Resolved')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">SOLVED ISSUES (ON CALL)</div>
+                <div class="kpi-value" id="support-kpi-solved" style="color: #047857;">0</div>
+                <div class="kpi-trend" style="color: #047857;">Resolved via Desk & Phone</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-green">✓</div>
+            </div>
+
+            <div class="kpi-card" onclick="filterSupportByPriority('Urgent')" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">URGENT INQUIRIES</div>
+                <div class="kpi-value" id="support-kpi-urgent" style="color: #dc2626;">0</div>
+                <div class="kpi-trend" style="color: #dc2626;">High Priority Pilgrims</div>
+              </div>
+              <div class="kpi-icon-wrap" style="background: #fee2e2; color: #dc2626;">🚨</div>
+            </div>
+
+            <div class="kpi-card" onclick="resetSupportFilters()" style="cursor: pointer;">
+              <div>
+                <div class="kpi-label">TOTAL INQUIRIES</div>
+                <div class="kpi-value" id="support-kpi-total">0</div>
+                <div class="kpi-trend">All Logged Records</div>
+              </div>
+              <div class="kpi-icon-wrap kpi-icon-teal">🎧</div>
+            </div>
+          </div>
+
+          <!-- Customer / Request Search & Filter Bar -->
+          <div class="card" style="margin-top: 20px;">
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <!-- Main Search Input -->
+                <div style="flex: 1; min-width: 280px; position: relative;">
+                  <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--text-light);">🔍</span>
+                  <input type="text" id="support-search-input" class="form-input" placeholder="Search by Request ID, Issue ID, customer name, phone, email or issue..." style="padding-left: 40px; height: 44px; border-radius: var(--radius-md);" oninput="handleSupportSearch(this.value)">
+                </div>
+
+                <!-- Status Filter -->
+                <select id="support-filter-status" class="form-select" style="width: auto; min-width: 140px; height: 44px;" onchange="handleSupportFilterChange()">
+                  <option value="All">All Statuses</option>
+                  <option value="Open">Open</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Waiting for Customer">Waiting for Customer</option>
+                  <option value="Resolved">Resolved</option>
+                  <option value="Closed">Closed</option>
+                  <option value="Reopened">Reopened</option>
+                </select>
+
+                <!-- Priority Filter -->
+                <select id="support-filter-priority" class="form-select" style="width: auto; min-width: 130px; height: 44px;" onchange="handleSupportFilterChange()">
+                  <option value="All">All Priorities</option>
+                  <option value="Urgent">Urgent</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+
+                <!-- Category Filter -->
+                <select id="support-filter-category" class="form-select" style="width: auto; min-width: 160px; height: 44px;" onchange="handleSupportFilterChange()">
+                  <option value="All">All Categories</option>
+                  <option value="Package Information">Package Information</option>
+                  <option value="Hotel Related">Hotel Related</option>
+                  <option value="Payment">Payment</option>
+                  <option value="Travel Date Change">Travel Date Change</option>
+                  <option value="Visa & Passport">Visa & Passport</option>
+                  <option value="Transport / Ziyarat">Transport / Ziyarat</option>
+                  <option value="Booking">Booking</option>
+                  <option value="Cancellation">Cancellation</option>
+                  <option value="Refund">Refund</option>
+                  <option value="Document Related">Document Related</option>
+                  <option value="Technical Problem">Technical Problem</option>
+                  <option value="General Inquiry">General Inquiry</option>
+                  <option value="Other">Other</option>
+                </select>
+
+                <!-- Sort Filter -->
+                <select id="support-filter-sort" class="form-select" style="width: auto; min-width: 140px; height: 44px;" onchange="handleSupportFilterChange()">
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="priority">Priority First</option>
+                  <option value="updated">Recently Updated</option>
+                </select>
+
+                <button onclick="resetSupportFilters()" class="btn btn-secondary btn-sm" style="height: 44px; padding: 0 16px;">
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Support Tickets Queue Table -->
+          <div class="card" style="margin-top: 20px;">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Customer Care Inquiries & Tickets</h3>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;" id="support-table-subtitle">Live real-time feed of pilgrim issues</p>
+              </div>
+              <div id="support-count-pill" style="font-size: 12px; font-weight: 800; background: #e8f5ee; color: #0d5c3a; padding: 4px 12px; border-radius: var(--radius-pill);">
+                3 Tickets
+              </div>
+            </div>
+
+            <div class="table-container" style="border: none; box-shadow: none;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Issue ID</th>
+                    <th>Request ID</th>
+                    <th>Customer Name</th>
+                    <th>Issue Type</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Raised On</th>
+                    <th style="text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="support-tickets-tbody">
+                  <!-- Dynamic Ticket Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Detailed Issue & Resolution Workspace (Split Two-Column Grid) -->
+          <div class="support-workspace-grid" id="support-issue-workspace" style="display: none;">
+            
+            <!-- Left Column: Active Issue & Full Conversation -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              
+              <!-- Active Issue Details Card -->
+              <div class="card">
+                <div class="card-header" style="align-items: flex-start;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                      <span id="detail-issue-id" style="font-size: 20px; font-weight: 900; color: var(--text-main); font-family: monospace;">--</span>
+                      <span id="detail-req-id-badge" style="font-size: 12px; font-weight: 800; background: #e0f2fe; color: #0369a1; padding: 3px 10px; border-radius: var(--radius-pill);">--</span>
+                      <span id="detail-priority-badge" class="badge">Medium</span>
+                      <span id="detail-status-badge" class="badge">Open</span>
+                    </div>
+                    <h3 id="detail-subject" style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 8px;">Select a ticket to view details</h3>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                      Raised on <span id="detail-created-at" style="font-weight: 700; color: var(--text-body);">--</span> · Last updated <span id="detail-updated-at" style="font-weight: 700; color: var(--text-body);">--</span>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; gap: 8px;">
+                    <button onclick="quickUpdateStatus('Resolved')" class="btn btn-primary btn-sm" title="Mark Resolved">
+                      ✓ Resolve
+                    </button>
+                    <button onclick="quickUpdateStatus('Closed')" class="btn btn-secondary btn-sm" title="Close Ticket">
+                      Close
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Original Description Block -->
+                <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 14px; margin-top: 14px;">
+                  <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">Original Issue Description</div>
+                  <div id="detail-description" style="font-size: 13px; color: var(--text-body); line-height: 1.5; white-space: pre-wrap;">--</div>
+                  <div id="detail-attachment-preview" style="margin-top: 10px;"></div>
+                </div>
+
+                <!-- Full Conversation Thread -->
+                <div style="margin-top: 20px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-size: 13px; font-weight: 800; color: var(--text-main);">Full Conversation</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">Real-time synchronized history</div>
+                  </div>
+
+                  <div class="chat-thread-container" id="admin-chat-thread">
+                    <!-- Dynamic Messages -->
+                  </div>
+                </div>
+
+                <!-- Reply & Action Control Section -->
+                <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+                  
+                  <!-- Reply Mode Toggles -->
+                  <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                    <button type="button" id="btn-mode-reply" class="pill-btn active" onclick="setAdminReplyMode('CUSTOMER_REPLY')">
+                      💬 Reply to Customer
+                    </button>
+                    <button type="button" id="btn-mode-internal" class="pill-btn" onclick="setAdminReplyMode('INTERNAL_NOTE')" style="background: #fffbeb; color: #92400e; border-color: #fde68a;">
+                      🔒 Internal Note (Staff Only)
+                    </button>
+                  </div>
+
+                  <!-- Text Input Area -->
+                  <div class="form-group" style="margin-bottom: 12px;">
+                    <textarea id="admin-reply-textarea" class="form-input" rows="3" placeholder="Thank you for contacting ZILHAJ support. Our team is checking the details..." style="resize: vertical; font-size: 13px;"></textarea>
+                  </div>
+
+                  <!-- Bottom Toolbar: Status change, priority, assigned exec & send button -->
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                      
+                      <!-- Status Dropdown -->
+                      <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Status:</span>
+                        <select id="admin-action-status" class="form-select" style="font-size: 12px; padding: 6px 10px; width: auto;" onchange="handleAdminStatusSelect(this.value)">
+                          <option value="Open">Open</option>
+                          <option value="In Progress">In Progress</option>
+                          <option value="Waiting for Customer">Waiting for Customer</option>
+                          <option value="Resolved">Resolved</option>
+                          <option value="Closed">Closed</option>
+                          <option value="Reopened">Reopened</option>
+                          <option value="Wrong Request / Invalid">Wrong Request / Invalid</option>
+                        </select>
+                      </div>
+
+                      <!-- Priority Dropdown -->
+                      <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Priority:</span>
+                        <select id="admin-action-priority" class="form-select" style="font-size: 12px; padding: 6px 10px; width: auto;" onchange="handleAdminPrioritySelect(this.value)">
+                          <option value="Low">Low</option>
+                          <option value="Medium">Medium</option>
+                          <option value="High">High</option>
+                          <option value="Urgent">Urgent</option>
+                        </select>
+                      </div>
+
+                      <!-- Assigned Executive Dropdown -->
+                      <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Assigned To:</span>
+                        <select id="admin-action-assign" class="form-select" style="font-size: 12px; padding: 6px 10px; width: auto;" onchange="handleAdminAssignSelect(this.value)">
+                          <option value="Aman Khan">Aman Khan (Customer Care)</option>
+                          <option value="Admin Desk">Admin Desk</option>
+                          <option value="Tariq Ahmad">Tariq Ahmad (Sub Admin)</option>
+                        </select>
+                      </div>
+
+                    </div>
+
+                    <button type="button" id="btn-admin-submit-reply" onclick="submitAdminReply()" class="btn btn-primary" style="padding: 8px 20px;">
+                      <span>Send Reply</span>
+                      <span>➤</span>
+                    </button>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- Right Column: Customer Info, Request Context, Issue History & On-Call Resolution -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              
+              <!-- 1. Customer Information Card -->
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Customer Information</h3>
+                </div>
+
+                <div style="display: flex; gap: 14px; margin-top: 10px; align-items: center;">
+                  <div class="avatar-circle" id="support-cust-avatar" style="width: 48px; height: 48px; font-size: 16px; background: #d1fae5; color: #065f46;">
+                    --
+                  </div>
+                  <div style="font-size: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <h4 id="support-cust-name" style="font-size: 15px; font-weight: 800;">--</h4>
+                    <div style="color: var(--text-muted);">📞 <span id="support-cust-phone">--</span></div>
+                    <div style="color: var(--text-muted);">📧 <span id="support-cust-email">--</span></div>
+                    <div style="color: var(--text-muted);">📍 <span id="support-cust-loc">--</span></div>
+                  </div>
+                </div>
+
+                <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 10px 14px; margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px;">
+                  <div>
+                    <span style="color: var(--text-muted);">Customer Since:</span>
+                    <strong style="display: block; color: var(--text-main);" id="support-cust-since">--</strong>
+                  </div>
+                  <div>
+                    <span style="color: var(--text-muted);">Verified Requests:</span>
+                    <strong style="display: block; color: var(--text-main);" id="support-cust-total-reqs">--</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Request Information Card -->
+              <div class="card" id="support-req-context-card">
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Request Information</h3>
+                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; margin-top: 2px;" id="support-req-id-tag">GENERAL</div>
+                  </div>
+                  <span class="badge badge-offers-ready" id="support-req-status-badge">Active</span>
+                </div>
+
+                <div style="font-size: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Service Type:</span>
+                    <strong id="support-req-service">Umrah Package</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Travel Date:</span>
+                    <strong id="support-req-travel-date">15 Feb 2026</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">No. of Pilgrims:</span>
+                    <strong id="support-req-pilgrims">4 Pilgrims</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Hotel Preference:</span>
+                    <strong id="support-req-hotel">3 Star (Near Haram)</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Room Preference:</span>
+                    <strong id="support-req-room">Quad Sharing</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Duration:</span>
+                    <strong id="support-req-duration">18 Days</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Budget:</span>
+                    <strong id="support-req-budget" style="color: var(--primary);">₹1,20,000 - ₹1,50,000</strong>
+                  </div>
+                  <div style="padding-top: 8px; border-top: 1px solid var(--border-subtle); margin-top: 4px;">
+                    <span style="color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 2px;">Special Requirements:</span>
+                    <span style="color: var(--text-body);" id="support-req-notes">Ground shuttle transport needed for elderly parents.</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Issue History (Previous Calls & Issues) -->
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Issue History (Previous Calls)</h3>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">All past support requests & on-call records</p>
+                  </div>
+                </div>
+
+                <div id="admin-issue-history-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                  <!-- Dynamic Previous Issues / Calls -->
+                </div>
+              </div>
+
+              <!-- 4. On-Call Resolution Section -->
+              <div class="card" style="background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); border: 1.5px solid #bbf0d6;">
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title" style="color: #065f46;">On-Call Resolution</h3>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Log telephonic resolution with pilgrim</p>
+                  </div>
+                  <span style="font-size: 18px;">📞</span>
+                </div>
+
+                <form onsubmit="handleOnCallSubmit(event)" style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                  <div class="form-group">
+                    <label class="form-label" style="font-size: 11px;">Issue Category</label>
+                    <select id="oncall-category" class="form-select" style="font-size: 12px;">
+                      <option value="Hotel Related">Hotel Related</option>
+                      <option value="Package Information">Package Information</option>
+                      <option value="Payment">Payment</option>
+                      <option value="Travel Date Change">Travel Date Change</option>
+                      <option value="Visa & Passport">Visa & Passport</option>
+                      <option value="Transport / Ziyarat">Transport / Ziyarat</option>
+                      <option value="General Inquiry">General Inquiry</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" style="font-size: 11px;">Call Status</label>
+                    <select id="oncall-status" class="form-select" style="font-size: 12px; font-weight: 700;">
+                      <option value="Resolved">Resolved</option>
+                      <option value="Follow Up Required">Follow Up Required</option>
+                      <option value="Not Resolved">Not Resolved</option>
+                      <option value="Wrong Request / Invalid">Wrong Request / Invalid</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" style="font-size: 11px;">Call Notes *</label>
+                    <textarea id="oncall-notes" required class="form-input" rows="3" placeholder="Enter notes discussed with the pilgrim on the phone..." style="font-size: 12px; resize: vertical;"></textarea>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 800; justify-content: center;">
+                    <span>Update Resolution & History</span>
+                  </button>
+                </form>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- Footer matching screenshot -->
+        <footer style="margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border-light); font-size: 11px; color: var(--text-light); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>© 2026 ZILHAJ Private Limited. All rights reserved.</div>
+          <div>Powered by <strong style="color: var(--text-body);">GOEXERGY PRIVATE LIMITED</strong></div>
+          <div>Designed, developed & maintained by <strong style="color: var(--text-body);">GOEXERGY PRIVATE LIMITED</strong></div>
+        </footer>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODALS -->
+  <!-- ======================================================= -->
+
+  <!-- 1. New Request Modal -->
+  <div id="new-request-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <h3 style="font-size: 18px; font-weight: 800;">Create New Pilgrim Request</h3>
+        <button onclick="closeModal('new-request-modal')" style="font-size: 20px; color: var(--text-light);">✕</button>
+      </div>
+
+      <form onsubmit="handleNewRequestSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Customer Name *</label>
+          <input type="text" id="new-req-customer" required class="form-input" placeholder="e.g. Tariq Ahmed">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number *</label>
+          <input type="text" id="new-req-phone" required class="form-input" placeholder="+91 98765 43210">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address (Optional)</label>
+          <input type="email" id="new-req-email" class="form-input" placeholder="customer@gmail.com">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Service Type</label>
+            <select id="new-req-service" class="form-select">
+              <option value="Umrah">Umrah</option>
+              <option value="Hajj">Hajj</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Travel Date</label>
+            <input type="text" id="new-req-date" class="form-input" value="27 Apr 2026">
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Adults</label>
+            <input type="number" id="new-req-adults" class="form-input" value="8" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Children</label>
+            <input type="number" id="new-req-children" class="form-input" value="2" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Budget Range</label>
+            <input type="text" id="new-req-budget" class="form-input" value="₹1,20,000 - ₹1,50,000">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+          <button type="button" onclick="closeModal('new-request-modal')" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Add Offer Modal -->
+  <div id="add-offer-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <h3 style="font-size: 18px; font-weight: 800;">Add Agency Offer</h3>
+        <button onclick="closeModal('add-offer-modal')" style="font-size: 20px; color: var(--text-light);">✕</button>
+      </div>
+
+      <form onsubmit="handleAddOfferSubmit(event)">
+        <!-- Quick-Fill from Inventory -->
+        <div class="form-group" style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: var(--radius-md); padding: 12px; margin-bottom: 16px;">
+          <label class="form-label" style="color: #065f46; font-weight: 800; font-size: 12px; margin-bottom: 4px;">⚡ Quick-Fill from Package Inventory</label>
+          <select id="add-offer-inventory-quickfill" class="form-select" onchange="handleQuickFillOfferFromInventory(this.value)">
+            <option value="">-- Select pre-stored package to auto-fill details --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Select Travel Agency</label>
+          <select id="add-offer-agent-name" class="form-select">
+            <option value="Al-Safwa Travel">Al-Safwa Travel (AGENT-1042)</option>
+            <option value="Makkah Tours">Makkah Tours (AGENT-8091)</option>
+            <option value="Haramain Express">Haramain Express (AGENT-3310)</option>
+            <option value="Rawdah Holidays">Rawdah Holidays (AGENT-7720)</option>
+            <option value="Al-Haramain Group">Al-Haramain Group (AGENT-4501)</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Package Title</label>
+            <input type="text" id="add-offer-pkg-title" class="form-input" value="Umrah Deluxe Package">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration</label>
+            <input type="text" id="add-offer-duration" class="form-input" value="25 Days">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Price Per Person (₹)</label>
+            <input type="number" id="add-offer-price" class="form-input" value="125000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select id="add-offer-status" class="form-select">
+              <option value="Published">Published (Customer Visible)</option>
+              <option value="Draft">Draft (Internal Review)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Makkah Hotel</label>
+            <input type="text" id="add-offer-makkah-hotel" class="form-input" value="Dar Al Eiman">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Distance</label>
+            <input type="text" id="add-offer-makkah-dist" class="form-input" value="500m from Haram">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Madinah Hotel</label>
+            <input type="text" id="add-offer-madinah-hotel" class="form-input" value="Anwar Al Madinah">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Distance</label>
+            <input type="text" id="add-offer-madinah-dist" class="form-input" value="200m from Haram">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Transport</label>
+            <input type="text" id="add-offer-transport" class="form-input" value="AC Bus">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Meal Plan</label>
+            <input type="text" id="add-offer-meal" class="form-input" value="Full Board">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ziyarat</label>
+            <input type="text" id="add-offer-ziyarat" class="form-input" value="Included">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+          <button type="button" onclick="closeModal('add-offer-modal')" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Attach Offer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Add Sub Admin Modal -->
+  <div id="add-subadmin-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 480px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <h3 style="font-size: 18px; font-weight: 800;">Add New Sub Admin</h3>
+        <button onclick="closeModal('add-subadmin-modal')" style="font-size: 20px; color: var(--text-light);">✕</button>
+      </div>
+
+      <form onsubmit="handleAddSubAdminSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input type="text" id="add-subadmin-name" required class="form-input" placeholder="e.g. Tariq Ahmad">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address *</label>
+          <input type="email" id="add-subadmin-email" required class="form-input" placeholder="tariq@gmail.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number *</label>
+          <input type="text" id="add-subadmin-phone" required class="form-input" placeholder="+91 99065 11223">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select id="add-subadmin-role" class="form-select">
+            <option value="Sub Admin">Sub Admin</option>
+            <option value="Senior Sub Admin">Senior Sub Admin</option>
+          </select>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+          <button type="button" onclick="closeModal('add-subadmin-modal')" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Payment Proof Modal -->
+  <div id="payment-proof-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 500px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <h3 style="font-size: 16px; font-weight: 800;">Verified Payment Receipt</h3>
+        <button onclick="closeModal('payment-proof-modal')" style="font-size: 20px; color: var(--text-light);">✕</button>
+      </div>
+
+      <div style="background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%); border: 1px solid #a7f3d0; border-radius: var(--radius-lg); padding: 24px; text-align: center;">
+        <div style="width: 52px; height: 52px; border-radius: 50%; background: #059669; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 12px;">
+          ✓
+        </div>
+        <div style="font-size: 11px; font-weight: 800; color: #065f46; text-transform: uppercase;">Payment Verified</div>
+        <div style="font-size: 32px; font-weight: 900; color: var(--text-main); margin: 4px 0;" id="modal-receipt-amount">₹50,000</div>
+        <div style="font-size: 11px; color: var(--text-muted);" id="modal-receipt-subtext">Advance Token for Pilgrimage Request</div>
+
+        <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 14px; margin-top: 16px; font-size: 12px; display: flex; flex-direction: column; gap: 6px; text-align: left;">
+          <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-muted);">Customer:</span><strong style="color: var(--text-main);" id="modal-receipt-cust">Customer</strong></div>
+          <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-muted);">Bank / Channel:</span><strong style="color: var(--text-main);" id="modal-receipt-bank">HDFC Bank UPI</strong></div>
+          <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-muted);">Txn Reference:</span><span style="font-family: monospace; font-weight: 700;" id="modal-receipt-txn">UPI/20260811/987654321</span></div>
+          <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-muted);">Timestamp:</span><span id="modal-receipt-time">11 Aug 2026</span></div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button onclick="window.print()" class="btn btn-secondary" style="flex: 1;">🖨️ Print</button>
+        <button onclick="showToast('Receipt verified and downloaded', 'success'); closeModal('payment-proof-modal');" class="btn btn-primary" style="flex: 1;">⬇️ Download PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Offer Details Modal -->
+  <div id="offer-details-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 600px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <div>
+          <h3 id="modal-offer-agent-name" style="font-size: 18px; font-weight: 800;">Al-Safwa Travel</h3>
+          <p style="font-size: 11px; color: var(--text-muted);">Comprehensive Pilgrimage Itinerary & Inclusions</p>
+        </div>
+        <button onclick="closeModal('offer-details-modal')" style="font-size: 20px; color: var(--text-light);">✕</button>
+      </div>
+
+      <div style="background: var(--primary); color: white; border-radius: var(--radius-lg); padding: 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <div style="font-size: 11px; color: #a7f3d0; text-transform: uppercase; font-weight: 700;">Price Per Person</div>
+          <div id="modal-offer-price-pp" style="font-size: 26px; font-weight: 900; color: #fde68a;">₹1,25,000</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 11px; color: #a7f3d0;">Total Group Package</div>
+          <div id="modal-offer-price-total" style="font-size: 20px; font-weight: 800;">₹12,50,000</div>
+        </div>
+      </div>
+
+      <div style="font-size: 12px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">🏢 Makkah Accommodation:</span>
+          <strong id="modal-offer-makkah">Dar Al Eiman (500m from Haram)</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">🏢 Madinah Accommodation:</span>
+          <strong id="modal-offer-madinah">Anwar Al Madinah (200m from Haram)</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">🚌 Ground Transport:</span>
+          <strong id="modal-offer-transport">AC Luxury Bus</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">🍽️ Meal Plan:</span>
+          <strong id="modal-offer-meal">Full Board (Indian/Kashmiri)</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">🧭 Historical Ziyarat:</span>
+          <strong id="modal-offer-ziyarat">Included in Makkah & Madinah</strong>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+        <button onclick="closeModal('offer-details-modal')" class="btn btn-secondary">Close</button>
+        <button onclick="handleSelectCurrentOffer()" class="btn btn-primary">
+          Select & Approve Offer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Notifications Modal -->
+  <div id="notifications-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 440px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <h3 style="font-size: 16px; font-weight: 800;">Recent Platform Alerts</h3>
+        <button onclick="closeModal('notifications-modal')" style="font-size: 20px; color: var(--text-light);">✕</button>
+      </div>
+
+      <div id="notifs-container-list" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Dynamic Alerts List -->
+      </div>
+
+      <div style="margin-top: 16px; text-align: center;">
+        <button onclick="markAllNotifsRead()" class="btn btn-secondary btn-sm" style="width: 100%;">
+          Mark All As Read
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Select from Inventory Modal (Attached to active request) -->
+  <div id="select-inventory-offer-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">📦</span>
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main);">Select Offer from Package Inventory</h3>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+            Quickly select any pre-created package from inventory to attach directly to <strong id="select-modal-req-id" style="color: var(--primary);">REQ</strong> (<span id="select-modal-req-service">--</span>, <span id="select-modal-req-pilgrims">-- pilgrims</span>).
+          </p>
+        </div>
+        <button onclick="closeModal('select-inventory-offer-modal')" style="font-size: 20px; color: var(--text-light); background: none; border: none; cursor: pointer;">✕</button>
+      </div>
+
+      <div style="margin-bottom: 14px; display: flex; gap: 10px;">
+        <input type="text" id="select-inventory-search" oninput="filterSelectInventoryCards(this.value)" placeholder="Search packages by title, agency or hotel..." class="form-input" style="flex: 1;">
+      </div>
+
+      <div id="select-inventory-cards-list" class="offers-grid" style="grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Add New Package to Inventory Modal -->
+  <div id="add-inventory-pkg-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 720px; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <div>
+          <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main);">Add Package to Central Inventory</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Create a reusable verified package that any admin can attach to pilgrim requests with 1 click.</p>
+        </div>
+        <button onclick="closeModal('add-inventory-pkg-modal')" style="font-size: 20px; color: var(--text-light); background: none; border: none; cursor: pointer;">✕</button>
+      </div>
+
+      <form onsubmit="handleAddInventoryPackageSubmit(event)">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Package Title *</label>
+            <input type="text" id="inv-pkg-title" required class="form-input" placeholder="e.g. 18 Days Premium Umrah Package">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Service Type *</label>
+            <select id="inv-pkg-service" class="form-select">
+              <option value="Umrah">Umrah</option>
+              <option value="Hajj">Hajj</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Travel Agency / Provider *</label>
+            <input type="text" id="inv-pkg-agent-name" required class="form-input" placeholder="e.g. Al-Safwa Travel & Tours" list="agency-suggestions">
+            <datalist id="agency-suggestions">
+              <option value="Al-Safwa Travel & Tours">
+              <option value="Makkah Tours & Services">
+              <option value="Haramain Express Travel">
+              <option value="Rawdah Holidays Pvt Ltd">
+              <option value="Al-Haramain Group Int.">
+              <option value="Noor Al Huda Pilgrimages">
+            </datalist>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Agency ID</label>
+            <input type="text" id="inv-pkg-agent-id" class="form-input" placeholder="e.g. AGENT-1042">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Duration *</label>
+            <input type="text" id="inv-pkg-duration" required class="form-input" placeholder="e.g. 18 Days" value="18 Days">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Price Per Person (₹) *</label>
+            <input type="number" id="inv-pkg-price" required class="form-input" placeholder="85000" min="1000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Available Seats</label>
+            <input type="number" id="inv-pkg-seats" class="form-input" placeholder="15" value="20" min="1">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Makkah Hotel</label>
+            <input type="text" id="inv-pkg-makkah-hotel" class="form-input" placeholder="e.g. Fairmont Clock Tower" value="Fairmont Clock Tower">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Makkah Distance from Haram</label>
+            <input type="text" id="inv-pkg-makkah-dist" class="form-input" placeholder="e.g. 50m from Haram" value="50m from Haram">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Madinah Hotel</label>
+            <input type="text" id="inv-pkg-madinah-hotel" class="form-input" placeholder="e.g. Oberoi Madinah" value="Oberoi Madinah">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Madinah Distance from Markazia</label>
+            <input type="text" id="inv-pkg-madinah-dist" class="form-input" placeholder="e.g. 100m from Haram" value="100m from Haram">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Transport Included</label>
+            <input type="text" id="inv-pkg-transport" class="form-input" placeholder="e.g. VIP AC Luxury Coach" value="VIP AC Luxury Coach">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Meal Plan</label>
+            <input type="text" id="inv-pkg-meals" class="form-input" placeholder="e.g. Full Board Buffet" value="Full Board (Indian & Continental Buffet)">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Ziyarat & Guidance Details</label>
+          <input type="text" id="inv-pkg-ziyarat" class="form-input" placeholder="e.g. Historical Ziyarat in Makkah & Madinah with Scholar" value="Historical Ziyarat in Makkah & Madinah with Scholar">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Inventory Status</label>
+          <select id="inv-pkg-status" class="form-select">
+            <option value="Active">Active / Available</option>
+            <option value="Inactive">Inactive / Hidden</option>
+          </select>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+          <button type="button" onclick="closeModal('add-inventory-pkg-modal')" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background: #047857; font-weight: 800;">Save Package to Inventory</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Vanilla JavaScript Admin Engine -->
+  <script src="/admin/app.js"></script>
+</body>
+</html>
