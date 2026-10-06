@@ -37,22 +37,34 @@ class WorkflowEngine {
             throw new Error('Authentication required: Valid user identity required to submit journey request.');
         }
 
-        const requestId = 'REQ-' + Math.floor(1000 + Math.random() * 9000);
+        const reqIdToUse = payload.id || ('REQ-' + Math.floor(1000 + Math.random() * 9000));
+        const cleanUserEmail = (userData.email || payload.email || payload.userEmail || '').toLowerCase().trim();
+        const customerName = userData.name || payload.userName || payload.customer || payload.fullname || 'Pilgrim';
+        const contactPhone = userData.phone || payload.phone || payload.mobile || payload.userPhone || '';
+        const serviceName = payload.service || payload.title || (payload.applyingFor ? `${payload.applyingFor} Package` : 'Umrah Custom Journey');
+
         const record = {
-            id: requestId,
-            requestId,
-            userId: String(userData.id || userData.email),
-            userName: userData.name || payload.userName || payload.fullname || 'Pilgrim',
-            email: (userData.email || payload.email || '').toLowerCase(),
-            phone: userData.phone || payload.phone || payload.mobile || '',
-            service: payload.service || payload.title || (payload.applyingFor ? `${payload.applyingFor} Package` : 'Umrah Custom Journey'),
-            serviceType: payload.serviceType || payload.applyingFor || 'Umrah',
+            id: reqIdToUse,
+            requestId: reqIdToUse,
+            userId: String(userData.id || userData.email || payload.userId),
+            userName: customerName,
+            customer: customerName,
+            fullname: customerName,
+            email: cleanUserEmail,
+            userEmail: cleanUserEmail,
+            phone: contactPhone,
+            userPhone: contactPhone,
+            mobile: contactPhone,
+            service: serviceName,
+            serviceType: payload.serviceType || payload.applyingFor || (serviceName.toLowerCase().includes('hajj') ? 'Hajj' : 'Umrah'),
             travelers: String(payload.travelers || payload.totalPersons || 1),
             totalPersons: String(payload.travelers || payload.totalPersons || 1),
             departureCity: payload.departureCity || 'Delhi (DEL)',
-            travelDate: payload.travelDate || 'As Scheduled',
+            travelDate: payload.travelDate || payload.departureDate || 'As Scheduled',
             duration: payload.duration || '14 Days',
+            durationDays: parseInt(payload.duration) || 14,
             hotelType: payload.hotelType || payload.hotelCategory || '5 Star',
+            hotelCategory: payload.hotelType || payload.hotelCategory || '5 Star',
             status: STATES.PENDING_REVIEW,
             step: 1,
             submittedOn: new Date().toLocaleDateString('en-GB'),
@@ -63,8 +75,13 @@ class WorkflowEngine {
 
         const db = await connectToDatabase();
         if (db) {
-            await db.collection('journey_requests').insertOne({ ...record });
-            await db.collection('requirements').insertOne({ ...record });
+            const doc1 = { ...record };
+            delete doc1._id;
+            await db.collection('journey_requests').insertOne(doc1);
+
+            const doc2 = { ...record };
+            delete doc2._id;
+            await db.collection('requirements').insertOne(doc2);
         }
 
         if (this.inMemoryStore && this.inMemoryStore.requirements) {
@@ -150,7 +167,7 @@ class WorkflowEngine {
         // Update DB
         if (db) {
             await db.collection('journey_requests').updateOne(
-                { id: requestId },
+                { $or: [{ id: requestId }, { requestId: requestId }] },
                 {
                     $set: {
                         status: STATES.OFFERS_PROVIDED,
@@ -161,7 +178,7 @@ class WorkflowEngine {
                 }
             );
             await db.collection('requirements').updateOne(
-                { id: requestId },
+                { $or: [{ id: requestId }, { requestId: requestId }] },
                 {
                     $set: {
                         status: STATES.OFFERS_PROVIDED,

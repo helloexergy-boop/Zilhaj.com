@@ -172,9 +172,12 @@ function validatePayloadUserId(req, res, next) {
         const matchesId = String(payloadUserId) === String(req.user.id);
         const matchesEmail = String(payloadUserId).toLowerCase() === String(req.user.email).toLowerCase();
 
+        const roleUpper = String(req.user.role || '').toUpperCase();
+        const isCustomer = !roleUpper.includes('ADMIN') && !roleUpper.includes('STAFF');
+
         // Admin and Subadmin operations may act on behalf of customers if authorized,
         // but Customers can strictly only submit under their own identity.
-        if (!matchesId && !matchesEmail && req.user.role === 'CUSTOMER') {
+        if (!matchesId && !matchesEmail && isCustomer) {
             return res.status(403).json({
                 error: 'Forbidden: You cannot submit requests under another user identity.',
                 code: 'ID_SPOOFING_DETECTED'
@@ -183,8 +186,10 @@ function validatePayloadUserId(req, res, next) {
     }
 
     // Always enforce server-authoritative userId on the payload
-    if (req.user.role === 'CUSTOMER' || !req.body.userId) {
-        req.body.userId = req.user.id;
+    const roleUpper = String(req.user.role || '').toUpperCase();
+    const isCustomer = !roleUpper.includes('ADMIN') && !roleUpper.includes('STAFF');
+    if (isCustomer || !req.body.userId) {
+        req.body.userId = String(req.user.id || req.user.email);
         req.body.userEmail = req.user.email;
         req.body.userName = req.user.name;
     }

@@ -10,11 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const token = (storedUser && (storedUser.token || storedUser.jwtToken)) ||
                 localStorage.getItem('umrah_token') ||
                 localStorage.getItem('zilhaj_token') ||
-                sessionStorage.getItem('zilhaj_token') ||
-                (storedUser && storedUser.id);
+                sessionStorage.getItem('zilhaj_token');
 
   if (!storedUser || !token) {
-    window.location.href = '/login?redirect=/dashboard';
+    window.location.replace('/login.html?redirect=/dashboard/index.html');
     return;
   }
 
@@ -23,11 +22,17 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const realtime = new window.RealtimeSyncClient();
       const userId = storedUser.id || storedUser.email;
-      realtime.subscribe([`user:${userId}:bookings`]);
+      realtime.subscribe([`user:${userId}:bookings`, `user:${userId}:requests`]);
       realtime.on('BOOKING_CONFIRMED', (booking) => {
         console.log('[DASHBOARD REALTIME] Booking confirmed:', booking);
         if (typeof window.renderPaymentsHistory === 'function') window.renderPaymentsHistory();
         if (typeof window.loadMyBookings === 'function') window.loadMyBookings();
+      });
+      realtime.on('NEW_REQUEST_SUBMITTED', () => {
+        if (typeof window.loadLiveDashboardData === 'function') window.loadLiveDashboardData();
+      });
+      realtime.on('OFFER_DISPATCHED', () => {
+        if (typeof window.loadLiveDashboardData === 'function') window.loadLiveDashboardData();
       });
     } catch (e) {}
   }
@@ -1367,8 +1372,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // ------------------------------------------------------------------------
   window.loadLiveDashboardData = function() {
     const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
-    const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
-    const headers = token ? { Authorization: 'Bearer ' + token } : {};
+    const token = (() => {
+      try {
+        const u = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+        return (u && (u.token || u.jwtToken)) ||
+               localStorage.getItem('umrah_token') ||
+               localStorage.getItem('zilhaj_token') ||
+               sessionStorage.getItem('zilhaj_token') || '';
+      } catch(e) {
+        return localStorage.getItem('umrah_token') || localStorage.getItem('zilhaj_token') || '';
+      }
+    })();
+    const headers = token ? { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' } : {};
 
     Promise.all([
       fetch(apiBase + '/requirements', { headers }).then(r => r.ok ? r.json() : []).catch(() => []),
@@ -1377,8 +1392,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('requestsList');
       const emptyState = document.getElementById('noRequestsEmptyState');
 
-      let liveReqs = Array.isArray(reqs) ? reqs : [];
-      let liveOffers = Array.isArray(offers) ? offers : [];
+      let liveReqs = Array.isArray(reqs) ? reqs : (reqs && Array.isArray(reqs.requirements) ? reqs.requirements : []);
+      let liveOffers = Array.isArray(offers) ? offers : (offers && Array.isArray(offers.offers) ? offers.offers : []);
 
       // Check local storage only if empty and user created offline draft
       if (liveReqs.length === 0) {

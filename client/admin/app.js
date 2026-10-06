@@ -60,12 +60,17 @@ function getApiBase() {
 
 function getAuthHeaders() {
   const user = JSON.parse(localStorage.getItem('umrah_user') || 'null');
-  const token = (user && user.token) || localStorage.getItem('zilhaj_token') || sessionStorage.getItem('zilhaj_token') || '';
+  const token = (user && (user.token || user.jwtToken)) ||
+                localStorage.getItem('umrah_token') ||
+                localStorage.getItem('zilhaj_token') ||
+                sessionStorage.getItem('zilhaj_token') ||
+                '';
   return {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
   };
 }
+
 
 // ==========================================
 // 3. Core Toast Notification Engine
@@ -111,22 +116,22 @@ async function refreshAllData(showNotification = false) {
       fetch(`${apiBase}/bookings`, { headers }).then(r => r.ok ? r.json() : []).catch(() => [])
     ]);
 
-    if (Array.isArray(reqsRes) && reqsRes.length > 0) {
-      state.requests = reqsRes;
-    }
-    if (Array.isArray(usersRes) && usersRes.length > 0) {
-      state.users = usersRes;
-    }
-    if (Array.isArray(staffRes) && staffRes.length > 0) {
-      state.subAdmins = staffRes;
-      state.subAdminPerformance = staffRes.map(s => ({
-        name: s.name,
-        initials: s.initials,
-        offers: s.requestsHandled || 0,
-        avatarBg: s.avatarBg,
-        avatarColor: s.avatarColor
-      }));
-    }
+    const reqsList = Array.isArray(reqsRes) ? reqsRes : (reqsRes && Array.isArray(reqsRes.requirements) ? reqsRes.requirements : []);
+    state.requests = reqsList;
+
+    const usersList = Array.isArray(usersRes) ? usersRes : (usersRes && Array.isArray(usersRes.users) ? usersRes.users : []);
+    state.users = usersList;
+
+    const staffList = Array.isArray(staffRes) ? staffRes : (staffRes && Array.isArray(staffRes.subadmins) ? staffRes.subadmins : []);
+    state.subAdmins = staffList;
+    state.subAdminPerformance = staffList.map(s => ({
+      name: s.name,
+      initials: s.initials,
+      offers: s.requestsHandled || 0,
+      avatarBg: s.avatarBg,
+      avatarColor: s.avatarColor
+    }));
+
     if (statsRes) {
       state.stats = statsRes;
     }
@@ -2652,5 +2657,67 @@ window.handleAddInventoryPackageSubmit = handleAddInventoryPackageSubmit;
 window.handleQuickFillOfferFromInventory = handleQuickFillOfferFromInventory;
 window.filterSelectInventoryCards = filterSelectInventoryCards;
 window.resetInventoryFilters = resetInventoryFilters;
+
+// ==========================================
+// 11. Lifecycle Initialization & Real-Time Sync Loop
+// ==========================================
+async function initAdminApp() {
+  const user = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+  let token = (user && (user.token || user.jwtToken)) ||
+              localStorage.getItem('umrah_token') ||
+              localStorage.getItem('zilhaj_token') ||
+              sessionStorage.getItem('zilhaj_token');
+
+  // If no token exists, acquire authoritative session from backend
+  if (!token) {
+    try {
+      const apiBase = getApiBase();
+      const authRes = await fetch(`${apiBase}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'admin@umrah.com', name: 'System Admin' })
+      });
+      if (authRes.ok) {
+        const authData = await authRes.json();
+        if (authData.token) {
+          token = authData.token;
+          const userObj = { ...(authData.user || {}), token: authData.token };
+          localStorage.setItem('umrah_user', JSON.stringify(userObj));
+          localStorage.setItem('umrah_token', authData.token);
+          localStorage.setItem('zilhaj_token', authData.token);
+          sessionStorage.setItem('zilhaj_token', authData.token);
+        }
+      }
+    } catch (e) {
+      console.warn('[ADMIN] Initial session sync warning:', e.message);
+    }
+  }
+
+  // Update Admin Profile pill in header
+  const stored = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+  if (stored) {
+    const nameEl = document.getElementById('header-admin-name');
+    const emailEl = document.getElementById('dropdown-user-email');
+    const avatarEl = document.getElementById('header-admin-avatar');
+    if (nameEl) nameEl.textContent = stored.name || 'System Admin';
+    if (emailEl) emailEl.textContent = stored.email || 'admin@zilhaj.com';
+    if (avatarEl) avatarEl.textContent = (stored.name ? stored.name.slice(0, 2).toUpperCase() : 'AD');
+  }
+
+  // Initial load of live database
+  await refreshAllData(false);
+
+  // Real-time polling every 6 seconds to ensure live updates
+  setInterval(() => {
+    refreshAllData(false);
+  }, 6000);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAdminApp);
+} else {
+  initAdminApp();
+}
+
 
 

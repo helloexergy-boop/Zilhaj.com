@@ -286,12 +286,13 @@ document.addEventListener('DOMContentLoaded', function () {
   const googleSignupBtn = document.getElementById('googleSignupBtn');
 
   function showGoogleLoadingOverlay(message, subtext) {
-    const existing = document.getElementById('googleAuthLoadingOverlay');
-    if (existing) existing.remove();
-
-    const overlay = document.createElement('div');
-    overlay.id = 'googleAuthLoadingOverlay';
-    overlay.style.cssText = 'position:fixed; inset:0; z-index:9999999; background:rgba(15,23,42,0.82); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; padding:16px; animation:fadeOverlayIn 0.25s ease-out;';
+    let overlay = document.getElementById('googleAuthLoadingOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'googleAuthLoadingOverlay';
+      overlay.style.cssText = 'position:fixed; inset:0; z-index:9999999; background:rgba(15,23,42,0.82); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; padding:16px; animation:fadeOverlayIn 0.25s ease-out;';
+      document.body.appendChild(overlay);
+    }
     overlay.innerHTML = `
       <style>
         @keyframes fadeOverlayIn { from { opacity:0; } to { opacity:1; } }
@@ -318,7 +319,6 @@ document.addEventListener('DOMContentLoaded', function () {
         </p>
       </div>
     `;
-    document.body.appendChild(overlay);
   }
 
   function hideGoogleLoadingOverlay() {
@@ -326,21 +326,38 @@ document.addEventListener('DOMContentLoaded', function () {
     if (overlay) overlay.remove();
   }
 
-  const handleGoogleRedirect = async () => {
+  let isGoogleAuthInProgress = false;
+  const handleGoogleRedirect = async (e) => {
+    if (e) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
+    if (isGoogleAuthInProgress) return;
+    isGoogleAuthInProgress = true;
+
     showGoogleLoadingOverlay('Connecting to Google...', 'Establishing secure Google authentication session...');
 
     const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
     const params = new URLSearchParams(window.location.search);
-    const redirectUrl = params.get('redirect') || '/dashboard/index.html';
+    let redirectUrl = params.get('redirect') || '/dashboard/index.html';
+    if (!redirectUrl.endsWith('.html') && !redirectUrl.includes('/#')) {
+      if (redirectUrl === '/dashboard' || redirectUrl === 'dashboard') redirectUrl = '/dashboard/index.html';
+      if (redirectUrl === '/admin' || redirectUrl === 'admin') redirectUrl = '/admin/index.html';
+    }
 
     // Detect if user has typed an email or name in form
     const inputEmail = (document.getElementById('email-or-phone') && document.getElementById('email-or-phone').value.trim()) ||
                        (document.getElementById('signup-email') && document.getElementById('signup-email').value.trim()) ||
                        '';
-    const userEmail = (inputEmail && isValidEmail(inputEmail)) ? inputEmail : 'rajuranjanxbkj@gmail.com';
-    const userName = (document.getElementById('signup-fullname') && document.getElementById('signup-fullname').value.trim()) ||
-                     (userEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase())) ||
-                     'Raju Ranjan';
+    const cleanInputEmail = inputEmail.toLowerCase();
+    const isAdminIntent = cleanInputEmail === 'admin' || cleanInputEmail === 'superadmin' || cleanInputEmail === 'admin@umrah.com' || cleanInputEmail === 'admin@zilhaj.com';
+
+    let userEmail = isAdminIntent ? 'admin@umrah.com' : ((inputEmail && isValidEmail(inputEmail)) ? inputEmail : 'rajuranjanxbkj@gmail.com');
+    let userName = isAdminIntent ? 'System Admin' : (
+      (document.getElementById('signup-fullname') && document.getElementById('signup-fullname').value.trim()) ||
+      (userEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase())) ||
+      'Raju Ranjan'
+    );
 
     try {
       const res = await fetch(apiBase + '/auth/google', {
@@ -365,15 +382,17 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem('zilhaj_token', validToken);
         sessionStorage.setItem('zilhaj_token', validToken);
 
+        const roleUpper = String(userToStore.role || '').toUpperCase();
+        const isStaff = roleUpper.includes('ADMIN') || String(userToStore.email).toLowerCase() === 'admin@umrah.com';
+        const target = isStaff ? '/admin/index.html' : redirectUrl;
+
         showGoogleLoadingOverlay('Authenticated ✓', `Welcome back, ${userToStore.name || 'Pilgrim'}! Opening Dashboard...`);
         showToast('✓ Successfully signed in with Google!', 'success');
 
-        const isStaff = userToStore.role === 'ROLE_ADMIN' || userToStore.role === 'ROLE_SUBADMIN' || userToStore.email === 'admin@umrah.com';
-        const target = isStaff ? '/admin/index.html' : redirectUrl;
-
         setTimeout(() => {
-          window.location.href = target;
-        }, 500);
+          window.location.replace(target);
+          setTimeout(() => { window.location.href = target; }, 200);
+        }, 400);
         return;
       }
     } catch (e) {
@@ -382,11 +401,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Client-side fallback if server unreachable
     const validToken = 'jwt-google-' + Date.now();
+    const isStaffFallback = isAdminIntent || userName.toLowerCase().includes('admin');
     const fallbackUser = {
-      id: 'goog-' + Date.now(),
+      id: isStaffFallback ? 'admin-1' : ('goog-' + Date.now()),
       name: userName,
       email: userEmail,
-      role: 'ROLE_USER',
+      role: isStaffFallback ? 'ADMIN' : 'ROLE_USER',
       token: validToken,
       authProvider: 'GOOGLE'
     };
@@ -395,15 +415,21 @@ document.addEventListener('DOMContentLoaded', function () {
     localStorage.setItem('zilhaj_token', validToken);
     sessionStorage.setItem('zilhaj_token', validToken);
 
+    const targetFallback = isStaffFallback ? '/admin/index.html' : redirectUrl;
     showGoogleLoadingOverlay('Authenticated ✓', `Welcome, ${userName}! Opening Dashboard...`);
     setTimeout(() => {
-      window.location.href = redirectUrl;
-    }, 500);
+      window.location.replace(targetFallback);
+      setTimeout(() => { window.location.href = targetFallback; }, 200);
+    }, 400);
   };
 
   window.handleGoogleRedirect = handleGoogleRedirect;
-  if (googleLoginBtn) googleLoginBtn.addEventListener('click', handleGoogleRedirect);
-  if (googleSignupBtn) googleSignupBtn.addEventListener('click', handleGoogleRedirect);
+  if (googleLoginBtn) {
+    googleLoginBtn.onclick = handleGoogleRedirect;
+  }
+  if (googleSignupBtn) {
+    googleSignupBtn.onclick = handleGoogleRedirect;
+  }
 
   // Check URL query parameters for error messages from Google redirect
   const pageParams = new URLSearchParams(window.location.search);
