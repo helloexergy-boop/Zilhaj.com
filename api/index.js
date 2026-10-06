@@ -7,6 +7,7 @@ const http = require('http');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const Razorpay = require('razorpay');
+const rateLimit = require('express-rate-limit');
 
 const { connectToDatabase, getDbHealth, getFastDb: getPoolFastDb } = require('./db');
 const {
@@ -239,6 +240,18 @@ async function bootstrapDatabase() {
             await db.collection('package_inventory').insertMany(DEFAULT_INVENTORY_PACKAGES);
             console.log('[BOOT] Default inventory packages seeded to MongoDB.');
         }
+
+        // 4. Ensure Production Indexes (Atomic and idempotent)
+        try {
+            await db.collection('users').createIndex({ email: 1 }, { unique: true, sparse: true });
+            await db.collection('journey_requests').createIndex({ userId: 1, createdAt: -1 });
+            await db.collection('bookings').createIndex({ bookingId: 1 }, { unique: true, sparse: true });
+            await db.collection('bookings').createIndex({ userId: 1, createdAt: -1 });
+            await db.collection('offers').createIndex({ requirementId: 1 });
+            console.log('[BOOT] Database performance and unique indexes verified.');
+        } catch (idxErr) {
+            console.warn('[BOOT] Index verification notice:', idxErr.message);
+        }
     } catch (err) {
         console.warn('[BOOT] Bootstrap database check warning:', err.message);
     }
@@ -246,9 +259,71 @@ async function bootstrapDatabase() {
 bootstrapDatabase();
 
 // ----------------------------------------------------------------------------
-// EXPRESS APPLICATION SETUP
+// EXPRESS APPLICATION SETUP & SECURITY MIDDLEWARE
 // ----------------------------------------------------------------------------
 const app = express();
+
+// Enterprise HTTP Security Headers Middleware
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    next();
+});
+
+// Production Rate Limiters (Prevents brute-force, scraping, and OTP flooding)
+const otpLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many OTP requests from this IP. Please try again after 15 minutes.' }
+});
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 25,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many authentication attempts. Please try again after 15 minutes.' }
+});
+
+const apiLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000,
+    max: 180,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => !req.path.startsWith('/api/') || req.path.startsWith('/api/realtime/stream')
+});
+
+app.use('/api/', apiLimiter);
+
+// Multi-Currency Exchange Configuration for International Pilgrims
+const SUPPORTED_CURRENCIES = {
+    INR: { code: 'INR', symbol: '₹', name: 'Indian Rupee', rateFromINR: 1.0, decimals: 0 },
+    SAR: { code: 'SAR', symbol: '﷼', name: 'Saudi Riyal', rateFromINR: 0.045, decimals: 2 },
+    USD: { code: 'USD', symbol: '$', name: 'US Dollar', rateFromINR: 0.012, decimals: 2 },
+    AED: { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham', rateFromINR: 0.044, decimals: 2 },
+    GBP: { code: 'GBP', symbol: '£', name: 'British Pound', rateFromINR: 0.0095, decimals: 2 },
+    EUR: { code: 'EUR', symbol: '€', name: 'Euro', rateFromINR: 0.011, decimals: 2 }
+};
+
+app.get('/api/currencies', (req, res) => {
+    res.json({
+        base: 'INR',
+        currencies: SUPPORTED_CURRENCIES,
+        timestamp: new Date()
+    });
+});
+
+app.get('/api/ready', async (req, res) => {
+    const health = await getDbHealth();
+    if (health.status === 'healthy' || health.status === 'degraded') {
+        return res.status(200).json({ ready: true, db: health.status });
+    }
+    res.status(503).json({ ready: false, db: health.status });
+});
 
 app.use(cors());
 app.use(express.json({ limit: '15mb' }));
@@ -1168,8 +1243,8 @@ const handleSendOtp = async (req, res) => {
     }
 };
 
-app.post('/api/auth/send-otp', handleSendOtp);
-app.post('/api/auth/resend-otp', handleSendOtp);
+app.post('/api/auth/send-otp', otpLimiter, handleSendOtp);
+app.post('/api/auth/resend-otp', otpLimiter, handleSendOtp);
 
 app.post('/api/auth/verify-otp', async (req, res) => {
     try {
@@ -1206,7 +1281,7 @@ app.post('/api/auth/verify-otp', async (req, res) => {
 // AUTHENTICATION APIS (JWT & Strictly Authenticated userId Ownership)
 // ----------------------------------------------------------------------------
 
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', authLimiter, async (req, res) => {
     try {
         const { name, email, password, phone } = req.body;
         if (!name || !email || !password) {
@@ -1266,7 +1341,7 @@ app.post('/api/auth/register', async (req, res) => {
     }
 });
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', authLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
@@ -1922,10 +1997,28 @@ app.get('*', (req, res, next) => {
 
 // Export app and start server
 const PORT = process.env.PORT || 3000;
+let serverInstance = null;
 if (!process.env.VERCEL) {
-    app.listen(PORT, () => {
+    serverInstance = app.listen(PORT, () => {
         console.log(`[SERVER] Zilhaj Production Engine active on port ${PORT}`);
     });
 }
 
+// Graceful Shutdown for Cloud Deployments (Vercel, Render, AWS, PM2)
+const shutdownGracefully = (signal) => {
+    console.log(`[SHUTDOWN] Received ${signal}. Closing server connections...`);
+    if (serverInstance) {
+        serverInstance.close(() => {
+            console.log('[SHUTDOWN] HTTP server closed cleanly.');
+            process.exit(0);
+        });
+    } else {
+        process.exit(0);
+    }
+};
+
+process.on('SIGTERM', () => shutdownGracefully('SIGTERM'));
+process.on('SIGINT', () => shutdownGracefully('SIGINT'));
+
 module.exports = app;
+
