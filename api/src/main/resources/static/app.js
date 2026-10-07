@@ -11123,7 +11123,14 @@ class App {
 
     toggleMobileMenu() {
         const menu = document.getElementById('navMenu');
-        if (menu) menu.classList.toggle('show-mobile');
+        const toggleBtn = document.querySelector('.mobile-toggle');
+        if (menu) {
+            menu.classList.toggle('open');
+            menu.classList.toggle('show-mobile');
+        }
+        if (toggleBtn) {
+            toggleBtn.classList.toggle('active');
+        }
     }
 
     openChatbot(e) {

@@ -190,6 +190,20 @@
       }
     }
 
+    @media (max-width: 600px) {
+      body {
+        padding: 10px 12px 40px;
+      }
+      .card-box {
+        padding: 16px 14px;
+        border-radius: var(--radius-md);
+      }
+      .top-navbar {
+        padding: 10px 14px;
+        margin-bottom: 16px;
+      }
+    }
+
     /* Cards */
     .card-box {
       background: var(--bg-card);
@@ -836,9 +850,9 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span>Download Official Tax Invoice</span>
         </button>
-        <a href="/dashboard/index.html#payments" class="btn-view-payments">
+        <a href="/dashboard/index.html#bookings" class="btn-view-payments">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-          <span>Go to Payment History</span>
+          <span>Go to My Bookings</span>
         </a>
       </div>
     </div>
@@ -899,15 +913,21 @@
 
       const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
 
-      try {
-        // STEP 1: CREATE ORDER (₹1 in paise = 100)
+        const userRaw = localStorage.getItem('umrah_user');
+        let authToken = null;
+        try { const u = userRaw ? JSON.parse(userRaw) : null; authToken = (u && u.token) || localStorage.getItem('zilhaj_token'); } catch (e) {}
+
+        // STEP 1: CREATE ORDER (Server Authoritative Amount)
         const orderRes = await fetch(apiBase + '/create-order', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+          },
           body: JSON.stringify({
-            amount: 100,
-            currency: 'INR',
-            bookingId: bookingData.reqId
+            bookingId: bookingData.reqId,
+            requestId: bookingData.reqId,
+            offerId: bookingData.offerId || bookingData.reqId
           })
         });
 
@@ -952,16 +972,34 @@
           },
           handler: async function(response) {
             btn.innerHTML = 'Verifying Payment...';
-            try {
-              // STEP 3: VERIFY SIGNATURE
+              // STEP 3: VERIFY SIGNATURE (Authenticated & MongoDB-backed)
               const verifyRes = await fetch(apiBase + '/verify-payment', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                },
                 body: JSON.stringify({
                   razorpay_order_id: response.razorpay_order_id || validOrderId,
                   razorpay_payment_id: response.razorpay_payment_id,
                   razorpay_signature: response.razorpay_signature,
-                  bookingId: bookingData.reqId
+                  bookingId: bookingData.reqId,
+                  offerId: bookingData.offerId,
+                  userId: storedUser.id || storedUser.email,
+                  customerEmail: storedUser.email || customerEmail,
+                  customerName: storedUser.name || customerName,
+                  customerPhone: storedUser.phone || customerPhone,
+                  bookingData: {
+                    userId: storedUser.id || storedUser.email,
+                    customerEmail: storedUser.email || customerEmail,
+                    customerName: storedUser.name || customerName,
+                    customerPhone: storedUser.phone || customerPhone,
+                    packageTitle: bookingData.packageName,
+                    agencyName: bookingData.agencyName,
+                    agentCode: bookingData.agentCode,
+                    price: 1,
+                    departureDate: bookingData.departureDate
+                  }
                 })
               });
 
@@ -970,10 +1008,13 @@
                 throw new Error(verifyData.message || 'Signature verification failed');
               }
 
+              const confirmedBookingId = verifyData.bookingId || (verifyData.booking && verifyData.booking.id) || ('BK-' + bookingData.reqId);
+
               // SUCCESS: SAVE TRANSACTION
               lastSuccessfulPayment = {
                 paymentId: response.razorpay_payment_id,
                 orderId: response.razorpay_order_id || validOrderId,
+                bookingId: confirmedBookingId,
                 reqId: bookingData.reqId,
                 packageName: bookingData.packageName,
                 agencyName: bookingData.agencyName,
@@ -1036,21 +1077,46 @@
     }
 
     // PDF RECEIPT GENERATOR (Tax Invoice / Bill of Supply)
-    function downloadTaxInvoicePDF() {
+    async function downloadTaxInvoicePDF() {
+      if (!lastSuccessfulPayment) {
+        alert('No verified payment record found. Please complete your payment before downloading the tax invoice.');
+        return;
+      }
+
+      const payment = lastSuccessfulPayment;
+      const bookingId = payment.bookingId || ('BK-' + payment.reqId);
+
+      // 1. Try downloading official backend-generated PDF invoice with official seal & QR code
+      try {
+        const userRaw = localStorage.getItem('umrah_user');
+        let authToken = null;
+        try { const u = userRaw ? JSON.parse(userRaw) : null; authToken = (u && u.token) || localStorage.getItem('zilhaj_token'); } catch (e) {}
+
+        const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+        const res = await fetch(apiBase + `/bookings/${encodeURIComponent(bookingId)}/pdf`, {
+          headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+        });
+
+        if (res.ok) {
+          const blob = await res.blob();
+          const blobUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = `Official_Booking_Invoice_${bookingId}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(blobUrl);
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend PDF download warning, using client-side renderer:', err);
+      }
+
       if (!window.jspdf || !window.jspdf.jsPDF) {
         alert('PDF generator is initializing. Please try again.');
         return;
       }
-
-      const payment = lastSuccessfulPayment || {
-        paymentId: 'pay_live_demo',
-        orderId: 'order_live_demo',
-        packageName: bookingData.packageName,
-        agencyName: bookingData.agencyName,
-        departureDate: bookingData.departureDate,
-        amount: 1,
-        invoiceNo: 'HYD8-782910'
-      };
 
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
