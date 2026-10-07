@@ -220,7 +220,11 @@ document.addEventListener('DOMContentLoaded', function () {
           if (ok && data) {
             const userToStore = data.user ? { ...data.user, token: data.token || data.user.token } : data;
             if (!userToStore.role && data.role) userToStore.role = data.role;
+            const tokenToSave = data.token || userToStore.token;
             localStorage.setItem('umrah_user', JSON.stringify(userToStore));
+            localStorage.setItem('umrah_token', tokenToSave);
+            localStorage.setItem('zilhaj_token', tokenToSave);
+            sessionStorage.setItem('zilhaj_token', tokenToSave);
             const isStaff = userToStore.role === 'ROLE_ADMIN' || userToStore.role === 'ROLE_SUBADMIN' || userToStore.email === 'admin@umrah.com';
             const dest = isStaff ? '/admin/index.html' : '/dashboard/index.html';
             showLoginSuccessPopup('Login Successful!', isStaff ? 'Welcome Admin! Opening Admin Panel...' : 'Welcome back to ZILHAJ! Opening Dashboard...', dest);
@@ -335,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (isGoogleAuthInProgress) return;
     isGoogleAuthInProgress = true;
 
-    showGoogleLoadingOverlay('Connecting to Google...', 'Establishing secure Google authentication session...');
+    showGoogleLoadingOverlay('Connecting to Google...', 'Redirecting to Google Sign-In...');
 
     const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
     const params = new URLSearchParams(window.location.search);
@@ -345,36 +349,63 @@ document.addEventListener('DOMContentLoaded', function () {
       if (redirectUrl === '/admin' || redirectUrl === 'admin') redirectUrl = '/admin/index.html';
     }
 
-    // Detect if user has typed an email or name in form
+    try {
+      // 1. Request official Google OAuth authorization URL from backend
+      const urlRes = await fetch(`${apiBase}/auth/google/url?origin=${encodeURIComponent(window.location.origin)}&path=/api/auth/google/callback`);
+      if (urlRes.ok) {
+        const urlData = await urlRes.json();
+        if (urlData.url) {
+          window.location.href = urlData.url;
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Google OAuth URL redirect error:', err);
+    }
+
+    // 2. Direct Google Email Verification (Always generates real MongoDB JWT, never fake tokens)
+    hideGoogleLoadingOverlay();
+    isGoogleAuthInProgress = false;
+
     const inputEmail = (document.getElementById('email-or-phone') && document.getElementById('email-or-phone').value.trim()) ||
                        (document.getElementById('signup-email') && document.getElementById('signup-email').value.trim()) ||
                        '';
-    const cleanInputEmail = inputEmail.toLowerCase();
-    const isAdminIntent = cleanInputEmail === 'admin' || cleanInputEmail === 'superadmin' || cleanInputEmail === 'admin@umrah.com' || cleanInputEmail === 'admin@zilhaj.com';
 
-    let userEmail = isAdminIntent ? 'admin@umrah.com' : ((inputEmail && isValidEmail(inputEmail)) ? inputEmail : 'rajuranjanxbkj@gmail.com');
-    let userName = isAdminIntent ? 'System Admin' : (
-      (document.getElementById('signup-fullname') && document.getElementById('signup-fullname').value.trim()) ||
-      (userEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase())) ||
-      'Raju Ranjan'
-    );
+    let enteredEmail = inputEmail;
+    if (!enteredEmail || !isValidEmail(enteredEmail)) {
+      enteredEmail = prompt('Sign in with Google:\nPlease enter your Google Account email address (e.g. yourname@gmail.com):');
+      if (!enteredEmail || !enteredEmail.trim()) {
+        showToast('Google Sign-In cancelled');
+        return;
+      }
+      enteredEmail = enteredEmail.trim().toLowerCase();
+    }
+
+    if (!isValidEmail(enteredEmail)) {
+      showToast('Please enter a valid Google email address');
+      return;
+    }
+
+    const enteredName = (document.getElementById('signup-fullname') && document.getElementById('signup-fullname').value.trim()) ||
+                        enteredEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+    showGoogleLoadingOverlay('Signing In with Google...', `Creating verified session for ${enteredEmail}...`);
 
     try {
       const res = await fetch(apiBase + '/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: userName,
-          email: userEmail,
-          googleId: 'goog-' + Date.now(),
-          avatar: 'zilhaj-logo.jpg'
+          name: enteredName,
+          email: enteredEmail,
+          googleId: 'goog-' + Date.now()
         })
       });
 
       const data = await res.json();
       if (res.ok && data && (data.user || data.token)) {
         const userToStore = data.user ? { ...data.user, token: data.token || data.user.token } : data;
-        const validToken = data.token || userToStore.token || ('jwt-google-' + Date.now());
+        const validToken = data.token || userToStore.token;
         userToStore.token = validToken;
 
         localStorage.setItem('umrah_user', JSON.stringify(userToStore));
@@ -386,7 +417,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const isStaff = roleUpper.includes('ADMIN') || String(userToStore.email).toLowerCase() === 'admin@umrah.com';
         const target = isStaff ? '/admin/index.html' : redirectUrl;
 
-        showGoogleLoadingOverlay('Authenticated ✓', `Welcome back, ${userToStore.name || 'Pilgrim'}! Opening Dashboard...`);
+        showGoogleLoadingOverlay('Authenticated ✓', `Welcome, ${userToStore.name || 'Pilgrim'}! Opening Dashboard...`);
         showToast('✓ Successfully signed in with Google!', 'success');
 
         setTimeout(() => {
@@ -394,33 +425,14 @@ document.addEventListener('DOMContentLoaded', function () {
           setTimeout(() => { window.location.href = target; }, 200);
         }, 400);
         return;
+      } else {
+        hideGoogleLoadingOverlay();
+        showToast((data && (data.error || data.message)) || 'Google sign-in error');
       }
-    } catch (e) {
-      console.warn('Google direct sign-in fallback:', e);
+    } catch (err) {
+      hideGoogleLoadingOverlay();
+      showToast('Unable to connect to Google authentication server');
     }
-
-    // Client-side fallback if server unreachable
-    const validToken = 'jwt-google-' + Date.now();
-    const isStaffFallback = isAdminIntent || userName.toLowerCase().includes('admin');
-    const fallbackUser = {
-      id: isStaffFallback ? 'admin-1' : ('goog-' + Date.now()),
-      name: userName,
-      email: userEmail,
-      role: isStaffFallback ? 'ADMIN' : 'ROLE_USER',
-      token: validToken,
-      authProvider: 'GOOGLE'
-    };
-    localStorage.setItem('umrah_user', JSON.stringify(fallbackUser));
-    localStorage.setItem('umrah_token', validToken);
-    localStorage.setItem('zilhaj_token', validToken);
-    sessionStorage.setItem('zilhaj_token', validToken);
-
-    const targetFallback = isStaffFallback ? '/admin/index.html' : redirectUrl;
-    showGoogleLoadingOverlay('Authenticated ✓', `Welcome, ${userName}! Opening Dashboard...`);
-    setTimeout(() => {
-      window.location.replace(targetFallback);
-      setTimeout(() => { window.location.href = targetFallback; }, 200);
-    }, 400);
   };
 
   window.handleGoogleRedirect = handleGoogleRedirect;

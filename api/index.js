@@ -1649,6 +1649,9 @@ const handleGoogleCallback = async (req, res) => {
                 </div>
                 <script>
                     localStorage.setItem('umrah_user', ${JSON.stringify(JSON.stringify(userDto))});
+                    localStorage.setItem('umrah_token', '${token}');
+                    localStorage.setItem('zilhaj_token', '${token}');
+                    sessionStorage.setItem('zilhaj_token', '${token}');
                     setTimeout(function() {
                         window.location.href = '${targetUrl}';
                     }, 400);

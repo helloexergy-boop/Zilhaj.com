@@ -166,32 +166,23 @@ function validatePayloadUserId(req, res, next) {
         return res.status(401).json({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
     }
 
-    const payloadUserId = req.body.userId || req.body.customerId;
-
-    if (payloadUserId) {
-        const matchesId = String(payloadUserId) === String(req.user.id);
-        const matchesEmail = String(payloadUserId).toLowerCase() === String(req.user.email).toLowerCase();
-
-        const roleUpper = String(req.user.role || '').toUpperCase();
-        const isCustomer = !roleUpper.includes('ADMIN') && !roleUpper.includes('STAFF');
-
-        // Admin and Subadmin operations may act on behalf of customers if authorized,
-        // but Customers can strictly only submit under their own identity.
-        if (!matchesId && !matchesEmail && isCustomer) {
-            return res.status(403).json({
-                error: 'Forbidden: You cannot submit requests under another user identity.',
-                code: 'ID_SPOOFING_DETECTED'
-            });
-        }
-    }
-
-    // Always enforce server-authoritative userId on the payload
+    // Always enforce server-authoritative authenticated user details
     const roleUpper = String(req.user.role || '').toUpperCase();
-    const isCustomer = !roleUpper.includes('ADMIN') && !roleUpper.includes('STAFF');
-    if (isCustomer || !req.body.userId) {
+    const isStaff = roleUpper.includes('ADMIN') || roleUpper.includes('STAFF');
+
+    if (!isStaff) {
+        // Authoritatively bind customer identity from verified JWT token
         req.body.userId = String(req.user.id || req.user.email);
-        req.body.userEmail = req.user.email;
-        req.body.userName = req.user.name;
+        req.body.userEmail = (req.user.email || req.body.email || '').toLowerCase().trim();
+        req.body.userName = req.user.name || req.body.fullname || req.body.userName || 'Pilgrim';
+    } else {
+        // Staff operations can submit on behalf of customers or self
+        if (!req.body.userId) {
+            req.body.userId = String(req.user.id || req.user.email);
+        }
+        if (!req.body.userEmail) {
+            req.body.userEmail = req.user.email;
+        }
     }
 
     next();

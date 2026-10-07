@@ -654,12 +654,21 @@
               body: JSON.stringify(payload)
             });
 
-            if (res.status === 401) {
+            if (res.status === 401 || res.status === 403) {
               sessionStorage.setItem('draft_journey_request', JSON.stringify(payload));
               alert('Session expired. Please log in to complete your submission.');
               window.location.href = '/login?redirect=/submit-request';
               return;
             }
+
+            const data = await res.json().catch(() => ({}));
+            const createdReq = (data && (data.request || data.data)) || payload;
+            try {
+              const localReqs = JSON.parse(localStorage.getItem('zilhaj_requirements') || '[]');
+              const filtered = localReqs.filter(r => (r.id || r.requestId) !== (createdReq.id || createdReq.requestId));
+              filtered.unshift(createdReq);
+              localStorage.setItem('zilhaj_requirements', JSON.stringify(filtered));
+            } catch(e) {}
 
             sessionStorage.removeItem('draft_journey_request');
             alert(`Request ${randomReqId} submitted successfully! Redirecting to your Dashboard to view submitted requests.`);

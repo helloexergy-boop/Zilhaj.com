@@ -66,6 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    if (targetTab === 'requests') {
+      if (typeof window.loadLiveDashboardData === 'function') {
+        window.loadLiveDashboardData();
+      }
+    }
+
     if (targetTab === 'payments') {
       const checkoutView = document.getElementById('checkoutView');
       const emptyPaymentsView = document.getElementById('emptyPaymentsView');
@@ -807,33 +813,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Asynchronously post to backend API database
       const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
-      const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
-      reqPayload.userId = userObj.id || userObj.email;
+      const token = (() => {
+        try {
+          const u = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+          return (u && (u.token || u.jwtToken)) ||
+                 localStorage.getItem('umrah_token') ||
+                 localStorage.getItem('zilhaj_token') ||
+                 sessionStorage.getItem('zilhaj_token') || '';
+        } catch(e) {
+          return localStorage.getItem('umrah_token') || localStorage.getItem('zilhaj_token') || '';
+        }
+      })();
+
+      if (!token) {
+        alert('Authentication required: Please log in to submit your journey request.');
+        window.location.href = '/login.html?redirect=/dashboard/index.html';
+        return;
+      }
+
+      const postHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      };
 
       fetch(apiBase + '/requests/journey', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': 'Bearer ' + token } : {})
-        },
+        headers: postHeaders,
         body: JSON.stringify(reqPayload)
-      }).then(res => res.json()).then(data => {
+      }).then(async res => {
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            alert('Your session has expired. Please log in again.');
+            window.location.href = '/login.html?redirect=/dashboard/index.html';
+            return;
+          }
+          // Secondary fallback to /api/requirements
+          return fetch(apiBase + '/requirements', {
+            method: 'POST',
+            headers: postHeaders,
+            body: JSON.stringify(reqPayload)
+          }).then(r => r.json());
+        }
+        return res.json();
+      }).then(data => {
         console.log('Journey request stored in MongoDB:', data);
+        const savedReq = (data && (data.request || data.data)) || reqPayload;
+        try {
+          const localReqs = JSON.parse(localStorage.getItem('zilhaj_requirements') || '[]');
+          const filtered = localReqs.filter(r => (r.id || r.requestId) !== (savedReq.id || savedReq.requestId));
+          filtered.unshift(savedReq);
+          localStorage.setItem('zilhaj_requirements', JSON.stringify(filtered));
+        } catch(e) {}
         if (typeof window.loadLiveDashboardData === 'function') {
           window.loadLiveDashboardData();
         }
       }).catch(err => {
         console.warn('Requirement DB post warning:', err);
-        fetch(apiBase + '/requirements', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': 'Bearer ' + token } : {})
-          },
-          body: JSON.stringify(reqPayload)
-        }).then(() => {
-          if (typeof window.loadLiveDashboardData === 'function') window.loadLiveDashboardData();
-        }).catch(() => {});
       });
 
       // Create new self-contained request card element with integrated tracker and 5-field info grid

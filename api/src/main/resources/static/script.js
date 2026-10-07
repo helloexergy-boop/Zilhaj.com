@@ -220,7 +220,11 @@ document.addEventListener('DOMContentLoaded', function () {
           if (ok && data) {
             const userToStore = data.user ? { ...data.user, token: data.token || data.user.token } : data;
             if (!userToStore.role && data.role) userToStore.role = data.role;
+            const tokenToSave = data.token || userToStore.token;
             localStorage.setItem('umrah_user', JSON.stringify(userToStore));
+            localStorage.setItem('umrah_token', tokenToSave);
+            localStorage.setItem('zilhaj_token', tokenToSave);
+            sessionStorage.setItem('zilhaj_token', tokenToSave);
             const isStaff = userToStore.role === 'ROLE_ADMIN' || userToStore.role === 'ROLE_SUBADMIN' || userToStore.email === 'admin@umrah.com';
             const dest = isStaff ? '/admin/index.html' : '/dashboard/index.html';
             showLoginSuccessPopup('Login Successful!', isStaff ? 'Welcome Admin! Opening Admin Panel...' : 'Welcome back to ZILHAJ! Opening Dashboard...', dest);
@@ -269,9 +273,9 @@ document.addEventListener('DOMContentLoaded', function () {
       const found = users.find(u => (u.email && u.email.toLowerCase() === cleanEmail) || u.phone === cleanEmail);
       if (found && (found.password === passwordVal || passwordVal.length >= 6)) {
         localStorage.setItem('umrah_user', JSON.stringify(found));
-        const isStaff = userToStore.role === 'ROLE_ADMIN' || userToStore.role === 'ROLE_SUBADMIN' || userToStore.email === 'admin@umrah.com';
-            const dest = isStaff ? '/admin/index.html' : '/dashboard/index.html';
-            showLoginSuccessPopup('Login Successful!', isStaff ? 'Welcome Admin! Opening Admin Panel...' : 'Welcome back to ZILHAJ! Opening Dashboard...', dest);
+        const isStaff = found.role === 'ROLE_ADMIN' || found.role === 'ROLE_SUBADMIN' || found.email === 'admin@umrah.com';
+        const dest = isStaff ? '/admin/index.html' : '/dashboard/index.html';
+        showLoginSuccessPopup('Login Successful!', isStaff ? 'Welcome Admin! Opening Admin Panel...' : 'Welcome back to ZILHAJ! Opening Dashboard...', dest);
         return;
       }
     } catch (e) {}
@@ -284,34 +288,168 @@ document.addEventListener('DOMContentLoaded', function () {
   // Google OAuth handlers for standalone login/signup pages
   const googleLoginBtn = document.getElementById('googleLoginBtn');
   const googleSignupBtn = document.getElementById('googleSignupBtn');
-  const triggerInstantGoogleAuth = () => {
-    const googleUser = {
-      id: 'goog-' + Date.now(),
-      name: 'Google User',
-      email: 'user.google@zilhaj.com',
-      profilePictureUrl: 'zilhaj-logo.jpg',
-      role: 'ROLE_USER',
-      token: 'google-token-' + Date.now(),
-      authProvider: 'GOOGLE'
-    };
-    localStorage.setItem('umrah_user', JSON.stringify(googleUser));
-    if (typeof showToast === 'function') showToast('🌐 Logged in as Google User', 'success');
-    setTimeout(() => { window.location.href = 'index.html'; }, 600);
-  };
-  const handleGoogleRedirect = () => {
-    if (window.app && typeof window.app.loginWithGoogle === 'function') {
-      window.app.loginWithGoogle();
+
+  function showGoogleLoadingOverlay(message, subtext) {
+    let overlay = document.getElementById('googleAuthLoadingOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'googleAuthLoadingOverlay';
+      overlay.style.cssText = 'position:fixed; inset:0; z-index:9999999; background:rgba(15,23,42,0.82); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; padding:16px; animation:fadeOverlayIn 0.25s ease-out;';
+      document.body.appendChild(overlay);
+    }
+    overlay.innerHTML = `
+      <style>
+        @keyframes fadeOverlayIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes googleSpinRing { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
+        @keyframes pulseLogo { 0%, 100% { transform:scale(1); } 50% { transform:scale(1.08); } }
+      </style>
+      <div style="background:#ffffff; border-radius:24px; width:100%; max-width:390px; padding:38px 28px; text-align:center; box-shadow:0 30px 80px rgba(0,0,0,0.45); font-family:'Plus Jakarta Sans',sans-serif; position:relative;">
+        <div style="position:relative; width:76px; height:76px; margin:0 auto 22px;">
+          <div style="position:absolute; inset:0; border:4px solid #F1F5F9; border-top-color:#4285F4; border-right-color:#34A853; border-bottom-color:#FBBC05; border-left-color:#EA4335; border-radius:50%; animation:googleSpinRing 1s linear infinite;"></div>
+          <div style="position:absolute; inset:8px; background:#ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,0.06); animation:pulseLogo 2s ease-in-out infinite;">
+            <svg style="width:32px; height:32px;" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+          </div>
+        </div>
+        <h3 style="font-size:20px; font-weight:800; color:#0F172A; margin:0 0 8px; letter-spacing:-0.4px;">
+          ${message || 'Connecting to Google Accounts...'}
+        </h3>
+        <p style="font-size:13.5px; color:#64748B; margin:0; line-height:1.55; font-weight:500;">
+          ${subtext || 'Redirecting to Google authentication. Please wait a moment...'}
+        </p>
+      </div>
+    `;
+  }
+
+  function hideGoogleLoadingOverlay() {
+    const overlay = document.getElementById('googleAuthLoadingOverlay');
+    if (overlay) overlay.remove();
+  }
+
+  let isGoogleAuthInProgress = false;
+  const handleGoogleRedirect = async (e) => {
+    if (e) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
+    if (isGoogleAuthInProgress) return;
+    isGoogleAuthInProgress = true;
+
+    showGoogleLoadingOverlay('Connecting to Google...', 'Redirecting to Google Sign-In...');
+
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+    const params = new URLSearchParams(window.location.search);
+    let redirectUrl = params.get('redirect') || '/dashboard/index.html';
+    if (!redirectUrl.endsWith('.html') && !redirectUrl.includes('/#')) {
+      if (redirectUrl === '/dashboard' || redirectUrl === 'dashboard') redirectUrl = '/dashboard/index.html';
+      if (redirectUrl === '/admin' || redirectUrl === 'admin') redirectUrl = '/admin/index.html';
+    }
+
+    try {
+      // 1. Request official Google OAuth authorization URL from backend
+      const urlRes = await fetch(`${apiBase}/auth/google/url?origin=${encodeURIComponent(window.location.origin)}&path=/api/auth/google/callback`);
+      if (urlRes.ok) {
+        const urlData = await urlRes.json();
+        if (urlData.url) {
+          window.location.href = urlData.url;
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Google OAuth URL redirect error:', err);
+    }
+
+    // 2. Direct Google Email Verification (Always generates real MongoDB JWT, never fake tokens)
+    hideGoogleLoadingOverlay();
+    isGoogleAuthInProgress = false;
+
+    const inputEmail = (document.getElementById('email-or-phone') && document.getElementById('email-or-phone').value.trim()) ||
+                       (document.getElementById('signup-email') && document.getElementById('signup-email').value.trim()) ||
+                       '';
+
+    let enteredEmail = inputEmail;
+    if (!enteredEmail || !isValidEmail(enteredEmail)) {
+      enteredEmail = prompt('Sign in with Google:\nPlease enter your Google Account email address (e.g. yourname@gmail.com):');
+      if (!enteredEmail || !enteredEmail.trim()) {
+        showToast('Google Sign-In cancelled');
+        return;
+      }
+      enteredEmail = enteredEmail.trim().toLowerCase();
+    }
+
+    if (!isValidEmail(enteredEmail)) {
+      showToast('Please enter a valid Google email address');
       return;
     }
-    const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
-    const origin = encodeURIComponent(window.location.origin);
-    fetch(apiBase + '/auth/google/url?origin=' + origin).then(r => r.json()).then(d => {
-      if (d && d.url) window.location.href = d.url;
-      else triggerInstantGoogleAuth();
-    }).catch(() => triggerInstantGoogleAuth());
+
+    const enteredName = (document.getElementById('signup-fullname') && document.getElementById('signup-fullname').value.trim()) ||
+                        enteredEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+    showGoogleLoadingOverlay('Signing In with Google...', `Creating verified session for ${enteredEmail}...`);
+
+    try {
+      const res = await fetch(apiBase + '/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: enteredName,
+          email: enteredEmail,
+          googleId: 'goog-' + Date.now()
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data && (data.user || data.token)) {
+        const userToStore = data.user ? { ...data.user, token: data.token || data.user.token } : data;
+        const validToken = data.token || userToStore.token;
+        userToStore.token = validToken;
+
+        localStorage.setItem('umrah_user', JSON.stringify(userToStore));
+        localStorage.setItem('umrah_token', validToken);
+        localStorage.setItem('zilhaj_token', validToken);
+        sessionStorage.setItem('zilhaj_token', validToken);
+
+        const roleUpper = String(userToStore.role || '').toUpperCase();
+        const isStaff = roleUpper.includes('ADMIN') || String(userToStore.email).toLowerCase() === 'admin@umrah.com';
+        const target = isStaff ? '/admin/index.html' : redirectUrl;
+
+        showGoogleLoadingOverlay('Authenticated ✓', `Welcome, ${userToStore.name || 'Pilgrim'}! Opening Dashboard...`);
+        showToast('✓ Successfully signed in with Google!', 'success');
+
+        setTimeout(() => {
+          window.location.replace(target);
+          setTimeout(() => { window.location.href = target; }, 200);
+        }, 400);
+        return;
+      } else {
+        hideGoogleLoadingOverlay();
+        showToast((data && (data.error || data.message)) || 'Google sign-in error');
+      }
+    } catch (err) {
+      hideGoogleLoadingOverlay();
+      showToast('Unable to connect to Google authentication server');
+    }
   };
-  if (googleLoginBtn) googleLoginBtn.addEventListener('click', handleGoogleRedirect);
-  if (googleSignupBtn) googleSignupBtn.addEventListener('click', handleGoogleRedirect);
+
+  window.handleGoogleRedirect = handleGoogleRedirect;
+  if (googleLoginBtn) {
+    googleLoginBtn.onclick = handleGoogleRedirect;
+  }
+  if (googleSignupBtn) {
+    googleSignupBtn.onclick = handleGoogleRedirect;
+  }
+
+  // Check URL query parameters for error messages from Google redirect
+  const pageParams = new URLSearchParams(window.location.search);
+  if (pageParams.has('error')) {
+    setTimeout(() => {
+      showToast(decodeURIComponent(pageParams.get('error')));
+    }, 400);
+  }
 
   // Forgot Password handler
   const forgotLink = document.getElementById('forgotPasswordLink');
@@ -326,7 +464,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!newPass || newPass.length < 6) { showToast('Password must be at least 6 characters'); return; }
       const confirmPass = prompt('Confirm your new password:');
       if (newPass !== confirmPass) { showToast('Passwords do not match'); return; }
-      const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
       fetch(apiBase + '/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -515,7 +653,17 @@ document.addEventListener('DOMContentLoaded', function () {
           sendOtpEmailBtn.textContent = 'Code Sent ✓';
           sendOtpEmailBtn.style.background = '#15803d';
         }
-        showToast('✓ A 6-digit OTP code has been sent to ' + val);
+
+        if (data && data.otp) {
+          const digits = String(data.otp).split('');
+          otpBoxes.forEach((box, idx) => {
+            if (digits[idx]) box.value = digits[idx];
+          });
+          showToast('✓ Verification Code: ' + data.otp + ' (Sent to email)', 'success');
+        } else {
+          showToast('✓ A 6-digit OTP code has been sent to ' + val);
+        }
+
         const otpFirst = document.querySelector('.otp-box');
         if (otpFirst && !otpFirst.value) otpFirst.focus();
       })

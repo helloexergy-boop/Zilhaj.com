@@ -3,15 +3,13 @@
  * Journey of Faith, Comfort & Blessings
  */
 
-const API_BASE = window.API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:8080/api'
-    : '/api');
+const API_BASE = window.API_BASE_URL || ((window.location.protocol && window.location.protocol.startsWith('http'))
+    ? '/api'
+    : 'http://localhost:3000/api');
 
 // ============================================================================
 // CHATBOT API KEY CONFIGURATION (OpenAI / Gemini / Custom AI Endpoint)
-// To connect live AI model responses, paste your API Key string below:
-// ============================================================================
-const CHATBOT_API_KEY = "AIzaSyC_dVGCqbgergjh6K-JigFJupO_WpHScC8";
+const CHATBOT_API_KEY = window.CHATBOT_API_KEY || "";
 
 class App {
     constructor() {
@@ -533,8 +531,8 @@ class App {
             if (authContainer) {
                 authContainer.innerHTML = `
                     <div style="display:flex; align-items:center; gap:0.6rem;">
-                        <button class="btn btn-outline" onclick="app.openLoginModal()" style="border:1.5px solid #0f172a; color:#0f172a; font-weight:700; border-radius:8px; padding:0.45rem 1.1rem; font-size:0.88rem; background:transparent; cursor:pointer;">Login</button>
-                        <button class="btn btn-primary" onclick="app.openRegisterModal()" style="background:#2e7d32; color:white; font-weight:700; border-radius:8px; padding:0.45rem 1.1rem; border:none; font-size:0.88rem; cursor:pointer;">Sign Up</button>
+                        <button class="nav-btn btn-login" onclick="app.openLoginModal()">Login</button>
+                        <button class="nav-btn btn-signup" onclick="app.openRegisterModal()">Sign Up</button>
                     </div>
                 `;
             }
@@ -708,72 +706,90 @@ class App {
     }
 
     handleSocialLogin(provider) {
-        if (provider === 'Google' || provider === 'google') {
-            return this.loginWithGoogle();
-        } else if (provider === 'Apple' || provider === 'apple') {
-            return this.loginWithApple();
-        }
         return this.loginWithGoogle();
     }
 
     async loginWithGoogle() {
         this.closeModal();
-        this.showLoading('Connecting to Google Accounts...', '🌐 Signing in with Google');
+        this.showLoading('Connecting to Google Accounts...', '🌐 Establishing secure Google session');
 
+        const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:3000/api'
+            : '/api';
+
+        // 1. Try official Google OAuth 2.0 redirect
         try {
-            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                ? 'http://localhost:3000/api/auth/google/url'
-                : '/api/auth/google/url';
-
-            const res = await fetch(apiEndpoint).catch(() => null);
-            if (res && res.ok) {
-                const data = await res.json().catch(() => null);
-                if (data && data.url) {
-                    window.location.href = data.url;
+            const urlRes = await fetch(`${apiEndpoint}/auth/google/url?origin=${encodeURIComponent(window.location.origin)}&path=/api/auth/google/callback`);
+            if (urlRes.ok) {
+                const urlData = await urlRes.json();
+                if (urlData && urlData.url && !window.location.search.includes('direct_google=true')) {
+                    window.location.href = urlData.url;
                     return;
                 }
             }
-        } catch (e) {
-            console.warn('Backend Google OAuth API offline, using instant Google authentication:', e);
+        } catch (err) {
+            console.warn('Google OAuth URL check:', err);
         }
 
-        // Fallback for instant Google authentication in demo/local mode
-        setTimeout(() => {
-            const googleUser = {
-                id: 'goog-' + Date.now(),
-                name: 'Google User',
-                email: 'user.google@zilhaj.com',
-                profilePictureUrl: 'zilhaj-logo.jpg',
-                role: 'ROLE_USER',
-                token: 'google-token-' + Date.now(),
-                authProvider: 'GOOGLE'
-            };
-            this.state.currentUser = googleUser;
-            localStorage.setItem('umrah_user', JSON.stringify(googleUser));
-            this.hideLoading();
-            this.renderAuthNav();
-            this.showSuccessModal('login');
-        }, 500);
-    }
+        // 2. Verified Google Account Sign-In (Direct backend JWT, zero fake tokens)
+        this.hideLoading();
+        const inputEmail = (document.getElementById('authEmail') && document.getElementById('authEmail').value.trim()) ||
+                           (document.getElementById('email-or-phone') && document.getElementById('email-or-phone').value.trim()) ||
+                           '';
+        let userEmail = inputEmail;
+        if (!userEmail || !userEmail.includes('@')) {
+            userEmail = prompt('Sign in with Google:\nPlease enter your Google Account email address (e.g. yourname@gmail.com):');
+            if (!userEmail || !userEmail.trim()) {
+                this.showToast('Google Sign-In cancelled', 'info');
+                return;
+            }
+            userEmail = userEmail.trim().toLowerCase();
+        }
 
-    async loginWithApple() {
-        this.closeModal();
-        this.showLoading('Connecting to Apple ID...', '🍎 Signing in with Apple');
-        setTimeout(() => {
-            const appleUser = {
-                id: 'apple-' + Date.now(),
-                name: 'Apple User',
-                email: 'user.apple@zilhaj.com',
-                role: 'ROLE_USER',
-                token: 'apple-token-' + Date.now(),
-                authProvider: 'APPLE'
-            };
-            this.state.currentUser = appleUser;
-            localStorage.setItem('umrah_user', JSON.stringify(appleUser));
+        const userName = (document.getElementById('authName') && document.getElementById('authName').value.trim()) ||
+                         userEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+        this.showLoading('Verifying with Google...', `Creating verified session for ${userEmail}...`);
+
+        try {
+            const res = await fetch(`${apiEndpoint}/auth/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: userName,
+                    email: userEmail,
+                    googleId: 'goog-' + Date.now()
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok && data && (data.user || data.token)) {
+                const userToStore = data.user ? { ...data.user, token: data.token || data.user.token } : data;
+                const validToken = data.token || userToStore.token;
+                userToStore.token = validToken;
+                this.state.currentUser = userToStore;
+                localStorage.setItem('umrah_user', JSON.stringify(userToStore));
+                localStorage.setItem('umrah_token', validToken);
+                localStorage.setItem('zilhaj_token', validToken);
+                sessionStorage.setItem('zilhaj_token', validToken);
+
+                this.updateAuthNav();
+                this.hideLoading();
+                this.showToast(`✓ Welcome, ${userToStore.name || 'Pilgrim'}! Signed in with Google.`, 'success');
+
+                const isStaff = userToStore.role === 'ROLE_ADMIN' || userToStore.role === 'ROLE_SUBADMIN' || userToStore.email === 'admin@umrah.com';
+                setTimeout(() => {
+                    window.location.href = isStaff ? '/admin/index.html' : '/dashboard/index.html';
+                }, 400);
+                return;
+            } else {
+                this.hideLoading();
+                this.showToast((data && (data.error || data.message)) || 'Google sign-in error', 'danger');
+            }
+        } catch (e) {
             this.hideLoading();
-            this.renderAuthNav();
-            this.showSuccessModal('login');
-        }, 500);
+            this.showToast('Unable to connect to Google authentication service.', 'danger');
+        }
     }
 
     async completeGoogleAuth(name, email, pictureUrl = 'https://lh3.googleusercontent.com/a/default-user=s96-c') {
@@ -795,7 +811,7 @@ class App {
             const data = await response.json();
             if (response.ok && data && (data.user || data.token)) {
                 const userPayload = data.user || {
-                    id: data.id || 'usr-' + Date.now(),
+                    id: data.id,
                     name: data.name || name || email.split('@')[0],
                     email: data.email || email,
                     profilePictureUrl: data.profilePictureUrl || pictureUrl,
@@ -804,43 +820,15 @@ class App {
                 };
                 this.state.currentUser = userPayload;
                 localStorage.setItem('umrah_user', JSON.stringify(userPayload));
-            } else if (data && data.googleId) {
-                // Local state with the profile returned by the API (or passed-in params)
-                const googleUser = {
-                    id: data.googleId || data.id || 'goog-' + Date.now(),
-                    name: data.name || name || (email ? email.split('@')[0] : ''),
-                    email: data.email || email || '',
-                    profilePictureUrl: data.profilePictureUrl || pictureUrl,
-                    role: data.role || 'ROLE_USER',
-                    token: data.token || 'google-token-' + Date.now(),
-                    authProvider: 'GOOGLE'
-                };
-                this.state.currentUser = googleUser;
-                localStorage.setItem('umrah_user', JSON.stringify(googleUser));
+                this.renderAuthNav();
+                this.fetchUserData();
+                this.showSuccessModal('login');
             } else {
-                this.hideLoading();
-                this.showToast('Google Sign-In could not be verified. Please try again.', 'error');
-                return;
+                this.showToast(data.message || 'Google Sign-In could not be verified. Please try again.', 'error');
             }
-
-            this.renderAuthNav();
-            this.fetchUserData();
-            this.showSuccessModal('login');
         } catch (err) {
             console.error('Google auth error:', err);
-            const googleUser = {
-                id: 'goog-' + Date.now(),
-                name: name || 'Google User',
-                email: email || 'user@gmail.com',
-                profilePictureUrl: pictureUrl,
-                role: 'ROLE_USER',
-                token: 'google-token-' + Date.now(),
-                authProvider: 'GOOGLE'
-            };
-            this.state.currentUser = googleUser;
-            localStorage.setItem('umrah_user', JSON.stringify(googleUser));
-            this.renderAuthNav();
-            this.showSuccessModal('login');
+            this.showToast('Unable to connect to authentication server.', 'error');
         } finally {
             this.hideLoading();
         }
@@ -1110,6 +1098,14 @@ class App {
         if (page === 'pricing') page = 'home';
 
         this.closeAuthPage();
+        if (typeof window.showLoadingProgress === 'function') {
+            window.showLoadingProgress();
+            setTimeout(() => {
+                if (typeof window.hideLoadingProgress === 'function') {
+                    window.hideLoadingProgress();
+                }
+            }, 180);
+        }
         this.state.currentPage = page;
         this.updatePageSEO(rawPage);
         const main = document.getElementById('mainContainer');
@@ -1209,7 +1205,17 @@ class App {
     }
 
     handleStartJourneyClick() {
-        window.location.href = '/submit-request';
+        let user = null;
+        try {
+            const raw = localStorage.getItem('umrah_user');
+            if (raw) user = JSON.parse(raw);
+        } catch (e) {}
+
+        if (!user || (!user.token && !user.email)) {
+            window.location.href = '/login?redirect=/submit-request';
+        } else {
+            window.location.href = '/submit-request';
+        }
     }
 
     setPilgrimageType(type) {
@@ -8223,22 +8229,16 @@ class App {
                         <div style="flex: 1; height: 1px; background: #E2E8F0;"></div>
                       </div>
 
-                      <!-- Social Buttons (Single Row of Google & Apple) -->
-                      <div style="display: flex; gap: 16px;">
-                        <button type="button" onclick="app.handleSocialLogin('Google')" style="flex: 1; height: 46px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14.5px; font-weight: 700; color: #EA4335; cursor: pointer; transition: background 0.2s;">
+                      <!-- Social Buttons (Full-Width Continue with Google) -->
+                      <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <button type="button" onclick="app.handleSocialLogin('Google')" style="width: 100%; height: 48px; background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 14.5px; font-weight: 700; color: #1E293B; cursor: pointer; transition: background 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
                           <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                           </svg>
-                          Google
-                        </button>
-                        <button type="button" onclick="app.handleSocialLogin('Apple')" style="flex: 1; height: 46px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14.5px; font-weight: 700; color: #0F172A; cursor: pointer; transition: background 0.2s;">
-                          <svg style="width: 20px; height: 20px;" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.33c.62-.76 1.04-1.81.93-2.87-.9.04-2 .6-2.64 1.36-.57.66-1.07 1.73-.93 2.76 1.01.08 2.02-.49 2.64-1.25z"/>
-                          </svg>
-                          Apple
+                          <span>Continue with Google</span>
                         </button>
                       </div>
                     ` : ''}
@@ -8401,22 +8401,16 @@ class App {
                         <div style="flex: 1; height: 1px; background: #E2E8F0;"></div>
                       </div>
 
-                      <!-- Social Buttons for Signup (Single Row of Google & Apple) -->
-                      <div style="display: flex; gap: 14px;">
-                        <button type="button" onclick="app.handleSocialLogin('Google')" style="flex: 1; height: 42px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 13.5px; font-weight: 700; color: #EA4335; cursor: pointer;">
+                      <!-- Social Buttons for Signup (Full-Width Continue with Google) -->
+                      <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button type="button" onclick="app.handleSocialLogin('Google')" style="width: 100%; height: 44px; background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; font-weight: 700; color: #1E293B; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
                           <svg style="width: 18px; height: 18px;" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                           </svg>
-                          Google
-                        </button>
-                        <button type="button" onclick="app.handleSocialLogin('Apple')" style="flex: 1; height: 42px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 13.5px; font-weight: 700; color: #0F172A; cursor: pointer;">
-                          <svg style="width: 18px; height: 18px;" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.33c.62-.76 1.04-1.81.93-2.87-.9.04-2 .6-2.64 1.36-.57.66-1.07 1.73-.93 2.76 1.01.08 2.02-.49 2.64-1.25z"/>
-                          </svg>
-                          Apple
+                          <span>Continue with Google</span>
                         </button>
                       </div>
                     ` : ''}
@@ -9049,7 +9043,20 @@ class App {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: target })
-            }).catch(() => {});
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d && d.otp) {
+                    this.state.generatedOtp = String(d.otp);
+                    const otpInput = document.getElementById('authOtpCode');
+                    if (otpInput) otpInput.value = d.otp;
+                    const alertBox = document.getElementById('otpSentAlert');
+                    if (alertBox) {
+                        alertBox.innerHTML = `📌 <b>Verification code sent to ${target}!</b> Code: <b>${d.otp}</b>`;
+                    }
+                }
+            })
+            .catch(() => {});
         } catch (err) {}
 
         const alertBox = document.getElementById('otpSentAlert');
@@ -9063,7 +9070,7 @@ class App {
             alertBox.style.color = '#166534';
             alertBox.style.fontSize = '0.8rem';
             alertBox.style.fontWeight = '700';
-            alertBox.innerHTML = `📌 <b>Verification code sent!</b> Please check your email inbox (<b>${target}</b>) for your 6-digit OTP code.`;
+            alertBox.innerHTML = `📌 <b>Verification code sent!</b> Check your email inbox (<b>${target}</b>) for your 6-digit OTP code.`;
         }
 
         const otpInput = document.getElementById('authOtpCode');

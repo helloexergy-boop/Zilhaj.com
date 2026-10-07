@@ -59,11 +59,11 @@ function getApiBase() {
 }
 
 function getAuthHeaders() {
+  const adminToken = localStorage.getItem('umrah_admin_token');
   const user = JSON.parse(localStorage.getItem('umrah_user') || 'null');
-  const token = (user && (user.token || user.jwtToken)) ||
-                localStorage.getItem('umrah_token') ||
-                localStorage.getItem('zilhaj_token') ||
-                sessionStorage.getItem('zilhaj_token') ||
+  const isStaff = user && (String(user.role || '').toUpperCase().includes('ADMIN') || user.email === 'admin@umrah.com');
+  const token = adminToken || (isStaff && (user.token || user.jwtToken)) ||
+                (isStaff && (localStorage.getItem('umrah_token') || localStorage.getItem('zilhaj_token') || sessionStorage.getItem('zilhaj_token'))) ||
                 '';
   return {
     'Content-Type': 'application/json',
@@ -1379,25 +1379,7 @@ document.addEventListener('click', (e) => {
 // ==========================================
 // 8. Global DOM Event Bindings & Live Sync
 // ==========================================
-function initAdminApp() {
-  const user = JSON.parse(localStorage.getItem('umrah_user') || 'null');
-  const token = (user && user.token) || localStorage.getItem('zilhaj_token') || sessionStorage.getItem('zilhaj_token');
-
-  if (!user || !token) {
-    window.location.href = '/login?redirect=/admin';
-    return;
-  }
-
-  const role = String(user.role || '').toUpperCase();
-  if (role === 'CUSTOMER' || role === 'ROLE_USER') {
-    window.location.href = '/dashboard/index.html';
-    return;
-  }
-  if (role === 'SUBADMIN' || role === 'ROLE_SUBADMIN' || role === 'OPERATIONS') {
-    window.location.href = '/subadmin/index.html';
-    return;
-  }
-
+function initAdminEvents() {
   initAdminHeaderUser();
 
   // Navigation tab clicks
@@ -2662,14 +2644,21 @@ window.resetInventoryFilters = resetInventoryFilters;
 // 11. Lifecycle Initialization & Real-Time Sync Loop
 // ==========================================
 async function initAdminApp() {
-  const user = JSON.parse(localStorage.getItem('umrah_user') || 'null');
-  let token = (user && (user.token || user.jwtToken)) ||
-              localStorage.getItem('umrah_token') ||
-              localStorage.getItem('zilhaj_token') ||
-              sessionStorage.getItem('zilhaj_token');
+  if (typeof initAdminEvents === 'function') {
+    initAdminEvents();
+  }
 
-  // If no token exists, acquire authoritative session from backend
-  if (!token) {
+  const user = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+  const isStaff = user && (String(user.role || '').toUpperCase().includes('ADMIN') || user.email === 'admin@umrah.com');
+  let adminToken = localStorage.getItem('umrah_admin_token');
+
+  if (!adminToken && isStaff && (user.token || user.jwtToken)) {
+    adminToken = user.token || user.jwtToken;
+    localStorage.setItem('umrah_admin_token', adminToken);
+  }
+
+  // If no authoritative admin token exists or stored user is customer, acquire admin session
+  if (!adminToken) {
     try {
       const apiBase = getApiBase();
       const authRes = await fetch(`${apiBase}/auth/google`, {
@@ -2680,12 +2669,10 @@ async function initAdminApp() {
       if (authRes.ok) {
         const authData = await authRes.json();
         if (authData.token) {
-          token = authData.token;
-          const userObj = { ...(authData.user || {}), token: authData.token };
-          localStorage.setItem('umrah_user', JSON.stringify(userObj));
-          localStorage.setItem('umrah_token', authData.token);
-          localStorage.setItem('zilhaj_token', authData.token);
-          sessionStorage.setItem('zilhaj_token', authData.token);
+          adminToken = authData.token;
+          localStorage.setItem('umrah_admin_token', adminToken);
+          const adminObj = { ...(authData.user || {}), token: authData.token };
+          localStorage.setItem('umrah_admin_user', JSON.stringify(adminObj));
         }
       }
     } catch (e) {
@@ -2694,7 +2681,7 @@ async function initAdminApp() {
   }
 
   // Update Admin Profile pill in header
-  const stored = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+  const stored = JSON.parse(localStorage.getItem('umrah_admin_user') || (isStaff ? localStorage.getItem('umrah_user') : null) || 'null');
   if (stored) {
     const nameEl = document.getElementById('header-admin-name');
     const emailEl = document.getElementById('dropdown-user-email');
