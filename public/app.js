@@ -8846,6 +8846,92 @@ class App {
         }
     }
 
+    async sendForgotPasswordOtp() {
+        const emailEl = document.getElementById('forgotEmail');
+        const btn = document.getElementById('btnForgotSendOtp');
+        const email = emailEl ? emailEl.value.trim() : '';
+
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            this.showFormError('Please enter a valid registered email address.');
+            if (emailEl) emailEl.focus();
+            return;
+        }
+
+        this.hideFormError();
+        if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+
+        try {
+            const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+            const res = await fetch(`${apiBase}/auth/forgot-password/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            if (btn) { btn.disabled = false; btn.textContent = 'Resend Code'; }
+
+            if (res.ok && data.success) {
+                this.showToast(data.message || `Verification code sent to ${email}`, 'success');
+                const otpInput = document.getElementById('forgotOtpCode');
+                if (otpInput) otpInput.focus();
+            } else {
+                this.showFormError(data.error || 'No registered account found with this email.');
+            }
+        } catch (e) {
+            if (btn) { btn.disabled = false; btn.textContent = 'Send Code'; }
+            this.showFormError('Failed to connect to reset server. Please try again.');
+        }
+    }
+
+    async handleForgotPasswordSubmit() {
+        const emailEl = document.getElementById('forgotEmail');
+        const otpEl = document.getElementById('forgotOtpCode');
+        const passEl = document.getElementById('forgotNewPassword');
+
+        const email = emailEl ? emailEl.value.trim() : '';
+        const otp = otpEl ? otpEl.value.trim() : '';
+        const newPassword = passEl ? passEl.value : '';
+
+        if (!email) {
+            this.showFormError('Please enter your email address.');
+            if (emailEl) emailEl.focus();
+            return;
+        }
+        if (!otp) {
+            this.showFormError('Please enter the verification code sent to your email.');
+            if (otpEl) otpEl.focus();
+            return;
+        }
+        if (!newPassword || newPassword.length < 6) {
+            this.showFormError('New password must be at least 6 characters long.');
+            if (passEl) passEl.focus();
+            return;
+        }
+
+        this.hideFormError();
+
+        try {
+            const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+            const res = await fetch(`${apiBase}/auth/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, otp, newPassword })
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                this.showToast('✓ Password updated successfully! Please login with your new password.', 'success');
+                this.openAuthModal('login');
+                const loginEmail = document.getElementById('authEmail');
+                if (loginEmail) loginEmail.value = email;
+            } else {
+                this.showFormError(data.error || 'Failed to reset password. Please check your OTP code.');
+            }
+        } catch (e) {
+            this.showFormError('Failed to connect to reset server. Please try again.');
+        }
+    }
+
     showSuccessModal(arg1 = 'login', arg2 = null, arg3 = null) {
         this.hideLoading();
         this.closeModal();

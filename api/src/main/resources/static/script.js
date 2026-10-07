@@ -451,53 +451,265 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 400);
   }
 
-  // Forgot Password handler
+  // ==========================================
+  // FORGOT PASSWORD MODAL & VERIFICATION FLOW
+  // ==========================================
+  const forgotModal = document.getElementById('forgotPasswordModal');
   const forgotLink = document.getElementById('forgotPasswordLink');
+  const closeForgotModalBtn = document.getElementById('closeForgotModalBtn');
+  const forgotModalAlert = document.getElementById('forgotModalAlert');
+  const forgotStep1 = document.getElementById('forgotStep1');
+  const forgotStep2 = document.getElementById('forgotStep2');
+  const forgotEmailInput = document.getElementById('forgotEmailInput');
+  const btnSendForgotOtp = document.getElementById('btnSendForgotOtp');
+  const forgotDisplayEmail = document.getElementById('forgotDisplayEmail');
+  const btnChangeForgotEmail = document.getElementById('btnChangeForgotEmail');
+  const btnResendForgotOtp = document.getElementById('btnResendForgotOtp');
+  const forgotOtpCountdown = document.getElementById('forgotOtpCountdown');
+  const forgotOtpInput = document.getElementById('forgotOtpInput');
+  const forgotNewPasswordInput = document.getElementById('forgotNewPasswordInput');
+  const forgotConfirmPasswordInput = document.getElementById('forgotConfirmPasswordInput');
+  const btnSubmitResetPassword = document.getElementById('btnSubmitResetPassword');
+
+  let forgotTimerInterval = null;
+  let forgotCountdown = 45;
+
+  function showForgotAlert(msg, type = 'error') {
+    if (!forgotModalAlert) return;
+    forgotModalAlert.style.display = 'block';
+    if (type === 'success') {
+      forgotModalAlert.style.background = '#F0FDF4';
+      forgotModalAlert.style.border = '1.5px solid #86EFAC';
+      forgotModalAlert.style.color = '#166534';
+      forgotModalAlert.innerHTML = `✓ ${msg}`;
+    } else {
+      forgotModalAlert.style.background = '#FEF2F2';
+      forgotModalAlert.style.border = '1.5px solid #FCA5A5';
+      forgotModalAlert.style.color = '#991B1B';
+      forgotModalAlert.innerHTML = `⚠️ ${msg}`;
+    }
+  }
+
+  function clearForgotAlert() {
+    if (forgotModalAlert) {
+      forgotModalAlert.style.display = 'none';
+      forgotModalAlert.innerHTML = '';
+    }
+  }
+
+  function startForgotOtpTimer() {
+    forgotCountdown = 45;
+    if (btnResendForgotOtp) btnResendForgotOtp.disabled = true;
+    if (forgotOtpCountdown) forgotOtpCountdown.textContent = `(00:45)`;
+    clearInterval(forgotTimerInterval);
+    forgotTimerInterval = setInterval(() => {
+      forgotCountdown--;
+      const formatted = forgotCountdown < 10 ? `0${forgotCountdown}` : `${forgotCountdown}`;
+      if (forgotOtpCountdown) forgotOtpCountdown.textContent = `(00:${formatted})`;
+      if (forgotCountdown <= 0) {
+        clearInterval(forgotTimerInterval);
+        if (forgotOtpCountdown) forgotOtpCountdown.textContent = '';
+        if (btnResendForgotOtp) btnResendForgotOtp.disabled = false;
+      }
+    }, 1000);
+  }
+
+  function openForgotModal() {
+    if (!forgotModal) return;
+    clearForgotAlert();
+    if (forgotStep1) forgotStep1.style.display = 'block';
+    if (forgotStep2) forgotStep2.style.display = 'none';
+    const currentEmail = (document.getElementById('email-or-phone') && document.getElementById('email-or-phone').value.trim()) || '';
+    if (forgotEmailInput && currentEmail && isValidEmail(currentEmail)) {
+      forgotEmailInput.value = currentEmail;
+    }
+    forgotModal.style.display = 'flex';
+    if (forgotEmailInput) setTimeout(() => forgotEmailInput.focus(), 100);
+  }
+
+  function closeForgotModal() {
+    if (!forgotModal) return;
+    forgotModal.style.display = 'none';
+    clearInterval(forgotTimerInterval);
+  }
+
   if (forgotLink) {
     forgotLink.addEventListener('click', function(e) {
       e.preventDefault();
-      const email = prompt('Enter your registered email address:');
-      if (!email || !email.trim()) return;
-      const cleanEmail = email.trim();
-      if (!isValidEmail(cleanEmail)) { showToast('Please enter a valid email address'); return; }
-      const newPass = prompt('Enter your new password (min 6 characters):');
-      if (!newPass || newPass.length < 6) { showToast('Password must be at least 6 characters'); return; }
-      const confirmPass = prompt('Confirm your new password:');
-      if (newPass !== confirmPass) { showToast('Passwords do not match'); return; }
-      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
-      fetch(apiBase + '/auth/reset-password', {
+      openForgotModal();
+    });
+  }
+
+  if (closeForgotModalBtn) {
+    closeForgotModalBtn.addEventListener('click', closeForgotModal);
+  }
+
+  if (forgotModal) {
+    forgotModal.addEventListener('click', function(e) {
+      if (e.target === forgotModal) closeForgotModal();
+    });
+  }
+
+  if (btnChangeForgotEmail) {
+    btnChangeForgotEmail.addEventListener('click', () => {
+      clearForgotAlert();
+      if (forgotStep1) forgotStep1.style.display = 'block';
+      if (forgotStep2) forgotStep2.style.display = 'none';
+      if (forgotEmailInput) forgotEmailInput.focus();
+    });
+  }
+
+  // Send OTP
+  async function requestForgotOtp() {
+    const email = forgotEmailInput ? forgotEmailInput.value.trim() : '';
+    if (!email) {
+      showForgotAlert('Please enter your registered email address.');
+      if (forgotEmailInput) forgotEmailInput.focus();
+      return;
+    }
+    if (!isValidEmail(email)) {
+      showForgotAlert('Please enter a valid email address.');
+      if (forgotEmailInput) forgotEmailInput.focus();
+      return;
+    }
+
+    clearForgotAlert();
+    if (btnSendForgotOtp) {
+      btnSendForgotOtp.disabled = true;
+      btnSendForgotOtp.innerHTML = 'Sending Code...';
+    }
+    if (btnResendForgotOtp) btnResendForgotOtp.disabled = true;
+
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+
+    try {
+      const res = await fetch(`${apiBase}/auth/forgot-password/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanEmail, newPassword: newPass })
-      }).then(r => r.json().then(d => ({ ok: r.ok, data: d }))).then(({ ok, data }) => {
-        if (ok) {
-          // Also update local fallback
-          try {
-            const users = JSON.parse(localStorage.getItem('zilhaj_users') || '[]');
-            const idx = users.findIndex(u => u.email && u.email.toLowerCase() === cleanEmail.toLowerCase());
-            if (idx !== -1) { users[idx].password = newPass; localStorage.setItem('zilhaj_users', JSON.stringify(users)); }
-            const cur = JSON.parse(localStorage.getItem('umrah_user') || 'null');
-            if (cur && cur.email && cur.email.toLowerCase() === cleanEmail.toLowerCase()) { cur.password = newPass; localStorage.setItem('umrah_user', JSON.stringify(cur)); }
-          } catch (e) {}
-          showToast('Password updated successfully! Please login with your new password.');
-        } else {
-          const msg = (data && (data.error || data.message)) || 'Failed to reset password';
-          showToast(msg);
-          // Fallback local update even if API says user not found, for demo accounts
-          try {
-            const users = JSON.parse(localStorage.getItem('zilhaj_users') || '[]');
-            const idx = users.findIndex(u => u.email && u.email.toLowerCase() === cleanEmail.toLowerCase());
-            if (idx !== -1) { users[idx].password = newPass; localStorage.setItem('zilhaj_users', JSON.stringify(users)); showToast('Password updated locally. Please login.'); }
-          } catch (e) {}
-        }
-      }).catch(() => {
-        try {
-          const users = JSON.parse(localStorage.getItem('zilhaj_users') || '[]');
-          const idx = users.findIndex(u => u.email && u.email.toLowerCase() === cleanEmail.toLowerCase());
-          if (idx !== -1) { users[idx].password = newPass; localStorage.setItem('zilhaj_users', JSON.stringify(users)); showToast('Password updated locally. Please login.'); }
-          else showToast('Password reset failed. Please try again.');
-        } catch (e) { showToast('Password reset failed. Please try again.'); }
+        body: JSON.stringify({ email })
       });
+      const data = await res.json();
+
+      if (btnSendForgotOtp) {
+        btnSendForgotOtp.disabled = false;
+        btnSendForgotOtp.innerHTML = 'Send Verification Code';
+      }
+
+      if (res.ok && data.success) {
+        if (forgotDisplayEmail) forgotDisplayEmail.textContent = email;
+        if (forgotStep1) forgotStep1.style.display = 'none';
+        if (forgotStep2) forgotStep2.style.display = 'block';
+        showForgotAlert(data.message || `Verification code sent to ${email}. Please check your inbox or spam folder.`, 'success');
+        startForgotOtpTimer();
+        if (forgotOtpInput) {
+          forgotOtpInput.value = '';
+          setTimeout(() => forgotOtpInput.focus(), 150);
+        }
+      } else {
+        const errorMsg = (data && (data.error || data.message)) || 'Unable to send verification code. Please check your email.';
+        showForgotAlert(errorMsg, 'error');
+      }
+    } catch (err) {
+      if (btnSendForgotOtp) {
+        btnSendForgotOtp.disabled = false;
+        btnSendForgotOtp.innerHTML = 'Send Verification Code';
+      }
+      showForgotAlert('Server connection error. Please make sure the backend is reachable.', 'error');
+    }
+  }
+
+  if (btnSendForgotOtp) {
+    btnSendForgotOtp.addEventListener('click', requestForgotOtp);
+  }
+
+  if (btnResendForgotOtp) {
+    btnResendForgotOtp.addEventListener('click', requestForgotOtp);
+  }
+
+  if (forgotEmailInput) {
+    forgotEmailInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        requestForgotOtp();
+      }
+    });
+  }
+
+  // Submit Password Reset
+  if (btnSubmitResetPassword) {
+    btnSubmitResetPassword.addEventListener('click', async function () {
+      const email = forgotEmailInput ? forgotEmailInput.value.trim() : '';
+      const otp = forgotOtpInput ? forgotOtpInput.value.trim() : '';
+      const newPass = forgotNewPasswordInput ? forgotNewPasswordInput.value : '';
+      const confirmPass = forgotConfirmPasswordInput ? forgotConfirmPasswordInput.value : '';
+
+      if (!otp) {
+        showForgotAlert('Please enter the 6-digit verification code.');
+        if (forgotOtpInput) forgotOtpInput.focus();
+        return;
+      }
+      if (otp.length < 4) {
+        showForgotAlert('Verification code must be at least 4-6 digits.');
+        if (forgotOtpInput) forgotOtpInput.focus();
+        return;
+      }
+      if (!newPass) {
+        showForgotAlert('Please enter a new password.');
+        if (forgotNewPasswordInput) forgotNewPasswordInput.focus();
+        return;
+      }
+      if (newPass.length < 6) {
+        showForgotAlert('Password must be at least 6 characters long.');
+        if (forgotNewPasswordInput) forgotNewPasswordInput.focus();
+        return;
+      }
+      if (newPass !== confirmPass) {
+        showForgotAlert('Passwords do not match. Please re-enter.');
+        if (forgotConfirmPasswordInput) forgotConfirmPasswordInput.focus();
+        return;
+      }
+
+      clearForgotAlert();
+      btnSubmitResetPassword.disabled = true;
+      btnSubmitResetPassword.innerHTML = 'Updating Password...';
+
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+
+      try {
+        const res = await fetch(`${apiBase}/auth/reset-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, otp, newPassword: newPass, confirmPassword: confirmPass })
+        });
+        const data = await res.json();
+        btnSubmitResetPassword.disabled = false;
+        btnSubmitResetPassword.innerHTML = 'Save New Password &rarr;';
+
+        if (res.ok && data.success) {
+          showForgotAlert('✓ Password updated successfully! Please login with your new password.', 'success');
+          showToast('✓ Password updated successfully! You can now log in.', 'success');
+
+          // Autofill email in the login form
+          const emailInput = document.getElementById('email-or-phone');
+          if (emailInput) emailInput.value = email;
+          const passInput = document.getElementById('password');
+          if (passInput) {
+            passInput.value = '';
+            setTimeout(() => passInput.focus(), 800);
+          }
+
+          // Close modal after 1.2s
+          setTimeout(() => {
+            closeForgotModal();
+          }, 1200);
+        } else {
+          showForgotAlert((data && (data.error || data.message)) || 'Failed to reset password. Please check your OTP code.', 'error');
+        }
+      } catch (err) {
+        btnSubmitResetPassword.disabled = false;
+        btnSubmitResetPassword.innerHTML = 'Save New Password &rarr;';
+        showForgotAlert('Failed to connect to reset server. Please try again.', 'error');
+      }
     });
   }
 

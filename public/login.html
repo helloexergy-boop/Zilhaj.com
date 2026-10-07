@@ -205,6 +205,96 @@
 
   </div>
 
+  <!-- ==========================================
+       FORGOT PASSWORD MODAL (Professional OTP & Password Reset)
+       ========================================== -->
+  <div id="forgotPasswordModal" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(11, 30, 23, 0.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;">
+    <div style="background: #ffffff; border-radius: 24px; width: 100%; max-width: 460px; box-shadow: 0 30px 80px rgba(0,0,0,0.4); position: relative; overflow: hidden; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; animation: popupScale 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+      
+      <!-- Modal Header -->
+      <div style="padding: 24px 28px 18px; background: #FAFDFB; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 42px; height: 42px; border-radius: 12px; background: #E8F5E9; display: flex; align-items: center; justify-content: center; color: #0F5A47; box-shadow: 0 4px 12px rgba(15, 90, 71, 0.12);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 20px; font-weight: 800; color: #0F172A; letter-spacing: -0.4px;">Reset Password</h3>
+            <p style="margin: 2px 0 0; font-size: 13px; color: #64748B; font-weight: 500;">Verify email via OTP code to set new password</p>
+          </div>
+        </div>
+        <button type="button" id="closeForgotModalBtn" style="background: #F1F5F9; border: none; font-size: 20px; color: #64748B; cursor: pointer; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; line-height: 1; transition: background 0.2s;">&times;</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div style="padding: 24px 28px 28px;">
+        
+        <!-- Status Alert Box -->
+        <div id="forgotModalAlert" style="display: none; padding: 12px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 18px; line-height: 1.45;"></div>
+
+        <!-- STEP 1: Email Input Form -->
+        <div id="forgotStep1">
+          <label for="forgotEmailInput" style="display: block; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase; margin-bottom: 8px;">Registered Email Address</label>
+          <div style="position: relative; margin-bottom: 18px;">
+            <input type="email" id="forgotEmailInput" placeholder="name@example.com" style="width: 100%; height: 50px; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0 16px; font-size: 15px; color: #0F172A; box-sizing: border-box; outline: none; transition: border-color 0.2s;">
+          </div>
+          <button type="button" id="btnSendForgotOtp" style="width: 100%; height: 50px; background: #0F5A47; color: #FFFFFF; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; letter-spacing: 0.3px; cursor: pointer; box-shadow: 0 4px 14px rgba(15, 90, 71, 0.25); display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;">
+            <span>Send Verification Code</span>
+          </button>
+        </div>
+
+        <!-- STEP 2: OTP Verification & New Password (Hidden until OTP sent) -->
+        <div id="forgotStep2" style="display: none;">
+          
+          <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="font-size: 13px; color: #166534; font-weight: 600;">
+              Code sent to: <span id="forgotDisplayEmail" style="font-weight: 800; color: #0F5A47;"></span>
+            </div>
+            <button type="button" id="btnChangeForgotEmail" style="background: none; border: none; color: #0F5A47; font-size: 12px; font-weight: 700; text-decoration: underline; cursor: pointer;">Change</button>
+          </div>
+
+          <!-- 6-digit OTP Input -->
+          <div style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label for="forgotOtpInput" style="font-size: 12px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase;">Verification Code (OTP)</label>
+              <button type="button" id="btnResendForgotOtp" style="background: none; border: none; color: #0F5A47; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline;">Resend Code <span id="forgotOtpCountdown"></span></button>
+            </div>
+            <input type="text" id="forgotOtpInput" placeholder="Enter 6-digit code (e.g. 123456)" maxlength="6" style="width: 100%; height: 50px; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0 16px; font-size: 17px; letter-spacing: 3px; font-weight: 700; color: #0F172A; box-sizing: border-box; outline: none; transition: border-color 0.2s;">
+          </div>
+
+          <!-- New Password Input -->
+          <div style="margin-bottom: 16px;">
+            <label for="forgotNewPasswordInput" style="display: block; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase; margin-bottom: 6px;">New Password</label>
+            <div style="position: relative;">
+              <input type="password" id="forgotNewPasswordInput" placeholder="At least 6 characters" style="width: 100%; height: 50px; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0 46px 0 16px; font-size: 15px; color: #0F172A; box-sizing: border-box; outline: none; transition: border-color 0.2s;">
+              <button type="button" id="toggleForgotPassBtn1" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #94A3B8; display: flex; align-items: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Confirm New Password Input -->
+          <div style="margin-bottom: 22px;">
+            <label for="forgotConfirmPasswordInput" style="display: block; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; color: #334155; text-transform: uppercase; margin-bottom: 6px;">Confirm New Password</label>
+            <div style="position: relative;">
+              <input type="password" id="forgotConfirmPasswordInput" placeholder="Re-enter new password" style="width: 100%; height: 50px; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0 46px 0 16px; font-size: 15px; color: #0F172A; box-sizing: border-box; outline: none; transition: border-color 0.2s;">
+              <button type="button" id="toggleForgotPassBtn2" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #94A3B8; display: flex; align-items: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <button type="button" id="btnSubmitResetPassword" style="width: 100%; height: 50px; background: #0F5A47; color: #FFFFFF; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; letter-spacing: 0.3px; cursor: pointer; box-shadow: 0 4px 14px rgba(15, 90, 71, 0.25); display: flex; align-items: center; justify-content: center; transition: background 0.2s;">
+            <span>Save New Password &rarr;</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <script src="script.js?v=20261007_1"></script>
 </body>
 </html>
