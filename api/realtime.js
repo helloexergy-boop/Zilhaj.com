@@ -90,6 +90,13 @@ class RealtimeServerEngine {
     }
 
     /**
+     * Broadcast an event (alias for publish)
+     */
+    broadcast(channelName, eventName, payload) {
+        return this.publish(channelName, eventName, payload);
+    }
+
+    /**
      * Send periodic heartbeat pings every 20 seconds to keep connection alive through proxies
      */
     initHeartbeat() {

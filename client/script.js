@@ -452,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!newPass || newPass.length < 6) { showToast('Password must be at least 6 characters'); return; }
       const confirmPass = prompt('Confirm your new password:');
       if (newPass !== confirmPass) { showToast('Passwords do not match'); return; }
-      const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
       fetch(apiBase + '/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

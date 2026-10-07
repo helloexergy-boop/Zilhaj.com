@@ -643,7 +643,7 @@
           const randomReqId = `REQ-${Math.floor(1000 + Math.random() * 9000)}`;
           payload.id = randomReqId;
 
-          const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
+          const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
           try {
             const res = await fetch(apiBase + '/requests/journey', {
               method: 'POST',
