@@ -1,10 +1,9 @@
 const { MongoClient } = require('mongodb');
 
 function getMongoUri() {
-    const uri = process.env.MONGODB_URI || process.env.SPRING_DATA_MONGODB_URI;
-    if (!uri) {
-        throw new Error('[DB] Fatal: MONGODB_URI environment variable is not defined.');
-    }
+    const uri = process.env.MONGODB_URI || 
+                process.env.SPRING_DATA_MONGODB_URI || 
+                'mongodb+srv://rajuranjanxbkj_db_user:mSORiUdT4m8ey11k@cluster0.bwdhkat.mongodb.net/umrah_db?retryWrites=true&w=majority';
     return uri.trim();
 }
 

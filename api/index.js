@@ -1311,15 +1311,19 @@ const handleSendOtp = async (req, res) => {
         }
 
         // Check if email already registered in MongoDB
-        const db = await connectToDatabase();
-        if (db) {
-            const existing = await db.collection('users').findOne({ email: cleanEmail });
-            if (existing && existing.password) {
-                return res.status(409).json({
-                    code: 'EMAIL_ALREADY_EXISTS',
-                    error: 'This email is already registered. Please log in.'
-                });
+        try {
+            const db = await connectToDatabase();
+            if (db) {
+                const existing = await db.collection('users').findOne({ email: cleanEmail });
+                if (existing && existing.password) {
+                    return res.status(409).json({
+                        code: 'EMAIL_ALREADY_EXISTS',
+                        error: 'This email is already registered. Please log in.'
+                    });
+                }
             }
+        } catch (dbErr) {
+            console.warn('[AUTH] DB lookup warning in send-otp:', dbErr.message);
         }
 
         // Generate 6-digit OTP
@@ -1349,12 +1353,13 @@ app.post('/api/auth/resend-otp', otpLimiter, handleSendOtp);
 
 app.post('/api/auth/verify-otp', async (req, res) => {
     try {
-        const { email, otp } = req.body;
-        if (!email || !otp) {
+        const { email, otp, code: incomingCode } = req.body || {};
+        const codeToCheck = otp || incomingCode;
+        if (!email || !codeToCheck) {
             return res.status(400).json({ error: 'Email and OTP code are required.' });
         }
         const cleanEmail = email.trim().toLowerCase();
-        const code = String(otp).trim();
+        const code = String(codeToCheck).trim();
 
         if (code === '123456' || code === '1234') {
             return res.json({ success: true, message: 'OTP verified successfully' });
