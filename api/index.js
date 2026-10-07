@@ -1260,16 +1260,9 @@ const otpStore = new Map(); // cleanEmail -> { otp, expiresAt }
 function getSmtpTransporter() {
     const user = process.env.SMTP_USER || 'hello.exergy@gmail.com';
     const pass = process.env.SMTP_PASS || 'gjokvymailqsetfl';
-
-    if (!process.env.SMTP_HOST || process.env.SMTP_HOST.includes('gmail')) {
-        return nodemailer.createTransport({
-            service: 'gmail',
-            auth: { user, pass }
-        });
-    }
-
     const host = process.env.SMTP_HOST || 'smtp.gmail.com';
     const port = parseInt(process.env.SMTP_PORT || '587');
+
     return nodemailer.createTransport({
         host,
         port,
@@ -1725,12 +1718,13 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
 
 app.post('/api/auth/login', authLimiter, async (req, res) => {
     try {
-        const { email, password } = req.body;
-        if (!email || !password) {
+        const identifier = (req.body && (req.body.email || req.body.emailOrPhone || req.body.phone || req.body.username)) || '';
+        const password = (req.body && req.body.password) || '';
+        if (!identifier || !password) {
             return res.status(400).json({ error: 'Email/Phone and password are required.' });
         }
 
-        const cleanInput = email.toString().trim();
+        const cleanInput = identifier.toString().trim();
         const cleanEmail = cleanInput.toLowerCase();
         const phoneDigits = cleanInput.replace(/\D/g, '');
 
