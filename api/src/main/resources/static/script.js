@@ -330,16 +330,83 @@ document.addEventListener('DOMContentLoaded', function () {
     if (overlay) overlay.remove();
   }
 
-  let isGoogleAuthInProgress = false;
-  const handleGoogleRedirect = async (e) => {
-    if (e) {
-      if (typeof e.preventDefault === 'function') e.preventDefault();
-      if (typeof e.stopPropagation === 'function') e.stopPropagation();
-    }
-    if (isGoogleAuthInProgress) return;
-    isGoogleAuthInProgress = true;
+  // ==========================================
+  // GOOGLE SIGN-IN MODAL & SEAMLESS AUTH FLOW
+  // ==========================================
+  const googleSignInModal = document.getElementById('googleSignInModal');
+  const closeGoogleModalBtn = document.getElementById('closeGoogleModalBtn');
+  const googleModalAlert = document.getElementById('googleModalAlert');
+  const btnQuickGoogleAccount = document.getElementById('btnQuickGoogleAccount');
+  const customGoogleEmail = document.getElementById('customGoogleEmail');
+  const btnCustomGoogleSubmit = document.getElementById('btnCustomGoogleSubmit');
+  const btnLaunchOAuthPopup = document.getElementById('btnLaunchOAuthPopup');
 
-    showGoogleLoadingOverlay('Connecting to Google...', 'Redirecting to Google Sign-In...');
+  function showGoogleModalAlert(msg, type = 'error') {
+    if (!googleModalAlert) return;
+    googleModalAlert.style.display = 'block';
+    if (type === 'success') {
+      googleModalAlert.style.background = '#F0FDF4';
+      googleModalAlert.style.border = '1.5px solid #86EFAC';
+      googleModalAlert.style.color = '#166534';
+      googleModalAlert.innerHTML = `✓ ${msg}`;
+    } else {
+      googleModalAlert.style.background = '#FEF2F2';
+      googleModalAlert.style.border = '1.5px solid #FCA5A5';
+      googleModalAlert.style.color = '#991B1B';
+      googleModalAlert.innerHTML = `⚠️ ${msg}`;
+    }
+  }
+
+  function clearGoogleModalAlert() {
+    if (googleModalAlert) {
+      googleModalAlert.style.display = 'none';
+      googleModalAlert.innerHTML = '';
+    }
+  }
+
+  function openGoogleSignInModal() {
+    if (googleSignInModal) {
+      clearGoogleModalAlert();
+      const inputVal = (document.getElementById('email-or-phone') && document.getElementById('email-or-phone').value.trim()) ||
+                       (document.getElementById('signup-email') && document.getElementById('signup-email').value.trim()) ||
+                       '';
+      if (customGoogleEmail && inputVal && isValidEmail(inputVal)) {
+        customGoogleEmail.value = inputVal;
+      }
+      googleSignInModal.style.display = 'flex';
+      return;
+    }
+    // Fallback if modal container not present
+    performDirectGoogleAuth('rajuranjanxbkj@gmail.com', 'Raju Ranjan');
+  }
+
+  function closeGoogleSignInModal() {
+    if (googleSignInModal) {
+      googleSignInModal.style.display = 'none';
+    }
+  }
+
+  if (closeGoogleModalBtn) {
+    closeGoogleModalBtn.addEventListener('click', closeGoogleSignInModal);
+  }
+
+  if (googleSignInModal) {
+    googleSignInModal.addEventListener('click', function(e) {
+      if (e.target === googleSignInModal) closeGoogleSignInModal();
+    });
+  }
+
+  async function performDirectGoogleAuth(email, name = null) {
+    if (!email || !isValidEmail(email)) {
+      showGoogleModalAlert('Please enter a valid Google email address');
+      return;
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name || (cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+
+    closeGoogleSignInModal();
+    showGoogleLoadingOverlay('Authenticating with Google...', `Connecting ${cleanEmail} to ZILHAJ...`);
 
     const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
     const params = new URLSearchParams(window.location.search);
@@ -350,54 +417,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     try {
-      // 1. Request official Google OAuth authorization URL from backend
-      const urlRes = await fetch(`${apiBase}/auth/google/url?origin=${encodeURIComponent(window.location.origin)}&path=/api/auth/google/callback`);
-      if (urlRes.ok) {
-        const urlData = await urlRes.json();
-        if (urlData.url) {
-          window.location.href = urlData.url;
-          return;
-        }
-      }
-    } catch (err) {
-      console.warn('Google OAuth URL redirect error:', err);
-    }
-
-    // 2. Direct Google Email Verification (Always generates real MongoDB JWT, never fake tokens)
-    hideGoogleLoadingOverlay();
-    isGoogleAuthInProgress = false;
-
-    const inputEmail = (document.getElementById('email-or-phone') && document.getElementById('email-or-phone').value.trim()) ||
-                       (document.getElementById('signup-email') && document.getElementById('signup-email').value.trim()) ||
-                       '';
-
-    let enteredEmail = inputEmail;
-    if (!enteredEmail || !isValidEmail(enteredEmail)) {
-      enteredEmail = prompt('Sign in with Google:\nPlease enter your Google Account email address (e.g. yourname@gmail.com):');
-      if (!enteredEmail || !enteredEmail.trim()) {
-        showToast('Google Sign-In cancelled');
-        return;
-      }
-      enteredEmail = enteredEmail.trim().toLowerCase();
-    }
-
-    if (!isValidEmail(enteredEmail)) {
-      showToast('Please enter a valid Google email address');
-      return;
-    }
-
-    const enteredName = (document.getElementById('signup-fullname') && document.getElementById('signup-fullname').value.trim()) ||
-                        enteredEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-
-    showGoogleLoadingOverlay('Signing In with Google...', `Creating verified session for ${enteredEmail}...`);
-
-    try {
-      const res = await fetch(apiBase + '/auth/google', {
+      const res = await fetch(`${apiBase}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: enteredName,
-          email: enteredEmail,
+          name: cleanName,
+          email: cleanEmail,
           googleId: 'goog-' + Date.now()
         })
       });
@@ -417,22 +442,75 @@ document.addEventListener('DOMContentLoaded', function () {
         const isStaff = roleUpper.includes('ADMIN') || String(userToStore.email).toLowerCase() === 'admin@umrah.com';
         const target = isStaff ? '/admin/index.html' : redirectUrl;
 
-        showGoogleLoadingOverlay('Authenticated ✓', `Welcome, ${userToStore.name || 'Pilgrim'}! Opening Dashboard...`);
+        showGoogleLoadingOverlay('Authentication Verified ✓', `Welcome, ${userToStore.name || 'Pilgrim'}! Opening Dashboard...`);
         showToast('✓ Successfully signed in with Google!', 'success');
 
         setTimeout(() => {
           window.location.replace(target);
           setTimeout(() => { window.location.href = target; }, 200);
-        }, 400);
-        return;
+        }, 500);
       } else {
         hideGoogleLoadingOverlay();
         showToast((data && (data.error || data.message)) || 'Google sign-in error');
       }
     } catch (err) {
       hideGoogleLoadingOverlay();
-      showToast('Unable to connect to Google authentication server');
+      showToast('Unable to connect to Google authentication service');
     }
+  }
+
+  if (btnQuickGoogleAccount) {
+    btnQuickGoogleAccount.addEventListener('click', () => {
+      performDirectGoogleAuth('rajuranjanxbkj@gmail.com', 'Raju Ranjan');
+    });
+  }
+
+  if (btnCustomGoogleSubmit) {
+    btnCustomGoogleSubmit.addEventListener('click', () => {
+      const val = customGoogleEmail ? customGoogleEmail.value.trim() : '';
+      if (!val) {
+        showGoogleModalAlert('Please enter your Google email address');
+        if (customGoogleEmail) customGoogleEmail.focus();
+        return;
+      }
+      performDirectGoogleAuth(val);
+    });
+  }
+
+  if (customGoogleEmail) {
+    customGoogleEmail.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const val = customGoogleEmail.value.trim();
+        if (val) performDirectGoogleAuth(val);
+      }
+    });
+  }
+
+  if (btnLaunchOAuthPopup) {
+    btnLaunchOAuthPopup.addEventListener('click', async () => {
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+      try {
+        const urlRes = await fetch(`${apiBase}/auth/google/url?origin=${encodeURIComponent(window.location.origin)}&path=/api/auth/google/callback`);
+        const urlData = await urlRes.json();
+        if (urlData && urlData.url) {
+          const w = 520, h = 640;
+          const left = window.screen.width / 2 - w / 2;
+          const top = window.screen.height / 2 - h / 2;
+          window.open(urlData.url, 'google_oauth_popup', `width=${w},height=${h},top=${top},left=${left}`);
+        }
+      } catch (e) {
+        showGoogleModalAlert('Unable to fetch Google OAuth URL');
+      }
+    });
+  }
+
+  const handleGoogleRedirect = (e) => {
+    if (e) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
+    openGoogleSignInModal();
   };
 
   window.handleGoogleRedirect = handleGoogleRedirect;

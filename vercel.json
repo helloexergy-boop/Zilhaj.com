@@ -20,6 +20,10 @@
       "dest": "/api/index.js"
     },
     {
+      "src": "/login/oauth2/code/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
       "src": "/services",
       "dest": "/client/services.html"
     },
