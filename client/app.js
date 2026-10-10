@@ -5,7 +5,7 @@
 
 const API_BASE = window.API_BASE_URL || ((window.location.protocol && window.location.protocol.startsWith('http'))
     ? '/api'
-    : 'http://localhost:3000/api');
+    : 'https://zilhaj.com/api');
 
 // ============================================================================
 // CHATBOT API KEY CONFIGURATION (OpenAI / Gemini / Custom AI Endpoint)

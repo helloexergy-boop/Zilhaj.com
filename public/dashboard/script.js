@@ -812,7 +812,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       // Asynchronously post to backend API database
-      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
       const token = (() => {
         try {
           const u = JSON.parse(localStorage.getItem('umrah_user') || 'null');
@@ -1244,7 +1244,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.downloadBookingInvoicePDF = async function(bookingId) {
     try {
       const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
-      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
       
       const res = await fetch(apiBase + `/bookings/${encodeURIComponent(bookingId)}/pdf`, {
         headers: token ? { 'Authorization': 'Bearer ' + token } : {}
@@ -1300,7 +1300,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('pending_checkout', JSON.stringify(pendingCheckout));
 
     const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
-    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
 
     fetch(apiBase + `/requests/${encodeURIComponent(reqId)}/select-offer`, {
       method: 'POST',
@@ -1323,7 +1323,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statTotalPayments = document.getElementById('statTotalPayments');
     const statTotalPaidAmount = document.getElementById('statTotalPaidAmount');
 
-    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
     const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
     const headers = token ? { Authorization: 'Bearer ' + token } : {};
 
@@ -1406,7 +1406,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // REAL-TIME LIVE DATA FETCHING FOR DASHBOARD (Live MongoDB Data, Zero Mock)
   // ------------------------------------------------------------------------
   window.loadLiveDashboardData = function() {
-    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
     const token = (() => {
       try {
         const u = JSON.parse(localStorage.getItem('umrah_user') || 'null');
@@ -2001,45 +2001,55 @@ window.openSubmissionSummaryModal = function(reqId, service, date, passengers, h
   if (modal) {
     const id = reqId || 'REQ-0517';
 
-    // Preset defaults for REQ-0517 and REQ-5417 if detailed args not provided
-    if (!service) {
-      if (id === 'REQ-5417') {
-        service = 'Umrah Package (25 Days)';
-        applyingFor = 'Umrah';
-        duration = '25 Days';
-        city = 'Delhi';
-        date = '27 Apr 2026';
-        male = '6 Male';
-        female = '4 Female';
-        children = '0 Children';
-        infants = '0 Infants';
-        hotelCategory = '5 Star';
-        fullname = 'Tariq Ahmed';
-        mobile = '+91 98765 43210';
-        email = 'tariq.ahmed@example.com';
-        address = 'Nowgam, Srinagar';
-        state = 'Jammu & Kashmir';
-        district = 'Srinagar';
-        specialReq = 'Family group of 10 traveling together. Adjacent rooms on lower floors preferred.';
-      } else {
-        service = 'Umrah Package (18 Days)';
-        applyingFor = 'Umrah';
-        duration = '18 Days';
-        city = 'Delhi';
-        date = '22 Mar 2026';
-        male = '2 Male';
-        female = '1 Female';
-        children = '0 Children';
-        infants = '0 Infants';
-        hotelCategory = '5 Star';
-        fullname = 'Tariq Ahmed';
-        mobile = '+91 98765 43210';
-        email = 'tariq.ahmed@example.com';
-        address = 'Nowgam, Srinagar';
-        state = 'Jammu & Kashmir';
-        district = 'Srinagar';
-        specialReq = 'Wheelchair assistance for 1 senior pilgrim during Tawaf.';
-      }
+    // Look up actual requirement object from current requests list if detailed arguments are not passed
+    let foundReq = null;
+    if (Array.isArray(window._currentReqs)) {
+      foundReq = window._currentReqs.find(r => (r.id || r.requestId) === id) || null;
+    }
+    if (!foundReq) {
+      try {
+        const localReqs = JSON.parse(localStorage.getItem('zilhaj_requirements') || '[]');
+        foundReq = localReqs.find(r => (r.id || r.requestId) === id) || null;
+      } catch(e) {}
+    }
+
+    if (foundReq) {
+      applyingFor = applyingFor || foundReq.applyingFor || (foundReq.service && foundReq.service.includes('Hajj') ? 'Hajj' : 'Umrah');
+      service = service || foundReq.service || `${applyingFor} Package`;
+      duration = duration || foundReq.duration || '14 Days';
+      city = city || foundReq.departureCity || 'Delhi';
+      date = date || foundReq.travelDate || foundReq.departureDate || 'Flexible';
+      male = (male !== undefined && male !== null && male !== '') ? male : `${foundReq.maleCount !== undefined ? foundReq.maleCount : (foundReq.travelers || 1)} Male`;
+      female = (female !== undefined && female !== null && female !== '') ? female : `${foundReq.femaleCount || 0} Female`;
+      children = (children !== undefined && children !== null && children !== '') ? children : `${foundReq.childCount || 0} Children`;
+      infants = (infants !== undefined && infants !== null && infants !== '') ? infants : `${foundReq.infantCount || 0} Infants`;
+      hotelCategory = hotelCategory || foundReq.hotelCategory || foundReq.hotelType || '3 Star';
+      fullname = fullname || foundReq.fullname || foundReq.userName || foundReq.customer || 'Pilgrim';
+      mobile = mobile || foundReq.mobile || foundReq.phone || foundReq.userPhone || '';
+      email = email || foundReq.email || foundReq.userEmail || '';
+      address = address || (foundReq.address ? foundReq.address : (foundReq.departureCity ? `${foundReq.departureCity}, India` : ''));
+      state = state || foundReq.state || '';
+      district = district || foundReq.district || foundReq.departureCity || '';
+      specialReq = specialReq || foundReq.specialRequirements || (Array.isArray(foundReq.specialRequests) ? foundReq.specialRequests.join(', ') : foundReq.specialRequests) || foundReq.notes || 'None specified';
+    } else if (!service) {
+      // Fallback only if no matching request is found
+      service = 'Umrah Custom Package';
+      applyingFor = 'Umrah';
+      duration = '14 Days';
+      city = 'Delhi';
+      date = 'Flexible';
+      male = '1 Male';
+      female = '0 Female';
+      children = '0 Children';
+      infants = '0 Infants';
+      hotelCategory = '3 Star';
+      fullname = 'Pilgrim';
+      mobile = '';
+      email = '';
+      address = 'Delhi, India';
+      state = 'Delhi';
+      district = 'Delhi';
+      specialReq = 'None specified';
     }
 
     if (document.getElementById('summaryModalReqId')) document.getElementById('summaryModalReqId').textContent = id;
@@ -2159,7 +2169,7 @@ window.openDirectLiveRazorpayCheckout = async function(agentCode, agencyName, pr
   const rawPhone = user.phone || '9876543210';
   const customerPhone = String(rawPhone).replace(/[^0-9]/g, '').slice(-10) || '9876543210';
 
-  const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+  const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
 
   try {
     const res = await fetch(apiBase + '/create-order', {
@@ -2373,7 +2383,7 @@ window.initiateRazorpayPayment = async function() {
   const customerPhone = String(rawPhone).replace(/[^0-9]/g, '').slice(-10) || '9876543210';
   const selectedMethod = document.querySelector('input[name="paymentOption"]:checked')?.value || 'Razorpay Online';
 
-  const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+  const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
 
   try {
     const res = await fetch(apiBase + '/create-order', {

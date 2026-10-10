@@ -275,6 +275,7 @@ bootstrapDatabase();
 // EXPRESS APPLICATION SETUP & SECURITY MIDDLEWARE
 // ----------------------------------------------------------------------------
 const app = express();
+app.enable('trust proxy');
 
 // Enterprise HTTP Security Headers Middleware
 app.use((req, res, next) => {
@@ -802,18 +803,35 @@ app.get('/api/admin/requirements', authenticateUser, requireRole(['SUBADMIN', 'A
             const offersList = Array.isArray(r.offers) && r.offers.length > 0 ? r.offers : linkedOffers;
 
             return {
+                ...r,
                 id: reqId,
                 rawId: r.id || (r._id ? r._id.toString() : reqId),
-                customer: r.userName || r.customer || r.fullname || 'Pilgrim',
-                phone: r.userPhone || r.phone || r.mobile || '',
-                email: r.userEmail || r.email || '',
+                customer: r.fullname || r.userName || r.customer || 'Pilgrim',
+                fullname: r.fullname || r.userName || r.customer || 'Pilgrim',
+                phone: r.mobile || r.phone || r.userPhone || '',
+                mobile: r.mobile || r.phone || r.userPhone || '',
+                email: r.email || r.userEmail || '',
+                departureCity: r.departureCity || 'Delhi',
                 address: r.fullAddress || r.address || (r.departureCity ? `${r.departureCity}, India` : 'Delhi, India'),
-                service: (r.serviceType || r.service || '').toLowerCase().includes('hajj') ? 'Hajj' : 'Umrah',
+                service: (r.serviceType || r.service || r.applyingFor || '').toLowerCase().includes('hajj') ? 'Hajj' : 'Umrah',
                 serviceType: r.serviceType || (r.service === 'Hajj' ? 'Hajj Premium Package' : 'Umrah Package'),
                 travelDate: r.preferredDepartureDate || r.travelDate || 'Flexible',
-                travelers: r.travelers || r.totalPersons || '1',
-                adults: parseInt(r.adults || r.maleCount || r.travelers || 1),
-                children: parseInt(r.children || r.femaleCount || r.childCount || 0),
+                duration: r.duration || '14 Days',
+                hotelType: r.hotelCategory || r.hotelType || '5 Star',
+                hotelCategory: r.hotelCategory || r.hotelType || '5 Star',
+                travelers: r.totalPersons || r.travelers || '1',
+                totalPersons: r.totalPersons || r.travelers || '1',
+                maleCount: parseInt(r.maleCount) || (parseInt(r.travelers) > 0 ? parseInt(r.travelers) : 1),
+                femaleCount: parseInt(r.femaleCount) || 0,
+                childCount: parseInt(r.childCount) || 0,
+                infantCount: parseInt(r.infantCount) || 0,
+                adults: parseInt(r.adults) || ((parseInt(r.maleCount) || 1) + (parseInt(r.femaleCount) || 0)),
+                children: parseInt(r.children) || ((parseInt(r.childCount) || 0) + (parseInt(r.infantCount) || 0)),
+                specialRequirements: r.specialRequirements || r.specialRequests || r.otherRequirements || r.notes || '',
+                specialRequests: Array.isArray(r.specialRequests) ? r.specialRequests : (r.specialRequirements ? [r.specialRequirements] : []),
+                otherRequirements: r.specialRequirements || r.otherRequirements || '',
+                budget: r.budget || 'Custom Quotes Expected',
+                purposeOfTravel: r.purposeOfTravel || 'Family',
                 status: r.status || 'PENDING_REVIEW',
                 step: r.step || 1,
                 offers: offersList,
@@ -1782,18 +1800,26 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     }
 });
 
-// Google OAuth Credentials
+// Google OAuth Credentials & Canonical Domain Setup (Authoritative Domain: zilhaj.com)
+const APP_DOMAIN = process.env.APP_DOMAIN || 'zilhaj.com';
+const APP_URL = process.env.APP_URL || `https://${APP_DOMAIN}`;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '494454822164-fucbkt6r86f3k89m9r209dirh5ca8f1q.apps.googleusercontent.com';
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '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';
 
 // Google OAuth URL endpoint
 app.get('/api/auth/google/url', (req, res) => {
-    const origin = req.query.origin || (req.headers.referer ? new URL(req.headers.referer).origin : 'http://localhost:3000');
+    let origin = req.query.origin;
+    if (!origin || origin.startsWith('file:') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        origin = req.headers.referer ? new URL(req.headers.referer).origin : APP_URL;
+        if (origin.startsWith('file:') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+            origin = APP_URL;
+        }
+    }
     const redirectPath = req.query.path || '/api/auth/google/callback';
     const redirectUri = encodeURIComponent(`${origin}${redirectPath}`);
     const scope = encodeURIComponent('openid email profile');
     const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&prompt=select_account`;
-    res.json({ success: true, url, clientId: GOOGLE_CLIENT_ID, clientConfigured: true });
+    res.json({ success: true, url, clientId: GOOGLE_CLIENT_ID, clientConfigured: true, domain: APP_DOMAIN, redirectUri: decodeURIComponent(redirectUri) });
 });
 
 // Google OAuth Callback Handler (Handles code exchange, MongoDB sync, and instant session establishment)
@@ -1803,7 +1829,9 @@ const handleGoogleCallback = async (req, res) => {
         return res.redirect(`/login.html?error=${encodeURIComponent(error || 'Google login cancelled')}`);
     }
     try {
-        const origin = `${req.protocol}://${req.get('host')}`;
+        const host = req.get('host') || APP_DOMAIN;
+        const proto = host.includes('zilhaj.com') ? 'https' : (req.headers['x-forwarded-proto'] || req.protocol || 'https');
+        const origin = `${proto}://${host}`;
         const redirectUri = `${origin}${req.path}`;
 
         // 1. Exchange authorization code for Google access token
@@ -2063,6 +2091,8 @@ const handleCreateRazorpayOrder = async (req, res) => {
         if (!authoritativeAmountPaise) {
             if (amount !== undefined && amount !== null && !isNaN(Number(amount)) && String(amount).trim() !== '') {
                 authoritativeAmountPaise = Math.round(Number(amount));
+            } else if (bookingId || requestId || offerId) {
+                authoritativeAmountPaise = 100;
             } else {
                 return res.status(400).json({ error: 'Missing or invalid payment amount' });
             }

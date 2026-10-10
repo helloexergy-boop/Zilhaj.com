@@ -38,12 +38,21 @@ class WorkflowEngine {
         }
 
         const reqIdToUse = payload.id || ('REQ-' + Math.floor(1000 + Math.random() * 9000));
-        const cleanUserEmail = (userData.email || payload.email || payload.userEmail || '').toLowerCase().trim();
-        const customerName = userData.name || payload.userName || payload.customer || payload.fullname || 'Pilgrim';
-        const contactPhone = userData.phone || payload.phone || payload.mobile || payload.userPhone || '';
+        const cleanUserEmail = (payload.email || payload.userEmail || userData.email || '').toLowerCase().trim();
+        const customerName = payload.fullname || payload.userName || payload.customer || userData.name || 'Pilgrim';
+        const contactPhone = payload.mobile || payload.phone || payload.userPhone || userData.phone || '';
         const serviceName = payload.service || payload.title || (payload.applyingFor ? `${payload.applyingFor} Package` : 'Umrah Custom Journey');
 
+        const male = parseInt(payload.maleCount) || (parseInt(payload.totalPersons) > 0 ? parseInt(payload.totalPersons) : 1);
+        const female = parseInt(payload.femaleCount) || 0;
+        const children = parseInt(payload.childCount) || 0;
+        const infants = parseInt(payload.infantCount) || 0;
+        const total = payload.totalPersons ? String(payload.totalPersons) : String(male + female + children + infants);
+
+        const specialReqText = payload.specialRequirements || payload.specialRequests || payload.otherRequirements || payload.notes || '';
+
         const record = {
+            ...payload,
             id: reqIdToUse,
             requestId: reqIdToUse,
             userId: String(userData.id || userData.email || payload.userId),
@@ -57,14 +66,25 @@ class WorkflowEngine {
             mobile: contactPhone,
             service: serviceName,
             serviceType: payload.serviceType || payload.applyingFor || (serviceName.toLowerCase().includes('hajj') ? 'Hajj' : 'Umrah'),
-            travelers: String(payload.travelers || payload.totalPersons || 1),
-            totalPersons: String(payload.travelers || payload.totalPersons || 1),
-            departureCity: payload.departureCity || 'Delhi (DEL)',
-            travelDate: payload.travelDate || payload.departureDate || 'As Scheduled',
+            applyingFor: payload.applyingFor || (serviceName.toLowerCase().includes('hajj') ? 'Hajj' : 'Umrah'),
+            travelers: total,
+            totalPersons: total,
+            maleCount: male,
+            femaleCount: female,
+            childCount: children,
+            infantCount: infants,
+            adults: male + female,
+            children: children + infants,
+            departureCity: payload.departureCity || 'Delhi',
+            travelDate: payload.travelDate || payload.departureDate || 'Flexible',
             duration: payload.duration || '14 Days',
             durationDays: parseInt(payload.duration) || 14,
-            hotelType: payload.hotelType || payload.hotelCategory || '5 Star',
-            hotelCategory: payload.hotelType || payload.hotelCategory || '5 Star',
+            hotelType: payload.hotelCategory || payload.hotelType || '5 Star',
+            hotelCategory: payload.hotelCategory || payload.hotelType || '5 Star',
+            specialRequirements: specialReqText,
+            specialRequests: specialReqText ? (Array.isArray(payload.specialRequests) ? payload.specialRequests : [specialReqText]) : [],
+            otherRequirements: specialReqText,
+            notes: specialReqText,
             status: STATES.PENDING_REVIEW,
             step: 1,
             submittedOn: new Date().toLocaleDateString('en-GB'),

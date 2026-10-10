@@ -911,7 +911,7 @@
       const customerPhone = rawMobile.replace(/[^0-9]/g, '').slice(-10) || '9876543210';
       const selectedMethod = document.querySelector('input[name="payMethod"]:checked')?.value || 'UPI / QR Code';
 
-      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
 
         const userRaw = localStorage.getItem('umrah_user');
         let authToken = null;
@@ -925,6 +925,8 @@
             ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
           },
           body: JSON.stringify({
+            amount: 100,
+            currency: 'INR',
             bookingId: bookingData.reqId,
             requestId: bookingData.reqId,
             offerId: bookingData.offerId || bookingData.reqId
@@ -1092,7 +1094,7 @@
         let authToken = null;
         try { const u = userRaw ? JSON.parse(userRaw) : null; authToken = (u && u.token) || localStorage.getItem('zilhaj_token'); } catch (e) {}
 
-        const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+        const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
         const res = await fetch(apiBase + `/bookings/${encodeURIComponent(bookingId)}/pdf`, {
           headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
         });

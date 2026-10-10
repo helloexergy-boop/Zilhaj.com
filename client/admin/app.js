@@ -567,27 +567,48 @@ function renderRequestDetails() {
   if (badgeSlot) badgeSlot.innerHTML = getBadgeHtml(req.status);
 
   // Customer Card
-  setElementText('req-detail-cust-name', req.customer);
-  setElementText('req-detail-cust-email', req.email);
-  setElementText('req-detail-cust-phone1', req.phone);
-  setElementText('req-detail-cust-address', req.address || 'Nowgam, Srinagar, Jammu & Kashmir, India');
+  setElementText('req-detail-cust-name', req.fullname || req.customer || 'Pilgrim');
+  setElementText('req-detail-cust-email', req.email || '--');
+  setElementText('req-detail-cust-phone1', req.phone || req.mobile || '--');
+  const cityStr = req.departureCity || (req.address ? req.address : 'Delhi');
+  setElementText('req-detail-cust-address', req.address && !req.address.includes('Nowgam') ? req.address : `${cityStr}, India`);
   const custAvatar = document.getElementById('req-detail-cust-avatar');
   if (custAvatar) {
-    custAvatar.textContent = (req.customer || 'P').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'PB';
+    const nameToUse = req.fullname || req.customer || 'Pilgrim';
+    custAvatar.textContent = nameToUse.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'PB';
   }
 
   // Request Specs
-  setElementText('req-detail-service', req.serviceType || `${req.service} Package`);
-  setElementText('req-detail-date', req.travelDateNote || req.travelDate);
-  setElementText('req-detail-travelers', req.travelers);
-  setElementText('req-detail-hotel', req.hotelType || '5 Star');
-  setElementText('req-detail-duration', req.duration || '25 Days');
-  setElementText('req-detail-budget', req.budget || '₹1,20,000 - ₹1,50,000');
-  setElementText('req-detail-purpose', req.purposeOfTravel || 'Family');
+  const male = parseInt(req.maleCount) || 0;
+  const female = parseInt(req.femaleCount) || 0;
+  const child = parseInt(req.childCount) || 0;
+  const infant = parseInt(req.infantCount) || 0;
+  const travelersDisplay = (male || female) 
+    ? `${req.totalPersons || req.travelers || 1} Pilgrims (${male} Male, ${female} Female${child ? `, ${child} Child` : ''}${infant ? `, ${infant} Infant` : ''})`
+    : `${req.totalPersons || req.travelers || 1} Pilgrims`;
+
+  setElementText('req-detail-service', req.serviceType || `${req.service || 'Umrah'} Package`);
+  setElementText('req-detail-date', req.travelDateNote || req.travelDate || 'Flexible');
+  setElementText('req-detail-travelers', travelersDisplay);
+  setElementText('req-detail-hotel', req.hotelCategory || req.hotelType || req.hotelPreference || '3 Star');
+  setElementText('req-detail-duration', req.duration || '14 Days');
+  setElementText('req-detail-budget', req.budget || 'Custom Quotes Expected');
+  setElementText('req-detail-purpose', req.purposeOfTravel || 'Family Journey');
 
   const specialList = document.getElementById('req-detail-special-list');
   if (specialList) {
-    const list = Array.isArray(req.specialRequests) && req.specialRequests.length > 0 ? req.specialRequests : ['Near to Haram', 'Indian Food Preference'];
+    let list = [];
+    if (Array.isArray(req.specialRequests) && req.specialRequests.length > 0) {
+      list = req.specialRequests;
+    } else if (req.specialRequirements && typeof req.specialRequirements === 'string') {
+      list = [req.specialRequirements];
+    } else if (req.otherRequirements && typeof req.otherRequirements === 'string') {
+      list = [req.otherRequirements];
+    } else if (req.notes && typeof req.notes === 'string') {
+      list = [req.notes];
+    } else {
+      list = ['Standard pilgrim service required'];
+    }
     specialList.innerHTML = list.map(s => `
       <div style="display: flex; align-items: center; gap: 6px; color: var(--text-body);">
         <span style="width: 5px; height: 5px; border-radius: 50%; background: var(--primary);"></span>

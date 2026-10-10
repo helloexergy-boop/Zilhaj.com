@@ -5,7 +5,7 @@
 
 const API_BASE = window.API_BASE_URL || ((window.location.protocol && window.location.protocol.startsWith('http'))
     ? '/api'
-    : 'http://localhost:3000/api');
+    : 'https://zilhaj.com/api');
 
 // ============================================================================
 // CHATBOT API KEY CONFIGURATION (OpenAI / Gemini / Custom AI Endpoint)
@@ -713,9 +713,9 @@ class App {
         this.closeModal();
         this.showLoading('Connecting to Google Accounts...', '🌐 Establishing secure Google session');
 
-        const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-            ? 'http://localhost:3000/api'
-            : '/api';
+        const apiEndpoint = (window.location.protocol && window.location.protocol.startsWith('http'))
+            ? '/api'
+            : 'https://zilhaj.com/api';
 
         // 1. Try official Google OAuth 2.0 redirect
         try {
@@ -797,9 +797,9 @@ class App {
         this.showLoading('Verifying Google credentials and establishing secure session...', '🌐 Securing Google Session');
 
         try {
-            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                ? 'http://localhost:3000/api/auth/google'
-                : '/api/auth/google';
+            const apiEndpoint = (window.location.protocol && window.location.protocol.startsWith('http'))
+                ? '/api/auth/google'
+                : 'https://zilhaj.com/api/auth/google';
 
             const googleId = 'goog-' + Date.now();
             const response = await fetch(apiEndpoint, {
@@ -8861,7 +8861,7 @@ class App {
         if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
 
         try {
-            const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+            const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
             const res = await fetch(`${apiBase}/auth/forgot-password/send-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -8911,7 +8911,7 @@ class App {
         this.hideFormError();
 
         try {
-            const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+            const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
             const res = await fetch(`${apiBase}/auth/reset-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -9121,9 +9121,9 @@ class App {
 
         // Send OTP via API endpoint asynchronously
         try {
-            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                ? 'http://localhost:3000/api/auth/resend-otp'
-                : '/api/auth/resend-otp';
+            const apiEndpoint = (window.location.protocol && window.location.protocol.startsWith('http'))
+                ? '/api/auth/resend-otp'
+                : 'https://zilhaj.com/api/auth/resend-otp';
 
             fetch(apiEndpoint, {
                 method: 'POST',
@@ -9191,9 +9191,9 @@ class App {
 
         if (!verified) {
             try {
-                const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                    ? 'http://localhost:3000/api/auth/verify-otp'
-                    : '/api/auth/verify-otp';
+                const apiEndpoint = (window.location.protocol && window.location.protocol.startsWith('http'))
+                    ? '/api/auth/verify-otp'
+                    : 'https://zilhaj.com/api/auth/verify-otp';
 
                 const response = await fetch(apiEndpoint, {
                     method: 'POST',
