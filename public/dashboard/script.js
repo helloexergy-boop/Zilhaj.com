@@ -2070,7 +2070,15 @@ window.openSubmissionSummaryModal = function(reqId, service, date, passengers, h
     if (document.getElementById('sumChildCount')) document.getElementById('sumChildCount').textContent = children || '0 Children';
     if (document.getElementById('sumInfantCount')) document.getElementById('sumInfantCount').textContent = infants || '0 Infants';
 
-    if (document.getElementById('sumHotelCategory')) document.getElementById('sumHotelCategory').textContent = hotelCategory || '5 Star';
+    if (document.getElementById('sumHotelCategory')) {
+      document.getElementById('sumHotelCategory').textContent = hotelCategory || '5 Star';
+      const starsEl = modal.querySelector('.s-hotel-stars');
+      if (starsEl) {
+        const catStr = String(hotelCategory || '');
+        const num = catStr.includes('5') ? 5 : catStr.includes('4') ? 4 : catStr.includes('3') ? 3 : catStr.includes('7') ? 5 : 4;
+        starsEl.textContent = '★'.repeat(num);
+      }
+    }
     
     if (document.getElementById('sumFullName')) document.getElementById('sumFullName').textContent = fullname || 'Tariq Ahmed';
     if (document.getElementById('sumMobile')) document.getElementById('sumMobile').textContent = mobile || '+91 98765 43210';

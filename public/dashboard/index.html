@@ -1206,76 +1206,208 @@
 
   <!-- MODAL 1: FULL SUBMISSION DETAILS SUMMARY (READ-ONLY VIEW) -->
   <div class="modal-backdrop" id="requestDetailsSummaryModal" style="display: none;">
-    <div class="modal-card wide-modal">
-      <button class="modal-close-btn" onclick="closeSubmissionSummaryModal()">&times;</button>
-      <div class="summary-modal-header">
-        <div>
-          <h2 class="summary-modal-title">Request Submission Summary</h2>
-          <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">Read-only summary of your submitted requirement</p>
+    <div class="modal-card summary-modal-card">
+      <button class="summary-modal-close-btn" onclick="closeSubmissionSummaryModal()" aria-label="Close Summary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Luxury Header -->
+      <div class="summary-modal-header-v2">
+        <div class="summary-header-main">
+          <div class="summary-header-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>Verified Pilgrimage Request</span>
+          </div>
+          <h2 class="summary-modal-title-v2">Request Submission Summary</h2>
+          <p class="summary-modal-subtitle-v2">Official record of your submitted pilgrimage requirements</p>
         </div>
-        <span class="summary-req-code" id="summaryModalReqId">REQ-0517</span>
+        <div class="summary-req-badge-wrap">
+          <span class="summary-req-label">REQUEST ID</span>
+          <span class="summary-req-code-v2" id="summaryModalReqId">REQ-0517</span>
+        </div>
       </div>
 
-      <div class="summary-modal-body">
+      <!-- Modal Body -->
+      <div class="summary-modal-body-v2">
         
         <!-- Section 1: Trip Details -->
-        <div class="summary-section">
-          <h4 class="s-section-title">∩╕ Trip Details</h4>
-          <div class="summary-grid">
-            <div class="s-field"><span>Applying For:</span> <strong id="sumApplyingFor">Umrah</strong></div>
-            <div class="s-field"><span>City of Departure:</span> <strong id="sumCity">Delhi</strong></div>
-            <div class="s-field"><span>Departure Date:</span> <strong id="sumDate">22 Mar 2026</strong></div>
-            <div class="s-field"><span>Duration of Stay:</span> <strong id="sumDuration">18 Days</strong></div>
+        <div class="summary-section-v2">
+          <div class="s-section-header-v2">
+            <div class="s-icon-wrap s-icon-trip">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.3c.4-.2.6-.6.5-1.1z"/>
+              </svg>
+            </div>
+            <div class="s-header-text">
+              <h4 class="s-section-title-v2">Trip Details</h4>
+              <span class="s-section-subtitle-v2">Pilgrimage schedule and route</span>
+            </div>
           </div>
-        </div>
-
-        <!-- Section 2: Traveler Details -->
-        <div class="summary-section">
-          <h4 class="s-section-title"> Traveler Details</h4>
-          <div class="summary-grid">
-            <div class="s-field"><span>Male Adults:</span> <strong id="sumMaleCount">2 Male</strong></div>
-            <div class="s-field"><span>Female Adults:</span> <strong id="sumFemaleCount">1 Female</strong></div>
-            <div class="s-field"><span>Children (2–11 yrs):</span> <strong id="sumChildCount">0 Children</strong></div>
-            <div class="s-field"><span>Infants (Below 2 yrs):</span> <strong id="sumInfantCount">0 Infants</strong></div>
-          </div>
-        </div>
-
-        <!-- Section 3: Hotel Preference -->
-        <div class="summary-section">
-          <h4 class="s-section-title"> Hotel Preference</h4>
-          <div class="summary-grid">
-            <div class="s-field"><span>Hotel Category:</span> <strong id="sumHotelCategory">5 Star</strong></div>
-          </div>
-        </div>
-
-        <!-- Section 4: Contact & Location -->
-        <div class="summary-section">
-          <h4 class="s-section-title"> Contact & Location</h4>
-          <div class="summary-grid">
-            <div class="s-field"><span>Full Name:</span> <strong id="sumFullName">Tariq Ahmed</strong></div>
-            <div class="s-field"><span>Mobile Number:</span> <strong id="sumMobile">+91 98765 43210</strong></div>
-            <div class="s-field"><span>Email Address:</span> <strong id="sumEmail">tariq.ahmed@example.com</strong></div>
-            <div class="s-field"><span>Full Address:</span> <strong id="sumAddress">Nowgam, Srinagar</strong></div>
-            <div class="s-field"><span>State:</span> <strong id="sumState">Jammu & Kashmir</strong></div>
-            <div class="s-field"><span>District / City:</span> <strong id="sumDistrict">Srinagar</strong></div>
-          </div>
-        </div>
-
-        <!-- Section 5: Special Requirements -->
-        <div class="summary-section">
-          <h4 class="s-section-title">¥ Special Requirements</h4>
-          <div class="summary-grid">
-            <div class="s-field" style="grid-column: span 2;">
-              <span>Special Requirement(s):</span>
-              <strong id="sumSpecialReq">None specified</strong>
+          <div class="summary-grid-v2">
+            <div class="s-field-v2">
+              <span class="s-field-lbl">Applying For</span>
+              <strong class="s-field-val s-highlight-green" id="sumApplyingFor">Umrah</strong>
+            </div>
+            <div class="s-field-v2">
+              <span class="s-field-lbl">City of Departure</span>
+              <strong class="s-field-val" id="sumCity">Delhi</strong>
+            </div>
+            <div class="s-field-v2">
+              <span class="s-field-lbl">Departure Date</span>
+              <strong class="s-field-val" id="sumDate">22 Mar 2026</strong>
+            </div>
+            <div class="s-field-v2">
+              <span class="s-field-lbl">Duration of Stay</span>
+              <strong class="s-field-val" id="sumDuration">18 Days</strong>
             </div>
           </div>
         </div>
 
+        <!-- Section 2: Traveler Details -->
+        <div class="summary-section-v2">
+          <div class="s-section-header-v2">
+            <div class="s-icon-wrap s-icon-travelers">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <div class="s-header-text">
+              <h4 class="s-section-title-v2">Traveler Details</h4>
+              <span class="s-section-subtitle-v2">Pilgrim group composition</span>
+            </div>
+          </div>
+          <div class="summary-grid-v2 s-grid-4">
+            <div class="s-field-v2 s-field-traveler">
+              <span class="s-field-lbl">Male Adults</span>
+              <strong class="s-field-val" id="sumMaleCount">2 Male</strong>
+            </div>
+            <div class="s-field-v2 s-field-traveler">
+              <span class="s-field-lbl">Female Adults</span>
+              <strong class="s-field-val" id="sumFemaleCount">1 Female</strong>
+            </div>
+            <div class="s-field-v2 s-field-traveler">
+              <span class="s-field-lbl">Children (2–11 yrs)</span>
+              <strong class="s-field-val" id="sumChildCount">0 Children</strong>
+            </div>
+            <div class="s-field-v2 s-field-traveler">
+              <span class="s-field-lbl">Infants (&lt; 2 yrs)</span>
+              <strong class="s-field-val" id="sumInfantCount">0 Infants</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Hotel Preference -->
+        <div class="summary-section-v2">
+          <div class="s-section-header-v2">
+            <div class="s-icon-wrap s-icon-hotel">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 21h18"/>
+                <path d="M5 21V7l8-4v18"/>
+                <path d="M19 21V11l-6-4"/>
+                <path d="M9 9h1"/>
+                <path d="M9 13h1"/>
+                <path d="M9 17h1"/>
+              </svg>
+            </div>
+            <div class="s-header-text">
+              <h4 class="s-section-title-v2">Hotel Preference</h4>
+              <span class="s-section-subtitle-v2">Accommodation comfort standard</span>
+            </div>
+          </div>
+          <div class="summary-grid-v2">
+            <div class="s-field-v2 s-field-hotel-cat">
+              <span class="s-field-lbl">Hotel Category</span>
+              <div class="s-hotel-badge-row">
+                <strong class="s-field-val s-hotel-val" id="sumHotelCategory">5 Star</strong>
+                <span class="s-hotel-stars">★★★★★</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Contact & Location -->
+        <div class="summary-section-v2">
+          <div class="s-section-header-v2">
+            <div class="s-icon-wrap s-icon-contact">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <div class="s-header-text">
+              <h4 class="s-section-title-v2">Contact & Location</h4>
+              <span class="s-section-subtitle-v2">Primary contact and residency</span>
+            </div>
+          </div>
+          <div class="summary-grid-v2">
+            <div class="s-field-v2">
+              <span class="s-field-lbl">Full Name</span>
+              <strong class="s-field-val" id="sumFullName">Tariq Ahmed</strong>
+            </div>
+            <div class="s-field-v2">
+              <span class="s-field-lbl">Mobile Number</span>
+              <strong class="s-field-val" id="sumMobile">+91 98765 43210</strong>
+            </div>
+            <div class="s-field-v2">
+              <span class="s-field-lbl">Email Address</span>
+              <strong class="s-field-val" id="sumEmail">tariq.ahmed@example.com</strong>
+            </div>
+            <div class="s-field-v2">
+              <span class="s-field-lbl">District / City</span>
+              <strong class="s-field-val" id="sumDistrict">Srinagar</strong>
+            </div>
+            <div class="s-field-v2">
+              <span class="s-field-lbl">State</span>
+              <strong class="s-field-val" id="sumState">Jammu & Kashmir</strong>
+            </div>
+            <div class="s-field-v2">
+              <span class="s-field-lbl">Full Address</span>
+              <strong class="s-field-val" id="sumAddress">Nowgam, Srinagar</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 5: Special Requirements -->
+        <div class="summary-section-v2 s-special-section">
+          <div class="s-section-header-v2">
+            <div class="s-icon-wrap s-icon-notes">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
+            <div class="s-header-text">
+              <h4 class="s-section-title-v2">Special Requirements & Preferences</h4>
+              <span class="s-section-subtitle-v2">Custom requests shared with verified travel agents</span>
+            </div>
+          </div>
+          <div class="s-special-req-card">
+            <strong class="s-special-text" id="sumSpecialReq">None specified</strong>
+          </div>
+        </div>
+
       </div>
 
-      <div class="summary-modal-footer">
-        <button class="btn-modal-filled" onclick="closeSubmissionSummaryModal()">Close Summary</button>
+      <!-- Footer -->
+      <div class="summary-modal-footer-v2">
+        <div class="summary-footer-trust">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span>Protected by ZILHAJ Safe Escrow</span>
+        </div>
+        <button class="btn-summary-close-v2" onclick="closeSubmissionSummaryModal()">Close Summary</button>
       </div>
     </div>
   </div>

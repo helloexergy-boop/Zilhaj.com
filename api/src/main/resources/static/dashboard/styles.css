@@ -3495,12 +3495,408 @@ body {
 }
 
 /* ==========================================================================
-   MODAL 1: SUBMISSION SUMMARY MODAL
+   MODAL 1: REQUEST SUBMISSION SUMMARY (LUXURY PILGRIMAGE DOSSIER DESIGN)
    ========================================================================== */
 
+#requestDetailsSummaryModal.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.68);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  animation: summaryModalFadeIn 0.25s ease-out;
+}
+
+@keyframes summaryModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes summaryCardSlideUp {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.summary-modal-card {
+  position: relative;
+  max-width: 680px !important;
+  width: 100% !important;
+  background: #FFFFFF !important;
+  border-radius: 24px !important;
+  box-shadow: 0 30px 70px -15px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(226, 232, 240, 0.8) !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 90vh !important;
+  animation: summaryCardSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.summary-modal-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.summary-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: rotate(90deg) scale(1.05);
+}
+
+/* Modal Header */
+.summary-modal-header-v2 {
+  background: linear-gradient(135deg, #064E3B 0%, #065F46 55%, #047857 100%);
+  padding: 26px 32px 24px;
+  color: #FFFFFF;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  position: relative;
+}
+
+.summary-modal-header-v2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%);
+}
+
+.summary-header-main {
+  flex: 1;
+  padding-right: 28px;
+}
+
+.summary-header-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.25);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #A7F3D0;
+  margin-bottom: 8px;
+}
+
+.summary-modal-title-v2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.25;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.3px;
+}
+
+.summary-modal-subtitle-v2 {
+  font-size: 13px;
+  color: rgba(209, 250, 229, 0.85);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.summary-req-badge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  padding-top: 4px;
+}
+
+.summary-req-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: rgba(209, 250, 229, 0.7);
+}
+
+.summary-req-code-v2 {
+  font-size: 14px;
+  font-weight: 800;
+  color: #FDE047;
+  background: rgba(254, 240, 138, 0.15);
+  border: 1px solid rgba(254, 240, 138, 0.35);
+  padding: 5px 12px;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+}
+
+/* Modal Body */
+.summary-modal-body-v2 {
+  padding: 22px 28px;
+  overflow-y: auto;
+  max-height: calc(85vh - 165px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #F8FAFC;
+}
+
+/* Custom Scrollbar */
+.summary-modal-body-v2::-webkit-scrollbar {
+  width: 6px;
+}
+.summary-modal-body-v2::-webkit-scrollbar-track {
+  background: #F1F5F9;
+  border-radius: 4px;
+}
+.summary-modal-body-v2::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+.summary-modal-body-v2::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Section Card */
+.summary-section-v2 {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-section-v2:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.s-section-header-v2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.s-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.s-icon-trip {
+  background: #ECFDF5;
+  color: #059669;
+}
+.s-icon-travelers {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+.s-icon-hotel {
+  background: #FFFBEB;
+  color: #D97706;
+}
+.s-icon-contact {
+  background: #F5F3FF;
+  color: #7C3AED;
+}
+.s-icon-notes {
+  background: #ECFDF5;
+  color: #047857;
+}
+
+.s-header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.s-section-title-v2 {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.s-section-subtitle-v2 {
+  font-size: 11px;
+  color: #64748B;
+  margin-top: 2px;
+}
+
+/* Grid Layout */
+.summary-grid-v2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.s-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Field Micro-Cards */
+.s-field-v2 {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: all 0.2s ease;
+}
+
+.s-field-v2:hover {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.s-field-lbl {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748B;
+}
+
+.s-field-val {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.s-highlight-green {
+  color: #059669 !important;
+}
+
+.s-field-traveler {
+  text-align: center;
+  align-items: center;
+}
+
+.s-field-hotel-cat {
+  grid-column: span 2;
+}
+
+.s-hotel-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.s-hotel-val {
+  color: #B45309;
+}
+
+.s-hotel-stars {
+  color: #F59E0B;
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+/* Special Requirements Card */
+.s-special-section {
+  background: linear-gradient(180deg, #F0FDF4 0%, #FFFFFF 100%);
+  border: 1px solid #A7F3D0;
+}
+
+.s-special-req-card {
+  background: #FFFFFF;
+  border: 1px dashed #6EE7B7;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.s-special-text {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #065F46;
+  line-height: 1.45;
+  display: block;
+}
+
+/* Footer */
+.summary-modal-footer-v2 {
+  padding: 16px 28px 20px;
+  background: #FFFFFF;
+  border-top: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.summary-footer-trust {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+}
+
+.btn-summary-close-v2 {
+  background: linear-gradient(135deg, #064E3B 0%, #047857 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 24px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.25);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-summary-close-v2:hover {
+  background: linear-gradient(135deg, #065F46 0%, #059669 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(4, 120, 87, 0.35);
+}
+
+.btn-summary-close-v2:active {
+  transform: translateY(0);
+}
+
+/* Legacy Class Fallbacks for Compatibility */
 .wide-modal {
-  max-width: 640px !important;
-  width: 90% !important;
+  max-width: 680px !important;
+  width: 92% !important;
 }
 
 .summary-modal-header {
