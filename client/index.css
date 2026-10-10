@@ -5330,7 +5330,8 @@ p, body {
 
 /* Fix Navbar Content Overlap Padding across pages */
 #mainContainer {
-    padding-top: 115px !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
 .dashboard-page-wrapper {
@@ -5338,7 +5339,8 @@ p, body {
 }
 
 .hero-green-banner {
-    padding-top: 125px !important;
+    margin-top: 0 !important;
+    padding-top: 5.5rem !important;
 }
 
 /* Printable PDF Booking Voucher Styling */
@@ -10766,15 +10768,15 @@ img, video, iframe {
   }
 }
 
-/* 4. Responsive Footer Columns */
+/* 4. Responsive Full-Width Footer Columns */
 .footer-primary-grid {
   width: 100% !important;
-  max-width: 1280px !important;
-  margin: 0 auto !important;
-  padding: 0 clamp(16px, 4vw, 2.5rem) !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 clamp(1rem, 2.5vw, 2.5rem) !important;
   display: grid !important;
   grid-template-columns: 1.4fr 1fr 1fr 1.3fr !important;
-  gap: clamp(1.5rem, 3vw, 2.8rem) !important;
+  gap: clamp(1.2rem, 2.5vw, 2.5rem) !important;
   align-items: start !important;
   box-sizing: border-box !important;
 }
@@ -10782,25 +10784,25 @@ img, video, iframe {
 @media (max-width: 1024px) {
   .footer-primary-grid {
     grid-template-columns: 1fr 1fr !important;
-    gap: 2rem !important;
+    gap: 1.8rem !important;
   }
 }
 
 @media (max-width: 640px) {
   .footer-primary-grid {
     grid-template-columns: 1fr !important;
-    gap: 1.8rem !important;
+    gap: 1.6rem !important;
   }
 }
 
 .footer-contacts-grid {
   width: 100% !important;
-  max-width: 1280px !important;
-  margin: 0 auto !important;
-  padding: 0 clamp(16px, 4vw, 2.5rem) !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 clamp(1rem, 2.5vw, 2.5rem) !important;
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
-  gap: clamp(1rem, 2vw, 1.8rem) !important;
+  gap: clamp(1rem, 1.8vw, 1.5rem) !important;
   box-sizing: border-box !important;
 }
 
@@ -10813,9 +10815,9 @@ img, video, iframe {
 
 .footer-bottom-row {
   width: 100% !important;
-  max-width: 1280px !important;
-  margin: 0 auto !important;
-  padding: 0 clamp(16px, 4vw, 2.5rem) !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 clamp(1rem, 2.5vw, 2.5rem) !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;

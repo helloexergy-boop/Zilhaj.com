@@ -408,7 +408,7 @@ document.addEventListener('DOMContentLoaded', function () {
     closeGoogleSignInModal();
     showGoogleLoadingOverlay('Authenticating with Google...', `Connecting ${cleanEmail} to ZILHAJ...`);
 
-    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
     const params = new URLSearchParams(window.location.search);
     let redirectUrl = params.get('redirect') || '/dashboard/index.html';
     if (!redirectUrl.endsWith('.html') && !redirectUrl.includes('/#')) {
@@ -489,7 +489,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (btnLaunchOAuthPopup) {
     btnLaunchOAuthPopup.addEventListener('click', async () => {
-      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
       try {
         const urlRes = await fetch(`${apiBase}/auth/google/url?origin=${encodeURIComponent(window.location.origin)}&path=/api/auth/google/callback`);
         const urlData = await urlRes.json();
@@ -505,12 +505,26 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  const handleGoogleRedirect = (e) => {
+  const handleGoogleRedirect = async (e) => {
     if (e) {
       if (typeof e.preventDefault === 'function') e.preventDefault();
       if (typeof e.stopPropagation === 'function') e.stopPropagation();
     }
-    openGoogleSignInModal();
+    try {
+      showGoogleLoadingOverlay('Connecting to Google...', 'Redirecting to Official Google Sign-In...');
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
+      const urlRes = await fetch(`${apiBase}/auth/google/url`);
+      const urlData = await urlRes.json();
+      if (urlData && urlData.url) {
+        window.location.href = urlData.url;
+        return;
+      }
+      hideGoogleLoadingOverlay();
+      showToast('Unable to initiate Google Sign-in. Please try again.');
+    } catch (err) {
+      hideGoogleLoadingOverlay();
+      showToast('Connection error connecting to Google Sign-in');
+    }
   };
 
   window.handleGoogleRedirect = handleGoogleRedirect;
@@ -658,7 +672,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (btnResendForgotOtp) btnResendForgotOtp.disabled = true;
 
-    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
 
     try {
       const res = await fetch(`${apiBase}/auth/forgot-password/send-otp`, {
@@ -751,7 +765,7 @@ document.addEventListener('DOMContentLoaded', function () {
       btnSubmitResetPassword.disabled = true;
       btnSubmitResetPassword.innerHTML = 'Updating Password...';
 
-      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
 
       try {
         const res = await fetch(`${apiBase}/auth/reset-password`, {

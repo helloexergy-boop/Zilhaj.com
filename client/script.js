@@ -505,12 +505,26 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  const handleGoogleRedirect = (e) => {
+  const handleGoogleRedirect = async (e) => {
     if (e) {
       if (typeof e.preventDefault === 'function') e.preventDefault();
       if (typeof e.stopPropagation === 'function') e.stopPropagation();
     }
-    openGoogleSignInModal();
+    try {
+      showGoogleLoadingOverlay('Connecting to Google...', 'Redirecting to Official Google Sign-In...');
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
+      const urlRes = await fetch(`${apiBase}/auth/google/url`);
+      const urlData = await urlRes.json();
+      if (urlData && urlData.url) {
+        window.location.href = urlData.url;
+        return;
+      }
+      hideGoogleLoadingOverlay();
+      showToast('Unable to initiate Google Sign-in. Please try again.');
+    } catch (err) {
+      hideGoogleLoadingOverlay();
+      showToast('Connection error connecting to Google Sign-in');
+    }
   };
 
   window.handleGoogleRedirect = handleGoogleRedirect;

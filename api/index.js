@@ -1803,23 +1803,17 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 // Google OAuth Credentials & Canonical Domain Setup (Authoritative Domain: zilhaj.com)
 const APP_DOMAIN = process.env.APP_DOMAIN || 'zilhaj.com';
 const APP_URL = process.env.APP_URL || `https://${APP_DOMAIN}`;
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '494454822164-fucbkt6r86f3k89m9r209dirh5ca8f1q.apps.googleusercontent.com';
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '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';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
 
 // Google OAuth URL endpoint
 app.get('/api/auth/google/url', (req, res) => {
-    let origin = req.query.origin;
-    if (!origin || origin.startsWith('file:') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
-        origin = req.headers.referer ? new URL(req.headers.referer).origin : APP_URL;
-        if (origin.startsWith('file:') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
-            origin = APP_URL;
-        }
-    }
-    const redirectPath = req.query.path || '/api/auth/google/callback';
-    const redirectUri = encodeURIComponent(`${origin}${redirectPath}`);
+    // Canonical redirect URI registered in Google Developer Console:
+    const canonicalRedirectUri = `${APP_URL}/api/auth/google/callback`;
+    const redirectUri = encodeURIComponent(canonicalRedirectUri);
     const scope = encodeURIComponent('openid email profile');
     const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&prompt=select_account`;
-    res.json({ success: true, url, clientId: GOOGLE_CLIENT_ID, clientConfigured: true, domain: APP_DOMAIN, redirectUri: decodeURIComponent(redirectUri) });
+    res.json({ success: true, url, clientId: GOOGLE_CLIENT_ID, clientConfigured: true, domain: APP_DOMAIN, redirectUri: canonicalRedirectUri });
 });
 
 // Google OAuth Callback Handler (Handles code exchange, MongoDB sync, and instant session establishment)
@@ -1829,10 +1823,8 @@ const handleGoogleCallback = async (req, res) => {
         return res.redirect(`/login.html?error=${encodeURIComponent(error || 'Google login cancelled')}`);
     }
     try {
-        const host = req.get('host') || APP_DOMAIN;
-        const proto = host.includes('zilhaj.com') ? 'https' : (req.headers['x-forwarded-proto'] || req.protocol || 'https');
-        const origin = `${proto}://${host}`;
-        const redirectUri = `${origin}${req.path}`;
+        // Must match exactly the canonical redirect_uri sent in authorization request
+        const redirectUri = `${APP_URL}/api/auth/google/callback`;
 
         // 1. Exchange authorization code for Google access token
         const tokenRes = await fetch('https://oauth2.googleapis.com/token', {

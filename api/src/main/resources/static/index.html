@@ -256,35 +256,45 @@
             text-rendering: optimizeLegibility;
         }
 
-        /* Responsive Footer Grid & Orientation Fix */
+        /* Eliminate upper gap on main home page */
+        #mainContainer {
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+        }
+
+        .hero-green-banner {
+            margin-top: 0 !important;
+        }
+
+        /* Responsive Full-Width (100% screen) Footer Grid */
         .footer-primary-grid {
             width: 100% !important;
-            max-width: 1280px !important;
-            margin: 0 auto !important;
-            padding: 0 clamp(16px, 4vw, 3.5rem) !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 clamp(1rem, 2.5vw, 2.5rem) !important;
             display: grid !important;
             grid-template-columns: 1.4fr 1fr 1fr 1.3fr !important;
-            gap: clamp(1.5rem, 3vw, 2.8rem) !important;
+            gap: clamp(1.2rem, 2.5vw, 2.5rem) !important;
             align-items: start !important;
             box-sizing: border-box !important;
         }
 
         .footer-contacts-grid {
             width: 100% !important;
-            max-width: 1280px !important;
-            margin: 0 auto !important;
-            padding: 0 clamp(16px, 4vw, 3.5rem) !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 clamp(1rem, 2.5vw, 2.5rem) !important;
             display: grid !important;
             grid-template-columns: repeat(3, 1fr) !important;
-            gap: clamp(1rem, 2vw, 1.8rem) !important;
+            gap: clamp(1rem, 1.8vw, 1.5rem) !important;
             box-sizing: border-box !important;
         }
 
         .footer-bottom-row {
             width: 100% !important;
-            max-width: 1280px !important;
-            margin: 0 auto !important;
-            padding: 0 clamp(16px, 4vw, 3.5rem) !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 clamp(1rem, 2.5vw, 2.5rem) !important;
             display: flex !important;
             justify-content: space-between !important;
             align-items: center !important;
@@ -298,18 +308,18 @@
         @media (max-width: 1024px) {
             .footer-primary-grid {
                 grid-template-columns: 1fr 1fr !important;
-                gap: 2rem !important;
+                gap: 1.8rem !important;
             }
             .footer-contacts-grid {
                 grid-template-columns: 1fr !important;
-                gap: 1.2rem !important;
+                gap: 1rem !important;
             }
         }
 
         @media (max-width: 640px) {
             .footer-primary-grid {
                 grid-template-columns: 1fr !important;
-                gap: 1.8rem !important;
+                gap: 1.6rem !important;
             }
         }
 
@@ -387,7 +397,7 @@
         </div>
 
         <!-- Main Content Root Container -->
-        <main class="main-container" id="mainContainer">
+        <main class="main-container" id="mainContainer" style="padding-top:0 !important; margin-top:0 !important;">
         </main>
 
 
@@ -535,7 +545,7 @@
                         </div>
                         <div style="font-size:1rem;font-weight:800;color:#0f172a;line-height:1.35;margin-bottom:0.4rem;">One Request.<br>Multiple Verified Offers.</div>
                         <div style="width:36px;height:3px;background:#c8831a;border-radius:2px;margin-bottom:0.9rem;"></div>
-                        <p style="font-size:0.82rem;color:#6b7280;line-height:1.68;margin:0;max-width:280px;">ZILHAJ is your trusted platform for Umrah packages, flights, trains and more. One request gets you multiple verified offers&#8212;so you can choose with confidence.</p>
+                        <p style="font-size:0.82rem;color:#6b7280;line-height:1.68;margin:0;max-width:100%;">ZILHAJ is your trusted platform for Umrah packages, flights, trains and more. One request gets you multiple verified offers&#8212;so you can choose with confidence.</p>
                     </div>
 
                     <!-- Col 2: COMPANY -->
