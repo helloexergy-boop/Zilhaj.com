@@ -2,29 +2,47 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
 
-const CLIENT_INVOICES_DIR = path.join(__dirname, '../../client/invoices');
-const PUBLIC_INVOICES_DIR = path.join(__dirname, '../../public/invoices');
+// Safe invoices directory resolution (root/public/invoices and os tmp fallback)
+const PROJECT_ROOT = path.resolve(__dirname, '../..');
+const PUBLIC_INVOICES_DIR = path.join(PROJECT_ROOT, 'public', 'invoices');
+const TMP_INVOICES_DIR = path.join(require('os').tmpdir(), 'zilhaj_invoices');
 
-[CLIENT_INVOICES_DIR, PUBLIC_INVOICES_DIR].forEach(dir => {
-    if (!fs.existsSync(dir)) {
-        try { fs.mkdirSync(dir, { recursive: true }); } catch (e) {}
-    }
+[PUBLIC_INVOICES_DIR, TMP_INVOICES_DIR].forEach(dir => {
+    try {
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    } catch (e) {}
 });
-const INVOICES_DIR = CLIENT_INVOICES_DIR;
 
 /**
  * Generate official Booking Confirmation PDF Document
+ * Collects PDF stream into memory Buffer and writes to disk if possible.
  */
 async function generateBookingPDF(bookingData) {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ margin: 40, size: 'A4' });
             const bookingId = bookingData.bookingId || bookingData.id || `BK-${Date.now()}`;
-            const fileName = `Booking_${bookingId.replace(/[^a-zA-Z0-9_-]/g, '')}.pdf`;
-            const filePath = path.join(INVOICES_DIR, fileName);
-            const stream = fs.createWriteStream(filePath);
+            const fileName = `Booking_${String(bookingId).replace(/[^a-zA-Z0-9_-]/g, '')}.pdf`;
+            
+            // Try saving to public or temp directory
+            let filePath = path.join(PUBLIC_INVOICES_DIR, fileName);
+            let fileStream = null;
+            try {
+                fileStream = fs.createWriteStream(filePath);
+            } catch (e) {
+                try {
+                    filePath = path.join(TMP_INVOICES_DIR, fileName);
+                    fileStream = fs.createWriteStream(filePath);
+                } catch (err) {}
+            }
 
-            doc.pipe(stream);
+            const chunks = [];
+            doc.on('data', chunk => chunks.push(chunk));
+
+            if (fileStream) {
+                doc.pipe(fileStream);
+                fileStream.on('error', (err) => console.warn('[PDF] File stream write warning:', err.message));
+            }
 
             // HEADER SECTION
             doc.rect(0, 0, 595, 110).fill('#0f172a');
@@ -55,98 +73,78 @@ async function generateBookingPDF(bookingData) {
             doc.text('Phone Number:', 50, y + 46);
 
             doc.font('Helvetica');
-            doc.text(bookingData.customerName || bookingData.userName || 'Valued Pilgrim', 160, y + 10);
+            doc.text(bookingData.customerName || bookingData.userName || bookingData.customer || 'Valued Pilgrim', 160, y + 10);
             doc.text(bookingData.customerEmail || bookingData.email || 'N/A', 160, y + 28);
             doc.text(bookingData.customerPhone || bookingData.phone || 'N/A', 160, y + 46);
 
-            doc.font('Helvetica-Bold').text('Departure City:', 320, y + 10);
-            doc.font('Helvetica-Bold').text('Travel Date:', 320, y + 28);
-            doc.font('Helvetica-Bold').text('Total Passengers:', 320, y + 46);
-
-            doc.font('Helvetica');
-            doc.text(bookingData.departureCity || 'Delhi (DEL)', 430, y + 10);
-            doc.text(bookingData.travelDate || bookingData.departureDate || 'As Scheduled', 430, y + 28);
-            doc.text(String(bookingData.travelers || bookingData.totalPersons || 1), 430, y + 46);
-
-            // ITINERARY BREAKDOWN
-            y += 85;
-            doc.fillColor('#0f172a').fontSize(12).font('Helvetica-Bold').text('2. ITINERARY & ACCOMMODATION DETAILS', 40, y);
+            // PACKAGE DETAILS
+            y += 80;
+            doc.fillColor('#0f172a').fontSize(12).font('Helvetica-Bold').text('2. RESERVED PACKAGE DETAILS', 40, y);
             y += 20;
 
-            doc.rect(40, y, 515, 115).fill('#ffffff').stroke('#cbd5e1');
-            doc.fillColor('#0f172a').fontSize(11).font('Helvetica-Bold').text(bookingData.packageTitle || bookingData.packageName || 'Deluxe Umrah Package', 50, y + 12);
-            doc.fillColor('#475569').fontSize(9).font('Helvetica').text(`Duration: ${bookingData.duration || '18 Days'}  |  Partner Agency: ${bookingData.agencyName || bookingData.agentName || 'Al-Haramain Luxury Group'} (${bookingData.agentCode || 'AGENT-2826'})`, 50, y + 28);
+            doc.rect(40, y, 515, 95).fill('#f8fafc').stroke('#e2e8f0');
+            doc.fillColor('#334155').fontSize(10).font('Helvetica-Bold');
+            doc.text('Package Title:', 50, y + 10);
+            doc.text('Service Type:', 50, y + 28);
+            doc.text('Agency / Provider:', 50, y + 46);
+            doc.text('Departure Date:', 50, y + 64);
+            doc.text('Duration:', 50, y + 82);
 
-            doc.moveTo(50, y + 42).lineTo(545, y + 42).stroke('#e2e8f0');
+            doc.font('Helvetica');
+            doc.text(bookingData.packageTitle || bookingData.service || 'Custom Umrah Package', 160, y + 10);
+            doc.text(bookingData.serviceType || 'Umrah Pilgrimage', 160, y + 28);
+            doc.text(bookingData.agentName || 'Verified Zilhaj Partner Agency', 160, y + 46);
+            doc.text(bookingData.departureDateText || bookingData.travelDate || 'Flexible / Confirmed', 160, y + 64);
+            doc.text(bookingData.duration || '14-18 Days', 160, y + 82);
 
-            doc.fillColor('#0f172a').fontSize(9).font('Helvetica-Bold').text('Makkah Hotel:', 50, y + 50);
-            doc.font('Helvetica').text(`${bookingData.makkahHotel || 'Fairmont Clock Tower'} (${bookingData.makkahDistance || '50m from Haram'})`, 140, y + 50);
-
-            doc.fillColor('#0f172a').fontSize(9).font('Helvetica-Bold').text('Madinah Hotel:', 50, y + 66);
-            doc.font('Helvetica').text(`${bookingData.madinahHotel || 'Dar Al-Taqwa'} (${bookingData.madinahDistance || '50m from Gate 25'})`, 140, y + 66);
-
-            doc.fillColor('#0f172a').fontSize(9).font('Helvetica-Bold').text('Transport:', 50, y + 82);
-            doc.font('Helvetica').text(bookingData.transport || 'VIP AC Luxury Coach (Private Fleet)', 140, y + 82);
-
-            doc.fillColor('#0f172a').fontSize(9).font('Helvetica-Bold').text('Meal Plan:', 50, y + 98);
-            doc.font('Helvetica').text(bookingData.mealPlan || 'Full Board (Indian & International Buffet)', 140, y + 98);
-
-            // FINANCIAL & PRICE BREAKDOWN
-            y += 130;
-            doc.fillColor('#0f172a').fontSize(12).font('Helvetica-Bold').text('3. FINANCIAL BREAKDOWN & PAYMENT', 40, y);
+            // FINANCIAL SUMMARY TABLE
+            y += 115;
+            doc.fillColor('#0f172a').fontSize(12).font('Helvetica-Bold').text('3. PAYMENT & ESCROW SUMMARY', 40, y);
             y += 20;
 
             // Table Header
-            doc.rect(40, y, 515, 22).fill('#1e293b');
-            doc.fillColor('#ffffff').fontSize(9).font('Helvetica-Bold');
-            doc.text('Description', 50, y + 6);
-            doc.text('Qty', 350, y + 6);
-            doc.text('Amount (INR)', 450, y + 6, { align: 'right' });
-            y += 22;
-
-            const price = Number(bookingData.price || 1);
-            const basePrice = Math.round(price * 0.95 * 100) / 100;
-            const taxAmount = Math.round((price - basePrice) * 100) / 100;
-
-            doc.rect(40, y, 515, 50).fill('#ffffff').stroke('#e2e8f0');
-            doc.fillColor('#334155').fontSize(9).font('Helvetica');
-            doc.text(bookingData.packageTitle || 'Umrah Pilgrimage Package', 50, y + 8);
-            doc.text('Includes eVisa, Flight Tickets, 5-Star Hotel, Ziyarat & Zamzam', 50, y + 22);
-            doc.text(String(bookingData.travelers || 1), 350, y + 8);
-            doc.text(`₹${basePrice.toLocaleString('en-IN')}`, 450, y + 8, { align: 'right' });
-
-            doc.text('GST & Statutory Taxes (5% Included)', 50, y + 34);
-            doc.text(`₹${taxAmount.toLocaleString('en-IN')}`, 450, y + 34, { align: 'right' });
-            y += 50;
-
-            // Total Row
-            doc.rect(40, y, 515, 25).fill('#f1f5f9').stroke('#cbd5e1');
+            doc.rect(40, y, 515, 25).fill('#e2e8f0');
             doc.fillColor('#0f172a').fontSize(10).font('Helvetica-Bold');
-            doc.text('TOTAL AMOUNT PAID:', 50, y + 7);
-            doc.fillColor('#16a34a').fontSize(12).text(`₹${price.toLocaleString('en-IN')}`, 450, y + 6, { align: 'right' });
-            y += 35;
+            doc.text('Description', 50, y + 7);
+            doc.text('Qty / Travelers', 280, y + 7);
+            doc.text('Amount (INR)', 430, y + 7, { width: 110, align: 'right' });
 
-            // TRANSACTION METADATA & STAMP / QR CODE VERIFICATION
-            doc.rect(40, y, 320, 80).fill('#f8fafc').stroke('#e2e8f0');
-            doc.fillColor('#0f172a').fontSize(9).font('Helvetica-Bold').text('TRANSACTION & ESCROW METADATA', 50, y + 10);
-            doc.fillColor('#475569').fontSize(8).font('Helvetica');
-            doc.text(`Payment Gateway: Razorpay Escrow Protected`, 50, y + 26);
-            doc.text(`Payment Txn ID: ${bookingData.paymentId || bookingData.razorpayPaymentId || 'pay_live_zilhaj_' + Date.now()}`, 50, y + 39);
-            doc.text(`Razorpay Order ID: ${bookingData.orderId || bookingData.razorpayOrderId || 'order_' + Date.now()}`, 50, y + 52);
-            doc.text(`Escrow Clearance: 100% Guaranteed & Insured`, 50, y + 65);
+            // Table Row 1: Package Cost
+            y += 25;
+            doc.rect(40, y, 515, 25).fill('#ffffff').stroke('#e2e8f0');
+            doc.fillColor('#334155').fontSize(9).font('Helvetica');
+            doc.text(bookingData.packageTitle || 'Pilgrimage Package Full Service', 50, y + 7);
+            doc.text(`${bookingData.travelers || bookingData.passengers || 1} Person(s)`, 280, y + 7);
+            
+            const rawAmount = bookingData.totalAmount || bookingData.amount || bookingData.price || 85000;
+            const formattedAmount = Number(rawAmount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
+            doc.font('Helvetica-Bold').text(formattedAmount, 430, y + 7, { width: 110, align: 'right' });
 
-            // Official Stamp & Digital Signatory
-            doc.save();
-            doc.circle(410, y + 40, 26).lineWidth(1.5).stroke('#127a4d');
-            doc.circle(410, y + 40, 23).lineWidth(0.6).dash(2, { space: 2 }).stroke('#127a4d');
-            doc.undash();
-            doc.fillColor('#127a4d').fontSize(5.5).font('Helvetica-Bold').text('ZILHAJ ESCROW', 386, y + 28, { width: 48, align: 'center' });
-            doc.fontSize(5).text('OFFICIAL SEAL', 386, y + 36, { width: 48, align: 'center' });
-            doc.fontSize(4.5).text('VERIFIED & VALID', 386, y + 45, { width: 48, align: 'center' });
-            doc.restore();
+            // Table Row 2: Escrow Protection
+            y += 25;
+            doc.rect(40, y, 515, 25).fill('#f8fafc').stroke('#e2e8f0');
+            doc.fillColor('#15803d').fontSize(9).font('Helvetica');
+            doc.text('Zilhaj Safe Escrow Protection & Verification', 50, y + 7);
+            doc.text('Included', 280, y + 7);
+            doc.font('Helvetica-Bold').text('FREE (₹0)', 430, y + 7, { width: 110, align: 'right' });
 
-            // Scannable Verification Box / QR representation
-            doc.rect(455, y, 100, 80).fill('#ffffff').stroke('#0f172a');
+            // Total Due / Paid Row
+            y += 25;
+            doc.rect(40, y, 515, 30).fill('#0f172a');
+            doc.fillColor('#ffffff').fontSize(11).font('Helvetica-Bold');
+            doc.text('TOTAL PAID & CLEARED:', 50, y + 9);
+            doc.fillColor('#38bdf8').text(formattedAmount, 430, y + 9, { width: 110, align: 'right' });
+
+            // ESCROW & TRUST ASSURANCE BOX
+            y += 45;
+            doc.rect(40, y, 515, 75).fill('#f0fdf4').stroke('#86efac');
+            doc.fillColor('#166534').fontSize(10).font('Helvetica-Bold').text('ZILHAJ 100% ESCROW GUARANTEE', 50, y + 10);
+            doc.fillColor('#15803d').fontSize(8.5).font('Helvetica').text(
+                'Your payment is held safely in ZILHAJ escrow until services are verified. Direct booking protection is provided under strict Islamic ethics and verified partner agency guidelines. For assistance or amendments, quote your Ref ID to support@zilhaj.com.',
+                50, y + 26, { width: 415, lineGap: 3 }
+            );
+
+            // QR & Security Code
             doc.rect(480, y + 8, 50, 48).fill('#0f172a');
             doc.fillColor('#ffffff').fontSize(8).font('Helvetica-Bold').text('SCAN QR', 484, y + 26, { width: 42, align: 'center' });
             doc.fillColor('#0f172a').fontSize(6.5).font('Helvetica-Bold').text('SECURE QR VALIDATION', 458, y + 60, { width: 94, align: 'center' });
@@ -161,17 +159,19 @@ async function generateBookingPDF(bookingData) {
 
             doc.end();
 
-            stream.on('finish', () => {
+            doc.on('end', () => {
+                const pdfBuffer = Buffer.concat(chunks);
                 const publicUrl = `/invoices/${fileName}`;
                 resolve({
                     fileName,
                     filePath,
+                    pdfBuffer,
                     publicUrl,
                     bookingId
                 });
             });
 
-            stream.on('error', (err) => {
+            doc.on('error', (err) => {
                 reject(err);
             });
         } catch (err) {

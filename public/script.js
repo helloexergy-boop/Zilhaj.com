@@ -216,8 +216,8 @@ document.addEventListener('DOMContentLoaded', function () {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: emailOrPhoneVal, password: passwordVal })
-        }).then(r => r.json().then(d => ({ ok: r.ok, data: d }))).then(({ ok, data }) => {
-          if (ok && data) {
+        }).then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d }))).then(({ ok, status, data }) => {
+          if (ok && data && (data.user || data.token)) {
             const userToStore = data.user ? { ...data.user, token: data.token || data.user.token } : data;
             if (!userToStore.role && data.role) userToStore.role = data.role;
             const tokenToSave = data.token || userToStore.token;
@@ -229,60 +229,18 @@ document.addEventListener('DOMContentLoaded', function () {
             const dest = isStaff ? '/admin/index.html' : '/dashboard/index.html';
             showLoginSuccessPopup('Login Successful!', isStaff ? 'Welcome Admin! Opening Admin Panel...' : 'Welcome back to ZILHAJ! Opening Dashboard...', dest);
           } else {
-            checkDemoAdminFallbackScript(emailOrPhoneVal, passwordVal, submitBtn, origText, (data && (data.message || data.error)) || 'Invalid credentials');
+            const errMsg = (data && (data.message || data.error)) || 'Invalid email or password';
+            showError(emailOrPhoneInput, 'email-or-phone-error', errMsg);
+            showToast(errMsg);
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = origText; }
           }
         }).catch(() => {
-          checkDemoAdminFallbackScript(emailOrPhoneVal, passwordVal, submitBtn, origText, 'Unable to connect to login server');
+          showError(emailOrPhoneInput, 'email-or-phone-error', 'Unable to connect to login server. Please try again.');
+          showToast('Unable to connect to login server');
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = origText; }
         });
       }
     });
-  }
-
-  function checkDemoAdminFallbackScript(emailOrPhoneVal, passwordVal, submitBtn, origText, defaultErrMsg) {
-    const cleanEmail = emailOrPhoneVal.toLowerCase().trim();
-    if (cleanEmail === 'admin@umrah.com' && passwordVal === 'password123') {
-      const superAdminUser = {
-        id: 'admin-1',
-        name: 'System Administrator',
-        email: 'admin@umrah.com',
-        role: 'ROLE_ADMIN',
-        permissions: ['MANAGE_USERS', 'MANAGE_AGENTS', 'APPROVE_REQUIREMENTS', 'MODERATE_PACKAGES', 'VIEW_FINANCES', 'MANAGE_SUBADMINS'],
-        token: 'demo-superadmin-jwt-token'
-      };
-      localStorage.setItem('umrah_user', JSON.stringify(superAdminUser));
-      showLoginSuccessPopup('Login Successful!', 'Welcome back, System Administrator!', '/admin/index.html');
-      return;
-    }
-
-    if (cleanEmail === 'subadmin@umrah.com' && passwordVal === 'password123') {
-      const subAdminUser = {
-        id: 'subadmin-1',
-        name: 'Operations SubAdmin',
-        email: 'subadmin@umrah.com',
-        role: 'ROLE_SUBADMIN',
-        permissions: ['MANAGE_USERS', 'MANAGE_AGENTS', 'APPROVE_REQUIREMENTS'],
-        token: 'demo-subadmin-jwt-token'
-      };
-      localStorage.setItem('umrah_user', JSON.stringify(subAdminUser));
-      showLoginSuccessPopup('Login Successful!', 'Welcome back, Operations SubAdmin!', '/admin/index.html');
-      return;
-    }
-
-    try {
-      const users = JSON.parse(localStorage.getItem('zilhaj_users') || '[]');
-      const found = users.find(u => (u.email && u.email.toLowerCase() === cleanEmail) || u.phone === cleanEmail);
-      if (found && (found.password === passwordVal || passwordVal.length >= 6)) {
-        localStorage.setItem('umrah_user', JSON.stringify(found));
-        const isStaff = found.role === 'ROLE_ADMIN' || found.role === 'ROLE_SUBADMIN' || found.email === 'admin@umrah.com';
-        const dest = isStaff ? '/admin/index.html' : '/dashboard/index.html';
-        showLoginSuccessPopup('Login Successful!', isStaff ? 'Welcome Admin! Opening Admin Panel...' : 'Welcome back to ZILHAJ! Opening Dashboard...', dest);
-        return;
-      }
-    } catch (e) {}
-
-    showError(document.getElementById('email-or-phone'), 'email-or-phone-error', defaultErrMsg);
-    showToast(defaultErrMsg);
-    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = origText; }
   }
 
   // Google OAuth handlers for standalone login/signup pages
@@ -331,180 +289,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ==========================================
-  // GOOGLE SIGN-IN MODAL & SEAMLESS AUTH FLOW
+  // OFFICIAL GOOGLE OAUTH FLOW
   // ==========================================
-  const googleSignInModal = document.getElementById('googleSignInModal');
-  const closeGoogleModalBtn = document.getElementById('closeGoogleModalBtn');
-  const googleModalAlert = document.getElementById('googleModalAlert');
-  const btnQuickGoogleAccount = document.getElementById('btnQuickGoogleAccount');
-  const customGoogleEmail = document.getElementById('customGoogleEmail');
-  const btnCustomGoogleSubmit = document.getElementById('btnCustomGoogleSubmit');
-  const btnLaunchOAuthPopup = document.getElementById('btnLaunchOAuthPopup');
-
-  function showGoogleModalAlert(msg, type = 'error') {
-    if (!googleModalAlert) return;
-    googleModalAlert.style.display = 'block';
-    if (type === 'success') {
-      googleModalAlert.style.background = '#F0FDF4';
-      googleModalAlert.style.border = '1.5px solid #86EFAC';
-      googleModalAlert.style.color = '#166534';
-      googleModalAlert.innerHTML = `✓ ${msg}`;
-    } else {
-      googleModalAlert.style.background = '#FEF2F2';
-      googleModalAlert.style.border = '1.5px solid #FCA5A5';
-      googleModalAlert.style.color = '#991B1B';
-      googleModalAlert.innerHTML = `⚠️ ${msg}`;
-    }
-  }
-
-  function clearGoogleModalAlert() {
-    if (googleModalAlert) {
-      googleModalAlert.style.display = 'none';
-      googleModalAlert.innerHTML = '';
-    }
-  }
-
-  function openGoogleSignInModal() {
-    if (googleSignInModal) {
-      clearGoogleModalAlert();
-      const inputVal = (document.getElementById('email-or-phone') && document.getElementById('email-or-phone').value.trim()) ||
-                       (document.getElementById('signup-email') && document.getElementById('signup-email').value.trim()) ||
-                       '';
-      if (customGoogleEmail && inputVal && isValidEmail(inputVal)) {
-        customGoogleEmail.value = inputVal;
-      }
-      googleSignInModal.style.display = 'flex';
-      return;
-    }
-    // Fallback if modal container not present
-    performDirectGoogleAuth('rajuranjanxbkj@gmail.com', 'Raju Ranjan');
-  }
-
-  function closeGoogleSignInModal() {
-    if (googleSignInModal) {
-      googleSignInModal.style.display = 'none';
-    }
-  }
-
-  if (closeGoogleModalBtn) {
-    closeGoogleModalBtn.addEventListener('click', closeGoogleSignInModal);
-  }
-
-  if (googleSignInModal) {
-    googleSignInModal.addEventListener('click', function(e) {
-      if (e.target === googleSignInModal) closeGoogleSignInModal();
-    });
-  }
-
-  async function performDirectGoogleAuth(email, name = null) {
-    if (!email || !isValidEmail(email)) {
-      showGoogleModalAlert('Please enter a valid Google email address');
-      return;
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanName = name || (cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
-
-    closeGoogleSignInModal();
-    showGoogleLoadingOverlay('Authenticating with Google...', `Connecting ${cleanEmail} to ZILHAJ...`);
-
-    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
-    const params = new URLSearchParams(window.location.search);
-    let redirectUrl = params.get('redirect') || '/dashboard/index.html';
-    if (!redirectUrl.endsWith('.html') && !redirectUrl.includes('/#')) {
-      if (redirectUrl === '/dashboard' || redirectUrl === 'dashboard') redirectUrl = '/dashboard/index.html';
-      if (redirectUrl === '/admin' || redirectUrl === 'admin') redirectUrl = '/admin/index.html';
-    }
-
-    try {
-      const res = await fetch(`${apiBase}/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: cleanName,
-          email: cleanEmail,
-          googleId: 'goog-' + Date.now()
-        })
-      });
-
-      const data = await res.json();
-      if (res.ok && data && (data.user || data.token)) {
-        const userToStore = data.user ? { ...data.user, token: data.token || data.user.token } : data;
-        const validToken = data.token || userToStore.token;
-        userToStore.token = validToken;
-
-        localStorage.setItem('umrah_user', JSON.stringify(userToStore));
-        localStorage.setItem('umrah_token', validToken);
-        localStorage.setItem('zilhaj_token', validToken);
-        sessionStorage.setItem('zilhaj_token', validToken);
-
-        const roleUpper = String(userToStore.role || '').toUpperCase();
-        const isStaff = roleUpper.includes('ADMIN') || String(userToStore.email).toLowerCase() === 'admin@umrah.com';
-        const target = isStaff ? '/admin/index.html' : redirectUrl;
-
-        showGoogleLoadingOverlay('Authentication Verified ✓', `Welcome, ${userToStore.name || 'Pilgrim'}! Opening Dashboard...`);
-        showToast('✓ Successfully signed in with Google!', 'success');
-
-        setTimeout(() => {
-          window.location.replace(target);
-          setTimeout(() => { window.location.href = target; }, 200);
-        }, 500);
-      } else {
-        hideGoogleLoadingOverlay();
-        showToast((data && (data.error || data.message)) || 'Google sign-in error');
-      }
-    } catch (err) {
-      hideGoogleLoadingOverlay();
-      showToast('Unable to connect to Google authentication service');
-    }
-  }
-
-  if (btnQuickGoogleAccount) {
-    btnQuickGoogleAccount.addEventListener('click', () => {
-      performDirectGoogleAuth('rajuranjanxbkj@gmail.com', 'Raju Ranjan');
-    });
-  }
-
-  if (btnCustomGoogleSubmit) {
-    btnCustomGoogleSubmit.addEventListener('click', () => {
-      const val = customGoogleEmail ? customGoogleEmail.value.trim() : '';
-      if (!val) {
-        showGoogleModalAlert('Please enter your Google email address');
-        if (customGoogleEmail) customGoogleEmail.focus();
-        return;
-      }
-      performDirectGoogleAuth(val);
-    });
-  }
-
-  if (customGoogleEmail) {
-    customGoogleEmail.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const val = customGoogleEmail.value.trim();
-        if (val) performDirectGoogleAuth(val);
-      }
-    });
-  }
-
-  if (btnLaunchOAuthPopup) {
-    btnLaunchOAuthPopup.addEventListener('click', async () => {
-      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
-      try {
-        const urlRes = await fetch(`${apiBase}/auth/google/url?origin=${encodeURIComponent(window.location.origin)}&path=/api/auth/google/callback`);
-        const urlData = await urlRes.json();
-        if (urlData && urlData.url) {
-          const w = 520, h = 640;
-          const left = window.screen.width / 2 - w / 2;
-          const top = window.screen.height / 2 - h / 2;
-          window.open(urlData.url, 'google_oauth_popup', `width=${w},height=${h},top=${top},left=${left}`);
-        }
-      } catch (e) {
-        showGoogleModalAlert('Unable to fetch Google OAuth URL');
-      }
-    });
-  }
-
   const handleGoogleRedirect = async (e) => {
     if (e) {
       if (typeof e.preventDefault === 'function') e.preventDefault();
@@ -1115,16 +901,17 @@ document.addEventListener('DOMContentLoaded', function () {
           body: JSON.stringify({ name: fullnameVal, email: emailVal, phone: phoneVal, password: passwordVal, otp: otpCode })
         }).then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d }))).then(({ ok, status, data }) => {
           if (ok && (data.success || data.user)) {
-            const userToStore = data.user ? { ...data.user, token: data.token || data.user.token } : { id: 'usr-' + Date.now(), name: fullnameVal, email: emailVal, phone: phoneVal, role: 'ROLE_USER', token: 'local-' + Date.now() };
-            if (!data.user) {
-              userToStore.password = passwordVal;
-              const users = JSON.parse(localStorage.getItem('zilhaj_users') || '[]');
-              users.push(userToStore);
-              localStorage.setItem('zilhaj_users', JSON.stringify(users));
+            const userToStore = data.user || { id: 'usr-' + Date.now(), name: fullnameVal, email: emailVal, phone: phoneVal, role: 'ROLE_USER' };
+            const tokenToSave = data.token || userToStore.token;
+            if (tokenToSave) {
+              userToStore.token = tokenToSave;
+              localStorage.setItem('umrah_user', JSON.stringify(userToStore));
+              localStorage.setItem('umrah_token', tokenToSave);
+              localStorage.setItem('zilhaj_token', tokenToSave);
+              sessionStorage.setItem('zilhaj_token', tokenToSave);
             }
-            localStorage.setItem('umrah_user', JSON.stringify(userToStore));
-            showToast('Account Created Successfully! Welcome to ZILHAJ.');
-            setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+            showToast('✓ Account created successfully! Welcome to ZILHAJ.', 'success');
+            setTimeout(() => { window.location.href = '/dashboard/index.html'; }, 1000);
           } else {
             const msg = (data && (data.error || data.message)) || 'Registration failed';
             if (status === 409 || (data && data.code === 'EMAIL_ALREADY_EXISTS') || msg.toLowerCase().includes('already exists') || msg.toLowerCase().includes('already registered')) {
@@ -1136,19 +923,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
           }
         }).catch(() => {
-          // Fallback local creation when backend unreachable
-          const users = JSON.parse(localStorage.getItem('zilhaj_users') || '[]');
-          if (users.some(u => u.email && u.email.toLowerCase() === emailVal.toLowerCase())) {
-            renderDuplicateEmailError(document.getElementById('signup-email-error'), 'This email is already registered. Please login.');
-            showToast('Email already registered');
-          } else {
-            const localUser = { id: 'usr-' + Date.now(), name: fullnameVal, email: emailVal, phone: phoneVal, password: passwordVal, role: 'ROLE_USER', token: 'local-' + Date.now() };
-            users.push(localUser);
-            localStorage.setItem('zilhaj_users', JSON.stringify(users));
-            localStorage.setItem('umrah_user', JSON.stringify(localUser));
-            showToast('Account Created Successfully! Welcome to ZILHAJ.');
-            setTimeout(() => { window.location.href = 'login.html'; }, 1200);
-          }
+          showError(emailInput, 'signup-email-error', 'Unable to connect to registration server. Please try again.');
+          showToast('Unable to connect to registration server');
         }).finally(() => {
           if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = origText; }
         });

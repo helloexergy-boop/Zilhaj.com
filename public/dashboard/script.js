@@ -256,20 +256,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (elSupport) elSupport.textContent = supportCount;
   };
 
-  // Load saved profile data from localStorage
+  // Load saved profile data from localStorage & render
   const loadSavedProfile = () => {
     let savedName = localStorage.getItem('zilhaj_user_name');
     let savedEmail = localStorage.getItem('zilhaj_user_email');
     let savedPhone = localStorage.getItem('zilhaj_user_phone');
+    let savedPhoto = '';
 
-    if (!savedName || !savedEmail) {
-      try {
-        const u = JSON.parse(localStorage.getItem('umrah_user') || '{}');
-        if (u && (u.name || u.fullName)) savedName = savedName || u.name || u.fullName;
-        if (u && u.email) savedEmail = savedEmail || u.email;
-        if (u && (u.phone || u.mobile)) savedPhone = savedPhone || u.phone || u.mobile;
-      } catch(e) {}
-    }
+    try {
+      const u = JSON.parse(localStorage.getItem('umrah_user') || '{}');
+      if (u) {
+        if (!savedName && (u.name || u.fullName)) savedName = u.name || u.fullName;
+        if (!savedEmail && u.email) savedEmail = u.email;
+        if (!savedPhone && (u.phone || u.mobile)) savedPhone = u.phone || u.mobile;
+        savedPhoto = u.picture || u.avatar || u.profilePhoto || '';
+      }
+    } catch(e) {}
 
     if (savedName) {
       if (profileNameDisplay) profileNameDisplay.textContent = savedName;
@@ -281,8 +283,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (welcomeNameEl) welcomeNameEl.textContent = savedName;
 
       const initials = savedName.trim().charAt(0).toUpperCase() || 'P';
-      if (navAvatarInitials) navAvatarInitials.textContent = initials;
-      if (profileAvatarLarge) profileAvatarLarge.textContent = initials;
+      if (savedPhoto) {
+        if (navAvatarInitials) navAvatarInitials.innerHTML = `<img src="${savedPhoto}" alt="${savedName}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" onerror="this.onerror=null;this.parentElement.textContent='${initials}'">`;
+        if (profileAvatarLarge) profileAvatarLarge.innerHTML = `<img src="${savedPhoto}" alt="${savedName}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" onerror="this.onerror=null;this.parentElement.textContent='${initials}'">`;
+      } else {
+        if (navAvatarInitials) navAvatarInitials.textContent = initials;
+        if (profileAvatarLarge) profileAvatarLarge.textContent = initials;
+      }
     }
     if (savedEmail) {
       if (profileEmailDisplay) profileEmailDisplay.textContent = savedEmail;
@@ -301,6 +308,34 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   loadSavedProfile();
+
+  // Authoritatively refresh user profile from /api/auth/me
+  const refreshAuthoritativeUserProfile = async () => {
+    const activeToken = localStorage.getItem('umrah_token') || localStorage.getItem('zilhaj_token') || sessionStorage.getItem('zilhaj_token');
+    if (!activeToken) return;
+    try {
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
+      const res = await fetch(`${apiBase}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${activeToken}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.user) {
+          const fresh = data.user;
+          const current = JSON.parse(localStorage.getItem('umrah_user') || '{}');
+          const merged = { ...current, ...fresh, token: activeToken };
+          localStorage.setItem('umrah_user', JSON.stringify(merged));
+          if (fresh.name) localStorage.setItem('zilhaj_user_name', fresh.name);
+          if (fresh.email) localStorage.setItem('zilhaj_user_email', fresh.email);
+          if (fresh.phone) localStorage.setItem('zilhaj_user_phone', fresh.phone);
+          loadSavedProfile();
+        }
+      }
+    } catch (e) {
+      console.warn('[AUTH] Authoritative profile fetch note:', e);
+    }
+  };
+  refreshAuthoritativeUserProfile();
 
   if (btnEditProfile) {
     btnEditProfile.addEventListener('click', () => {
@@ -1429,21 +1464,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let liveReqs = Array.isArray(reqs) ? reqs : (reqs && Array.isArray(reqs.requirements) ? reqs.requirements : []);
       let liveOffers = Array.isArray(offers) ? offers : (offers && Array.isArray(offers.offers) ? offers.offers : []);
-
-      // Check local storage only if empty and user created offline draft matching user email
-      if (liveReqs.length === 0) {
-        try {
-          const userObj = JSON.parse(localStorage.getItem('umrah_user') || 'null');
-          const uEmail = userObj && userObj.email ? userObj.email.toLowerCase().trim() : '';
-          const localReqs = JSON.parse(localStorage.getItem('zilhaj_requirements') || '[]');
-          if (Array.isArray(localReqs) && localReqs.length > 0 && uEmail) {
-            liveReqs = localReqs.filter(r => {
-              const rEmail = (r.email || r.userEmail || '').toLowerCase().trim();
-              return rEmail === uEmail && !rEmail.includes('test') && !rEmail.includes('pilgrim');
-            });
-          }
-        } catch(e) {}
-      }
 
       window._currentReqs = liveReqs;
       window._currentOffers = liveOffers;

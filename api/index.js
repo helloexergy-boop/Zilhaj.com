@@ -87,11 +87,17 @@ function verifyPassword(password, hashedPassword) {
 // Helper to sanitize User objects into DTOs (Never expose password hashes)
 function toUserDTO(user) {
     if (!user) return null;
+    const photo = user.picture || user.avatar || user.profilePhoto || user.profilePictureUrl || '';
     return {
         id: String(user.id || user._id),
-        name: user.name || 'User',
-        email: (user.email || '').toLowerCase(),
+        name: user.name || 'Pilgrim',
+        email: (user.email || '').toLowerCase().trim(),
         phone: user.phone || '',
+        picture: photo,
+        avatar: photo,
+        profilePhoto: photo,
+        googleId: user.googleId || '',
+        hasPassword: !!user.password,
         role: normalizeRole(user.role),
         permissions: Array.isArray(user.permissions) ? user.permissions : [],
         isStaffEnabled: user.isStaffEnabled !== false,
@@ -521,9 +527,17 @@ app.get('/api/bookings/:id/pdf', authenticateUser, async (req, res) => {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `inline; filename="${pdfResult.fileName}"`);
 
+        if (pdfResult.pdfBuffer) {
+            return res.send(pdfResult.pdfBuffer);
+        }
+
         const fs = require('fs');
-        const readStream = fs.createReadStream(pdfResult.filePath);
-        readStream.pipe(res);
+        if (pdfResult.filePath && fs.existsSync(pdfResult.filePath)) {
+            const readStream = fs.createReadStream(pdfResult.filePath);
+            readStream.pipe(res);
+        } else {
+            res.status(500).json({ error: 'Generated PDF not found on server.' });
+        }
     } catch (err) {
         console.error('[API] Error serving booking PDF:', err.message);
         res.status(500).json({ error: 'Failed to generate booking confirmation PDF.' });
@@ -577,15 +591,14 @@ app.get('/api/requirements', authenticateUser, async (req, res) => {
             return res.json([]);
         }
 
+        const userRole = normalizeRole(req.user.role);
+        const isStaff = userRole === 'ADMIN' || userRole === 'SUBADMIN';
         let filter = {};
-        const roleUpper = String(req.user.role || '').toUpperCase();
-        const isStaff = roleUpper.includes('ADMIN') || roleUpper.includes('STAFF');
         if (!isStaff) {
             const orConditions = [];
             if (req.user.id) {
                 orConditions.push({ userId: req.user.id });
                 orConditions.push({ userId: String(req.user.id) });
-                orConditions.push({ id: req.user.id });
             }
             if (req.user._id) {
                 orConditions.push({ userId: String(req.user._id) });
@@ -713,23 +726,25 @@ app.delete('/api/requirements/:id', authenticateUser, requireRole(['SUBADMIN', '
 app.get('/api/offers', authenticateUser, async (req, res) => {
     try {
         const db = await connectToDatabase();
-        if (req.user.role === 'CUSTOMER') {
+        const userRole = normalizeRole(req.user.role);
+        const isStaff = userRole === 'ADMIN' || userRole === 'SUBADMIN';
+        if (!isStaff) {
             // Find all requirement IDs belonging to this customer
             const userReqs = await db.collection('requirements').find({
                 $or: [
                     { userId: req.user.id },
                     { userId: String(req.user._id) },
-                    { email: req.user.email ? req.user.email.toLowerCase() : '' },
-                    { userEmail: req.user.email ? req.user.email.toLowerCase() : '' }
+                    { email: req.user.email ? req.user.email.toLowerCase().trim() : '' },
+                    { userEmail: req.user.email ? req.user.email.toLowerCase().trim() : '' }
                 ]
             }).toArray();
 
-            const reqIds = userReqs.map(r => r.id).filter(Boolean);
+            const reqIds = userReqs.map(r => r.id || r.requestId).filter(Boolean);
             const offers = await db.collection('offers').find({
                 $or: [
-                    { requirementId: { $in: reqIds } },
+                    ...(reqIds.length > 0 ? [{ requirementId: { $in: reqIds } }] : []),
                     { userId: req.user.id },
-                    { customerEmail: req.user.email ? req.user.email.toLowerCase() : '' }
+                    { customerEmail: req.user.email ? req.user.email.toLowerCase().trim() : '' }
                 ]
             }).toArray();
             return res.json(offers);
@@ -1800,6 +1815,32 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     }
 });
 
+// Authoritative user profile endpoint
+app.get('/api/auth/me', authenticateUser, async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+        const db = await connectToDatabase();
+        let freshUser = null;
+        if (db) {
+            freshUser = await db.collection('users').findOne({
+                $or: [
+                    { email: (req.user.email || '').toLowerCase().trim() },
+                    { id: req.user.id }
+                ]
+            });
+        }
+        const userObj = freshUser || req.user;
+        res.json({
+            success: true,
+            user: toUserDTO(userObj)
+        });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to retrieve profile: ' + err.message });
+    }
+});
+
 // Google OAuth Credentials & Canonical Domain Setup (Authoritative Domain: zilhaj.com)
 const APP_DOMAIN = process.env.APP_DOMAIN || 'zilhaj.com';
 const APP_URL = process.env.APP_URL || `https://${APP_DOMAIN}`;
@@ -1871,6 +1912,7 @@ const handleGoogleCallback = async (req, res) => {
                     googleId: profile.id || profile.sub || '',
                     role: 'ROLE_USER',
                     picture: profile.picture || '',
+                    avatar: profile.picture || '',
                     isVerified: true,
                     isStaffEnabled: true,
                     createdAt: new Date(),
@@ -1879,13 +1921,20 @@ const handleGoogleCallback = async (req, res) => {
                 await db.collection('users').insertOne(user);
             } else {
                 const updateFields = { isVerified: true, isStaffEnabled: true, updatedAt: new Date() };
-                if (profile.picture) updateFields.picture = profile.picture;
-                if (profile.name && (!user.name || user.name === cleanEmail.split('@')[0])) updateFields.name = profile.name;
+                if (profile.picture) {
+                    updateFields.picture = profile.picture;
+                    updateFields.avatar = profile.picture;
+                }
+                if (profile.id || profile.sub) updateFields.googleId = profile.id || profile.sub;
+                if (profile.name && (!user.name || user.name === cleanEmail.split('@')[0] || user.name === 'User' || user.name === 'Pilgrim')) {
+                    updateFields.name = profile.name;
+                }
                 await db.collection('users').updateOne({ _id: user._id }, { $set: updateFields });
+                user = { ...user, ...updateFields };
             }
         }
 
-        const userObj = user || { id: 'usr-' + Date.now(), email: cleanEmail, name: profile.name, role: 'ROLE_USER' };
+        const userObj = user || { id: 'usr-' + Date.now(), email: cleanEmail, name: profile.name, picture: profile.picture, role: 'ROLE_USER' };
         const token = generateAuthToken(userObj);
         adminSessions.set(token, cleanEmail);
 
@@ -1965,60 +2014,110 @@ app.get('/login/oauth2/code/google', handleGoogleCallback);
 
 app.post('/api/auth/google', async (req, res) => {
     try {
-        let { name, email, googleId, picture, avatar } = req.body || {};
-        if (!email) {
-            email = 'pilgrim.' + Date.now().toString().slice(-4) + '@zilhaj.com';
-        }
+        const { credential, code } = req.body || {};
+        let profile = null;
 
-        let cleanEmail = String(email).trim().toLowerCase();
-        if (cleanEmail === 'admin' || cleanEmail === 'superadmin' || cleanEmail === 'admin@zilhaj.com') {
-            cleanEmail = seededAdminEmail || 'admin@umrah.com';
-        }
-
-        const isSuperAdminEmail = cleanEmail === seededAdminEmail || cleanEmail === 'admin@umrah.com';
-        const db = await connectToDatabase();
-        let user = null;
-
-        if (db) {
-            user = await db.collection('users').findOne({ email: cleanEmail });
-            if (!user) {
-                user = {
-                    id: isSuperAdminEmail ? 'admin-1' : ('usr-' + Date.now()),
-                    name: name || (isSuperAdminEmail ? seededAdminName : cleanEmail.split('@')[0]),
-                    email: cleanEmail,
-                    googleId: googleId || ('goog-' + Date.now()),
-                    role: isSuperAdminEmail ? 'ROLE_ADMIN' : 'ROLE_USER',
-                    picture: picture || avatar || '',
-                    permissions: isSuperAdminEmail ? [...ALL_STAFF_PERMISSIONS] : [],
-                    isVerified: true,
-                    isStaffEnabled: true,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                };
-                await db.collection('users').insertOne(user);
-            } else {
-                const updateFields = { isVerified: true, isStaffEnabled: true, updatedAt: new Date() };
-                if (picture || avatar) updateFields.picture = picture || avatar;
-                if (name && (!user.name || user.name === user.email.split('@')[0])) updateFields.name = name;
-                if (isSuperAdminEmail) {
-                    updateFields.role = 'ROLE_ADMIN';
-                    updateFields.permissions = [...ALL_STAFF_PERMISSIONS];
+        // 1. Verify Google Identity Services (GIS) ID Token
+        if (credential) {
+            try {
+                const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+                if (verifyRes.ok) {
+                    const tokenInfo = await verifyRes.json();
+                    const expectedClientId = GOOGLE_CLIENT_ID ? GOOGLE_CLIENT_ID.split('-')[0] : '';
+                    if (tokenInfo && tokenInfo.email && (!expectedClientId || (tokenInfo.aud && tokenInfo.aud.includes(expectedClientId)))) {
+                        profile = {
+                            id: tokenInfo.sub,
+                            email: tokenInfo.email,
+                            name: tokenInfo.name,
+                            picture: tokenInfo.picture
+                        };
+                    }
                 }
-                await db.collection('users').updateOne({ _id: user._id }, { $set: updateFields });
-                user = { ...user, ...updateFields };
+            } catch (vErr) {
+                console.warn('[AUTH] Tokeninfo verification warning:', vErr.message);
             }
         }
 
-        const userObj = user || {
-            id: isSuperAdminEmail ? 'admin-1' : ('usr-' + Date.now()),
-            email: cleanEmail,
-            name: name || (isSuperAdminEmail ? seededAdminName : cleanEmail.split('@')[0]),
-            role: isSuperAdminEmail ? 'ROLE_ADMIN' : 'ROLE_USER',
-            permissions: isSuperAdminEmail ? [...ALL_STAFF_PERMISSIONS] : []
-        };
-        const token = generateAuthToken(userObj);
+        // 2. Or exchange authorization code if code is supplied
+        if (!profile && code) {
+            try {
+                const redirectUri = `${APP_URL}/api/auth/google/callback`;
+                const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        code,
+                        client_id: GOOGLE_CLIENT_ID,
+                        client_secret: GOOGLE_CLIENT_SECRET,
+                        redirect_uri: redirectUri,
+                        grant_type: 'authorization_code'
+                    })
+                });
+                const tokenData = await tokenRes.json();
+                if (tokenData.access_token) {
+                    const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                        headers: { Authorization: `Bearer ${tokenData.access_token}` }
+                    });
+                    profile = await userRes.json();
+                } else if (tokenData.id_token) {
+                    const parts = tokenData.id_token.split('.');
+                    profile = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+                }
+            } catch (cErr) {
+                console.warn('[AUTH] Code exchange warning:', cErr.message);
+            }
+        }
+
+        if (!profile || !profile.email) {
+            return res.status(400).json({ error: 'Valid Google credential or authorization code is required.' });
+        }
+
+        const cleanEmail = String(profile.email).trim().toLowerCase();
+        const db = await connectToDatabase();
+        if (!db) {
+            return res.status(503).json({ error: 'Database service unavailable' });
+        }
+
+        let user = await db.collection('users').findOne({ email: cleanEmail });
+        if (!user) {
+            // First-time Google user -> create new account
+            user = {
+                id: 'usr-' + Date.now(),
+                name: profile.name || cleanEmail.split('@')[0],
+                email: cleanEmail,
+                googleId: profile.id || profile.sub || '',
+                role: 'ROLE_USER',
+                picture: profile.picture || '',
+                avatar: profile.picture || '',
+                isVerified: true,
+                isStaffEnabled: true,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
+            await db.collection('users').insertOne(user);
+        } else {
+            // Existing user (manual or google) -> link googleId, update picture if provided
+            const updateFields = { isVerified: true, isStaffEnabled: true, updatedAt: new Date() };
+            if (profile.picture) {
+                updateFields.picture = profile.picture;
+                updateFields.avatar = profile.picture;
+            }
+            if (profile.id || profile.sub) updateFields.googleId = profile.id || profile.sub;
+            if (profile.name && (!user.name || user.name === cleanEmail.split('@')[0] || user.name === 'User' || user.name === 'Pilgrim')) {
+                updateFields.name = profile.name;
+            }
+            await db.collection('users').updateOne({ _id: user._id }, { $set: updateFields });
+            user = { ...user, ...updateFields };
+        }
+
+        const token = generateAuthToken(user);
         adminSessions.set(token, cleanEmail);
-        res.json({ success: true, token, user: { ...toUserDTO(userObj), token } });
+        res.json({
+            success: true,
+            message: 'Google authentication successful',
+            token,
+            user: { ...toUserDTO(user), token }
+        });
     } catch (err) {
         console.error('Google sign-in error:', err);
         res.status(500).json({ error: 'Google sign-in error: ' + err.message });
