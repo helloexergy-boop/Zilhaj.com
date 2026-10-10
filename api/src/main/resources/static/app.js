@@ -5,7 +5,7 @@
 
 const API_BASE = window.API_BASE_URL || ((window.location.protocol && window.location.protocol.startsWith('http'))
     ? '/api'
-    : 'http://localhost:3000/api');
+    : 'https://zilhaj.com/api');
 
 // ============================================================================
 // CHATBOT API KEY CONFIGURATION (OpenAI / Gemini / Custom AI Endpoint)
@@ -62,13 +62,27 @@ class App {
             } catch (e) {}
         });
 
-        // Remove any pre-existing mock agent offers (generated without real userId/packageId) so
-        // users only see offers dispatched by the Admin through the control panel.
+        // Remove any pre-existing mock agent offers and test requirements from localStorage
         try {
             const rawOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
             const realOffers = rawOffers.filter(o => (o.userId && o.userId !== 'usr-1') || o.packageId);
             localStorage.setItem('umrah_user_offers', JSON.stringify(realOffers));
             this.state.userOffers = realOffers;
+
+            ['umrah_requirements', 'zilhaj_requirements'].forEach(k => {
+                const raw = localStorage.getItem(k);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) {
+                        const clean = parsed.filter(r => {
+                            const em = (r.email || r.userEmail || '').toLowerCase();
+                            const fn = (r.fullname || r.customer || '').toLowerCase();
+                            return !em.includes('test') && !em.includes('pilgrim') && !fn.includes('test') && !fn.includes('automated');
+                        });
+                        localStorage.setItem(k, JSON.stringify(clean));
+                    }
+                }
+            });
         } catch (e) {}
 
         // Handle Google OAuth callback URL parameters (Step 2 & 5)
@@ -713,9 +727,9 @@ class App {
         this.closeModal();
         this.showLoading('Connecting to Google Accounts...', '🌐 Establishing secure Google session');
 
-        const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-            ? 'http://localhost:3000/api'
-            : '/api';
+        const apiEndpoint = (window.location.protocol && window.location.protocol.startsWith('http'))
+            ? '/api'
+            : 'https://zilhaj.com/api';
 
         // 1. Try official Google OAuth 2.0 redirect
         try {
@@ -797,9 +811,9 @@ class App {
         this.showLoading('Verifying Google credentials and establishing secure session...', '🌐 Securing Google Session');
 
         try {
-            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                ? 'http://localhost:3000/api/auth/google'
-                : '/api/auth/google';
+            const apiEndpoint = (window.location.protocol && window.location.protocol.startsWith('http'))
+                ? '/api/auth/google'
+                : 'https://zilhaj.com/api/auth/google';
 
             const googleId = 'goog-' + Date.now();
             const response = await fetch(apiEndpoint, {
@@ -3711,9 +3725,15 @@ class App {
         const allReqs   = [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
         const allOffers = [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
         const apiBookings = this.state.myBookings || [];
-        const allBookings = [...apiBookings, ...localBookings.filter(lb => !apiBookings.some(b => b.id === lb.id))];
-        const requirements = allReqs.filter(r => !r.userId || r.userId === user.id || r.userEmail === user.email);
-        const offers   = allOffers;
+        const requirements = allReqs.filter(r => {
+            if (!user || (!user.id && !user.email)) return false;
+            const matchId = user.id && (r.userId === user.id || String(r.userId) === String(user.id));
+            const matchEmail = user.email && (
+                (r.email && r.email.toLowerCase() === user.email.toLowerCase()) ||
+                (r.userEmail && r.userEmail.toLowerCase() === user.email.toLowerCase())
+            );
+            return matchId || matchEmail;
+        });
         const bookings = allBookings;
 
         // ── Support contact helpers ──────────────────────────────────────────────
@@ -8861,7 +8881,7 @@ class App {
         if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
 
         try {
-            const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+            const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
             const res = await fetch(`${apiBase}/auth/forgot-password/send-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -8911,7 +8931,7 @@ class App {
         this.hideFormError();
 
         try {
-            const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+            const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
             const res = await fetch(`${apiBase}/auth/reset-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -9121,9 +9141,9 @@ class App {
 
         // Send OTP via API endpoint asynchronously
         try {
-            const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                ? 'http://localhost:3000/api/auth/resend-otp'
-                : '/api/auth/resend-otp';
+            const apiEndpoint = (window.location.protocol && window.location.protocol.startsWith('http'))
+                ? '/api/auth/resend-otp'
+                : 'https://zilhaj.com/api/auth/resend-otp';
 
             fetch(apiEndpoint, {
                 method: 'POST',
@@ -9191,9 +9211,9 @@ class App {
 
         if (!verified) {
             try {
-                const apiEndpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                    ? 'http://localhost:3000/api/auth/verify-otp'
-                    : '/api/auth/verify-otp';
+                const apiEndpoint = (window.location.protocol && window.location.protocol.startsWith('http'))
+                    ? '/api/auth/verify-otp'
+                    : 'https://zilhaj.com/api/auth/verify-otp';
 
                 const response = await fetch(apiEndpoint, {
                     method: 'POST',

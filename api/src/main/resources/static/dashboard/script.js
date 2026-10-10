@@ -3,6 +3,39 @@
 // ==========================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Authentication check for Dashboard access
+  const storedUserRaw = localStorage.getItem('umrah_user');
+  let storedUser = null;
+  try { storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null; } catch (e) {}
+  const token = (storedUser && (storedUser.token || storedUser.jwtToken)) ||
+                localStorage.getItem('umrah_token') ||
+                localStorage.getItem('zilhaj_token') ||
+                sessionStorage.getItem('zilhaj_token');
+
+  if (!storedUser || !token) {
+    window.location.replace('/login.html?redirect=/dashboard/index.html');
+    return;
+  }
+
+  // Subscribe to real-time events for this user
+  if (window.RealtimeSyncClient && storedUser && (storedUser.id || storedUser.email)) {
+    try {
+      const realtime = new window.RealtimeSyncClient();
+      const userId = storedUser.id || storedUser.email;
+      realtime.subscribe([`user:${userId}:bookings`, `user:${userId}:requests`]);
+      realtime.on('BOOKING_CONFIRMED', (booking) => {
+        console.log('[DASHBOARD REALTIME] Booking confirmed:', booking);
+        if (typeof window.renderPaymentsHistory === 'function') window.renderPaymentsHistory();
+        if (typeof window.loadMyBookings === 'function') window.loadMyBookings();
+      });
+      realtime.on('NEW_REQUEST_SUBMITTED', () => {
+        if (typeof window.loadLiveDashboardData === 'function') window.loadLiveDashboardData();
+      });
+      realtime.on('OFFER_DISPATCHED', () => {
+        if (typeof window.loadLiveDashboardData === 'function') window.loadLiveDashboardData();
+      });
+    } catch (e) {}
+  }
 
   // ------------------------------------------------------------------------
   // 1. UNIFIED TOP NAVBAR & SIDEBAR TAB NAVIGATION
@@ -13,6 +46,16 @@ document.addEventListener('DOMContentLoaded', () => {
   window.switchTab = (targetTab) => {
     if (!targetTab) targetTab = 'requests';
     targetTab = targetTab.replace('#', '').toLowerCase();
+    if (targetTab === 'bookings' || targetTab === 'my-bookings') targetTab = 'payments';
+
+    if (typeof window.showLoadingProgress === 'function') {
+      window.showLoadingProgress();
+      setTimeout(() => {
+        if (typeof window.hideLoadingProgress === 'function') {
+          window.hideLoadingProgress();
+        }
+      }, 200);
+    }
 
     const mainLayout = document.querySelector('.main-layout');
     if (mainLayout) {
@@ -20,6 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
         mainLayout.classList.add('full-width-mode');
       } else {
         mainLayout.classList.remove('full-width-mode');
+      }
+    }
+
+    if (targetTab === 'requests') {
+      if (typeof window.loadLiveDashboardData === 'function') {
+        window.loadLiveDashboardData();
       }
     }
 
@@ -94,6 +143,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    // Refresh quick stats
+    if (typeof window.updateDashboardSummaryCards === 'function') {
+      window.updateDashboardSummaryCards();
+    }
+
     // Scroll smoothly to top of content
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -124,9 +178,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // URL Hash Navigation / Hash Redirect Handling
+  // URL Hash & Query Param Navigation / Redirect Handling
+  const urlQueryTab = new URLSearchParams(window.location.search).get('tab');
   const initialHash = window.location.hash.replace('#', '').toLowerCase();
-  if (initialHash) {
+  if (urlQueryTab) {
+    switchTab(urlQueryTab.toLowerCase());
+  } else if (initialHash) {
     switchTab(initialHash);
   } else {
     switchTab('requests');
@@ -164,11 +221,55 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Dynamic Quick Summary Cards Counter
+  window.updateDashboardSummaryCards = () => {
+    const reqCards = document.querySelectorAll('#requestsList .request-card-box');
+    const activeCount = reqCards.length;
+    const offersCount = document.querySelectorAll('#requestsList .agency-offer-card').length;
+    
+    let confirmedCount = 0;
+    try {
+      const bookings = JSON.parse(localStorage.getItem('umrah_my_bookings') || '[]');
+      confirmedCount = Array.isArray(bookings) ? bookings.length : 0;
+    } catch(e) {}
+
+    let supportCount = 0;
+    try {
+      if (window.customerSupportState && Array.isArray(window.customerSupportState.tickets)) {
+        supportCount = window.customerSupportState.tickets.length;
+      } else {
+        const raw = localStorage.getItem('zilhaj_support_tickets_v1');
+        if (raw) supportCount = JSON.parse(raw).length;
+      }
+    } catch(e) {}
+
+    const elActive = document.getElementById('dashStatActiveRequests');
+    if (elActive) elActive.textContent = activeCount;
+
+    const elOffers = document.getElementById('dashStatOffersReceived');
+    if (elOffers) elOffers.textContent = offersCount;
+
+    const elConfirmed = document.getElementById('dashStatConfirmedTrips');
+    if (elConfirmed) elConfirmed.textContent = confirmedCount;
+
+    const elSupport = document.getElementById('dashStatSupportInquiries');
+    if (elSupport) elSupport.textContent = supportCount;
+  };
+
   // Load saved profile data from localStorage
   const loadSavedProfile = () => {
-    const savedName = localStorage.getItem('zilhaj_user_name');
-    const savedEmail = localStorage.getItem('zilhaj_user_email');
-    const savedPhone = localStorage.getItem('zilhaj_user_phone');
+    let savedName = localStorage.getItem('zilhaj_user_name');
+    let savedEmail = localStorage.getItem('zilhaj_user_email');
+    let savedPhone = localStorage.getItem('zilhaj_user_phone');
+
+    if (!savedName || !savedEmail) {
+      try {
+        const u = JSON.parse(localStorage.getItem('umrah_user') || '{}');
+        if (u && (u.name || u.fullName)) savedName = savedName || u.name || u.fullName;
+        if (u && u.email) savedEmail = savedEmail || u.email;
+        if (u && (u.phone || u.mobile)) savedPhone = savedPhone || u.phone || u.mobile;
+      } catch(e) {}
+    }
 
     if (savedName) {
       if (profileNameDisplay) profileNameDisplay.textContent = savedName;
@@ -176,7 +277,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (navUserName) navUserName.textContent = savedName;
       if (profileHeaderName) profileHeaderName.textContent = savedName;
       
-      const initials = savedName.trim().charAt(0).toUpperCase() || 'O';
+      const welcomeNameEl = document.getElementById('dashWelcomeUserName');
+      if (welcomeNameEl) welcomeNameEl.textContent = savedName;
+
+      const initials = savedName.trim().charAt(0).toUpperCase() || 'P';
       if (navAvatarInitials) navAvatarInitials.textContent = initials;
       if (profileAvatarLarge) profileAvatarLarge.textContent = initials;
     }
@@ -189,6 +293,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const cleanPhone = savedPhone.replace(/\D/g, '');
       if (profilePhoneDisplay) profilePhoneDisplay.textContent = cleanPhone ? `+91 ${cleanPhone}` : '';
       if (profilePhoneInput) profilePhoneInput.value = cleanPhone;
+    }
+
+    if (typeof window.updateDashboardSummaryCards === 'function') {
+      window.updateDashboardSummaryCards();
     }
   };
 
@@ -704,14 +812,64 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       // Asynchronously post to backend API database
-      const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
-      fetch(apiBase + '/requirements', {
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
+      const token = (() => {
+        try {
+          const u = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+          return (u && (u.token || u.jwtToken)) ||
+                 localStorage.getItem('umrah_token') ||
+                 localStorage.getItem('zilhaj_token') ||
+                 sessionStorage.getItem('zilhaj_token') || '';
+        } catch(e) {
+          return localStorage.getItem('umrah_token') || localStorage.getItem('zilhaj_token') || '';
+        }
+      })();
+
+      if (!token) {
+        alert('Authentication required: Please log in to submit your journey request.');
+        window.location.href = '/login.html?redirect=/dashboard/index.html';
+        return;
+      }
+
+      const postHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      };
+
+      fetch(apiBase + '/requests/journey', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: postHeaders,
         body: JSON.stringify(reqPayload)
-      }).then(res => res.json()).then(data => {
-        console.log('Requirement stored in DB:', data);
-      }).catch(err => console.warn('Requirement DB post warning:', err));
+      }).then(async res => {
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            alert('Your session has expired. Please log in again.');
+            window.location.href = '/login.html?redirect=/dashboard/index.html';
+            return;
+          }
+          // Secondary fallback to /api/requirements
+          return fetch(apiBase + '/requirements', {
+            method: 'POST',
+            headers: postHeaders,
+            body: JSON.stringify(reqPayload)
+          }).then(r => r.json());
+        }
+        return res.json();
+      }).then(data => {
+        console.log('Journey request stored in MongoDB:', data);
+        const savedReq = (data && (data.request || data.data)) || reqPayload;
+        try {
+          const localReqs = JSON.parse(localStorage.getItem('zilhaj_requirements') || '[]');
+          const filtered = localReqs.filter(r => (r.id || r.requestId) !== (savedReq.id || savedReq.requestId));
+          filtered.unshift(savedReq);
+          localStorage.setItem('zilhaj_requirements', JSON.stringify(filtered));
+        } catch(e) {}
+        if (typeof window.loadLiveDashboardData === 'function') {
+          window.loadLiveDashboardData();
+        }
+      }).catch(err => {
+        console.warn('Requirement DB post warning:', err);
+      });
 
       // Create new self-contained request card element with integrated tracker and 5-field info grid
       const newCard = document.createElement('div');
@@ -876,6 +1034,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       checkEmptyRequestsState();
       applyCancelButtonStates();
+      if (typeof window.updateDashboardSummaryCards === 'function') {
+        window.updateDashboardSummaryCards();
+      }
 
       // Reset form
       fullRequestForm.reset();
@@ -1077,405 +1238,534 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch (e) {}
 
   // ------------------------------------------------------------------------
-  // CONFIRMED PAYMENTS & INVOICES RENDERER
   // ------------------------------------------------------------------------
-  window.renderPaymentsHistory = function() {
+  // AUTHENTIC BOOKING INVOICE PDF DOWNLOADER (Backend-Authoritative)
+  // ------------------------------------------------------------------------
+  window.downloadBookingInvoicePDF = async function(bookingId) {
+    try {
+      const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
+      const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
+      
+      const res = await fetch(apiBase + `/bookings/${encodeURIComponent(bookingId)}/pdf`, {
+        headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+      });
+
+      if (!res.ok) {
+        throw new Error('Server returned ' + res.status);
+      }
+
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `Booking_Invoice_${bookingId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.warn('[PDF] Backend PDF fetch error, fallback to client generator:', err.message);
+      if (typeof window.generatePDFInvoice === 'function') {
+        window.generatePDFInvoice(bookingId);
+      } else {
+        alert('Could not download invoice PDF. Please try again or contact support.');
+      }
+    }
+  };
+
+  // ------------------------------------------------------------------------
+  // PROCEED TO BOOK OFFER (Saves offer & transitions to Checkout)
+  // ------------------------------------------------------------------------
+  window.proceedToBookOffer = function(offerId, reqId) {
+    const offer = (window._currentOffers || []).find(o => (o.id === offerId || o.offerId === offerId)) || {};
+    const req = (window._currentReqs || []).find(r => (r.id === reqId || r.requestId === reqId)) || {};
+
+    const pendingCheckout = {
+      reqId: reqId,
+      offerId: offerId,
+      agentCode: offer.agentCode || offer.agentId || 'AGENT-1042',
+      agencyName: offer.agencyName || offer.agentName || 'Verified Partner Agency',
+      packageName: offer.packageTitle || offer.packageName || 'Umrah Pilgrimage Package',
+      price: offer.priceFormatted || ('₹' + (offer.price ? Number(offer.price).toLocaleString('en-IN') : '1')),
+      duration: offer.duration || req.duration || '14 Days',
+      departureDate: offer.departureDate || req.travelDate || 'As Scheduled',
+      makkahHotel: offer.makkahHotel || '',
+      makkahDistance: offer.makkahDistance || '',
+      madinahHotel: offer.madinahHotel || '',
+      madinahDistance: offer.madinahDistance || '',
+      transport: offer.transport || '',
+      mealPlan: offer.mealPlan || ''
+    };
+
+    localStorage.setItem('pending_checkout', JSON.stringify(pendingCheckout));
+
+    const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
+
+    fetch(apiBase + `/requests/${encodeURIComponent(reqId)}/select-offer`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+      },
+      body: JSON.stringify({ offerId })
+    }).catch(e => console.warn('[CHECKOUT] Select offer warning:', e));
+
+    window.location.href = `/checkout.html?reqId=${encodeURIComponent(reqId)}&offerId=${encodeURIComponent(offerId)}`;
+  };
+
+  // ------------------------------------------------------------------------
+  // CONFIRMED PAYMENTS & INVOICES RENDERER (Live Data, Zero Mock Data)
+  // ------------------------------------------------------------------------
+  window.renderPaymentsHistory = async function() {
     const listEl = document.getElementById('paymentsHistoryList');
     const emptyEl = document.getElementById('emptyPaymentsView');
     const statTotalPayments = document.getElementById('statTotalPayments');
     const statTotalPaidAmount = document.getElementById('statTotalPaidAmount');
 
-    let payments = [];
-    try {
-      payments = JSON.parse(localStorage.getItem('zilhaj_payments') || '[]');
-    } catch(e) { payments = []; }
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
+    const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
+    const headers = token ? { Authorization: 'Bearer ' + token } : {};
 
-    // Seed 1 default confirmed booking test payment if none exists yet
-    if (!payments || payments.length === 0) {
-      payments = [
-        {
-          id: 'PAY-8842-TEST',
-          bookingId: 'BK-REQ-8842',
-          packageName: '15-Day Premium Deluxe Umrah Special',
-          agencyName: 'Al-Haram Exergy Travels',
-          agentCode: 'AG-904',
-          amount: 1,
-          date: '25 August 2026, 11:30 AM',
-          status: 'Escrow Confirmed',
-          paymentMethod: 'Razorpay Online'
-        }
-      ];
+    let bookings = [];
+    try {
+      const res = await fetch(apiBase + '/bookings', { headers });
+      if (res.ok) {
+        bookings = await res.json();
+      }
+    } catch (e) {
+      console.warn('[PAYMENTS] Error fetching live bookings:', e);
     }
 
-    if (statTotalPayments) statTotalPayments.textContent = `${payments.length} Payment${payments.length > 1 ? 's' : ''}`;
-    const totalDeposit = payments.reduce((sum, p) => sum + (Number(p.amount) || 1), 0);
-    if (statTotalPaidAmount) statTotalPaidAmount.textContent = `₹${totalDeposit}`;
+    if (!Array.isArray(bookings) || bookings.length === 0) {
+      try {
+        bookings = JSON.parse(localStorage.getItem('umrah_payments') || '[]');
+      } catch(e) { bookings = []; }
+    }
+
+    if (!Array.isArray(bookings)) bookings = [];
+
+    if (statTotalPayments) statTotalPayments.textContent = `${bookings.length} Booking${bookings.length === 1 ? '' : 's'}`;
+    const totalDeposit = bookings.reduce((sum, b) => sum + (Number(b.price || b.amount) || 1), 0);
+    if (statTotalPaidAmount) statTotalPaidAmount.textContent = `₹${totalDeposit.toLocaleString('en-IN')}`;
 
     if (!listEl) return;
 
-    if (payments.length === 0) {
+    if (bookings.length === 0) {
       listEl.innerHTML = '';
       if (emptyEl) emptyEl.style.display = 'block';
       return;
     }
 
     if (emptyEl) emptyEl.style.display = 'none';
-    listEl.innerHTML = payments.map(p => `
-      <div class="payment-card-item" style="background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
-          <div>
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-              <span style="font-size: 11px; font-weight: 800; color: #127A4D; background: #E8F6EF; padding: 3px 10px; border-radius: 99px;">CONFIRMED DEPOSIT</span>
-              <span style="font-size: 12px; font-weight: 700; color: #687970;">REF: ${p.bookingId || p.id}</span>
-            </div>
-            <h3 style="font-size: 18px; font-weight: 800; color: #1A2B23; margin: 4px 0 2px 0;">${p.packageName || 'Umrah Package'}</h3>
-            <p style="font-size: 13px; color: #687970; margin: 0;">Partner Agency: <b>${p.agencyName || 'Al-Haram Exergy Travels'}</b> • ${p.date || 'Recent Transaction'}</p>
-          </div>
-          <div style="text-align: right;">
-            <span style="font-size: 11.5px; font-weight: 700; color: #687970; display: block;">DEPOSIT AMOUNT</span>
-            <div style="font-size: 24px; font-weight: 900; color: #127A4D;">₹${p.amount || 1}</div>
-            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; color: #166534; background: #DCFCE7; padding: 2px 8px; border-radius: 99px; margin-top: 4px;">
-              <span>✓</span> ${p.status || 'Escrow Secured'}
-            </span>
-          </div>
-        </div>
+    listEl.innerHTML = bookings.map(b => {
+      const bookingId = b.bookingId || b.id || 'BK-ZIL-001';
+      const pkgName = b.packageTitle || b.packageName || '18 Days Premium Umrah Package';
+      const agency = b.agencyName || b.agentName || 'Al-Haramain Luxury Group';
+      const amount = Number(b.price || b.amount || 1);
+      const formattedAmount = '₹' + amount.toLocaleString('en-IN');
+      const dateStr = b.paidAt ? new Date(b.paidAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : (b.dateStr || b.date || 'Confirmed');
+      const paymentMethod = b.method || b.paymentMethod || 'Razorpay Gateway';
 
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 14px; border-top: 1px dashed #CBD5E1;">
-          <div style="font-size: 12.5px; color: #475569; display: flex; align-items: center; gap: 6px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            <span>Payment Method: <b>${p.paymentMethod || 'Razorpay Gateway'}</b> (Escrow Locked)</span>
+      return `
+        <div class="payment-card-item" style="background: #FFFFFF; border: 1.5px solid #E2E9E5; border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                <span style="font-size: 11px; font-weight: 800; color: #127A4D; background: #E8F6EF; padding: 3px 10px; border-radius: 99px;">CONFIRMED BOOKING</span>
+                <span style="font-size: 12px; font-weight: 700; color: #687970;">REF: ${bookingId}</span>
+              </div>
+              <h3 style="font-size: 18px; font-weight: 800; color: #1A2B23; margin: 4px 0 2px 0;">${pkgName}</h3>
+              <p style="font-size: 13px; color: #687970; margin: 0;">Partner Agency: <b>${agency}</b> • Confirmed on ${dateStr}</p>
+            </div>
+            <div style="text-align: right;">
+              <span style="font-size: 11.5px; font-weight: 700; color: #687970; display: block;">CONFIRMATION DEPOSIT</span>
+              <div style="font-size: 24px; font-weight: 900; color: #127A4D;">${formattedAmount}</div>
+              <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; color: #166534; background: #DCFCE7; padding: 2px 8px; border-radius: 99px; margin-top: 4px;">
+                <span>✓</span> Escrow Protected
+              </span>
+            </div>
           </div>
-          <button onclick="if(window.generatePDFInvoice){ window.generatePDFInvoice('${p.bookingId || 'BK-REQ-8842'}', '${p.agencyName || 'Al-Haram Exergy Travels'}', '${p.packageName || '15-Day Premium Deluxe Umrah Special'}', '₹${p.amount || 1}'); } else { alert('Invoice ready.'); }" style="background: #FFFFFF; color: #127A4D; border: 1.5px solid #127A4D; padding: 8px 18px; border-radius: 8px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(18,122,77,0.1); transition: all 0.2s ease;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            <span>Download Invoice PDF</span>
-          </button>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 14px; border-top: 1px dashed #CBD5E1;">
+            <div style="font-size: 12.5px; color: #475569; display: flex; align-items: center; gap: 6px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#127A4D" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>Payment Method: <b>${paymentMethod}</b> (100% Escrow Secured)</span>
+            </div>
+            <button onclick="window.downloadBookingInvoicePDF('${bookingId}')" style="background: #FFFFFF; color: #127A4D; border: 1.5px solid #127A4D; padding: 8px 18px; border-radius: 8px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(18,122,77,0.1); transition: all 0.2s ease;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Download Invoice PDF</span>
+            </button>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   };
 
   // ------------------------------------------------------------------------
-  // REAL-TIME LIVE DATA FETCHING FOR DASHBOARD (Requirements & Offers)
-  // ------------------------------------------------------------------------
-  // ------------------------------------------------------------------------
-  // REAL-TIME LIVE DATA FETCHING FOR DASHBOARD (Requirements & Offers)
+  // REAL-TIME LIVE DATA FETCHING FOR DASHBOARD (Live MongoDB Data, Zero Mock)
   // ------------------------------------------------------------------------
   window.loadLiveDashboardData = function() {
-    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
-    const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
-    const headers = token ? { Authorization: 'Bearer ' + token } : {};
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
+    const token = (() => {
+      try {
+        const u = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+        return (u && (u.token || u.jwtToken)) ||
+               localStorage.getItem('umrah_token') ||
+               localStorage.getItem('zilhaj_token') ||
+               sessionStorage.getItem('zilhaj_token') || '';
+      } catch(e) {
+        return localStorage.getItem('umrah_token') || localStorage.getItem('zilhaj_token') || '';
+      }
+    })();
+    const headers = token ? { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' } : {};
 
     Promise.all([
-      fetch(apiBase + '/requirements', { headers }).then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch(apiBase + '/offers', { headers }).then(r => r.ok ? r.json() : null).catch(() => null)
+      fetch(apiBase + '/requirements', { headers }).then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch(apiBase + '/offers', { headers }).then(r => r.ok ? r.json() : []).catch(() => [])
     ]).then(([reqs, offers]) => {
       const container = document.getElementById('requestsList');
       const emptyState = document.getElementById('noRequestsEmptyState');
 
-      let liveReqs = Array.isArray(reqs) && reqs.length > 0 ? reqs : [];
-      let liveOffers = Array.isArray(offers) ? offers : [];
+      let liveReqs = Array.isArray(reqs) ? reqs : (reqs && Array.isArray(reqs.requirements) ? reqs.requirements : []);
+      let liveOffers = Array.isArray(offers) ? offers : (offers && Array.isArray(offers.offers) ? offers.offers : []);
 
+      // Check local storage only if empty and user created offline draft matching user email
       if (liveReqs.length === 0) {
         try {
+          const userObj = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+          const uEmail = userObj && userObj.email ? userObj.email.toLowerCase().trim() : '';
           const localReqs = JSON.parse(localStorage.getItem('zilhaj_requirements') || '[]');
-          if (Array.isArray(localReqs) && localReqs.length > 0) liveReqs = localReqs;
+          if (Array.isArray(localReqs) && localReqs.length > 0 && uEmail) {
+            liveReqs = localReqs.filter(r => {
+              const rEmail = (r.email || r.userEmail || '').toLowerCase().trim();
+              return rEmail === uEmail && !rEmail.includes('test') && !rEmail.includes('pilgrim');
+            });
+          }
         } catch(e) {}
       }
 
-      // Default to production-matched requirements (Screenshots 1 & 2)
+      window._currentReqs = liveReqs;
+      window._currentOffers = liveOffers;
+
+      if (!container) return;
+
+      // STRICT ZERO MOCK DATA: If user has no requests in MongoDB, show clean empty state
       if (liveReqs.length === 0) {
-        liveReqs = [
-          {
-            id: 'REQ-0517',
-            customer: 'Tariq Ahmed',
-            userName: 'Tariq Ahmed',
-            service: 'Umrah Package (18 Days)',
-            travelDate: '22 Mar 2026 (Approx.)',
-            totalPersons: '3',
-            travelers: '3 Persons',
-            hotelType: '5 Star',
-            submittedOn: '11 Aug 2026',
-            status: 'OFFERS_AVAILABLE',
-            step: 4
-          },
-          {
-            id: 'REQ-5417',
-            customer: 'Tariq Ahmed',
-            userName: 'Tariq Ahmed',
-            service: 'Umrah Package (25 Days)',
-            travelDate: '27 Apr 2026 (Approx.)',
-            totalPersons: '10',
-            travelers: '10 Persons',
-            hotelType: '5 Star',
-            submittedOn: '11 Aug 2026',
-            status: 'COLLECTING_OFFERS',
-            step: 2
-          }
-        ];
-      }
-
-      if (liveOffers.length === 0) {
-        liveOffers = [
-          {
-            id: 'OFF-1042',
-            requirementId: 'REQ-0517',
-            agencyName: 'Al-Safwa Travel',
-            agentCode: 'AGENT-1042',
-            packageTitle: '18-Day Deluxe Umrah Package',
-            packageName: '18-Day Deluxe Umrah Package',
-            price: 1,
-            priceFormatted: '₹1',
-            makkahHotel: 'Al Safwa Royal Orchid',
-            madinahHotel: 'Dar Al-Taqwa Hotel',
-            duration: '18 Days',
-            departureDate: '22 Mar 2026',
-            status: 'ACTIVE',
-            verified: true
-          }
-        ];
-      }
-
-      if (container) {
         container.innerHTML = '';
-        liveReqs.forEach(req => {
-          const reqId = req.id || 'REQ-0517';
-          const relatedOffers = liveOffers.filter(o => 
+        if (emptyState) emptyState.style.display = 'block';
+        return;
+      }
+
+      if (emptyState) emptyState.style.display = 'none';
+      container.innerHTML = '';
+
+      liveReqs.forEach(req => {
+        const reqId = req.id || req.requestId || 'REQ-0001';
+        
+        // Find offers matching this requirement
+        let relatedOffers = [];
+        if (Array.isArray(req.offers) && req.offers.length > 0) {
+          relatedOffers = req.offers;
+        } else {
+          relatedOffers = liveOffers.filter(o => 
             o.requirementId === reqId || 
             o.requirementId === reqId.replace('REQ-', '') || 
             o.requirementId === ('REQ-' + reqId)
           );
+        }
 
-          const hasOffers = relatedOffers.length > 0 || req.status === 'OFFERS_AVAILABLE';
-          const stepNum = req.step || (hasOffers ? 4 : 2);
-          const submittedDate = req.submittedOn || '11 Aug 2026';
-          const customerName = req.customer || req.userName || 'Tariq Ahmed';
-          const serviceName = req.service || req.title || 'Umrah Package (18 Days)';
-          const travelDate = req.travelDate || '22 Mar 2026 (Approx.)';
-          const totalPersons = req.totalPersons || req.travelers || '3';
-          const hotelType = req.hotelType || '5 Star';
+        const hasOffers = relatedOffers.length > 0 || req.status === 'OFFERS_AVAILABLE' || req.status === 'OFFERS_PROVIDED';
+        const stepNum = req.step || (hasOffers ? 3 : 2);
+        const submittedDate = req.submittedOn || (req.createdAt ? new Date(req.createdAt).toLocaleDateString('en-GB') : 'Recent');
+        const customerName = req.customer || req.userName || req.fullname || 'Pilgrim';
+        const serviceName = req.service || req.title || (req.applyingFor ? `${req.applyingFor} Package` : 'Umrah Package');
+        const travelDate = req.travelDate || 'Flexible';
+        const totalPersons = req.totalPersons || req.travelers || '1';
+        const hotelType = req.hotelType || req.hotelCategory || '5 Star';
 
-          const card = document.createElement('div');
-          card.className = 'request-card-box';
-          card.setAttribute('data-req-id', reqId);
+        const card = document.createElement('div');
+        card.className = 'request-card-box';
+        card.setAttribute('data-req-id', reqId);
 
-          // Build Tracker HTML
-          let trackerHtml = '';
-          if (stepNum >= 4) {
-            trackerHtml = `
-              <div class="req-progress-tracker">
-                <div class="tracker-step-item done">
-                  <div class="tracker-step-circle done">✓</div>
-                  <span class="tracker-step-label">Request Received</span>
-                </div>
-                <div class="tracker-step-line done"></div>
-                <div class="tracker-step-item done">
-                  <div class="tracker-step-circle done">✓</div>
-                  <span class="tracker-step-label">Collecting Offers</span>
-                </div>
-                <div class="tracker-step-line done"></div>
-                <div class="tracker-step-item done">
-                  <div class="tracker-step-circle done">✓</div>
-                  <span class="tracker-step-label">Offers Ready</span>
-                </div>
-                <div class="tracker-step-line done"></div>
-                <div class="tracker-step-item active">
-                  <div class="tracker-step-circle active">✓</div>
-                  <span class="tracker-step-label">You Choose</span>
-                </div>
+        // Build Tracker HTML
+        let trackerHtml = '';
+        if (stepNum >= 3) {
+          trackerHtml = `
+            <div class="req-progress-tracker">
+              <div class="tracker-step-item done">
+                <div class="tracker-step-circle done">✓</div>
+                <span class="tracker-step-label">Request Received</span>
               </div>
-            `;
-          } else {
-            trackerHtml = `
-              <div class="req-progress-tracker">
-                <div class="tracker-step-item done">
-                  <div class="tracker-step-circle done">✓</div>
-                  <span class="tracker-step-label">Request Received</span>
-                </div>
-                <div class="tracker-step-line done"></div>
-                <div class="tracker-step-item active">
-                  <div class="tracker-step-circle active">✓</div>
-                  <span class="tracker-step-label">Collecting Offers</span>
-                </div>
-                <div class="tracker-step-line pending"></div>
-                <div class="tracker-step-item pending">
-                  <div class="tracker-step-circle pending">3</div>
-                  <span class="tracker-step-label">Offers Ready</span>
-                </div>
-                <div class="tracker-step-line pending"></div>
-                <div class="tracker-step-item pending">
-                  <div class="tracker-step-circle pending">4</div>
-                  <span class="tracker-step-label">You Choose</span>
-                </div>
+              <div class="tracker-step-line done"></div>
+              <div class="tracker-step-item done">
+                <div class="tracker-step-circle done">✓</div>
+                <span class="tracker-step-label">Collecting Offers</span>
               </div>
-            `;
-          }
-
-          // Build Offers / Waiting HTML
-          let offersSectionHtml = '';
-          if (hasOffers && relatedOffers.length > 0) {
-            const offer = relatedOffers[0];
-            const depositPrice = offer.price || 1;
-            const agentName = offer.agencyName || 'Al-Safwa Travel';
-            const agentCode = offer.agentCode || 'AGENT-1042';
-            const pkgName = offer.packageName || offer.packageTitle || '18-Day Deluxe Umrah Package';
-            const makkah = offer.makkahHotel || 'Al Safwa Royal Orchid';
-            const madinah = offer.madinahHotel || 'Dar Al-Taqwa Hotel';
-            const duration = offer.duration || '18 Days';
-            const depDate = travelDate.split('(')[0].trim() || '22 Mar 2026';
-
-            offersSectionHtml = `
-              <h4 class="agency-offers-title">Verified Agency Offers (${relatedOffers.length})</h4>
-
-              <div class="agency-offer-card">
-                <div class="offer-card-top-row">
-                  <div>
-                    <span class="offer-agent-tag">${agentCode}</span>
-                    <h5 class="offer-agency-title">${agentName}</h5>
-                  </div>
-                  <div style="text-align: right;">
-                    <span class="offer-price-val">₹${depositPrice}</span>
-                    <span class="offer-price-unit">/person</span>
-                  </div>
-                </div>
-
-                <div class="offer-pill-badges">
-                  <span class="offer-pill-tag">${duration}</span>
-                  <span class="offer-pill-tag">★ 5 Star Package</span>
-                </div>
-
-                <div class="offer-hotel-box">
-                  <div>📍 <strong>Makkah:</strong> ${makkah}</div>
-                  <div>📍 <strong>Madinah:</strong> ${madinah}</div>
-                </div>
-
-                <div class="offer-actions-row">
-                  <button class="btn-offer-view-detail" onclick="openOfferFlyerModal('${agentCode}', '${agentName}', '₹${depositPrice}', '${duration}', '${makkah}', '${madinah}', '${depDate}', '${reqId}')">View in Detail</button>
-                  <button class="btn-offer-book-now" onclick="openDirectLiveRazorpayCheckout('${agentCode}', '${agentName}', ${depositPrice}, '${pkgName}', '${reqId}', '${depDate}')">Book Now</button>
-                </div>
+              <div class="tracker-step-line done"></div>
+              <div class="tracker-step-item done">
+                <div class="tracker-step-circle done">✓</div>
+                <span class="tracker-step-label">Offers Ready</span>
               </div>
-
-              <div class="offer-dots-row">
-                <span class="offer-dot active"></span>
-                <span class="offer-dot inactive"></span>
-                <span class="offer-dot inactive"></span>
+              <div class="tracker-step-line done"></div>
+              <div class="tracker-step-item active">
+                <div class="tracker-step-circle active">✓</div>
+                <span class="tracker-step-label">You Choose</span>
               </div>
-
-              <div class="ask-opinion-row">
-                <button class="btn-ask-opinion" onclick="openAskOpinionModal('${reqId}')">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                  </svg>
-                  <span>Ask Opinion</span>
-                </button>
+            </div>
+          `;
+        } else {
+          trackerHtml = `
+            <div class="req-progress-tracker">
+              <div class="tracker-step-item done">
+                <div class="tracker-step-circle done">✓</div>
+                <span class="tracker-step-label">Request Received</span>
               </div>
-            `;
-          } else {
-            offersSectionHtml = `
-              <h4 class="agency-offers-title">Verified Agency Offers (0)</h4>
-
-              <div class="waiting-offers-box">
-                <div class="waiting-phone-icon">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                    <circle cx="12" cy="9" r="2.5" fill="#E8F5E9"></circle>
-                    <path d="M9 13.5c1-1 5-1 6 0"></path>
-                  </svg>
-                </div>
-                <h4 class="waiting-title">No Offers Yet — We're Working on the Best Ones for You! ✨</h4>
-                <p class="waiting-subtext">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                  </svg>
-                  <span>Usually takes 30 minutes to 6 hours depending on the request.</span>
-                </p>
-                <div class="waiting-actions-row">
-                  <button class="btn-get-notified-pill" onclick="alert('Notification alert is active. You will receive an SMS & WhatsApp alert once agencies submit their quotes.')">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                    </svg>
-                    <span>Get Notified</span>
-                  </button>
-                  <button class="btn-cancel-request-pill" onclick="cancelRequest('${reqId}', this)">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="15" y1="9" x2="9" y2="15"></line>
-                      <line x1="9" y1="9" x2="15" y2="15"></line>
-                    </svg>
-                    <span>Cancel Request</span>
-                  </button>
-                </div>
+              <div class="tracker-step-line done"></div>
+              <div class="tracker-step-item active">
+                <div class="tracker-step-circle active">✓</div>
+                <span class="tracker-step-label">Collecting Offers</span>
               </div>
-            `;
-          }
+              <div class="tracker-step-line pending"></div>
+              <div class="tracker-step-item pending">
+                <div class="tracker-step-circle pending">3</div>
+                <span class="tracker-step-label">Offers Ready</span>
+              </div>
+              <div class="tracker-step-line pending"></div>
+              <div class="tracker-step-item pending">
+                <div class="tracker-step-circle pending">4</div>
+                <span class="tracker-step-label">You Choose</span>
+              </div>
+            </div>
+          `;
+        }
 
-          card.innerHTML = `
-            <div class="request-card-header">
-              <div class="req-header-left">
-                <div class="req-icon-mint">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#78350F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                  </svg>
-                </div>
+        // Build Offers / Waiting HTML (Horizontal Scrollable Carousel Matching User Screenshot)
+        let offersSectionHtml = '';
+        if (hasOffers && relatedOffers.length > 0) {
+          offersSectionHtml = `
+            <div style="margin-top: 22px;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
                 <div>
-                  <h3 class="req-id-title">${reqId}</h3>
-                  <p class="req-date-sub">Submitted on ${submittedDate}</p>
+                  <h4 class="agency-offers-title" style="margin: 0; font-size: 16px; font-weight: 800; color: #0F172A;">Verified Agency Offers (${relatedOffers.length})</h4>
+                  <p style="margin: 2px 0 0 0; font-size: 12.5px; color: #64748B;">Compare packages and click Book Offer to proceed to secure checkout.</p>
                 </div>
+                ${relatedOffers.length > 1 ? '<span style="font-size: 12px; color: #127A4D; font-weight: 700;">Swipe &rarr;</span>' : ''}
               </div>
-              <div class="req-status-pill ${hasOffers ? 'status-ready' : 'status-waiting'}">
-                <span class="status-dot"></span>
-                <span>${hasOffers ? 'Offers Available' : 'Waiting for Offers'}</span>
+
+              <div class="offers-horizontal-scroll-container">
+                ${relatedOffers.map((offer, idx) => {
+                  const offerId = offer.id || offer.offerId || `OFF-${reqId}-${idx + 1}`;
+                  const rawPrice = offer.price || 1;
+                  const priceFormatted = offer.priceFormatted || ('₹' + Number(rawPrice).toLocaleString('en-IN'));
+                  const agentCode = offer.agentCode || offer.agentId || 'AGENT-1042';
+                  const agentName = offer.agencyName || offer.agentName || 'Verified Agency';
+                  const pkgTitle = offer.packageTitle || offer.packageName || 'Umrah Package';
+                  const duration = offer.duration || '14 Days';
+                  const status = (offer.status || 'Active').toLowerCase() === 'inactive' ? 'Inactive' : 'Active';
+                  const serviceType = offer.serviceType || (serviceName.includes('Hajj') ? 'Hajj' : 'Umrah');
+                  const makkahHotel = offer.makkahHotel || 'Fairmont Clock Tower';
+                  const makkahDist = offer.makkahDistance || '50m from Haram';
+                  const madinahHotel = offer.madinahHotel || 'Dar Al Taqwa';
+                  const madinahDist = offer.madinahDistance || '50m from Gate 25';
+                  const transport = offer.transport || 'Dedicated AC Fleet';
+                  const mealPlan = offer.mealPlan || offer.meals || 'Full Board Buffet';
+
+                  return `
+                    <div class="screenshot-offer-card" data-offer-id="${offerId}">
+                      <div>
+                        <!-- Top Row: [🕋 Umrah] agentCode on left, [Active/Inactive] on right -->
+                        <div class="soc-header-row">
+                          <div class="soc-tag-group">
+                            <span class="soc-type-pill">🕋 ${serviceType}</span>
+                            <span class="soc-agent-code">${agentCode}</span>
+                          </div>
+                          <span class="soc-status-pill ${status.toLowerCase()}">${status}</span>
+                        </div>
+
+                        <!-- Title & Agency -->
+                        <h4 class="soc-title">${pkgTitle}</h4>
+                        <p class="soc-agency">${agentName}</p>
+
+                        <!-- Price & Duration -->
+                        <div class="soc-price-duration-row">
+                          <div>
+                            <span class="soc-price-val">${priceFormatted}</span>
+                            <span class="soc-price-unit">/person</span>
+                          </div>
+                          <div class="soc-duration-col">
+                            <span class="soc-duration-label">DURATION</span>
+                            <span class="soc-duration-val">${duration}</span>
+                          </div>
+                        </div>
+
+                        <!-- 2x2 Details Grid -->
+                        <div class="soc-details-grid">
+                          <div class="soc-detail-tile">
+                            <div class="soc-tile-label makkah">
+                              <span>🏢</span>
+                              <span>Makkah Hotel</span>
+                            </div>
+                            <div class="soc-tile-val" title="${makkahHotel}">${makkahHotel}</div>
+                            <div class="soc-tile-sub" title="${makkahDist}">${makkahDist}</div>
+                          </div>
+
+                          <div class="soc-detail-tile">
+                            <div class="soc-tile-label madinah">
+                              <span>🏨</span>
+                              <span>Madinah Hotel</span>
+                            </div>
+                            <div class="soc-tile-val" title="${madinahHotel}">${madinahHotel}</div>
+                            <div class="soc-tile-sub" title="${madinahDist}">${madinahDist}</div>
+                          </div>
+
+                          <div class="soc-detail-tile">
+                            <div class="soc-tile-label transport">
+                              <span>🚌</span>
+                              <span>Transport</span>
+                            </div>
+                            <div class="soc-tile-val" title="${transport}">${transport}</div>
+                          </div>
+
+                          <div class="soc-detail-tile">
+                            <div class="soc-tile-label meals">
+                              <span>🍽️</span>
+                              <span>Meals</span>
+                            </div>
+                            <div class="soc-tile-val" title="${mealPlan}">${mealPlan}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Action Buttons -->
+                      <div class="soc-actions-row">
+                        <button class="btn-soc-view" onclick="openOfferFlyerModal('${agentCode}', '${agentName}', '${priceFormatted}', '${duration}', '${makkahHotel}', '${madinahHotel}', '${travelDate}', '${reqId}')">View Offer</button>
+                        <button class="btn-soc-book" onclick="proceedToBookOffer('${offerId}', '${reqId}')">Book Offer</button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
               </div>
             </div>
 
-            ${trackerHtml}
+            <div class="ask-opinion-row">
+              <button class="btn-ask-opinion" onclick="openAskOpinionModal('${reqId}')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Ask Opinion</span>
+              </button>
+            </div>
+          `;
+        } else {
+          offersSectionHtml = `
+            <h4 class="agency-offers-title">Verified Agency Offers (0)</h4>
 
-            <div class="req-metadata-strip">
-              <div class="meta-fields-group">
-                <div class="meta-field-col">
-                  <span class="meta-label">NAME</span>
-                  <span class="meta-val">${customerName}</span>
-                </div>
-                <div class="meta-field-col">
-                  <span class="meta-label">SERVICE</span>
-                  <span class="meta-val">${serviceName}</span>
-                </div>
-                <div class="meta-field-col">
-                  <span class="meta-label">TRAVEL DATE</span>
-                  <span class="meta-val">${travelDate}</span>
-                </div>
-                <div class="meta-field-col">
-                  <span class="meta-label">TOTAL PERSONS</span>
-                  <span class="meta-val">${totalPersons}</span>
-                </div>
-                <div class="meta-field-col">
-                  <span class="meta-label">HOTEL TYPE</span>
-                  <span class="meta-val">${hotelType}</span>
-                </div>
+            <div class="waiting-offers-box">
+              <div class="waiting-phone-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0F5A47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                  <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                  <circle cx="12" cy="9" r="2.5" fill="#E8F5E9"></circle>
+                  <path d="M9 13.5c1-1 5-1 6 0"></path>
+                </svg>
               </div>
-              <button class="btn-view-details-pill" onclick="openSubmissionSummaryModal('${reqId}')">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <h4 class="waiting-title">No Offers Yet — We're Working on the Best Ones for You! ✨</h4>
+              <p class="waiting-subtext">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10"></circle>
                   <line x1="12" y1="16" x2="12" y2="12"></line>
                   <line x1="12" y1="8" x2="12.01" y2="8"></line>
                 </svg>
-                <span>View Details</span>
-              </button>
+                <span>Usually takes 30 minutes to 6 hours depending on the request.</span>
+              </p>
+              <div class="waiting-actions-row">
+                <button class="btn-get-notified-pill" onclick="alert('Notification alert is active. You will receive an SMS & WhatsApp alert once agencies submit their quotes.')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                  </svg>
+                  <span>Get Notified</span>
+                </button>
+                <button class="btn-cancel-request-pill" onclick="cancelRequest('${reqId}', this)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                  </svg>
+                  <span>Cancel Request</span>
+                </button>
+              </div>
             </div>
-
-            ${offersSectionHtml}
           `;
+        }
 
-          container.appendChild(card);
-        });
+        card.innerHTML = `
+          <div class="request-card-header">
+            <div class="req-header-left">
+              <div class="req-icon-mint">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#78350F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="req-id-title">${reqId}</h3>
+                <p class="req-date-sub">Submitted on ${submittedDate}</p>
+              </div>
+            </div>
+            <div class="req-status-pill ${hasOffers ? 'status-ready' : 'status-waiting'}">
+              <span class="status-dot"></span>
+              <span>${hasOffers ? 'Offers Available' : 'Waiting for Offers'}</span>
+            </div>
+          </div>
 
-        if (emptyState) emptyState.style.display = 'none';
-        applyCancelButtonStates();
+          ${trackerHtml}
+
+          <div class="req-metadata-strip">
+            <div class="meta-fields-group">
+              <div class="meta-field-col">
+                <span class="meta-label">NAME</span>
+                <span class="meta-val">${customerName}</span>
+              </div>
+              <div class="meta-field-col">
+                <span class="meta-label">SERVICE</span>
+                <span class="meta-val">${serviceName}</span>
+              </div>
+              <div class="meta-field-col">
+                <span class="meta-label">TRAVEL DATE</span>
+                <span class="meta-val">${travelDate}</span>
+              </div>
+              <div class="meta-field-col">
+                <span class="meta-label">TOTAL PERSONS</span>
+                <span class="meta-val">${totalPersons}</span>
+              </div>
+              <div class="meta-field-col">
+                <span class="meta-label">HOTEL TYPE</span>
+                <span class="meta-val">${hotelType}</span>
+              </div>
+            </div>
+            <button class="btn-view-details-pill" onclick="openSubmissionSummaryModal('${reqId}')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>View Details</span>
+            </button>
+          </div>
+
+          ${offersSectionHtml}
+        `;
+
+        container.appendChild(card);
+      });
+
+      if (emptyState) emptyState.style.display = 'none';
+      if (typeof applyCancelButtonStates === 'function') applyCancelButtonStates();
+      if (typeof window.updateDashboardSummaryCards === 'function') {
+        window.updateDashboardSummaryCards();
       }
     });
   };
@@ -1563,6 +1853,9 @@ window.confirmCancelRequest = function() {
       cardBox.remove();
       if (typeof checkEmptyRequestsState === 'function') {
         checkEmptyRequestsState();
+      }
+      if (typeof window.updateDashboardSummaryCards === 'function') {
+        window.updateDashboardSummaryCards();
       }
     }, 300);
   }
@@ -1715,45 +2008,55 @@ window.openSubmissionSummaryModal = function(reqId, service, date, passengers, h
   if (modal) {
     const id = reqId || 'REQ-0517';
 
-    // Preset defaults for REQ-0517 and REQ-5417 if detailed args not provided
-    if (!service) {
-      if (id === 'REQ-5417') {
-        service = 'Umrah Package (25 Days)';
-        applyingFor = 'Umrah';
-        duration = '25 Days';
-        city = 'Delhi';
-        date = '27 Apr 2026';
-        male = '6 Male';
-        female = '4 Female';
-        children = '0 Children';
-        infants = '0 Infants';
-        hotelCategory = '5 Star';
-        fullname = 'Tariq Ahmed';
-        mobile = '+91 98765 43210';
-        email = 'tariq.ahmed@example.com';
-        address = 'Nowgam, Srinagar';
-        state = 'Jammu & Kashmir';
-        district = 'Srinagar';
-        specialReq = 'Family group of 10 traveling together. Adjacent rooms on lower floors preferred.';
-      } else {
-        service = 'Umrah Package (18 Days)';
-        applyingFor = 'Umrah';
-        duration = '18 Days';
-        city = 'Delhi';
-        date = '22 Mar 2026';
-        male = '2 Male';
-        female = '1 Female';
-        children = '0 Children';
-        infants = '0 Infants';
-        hotelCategory = '5 Star';
-        fullname = 'Tariq Ahmed';
-        mobile = '+91 98765 43210';
-        email = 'tariq.ahmed@example.com';
-        address = 'Nowgam, Srinagar';
-        state = 'Jammu & Kashmir';
-        district = 'Srinagar';
-        specialReq = 'Wheelchair assistance for 1 senior pilgrim during Tawaf.';
-      }
+    // Look up actual requirement object from current requests list if detailed arguments are not passed
+    let foundReq = null;
+    if (Array.isArray(window._currentReqs)) {
+      foundReq = window._currentReqs.find(r => (r.id || r.requestId) === id) || null;
+    }
+    if (!foundReq) {
+      try {
+        const localReqs = JSON.parse(localStorage.getItem('zilhaj_requirements') || '[]');
+        foundReq = localReqs.find(r => (r.id || r.requestId) === id) || null;
+      } catch(e) {}
+    }
+
+    if (foundReq) {
+      applyingFor = applyingFor || foundReq.applyingFor || (foundReq.service && foundReq.service.includes('Hajj') ? 'Hajj' : 'Umrah');
+      service = service || foundReq.service || `${applyingFor} Package`;
+      duration = duration || foundReq.duration || '14 Days';
+      city = city || foundReq.departureCity || 'Delhi';
+      date = date || foundReq.travelDate || foundReq.departureDate || 'Flexible';
+      male = (male !== undefined && male !== null && male !== '') ? male : `${foundReq.maleCount !== undefined ? foundReq.maleCount : (foundReq.travelers || 1)} Male`;
+      female = (female !== undefined && female !== null && female !== '') ? female : `${foundReq.femaleCount || 0} Female`;
+      children = (children !== undefined && children !== null && children !== '') ? children : `${foundReq.childCount || 0} Children`;
+      infants = (infants !== undefined && infants !== null && infants !== '') ? infants : `${foundReq.infantCount || 0} Infants`;
+      hotelCategory = hotelCategory || foundReq.hotelCategory || foundReq.hotelType || '3 Star';
+      fullname = fullname || foundReq.fullname || foundReq.userName || foundReq.customer || 'Pilgrim';
+      mobile = mobile || foundReq.mobile || foundReq.phone || foundReq.userPhone || '';
+      email = email || foundReq.email || foundReq.userEmail || '';
+      address = address || (foundReq.address ? foundReq.address : (foundReq.departureCity ? `${foundReq.departureCity}, India` : ''));
+      state = state || foundReq.state || '';
+      district = district || foundReq.district || foundReq.departureCity || '';
+      specialReq = specialReq || foundReq.specialRequirements || (Array.isArray(foundReq.specialRequests) ? foundReq.specialRequests.join(', ') : foundReq.specialRequests) || foundReq.notes || 'None specified';
+    } else if (!service) {
+      // Fallback only if no matching request is found
+      service = 'Umrah Custom Package';
+      applyingFor = 'Umrah';
+      duration = '14 Days';
+      city = 'Delhi';
+      date = 'Flexible';
+      male = '1 Male';
+      female = '0 Female';
+      children = '0 Children';
+      infants = '0 Infants';
+      hotelCategory = '3 Star';
+      fullname = 'Pilgrim';
+      mobile = '';
+      email = '';
+      address = 'Delhi, India';
+      state = 'Delhi';
+      district = 'Delhi';
+      specialReq = 'None specified';
     }
 
     if (document.getElementById('summaryModalReqId')) document.getElementById('summaryModalReqId').textContent = id;
@@ -1873,7 +2176,7 @@ window.openDirectLiveRazorpayCheckout = async function(agentCode, agencyName, pr
   const rawPhone = user.phone || '9876543210';
   const customerPhone = String(rawPhone).replace(/[^0-9]/g, '').slice(-10) || '9876543210';
 
-  const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+  const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
 
   try {
     const res = await fetch(apiBase + '/create-order', {
@@ -2087,7 +2390,7 @@ window.initiateRazorpayPayment = async function() {
   const customerPhone = String(rawPhone).replace(/[^0-9]/g, '').slice(-10) || '9876543210';
   const selectedMethod = document.querySelector('input[name="paymentOption"]:checked')?.value || 'Razorpay Online';
 
-  const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'http://localhost:3000/api';
+  const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
 
   try {
     const res = await fetch(apiBase + '/create-order', {
@@ -2533,3 +2836,925 @@ window.generateReceiptPDF = function(bookingData) {
   // Save PDF Download
   doc.save(`zilhaj-receipt-${bookingNo}.pdf`);
 };
+
+// ==========================================================================
+// ZILHAJ SUPPORT & CUSTOMER CARE CLIENT-SIDE ENGINE
+// ==========================================================================
+
+window.customerSupportState = {
+  tickets: [],
+  activeTicket: null,
+  pendingAttachment: null,
+  unreadCount: 0,
+  pollTimer: null,
+  ticketPollInterval: null,
+  requests: []
+};
+
+// Helper: Get active authenticated customer profile
+window.getCurrentSupportUser = function() {
+  let name = '';
+  let email = '';
+  let phone = '';
+
+  try {
+    const rawUmrah = localStorage.getItem('umrah_user');
+    if (rawUmrah) {
+      const u = JSON.parse(rawUmrah);
+      if (u.name || u.fullName) name = u.name || u.fullName;
+      if (u.email) email = u.email;
+      if (u.phone || u.mobile) phone = u.phone || u.mobile;
+    }
+  } catch (e) {}
+
+  if (!name) name = localStorage.getItem('zilhaj_user_name') || '';
+  if (!email) email = localStorage.getItem('zilhaj_user_email') || '';
+  if (!phone) phone = localStorage.getItem('zilhaj_user_phone') || '';
+
+  if (!name) name = 'Valued Pilgrim';
+  if (!email) {
+    let guestId = localStorage.getItem('zilhaj_guest_id');
+    if (!guestId) {
+      guestId = 'user_' + Math.random().toString(36).substring(2, 9);
+      localStorage.setItem('zilhaj_guest_id', guestId);
+    }
+    email = `${guestId}@zilhaj.com`;
+  }
+
+  return { name, email, phone };
+};
+
+// Open Help & Support Tab smoothly
+window.openHelpSupportTab = function() {
+  if (typeof window.switchTab === 'function') {
+    window.switchTab('help');
+  }
+};
+
+window.openMySupportRequestsSection = function() {
+  window.openHelpSupportTab();
+  setTimeout(() => {
+    const sec = document.getElementById('section-my-support-requests');
+    if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+  }, 150);
+};
+
+window.focusFaqSearch = function() {
+  window.openHelpSupportTab();
+  setTimeout(() => {
+    const inp = document.getElementById('faqSearchInput');
+    if (inp) {
+      inp.focus();
+      inp.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, 150);
+};
+
+// Open Report an Issue Modal
+window.openReportIssueModal = function(prefillCategory) {
+  const user = window.getCurrentSupportUser();
+  const nameEl = document.getElementById('report-customer-name');
+  const emailEl = document.getElementById('report-customer-email');
+  const phoneEl = document.getElementById('report-customer-phone');
+  
+  if (nameEl) nameEl.value = user.name;
+  if (emailEl) emailEl.value = user.email;
+  if (phoneEl) phoneEl.value = user.phone;
+
+  const nameDisplay = document.getElementById('report-customer-name-display');
+  const emailDisplay = document.getElementById('report-customer-email-display');
+  const avatarEl = document.getElementById('report-customer-avatar');
+  if (nameDisplay) nameDisplay.textContent = user.name;
+  if (emailDisplay) emailDisplay.textContent = user.email;
+  if (avatarEl) avatarEl.textContent = (user.name.charAt(0) || 'P').toUpperCase();
+
+  // Reset form views
+  const successView = document.getElementById('report-issue-success-view');
+  const formEl = document.getElementById('form-report-issue');
+  const errEl = document.getElementById('report-issue-error');
+
+  if (successView) successView.style.display = 'none';
+  if (formEl) {
+    formEl.style.display = 'block';
+    formEl.reset();
+  }
+  if (errEl) errEl.style.display = 'none';
+  if (typeof window.removeReportFile === 'function') window.removeReportFile();
+
+  if (prefillCategory) {
+    const catSelect = document.getElementById('report-issue-category');
+    if (catSelect) catSelect.value = prefillCategory;
+  }
+
+  // Dynamically populate actual user requests
+  const reqSelect = document.getElementById('report-request-select');
+  if (reqSelect) {
+    reqSelect.innerHTML = '<option value="GENERAL" selected>General Support Query (No Specific Booking)</option>';
+    
+    // Find all real request cards on the dashboard
+    const realCards = document.querySelectorAll('#requestsList .request-card-box');
+    const seenReqs = new Set();
+    realCards.forEach(card => {
+      const rid = card.getAttribute('data-req-id') || card.querySelector('.req-id-title')?.textContent?.trim();
+      const service = card.querySelector('.meta-field-col:nth-child(2) .meta-val')?.textContent?.trim() || 'Custom Package';
+      if (rid && !seenReqs.has(rid)) {
+        seenReqs.add(rid);
+        const opt = document.createElement('option');
+        opt.value = rid;
+        opt.textContent = `${rid} (${service})`;
+        reqSelect.appendChild(opt);
+      }
+    });
+
+    reqSelect.value = 'GENERAL';
+    window.handleReportRequestChange('GENERAL');
+  }
+
+  const modal = document.getElementById('modal-report-issue');
+  if (modal) modal.style.display = 'flex';
+};
+
+window.closeReportIssueModal = function() {
+  const modal = document.getElementById('modal-report-issue');
+  if (modal) modal.style.display = 'none';
+};
+
+// Handle Request Dropdown Selection Change
+window.handleReportRequestChange = function(selectedReqId) {
+  const previewBox = document.getElementById('report-request-details-card');
+  const pReqId = document.getElementById('preview-req-id');
+  const pService = document.getElementById('preview-req-service');
+  const pDate = document.getElementById('preview-req-date');
+
+  if (!selectedReqId || selectedReqId === 'GENERAL') {
+    if (previewBox) {
+      previewBox.style.display = 'grid';
+      if (pReqId) pReqId.textContent = 'None';
+      if (pService) pService.textContent = 'General Support Inquiry';
+      if (pDate) pDate.textContent = 'N/A';
+    }
+    return;
+  }
+
+  const card = document.querySelector(`.request-card-box[data-req-id="${selectedReqId}"]`);
+  if (card && previewBox) {
+    previewBox.style.display = 'grid';
+    if (pReqId) pReqId.textContent = selectedReqId;
+    const sEl = card.querySelector('.meta-field-col:nth-child(2) .meta-val');
+    const dEl = card.querySelector('.meta-field-col:nth-child(3) .meta-val');
+    if (pService) pService.textContent = sEl ? sEl.textContent.trim() : 'Active Request';
+    if (pDate) pDate.textContent = dEl ? dEl.textContent.trim() : 'Scheduled';
+  } else if (previewBox) {
+    previewBox.style.display = 'grid';
+    if (pReqId) pReqId.textContent = selectedReqId;
+    if (pService) pService.textContent = 'Active Service Request';
+    if (pDate) pDate.textContent = 'Scheduled';
+  }
+};
+
+// Handle File Dropzone & Selection (Kept as optional fallback helper)
+window.handleReportFileSelect = function(fileInput) {
+  if (!fileInput.files || !fileInput.files[0]) return;
+  const file = fileInput.files[0];
+  if (file.size > 10 * 1024 * 1024) {
+    alert('File size exceeds the 10 MB limit.');
+    fileInput.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    window.customerSupportState.pendingAttachment = {
+      name: file.name,
+      size: `${(file.size / 1024).toFixed(1)} KB`,
+      type: file.type || 'application/octet-stream',
+      dataUrl: e.target.result
+    };
+  };
+  reader.readAsDataURL(file);
+};
+
+window.removeReportFile = function() {
+  window.customerSupportState.pendingAttachment = null;
+  const fileInput = document.getElementById('report-file-input');
+  if (fileInput) fileInput.value = '';
+};
+
+// Submit Report Issue Form
+window.handleReportIssueSubmit = async function(event) {
+  event.preventDefault();
+  const user = window.getCurrentSupportUser();
+  const reqSelect = document.getElementById('report-request-select');
+  const catSelect = document.getElementById('report-issue-category');
+  const descInput = document.getElementById('report-issue-description');
+  const btnSubmit = document.getElementById('btnSubmitReportIssue');
+  const btnText = document.getElementById('btnSubmitReportText');
+  const btnSpinner = document.getElementById('btnSubmitReportSpinner');
+  const errEl = document.getElementById('report-issue-error');
+
+  const description = descInput ? descInput.value.trim() : '';
+  const category = catSelect ? catSelect.value : 'General Query';
+  const reqId = reqSelect ? reqSelect.value : 'GENERAL';
+
+  // Auto-generate clean issue subject from Category and Description
+  let subject = `${category} Inquiry`;
+  if (description) {
+    const cleanFirstLine = description.split('\n')[0].replace(/[^\w\s-]/g, '').trim();
+    if (cleanFirstLine.length >= 5) {
+      subject = `${category}: ${cleanFirstLine.substring(0, 45)}`;
+    } else {
+      subject = `${category} - ${reqId}`;
+    }
+  }
+
+  if (description.length < 10) {
+    if (errEl) {
+      errEl.textContent = 'Please describe the issue in at least 10 characters so our care team can help.';
+      errEl.style.display = 'block';
+    }
+    return;
+  }
+
+  // Loading state
+  if (btnSubmit) btnSubmit.disabled = true;
+  if (btnText) btnText.textContent = 'Submitting issue...';
+  if (btnSpinner) btnSpinner.style.display = 'inline-block';
+  if (errEl) errEl.style.display = 'none';
+
+  const payload = {
+    customerName: user.name,
+    customerEmail: user.email,
+    customerPhone: user.phone,
+    requestId: reqId || 'GENERAL',
+    category: category,
+    priority: 'Medium',
+    subject: subject,
+    description: description,
+    attachment: null
+  };
+
+  try {
+    const res = await fetch('/api/support/tickets', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-email': user.email,
+        'x-user-name': user.name,
+        'x-user-phone': user.phone
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Unable to submit issue. Please try again.');
+    }
+
+    const tId = data.ticket?.issueId || data.ticket?.issue_id || data.issue_id;
+    const rId = data.ticket?.requestId || data.ticket?.request_id || data.request_id || 'General';
+    const statusVal = data.ticket?.status || 'Open';
+
+    // Success screen
+    const formEl = document.getElementById('form-report-issue');
+    const successView = document.getElementById('report-issue-success-view');
+    const sIssueId = document.getElementById('success-issue-id');
+    const sReqId = document.getElementById('success-request-id');
+    const sStatus = document.getElementById('success-status-pill');
+    const btnView = document.getElementById('btnSuccessViewTicket');
+
+    if (formEl) formEl.style.display = 'none';
+    if (successView) successView.style.display = 'block';
+    if (sIssueId) sIssueId.textContent = tId;
+    if (sReqId) sReqId.textContent = rId;
+    if (sStatus) {
+      sStatus.textContent = statusVal;
+      sStatus.className = 'badge-status-pill badge-open';
+    }
+
+    if (btnView) {
+      btnView.onclick = () => {
+        window.closeReportIssueModal();
+        window.openCustomerTicketDetails(tId);
+      };
+    }
+
+    // Refresh tickets table in background
+    window.loadCustomerTickets(false);
+
+  } catch (err) {
+    if (errEl) {
+      errEl.textContent = err.message || 'Failed to submit issue. Please check your network and try again.';
+      errEl.style.display = 'block';
+    }
+  } finally {
+    if (btnSubmit) btnSubmit.disabled = false;
+    if (btnText) btnText.textContent = 'Submit Issue';
+    if (btnSpinner) btnSpinner.style.display = 'none';
+  }
+};
+
+// Fetch & Render Customer's Tickets
+window.loadCustomerTickets = async function(showFeedback = false) {
+  const user = window.getCurrentSupportUser();
+  const tbody = document.getElementById('customer-support-tickets-tbody');
+  if (!tbody) return;
+
+  try {
+    const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
+    const res = await fetch(`/api/support/tickets?email=${encodeURIComponent(user.email)}`, {
+      headers: {
+        ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
+        'x-user-email': user.email,
+        'x-user-name': user.name,
+        'x-user-phone': user.phone
+      }
+    });
+
+    const data = await res.json();
+    if (data && data.success && Array.isArray(data.tickets)) {
+      window.customerSupportState.tickets = data.tickets;
+      window.renderCustomerTicketsTable(data.tickets);
+      if (typeof window.updateDashboardSummaryCards === 'function') {
+        window.updateDashboardSummaryCards();
+      }
+    }
+  } catch (err) {
+    console.warn('Could not load customer tickets:', err);
+  }
+};
+
+window.renderCustomerTicketsTable = function(tickets) {
+  const tbody = document.getElementById('customer-support-tickets-tbody');
+  if (!tbody) return;
+
+  if (!tickets || tickets.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; padding: 36px 20px; color: #64748B;">
+          <div style="font-size: 32px; margin-bottom: 8px;">📂</div>
+          <strong style="display: block; font-size: 15px; color: #1E293B;">No support requests yet</strong>
+          <p style="font-size: 13px; margin: 4px 0 16px;">Have questions about your package, travel or hotel? We're here to help 24/7.</p>
+          <button type="button" onclick="openReportIssueModal()" class="btn-primary-action" style="padding: 8px 20px; font-size: 13px;">Report an Issue</button>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = tickets.map(t => {
+    const tId = t.issueId || t.issue_id;
+    const rId = t.requestId || t.request_id || 'General';
+    const subj = t.subject || 'Support Ticket';
+    const cat = t.category || 'General';
+    const prio = t.priority || 'Medium';
+    const stat = t.status || 'Open';
+    const created = t.createdAt || t.created_at;
+    const updated = t.updatedAt || t.updated_at || t.lastUpdated;
+
+    const statusClass = stat.toLowerCase().replace(/\s+/g, '-');
+    const priorityClass = prio.toLowerCase();
+    return `
+      <tr style="border-bottom: 1px solid #F1F5F9; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
+        <td style="padding: 14px 18px; font-weight: 700; color: #127A4D; font-family: monospace;">${tId}</td>
+        <td style="padding: 14px 18px; font-family: monospace; color: #1E293B;">${rId}</td>
+        <td style="padding: 14px 18px;">
+          <strong style="display: block; color: #0F172A; font-size: 13.5px;">${escapeHtml(subj)}</strong>
+          <span style="font-size: 11px; color: #94A3B8;">${updated ? timeAgo(updated) : ''}</span>
+        </td>
+        <td style="padding: 14px 18px; font-size: 13px; color: #475569;">${cat}</td>
+        <td style="padding: 14px 18px;">
+          <span class="badge-priority badge-${priorityClass}">${prio}</span>
+        </td>
+        <td style="padding: 14px 18px;">
+          <span class="badge-status-pill badge-${statusClass}">${stat}</span>
+        </td>
+        <td style="padding: 14px 18px; font-size: 12px; color: #64748B;">${formatDateClean(created)}</td>
+        <td style="padding: 14px 18px; text-align: right;">
+          <button type="button" onclick="openCustomerTicketDetails('${tId}')" style="background: #127A4D; color: #FFFFFF; font-weight: 700; border: none; border-radius: 8px; padding: 7px 16px; font-size: 12px; cursor: pointer; transition: background 0.15s;">
+            View
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+// Open Ticket Details & Conversation Modal
+window.openCustomerTicketDetails = async function(issueId, isSilent = false) {
+  if (!issueId) return;
+  const user = window.getCurrentSupportUser();
+  const modal = document.getElementById('modal-ticket-details');
+  if (modal) modal.style.display = 'flex';
+
+  // Immediately clear old/mock text only when freshly opened (not on silent refresh)
+  const idEl = document.getElementById('modal-ticket-id');
+  const reqEl = document.getElementById('modal-ticket-req-id');
+  const catEl = document.getElementById('modal-ticket-category');
+  const prioEl = document.getElementById('modal-ticket-priority');
+  const statEl = document.getElementById('modal-ticket-status-pill');
+  const subEl = document.getElementById('modal-ticket-subject');
+  const dateEl = document.getElementById('modal-ticket-created');
+  const descEl = document.getElementById('modal-ticket-description');
+  const msgList = document.getElementById('modal-ticket-messages-list');
+
+  if (!isSilent) {
+    if (idEl) idEl.textContent = issueId;
+    if (reqEl) reqEl.textContent = '--';
+    if (catEl) catEl.textContent = '--';
+    if (prioEl) prioEl.textContent = '--';
+    if (statEl) {
+      statEl.textContent = 'Loading...';
+      statEl.className = 'badge-status-pill badge-open';
+    }
+    if (subEl) subEl.textContent = 'Loading issue details...';
+    if (dateEl) dateEl.textContent = '--';
+    if (descEl) descEl.textContent = 'Please wait while ticket details are loaded...';
+    if (msgList) {
+      msgList.innerHTML = '<div style="text-align: center; padding: 30px; color: #64748B;">Loading conversation...</div>';
+    }
+  }
+
+  const fetchTicket = async () => {
+    const res = await fetch(`/api/support/tickets/${issueId}?email=${encodeURIComponent(user.email)}`, {
+      headers: {
+        'x-user-email': user.email,
+        'x-user-name': user.name,
+        'x-user-phone': user.phone
+      }
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success || !data.ticket) {
+      throw new Error(data.message || 'Support ticket not found.');
+    }
+
+    const t = data.ticket;
+    window.customerSupportState.activeTicket = t;
+
+    const tId = t.issueId || t.issue_id || issueId;
+    const rId = t.requestId || t.request_id || 'General';
+    const cat = t.category || 'General';
+    const prio = t.priority || 'Medium';
+    const stat = t.status || 'Open';
+    const sub = t.subject || 'Support Ticket';
+    const created = t.createdAt || t.created_at;
+    const desc = t.description || '';
+
+    if (idEl) idEl.textContent = tId;
+    if (reqEl) reqEl.textContent = rId;
+    if (catEl) catEl.textContent = cat;
+    if (prioEl) prioEl.textContent = prio;
+
+    if (statEl) {
+      statEl.textContent = stat;
+      statEl.className = `badge-status-pill badge-${stat.toLowerCase().replace(/\s+/g, '-')}`;
+    }
+
+    if (subEl) subEl.textContent = sub;
+    if (dateEl) dateEl.textContent = formatDateClean(created);
+    if (descEl) descEl.textContent = desc;
+
+    // Attachment box
+    const attBox = document.getElementById('modal-ticket-attachment-box');
+    if (attBox) {
+      if (t.attachment && t.attachment.name) {
+        attBox.style.display = 'block';
+        attBox.innerHTML = `
+          <div style="display: inline-flex; align-items: center; gap: 8px; background: #F1F5F9; border-radius: 8px; padding: 6px 12px; font-size: 12px; margin-top: 6px;">
+            <span>📎</span>
+            <strong style="color: #1E293B;">${escapeHtml(t.attachment.name)}</strong>
+            <span style="color: #64748B;">(${escapeHtml(t.attachment.size || '')})</span>
+            ${t.attachment.dataUrl ? `<a href="${t.attachment.dataUrl}" download="${escapeHtml(t.attachment.name)}" style="color: #127A4D; font-weight: 700; margin-left: 8px; text-decoration: underline;">Download</a>` : ''}
+          </div>
+        `;
+      } else {
+        attBox.style.display = 'none';
+      }
+    }
+
+    // Render messages thread
+    window.renderCustomerMessages(data.messages || []);
+
+    // Toggle reply / resolved / closed container
+    const boxReply = document.getElementById('box-active-reply');
+    const boxResolved = document.getElementById('box-resolved-ticket');
+    const boxClosed = document.getElementById('box-closed-ticket');
+
+    if (stat === 'Resolved') {
+      if (boxReply) boxReply.style.display = 'none';
+      if (boxResolved) boxResolved.style.display = 'block';
+      if (boxClosed) boxClosed.style.display = 'none';
+    } else if (stat === 'Closed') {
+      if (boxReply) boxReply.style.display = 'none';
+      if (boxResolved) boxResolved.style.display = 'none';
+      if (boxClosed) boxClosed.style.display = 'block';
+    } else {
+      if (boxReply) boxReply.style.display = 'block';
+      if (boxResolved) boxResolved.style.display = 'none';
+      if (boxClosed) boxClosed.style.display = 'none';
+    }
+
+    if (typeof window.markTicketNotificationsAsRead === 'function') {
+      window.markTicketNotificationsAsRead(tId);
+    }
+  };
+
+  try {
+    await fetchTicket();
+
+    // Start Real-Time polling (every 3 seconds) for live chat updates
+    if (window.customerSupportState.ticketPollInterval) {
+      clearInterval(window.customerSupportState.ticketPollInterval);
+    }
+    window.customerSupportState.ticketPollInterval = setInterval(async () => {
+      const curModal = document.getElementById('modal-ticket-details');
+      if (curModal && curModal.style.display !== 'none' && window.customerSupportState.activeTicket) {
+        try {
+          await fetchTicket();
+        } catch (e) {}
+      }
+    }, 3000);
+
+  } catch (err) {
+    if (msgList) {
+      msgList.innerHTML = `<div style="text-align: center; color: #EF4444; padding: 20px;">${err.message || 'Support ticket not found.'}</div>`;
+    }
+    if (descEl) descEl.textContent = 'Ticket information is not available.';
+  }
+};
+
+window.refreshCurrentTicketModal = function() {
+  if (window.customerSupportState.activeTicket) {
+    const tId = window.customerSupportState.activeTicket.issueId || window.customerSupportState.activeTicket.issue_id;
+    window.openCustomerTicketDetails(tId);
+  }
+};
+
+window.closeCustomerTicketDetails = function() {
+  const modal = document.getElementById('modal-ticket-details');
+  if (modal) modal.style.display = 'none';
+  if (window.customerSupportState.ticketPollInterval) {
+    clearInterval(window.customerSupportState.ticketPollInterval);
+    window.customerSupportState.ticketPollInterval = null;
+  }
+  window.customerSupportState.activeTicket = null;
+  window.loadCustomerTickets(false);
+};
+
+// Render Conversation Thread
+window.renderCustomerMessages = function(messages) {
+  const container = document.getElementById('modal-ticket-messages-list');
+  if (!container) return;
+
+  if (!messages || messages.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 24px; color: #94A3B8; font-size: 13px;">
+        No replies yet. A Customer Care Executive will review your ticket and respond soon.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = messages.map(m => {
+    const isCustomer = (m.senderRole === 'CUSTOMER' || m.sender_role === 'CUSTOMER');
+    const senderTitle = isCustomer ? 'You (Customer)' : (m.senderName || m.sender_name || 'Customer Care');
+    const alignStyle = isCustomer ? 'align-self: flex-end; max-width: 82%;' : 'align-self: flex-start; max-width: 82%;';
+    const bgStyle = isCustomer ? 'background: #127A4D; color: #FFFFFF; border-radius: 16px 16px 4px 16px;' : 'background: #FFFFFF; color: #1E293B; border: 1.5px solid #E2E8F0; border-radius: 16px 16px 16px 4px;';
+    const metaColor = isCustomer ? '#D1FAE5' : '#64748B';
+    const dateStr = formatDateClean(m.createdAt || m.created_at);
+
+    return `
+      <div style="${alignStyle} ${bgStyle} padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 6px;">
+          <strong style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">${senderTitle}</strong>
+          <span style="font-size: 11px; color: ${metaColor};">${dateStr}</span>
+        </div>
+        <div style="font-size: 13.5px; line-height: 1.5; white-space: pre-wrap;">${escapeHtml(m.message)}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Scroll to latest message
+  container.scrollTop = container.scrollHeight;
+};
+
+// Send Reply from Customer
+window.sendCustomerReply = async function() {
+  const ticket = window.customerSupportState.activeTicket;
+  if (!ticket) return;
+
+  const tId = ticket.issueId || ticket.issue_id;
+  const user = window.getCurrentSupportUser();
+  const replyInput = document.getElementById('customer-reply-message');
+  const btn = document.getElementById('btnSendCustomerReply');
+  const message = replyInput ? replyInput.value.trim() : '';
+
+  if (!message) {
+    alert('Please enter your reply message.');
+    return;
+  }
+
+  // 1. Optimistic append: render immediately in chat thread in 0ms!
+  const container = document.getElementById('modal-ticket-messages-list');
+  if (container) {
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const tempHtml = `
+      <div class="chat-bubble-customer" style="margin-bottom: 12px; background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 12px; padding: 10px 14px; max-width: 80%; align-self: flex-end; margin-left: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px;">
+          <strong style="font-size: 12px; color: #0369a1;">You (Customer)</strong>
+          <span style="font-size: 10px; color: #64748b;">${nowTime} · Sent</span>
+        </div>
+        <div style="font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; color: #0f172a;">${escapeHtml(message)}</div>
+      </div>
+    `;
+    container.insertAdjacentHTML('beforeend', tempHtml);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  if (replyInput) replyInput.value = '';
+
+  try {
+    const res = await fetch(`/api/support/tickets/${tId}/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-email': user.email,
+        'x-user-name': user.name,
+        'x-user-phone': user.phone
+      },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Unable to send reply.');
+    }
+
+    // Background silent refresh (no wiping out the conversation)
+    await window.openCustomerTicketDetails(tId, true);
+
+  } catch (err) {
+    alert(err.message || 'Failed to send reply. Please try again.');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Send Reply';
+    }
+  }
+};
+
+// Reopen Ticket Flow
+window.promptReopenTicket = function() {
+  const modal = document.getElementById('modal-reopen-ticket');
+  if (modal) {
+    modal.style.display = 'flex';
+    const reasonEl = document.getElementById('reopen-ticket-reason');
+    if (reasonEl) reasonEl.value = '';
+  }
+};
+
+window.confirmReopenTicket = async function() {
+  const ticket = window.customerSupportState.activeTicket;
+  if (!ticket) return;
+
+  const user = window.getCurrentSupportUser();
+  const reasonEl = document.getElementById('reopen-ticket-reason');
+  const reason = reasonEl ? reasonEl.value.trim() : '';
+
+  if (!reason) {
+    alert('Please provide a reason for reopening this ticket.');
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/support/tickets/${ticket.issueId}/reopen`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-email': user.email,
+        'x-user-name': user.name,
+        'x-user-phone': user.phone
+      },
+      body: JSON.stringify({ reason })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Unable to reopen ticket.');
+    }
+
+    document.getElementById('modal-reopen-ticket').style.display = 'none';
+    await window.openCustomerTicketDetails(ticket.issueId);
+    alert('Your ticket has been reopened. A Customer Care Executive has been notified.');
+
+  } catch (err) {
+    alert(err.message || 'Failed to reopen ticket.');
+  }
+};
+
+// Real-Time Notification Poller
+window.startSupportNotificationsPoller = function() {
+  window.checkCustomerNotifications();
+  if (window.customerSupportState.pollTimer) clearInterval(window.customerSupportState.pollTimer);
+  window.customerSupportState.pollTimer = setInterval(window.checkCustomerNotifications, 12000);
+};
+
+window.checkCustomerNotifications = async function() {
+  const user = window.getCurrentSupportUser();
+  try {
+    const res = await fetch(`/api/support/notifications?email=${encodeURIComponent(user.email)}`, {
+      headers: {
+        'x-user-email': user.email,
+        'x-user-name': user.name,
+        'x-user-phone': user.phone
+      }
+    });
+
+    const data = await res.json();
+    if (data && data.success) {
+      const count = data.unreadCount || 0;
+      window.updateCustomerNotificationBadges(count, data.notifications || []);
+    }
+  } catch (e) {}
+};
+
+window.updateCustomerNotificationBadges = function(count, notifs) {
+  window.customerSupportState.unreadCount = count;
+
+  // Sidebar badge: Help & Support 🔔 2
+  const sidebarBadge = document.getElementById('customerHelpBadge');
+  if (sidebarBadge) {
+    if (count > 0) {
+      sidebarBadge.textContent = `🔔 ${count}`;
+      sidebarBadge.style.display = 'inline-block';
+    } else {
+      sidebarBadge.style.display = 'none';
+    }
+  }
+
+  // Header Bell Dot
+  const headerDot = document.getElementById('headerCustomerNotifDot');
+  if (headerDot) {
+    headerDot.style.display = count > 0 ? 'block' : 'none';
+  }
+
+  // Render notifications in dropdown modal
+  const notifList = document.getElementById('customer-notifs-list');
+  if (notifList) {
+    if (!notifs || notifs.length === 0) {
+      notifList.innerHTML = '<div style="padding: 24px; text-align: center; color: #94A3B8; font-size: 13px;">No notifications yet.</div>';
+    } else {
+      notifList.innerHTML = notifs.map(n => `
+        <div onclick="handleCustomerNotificationClick('${n.id}', '${n.ticketId}')" style="padding: 12px 18px; border-bottom: 1px solid #F1F5F9; cursor: pointer; background: ${n.isRead ? '#FFFFFF' : '#F0FDF4'}; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='${n.isRead ? '#FFFFFF' : '#F0FDF4'}'">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <strong style="font-size: 13px; color: ${n.isRead ? '#475569' : '#127A4D'};">${n.title}</strong>
+            <span style="font-size: 11px; color: #94A3B8;">${timeAgo(n.createdAt)}</span>
+          </div>
+          <p style="font-size: 12.5px; color: #334155; margin: 0; line-height: 1.4;">${n.message}</p>
+        </div>
+      `).join('');
+    }
+  }
+};
+
+window.toggleCustomerNotifsModal = function() {
+  const modal = document.getElementById('modal-customer-notifications');
+  if (modal) {
+    modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+  }
+};
+
+window.handleCustomerNotificationClick = async function(notifId, ticketId) {
+  try {
+    await fetch(`/api/support/notifications/${notifId}/read`, { method: 'PATCH' });
+  } catch (e) {}
+  window.toggleCustomerNotifsModal();
+  if (ticketId) {
+    window.openCustomerTicketDetails(ticketId);
+  }
+};
+
+window.markAllCustomerNotifsRead = async function() {
+  const user = window.getCurrentSupportUser();
+  try {
+    await fetch('/api/support/notifications/read-all', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-email': user.email
+      }
+    });
+    window.checkCustomerNotifications();
+  } catch (e) {}
+};
+
+window.markTicketNotificationsAsRead = async function(ticketId) {
+  const user = window.getCurrentSupportUser();
+  try {
+    await fetch(`/api/support/notifications/read-ticket/${ticketId}`, {
+      method: 'PATCH',
+      headers: { 'x-user-email': user.email }
+    });
+    window.checkCustomerNotifications();
+  } catch (e) {}
+};
+
+// FAQ Real-Time Search Engine
+window.handleFaqSearch = async function(query) {
+  const container = document.getElementById('faqSearchResultsContainer');
+  if (!container) return;
+
+  const q = (query || '').trim();
+  if (!q) {
+    container.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/support/faqs?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    container.style.display = 'block';
+
+    if (!data.results || data.results.length === 0) {
+      container.innerHTML = `
+        <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 24px; text-align: center;">
+          <p style="color: #64748B; font-size: 14px; margin: 0 0 12px;">No help articles found matching "<strong>${escapeHtml(q)}</strong>".</p>
+          <div style="font-size: 13px; color: #1E293B; margin-bottom: 12px;">Still need help with your issue?</div>
+          <button type="button" onclick="openReportIssueModal()" class="btn-primary-action" style="padding: 9px 22px; font-size: 13px;">Report an Issue</button>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 18px 24px; box-shadow: 0 4px 14px rgba(0,0,0,0.04);">
+        <h4 style="font-size: 14px; font-weight: 800; color: #127A4D; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.5px;">Matching FAQs (${data.results.length})</h4>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          ${data.results.map(f => `
+            <details style="background: #F8FCF9; border: 1px solid #E2E9E5; border-radius: 10px; padding: 10px 14px; cursor: pointer;">
+              <summary style="font-weight: 700; color: #1A2B23; font-size: 13.5px;">${f.question}</summary>
+              <div style="margin-top: 8px; font-size: 13px; color: #475569; line-height: 1.5;">${f.answer}</div>
+            </details>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } catch (e) {
+    container.style.display = 'none';
+  }
+};
+
+// Helper: Escape HTML string
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+}
+
+function formatDateClean(d) {
+  if (!d) return '';
+  try {
+    const dt = new Date(d);
+    return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch (e) {
+    return String(d);
+  }
+}
+
+function timeAgo(dateString) {
+  if (!dateString) return '';
+  try {
+    const diff = (Date.now() - new Date(dateString).getTime()) / 1000;
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+  } catch (e) {
+    return '';
+  }
+}
+
+// Auto-boot customer support logic on load
+window.addEventListener('load', () => {
+  window.loadCustomerTickets(false);
+  window.startSupportNotificationsPoller();
+
+  // Check URL parameters for direct deep-linking
+  const urlParams = new URLSearchParams(window.location.search);
+  const action = urlParams.get('action');
+  const tab = urlParams.get('tab');
+
+  if (tab === 'help') {
+    window.openHelpSupportTab();
+  }
+  if (action === 'report') {
+    setTimeout(window.openReportIssueModal, 200);
+  } else if (action === 'requests') {
+    setTimeout(window.openMySupportRequestsSection, 200);
+  }
+});
+

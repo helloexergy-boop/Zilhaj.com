@@ -1430,11 +1430,18 @@ document.addEventListener('DOMContentLoaded', () => {
       let liveReqs = Array.isArray(reqs) ? reqs : (reqs && Array.isArray(reqs.requirements) ? reqs.requirements : []);
       let liveOffers = Array.isArray(offers) ? offers : (offers && Array.isArray(offers.offers) ? offers.offers : []);
 
-      // Check local storage only if empty and user created offline draft
+      // Check local storage only if empty and user created offline draft matching user email
       if (liveReqs.length === 0) {
         try {
+          const userObj = JSON.parse(localStorage.getItem('umrah_user') || 'null');
+          const uEmail = userObj && userObj.email ? userObj.email.toLowerCase().trim() : '';
           const localReqs = JSON.parse(localStorage.getItem('zilhaj_requirements') || '[]');
-          if (Array.isArray(localReqs) && localReqs.length > 0) liveReqs = localReqs;
+          if (Array.isArray(localReqs) && localReqs.length > 0 && uEmail) {
+            liveReqs = localReqs.filter(r => {
+              const rEmail = (r.email || r.userEmail || '').toLowerCase().trim();
+              return rEmail === uEmail && !rEmail.includes('test') && !rEmail.includes('pilgrim');
+            });
+          }
         } catch(e) {}
       }
 

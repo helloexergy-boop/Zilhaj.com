@@ -62,13 +62,27 @@ class App {
             } catch (e) {}
         });
 
-        // Remove any pre-existing mock agent offers (generated without real userId/packageId) so
-        // users only see offers dispatched by the Admin through the control panel.
+        // Remove any pre-existing mock agent offers and test requirements from localStorage
         try {
             const rawOffers = JSON.parse(localStorage.getItem('umrah_user_offers') || '[]');
             const realOffers = rawOffers.filter(o => (o.userId && o.userId !== 'usr-1') || o.packageId);
             localStorage.setItem('umrah_user_offers', JSON.stringify(realOffers));
             this.state.userOffers = realOffers;
+
+            ['umrah_requirements', 'zilhaj_requirements'].forEach(k => {
+                const raw = localStorage.getItem(k);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) {
+                        const clean = parsed.filter(r => {
+                            const em = (r.email || r.userEmail || '').toLowerCase();
+                            const fn = (r.fullname || r.customer || '').toLowerCase();
+                            return !em.includes('test') && !em.includes('pilgrim') && !fn.includes('test') && !fn.includes('automated');
+                        });
+                        localStorage.setItem(k, JSON.stringify(clean));
+                    }
+                }
+            });
         } catch (e) {}
 
         // Handle Google OAuth callback URL parameters (Step 2 & 5)
@@ -3711,9 +3725,15 @@ class App {
         const allReqs   = [...apiReqs, ...localReqs.filter(lr => !apiReqs.some(r => r.id === lr.id))];
         const allOffers = [...apiOffers, ...localOffers.filter(lo => !apiOffers.some(o => o.id === lo.id))];
         const apiBookings = this.state.myBookings || [];
-        const allBookings = [...apiBookings, ...localBookings.filter(lb => !apiBookings.some(b => b.id === lb.id))];
-        const requirements = allReqs.filter(r => !r.userId || r.userId === user.id || r.userEmail === user.email);
-        const offers   = allOffers;
+        const requirements = allReqs.filter(r => {
+            if (!user || (!user.id && !user.email)) return false;
+            const matchId = user.id && (r.userId === user.id || String(r.userId) === String(user.id));
+            const matchEmail = user.email && (
+                (r.email && r.email.toLowerCase() === user.email.toLowerCase()) ||
+                (r.userEmail && r.userEmail.toLowerCase() === user.email.toLowerCase())
+            );
+            return matchId || matchEmail;
+        });
         const bookings = allBookings;
 
         // ── Support contact helpers ──────────────────────────────────────────────

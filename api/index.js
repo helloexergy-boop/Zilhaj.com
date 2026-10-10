@@ -602,7 +602,7 @@ app.get('/api/requirements', authenticateUser, async (req, res) => {
                 orConditions.push({ phone: req.user.phone });
                 orConditions.push({ userPhone: req.user.phone });
             }
-            filter = orConditions.length > 0 ? { $or: orConditions } : {};
+            filter = orConditions.length > 0 ? { $or: orConditions } : { _id: null };
         }
 
         const [reqs1, reqs2, allOffers] = await Promise.all([
