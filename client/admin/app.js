@@ -2376,14 +2376,9 @@ function renderInventoryList() {
               <div class="amenity-dist" style="font-size: 10px; color: var(--text-muted);">${escapeHtml(p.madinahDistance || '')}</div>
             </div>
 
-            <div class="amenity-box" style="background: #f8fafc; padding: 8px 10px; border-radius: var(--radius-sm);">
+            <div class="amenity-box" style="background: #f8fafc; padding: 8px 10px; border-radius: var(--radius-sm); grid-column: 1 / -1;">
               <div class="amenity-label" style="font-weight: 700; color: var(--text-light);">🚌 Transport</div>
-              <div class="amenity-val">${escapeHtml(p.transport || 'AC Bus')}</div>
-            </div>
-
-            <div class="amenity-box" style="background: #f8fafc; padding: 8px 10px; border-radius: var(--radius-sm);">
-              <div class="amenity-label" style="font-weight: 700; color: var(--text-light);">🍽️ Meals</div>
-              <div class="amenity-val">${escapeHtml(p.mealPlan || 'Included')}</div>
+              <div class="amenity-val">${escapeHtml(p.transport || 'Dedicated AC Coach')}</div>
             </div>
           </div>
         </div>
@@ -2682,17 +2677,16 @@ async function handleAddInventoryPackageSubmit(e) {
   const service = document.getElementById('inv-pkg-service')?.value || 'Umrah';
   const agentName = document.getElementById('inv-pkg-agent-name')?.value.trim();
   const agentId = document.getElementById('inv-pkg-agent-id')?.value.trim() || `AGENT-${Math.floor(1000 + Math.random() * 9000)}`;
-  const departureDate = document.getElementById('inv-pkg-departure-date')?.value.trim() || '2026-11-15';
-  const duration = document.getElementById('inv-pkg-duration')?.value.trim() || '18 Days';
-  const price = Number(document.getElementById('inv-pkg-price')?.value) || 85000;
-  const seats = Number(document.getElementById('inv-pkg-seats')?.value) || 20;
-  const makkahHotel = document.getElementById('inv-pkg-makkah-hotel')?.value.trim() || 'Fairmont Clock Tower';
-  const makkahDist = document.getElementById('inv-pkg-makkah-dist')?.value.trim() || '50m from Haram';
-  const madinahHotel = document.getElementById('inv-pkg-madinah-hotel')?.value.trim() || 'Dar Al Taqwa';
-  const madinahDist = document.getElementById('inv-pkg-madinah-dist')?.value.trim() || '100m from Nabawi';
-  const transport = document.getElementById('inv-pkg-transport')?.value.trim() || 'AC Luxury Coach';
-  const meals = document.getElementById('inv-pkg-meals')?.value.trim() || 'Full Board Buffet';
-  const ziyarat = document.getElementById('inv-pkg-ziyarat')?.value.trim() || 'Historical Ziyarat Included';
+  const departureDate = document.getElementById('inv-pkg-departure-date')?.value.trim() || '';
+  const duration = document.getElementById('inv-pkg-duration')?.value.trim() || '14 Days';
+  const price = Number(document.getElementById('inv-pkg-price')?.value) || 0;
+  const seats = Number(document.getElementById('inv-pkg-seats')?.value) || 10;
+  const makkahHotel = document.getElementById('inv-pkg-makkah-hotel')?.value.trim() || '';
+  const makkahDist = document.getElementById('inv-pkg-makkah-dist')?.value.trim() || '';
+  const madinahHotel = document.getElementById('inv-pkg-madinah-hotel')?.value.trim() || '';
+  const madinahDist = document.getElementById('inv-pkg-madinah-dist')?.value.trim() || '';
+  const transport = document.getElementById('inv-pkg-transport')?.value.trim() || '';
+  const ziyarat = document.getElementById('inv-pkg-ziyarat')?.value.trim() || '';
   const status = document.getElementById('inv-pkg-status')?.value || 'Active';
 
   const newPkg = {
@@ -2711,7 +2705,6 @@ async function handleAddInventoryPackageSubmit(e) {
     madinahHotel: madinahHotel,
     madinahDistance: madinahDist,
     transport: transport,
-    mealPlan: meals,
     ziyarat: ziyarat,
     status: status
   };
@@ -2754,16 +2747,15 @@ function openEditInventoryPackageModal(packageId) {
   setVal('edit-inv-pkg-service', p.serviceType || 'Umrah');
   setVal('edit-inv-pkg-agent-name', p.agentName);
   setVal('edit-inv-pkg-agent-id', p.agentId || 'AGENT-1042');
-  setVal('edit-inv-pkg-departure-date', p.departureDate || p.departureDateText || '2026-11-15');
-  setVal('edit-inv-pkg-duration', p.duration || '18 Days');
-  setVal('edit-inv-pkg-price', p.pricePerPerson || 85000);
-  setVal('edit-inv-pkg-seats', p.seatsAvailable || p.availableSeats || 25);
+  setVal('edit-inv-pkg-departure-date', p.departureDate || p.departureDateText || '');
+  setVal('edit-inv-pkg-duration', p.duration || '14 Days');
+  setVal('edit-inv-pkg-price', p.pricePerPerson || 0);
+  setVal('edit-inv-pkg-seats', p.seatsAvailable || p.availableSeats || 10);
   setVal('edit-inv-pkg-makkah-hotel', p.makkahHotel);
   setVal('edit-inv-pkg-makkah-dist', p.makkahDistance);
   setVal('edit-inv-pkg-madinah-hotel', p.madinahHotel);
   setVal('edit-inv-pkg-madinah-dist', p.madinahDistance);
   setVal('edit-inv-pkg-transport', p.transport);
-  setVal('edit-inv-pkg-meals', p.mealPlan);
   setVal('edit-inv-pkg-ziyarat', p.ziyarat);
   setVal('edit-inv-pkg-status', p.status || 'Active');
 
@@ -2784,14 +2776,13 @@ async function handleEditInventoryPackageSubmit(e) {
     departureDate: getVal('edit-inv-pkg-departure-date'),
     departureDateText: getVal('edit-inv-pkg-departure-date'),
     duration: getVal('edit-inv-pkg-duration'),
-    pricePerPerson: Number(document.getElementById('edit-inv-pkg-price')?.value) || 85000,
-    availableSeats: Number(document.getElementById('edit-inv-pkg-seats')?.value) || 25,
+    pricePerPerson: Number(document.getElementById('edit-inv-pkg-price')?.value) || 0,
+    availableSeats: Number(document.getElementById('edit-inv-pkg-seats')?.value) || 10,
     makkahHotel: getVal('edit-inv-pkg-makkah-hotel'),
     makkahDistance: getVal('edit-inv-pkg-makkah-dist'),
     madinahHotel: getVal('edit-inv-pkg-madinah-hotel'),
     madinahDistance: getVal('edit-inv-pkg-madinah-dist'),
     transport: getVal('edit-inv-pkg-transport'),
-    mealPlan: getVal('edit-inv-pkg-meals'),
     ziyarat: getVal('edit-inv-pkg-ziyarat'),
     status: getVal('edit-inv-pkg-status') || 'Active'
   };

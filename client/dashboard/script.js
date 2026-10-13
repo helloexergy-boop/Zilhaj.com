@@ -1115,8 +1115,8 @@ document.addEventListener('DOMContentLoaded', () => {
               </svg>
             </div>
 
-            <h3 class="empty-state-title">No Offers Yet - We're Working on the Best Ones for You!</h3>
-            <p class="empty-state-subtext">Our verified partners are reviewing your request and collecting the most suitable options. You'll be notified as soon as offers are ready.</p>
+            <h3 class="empty-state-title">No Offers Yet — Verified Proposals in Progress</h3>
+            <p class="empty-state-subtext">Our verified agency partners are reviewing your pilgrimage request and preparing tailored itineraries. You will be notified as soon as proposals are ready.</p>
 
             <div class="empty-state-info-bar">
               <div class="info-bar-left">
@@ -1969,7 +1969,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   <path d="M9 13.5c1-1 5-1 6 0"></path>
                 </svg>
               </div>
-              <h4 class="waiting-title">No Offers Yet — We're Working on the Best Ones for You! ✨</h4>
+              <h4 class="waiting-title">No Offers Yet — Verified partner agencies are preparing custom proposals.</h4>
               <p class="waiting-subtext">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10"></circle>
