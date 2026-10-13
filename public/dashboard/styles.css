@@ -5883,6 +5883,86 @@ body {
 }
 
 /* ==========================================================================
+   UNIVERSAL CLEAN GREEN CIRCLE LOADING SPINNERS & OVERLAY
+   ========================================================================== */
+@keyframes zilhaj-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.zilhaj-spinner-circle {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(18, 122, 77, 0.2);
+  border-top-color: #127A4D;
+  border-radius: 50%;
+  animation: zilhaj-spin 0.75s linear infinite;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.zilhaj-spinner-circle.white {
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #FFFFFF;
+}
+
+.zilhaj-spinner-circle.sm {
+  width: 15px;
+  height: 15px;
+  border-width: 2px;
+}
+
+.zilhaj-spinner-circle.lg {
+  width: 44px;
+  height: 44px;
+  border-width: 3.5px;
+  border-top-color: #127A4D;
+}
+
+/* Clean Responsive Loading Overlay */
+.zilhaj-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: rgba(10, 25, 18, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zilhaj-loading-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E9E5;
+  border-radius: 18px;
+  padding: 32px 36px;
+  text-align: center;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+  max-width: 360px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.zilhaj-loading-card .loading-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1A2B23;
+  margin: 0;
+}
+
+.zilhaj-loading-card .loading-sub {
+  font-size: 13px;
+  color: #687970;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
    DASHBOARD MOBILE RESPONSIVE UI/UX ARCHITECTURE
    ========================================================================== */
 *, *::before, *::after {

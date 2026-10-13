@@ -610,6 +610,70 @@
     .btn-view-payments:hover {
       background: var(--primary-green-light);
     }
+
+    /* Green Circle Loading Spinner & Overlay */
+    @keyframes zilhaj-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .zilhaj-spinner-circle {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(18, 122, 77, 0.2);
+      border-top-color: #127A4D;
+      border-radius: 50%;
+      animation: zilhaj-spin 0.75s linear infinite;
+      vertical-align: middle;
+      box-sizing: border-box;
+    }
+    .zilhaj-spinner-circle.white {
+      border: 2.5px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #FFFFFF;
+    }
+    .zilhaj-spinner-circle.lg {
+      width: 44px;
+      height: 44px;
+      border-width: 3.5px;
+      border-top-color: #127A4D;
+    }
+    .checkout-loading-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      background: rgba(10, 25, 18, 0.65);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .checkout-loading-card {
+      background: #FFFFFF;
+      border: 1.5px solid #E2E9E5;
+      border-radius: 18px;
+      padding: 32px 36px;
+      text-align: center;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+      max-width: 360px;
+      width: 90%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .checkout-loading-card .l-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1A2B23;
+      margin: 0;
+    }
+    .checkout-loading-card .l-sub {
+      font-size: 13px;
+      color: #687970;
+      margin: 0;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
@@ -858,6 +922,15 @@
     </div>
   </div>
 
+  <!-- CHECKOUT LOADING OVERLAY -->
+  <div class="checkout-loading-overlay" id="checkoutLoader">
+    <div class="checkout-loading-card">
+      <span class="zilhaj-spinner-circle lg"></span>
+      <h4 class="l-title" id="checkoutLoaderTitle">Connecting to Razorpay...</h4>
+      <p class="l-sub" id="checkoutLoaderSub">Preparing secure 100% escrow payment session...</p>
+    </div>
+  </div>
+
   <script>
     // 1. Parse Query Parameters or retrieve from localStorage
     const urlParams = new URLSearchParams(window.location.search);
@@ -915,10 +988,27 @@
 
     let lastSuccessfulPayment = null;
 
+    function showCheckoutLoader(title = 'Connecting to Razorpay...', sub = 'Preparing secure 100% escrow payment session...') {
+      const overlay = document.getElementById('checkoutLoader');
+      if (overlay) {
+        const t = document.getElementById('checkoutLoaderTitle');
+        const s = document.getElementById('checkoutLoaderSub');
+        if (t) t.textContent = title;
+        if (s) s.textContent = sub;
+        overlay.style.display = 'flex';
+      }
+    }
+
+    function hideCheckoutLoader() {
+      const overlay = document.getElementById('checkoutLoader');
+      if (overlay) overlay.style.display = 'none';
+    }
+
     async function startRazorpayPayment() {
       const btn = document.getElementById('btnPayDeposit');
       btn.disabled = true;
-      btn.innerHTML = 'Connecting to Razorpay...';
+      btn.innerHTML = '<span class="zilhaj-spinner-circle white" style="margin-right: 8px;"></span><span>Connecting to Razorpay...</span>';
+      showCheckoutLoader('Connecting to Razorpay...', 'Initializing secure 100% escrow payment session...');
 
       const customerName = document.getElementById('travelerName').value.trim() || 'Valued Pilgrim';
       const customerEmail = document.getElementById('travelerEmail').value.trim() || 'customer@zilhaj.com';
@@ -928,6 +1018,7 @@
 
       const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
 
+      try {
         const userRaw = localStorage.getItem('umrah_user');
         let authToken = null;
         try { const u = userRaw ? JSON.parse(userRaw) : null; authToken = (u && u.token) || localStorage.getItem('zilhaj_token'); } catch (e) {}
@@ -949,6 +1040,7 @@
         });
 
         if (!orderRes.ok) {
+          hideCheckoutLoader();
           const err = await orderRes.json().catch(() => ({}));
           throw new Error(err.message || err.error || 'Server error creating order');
         }
@@ -958,11 +1050,13 @@
         const keyId = orderData.key_id || orderData.key || 'rzp_live_TdOWoVLFjxHfTO';
 
         if (!validOrderId) {
+          hideCheckoutLoader();
           throw new Error('Order creation did not return order_id');
         }
 
         // STEP 2: LAUNCH RAZORPAY MODAL
         if (!window.Razorpay) {
+          hideCheckoutLoader();
           throw new Error('Razorpay SDK not loaded. Please check your internet connection.');
         }
 
@@ -983,12 +1077,15 @@
           },
           modal: {
             ondismiss: function() {
+              hideCheckoutLoader();
               btn.disabled = false;
-              btn.innerHTML = '💳 Pay Booking Deposit (₹1)';
+              btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg><span>Pay Booking Deposit (₹1)</span>';
             }
           },
           handler: async function(response) {
-            btn.innerHTML = 'Verifying Payment...';
+            btn.innerHTML = '<span class="zilhaj-spinner-circle white" style="margin-right: 8px;"></span><span>Verifying Payment...</span>';
+            showCheckoutLoader('Verifying Payment...', 'Confirming transaction with bank and issuing official invoice...');
+            try {
               // STEP 3: VERIFY SIGNATURE (Authenticated & MongoDB-backed)
               const verifyRes = await fetch(apiBase + '/verify-payment', {
                 method: 'POST',
@@ -1021,6 +1118,7 @@
               });
 
               const verifyData = await verifyRes.json();
+              hideCheckoutLoader();
               if (!verifyRes.ok || !verifyData.success) {
                 throw new Error(verifyData.message || 'Signature verification failed');
               }
@@ -1054,25 +1152,29 @@
               document.getElementById('successModal').style.display = 'flex';
 
             } catch (vErr) {
+              hideCheckoutLoader();
               alert('Payment verification error: ' + vErr.message);
               btn.disabled = false;
-              btn.innerHTML = '💳 Pay Booking Deposit (₹1)';
+              btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg><span>Pay Booking Deposit (₹1)</span>';
             }
           }
         };
 
+        hideCheckoutLoader();
         const rzp = new Razorpay(options);
         rzp.on('payment.failed', function(resp) {
+          hideCheckoutLoader();
           btn.disabled = false;
-          btn.innerHTML = '💳 Pay Booking Deposit (₹1)';
+          btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg><span>Pay Booking Deposit (₹1)</span>';
           alert('Payment Failed: ' + ((resp.error && resp.error.description) || 'Transaction declined by bank.'));
         });
         rzp.open();
 
       } catch (err) {
+        hideCheckoutLoader();
         alert('Could not start payment: ' + err.message);
         btn.disabled = false;
-        btn.innerHTML = '💳 Pay Booking Deposit (₹1)';
+        btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg><span>Pay Booking Deposit (₹1)</span>';
       }
     }
 

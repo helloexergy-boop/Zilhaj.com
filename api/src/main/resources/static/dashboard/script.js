@@ -1396,9 +1396,46 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ------------------------------------------------------------------------
+  // RESPONSIVE LOADING OVERLAY (GREEN CIRCLE SPINNER)
+  // ------------------------------------------------------------------------
+  window.showZilhajLoader = function(title = 'Connecting to Secure Gateway...', sub = 'Please wait while we prepare your request...') {
+    let overlay = document.getElementById('zilhajUniversalLoader');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'zilhajUniversalLoader';
+      overlay.className = 'zilhaj-loading-overlay';
+      overlay.innerHTML = `
+        <div class="zilhaj-loading-card">
+          <span class="zilhaj-spinner-circle lg"></span>
+          <h4 class="loading-title" id="zilhajLoaderTitle">${title}</h4>
+          <p class="loading-sub" id="zilhajLoaderSub">${sub}</p>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    } else {
+      const t = document.getElementById('zilhajLoaderTitle');
+      const s = document.getElementById('zilhajLoaderSub');
+      if (t) t.textContent = title;
+      if (s) s.textContent = sub;
+      overlay.style.display = 'flex';
+    }
+  };
+
+  window.hideZilhajLoader = function() {
+    const overlay = document.getElementById('zilhajUniversalLoader');
+    if (overlay) overlay.style.display = 'none';
+  };
+
+  // ------------------------------------------------------------------------
   // PROCEED TO BOOK OFFER (Saves offer & transitions to Checkout)
   // ------------------------------------------------------------------------
-  window.proceedToBookOffer = function(offerId, reqId) {
+  window.proceedToBookOffer = function(offerId, reqId, btn) {
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<span class="zilhaj-spinner-circle white sm" style="margin-right: 6px;"></span><span>Securing Offer...</span>`;
+    }
+    window.showZilhajLoader('Opening Secure Booking...', 'Securing your package offer with ZILHAJ verified escrow.');
+
     const offer = (window._currentOffers || []).find(o => (o.id === offerId || o.offerId === offerId)) || {};
     const req = (window._currentReqs || []).find(r => (r.id === reqId || r.requestId === reqId)) || {};
 
@@ -1557,14 +1594,9 @@ document.addEventListener('DOMContentLoaded', () => {
               <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto;">
                 ${status === 'ACCEPTED' 
                   ? '<div style="text-align: center; background: #D1FAE5; color: #065F46; font-weight: 700; padding: 10px; border-radius: 8px; font-size: 13px;">✅ Booked & Accepted</div>'
-                  : status === 'REJECTED'
-                  ? '<div style="text-align: center; background: #FEE2E2; color: #991B1B; font-weight: 700; padding: 10px; border-radius: 8px; font-size: 13px;">❌ Declined by You</div>'
                   : `
                     <button type="button" onclick="closeCompareOffersModal(); proceedToBookOffer('${offerId}', '${reqId}');" style="width: 100%; background: #127A4D; color: #FFFFFF; font-weight: 700; font-size: 13px; padding: 11px; border: none; border-radius: 8px; cursor: pointer;">
                       Book Offer &rarr;
-                    </button>
-                    <button type="button" onclick="closeCompareOffersModal(); rejectOfferCustomer('${offerId}', '${reqId}');" style="width: 100%; background: transparent; color: #DC2626; border: 1.5px solid #FCA5A5; font-weight: 700; font-size: 12px; padding: 8px; border-radius: 8px; cursor: pointer;">
-                      Decline Offer
                     </button>
                   `
                 }
@@ -1690,6 +1722,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     })();
     const headers = token ? { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' } : {};
+
+    const container = document.getElementById('requestsList');
+    if (container && (!window._currentReqs || window._currentReqs.length === 0)) {
+      container.innerHTML = `
+        <div class="zilhaj-loading-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 20px; gap: 14px; width: 100%;">
+          <span class="zilhaj-spinner-circle lg"></span>
+          <span style="font-size: 14px; font-weight: 700; color: #127A4D;">Loading Pilgrimage Requests &amp; Verified Offers...</span>
+        </div>
+      `;
+    }
 
     Promise.all([
       fetch(apiBase + '/requirements', { headers }).then(r => r.ok ? r.json() : []).catch(() => []),
@@ -1870,7 +1912,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="soc-type-pill">🕋 ${serviceType}</span>
                             <span class="soc-agent-code">${agentCode}</span>
                           </div>
-                          <span class="soc-status-pill ${isAccepted ? 'accepted' : (isRejected ? 'rejected' : 'active')}" style="${isAccepted ? 'background: #D1FAE5; color: #065F46;' : (isRejected ? 'background: #FEE2E2; color: #991B1B;' : '')}">${statusDisplay}</span>
+                          <span class="soc-status-pill ${isAccepted ? 'accepted' : 'active'}" style="${isAccepted ? 'background: #D1FAE5; color: #065F46;' : 'background: #E8F5E9; color: #127A4D;'}">${isAccepted ? 'Booked & Accepted' : 'Active Offer'}</span>
                         </div>
 
                         <!-- Title & Agency -->
@@ -1927,17 +1969,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                       </div>
 
-                      <!-- Action Buttons & Status -->
-                      <div class="soc-actions-row" style="display: flex; gap: 8px; align-items: center; margin-top: 14px; flex-wrap: wrap;">
+                      <!-- Action Buttons (Only View Offer and Book Offer) -->
+                      <div class="soc-actions-row" style="display: flex; gap: 8px; align-items: center; margin-top: 14px;">
                         ${isAccepted 
                           ? `<span style="background: #D1FAE5; color: #065F46; font-weight: 700; padding: 7px 12px; border-radius: 8px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">✓ Booked &amp; Accepted</span>
                              <button class="btn-soc-view" style="flex: 1;" onclick="openOfferFlyerModal('${offerId}', '${reqId}')">View Offer</button>`
-                          : isRejected
-                          ? `<span style="background: #FEE2E2; color: #991B1B; font-weight: 700; padding: 7px 12px; border-radius: 8px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">✕ Declined</span>
-                             <button class="btn-soc-view" style="flex: 1;" onclick="openOfferFlyerModal('${offerId}', '${reqId}')">View Offer</button>`
                           : `<button class="btn-soc-view" onclick="openOfferFlyerModal('${offerId}', '${reqId}')">View Offer</button>
-                             <button class="btn-soc-book" onclick="proceedToBookOffer('${offerId}', '${reqId}')">Book Offer</button>
-                             <button class="btn-soc-decline" onclick="rejectOfferCustomer('${offerId}', '${reqId}')" style="background: transparent; color: #DC2626; border: 1.5px solid #FCA5A5; font-size: 12px; font-weight: 700; border-radius: 8px; padding: 7px 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#FEE2E2'" onmouseout="this.style.background='transparent'" title="Decline this agency offer">Decline</button>`
+                             <button class="btn-soc-book" onclick="proceedToBookOffer('${offerId}', '${reqId}', this)">Book Offer</button>`
                         }
                       </div>
                     </div>
@@ -2556,9 +2594,15 @@ window.closeOfferFlyerModal = function() {
 };
 
 window.triggerBookFromFlyer = function() {
+  const btn = document.getElementById('btnFlyerBookNow');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="zilhaj-spinner-circle white sm" style="margin-right: 8px;"></span><span>Connecting to Razorpay...</span>`;
+  }
+  window.showZilhajLoader('Opening Secure Payment...', 'Connecting to Razorpay Live Gateway (₹1 deposit)...');
   window.closeOfferFlyerModal();
   if (window.currentSelectedOffer && window.currentSelectedOffer.offerId && window.currentSelectedOffer.reqId) {
-    window.proceedToBookOffer(window.currentSelectedOffer.offerId, window.currentSelectedOffer.reqId);
+    window.proceedToBookOffer(window.currentSelectedOffer.offerId, window.currentSelectedOffer.reqId, btn);
   } else if (window.currentSelectedOffer) {
     const o = window.currentSelectedOffer;
     window.openDirectLiveRazorpayCheckout(
@@ -2576,6 +2620,8 @@ window.triggerBookFromFlyer = function() {
 // DIRECT LIVE RAZORPAY CHECKOUT (1-Click Instant Deposit & Tax Invoice)
 // ------------------------------------------------------------------------
 window.openDirectLiveRazorpayCheckout = async function(agentCode, agencyName, price, packageName, reqId, departureDate) {
+  window.showZilhajLoader('Connecting to Razorpay...', 'Initializing secure 1-click booking deposit...');
+
   const depositAmountPaise = 100; // 100 paise = ₹1.00 INR
   const bookingId = reqId || 'REQ-0517';
   const pkgName = packageName || '18-Day Deluxe Umrah Package';
@@ -2608,6 +2654,7 @@ window.openDirectLiveRazorpayCheckout = async function(agentCode, agencyName, pr
     });
 
     if (!res.ok) {
+      window.hideZilhajLoader();
       const errData = await res.json().catch(() => ({}));
       throw new Error(errData.message || errData.error || ('Server returned ' + res.status));
     }
@@ -2617,6 +2664,7 @@ window.openDirectLiveRazorpayCheckout = async function(agentCode, agencyName, pr
     const razorpayKey = (orderData && (orderData.key_id || orderData.key)) || 'rzp_live_TdOWoVLFjxHfTO';
 
     if (!validOrderId) {
+      window.hideZilhajLoader();
       alert('Could not initialize Razorpay order: ' + ((orderData && (orderData.message || orderData.error)) || 'Failed to create order on server.'));
       return;
     }
@@ -2639,10 +2687,12 @@ window.openDirectLiveRazorpayCheckout = async function(agentCode, agencyName, pr
         },
         modal: {
           ondismiss: function() {
+            window.hideZilhajLoader();
             console.log('Payment modal dismissed by user');
           }
         },
         handler: async function (response) {
+          window.showZilhajLoader('Verifying Payment...', 'Confirming transaction with bank and locking your booking...');
           try {
             const vRes = await fetch(apiBase + '/verify-payment', {
               method: 'POST',
@@ -2655,6 +2705,7 @@ window.openDirectLiveRazorpayCheckout = async function(agentCode, agencyName, pr
               })
             });
             const vData = await vRes.json();
+            window.hideZilhajLoader();
             if (!vRes.ok || !vData.success) {
               alert('Payment verification failed: ' + ((vData && vData.message) || 'Signature mismatch'));
               return;

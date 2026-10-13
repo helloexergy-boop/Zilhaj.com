@@ -10910,3 +10910,40 @@ img, video, iframe {
     text-align: center !important;
   }
 }
+
+/* ==========================================================================
+   UNIVERSAL GREEN CIRCLE LOADING SPINNERS
+   ========================================================================== */
+@keyframes zilhaj-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.zilhaj-spinner-circle {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(18, 122, 77, 0.2);
+  border-top-color: #127A4D;
+  border-radius: 50%;
+  animation: zilhaj-spin 0.75s linear infinite;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.zilhaj-spinner-circle.white {
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #FFFFFF;
+}
+
+.zilhaj-spinner-circle.sm {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+.zilhaj-spinner-circle.lg {
+  width: 40px;
+  height: 40px;
+  border-width: 3.5px;
+}
