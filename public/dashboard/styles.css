@@ -3969,48 +3969,6 @@ body {
   justify-content: flex-end;
 }
 
-@media (max-width: 640px) {
-  .summary-modal-card {
-    border-radius: 18px !important;
-  }
-  .summary-modal-header-v2 {
-    padding: 20px 20px 18px;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .summary-req-badge-wrap {
-    align-items: flex-start;
-    flex-direction: row;
-    gap: 8px;
-    margin-top: 4px;
-  }
-  .summary-modal-body-v2 {
-    padding: 16px;
-    gap: 12px;
-  }
-  .summary-grid-v2 {
-    grid-template-columns: 1fr;
-  }
-  .s-grid-4 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .s-field-hotel-cat {
-    grid-column: span 1;
-  }
-  .summary-modal-footer-v2 {
-    padding: 14px 16px 18px;
-    flex-direction: column-reverse;
-    align-items: stretch;
-    gap: 12px;
-  }
-  .btn-summary-close-v2 {
-    width: 100%;
-  }
-  .summary-footer-trust {
-    justify-content: center;
-  }
-}
-
 /* ==========================================================================
    MODAL 2: TRAVEL PACKAGE FLYER POPUP (PREMIUM AGENCY FLYER DESIGN)
    ========================================================================== */

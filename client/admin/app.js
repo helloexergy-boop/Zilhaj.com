@@ -226,8 +226,30 @@ async function openSupportFromNotification(issueId, notifId) {
 
 let adminSupportPollInterval = null;
 
+function toggleMobileSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('mobile-sidebar-backdrop');
+  if (sidebar) {
+    sidebar.classList.toggle('mobile-open');
+  }
+  if (backdrop) {
+    backdrop.classList.toggle('active');
+  }
+}
+window.toggleMobileSidebar = toggleMobileSidebar;
+
 function navigateToTab(tabId) {
   state.currentTab = tabId;
+
+  // Auto-close mobile sidebar if open
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('mobile-sidebar-backdrop');
+  if (sidebar && sidebar.classList.contains('mobile-open')) {
+    sidebar.classList.remove('mobile-open');
+  }
+  if (backdrop && backdrop.classList.contains('active')) {
+    backdrop.classList.remove('active');
+  }
 
   // Manage real-time polling for Customer Support tab
   if (tabId === 'support') {
@@ -769,7 +791,8 @@ function renderRequestDetails() {
             </div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
   }
 }
@@ -1143,6 +1166,7 @@ async function handleAddOfferSubmit(e) {
     agentId: `AGENT-${Math.floor(1000 + Math.random() * 9000)}`,
     agentName,
     packageName: document.getElementById('add-offer-pkg-title').value || 'Umrah Package',
+    packageTitle: document.getElementById('add-offer-pkg-title').value || 'Umrah Package',
     duration: document.getElementById('add-offer-duration').value || '25 Days',
     pricePerPerson: `₹${price.toLocaleString('en-IN')}`,
     totalPrice: `₹${total.toLocaleString('en-IN')}`,
@@ -2879,6 +2903,36 @@ window.handleAddInventoryPackageSubmit = handleAddInventoryPackageSubmit;
 window.handleQuickFillOfferFromInventory = handleQuickFillOfferFromInventory;
 window.filterSelectInventoryCards = filterSelectInventoryCards;
 window.resetInventoryFilters = resetInventoryFilters;
+window.openOfferDetailModal = openOfferDetailModal;
+window.deleteOffer = deleteOffer;
+window.toggleOfferPublish = toggleOfferPublish;
+window.handleSelectCurrentOffer = handleSelectCurrentOffer;
+window.copyRequestInfo = copyRequestInfo;
+window.clearRequestsFilters = clearRequestsFilters;
+window.setStatusFilter = setStatusFilter;
+window.handleStatusChange = handleStatusChange;
+window.quickUpdateStatus = quickUpdateStatus;
+window.handleAddSubAdminSubmit = handleAddSubAdminSubmit;
+window.handleNewRequestSubmit = handleNewRequestSubmit;
+window.handleOnCallSubmit = handleOnCallSubmit;
+window.handleAddOfferSubmit = handleAddOfferSubmit;
+window.handleAdminAssignSelect = handleAdminAssignSelect;
+window.handleAdminPrioritySelect = handleAdminPrioritySelect;
+window.handleAdminStatusSelect = handleAdminStatusSelect;
+window.handleInventoryFilterChange = handleInventoryFilterChange;
+window.handleInventorySearch = handleInventorySearch;
+window.refreshInventoryData = refreshInventoryData;
+window.handleSupportFilterChange = handleSupportFilterChange;
+window.handleSupportSearch = handleSupportSearch;
+window.filterSupportByPriority = filterSupportByPriority;
+window.filterSupportByStatus = filterSupportByStatus;
+window.resetSupportFilters = resetSupportFilters;
+window.setAdminReplyMode = setAdminReplyMode;
+window.loadAdminSupportData = loadAdminSupportData;
+window.exportReportsCsv = exportReportsCsv;
+window.exportRequestsCsv = exportRequestsCsv;
+window.exportSubAdminsCsv = exportSubAdminsCsv;
+window.exportUsersCsv = exportUsersCsv;
 
 // ==========================================
 // 11. Lifecycle Initialization & Real-Time Sync Loop

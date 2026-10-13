@@ -1837,6 +1837,30 @@ document.addEventListener('DOMContentLoaded', () => {
                   const transport = offer.transport || 'Dedicated AC Fleet';
                   const mealPlan = offer.mealPlan || offer.meals || 'Full Board Buffet';
 
+                  window._allOffersMap = window._allOffersMap || {};
+                  window._allOffersMap[offerId] = {
+                    ...offer,
+                    id: offerId,
+                    offerId,
+                    reqId,
+                    packageTitle: pkgTitle,
+                    packageName: pkgTitle,
+                    agentCode,
+                    agentName,
+                    priceFormatted,
+                    duration,
+                    makkahHotel,
+                    makkahDistance: makkahDist,
+                    makkahDist,
+                    madinahHotel,
+                    madinahDistance: madinahDist,
+                    madinahDist,
+                    transport,
+                    mealPlan,
+                    departureDate: travelDate,
+                    travelDate
+                  };
+
                   return `
                     <div class="screenshot-offer-card" data-offer-id="${offerId}">
                       <div>
@@ -1907,11 +1931,11 @@ document.addEventListener('DOMContentLoaded', () => {
                       <div class="soc-actions-row" style="display: flex; gap: 8px; align-items: center; margin-top: 14px; flex-wrap: wrap;">
                         ${isAccepted 
                           ? `<span style="background: #D1FAE5; color: #065F46; font-weight: 700; padding: 7px 12px; border-radius: 8px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">✓ Booked &amp; Accepted</span>
-                             <button class="btn-soc-view" style="flex: 1;" onclick="openOfferFlyerModal('${agentCode}', '${agentName}', '${priceFormatted}', '${duration}', '${makkahHotel}', '${madinahHotel}', '${travelDate}', '${reqId}')">View Offer</button>`
+                             <button class="btn-soc-view" style="flex: 1;" onclick="openOfferFlyerModal('${offerId}', '${reqId}')">View Offer</button>`
                           : isRejected
                           ? `<span style="background: #FEE2E2; color: #991B1B; font-weight: 700; padding: 7px 12px; border-radius: 8px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">✕ Declined</span>
-                             <button class="btn-soc-view" style="flex: 1;" onclick="openOfferFlyerModal('${agentCode}', '${agentName}', '${priceFormatted}', '${duration}', '${makkahHotel}', '${madinahHotel}', '${travelDate}', '${reqId}')">View Offer</button>`
-                          : `<button class="btn-soc-view" onclick="openOfferFlyerModal('${agentCode}', '${agentName}', '${priceFormatted}', '${duration}', '${makkahHotel}', '${madinahHotel}', '${travelDate}', '${reqId}')">View Offer</button>
+                             <button class="btn-soc-view" style="flex: 1;" onclick="openOfferFlyerModal('${offerId}', '${reqId}')">View Offer</button>`
+                          : `<button class="btn-soc-view" onclick="openOfferFlyerModal('${offerId}', '${reqId}')">View Offer</button>
                              <button class="btn-soc-book" onclick="proceedToBookOffer('${offerId}', '${reqId}')">Book Offer</button>
                              <button class="btn-soc-decline" onclick="rejectOfferCustomer('${offerId}', '${reqId}')" style="background: transparent; color: #DC2626; border: 1.5px solid #FCA5A5; font-size: 12px; font-weight: 700; border-radius: 8px; padding: 7px 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#FEE2E2'" onmouseout="this.style.background='transparent'" title="Decline this agency offer">Decline</button>`
                         }
@@ -2070,6 +2094,7 @@ function adjustCounter(elementId, change) {
     el.textContent = newVal;
   }
 }
+window.adjustCounter = adjustCounter;
 
 // Toggle Request Card Sub Details (Expand / Collapse)
 function toggleCardDetails(btn) {
@@ -2082,6 +2107,7 @@ function toggleCardDetails(btn) {
     }
   }
 }
+window.toggleCardDetails = toggleCardDetails;
 
 // Cancel Request Modal State & Handlers
 window.pendingCancelData = null;
@@ -2376,45 +2402,147 @@ window.closeSubmissionSummaryModal = function() {
 // 2. Offer Package Flyer Modal
 window.currentSelectedOffer = null;
 
-window.openOfferFlyerModal = function(agentCode, agencyName, price, duration, makkahHotel, madinahHotel, departureDate, reqIdParam, btnEl) {
-  let targetBtn = (typeof btnEl === 'object' && btnEl !== null && btnEl.nodeType) ? btnEl : (typeof event !== 'undefined' && event && event.target ? event.target.closest('button') : null);
-  let cardBox = targetBtn ? targetBtn.closest('.request-card-box') : null;
-  let reqId = reqIdParam || (cardBox ? cardBox.getAttribute('data-req-id') : 'REQ-0517');
+window.openOfferFlyerModal = function(arg1, arg2, price, duration, makkahHotel, madinahHotel, departureDate, reqIdParam, btnEl) {
+  let offerId = null;
+  let reqId = null;
+  let offer = null;
 
-  let dateVal = departureDate;
-  if (!dateVal && cardBox) {
-    const fields = cardBox.querySelectorAll('.info-field');
-    fields.forEach(f => {
-      const label = f.querySelector('.field-label');
-      if (label && label.textContent.includes('TRAVEL DATE')) {
-        const valEl = f.querySelector('.field-value');
-        if (valEl) dateVal = valEl.childNodes[0].textContent.trim();
-      }
-    });
+  // 1. Check if called with (offerId, reqId) from _allOffersMap
+  if (window._allOffersMap && window._allOffersMap[arg1]) {
+    offer = window._allOffersMap[arg1];
+    offerId = arg1;
+    reqId = arg2 || offer.reqId;
+  } else if (Array.isArray(window._currentOffers)) {
+    offer = window._currentOffers.find(o => (o.id === arg1 || o.offerId === arg1)) || null;
+    if (offer) {
+      offerId = arg1;
+      reqId = arg2 || offer.requirementId || offer.reqId;
+    }
   }
-  if (!dateVal) dateVal = '22 Mar 2026';
 
-  window.currentSelectedOffer = { agentCode, agencyName, price, duration, makkahHotel, madinahHotel, departureDate: dateVal, reqId };
+  // 2. Also search in current requests offers
+  if (!offer && Array.isArray(window._currentReqs)) {
+    for (const r of window._currentReqs) {
+      if (Array.isArray(r.offers)) {
+        const found = r.offers.find(o => (o.id === arg1 || o.offerId === arg1));
+        if (found) {
+          offer = found;
+          offerId = arg1;
+          reqId = r.id || r.requestId;
+          break;
+        }
+      }
+    }
+  }
+
+  let agentCode, agencyName, formattedPrice, durVal, dateVal, makkahName, makkahDistance, madinahName, madinahDistance, pkgTitle, transportVal, mealsVal, ziyaratVal;
+
+  if (offer) {
+    offerId = offerId || offer.id || offer.offerId;
+    reqId = reqId || offer.reqId || offer.requirementId;
+    agentCode = offer.agentCode || offer.agentId || 'AGENT-1042';
+    agencyName = offer.agencyName || offer.agentName || 'Verified Agency';
+    pkgTitle = offer.packageTitle || offer.packageName || offer.title || 'Umrah Package';
+    durVal = offer.duration || '14 Days';
+    dateVal = offer.departureDate || offer.travelDate || 'Flexible';
+    formattedPrice = offer.priceFormatted || (offer.price ? ('₹' + Number(offer.price).toLocaleString('en-IN')) : '₹1');
+    makkahName = offer.makkahHotel || offer.makkah || 'Fairmont Clock Tower';
+    makkahDistance = offer.makkahDistance || offer.makkahDist || '50m from Haram';
+    madinahName = offer.madinahHotel || offer.madinah || 'Dar Al Taqwa';
+    madinahDistance = offer.madinahDistance || offer.madinahDist || '50m from Gate 25';
+    transportVal = offer.transport || 'Dedicated AC Fleet';
+    mealsVal = offer.mealPlan || offer.meals || 'Full Board Buffet';
+    ziyaratVal = offer.ziyarat || 'Guided Ziyarat in Makkah & Madinah';
+  } else {
+    // Legacy argument fallback
+    let targetBtn = (typeof btnEl === 'object' && btnEl !== null && btnEl.nodeType) ? btnEl : (typeof event !== 'undefined' && event && event.target ? event.target.closest('button') : null);
+    let cardBox = targetBtn ? targetBtn.closest('.request-card-box') : null;
+    reqId = reqIdParam || (cardBox ? cardBox.getAttribute('data-req-id') : 'REQ-0517');
+
+    dateVal = departureDate;
+    if (!dateVal && cardBox) {
+      const fields = cardBox.querySelectorAll('.info-field');
+      fields.forEach(f => {
+        const label = f.querySelector('.field-label');
+        if (label && label.textContent.includes('TRAVEL DATE')) {
+          const valEl = f.querySelector('.field-value');
+          if (valEl) dateVal = valEl.childNodes[0].textContent.trim();
+        }
+      });
+    }
+    if (!dateVal) dateVal = '22 Mar 2026';
+
+    agentCode = arg1 || 'AGENT-1042';
+    agencyName = arg2 || 'Al-Safwa Travel';
+    formattedPrice = price || '₹1 / Person';
+    durVal = duration || '18 Days';
+    makkahName = makkahHotel || 'Al Safwa Royal Orchid';
+    madinahName = madinahHotel || 'Dar Al-Taqwa Hotel';
+    pkgTitle = 'Umrah Package';
+    makkahDistance = '50 meters from Masjid Al-Haram';
+    madinahDistance = '100 meters from Al-Masjid An-Nabawi';
+    transportVal = 'Dedicated AC Fleet & Airport Transfers';
+    mealsVal = 'Full Board (Breakfast, Lunch, Dinner)';
+    ziyaratVal = 'Guided Ziyarat in Makkah & Madinah';
+  }
+
+  if (!formattedPrice.includes('/ Person') && !formattedPrice.includes('/ person')) {
+    formattedPrice = `${formattedPrice} / Person`;
+  }
+
+  window.currentSelectedOffer = {
+    offerId,
+    reqId,
+    agentCode,
+    agencyName,
+    price: formattedPrice,
+    duration: durVal,
+    departureDate: dateVal,
+    packageTitle: pkgTitle,
+    makkahHotel: makkahName,
+    makkahDistance: makkahDistance,
+    madinahHotel: madinahName,
+    madinahDistance: madinahDistance,
+    transport: transportVal,
+    mealPlan: mealsVal,
+    ziyarat: ziyaratVal
+  };
+
   const modal = document.getElementById('offerFlyerModal');
   if (modal) {
     const elAgentCode = document.getElementById('flyerAgentCode');
     const elAgencyName = document.getElementById('flyerAgencyName');
+    const elPackageTitle = document.getElementById('flyerPackageTitle');
     const elPrice = document.getElementById('flyerPrice');
     const elDuration = document.getElementById('flyerDuration');
     const elDepartureDate = document.getElementById('flyerDepartureDate');
     const elMakkahHotel = document.getElementById('flyerMakkahHotel');
+    const elMakkahDistance = document.getElementById('flyerMakkahDistance');
     const elMadinahHotel = document.getElementById('flyerMadinahHotel');
+    const elMadinahDistance = document.getElementById('flyerMadinahDistance');
+    const elIncludesList = document.getElementById('flyerIncludesList');
 
-    if (elAgentCode) elAgentCode.textContent = agentCode || 'AGENT-1042';
-    if (elAgencyName) elAgencyName.textContent = agencyName || 'Al-Safwa Travel';
-    if (elPrice) {
-      const formattedPrice = price ? (price.includes('/ Person') || price.includes('/ person') ? price : `${price} / Person`) : '₹1 / Person';
-      elPrice.textContent = formattedPrice;
-    }
-    if (elDuration) elDuration.textContent = duration || '18 Days';
+    if (elAgentCode) elAgentCode.textContent = agentCode;
+    if (elAgencyName) elAgencyName.textContent = agencyName;
+    if (elPackageTitle) elPackageTitle.textContent = pkgTitle;
+    if (elPrice) elPrice.textContent = formattedPrice;
+    if (elDuration) elDuration.textContent = durVal;
     if (elDepartureDate) elDepartureDate.textContent = dateVal;
-    if (elMakkahHotel) elMakkahHotel.textContent = makkahHotel || 'Al Safwa Royal Orchid';
-    if (elMadinahHotel) elMadinahHotel.textContent = madinahHotel || 'Dar Al-Taqwa Hotel';
+    if (elMakkahHotel) elMakkahHotel.textContent = makkahName;
+    if (elMakkahDistance) elMakkahDistance.textContent = makkahDistance;
+    if (elMadinahHotel) elMadinahHotel.textContent = madinahName;
+    if (elMadinahDistance) elMadinahDistance.textContent = madinahDistance;
+
+    if (elIncludesList) {
+      elIncludesList.innerHTML = `
+        <li><span class="check-icon">✓</span> Return flights &amp; Saudi eVisa support</li>
+        <li><span class="check-icon">✓</span> Makkah Hotel: ${makkahName} (${makkahDistance})</li>
+        <li><span class="check-icon">✓</span> Madinah Hotel: ${madinahName} (${madinahDistance})</li>
+        <li><span class="check-icon">✓</span> Daily meals: ${mealsVal}</li>
+        <li><span class="check-icon">✓</span> Transport: ${transportVal}</li>
+        <li><span class="check-icon">✓</span> ${ziyaratVal}</li>
+      `;
+    }
 
     modal.style.display = 'flex';
     lockBodyScroll();
@@ -2429,7 +2557,19 @@ window.closeOfferFlyerModal = function() {
 
 window.triggerBookFromFlyer = function() {
   window.closeOfferFlyerModal();
-  window.openDirectLiveRazorpayCheckout('AGENT-1042', 'Al-Safwa Travel', 1, '18-Day Deluxe Umrah Package', 'REQ-0517', '22 Mar 2026');
+  if (window.currentSelectedOffer && window.currentSelectedOffer.offerId && window.currentSelectedOffer.reqId) {
+    window.proceedToBookOffer(window.currentSelectedOffer.offerId, window.currentSelectedOffer.reqId);
+  } else if (window.currentSelectedOffer) {
+    const o = window.currentSelectedOffer;
+    window.openDirectLiveRazorpayCheckout(
+      o.agentCode || 'AGENT-1042',
+      o.agencyName || 'Al-Safwa Travel',
+      1,
+      o.packageTitle || '18-Day Deluxe Umrah Package',
+      o.reqId || 'REQ-0517',
+      o.departureDate || '22 Mar 2026'
+    );
+  }
 };
 
 // ------------------------------------------------------------------------

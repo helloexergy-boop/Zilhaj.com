@@ -670,12 +670,12 @@
             <strong>Agent Code:</strong> <span id="displayAgentCode">AG-904</span> (Verified Partner)
           </div>
 
-          <div class="package-details-bubble">
-            <div>🏢 <strong>Makkah Hotel:</strong> Swissotel Clock Tower (5 Star - 150m)</div>
-            <div>🏢 <strong>Madinah Hotel:</strong> Pullman Zamzam (5 Star - 100m)</div>
-            <div>✈️ <strong>Flight:</strong> Direct Saudi Airlines (DEL-JED-MED-DEL)</div>
-            <div>📋 <strong>Inclusions:</strong> Saudi eVisa, 3x Daily Meals, VIP Air-Conditioned Transport, Ziyarat</div>
-            <div>📅 <strong>Travel Date:</strong> <span id="displayTravelDate">25 Oct 2026</span> &bull; <strong>Duration:</strong> 15 Days</div>
+          <div class="package-details-bubble" id="checkoutPackageBubble">
+            <div>🏢 <strong>Makkah Hotel:</strong> <span id="displayMakkahHotel">Fairmont Clock Tower</span> (<span id="displayMakkahDist">50m from Haram</span>)</div>
+            <div>🏢 <strong>Madinah Hotel:</strong> <span id="displayMadinahHotel">Dar Al Taqwa</span> (<span id="displayMadinahDist">50m from Gate 25</span>)</div>
+            <div>✈️ <strong>Transport:</strong> <span id="displayTransport">Dedicated AC Fleet</span></div>
+            <div>🍽️ <strong>Meal Plan:</strong> <span id="displayMealPlan">Full Board (Breakfast, Lunch, Dinner)</span></div>
+            <div>📅 <strong>Travel Date:</strong> <span id="displayTravelDate">25 Oct 2026</span> &bull; <strong>Duration:</strong> <span id="displayDuration">15 Days</span></div>
           </div>
         </div>
 
@@ -872,11 +872,19 @@
 
     const bookingData = {
       reqId: urlParams.get('reqId') || storedBooking.reqId || 'REQ-8842',
+      offerId: urlParams.get('offerId') || storedBooking.offerId || '',
       agentCode: urlParams.get('agentCode') || storedBooking.agentCode || 'AG-904',
       agencyName: urlParams.get('agencyName') || storedBooking.agencyName || 'Al-Haram Exergy Travels',
       price: urlParams.get('price') || storedBooking.price || '₹72,000',
       packageName: urlParams.get('packageName') || storedBooking.packageName || '15-Day Premium Deluxe Umrah Special',
-      departureDate: urlParams.get('departureDate') || storedBooking.departureDate || '25 Oct 2026'
+      departureDate: urlParams.get('departureDate') || storedBooking.departureDate || '25 Oct 2026',
+      duration: urlParams.get('duration') || storedBooking.duration || '15 Days',
+      makkahHotel: urlParams.get('makkahHotel') || storedBooking.makkahHotel || 'Fairmont Clock Tower',
+      makkahDistance: urlParams.get('makkahDistance') || storedBooking.makkahDistance || '50m from Haram',
+      madinahHotel: urlParams.get('madinahHotel') || storedBooking.madinahHotel || 'Dar Al Taqwa',
+      madinahDistance: urlParams.get('madinahDistance') || storedBooking.madinahDistance || '50m from Gate 25',
+      transport: urlParams.get('transport') || storedBooking.transport || 'Dedicated AC Fleet',
+      mealPlan: urlParams.get('mealPlan') || storedBooking.mealPlan || 'Full Board (Breakfast, Lunch, Dinner)'
     };
 
     // Populate UI
@@ -886,6 +894,13 @@
     document.getElementById('displayAgentCode').textContent = bookingData.agentCode;
     document.getElementById('displayTravelDate').textContent = bookingData.departureDate;
     document.getElementById('displayPricePerPerson').textContent = bookingData.price;
+    if (document.getElementById('displayMakkahHotel')) document.getElementById('displayMakkahHotel').textContent = bookingData.makkahHotel;
+    if (document.getElementById('displayMakkahDist')) document.getElementById('displayMakkahDist').textContent = bookingData.makkahDistance;
+    if (document.getElementById('displayMadinahHotel')) document.getElementById('displayMadinahHotel').textContent = bookingData.madinahHotel;
+    if (document.getElementById('displayMadinahDist')) document.getElementById('displayMadinahDist').textContent = bookingData.madinahDistance;
+    if (document.getElementById('displayTransport')) document.getElementById('displayTransport').textContent = bookingData.transport;
+    if (document.getElementById('displayMealPlan')) document.getElementById('displayMealPlan').textContent = bookingData.mealPlan;
+    if (document.getElementById('displayDuration')) document.getElementById('displayDuration').textContent = bookingData.duration;
 
     if (storedUser.name) document.getElementById('travelerName').value = storedUser.name;
     if (storedUser.email) document.getElementById('travelerEmail').value = storedUser.email;
