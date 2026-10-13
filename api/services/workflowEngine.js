@@ -127,8 +127,8 @@ class WorkflowEngine {
         let requestRecord = null;
 
         if (db) {
-            requestRecord = await db.collection('journey_requests').findOne({ id: requestId }) ||
-                            await db.collection('requirements').findOne({ id: requestId });
+            requestRecord = await db.collection('journey_requests').findOne({ $or: [{ id: requestId }, { requestId: requestId }] }) ||
+                            await db.collection('requirements').findOne({ $or: [{ id: requestId }, { requestId: requestId }] });
         }
 
         if (!requestRecord && this.inMemoryStore && this.inMemoryStore.requirements) {
@@ -139,13 +139,16 @@ class WorkflowEngine {
             throw new Error(`Journey request [${requestId}] not found.`);
         }
 
+        const existingOffers = Array.isArray(requestRecord.offers) ? requestRecord.offers : [];
+        const startIndex = existingOffers.length;
+
         const generatedOffers = selectedInventoryItems.map((item, index) => {
-            const offerId = `OFF-${requestId}-${index + 1}`;
+            const offerId = item.id ? `OFF-${requestId}-${item.id}` : `OFF-${requestId}-${startIndex + index + 1}`;
             const price = Number(item.price || item.pricePerPerson || 1);
             const agentCode = item.agentId || item.agentCode || specialistData.id || 'AGENT-1042';
             const agentName = item.agentName || specialistData.name || 'Al-Haramain Luxury Group';
             const serviceType = item.serviceType || 'Umrah';
-            const packageTitle = item.packageTitle || item.title || item.packageName || `Package Option #${index + 1}`;
+            const packageTitle = item.packageTitle || item.title || item.packageName || `Package Option #${startIndex + index + 1}`;
             const duration = item.duration || (item.durationDays ? `${item.durationDays} Days` : '18 Days');
             const makkahHotel = item.makkahHotel || item.makkahHotelName || 'Fairmont Clock Tower';
             const makkahDistance = item.makkahDistance || '50m from Haram';
@@ -184,6 +187,12 @@ class WorkflowEngine {
             };
         });
 
+        // Merge existing and new offers
+        const allOffersMap = new Map();
+        existingOffers.forEach(o => allOffersMap.set(o.id || o.offerId, o));
+        generatedOffers.forEach(o => allOffersMap.set(o.id || o.offerId, o));
+        const combinedOffers = Array.from(allOffersMap.values());
+
         // Update DB
         if (db) {
             await db.collection('journey_requests').updateOne(
@@ -192,7 +201,7 @@ class WorkflowEngine {
                     $set: {
                         status: STATES.OFFERS_PROVIDED,
                         step: 3,
-                        offers: generatedOffers,
+                        offers: combinedOffers,
                         updatedAt: new Date()
                     }
                 }
@@ -203,7 +212,7 @@ class WorkflowEngine {
                     $set: {
                         status: STATES.OFFERS_PROVIDED,
                         step: 3,
-                        offers: generatedOffers,
+                        offers: combinedOffers,
                         updatedAt: new Date()
                     }
                 }
@@ -214,19 +223,38 @@ class WorkflowEngine {
         // Update in-memory fallback
         requestRecord.status = STATES.OFFERS_PROVIDED;
         requestRecord.step = 3;
-        requestRecord.offers = generatedOffers;
+        requestRecord.offers = combinedOffers;
         if (this.inMemoryStore && this.inMemoryStore.offers) {
             this.inMemoryStore.offers.push(...generatedOffers);
         }
 
-        // Real-time broadcast to customer channel request:{requestId}
-        realtimeEngine.publish(`request:${requestId}`, 'OFFERS_ATTACHED', {
-            requestId,
-            offers: generatedOffers,
-            status: STATES.OFFERS_PROVIDED
-        });
+        // Real-time broadcast to customer channel request:{requestId} and user channels
+        const targetUserId = String(requestRecord.userId || '').trim();
+        const targetUserEmail = String(requestRecord.email || requestRecord.userEmail || '').trim().toLowerCase();
 
-        return { requestId, offers: generatedOffers, status: STATES.OFFERS_PROVIDED };
+        const broadcastPayload = {
+            requestId,
+            offers: combinedOffers,
+            newOffers: generatedOffers,
+            status: STATES.OFFERS_PROVIDED
+        };
+
+        realtimeEngine.publish(`request:${requestId}`, 'OFFERS_ATTACHED', broadcastPayload);
+        realtimeEngine.publish(`request:${requestId}`, 'OFFER_DISPATCHED', broadcastPayload);
+        if (targetUserId) {
+            realtimeEngine.publish(`user:${targetUserId}:requests`, 'OFFERS_ATTACHED', broadcastPayload);
+            realtimeEngine.publish(`user:${targetUserId}:requests`, 'OFFER_DISPATCHED', broadcastPayload);
+        }
+        if (targetUserEmail) {
+            realtimeEngine.publish(`user:${targetUserEmail}:requests`, 'OFFERS_ATTACHED', broadcastPayload);
+            realtimeEngine.publish(`user:${targetUserEmail}:requests`, 'OFFER_DISPATCHED', broadcastPayload);
+        }
+        realtimeEngine.publish('admin:requirements', 'OFFERS_ATTACHED', broadcastPayload);
+        realtimeEngine.publish('ops:queue', 'OFFERS_ATTACHED', broadcastPayload);
+        realtimeEngine.publish('all', 'OFFERS_ATTACHED', broadcastPayload);
+        realtimeEngine.publish('all', 'OFFER_DISPATCHED', broadcastPayload);
+
+        return { requestId, offers: combinedOffers, newOffers: generatedOffers, status: STATES.OFFERS_PROVIDED };
     }
 
     /**
@@ -379,6 +407,31 @@ class WorkflowEngine {
                     );
                 }
 
+                // Insert payment record into payments collection for transaction auditing
+                const paymentDoc = {
+                    paymentId: paymentId,
+                    razorpayPaymentId: paymentId,
+                    orderId: orderId,
+                    razorpayOrderId: orderId,
+                    requestId: requestId || (requestRecord ? requestRecord.id : 'DIRECT'),
+                    offerId: offerId || (offer ? offer.id : 'DIRECT-OFFER'),
+                    bookingId: bookingId,
+                    userId: String(userId || (requestRecord ? requestRecord.userId : '')),
+                    customerName: bookingRecord.customerName,
+                    customerEmail: bookingRecord.customerEmail,
+                    packageTitle: bookingRecord.packageTitle,
+                    amount: authoritativePrice,
+                    currency: 'INR',
+                    paymentStatus: 'PAID',
+                    status: 'CONFIRMED',
+                    method: 'Razorpay Live Escrow Gateway',
+                    gateway: 'Razorpay',
+                    signature: signature || 'verified',
+                    paidAt: new Date(),
+                    createdAt: new Date()
+                };
+                await db.collection('payments').insertOne(paymentDoc);
+
                 // Insert booking record
                 await db.collection('bookings').insertOne({ ...bookingRecord });
 
@@ -392,6 +445,16 @@ class WorkflowEngine {
                         { id: requestId },
                         { $set: { status: STATES.CONFIRMED, step: 5, bookingId, updatedAt: new Date() } }
                     );
+                    if (offerId) {
+                        await db.collection('journey_requests').updateOne(
+                            { id: requestId, 'offers.id': offerId },
+                            { $set: { 'offers.$.status': 'ACCEPTED', 'offers.$.paymentStatus': 'PAID' } }
+                        );
+                        await db.collection('requirements').updateOne(
+                            { id: requestId, 'offers.id': offerId },
+                            { $set: { 'offers.$.status': 'ACCEPTED', 'offers.$.paymentStatus': 'PAID' } }
+                        );
+                    }
                 }
 
                 if (offerId) {
@@ -430,8 +493,11 @@ class WorkflowEngine {
         }
         if (requestId) {
             realtimeEngine.publish(`request:${requestId}`, 'BOOKING_CONFIRMED', bookingRecord);
+            realtimeEngine.publish(`request:${requestId}`, 'OFFER_STATUS_UPDATED', { requestId, offerId, status: 'ACCEPTED', bookingId });
         }
+        realtimeEngine.publish('admin:requirements', 'OFFER_STATUS_UPDATED', { requestId, offerId, status: 'ACCEPTED', bookingId });
         realtimeEngine.publish('ops:queue', 'BOOKING_PAYMENT_SUCCESS', bookingRecord);
+        realtimeEngine.publish('all', 'BOOKING_PAYMENT_SUCCESS', bookingRecord);
 
         return bookingRecord;
     }
@@ -463,6 +529,55 @@ class WorkflowEngine {
         }
 
         return bookings;
+    }
+
+    /**
+     * Customer Rejects An Offer
+     */
+    async rejectOffer(requestId, offerId, userId) {
+        const db = await connectToDatabase();
+        let requestRecord = null;
+        if (db) {
+            requestRecord = await db.collection('journey_requests').findOne({ id: requestId }) ||
+                            await db.collection('requirements').findOne({ id: requestId });
+        }
+        if (!requestRecord && this.inMemoryStore && this.inMemoryStore.requirements) {
+            requestRecord = this.inMemoryStore.requirements.find(r => r.id === requestId);
+        }
+        if (!requestRecord) {
+            throw new Error(`Journey request [${requestId}] not found.`);
+        }
+
+        if (db) {
+            await db.collection('journey_requests').updateOne(
+                { id: requestId, 'offers.id': offerId },
+                { $set: { 'offers.$.status': 'REJECTED', updatedAt: new Date() } }
+            );
+            await db.collection('requirements').updateOne(
+                { id: requestId, 'offers.id': offerId },
+                { $set: { 'offers.$.status': 'REJECTED', updatedAt: new Date() } }
+            );
+            await db.collection('offers').updateOne(
+                { id: offerId },
+                { $set: { status: 'REJECTED', updatedAt: new Date() } }
+            );
+        }
+
+        if (Array.isArray(requestRecord.offers)) {
+            const targetOffer = requestRecord.offers.find(o => o.id === offerId || o.offerId === offerId);
+            if (targetOffer) targetOffer.status = 'REJECTED';
+        }
+
+        const payload = { requestId, offerId, status: 'REJECTED' };
+        realtimeEngine.publish(`request:${requestId}`, 'OFFER_STATUS_UPDATED', payload);
+        if (requestRecord.userId) {
+            realtimeEngine.publish(`user:${requestRecord.userId}:requests`, 'OFFER_STATUS_UPDATED', payload);
+        }
+        realtimeEngine.publish('admin:requirements', 'OFFER_STATUS_UPDATED', payload);
+        realtimeEngine.publish('ops:queue', 'OFFER_STATUS_UPDATED', payload);
+        realtimeEngine.publish('all', 'OFFER_STATUS_UPDATED', payload);
+
+        return { success: true, requestId, offerId, status: 'REJECTED' };
     }
 }
 

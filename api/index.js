@@ -267,6 +267,13 @@ async function bootstrapDatabase() {
             await db.collection('bookings').createIndex({ bookingId: 1 }, { unique: true, sparse: true });
             await db.collection('bookings').createIndex({ userId: 1, createdAt: -1 });
             await db.collection('offers').createIndex({ requirementId: 1 });
+            await db.collection('package_inventory').createIndex({ id: 1 }, { unique: true, sparse: true });
+            await db.collection('package_inventory').createIndex({ agentId: 1 });
+            await db.collection('package_inventory').createIndex({ pricePerPerson: 1 });
+            await db.collection('package_inventory').createIndex({ departureDate: 1 });
+            await db.collection('payments').createIndex({ paymentId: 1 }, { unique: true, sparse: true });
+            await db.collection('payments').createIndex({ userId: 1, createdAt: -1 });
+            await db.collection('payments').createIndex({ requestId: 1 });
             console.log('[BOOT] Database performance and unique indexes verified.');
         } catch (idxErr) {
             console.warn('[BOOT] Index verification notice:', idxErr.message);
@@ -298,6 +305,7 @@ const otpLimiter = rateLimit({
     max: 10,
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { trustProxy: false },
     message: { error: 'Too many OTP requests from this IP. Please try again after 15 minutes.' }
 });
 
@@ -306,6 +314,7 @@ const authLimiter = rateLimit({
     max: 25,
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { trustProxy: false },
     message: { error: 'Too many authentication attempts. Please try again after 15 minutes.' }
 });
 
@@ -314,6 +323,7 @@ const apiLimiter = rateLimit({
     max: 180,
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { trustProxy: false },
     skip: (req) => !req.path.startsWith('/api/') || req.path.startsWith('/api/realtime/stream')
 });
 
@@ -884,22 +894,33 @@ app.put('/api/admin/requirements/:id/status', authenticateUser, requireRole(['SU
     }
 });
 
-// Attach Inventory Offer to Requirement
+// Attach Inventory Offer(s) to Requirement (Supports single or multi-package batch attachment)
 app.post('/api/admin/requirements/:id/apply-inventory-offer', authenticateUser, requireRole(['SUBADMIN', 'ADMIN']), async (req, res) => {
     try {
         const reqId = req.params.id;
-        const { packageId, inventoryIds, selectedItems } = req.body;
+        const { packageId, packageIds, inventoryIds, selectedItems } = req.body;
         const db = await connectToDatabase();
 
         let itemsToAttach = selectedItems || [];
-        if (itemsToAttach.length === 0 && inventoryIds && Array.isArray(inventoryIds) && db) {
+        const allIds = [
+            ...(Array.isArray(packageIds) ? packageIds : []),
+            ...(Array.isArray(inventoryIds) ? inventoryIds : []),
+            ...(packageId ? [packageId] : [])
+        ];
+
+        if (itemsToAttach.length === 0 && allIds.length > 0 && db) {
             itemsToAttach = await db.collection('package_inventory').find({
-                id: { $in: inventoryIds }
+                $or: [
+                    { id: { $in: allIds } },
+                    { packageId: { $in: allIds } }
+                ]
             }).toArray();
         }
 
         if (itemsToAttach.length === 0 && packageId && db) {
-            const single = await db.collection('package_inventory').findOne({ id: packageId });
+            const single = await db.collection('package_inventory').findOne({
+                $or: [{ id: packageId }, { packageId: packageId }]
+            });
             if (single) itemsToAttach = [single];
         }
 
@@ -908,13 +929,13 @@ app.post('/api/admin/requirements/:id/apply-inventory-offer', authenticateUser, 
         }
 
         const result = await workflowEngine.dispatchOffersToCustomer(reqId, req.user, itemsToAttach);
-        res.status(201).json({ success: true, message: 'Offers attached successfully', data: result });
+        res.status(201).json({ success: true, message: `${itemsToAttach.length} offer(s) attached successfully`, data: result, count: itemsToAttach.length });
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
 });
 
-// Operations / Subadmin Offer Dispatch API
+// Operations / Subadmin Offer Dispatch API (Multiple offers supported)
 app.post(['/api/ops/offers', '/api/ops/dispatch-offers'], authenticateUser, requireRole(['SUBADMIN', 'ADMIN']), async (req, res) => {
     try {
         const reqId = req.body.requestId || req.body.id;
@@ -929,58 +950,256 @@ app.post(['/api/ops/offers', '/api/ops/dispatch-offers'], authenticateUser, requ
     }
 });
 
-// Admin Inventory Management
+// Reject Offer Endpoint (Customer or Admin)
+app.post(['/api/requests/:id/offers/:offerId/reject', '/api/requests/:id/reject-offer', '/api/offers/:offerId/reject'], authenticateUser, async (req, res) => {
+    try {
+        const requestId = req.params.id || req.body.requestId;
+        const offerId = req.params.offerId || req.body.offerId;
+        if (!offerId) return res.status(400).json({ error: 'offerId is required' });
+        if (!requestId) {
+            // Find request by offerId if requestId not passed in URL
+            const db = await connectToDatabase();
+            if (db) {
+                const off = await db.collection('offers').findOne({ id: offerId });
+                if (off && off.requirementId) {
+                    const result = await workflowEngine.rejectOffer(off.requirementId, offerId, req.user?.id);
+                    return res.json(result);
+                }
+            }
+            return res.status(400).json({ error: 'requestId could not be determined' });
+        }
+        const result = await workflowEngine.rejectOffer(requestId, offerId, req.user?.id);
+        res.json(result);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// Accept Offer Endpoint (Customer or Admin)
+app.post(['/api/requests/:id/offers/:offerId/accept', '/api/offers/:offerId/accept'], authenticateUser, async (req, res) => {
+    try {
+        const requestId = req.params.id || req.body.requestId;
+        const offerId = req.params.offerId || req.body.offerId;
+        if (!offerId) return res.status(400).json({ error: 'offerId is required' });
+        const result = await workflowEngine.selectOfferForCheckout(requestId, req.user?.id, offerId);
+        
+        const db = await connectToDatabase();
+        if (db) {
+            await db.collection('journey_requests').updateOne(
+                { id: requestId, 'offers.id': offerId },
+                { $set: { 'offers.$.status': 'ACCEPTED', updatedAt: new Date() } }
+            );
+            await db.collection('requirements').updateOne(
+                { id: requestId, 'offers.id': offerId },
+                { $set: { 'offers.$.status': 'ACCEPTED', updatedAt: new Date() } }
+            );
+            await db.collection('offers').updateOne(
+                { id: offerId },
+                { $set: { status: 'ACCEPTED', updatedAt: new Date() } }
+            );
+        }
+
+        realtimeEngine.publish(`request:${requestId}`, 'OFFER_STATUS_UPDATED', { requestId, offerId, status: 'ACCEPTED' });
+        realtimeEngine.publish('admin:requirements', 'OFFER_STATUS_UPDATED', { requestId, offerId, status: 'ACCEPTED' });
+        realtimeEngine.publish('all', 'OFFER_STATUS_UPDATED', { requestId, offerId, status: 'ACCEPTED' });
+        res.json(result);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// Package Inventory System (HCI) - Advanced Search by Date, Agent ID, Name, Duration, Price
 app.get('/api/admin/inventory', authenticateUser, requireRole(['SUBADMIN', 'ADMIN']), async (req, res) => {
     try {
         const db = await connectToDatabase();
+        const { q, search, agentId, name, duration, date, minPrice, maxPrice, service, status } = req.query;
+        let query = {};
+
+        if (q || search) {
+            const searchTerm = (q || search).trim();
+            query.$or = [
+                { packageTitle: { $regex: searchTerm, $options: 'i' } },
+                { agentName: { $regex: searchTerm, $options: 'i' } },
+                { agentId: { $regex: searchTerm, $options: 'i' } },
+                { id: { $regex: searchTerm, $options: 'i' } },
+                { makkahHotel: { $regex: searchTerm, $options: 'i' } },
+                { madinahHotel: { $regex: searchTerm, $options: 'i' } },
+                { duration: { $regex: searchTerm, $options: 'i' } }
+            ];
+        }
+
+        if (agentId && agentId.trim()) {
+            query.agentId = { $regex: agentId.trim(), $options: 'i' };
+        }
+
+        if (name && name.trim()) {
+            query.packageTitle = { $regex: name.trim(), $options: 'i' };
+        }
+
+        if (duration && duration.trim()) {
+            query.$or = [
+                { duration: { $regex: duration.trim(), $options: 'i' } },
+                { durationDays: parseInt(duration.trim()) || 0 }
+            ];
+        }
+
+        if (date && date.trim()) {
+            query.$or = [
+                { departureDate: { $regex: date.trim(), $options: 'i' } },
+                { departureDateText: { $regex: date.trim(), $options: 'i' } },
+                { travelDate: { $regex: date.trim(), $options: 'i' } }
+            ];
+        }
+
+        if (service && service !== 'All') {
+            query.serviceType = { $regex: service.trim(), $options: 'i' };
+        }
+
+        if (status && status !== 'All') {
+            query.status = status.trim();
+        }
+
+        if (minPrice || maxPrice) {
+            const priceCond = {};
+            if (minPrice) priceCond.$gte = Number(minPrice);
+            if (maxPrice) priceCond.$lte = Number(maxPrice);
+            if (!query.$and) query.$and = [];
+            query.$and.push({
+                $or: [
+                    { pricePerPerson: priceCond },
+                    { price: priceCond }
+                ]
+            });
+        }
+
         let items = [];
-        if (db) items = await db.collection('package_inventory').find({}).sort({ createdAt: -1 }).toArray();
-        if (!items || items.length === 0) items = DEFAULT_INVENTORY_PACKAGES;
-        res.json({ success: true, packages: items, inventory: items });
+        if (db) {
+            items = await db.collection('package_inventory').find(query).sort({ createdAt: -1 }).toArray();
+        }
+        if ((!items || items.length === 0) && Object.keys(query).length === 0) {
+            items = DEFAULT_INVENTORY_PACKAGES;
+        }
+
+        res.json({ success: true, count: items.length, packages: items, inventory: items });
     } catch (err) {
+        console.error('Inventory lookup error:', err);
         res.status(500).json({ error: 'Failed to fetch inventory' });
     }
 });
 
+// Add New Package to Inventory (Includes future packages with departure dates)
 app.post('/api/admin/inventory', authenticateUser, requireRole(['SUBADMIN', 'ADMIN']), async (req, res) => {
     try {
+        const body = req.body || {};
+        const packageId = body.id || body.packageId || ('PKG-' + Math.floor(1000 + Math.random() * 9000));
         const newItem = {
-            id: 'PKG-' + Math.floor(1000 + Math.random() * 9000),
-            agentId: req.user.id,
-            agentName: req.user.name,
+            id: packageId,
+            packageId: packageId,
+            agentId: body.agentId || req.user.id || 'AGENT-1042',
+            agentName: body.agentName || req.user.name || 'Al-Safwa Travel & Tours',
+            packageTitle: body.packageTitle || body.title || body.name || 'Custom Umrah Package',
+            serviceType: body.serviceType || 'Umrah',
+            duration: body.duration || '18 Days',
+            durationDays: parseInt(body.durationDays) || parseInt(body.duration) || 18,
+            pricePerPerson: Number(body.pricePerPerson || body.price || 85000),
+            price: Number(body.price || body.pricePerPerson || 1),
+            makkahHotel: body.makkahHotel || 'Fairmont Clock Tower',
+            makkahDistance: body.makkahDistance || '50m from Haram',
+            madinahHotel: body.madinahHotel || 'Dar Al Taqwa',
+            madinahDistance: body.madinahDistance || '100m from Nabawi',
+            transport: body.transport || 'Private AC GMC Yukon / Luxury Coach',
+            mealPlan: body.mealPlan || 'Full Board (Buffet Breakfast, Lunch & Dinner)',
+            ziyarat: body.ziyarat || 'Complete Makkah & Madinah Guided Historical Tours',
+            departureDate: body.departureDate || body.departureDateText || '2026-11-15',
+            departureDateText: body.departureDateText || body.departureDate || '15 Nov 2026',
+            availableSeats: Number(body.availableSeats || body.totalSeats) || 30,
+            status: body.status || 'Active',
             createdAt: new Date(),
-            ...req.body
+            updatedAt: new Date()
         };
         const db = await connectToDatabase();
         if (db) await db.collection('package_inventory').insertOne(newItem);
         res.status(201).json({ success: true, package: newItem });
     } catch (err) {
-        res.status(500).json({ error: 'Failed to create inventory item' });
+        res.status(500).json({ error: 'Failed to create inventory item', message: err.message });
     }
 });
 
+// Edit / Update Package in Inventory
 app.put('/api/admin/inventory/:id', authenticateUser, requireRole(['SUBADMIN', 'ADMIN']), async (req, res) => {
     try {
+        const packageId = req.params.id;
+        const body = req.body || {};
+        const updateData = {
+            ...(body.packageTitle || body.title || body.name ? { packageTitle: body.packageTitle || body.title || body.name } : {}),
+            ...(body.serviceType ? { serviceType: body.serviceType } : {}),
+            ...(body.duration ? { duration: body.duration } : {}),
+            ...(body.duration ? { durationDays: parseInt(body.duration) || 14 } : {}),
+            ...(body.durationDays !== undefined ? { durationDays: Number(body.durationDays) } : {}),
+            ...(body.pricePerPerson !== undefined || body.price !== undefined ? { 
+                pricePerPerson: Number(body.pricePerPerson !== undefined ? body.pricePerPerson : body.price),
+                price: Number(body.price !== undefined ? body.price : body.pricePerPerson)
+            } : {}),
+            ...(body.makkahHotel ? { makkahHotel: body.makkahHotel } : {}),
+            ...(body.makkahDistance ? { makkahDistance: body.makkahDistance } : {}),
+            ...(body.madinahHotel ? { madinahHotel: body.madinahHotel } : {}),
+            ...(body.madinahDistance ? { madinahDistance: body.madinahDistance } : {}),
+            ...(body.transport ? { transport: body.transport } : {}),
+            ...(body.mealPlan ? { mealPlan: body.mealPlan } : {}),
+            ...(body.ziyarat ? { ziyarat: body.ziyarat } : {}),
+            ...(body.agentId ? { agentId: body.agentId } : {}),
+            ...(body.agentName ? { agentName: body.agentName } : {}),
+            ...(body.departureDate ? { departureDate: body.departureDate } : {}),
+            ...(body.departureDateText ? { departureDateText: body.departureDateText } : {}),
+            ...(body.availableSeats !== undefined ? { availableSeats: Number(body.availableSeats) } : {}),
+            ...(body.status ? { status: body.status } : {}),
+            updatedAt: new Date()
+        };
+
         const db = await connectToDatabase();
         if (db) {
             await db.collection('package_inventory').updateOne(
-                { id: req.params.id },
-                { $set: { ...req.body, updatedAt: new Date() } }
+                { $or: [{ id: packageId }, { packageId: packageId }] },
+                { $set: updateData }
             );
         }
-        res.json({ success: true, message: 'Inventory package updated' });
+        res.json({ success: true, message: 'Inventory package updated successfully', packageId, updateData, package: { id: packageId, ...updateData } });
     } catch (err) {
-        res.status(500).json({ error: 'Failed to update inventory' });
+        res.status(500).json({ error: 'Failed to update inventory', message: err.message });
     }
 });
 
+// Delete Package from Inventory
 app.delete('/api/admin/inventory/:id', authenticateUser, requireRole(['SUBADMIN', 'ADMIN']), async (req, res) => {
     try {
+        const packageId = req.params.id;
         const db = await connectToDatabase();
-        if (db) await db.collection('package_inventory').deleteOne({ id: req.params.id });
-        res.json({ success: true, message: 'Inventory package deleted' });
+        if (db) {
+            await db.collection('package_inventory').deleteOne({
+                $or: [{ id: packageId }, { packageId: packageId }]
+            });
+        }
+        res.json({ success: true, message: 'Inventory package deleted successfully' });
     } catch (err) {
-        res.status(500).json({ error: 'Failed to delete inventory' });
+        res.status(500).json({ error: 'Failed to delete inventory item' });
+    }
+});
+
+// Payments & Transaction History Endpoint
+app.get('/api/payments', authenticateUser, async (req, res) => {
+    try {
+        const db = await connectToDatabase();
+        if (!db) return res.json([]);
+        if (req.user.role === 'CUSTOMER') {
+            const payments = await db.collection('payments').find({
+                $or: [{ userId: String(req.user.id) }, { customerEmail: String(req.user.email).toLowerCase() }]
+            }).sort({ createdAt: -1 }).toArray();
+            return res.json(payments);
+        }
+        const allPayments = await db.collection('payments').find({}).sort({ createdAt: -1 }).toArray();
+        res.json(allPayments);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch payments' });
     }
 });
 

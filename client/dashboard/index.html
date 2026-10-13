@@ -1529,6 +1529,26 @@
   </div>
 
 
+  <!-- MODAL: SIDE-BY-SIDE OFFERS COMPARISON -->
+  <div class="modal-backdrop" id="compareOffersModal" style="display: none; z-index: 9999; backdrop-filter: blur(8px); background: rgba(10, 25, 18, 0.7);">
+    <div class="modal-card" style="max-width: 1080px; width: 95%; max-height: 90vh; overflow-y: auto; background: #ffffff; border-radius: 20px; padding: 24px 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.25);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 16px; border-bottom: 1.5px solid #E2E8F0; margin-bottom: 20px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 24px;">⚖️</span>
+            <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; margin: 0;">Side-by-Side Offer Comparison</h2>
+          </div>
+          <p style="font-size: 13px; color: #64748B; margin: 4px 0 0 0;">Compare hotel proximity, meals, and prices across verified partner quotes for <strong id="compareModalReqId" style="color: #0F5A47;">REQ</strong>.</p>
+        </div>
+        <button onclick="closeCompareOffersModal()" style="font-size: 24px; color: #94A3B8; background: none; border: none; cursor: pointer; padding: 4px 8px;">✕</button>
+      </div>
+
+      <div id="compareOffersContainer" style="overflow-x: auto;">
+        <!-- Dynamically rendered comparison grid -->
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL 3: BOOKING TERMS CONFIRMATION -->
   <div class="modal-backdrop" id="bookingTermsModal" style="display: none;">
     <div class="modal-card">
@@ -1902,6 +1922,7 @@
   <!-- jsPDF & AutoTable CDNs for Client-Side Invoice PDF Generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="/js/realtime-client.js"></script>
   <script src="/dashboard/script.js"></script>
   <script src="/js/nav-helper.js"></script>
 </body>

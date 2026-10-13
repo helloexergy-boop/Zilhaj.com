@@ -753,30 +753,67 @@
             </div>
           </div>
 
-          <!-- Inventory Filter Toolbar -->
-          <div class="card" style="margin-bottom: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
-              <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 280px;">
-                <div style="position: relative; width: 100%;">
-                  <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light);">🔍</span>
-                  <input type="text" id="inventory-search-input" oninput="handleInventorySearch(this.value)" placeholder="Search inventory by title, agency, hotels, duration, price..." class="form-input" style="padding-left: 36px;">
-                </div>
+          <!-- Inventory Filter Toolbar with Fast Indexed Search (Date, Agent ID, Name, Duration, Price) -->
+          <div class="card" style="margin-bottom: 20px; padding: 16px 20px; background: #ffffff; border-radius: var(--radius-xl); border: 1.5px solid var(--border-light); box-shadow: var(--shadow-sm);">
+            <!-- Row 1: Search Query + Primary Actions -->
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 12px;">
+              <div style="position: relative; flex: 2; min-width: 260px;">
+                <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light);">🔍</span>
+                <input type="text" id="inventory-search-input" oninput="handleInventorySearch(this.value)" placeholder="Search packages by Name, Agent, Hotel, Keywords..." class="form-input" style="padding-left: 36px;">
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button onclick="applyAdvancedInventorySearch()" class="btn btn-primary btn-sm" style="background: #047857; font-weight: 800; padding: 8px 16px;">
+                  <span>⚡ Indexed Search</span>
+                </button>
+                <button onclick="resetInventoryFilters()" class="btn btn-secondary btn-sm" style="padding: 8px 14px;">Reset</button>
+              </div>
+            </div>
+
+            <!-- Row 2: Granular Filters: Date, Agent ID, Duration, Max Price, Service, Status -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; align-items: center; padding-top: 10px; border-top: 1px dashed var(--border-subtle);">
+              <div>
+                <label style="display: block; font-size: 10px; font-weight: 800; color: var(--text-light); margin-bottom: 3px; text-transform: uppercase;">Agent ID</label>
+                <input type="text" id="inventory-filter-agent" oninput="handleInventoryFilterChange()" placeholder="e.g. AGENT-1042" class="form-input" style="font-size: 12px; padding: 6px 10px;">
               </div>
 
-              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                <select id="inventory-filter-service" onchange="handleInventoryFilterChange()" class="select-control">
+              <div>
+                <label style="display: block; font-size: 10px; font-weight: 800; color: var(--text-light); margin-bottom: 3px; text-transform: uppercase;">Departure Date</label>
+                <input type="date" id="inventory-filter-date" onchange="handleInventoryFilterChange()" class="form-input" style="font-size: 12px; padding: 6px 10px;">
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 10px; font-weight: 800; color: var(--text-light); margin-bottom: 3px; text-transform: uppercase;">Duration</label>
+                <select id="inventory-filter-duration" onchange="handleInventoryFilterChange()" class="select-control" style="width: 100%; font-size: 12px; padding: 6px 10px;">
+                  <option value="All">All Durations</option>
+                  <option value="14 Days">14 Days</option>
+                  <option value="15 Days">15 Days</option>
+                  <option value="18 Days">18 Days</option>
+                  <option value="20 Days">20 Days</option>
+                  <option value="21 Days">21 Days</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 10px; font-weight: 800; color: var(--text-light); margin-bottom: 3px; text-transform: uppercase;">Max Price (₹)</label>
+                <input type="number" id="inventory-filter-price" oninput="handleInventoryFilterChange()" placeholder="e.g. 100000" class="form-input" style="font-size: 12px; padding: 6px 10px;">
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 10px; font-weight: 800; color: var(--text-light); margin-bottom: 3px; text-transform: uppercase;">Service</label>
+                <select id="inventory-filter-service" onchange="handleInventoryFilterChange()" class="select-control" style="width: 100%; font-size: 12px; padding: 6px 10px;">
                   <option value="All">All Services</option>
-                  <option value="Umrah">Umrah Packages</option>
-                  <option value="Hajj">Hajj Packages</option>
+                  <option value="Umrah">Umrah</option>
+                  <option value="Hajj">Hajj</option>
                 </select>
+              </div>
 
-                <select id="inventory-filter-status" onchange="handleInventoryFilterChange()" class="select-control">
+              <div>
+                <label style="display: block; font-size: 10px; font-weight: 800; color: var(--text-light); margin-bottom: 3px; text-transform: uppercase;">Status</label>
+                <select id="inventory-filter-status" onchange="handleInventoryFilterChange()" class="select-control" style="width: 100%; font-size: 12px; padding: 6px 10px;">
                   <option value="All">All Status</option>
-                  <option value="Active">Active / Available</option>
-                  <option value="Inactive">Inactive / Draft</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
                 </select>
-
-                <button onclick="resetInventoryFilters()" class="btn btn-secondary btn-sm">Reset</button>
               </div>
             </div>
           </div>
@@ -1878,35 +1915,47 @@
     </div>
   </div>
 
-  <!-- 7. Select from Inventory Modal (Attached to active request) -->
+  <!-- 7. Select from Inventory Modal (Attached to active request, Multi-Offer Enabled) -->
   <div id="select-inventory-offer-modal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+    <div class="modal-content" style="max-width: 960px; max-height: 90vh; overflow-y: auto;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
         <div>
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 20px;">📦</span>
-            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main);">Select Offer from Package Inventory</h3>
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main);">Select & Attach Offers to Request</h3>
           </div>
           <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
-            Quickly select any pre-created package from inventory to attach directly to <strong id="select-modal-req-id" style="color: var(--primary);">REQ</strong> (<span id="select-modal-req-service">--</span>, <span id="select-modal-req-pilgrims">-- pilgrims</span>).
+            Choose 1 or multiple packages from inventory to dispatch directly to <strong id="select-modal-req-id" style="color: var(--primary);">REQ</strong> (<span id="select-modal-req-service">--</span>, <span id="select-modal-req-pilgrims">-- pilgrims</span>).
           </p>
         </div>
         <button onclick="closeModal('select-inventory-offer-modal')" style="font-size: 20px; color: var(--text-light); background: none; border: none; cursor: pointer;">✕</button>
       </div>
 
-      <div style="margin-bottom: 14px; display: flex; gap: 10px;">
-        <input type="text" id="select-inventory-search" oninput="filterSelectInventoryCards(this.value)" placeholder="Search packages by title, agency or hotel..." class="form-input" style="flex: 1;">
+      <!-- Multi-select Action Bar -->
+      <div style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 10px 14px;">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 240px;">
+          <input type="text" id="select-inventory-search" oninput="filterSelectInventoryCards(this.value)" placeholder="Search packages by title, agency or hotel..." class="form-input" style="padding: 7px 12px; font-size: 12.5px;">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span id="select-inventory-count-badge" style="font-size: 12px; font-weight: 800; color: #047857; background: #dcfce7; padding: 4px 10px; border-radius: 99px;">
+            0 packages selected
+          </span>
+          <button id="btn-attach-selected-batch" onclick="applyBatchSelectedInventoryOffers()" class="btn btn-primary btn-sm" disabled style="background: #047857; font-weight: 800; opacity: 0.5;">
+            ⚡ Attach Selected Offers (0)
+          </button>
+        </div>
       </div>
 
       <div id="select-inventory-cards-list" class="offers-grid" style="grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));">
-        <!-- Rendered dynamically -->
+        <!-- Rendered dynamically with checkboxes for multi-select -->
       </div>
     </div>
   </div>
 
   <!-- 8. Add New Package to Inventory Modal -->
   <div id="add-inventory-pkg-modal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 720px; max-height: 90vh; overflow-y: auto;">
+    <div class="modal-content" style="max-width: 740px; max-height: 90vh; overflow-y: auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
         <div>
           <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main);">Add Package to Central Inventory</h3>
@@ -1930,7 +1979,7 @@
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
           <div class="form-group">
             <label class="form-label">Travel Agency / Provider *</label>
             <input type="text" id="inv-pkg-agent-name" required class="form-input" placeholder="e.g. Al-Safwa Travel & Tours" list="agency-suggestions">
@@ -1944,8 +1993,12 @@
             </datalist>
           </div>
           <div class="form-group">
-            <label class="form-label">Agency ID</label>
-            <input type="text" id="inv-pkg-agent-id" class="form-input" placeholder="e.g. AGENT-1042">
+            <label class="form-label">Agency ID *</label>
+            <input type="text" id="inv-pkg-agent-id" required class="form-input" placeholder="e.g. AGENT-1042" value="AGENT-1042">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Departure Date (Future) *</label>
+            <input type="date" id="inv-pkg-departure-date" required class="form-input">
           </div>
         </div>
 
@@ -1960,7 +2013,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Available Seats</label>
-            <input type="number" id="inv-pkg-seats" class="form-input" placeholder="15" value="20" min="1">
+            <input type="number" id="inv-pkg-seats" class="form-input" placeholder="25" value="25" min="1">
           </div>
         </div>
 
@@ -2013,6 +2066,121 @@
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
           <button type="button" onclick="closeModal('add-inventory-pkg-modal')" class="btn btn-secondary">Cancel</button>
           <button type="submit" class="btn btn-primary" style="background: #047857; font-weight: 800;">Save Package to Inventory</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 9. Edit Existing Package in Inventory Modal -->
+  <div id="edit-inventory-pkg-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 740px; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">✏️</span>
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main);">Edit Inventory Package (<span id="edit-inv-pkg-id-display">--</span>)</h3>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Update package details, pricing, hotel proximity, and future departure dates.</p>
+        </div>
+        <button onclick="closeModal('edit-inventory-pkg-modal')" style="font-size: 20px; color: var(--text-light); background: none; border: none; cursor: pointer;">✕</button>
+      </div>
+
+      <form onsubmit="handleEditInventoryPackageSubmit(event)">
+        <input type="hidden" id="edit-inv-pkg-id">
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Package Title *</label>
+            <input type="text" id="edit-inv-pkg-title" required class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Service Type *</label>
+            <select id="edit-inv-pkg-service" class="form-select">
+              <option value="Umrah">Umrah</option>
+              <option value="Hajj">Hajj</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Agency Name *</label>
+            <input type="text" id="edit-inv-pkg-agent-name" required class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Agency ID *</label>
+            <input type="text" id="edit-inv-pkg-agent-id" required class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Departure Date *</label>
+            <input type="date" id="edit-inv-pkg-departure-date" class="form-input">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Duration *</label>
+            <input type="text" id="edit-inv-pkg-duration" required class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Price Per Person (₹) *</label>
+            <input type="number" id="edit-inv-pkg-price" required class="form-input" min="1000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Available Seats</label>
+            <input type="number" id="edit-inv-pkg-seats" class="form-input" min="1">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Makkah Hotel</label>
+            <input type="text" id="edit-inv-pkg-makkah-hotel" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Makkah Distance from Haram</label>
+            <input type="text" id="edit-inv-pkg-makkah-dist" class="form-input">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Madinah Hotel</label>
+            <input type="text" id="edit-inv-pkg-madinah-hotel" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Madinah Distance from Markazia</label>
+            <input type="text" id="edit-inv-pkg-madinah-dist" class="form-input">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Transport Included</label>
+            <input type="text" id="edit-inv-pkg-transport" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Meal Plan</label>
+            <input type="text" id="edit-inv-pkg-meals" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Ziyarat Details</label>
+          <input type="text" id="edit-inv-pkg-ziyarat" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Inventory Status</label>
+          <select id="edit-inv-pkg-status" class="form-select">
+            <option value="Active">Active / Available</option>
+            <option value="Inactive">Inactive / Hidden</option>
+          </select>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+          <button type="button" onclick="closeModal('edit-inventory-pkg-modal')" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background: #047857; font-weight: 800;">Update Inventory Package</button>
         </div>
       </form>
     </div>

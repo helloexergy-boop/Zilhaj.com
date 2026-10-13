@@ -298,9 +298,10 @@ function getBadgeHtml(status) {
   let badgeClass = 'badge-pending';
   const s = (status || '').toLowerCase();
   if (s === 'in progress' || s === 'collecting offers' || s === 'bidding') badgeClass = 'badge-in-progress';
-  else if (s === 'offers ready') badgeClass = 'badge-offers-ready';
-  else if (s === 'completed' || s === 'booked') badgeClass = 'badge-completed';
-  else if (s === 'selected' || s === 'accepted') badgeClass = 'badge-selected';
+  else if (s === 'offers ready' || s === 'offers available' || s === 'offers_provided') badgeClass = 'badge-offers-ready';
+  else if (s === 'completed' || s === 'booked' || s === 'paid') badgeClass = 'badge-completed';
+  else if (s === 'selected' || s === 'accepted') badgeClass = 'badge-accepted';
+  else if (s === 'rejected' || s === 'declined' || s === 'cancelled') badgeClass = 'badge-rejected';
   else if (s === 'active') badgeClass = 'badge-active';
   else if (s === 'inactive') badgeClass = 'badge-inactive';
   else if (s === 'published') badgeClass = 'badge-published';
@@ -668,7 +669,13 @@ function renderRequestDetails() {
   const offersGrid = document.getElementById('req-offers-grid');
   const offersCountHeader = document.getElementById('req-offers-count-header');
   const count = req.offers ? req.offers.length : 0;
-  if (offersCountHeader) offersCountHeader.textContent = `Offers (${count})`;
+  const acceptedCount = (req.offers || []).filter(o => (o.status || '').toUpperCase() === 'ACCEPTED').length;
+  const rejectedCount = (req.offers || []).filter(o => (o.status || '').toUpperCase() === 'REJECTED').length;
+  const pendingCount = count - acceptedCount - rejectedCount;
+
+  if (offersCountHeader) {
+    offersCountHeader.innerHTML = `Offers (${count}) &bull; <span style="color:#047857;font-weight:800;">${acceptedCount} Accepted</span> &bull; <span style="color:#dc2626;font-weight:800;">${rejectedCount} Rejected</span> &bull; <span style="color:#d97706;font-weight:800;">${pendingCount} Pending</span>`;
+  }
 
   if (offersGrid) {
     if (!req.offers || req.offers.length === 0) {
@@ -680,18 +687,27 @@ function renderRequestDetails() {
         </div>
       `;
     } else {
-      offersGrid.innerHTML = req.offers.map(offer => `
-        <div class="offer-card">
+      offersGrid.innerHTML = req.offers.map(offer => {
+        const statusUpper = (offer.status || '').toUpperCase();
+        let statusBadgeHtml = '';
+        if (statusUpper === 'ACCEPTED') {
+          statusBadgeHtml = `<span style="font-size: 11px; font-weight: 800; background: #dcfce7; color: #15803d; border: 1px solid #86efac; padding: 3px 10px; border-radius: 99px;">✅ Accepted by Customer</span>`;
+        } else if (statusUpper === 'REJECTED') {
+          statusBadgeHtml = `<span style="font-size: 11px; font-weight: 800; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 3px 10px; border-radius: 99px;">❌ Rejected by Customer</span>`;
+        } else {
+          statusBadgeHtml = `<span style="font-size: 11px; font-weight: 800; background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 3px 10px; border-radius: 99px;">⏳ Pending Decision</span>`;
+        }
+
+        return `
+        <div class="offer-card" style="border: 1.5px solid ${statusUpper === 'ACCEPTED' ? '#86efac' : (statusUpper === 'REJECTED' ? '#fca5a5' : 'var(--border-light)')};">
           <div>
             <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle);">
               <div>
                 <span style="font-size: 10px; font-weight: 800; color: var(--text-light);">${offer.agentId || 'AGENT-1042'}</span>
                 <h4 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 2px;">${offer.agentName}</h4>
               </div>
-              <div>${getBadgeHtml(offer.status)}</div>
+              <div>${statusBadgeHtml}</div>
             </div>
-
-            <div style="margin: 14px 0; padding-bottom: 14px; border-bottom: 1px solid var(--border-subtle);">
               <div style="font-size: 12px; font-weight: 600; color: var(--text-muted);">${offer.packageName} • ${offer.duration}</div>
               <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px;">
                 <div>
@@ -2353,6 +2369,9 @@ function renderInventoryList() {
           <button onclick="useInventoryPackageInActiveRequest('${p.id}')" class="btn btn-primary btn-sm" style="flex: 2; font-weight: 800; background: #047857;">
             <span>⚡ Attach to Request</span>
           </button>
+          <button onclick="openEditInventoryPackageModal('${p.id}')" class="btn btn-secondary btn-sm" title="Edit Package" style="font-weight: 800; padding: 4px 10px;">
+            ✏️ Edit
+          </button>
           <button onclick="deleteInventoryPackage('${p.id}')" class="btn btn-danger btn-sm" title="Delete from Inventory" style="font-weight: 800; padding: 4px 10px;">
             ✕
           </button>
@@ -2422,7 +2441,7 @@ function handleQuickFillOfferFromInventory(packageId) {
   showToast(`Fields auto-filled from "${p.packageTitle}"`, 'success');
 }
 
-// Open Select From Inventory Modal for active request
+// Open Select From Inventory Modal for active request (Supports Multi-Offer Dispatch)
 function openSelectFromInventoryModal() {
   const req = state.requests.find(r => r.id === state.selectedRequestId) || state.requests[0];
   if (!req) {
@@ -2430,6 +2449,7 @@ function openSelectFromInventoryModal() {
     return;
   }
   state.selectedRequestId = req.id;
+  state.selectedInventoryPackageIds = new Set();
 
   setElementText('select-modal-req-id', req.id);
   setElementText('select-modal-req-service', req.service || req.serviceType || 'Umrah');
@@ -2439,7 +2459,39 @@ function openSelectFromInventoryModal() {
   if (searchInput) searchInput.value = '';
 
   filterSelectInventoryCards('');
+  updateSelectInventoryUI();
   openModal('select-inventory-offer-modal');
+}
+
+function toggleSelectInventoryCard(packageId) {
+  if (!state.selectedInventoryPackageIds) state.selectedInventoryPackageIds = new Set();
+  if (state.selectedInventoryPackageIds.has(packageId)) {
+    state.selectedInventoryPackageIds.delete(packageId);
+  } else {
+    state.selectedInventoryPackageIds.add(packageId);
+  }
+  updateSelectInventoryUI();
+}
+
+function updateSelectInventoryUI() {
+  const count = (state.selectedInventoryPackageIds && state.selectedInventoryPackageIds.size) || 0;
+  const badge = document.getElementById('select-inventory-count-badge');
+  const btn = document.getElementById('btn-attach-selected-batch');
+  if (badge) badge.textContent = `${count} package${count === 1 ? '' : 's'} selected`;
+  if (btn) {
+    btn.disabled = count === 0;
+    btn.style.opacity = count > 0 ? '1' : '0.5';
+    btn.innerHTML = `⚡ Attach Selected Offers (${count})`;
+  }
+
+  document.querySelectorAll('.select-inv-card').forEach(card => {
+    const pkgId = card.getAttribute('data-pkg-id');
+    const isSelected = state.selectedInventoryPackageIds && state.selectedInventoryPackageIds.has(pkgId);
+    card.style.borderColor = isSelected ? '#047857' : (card.getAttribute('data-matched') === 'true' ? '#86efac' : 'var(--border-light)');
+    card.style.background = isSelected ? '#f0fdf4' : '#ffffff';
+    const chk = card.querySelector('.select-inv-checkbox');
+    if (chk) chk.checked = isSelected;
+  });
 }
 
 function filterSelectInventoryCards(query = '') {
@@ -2455,6 +2507,7 @@ function filterSelectInventoryCards(query = '') {
     packages = packages.filter(p => {
       return (p.packageTitle || '').toLowerCase().includes(q) ||
              (p.agentName || '').toLowerCase().includes(q) ||
+             (p.agentId || '').toLowerCase().includes(q) ||
              (p.makkahHotel || '').toLowerCase().includes(q) ||
              (p.madinahHotel || '').toLowerCase().includes(q);
     });
@@ -2476,22 +2529,26 @@ function filterSelectInventoryCards(query = '') {
     const isMatched = reqService && (p.serviceType || '').toLowerCase().includes(reqService);
     const travelers = req ? (Number(req.travelers) || 4) : 4;
     const totalPrice = (Number(p.pricePerPerson || 0) * travelers).toLocaleString('en-IN');
+    const isSelected = state.selectedInventoryPackageIds && state.selectedInventoryPackageIds.has(p.id);
 
     return `
-      <div style="background: #ffffff; border: 1.5px solid ${isMatched ? '#86efac' : 'var(--border-light)'}; border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow-sm);">
+      <div class="select-inv-card" data-pkg-id="${p.id}" data-matched="${isMatched}" onclick="toggleSelectInventoryCard('${p.id}')" style="cursor: pointer; background: ${isSelected ? '#f0fdf4' : '#ffffff'}; border: 1.5px solid ${isSelected ? '#047857' : (isMatched ? '#86efac' : 'var(--border-light)')}; border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow-sm); transition: all 0.2s ease;">
         <div>
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-            <div>
-              <span class="badge ${p.serviceType === 'Umrah' ? 'badge-service-umrah' : 'badge-service-hajj'}" style="font-size: 10px; padding: 2px 8px;">
-                ${p.serviceType === 'Umrah' ? '🕋 Umrah' : '🏛️ Hajj'}
-              </span>
-              ${isMatched ? '<span style="font-size: 10px; font-weight: 800; background: #dcfce7; color: #047857; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Recommended Match</span>' : ''}
-              <h4 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin-top: 4px;">${escapeHtml(p.packageTitle)}</h4>
-              <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">${escapeHtml(p.agentName)}</div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" class="select-inv-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleSelectInventoryCard('${p.id}');" style="width: 18px; height: 18px; accent-color: #047857; cursor: pointer;">
+              <div>
+                <span class="badge ${p.serviceType === 'Umrah' ? 'badge-service-umrah' : 'badge-service-hajj'}" style="font-size: 10px; padding: 2px 8px;">
+                  ${p.serviceType === 'Umrah' ? '🕋 Umrah' : '🏛️ Hajj'}
+                </span>
+                ${isMatched ? '<span style="font-size: 10px; font-weight: 800; background: #dcfce7; color: #047857; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Recommended Match</span>' : ''}
+                <h4 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin-top: 4px;">${escapeHtml(p.packageTitle)}</h4>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 600;">${escapeHtml(p.agentName)} (${escapeHtml(p.agentId || 'AGENT')})</div>
+              </div>
             </div>
             <div style="text-align: right;">
               <span style="font-size: 18px; font-weight: 900; color: var(--primary);">₹${Number(p.pricePerPerson || 0).toLocaleString('en-IN')}</span>
-              <div style="font-size: 11px; color: var(--text-muted);">Total ₹${totalPrice} (${travelers} pers)</div>
+              <div style="font-size: 10.5px; color: var(--text-muted);">Total ₹${totalPrice} (${travelers} pers)</div>
             </div>
           </div>
 
@@ -2499,16 +2556,56 @@ function filterSelectInventoryCards(query = '') {
             <div><strong>Makkah:</strong> ${escapeHtml(p.makkahHotel)} (${escapeHtml(p.makkahDistance)})</div>
             <div><strong>Madinah:</strong> ${escapeHtml(p.madinahHotel)} (${escapeHtml(p.madinahDistance)})</div>
             <div><strong>Duration:</strong> ${escapeHtml(p.duration)}</div>
-            <div><strong>Meals:</strong> ${escapeHtml(p.mealPlan)}</div>
+            <div><strong>Date:</strong> ${escapeHtml(p.departureDateText || p.departureDate || 'Flexible')}</div>
           </div>
         </div>
 
-        <button onclick="applyInventoryPackageToCurrentRequest('${p.id}')" class="btn btn-primary" style="width: 100%; font-weight: 800; background: #047857;">
-          ✓ Attach this Offer to ${req ? req.id : 'Request'}
-        </button>
+        <div style="display: flex; gap: 8px;">
+          <button onclick="event.stopPropagation(); applyInventoryPackageToCurrentRequest('${p.id}')" class="btn btn-primary btn-sm" style="flex: 1; font-weight: 800; background: #047857;">
+            ✓ Attach Single Offer
+          </button>
+        </div>
       </div>
     `;
   }).join('');
+}
+
+async function applyBatchSelectedInventoryOffers() {
+  const selectedIds = Array.from(state.selectedInventoryPackageIds || []);
+  if (selectedIds.length === 0) {
+    showToast('Please select at least 1 package to attach', 'warning');
+    return;
+  }
+  if (!state.selectedRequestId) {
+    showToast('Please select a customer request first', 'warning');
+    return;
+  }
+
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+
+  try {
+    const res = await fetch(`${apiBase}/admin/requirements/${state.selectedRequestId}/apply-inventory-offer`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ packageIds: selectedIds, status: 'Published' })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to attach selected offers');
+    }
+
+    closeModal('select-inventory-offer-modal');
+    state.selectedInventoryPackageIds.clear();
+    showToast(`${selectedIds.length} offer(s) successfully attached to ${state.selectedRequestId}!`, 'success');
+
+    await refreshAllData(false);
+    renderRequestDetails();
+  } catch (err) {
+    console.error('Error attaching selected offers:', err);
+    showToast(err.message || 'Could not attach offers', 'danger');
+  }
 }
 
 async function applyInventoryPackageToCurrentRequest(packageId) {
@@ -2554,22 +2651,23 @@ function useInventoryPackageInActiveRequest(packageId) {
   applyInventoryPackageToCurrentRequest(packageId);
 }
 
-// Add New Package to Inventory Form Submit
+// Add New Package to Inventory Form Submit (Future Dates Included)
 async function handleAddInventoryPackageSubmit(e) {
   e.preventDefault();
   const title = document.getElementById('inv-pkg-title')?.value.trim();
   const service = document.getElementById('inv-pkg-service')?.value || 'Umrah';
   const agentName = document.getElementById('inv-pkg-agent-name')?.value.trim();
   const agentId = document.getElementById('inv-pkg-agent-id')?.value.trim() || `AGENT-${Math.floor(1000 + Math.random() * 9000)}`;
+  const departureDate = document.getElementById('inv-pkg-departure-date')?.value.trim() || '2026-11-15';
   const duration = document.getElementById('inv-pkg-duration')?.value.trim() || '18 Days';
   const price = Number(document.getElementById('inv-pkg-price')?.value) || 85000;
   const seats = Number(document.getElementById('inv-pkg-seats')?.value) || 20;
-  const makkahHotel = document.getElementById('inv-pkg-makkah-hotel')?.value.trim() || 'Standard Hotel';
-  const makkahDist = document.getElementById('inv-pkg-makkah-dist')?.value.trim() || '300m from Haram';
-  const madinahHotel = document.getElementById('inv-pkg-madinah-hotel')?.value.trim() || 'Standard Hotel';
-  const madinahDist = document.getElementById('inv-pkg-madinah-dist')?.value.trim() || '200m from Haram';
-  const transport = document.getElementById('inv-pkg-transport')?.value.trim() || 'AC Bus Transfers';
-  const meals = document.getElementById('inv-pkg-meals')?.value.trim() || 'Full Board Meals';
+  const makkahHotel = document.getElementById('inv-pkg-makkah-hotel')?.value.trim() || 'Fairmont Clock Tower';
+  const makkahDist = document.getElementById('inv-pkg-makkah-dist')?.value.trim() || '50m from Haram';
+  const madinahHotel = document.getElementById('inv-pkg-madinah-hotel')?.value.trim() || 'Dar Al Taqwa';
+  const madinahDist = document.getElementById('inv-pkg-madinah-dist')?.value.trim() || '100m from Nabawi';
+  const transport = document.getElementById('inv-pkg-transport')?.value.trim() || 'AC Luxury Coach';
+  const meals = document.getElementById('inv-pkg-meals')?.value.trim() || 'Full Board Buffet';
   const ziyarat = document.getElementById('inv-pkg-ziyarat')?.value.trim() || 'Historical Ziyarat Included';
   const status = document.getElementById('inv-pkg-status')?.value || 'Active';
 
@@ -2578,8 +2676,11 @@ async function handleAddInventoryPackageSubmit(e) {
     serviceType: service,
     agentName: agentName,
     agentId: agentId,
+    departureDate: departureDate,
+    departureDateText: departureDate,
     duration: duration,
     pricePerPerson: price,
+    availableSeats: seats,
     seatsAvailable: seats,
     makkahHotel: makkahHotel,
     makkahDistance: makkahDist,
@@ -2611,6 +2712,119 @@ async function handleAddInventoryPackageSubmit(e) {
     await loadInventoryData(false);
   } catch (err) {
     showToast(err.message || 'Error saving package to inventory', 'danger');
+  }
+}
+
+// Edit Existing Package Modal Handler
+function openEditInventoryPackageModal(packageId) {
+  const p = state.packageInventory.find(item => item.id === packageId || item.packageId === packageId);
+  if (!p) {
+    showToast('Package not found in inventory', 'warning');
+    return;
+  }
+
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  setElementText('edit-inv-pkg-id-display', p.id || packageId);
+  setVal('edit-inv-pkg-id', p.id || packageId);
+  setVal('edit-inv-pkg-title', p.packageTitle || p.name);
+  setVal('edit-inv-pkg-service', p.serviceType || 'Umrah');
+  setVal('edit-inv-pkg-agent-name', p.agentName);
+  setVal('edit-inv-pkg-agent-id', p.agentId || 'AGENT-1042');
+  setVal('edit-inv-pkg-departure-date', p.departureDate || p.departureDateText || '2026-11-15');
+  setVal('edit-inv-pkg-duration', p.duration || '18 Days');
+  setVal('edit-inv-pkg-price', p.pricePerPerson || 85000);
+  setVal('edit-inv-pkg-seats', p.seatsAvailable || p.availableSeats || 25);
+  setVal('edit-inv-pkg-makkah-hotel', p.makkahHotel);
+  setVal('edit-inv-pkg-makkah-dist', p.makkahDistance);
+  setVal('edit-inv-pkg-madinah-hotel', p.madinahHotel);
+  setVal('edit-inv-pkg-madinah-dist', p.madinahDistance);
+  setVal('edit-inv-pkg-transport', p.transport);
+  setVal('edit-inv-pkg-meals', p.mealPlan);
+  setVal('edit-inv-pkg-ziyarat', p.ziyarat);
+  setVal('edit-inv-pkg-status', p.status || 'Active');
+
+  openModal('edit-inventory-pkg-modal');
+}
+
+async function handleEditInventoryPackageSubmit(e) {
+  e.preventDefault();
+  const pkgId = document.getElementById('edit-inv-pkg-id')?.value;
+  if (!pkgId) return;
+
+  const getVal = (id) => document.getElementById(id)?.value?.trim() || '';
+  const updatedPkg = {
+    packageTitle: getVal('edit-inv-pkg-title'),
+    serviceType: getVal('edit-inv-pkg-service') || 'Umrah',
+    agentName: getVal('edit-inv-pkg-agent-name'),
+    agentId: getVal('edit-inv-pkg-agent-id'),
+    departureDate: getVal('edit-inv-pkg-departure-date'),
+    departureDateText: getVal('edit-inv-pkg-departure-date'),
+    duration: getVal('edit-inv-pkg-duration'),
+    pricePerPerson: Number(document.getElementById('edit-inv-pkg-price')?.value) || 85000,
+    availableSeats: Number(document.getElementById('edit-inv-pkg-seats')?.value) || 25,
+    makkahHotel: getVal('edit-inv-pkg-makkah-hotel'),
+    makkahDistance: getVal('edit-inv-pkg-makkah-dist'),
+    madinahHotel: getVal('edit-inv-pkg-madinah-hotel'),
+    madinahDistance: getVal('edit-inv-pkg-madinah-dist'),
+    transport: getVal('edit-inv-pkg-transport'),
+    mealPlan: getVal('edit-inv-pkg-meals'),
+    ziyarat: getVal('edit-inv-pkg-ziyarat'),
+    status: getVal('edit-inv-pkg-status') || 'Active'
+  };
+
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+
+  try {
+    const res = await fetch(`${apiBase}/admin/inventory/${pkgId}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(updatedPkg)
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.message || 'Failed to update package');
+
+    closeModal('edit-inventory-pkg-modal');
+    showToast(`Package "${updatedPkg.packageTitle}" updated successfully!`, 'success');
+    await loadInventoryData(false);
+  } catch (err) {
+    showToast(err.message || 'Error updating package', 'danger');
+  }
+}
+
+// Fast Indexed Package Search (Date, Agent ID, Name, Duration, Price)
+async function applyAdvancedInventorySearch() {
+  const q = document.getElementById('inventory-search-input')?.value?.trim() || '';
+  const agentId = document.getElementById('inventory-filter-agent')?.value?.trim() || '';
+  const date = document.getElementById('inventory-filter-date')?.value?.trim() || '';
+  const duration = document.getElementById('inventory-filter-duration')?.value || 'All';
+  const price = document.getElementById('inventory-filter-price')?.value?.trim() || '';
+  const service = document.getElementById('inventory-filter-service')?.value || 'All';
+  const status = document.getElementById('inventory-filter-status')?.value || 'All';
+
+  const params = new URLSearchParams();
+  if (q) params.append('q', q);
+  if (agentId) params.append('agentId', agentId);
+  if (date) params.append('date', date);
+  if (duration && duration !== 'All') params.append('duration', duration);
+  if (price) params.append('maxPrice', price);
+  if (service && service !== 'All') params.append('service', service);
+  if (status && status !== 'All') params.append('status', status);
+
+  const apiBase = getApiBase();
+  const headers = getAuthHeaders();
+
+  try {
+    const res = await fetch(`${apiBase}/admin/inventory?${params.toString()}`, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      state.packageInventory = data.packages || data.inventory || [];
+      renderInventoryList();
+      showToast(`Indexed search returned ${state.packageInventory.length} packages`, 'info');
+    }
+  } catch (err) {
+    console.warn('Advanced search error:', err);
   }
 }
 
@@ -2650,8 +2864,13 @@ window.openSupportFromNotification = openSupportFromNotification;
 window.showToast = showToast;
 window.refreshAllData = refreshAllData;
 window.openSelectFromInventoryModal = openSelectFromInventoryModal;
+window.toggleSelectInventoryCard = toggleSelectInventoryCard;
+window.applyBatchSelectedInventoryOffers = applyBatchSelectedInventoryOffers;
 window.applyInventoryPackageToCurrentRequest = applyInventoryPackageToCurrentRequest;
 window.useInventoryPackageInActiveRequest = useInventoryPackageInActiveRequest;
+window.openEditInventoryPackageModal = openEditInventoryPackageModal;
+window.handleEditInventoryPackageSubmit = handleEditInventoryPackageSubmit;
+window.applyAdvancedInventorySearch = applyAdvancedInventorySearch;
 window.deleteInventoryPackage = deleteInventoryPackage;
 window.openAdminTicket = openAdminTicket;
 window.handleAdminSendSupportMessage = handleAdminSendSupportMessage;

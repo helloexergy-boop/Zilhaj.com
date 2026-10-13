@@ -2,6 +2,68 @@
 // ZILHAJ.COM - INTERACTIVE JAVASCRIPT LOGIC
 // ==========================================================================
 
+// Fallback RealtimeSyncClient if realtime-client.js is still loading
+if (!window.RealtimeSyncClient) {
+  window.RealtimeSyncClient = class RealtimeSyncClient {
+    constructor(options = {}) {
+      this.baseUrl = options.baseUrl || '';
+      this.channels = new Set(options.channels || []);
+      this.eventSource = null;
+      this.listeners = new Map();
+      this.reconnectAttempts = 0;
+      this.maxReconnectDelay = 15000;
+    }
+    subscribe(channels) {
+      const list = Array.isArray(channels) ? channels : [channels];
+      list.forEach(c => this.channels.add(c));
+      this.connect();
+    }
+    connect() {
+      if (this.channels.size === 0) return;
+      if (this.eventSource && this.eventSource.readyState !== EventSource.CLOSED) {
+        this.eventSource.close();
+      }
+      const channelParam = Array.from(this.channels).join(',');
+      const url = `${this.baseUrl}/api/realtime/stream?channels=${encodeURIComponent(channelParam)}`;
+      try {
+        this.eventSource = new EventSource(url);
+        this.eventSource.onopen = () => {
+          this.reconnectAttempts = 0;
+        };
+        this.eventSource.onerror = () => {
+          this.eventSource.close();
+          const delay = Math.min(1000 * Math.pow(1.5, this.reconnectAttempts++), this.maxReconnectDelay);
+          setTimeout(() => this.connect(), delay);
+        };
+        this.listeners.forEach((callbacks, eventName) => {
+          this.eventSource.addEventListener(eventName, (e) => {
+            try {
+              const parsed = JSON.parse(e.data);
+              callbacks.forEach(cb => cb(parsed.payload, parsed));
+            } catch (err) {}
+          });
+        });
+      } catch (err) {}
+    }
+    on(eventName, callback) {
+      if (!this.listeners.has(eventName)) {
+        this.listeners.set(eventName, new Set());
+        if (this.eventSource) {
+          this.eventSource.addEventListener(eventName, (e) => {
+            try {
+              const parsed = JSON.parse(e.data);
+              const cbs = this.listeners.get(eventName);
+              if (cbs) cbs.forEach(cb => cb(parsed.payload, parsed));
+            } catch (err) {}
+          });
+        }
+      }
+      this.listeners.get(eventName).add(callback);
+      return this;
+    }
+  };
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Authentication check for Dashboard access
   const storedUserRaw = localStorage.getItem('umrah_user');
@@ -17,25 +79,50 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // Subscribe to real-time events for this user
-  if (window.RealtimeSyncClient && storedUser && (storedUser.id || storedUser.email)) {
+  // Subscribe to real-time events for this user and global updates
+  if (storedUser && (storedUser.id || storedUser.email)) {
     try {
       const realtime = new window.RealtimeSyncClient();
       const userId = storedUser.id || storedUser.email;
-      realtime.subscribe([`user:${userId}:bookings`, `user:${userId}:requests`]);
+      const channels = [
+        `user:${userId}:bookings`,
+        `user:${userId}:requests`,
+        'ops:queue',
+        'all',
+        'admin:requirements'
+      ];
+      if (storedUser.email) channels.push(`user:${storedUser.email}:requests`);
+      realtime.subscribe(channels);
+
+      const triggerRefresh = () => {
+        if (typeof window.loadLiveDashboardData === 'function') window.loadLiveDashboardData();
+        if (typeof window.renderPaymentsHistory === 'function') window.renderPaymentsHistory();
+      };
+
       realtime.on('BOOKING_CONFIRMED', (booking) => {
         console.log('[DASHBOARD REALTIME] Booking confirmed:', booking);
-        if (typeof window.renderPaymentsHistory === 'function') window.renderPaymentsHistory();
+        triggerRefresh();
         if (typeof window.loadMyBookings === 'function') window.loadMyBookings();
       });
-      realtime.on('NEW_REQUEST_SUBMITTED', () => {
-        if (typeof window.loadLiveDashboardData === 'function') window.loadLiveDashboardData();
-      });
-      realtime.on('OFFER_DISPATCHED', () => {
-        if (typeof window.loadLiveDashboardData === 'function') window.loadLiveDashboardData();
-      });
-    } catch (e) {}
+      realtime.on('BOOKING_PAYMENT_SUCCESS', triggerRefresh);
+      realtime.on('NEW_REQUEST_SUBMITTED', triggerRefresh);
+      realtime.on('OFFER_DISPATCHED', triggerRefresh);
+      realtime.on('OFFERS_ATTACHED', triggerRefresh);
+      realtime.on('OFFER_STATUS_UPDATED', triggerRefresh);
+      realtime.on('OFFER_ACCEPTED', triggerRefresh);
+      realtime.on('OFFER_REJECTED', triggerRefresh);
+      realtime.on('REQUIREMENT_UPDATED', triggerRefresh);
+    } catch (e) {
+      console.warn('[REALTIME] Init error:', e);
+    }
   }
+
+  // Auto-load live requirements and offers on page entry
+  setTimeout(() => {
+    if (typeof window.loadLiveDashboardData === 'function') {
+      window.loadLiveDashboardData();
+    }
+  }, 100);
 
   // ------------------------------------------------------------------------
   // 1. UNIFIED TOP NAVBAR & SIDEBAR TAB NAVIGATION
@@ -1350,6 +1437,155 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ------------------------------------------------------------------------
+  // CUSTOMER REJECT / DECLINE OFFER
+  // ------------------------------------------------------------------------
+  window.rejectOfferCustomer = async function(offerId, reqId) {
+    if (!confirm('Are you sure you want to decline this offer? The agency will be notified.')) return;
+
+    const token = (() => { try { const u = JSON.parse(localStorage.getItem('umrah_user') || 'null'); return u && u.token; } catch(e){ return null; } })();
+    const apiBase = (window.location.protocol && window.location.protocol.startsWith('http')) ? '/api' : 'https://zilhaj.com/api';
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+    };
+
+    try {
+      const res = await fetch(`${apiBase}/requests/${encodeURIComponent(reqId)}/offers/${encodeURIComponent(offerId)}/reject`, {
+        method: 'POST',
+        headers
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (typeof window.loadLiveDashboardData === 'function') {
+          window.loadLiveDashboardData();
+        }
+      } else {
+        alert(data.message || 'Could not decline offer.');
+      }
+    } catch (err) {
+      console.error('Error declining offer:', err);
+      alert('Failed to connect to server to decline offer.');
+    }
+  };
+
+  // ------------------------------------------------------------------------
+  // SIDE-BY-SIDE OFFERS COMPARISON MODAL
+  // ------------------------------------------------------------------------
+  window.openCompareOffersModal = function(reqId) {
+    const req = (window._currentReqs || []).find(r => (r.id === reqId || r.requestId === reqId)) || {};
+    let offers = [];
+    if (Array.isArray(req.offers) && req.offers.length > 0) {
+      offers = req.offers;
+    } else {
+      offers = (window._currentOffers || []).filter(o => 
+        o.requirementId === reqId || 
+        o.requirementId === reqId.replace('REQ-', '') || 
+        o.requirementId === ('REQ-' + reqId)
+      );
+    }
+
+    const modal = document.getElementById('compareOffersModal');
+    const idEl = document.getElementById('compareModalReqId');
+    const container = document.getElementById('compareOffersContainer');
+    if (!modal || !container) return;
+
+    if (idEl) idEl.textContent = reqId;
+
+    if (offers.length === 0) {
+      container.innerHTML = '<div style="text-align: center; padding: 40px; color: #64748B;">No offers available yet to compare.</div>';
+      modal.style.display = 'flex';
+      if (typeof window.lockBodyScroll === 'function') window.lockBodyScroll();
+      return;
+    }
+
+    // Render clean, modern side-by-side comparison cards
+    container.innerHTML = `
+      <div style="display: grid; grid-template-columns: repeat(${offers.length}, minmax(280px, 1fr)); gap: 20px; padding: 8px 0 20px 0;">
+        ${offers.map((offer, idx) => {
+          const offerId = offer.id || offer.offerId || `OFF-${reqId}-${idx + 1}`;
+          const rawPrice = offer.price || 1;
+          const priceFormatted = offer.priceFormatted || ('₹' + Number(rawPrice).toLocaleString('en-IN'));
+          const agentCode = offer.agentCode || offer.agentId || 'AGENT-1042';
+          const agentName = offer.agencyName || offer.agentName || 'Verified Agency';
+          const pkgTitle = offer.packageTitle || offer.packageName || 'Umrah Package';
+          const duration = offer.duration || '14 Days';
+          const makkahHotel = offer.makkahHotel || 'Fairmont Clock Tower';
+          const makkahDist = offer.makkahDistance || '50m from Haram';
+          const madinahHotel = offer.madinahHotel || 'Dar Al Taqwa';
+          const madinahDist = offer.madinahDistance || '50m from Gate 25';
+          const transport = offer.transport || 'Dedicated AC Fleet';
+          const mealPlan = offer.mealPlan || offer.meals || 'Full Board Buffet';
+          const status = (offer.status || 'Active').toUpperCase();
+
+          return `
+            <div style="border: 2px solid ${status === 'ACCEPTED' ? '#10B981' : '#E2E8F0'}; border-radius: 16px; padding: 20px; background: ${status === 'ACCEPTED' ? '#F0FDF4' : '#FFFFFF'}; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 14px rgba(0,0,0,0.06);">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <span style="font-size: 11px; font-weight: 800; background: #E8F6EF; color: #127A4D; padding: 4px 8px; border-radius: 6px;">${agentCode}</span>
+                  <span style="font-size: 11.5px; font-weight: 700; color: ${status === 'ACCEPTED' ? '#059669' : (status === 'REJECTED' ? '#DC2626' : '#64748B')};">${status}</span>
+                </div>
+                <h3 style="font-size: 17px; font-weight: 800; color: #0F172A; margin: 0 0 4px;">${pkgTitle}</h3>
+                <p style="font-size: 12.5px; color: #64748B; margin: 0 0 14px;">${agentName}</p>
+
+                <div style="background: #F8FAFC; border-radius: 12px; padding: 14px; margin-bottom: 16px; border: 1px solid #E2E8F0;">
+                  <div style="font-size: 24px; font-weight: 900; color: #0F5A47;">${priceFormatted}</div>
+                  <div style="font-size: 12px; color: #64748B; font-weight: 600;">per person &bull; ${duration}</div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; margin-bottom: 20px;">
+                  <div>
+                    <div style="font-weight: 700; color: #0F172A;">🏢 Makkah Hotel</div>
+                    <div style="color: #334155; font-weight: 500;">${makkahHotel}</div>
+                    <div style="font-size: 11.5px; color: #059669; font-weight: 600;">${makkahDist}</div>
+                  </div>
+                  <div>
+                    <div style="font-weight: 700; color: #0F172A;">🏨 Madinah Hotel</div>
+                    <div style="color: #334155; font-weight: 500;">${madinahHotel}</div>
+                    <div style="font-size: 11.5px; color: #059669; font-weight: 600;">${madinahDist}</div>
+                  </div>
+                  <div>
+                    <div style="font-weight: 700; color: #0F172A;">🚌 Transport</div>
+                    <div style="color: #64748B;">${transport}</div>
+                  </div>
+                  <div>
+                    <div style="font-weight: 700; color: #0F172A;">🍽️ Meals</div>
+                    <div style="color: #64748B;">${mealPlan}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto;">
+                ${status === 'ACCEPTED' 
+                  ? '<div style="text-align: center; background: #D1FAE5; color: #065F46; font-weight: 700; padding: 10px; border-radius: 8px; font-size: 13px;">✅ Booked & Accepted</div>'
+                  : status === 'REJECTED'
+                  ? '<div style="text-align: center; background: #FEE2E2; color: #991B1B; font-weight: 700; padding: 10px; border-radius: 8px; font-size: 13px;">❌ Declined by You</div>'
+                  : `
+                    <button type="button" onclick="closeCompareOffersModal(); proceedToBookOffer('${offerId}', '${reqId}');" style="width: 100%; background: #127A4D; color: #FFFFFF; font-weight: 700; font-size: 13px; padding: 11px; border: none; border-radius: 8px; cursor: pointer;">
+                      Book Offer &rarr;
+                    </button>
+                    <button type="button" onclick="closeCompareOffersModal(); rejectOfferCustomer('${offerId}', '${reqId}');" style="width: 100%; background: transparent; color: #DC2626; border: 1.5px solid #FCA5A5; font-weight: 700; font-size: 12px; padding: 8px; border-radius: 8px; cursor: pointer;">
+                      Decline Offer
+                    </button>
+                  `
+                }
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    modal.style.display = 'flex';
+    if (typeof window.lockBodyScroll === 'function') window.lockBodyScroll();
+  };
+
+  window.closeCompareOffersModal = function() {
+    const modal = document.getElementById('compareOffersModal');
+    if (modal) modal.style.display = 'none';
+    if (typeof window.unlockBodyScroll === 'function') window.unlockBodyScroll();
+  };
+
+  // ------------------------------------------------------------------------
   // CONFIRMED PAYMENTS & INVOICES RENDERER (Live Data, Zero Mock Data)
   // ------------------------------------------------------------------------
   window.renderPaymentsHistory = async function() {
@@ -1565,12 +1801,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hasOffers && relatedOffers.length > 0) {
           offersSectionHtml = `
             <div style="margin-top: 22px;">
-              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                 <div>
                   <h4 class="agency-offers-title" style="margin: 0; font-size: 16px; font-weight: 800; color: #0F172A;">Verified Agency Offers (${relatedOffers.length})</h4>
                   <p style="margin: 2px 0 0 0; font-size: 12.5px; color: #64748B;">Compare packages and click Book Offer to proceed to secure checkout.</p>
                 </div>
-                ${relatedOffers.length > 1 ? '<span style="font-size: 12px; color: #127A4D; font-weight: 700;">Swipe &rarr;</span>' : ''}
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  ${relatedOffers.length > 1 ? `
+                    <button type="button" onclick="openCompareOffersModal('${reqId}')" style="display: inline-flex; align-items: center; gap: 6px; background: #0F5A47; color: #FFFFFF; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 2px 6px rgba(15,90,71,0.2);">
+                      <span>⚖️</span> Compare Offers
+                    </button>
+                    <span style="font-size: 12px; color: #127A4D; font-weight: 700;">Swipe &rarr;</span>
+                  ` : ''}
+                </div>
               </div>
 
               <div class="offers-horizontal-scroll-container">
@@ -1582,7 +1825,10 @@ document.addEventListener('DOMContentLoaded', () => {
                   const agentName = offer.agencyName || offer.agentName || 'Verified Agency';
                   const pkgTitle = offer.packageTitle || offer.packageName || 'Umrah Package';
                   const duration = offer.duration || '14 Days';
-                  const status = (offer.status || 'Active').toLowerCase() === 'inactive' ? 'Inactive' : 'Active';
+                  const rawStatus = (offer.status || 'Active').toUpperCase();
+                  const isAccepted = rawStatus === 'ACCEPTED' || req.selectedOfferId === offerId;
+                  const isRejected = rawStatus === 'REJECTED';
+                  const statusDisplay = isAccepted ? 'Accepted' : (isRejected ? 'Declined' : 'Active');
                   const serviceType = offer.serviceType || (serviceName.includes('Hajj') ? 'Hajj' : 'Umrah');
                   const makkahHotel = offer.makkahHotel || 'Fairmont Clock Tower';
                   const makkahDist = offer.makkahDistance || '50m from Haram';
@@ -1594,13 +1840,13 @@ document.addEventListener('DOMContentLoaded', () => {
                   return `
                     <div class="screenshot-offer-card" data-offer-id="${offerId}">
                       <div>
-                        <!-- Top Row: [🕋 Umrah] agentCode on left, [Active/Inactive] on right -->
+                        <!-- Top Row: [🕋 Umrah] agentCode on left, [Active/Accepted/Declined] on right -->
                         <div class="soc-header-row">
                           <div class="soc-tag-group">
                             <span class="soc-type-pill">🕋 ${serviceType}</span>
                             <span class="soc-agent-code">${agentCode}</span>
                           </div>
-                          <span class="soc-status-pill ${status.toLowerCase()}">${status}</span>
+                          <span class="soc-status-pill ${isAccepted ? 'accepted' : (isRejected ? 'rejected' : 'active')}" style="${isAccepted ? 'background: #D1FAE5; color: #065F46;' : (isRejected ? 'background: #FEE2E2; color: #991B1B;' : '')}">${statusDisplay}</span>
                         </div>
 
                         <!-- Title & Agency -->
@@ -1657,10 +1903,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                       </div>
 
-                      <!-- Action Buttons -->
-                      <div class="soc-actions-row">
-                        <button class="btn-soc-view" onclick="openOfferFlyerModal('${agentCode}', '${agentName}', '${priceFormatted}', '${duration}', '${makkahHotel}', '${madinahHotel}', '${travelDate}', '${reqId}')">View Offer</button>
-                        <button class="btn-soc-book" onclick="proceedToBookOffer('${offerId}', '${reqId}')">Book Offer</button>
+                      <!-- Action Buttons & Status -->
+                      <div class="soc-actions-row" style="display: flex; gap: 8px; align-items: center; margin-top: 14px; flex-wrap: wrap;">
+                        ${isAccepted 
+                          ? `<span style="background: #D1FAE5; color: #065F46; font-weight: 700; padding: 7px 12px; border-radius: 8px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">✓ Booked &amp; Accepted</span>
+                             <button class="btn-soc-view" style="flex: 1;" onclick="openOfferFlyerModal('${agentCode}', '${agentName}', '${priceFormatted}', '${duration}', '${makkahHotel}', '${madinahHotel}', '${travelDate}', '${reqId}')">View Offer</button>`
+                          : isRejected
+                          ? `<span style="background: #FEE2E2; color: #991B1B; font-weight: 700; padding: 7px 12px; border-radius: 8px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">✕ Declined</span>
+                             <button class="btn-soc-view" style="flex: 1;" onclick="openOfferFlyerModal('${agentCode}', '${agentName}', '${priceFormatted}', '${duration}', '${makkahHotel}', '${madinahHotel}', '${travelDate}', '${reqId}')">View Offer</button>`
+                          : `<button class="btn-soc-view" onclick="openOfferFlyerModal('${agentCode}', '${agentName}', '${priceFormatted}', '${duration}', '${makkahHotel}', '${madinahHotel}', '${travelDate}', '${reqId}')">View Offer</button>
+                             <button class="btn-soc-book" onclick="proceedToBookOffer('${offerId}', '${reqId}')">Book Offer</button>
+                             <button class="btn-soc-decline" onclick="rejectOfferCustomer('${offerId}', '${reqId}')" style="background: transparent; color: #DC2626; border: 1.5px solid #FCA5A5; font-size: 12px; font-weight: 700; border-radius: 8px; padding: 7px 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#FEE2E2'" onmouseout="this.style.background='transparent'" title="Decline this agency offer">Decline</button>`
+                        }
                       </div>
                     </div>
                   `;
