@@ -41,26 +41,7 @@ class App {
     }
 
     async init() {
-        // Automatically sanitize and normalize any cached high-price objects in localStorage to testing fares (₹5),
-        // and purge stale mock offers that were never created through the admin panel (no userId/packageId).
-        ['umrah_user_offers', 'umrah_requirements', 'umrah_packages', 'umrah_my_bookings'].forEach(key => {
-            try {
-                const raw = localStorage.getItem(key);
-                if (raw) {
-                    let data = JSON.parse(raw);
-                    if (Array.isArray(data)) {
-                        data.forEach(item => {
-                            if (item.price > 100) item.price = 5;
-                            if (item.discountedPrice > 100) item.discountedPrice = 5;
-                            if (item.originalPrice > 100) item.originalPrice = 10;
-                            if (item.totalPrice > 100) item.totalPrice = 5;
-                            if (item.maxBudget > 100) item.maxBudget = 5;
-                        });
-                        localStorage.setItem(key, JSON.stringify(data));
-                    }
-                }
-            } catch (e) {}
-        });
+        // Retain genuine package prices and real user bookings without overriding to test fares
 
         // Remove any pre-existing mock agent offers and test requirements from localStorage
         try {

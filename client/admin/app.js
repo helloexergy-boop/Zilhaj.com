@@ -1010,9 +1010,25 @@ function renderAgentsList() {
 // G. Reports Render
 function renderReportsView() {
   const tbody = document.getElementById('reports-bookings-tbody');
+  const bookings = state.bookings || [];
+  const requests = state.requests || [];
+
+  // Compute live financial & analytics aggregates from confirmed bookings and live requests
+  const confirmedBookings = bookings.filter(b => (b.status || '').toUpperCase() === 'CONFIRMED' || (b.paymentStatus || '').toUpperCase() === 'PAID');
+  const grossAmount = (confirmedBookings.length > 0 ? confirmedBookings : bookings).reduce((acc, b) => acc + (Number(b.totalPrice || b.price || 0)), 0);
+  const commission = Math.round(grossAmount * 0.05);
+  const conversionRate = requests.length > 0 ? ((bookings.length / requests.length) * 100).toFixed(1) + '%' : '0.0%';
+
+  // Update KPI Cards dynamically with real amounts
+  const grossEl = document.getElementById('rep-gross-val');
+  const commEl = document.getElementById('rep-comm-val');
+  const convEl = document.getElementById('rep-conv-val');
+  if (grossEl) grossEl.textContent = `₹${grossAmount.toLocaleString('en-IN')}`;
+  if (commEl) commEl.textContent = `₹${commission.toLocaleString('en-IN')}`;
+  if (convEl) convEl.textContent = conversionRate;
+
   if (!tbody) return;
 
-  const bookings = state.bookings;
   if (bookings.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">No completed transactions recorded yet.</td></tr>`;
     return;
@@ -1020,13 +1036,13 @@ function renderReportsView() {
 
   tbody.innerHTML = bookings.map(b => `
     <tr>
-      <td style="font-weight: 800; color: var(--text-main);">${b.id || (b._id ? b._id.toString().slice(-6) : 'BKG-101')}</td>
-      <td style="font-weight: 700;">${b.packageTitle || 'Deluxe Umrah Package'}</td>
-      <td style="color: var(--text-muted);">${b.agentName || 'Al-Haram Express'}</td>
-      <td style="text-align: center; font-weight: 800;">${b.travelersCount || 1}</td>
-      <td style="font-weight: 800; color: var(--primary);">₹${(b.totalPrice || 2499).toLocaleString('en-IN')}</td>
-      <td>${getBadgeHtml(b.status === 'CANCELLED' ? 'Inactive' : 'Completed')}</td>
-      <td style="font-size: 11px; color: var(--text-light);">${b.travelDate || (b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB') : '2026')}</td>
+      <td style="font-weight: 800; color: var(--text-main);">${b.id || (b._id ? b._id.toString().slice(-6) : '—')}</td>
+      <td style="font-weight: 700;">${b.packageTitle || b.packageName || 'Package Order'}</td>
+      <td style="color: var(--text-muted);">${b.agentName || b.agencyName || 'Direct Booking'}</td>
+      <td style="text-align: center; font-weight: 800;">${b.travelersCount || b.travelers || 1}</td>
+      <td style="font-weight: 800; color: var(--primary);">₹${Number(b.totalPrice || b.price || 0).toLocaleString('en-IN')}</td>
+      <td>${getBadgeHtml(b.status === 'CANCELLED' ? 'Inactive' : (b.status || 'Completed'))}</td>
+      <td style="font-size: 11px; color: var(--text-light);">${b.travelDate || (b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB') : '—')}</td>
     </tr>
   `).join('');
 }
@@ -1365,7 +1381,7 @@ function exportSubAdminsCsv() {
 function exportReportsCsv() {
   const csv = "data:text/csv;charset=utf-8,"
     + "Booking ID,Package Title,Agency,Travelers,Amount,Status,Date\n"
-    + state.bookings.map(b => `"${b.id || 'BKG'}","${b.packageTitle}","${b.agentName || 'Agent'}",${b.travelersCount || 1},"${b.totalPrice || 2499}","${b.status}","${b.travelDate || '2026'}"`).join("\n");
+    + state.bookings.map(b => `"${b.id || (b._id ? b._id.toString().slice(-6) : 'BKG')}","${b.packageTitle || b.packageName || 'Package Order'}","${b.agentName || b.agencyName || 'Agency'}",${b.travelersCount || b.travelers || 1},"${b.totalPrice || b.price || 0}","${b.status || 'Completed'}","${b.travelDate || (b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB') : '')}"`).join("\n");
   
   downloadCsv(csv, `Zilhaj_Reports_${new Date().toISOString().slice(0,10)}.csv`);
   showToast("Executive report exported to CSV!", "success");

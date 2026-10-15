@@ -2977,8 +2977,13 @@ window.completePaymentSuccess = function(paymentId, method) {
 
   const methodEl = document.getElementById('paySuccessMethod');
   const agencyEl = document.getElementById('paySuccessAgency');
+  const amountEl = document.getElementById('paySuccessAmount');
   if (methodEl) methodEl.textContent = method || 'Razorpay / UPI';
-  if (agencyEl) agencyEl.textContent = agencyName;
+  if (agencyEl) agencyEl.textContent = agencyName || 'Travel Partner';
+  if (amountEl) {
+    const rawAmt = Number(cleanPrice) || (typeof window.pendingBooking === 'object' && window.pendingBooking.price ? Number(window.pendingBooking.price) : 0);
+    amountEl.textContent = rawAmt > 0 ? `₹${rawAmt.toLocaleString('en-IN')}` : (price || '₹0');
+  }
 
   const modal = document.getElementById('paymentSuccessModal');
   if (modal) {
