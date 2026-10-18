@@ -586,318 +586,157 @@ ul, ol {
 /* ==========================================================================
    SECTION 2 — THE IDEA BEHIND ZILHAJ
    ========================================================================== */
-.idea-intro-content {
-  max-width: 840px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  text-align: center;
-}
+<section class="section section-subtle" id="idea">
+      <div class="container">
+        
+        <header class="section-header reveal-on-scroll">
+          <div class="eyebrow">
+            <span class="eyebrow-dot" aria-hidden="true"></span>
+            <span>THE CORE CONCEPT</span>
+          </div>
+          <h2 class="section-title">The Idea Behind ZILHAJ</h2>
+          <div class="idea-intro-content">
+            <p class="section-lead-text">
+              ZILHAJ is a request-based platform designed to simplify Hajj &amp; Umrah planning. Instead of contacting multiple agents, pilgrims submit one request and receive multiple verified offers.
+            </p>
+            <p class="section-lead-text">
+              This allows pilgrims to compare packages easily, review details transparently, and choose the best option without stress or confusion.
+            </p>
+          </div>
+        </header>
 
-.section-lead-text {
-  font-size: var(--font-size-md);
-  color: var(--color-text-muted);
-  line-height: 1.7;
-}
+        <!-- Four Visually Distinct Content Blocks -->
+        <div class="idea-cards-grid">
+          
+          <!-- Card 1: OBSERVATION -->
+          <article class="idea-block idea-block-observation reveal-on-scroll">
+            <div class="idea-block-header">
+              <span class="idea-pill idea-pill-observation">OBSERVATION</span>
+              <div class="idea-icon-circle" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              </div>
+            </div>
+            <p class="idea-block-text">
+              People planning Hajj or Umrah often contact multiple agents to compare packages and services.
+            </p>
+          </article>
 
-/* 4 Visually Distinct Content Blocks */
-.idea-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-6);
-  margin-top: var(--space-12);
-  margin-bottom: var(--space-10);
-}
+          <!-- Card 2: FRUSTRATION -->
+          <article class="idea-block idea-block-frustration reveal-on-scroll delay-100">
+            <div class="idea-block-header">
+              <span class="idea-pill idea-pill-frustration">FRUSTRATION</span>
+              <div class="idea-icon-circle" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              </div>
+            </div>
+            <p class="idea-block-text">
+              Pricing can be inconsistent, information is scattered, and the process takes significant time and effort.
+            </p>
+          </article>
 
-.idea-block {
-  background: #FFFFFF;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
-  position: relative;
-}
+          <!-- Card 3: INSIGHT -->
+          <article class="idea-block idea-block-insight reveal-on-scroll delay-200">
+            <div class="idea-block-header">
+              <span class="idea-pill idea-pill-insight">INSIGHT</span>
+              <div class="idea-icon-circle" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              </div>
+            </div>
+            <p class="idea-block-text">
+              Instead of customers chasing providers, providers should compete for the customer.
+            </p>
+          </article>
 
-.idea-block:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-}
+          <!-- Card 4: SOLUTION (Visually Highlighted in ZILHAJ Green) -->
+          <article class="idea-block idea-block-solution reveal-on-scroll delay-300">
+            <div class="idea-block-header">
+              <span class="idea-pill idea-pill-solution">SOLUTION</span>
+              <div class="idea-icon-circle" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+              </div>
+            </div>
+            <p class="idea-block-text">
+              ZILHAJ enables pilgrims to submit a single Hajj or Umrah request and receive multiple verified offers they can easily compare and choose from.
+            </p>
+          </article>
 
-.idea-block-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-4);
-}
+        </div>
 
-.idea-pill {
-  font-family: var(--font-family-display);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-}
+        <!-- Platform Concept Workflow Bar -->
+        <div class="concept-flow-wrapper reveal-on-scroll delay-200">
+          <div class="concept-flow-caption">
+            <span class="caption-dot" aria-hidden="true"></span>
+            <span>How the ZILHAJ Marketplace Model Functions</span>
+          </div>
+          <div class="concept-flow-track">
+            <div class="flow-node">
+              <span class="flow-num">1</span>
+              <span class="flow-text">Customer submits ONE request</span>
+            </div>
+            <span class="flow-connector" aria-hidden="true">→</span>
+            <div class="flow-node">
+              <span class="flow-num">2</span>
+              <span class="flow-text">Suitable verified providers approached</span>
+            </div>
+            <span class="flow-connector" aria-hidden="true">→</span>
+            <div class="flow-node">
+              <span class="flow-num">3</span>
+              <span class="flow-text">Providers submit offers</span>
+            </div>
+            <span class="flow-connector" aria-hidden="true">→</span>
+            <div class="flow-node">
+              <span class="flow-num">4</span>
+              <span class="flow-text">ZILHAJ verifies &amp; reviews offers</span>
+            </div>
+            <span class="flow-connector" aria-hidden="true">→</span>
+            <div class="flow-node">
+              <span class="flow-num">5</span>
+              <span class="flow-text">Customer compares &amp; chooses</span>
+            </div>
+          </div>
+        </div>
 
-.idea-icon-circle {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition-fast);
-}
+      </div>
+    </section>
 
-.idea-block-text {
-  font-size: var(--font-size-sm);
-  line-height: 1.65;
-  color: var(--color-text-muted);
-}
+    <!-- ==========================================================================
+         SECTION 4 — BRAND STATEMENT
+         ========================================================================== -->
+    <section class="section brand-statement-section" id="statement">
+      <div class="container">
+        <div class="brand-statement-card reveal-on-scroll">
+          <div class="statement-bg-pattern" aria-hidden="true"></div>
+          
+          <div class="eyebrow statement-eyebrow">
+            <span class="eyebrow-dot eyebrow-dot-gold" aria-hidden="true"></span>
+            <span>THE ZILHAJ PROMISE</span>
+          </div>
 
-/* Card 1: Observation */
-.idea-block-observation {
-  border-top: 3.5px solid #64748B;
-  background: linear-gradient(180deg, #FAFAFA 0%, #FFFFFF 100%);
-}
-.idea-pill-observation {
-  background: #F1F5F9;
-  color: #475569;
-}
-.idea-block-observation .idea-icon-circle {
-  background: #F1F5F9;
-  color: #475569;
-}
+          <h2 class="brand-statement-heading">
+            “One Request. <span class="gold-accent-text">Multiple Verified Offers.</span>”
+          </h2>
 
-/* Card 2: Frustration */
-.idea-block-frustration {
-  border-top: 3.5px solid #E11D48;
-  background: linear-gradient(180deg, #FFF8F8 0%, #FFFFFF 100%);
-}
-.idea-pill-frustration {
-  background: #FFE4E6;
-  color: #BE123C;
-}
-.idea-block-frustration .idea-icon-circle {
-  background: #FFF1F2;
-  color: #E11D48;
-}
+          <p class="brand-statement-sub">
+            Submit once. Compare verified options. Choose with confidence.
+          </p>
 
-/* Card 3: Insight */
-.idea-block-insight {
-  border-top: 3.5px solid var(--color-gold);
-  background: linear-gradient(180deg, #FFFCF2 0%, #FFFFFF 100%);
-}
-.idea-pill-insight {
-  background: var(--color-gold-light);
-  color: var(--color-gold-dark);
-}
-.idea-block-insight .idea-icon-circle {
-  background: #FFFBEB;
-  color: var(--color-gold-dark);
-}
-
-/* Card 4: Solution (Highlighted using ZILHAJ Green) */
-.idea-block-solution {
-  background: linear-gradient(145deg, var(--color-primary-deep) 0%, var(--color-primary-dark) 100%);
-  border: 1px solid var(--color-gold);
-  border-top: 3.5px solid var(--color-gold-accent);
-  box-shadow: var(--shadow-xl);
-  color: #FFFFFF;
-}
-.idea-block-solution:hover {
-  border-color: var(--color-gold-accent);
-  box-shadow: var(--shadow-xl), 0 0 25px rgba(16, 185, 129, 0.25);
-}
-.idea-pill-solution {
-  background: var(--color-primary-emerald);
-  color: #FFFFFF;
-  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4);
-}
-.idea-block-solution .idea-icon-circle {
-  background: rgba(255, 255, 255, 0.15);
-  color: var(--color-gold-accent);
-}
-.idea-block-solution .idea-block-text {
-  color: #ECFDF5;
-  font-weight: 500;
-}
-
-/* Platform Concept Workflow Bar */
-.concept-flow-wrapper {
-  background: #FFFFFF;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-6) var(--space-8);
-  box-shadow: var(--shadow-sm);
-}
-
-.concept-flow-caption {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-family-display);
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  color: var(--color-primary-deep);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: var(--space-4);
-}
-
-.caption-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-primary-accent);
-}
-
-.concept-flow-track {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-
-.flow-node {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  flex: 1;
-  min-width: 170px;
-}
-
-.flow-num {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--color-primary-deep);
-  color: #FFFFFF;
-  font-size: 12px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.flow-text {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-main);
-  line-height: 1.35;
-}
-
-.flow-connector {
-  color: var(--color-gold);
-  font-size: 16px;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-
-/* ==========================================================================
-   SECTION 4 — BRAND STATEMENT
-   ========================================================================== */
-.brand-statement-section {
-  padding-top: var(--space-8);
-  padding-bottom: var(--space-8);
-}
-
-.brand-statement-card {
-  background: linear-gradient(135deg, var(--color-primary-darkest) 0%, var(--color-primary-deep) 60%, var(--color-primary-dark) 100%);
-  border: 1.5px solid var(--color-gold);
-  border-radius: var(--radius-2xl);
-  padding: var(--space-12) var(--space-8);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-xl);
-}
-
-.statement-bg-pattern {
-  position: absolute;
-  inset: 0;
-  background-image: url('../assets/images/pattern-islamic.svg');
-  background-repeat: repeat;
-  opacity: 0.08;
-  pointer-events: none;
-}
-
-.statement-eyebrow {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(212, 175, 55, 0.35);
-  color: var(--color-gold-accent);
-  margin-bottom: var(--space-4);
-  position: relative;
-  z-index: 1;
-}
-
-.brand-statement-heading {
-  font-family: var(--font-family-display);
-  font-size: var(--font-size-3xl);
-  font-weight: 800;
-  color: #FFFFFF;
-  letter-spacing: -0.02em;
-  margin-bottom: var(--space-3);
-  position: relative;
-  z-index: 1;
-}
-
-.gold-accent-text {
-  color: var(--color-gold-accent);
-  background: linear-gradient(90deg, #FDE68A 0%, #D4AF37 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.brand-statement-sub {
-  font-size: var(--font-size-md);
-  color: #D1FAE5;
-  margin-bottom: var(--space-8);
-  position: relative;
-  z-index: 1;
-  font-weight: 500;
-}
-
-.statement-highlights-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-  position: relative;
-  z-index: 1;
-}
-
-.statement-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 18px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: var(--radius-full);
-  color: #FFFFFF;
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  backdrop-filter: blur(4px);
-}
-
-.statement-pill svg {
-  color: var(--color-gold-accent);
-}
+          <div class="statement-highlights-row">
+            <div class="statement-pill">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Submit Once</span>
+            </div>
+            <div class="statement-pill">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Compare Verified Options</span>
+            </div>
+            <div class="statement-pill">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Choose with Confidence</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
 /* ==========================================================================
    SECTION 5 — WHY WE STARTED
