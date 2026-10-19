@@ -721,61 +721,62 @@ function renderRequestDetails() {
         }
 
         return `
-        <div class="offer-card" style="border: 1.5px solid ${statusUpper === 'ACCEPTED' ? '#86efac' : (statusUpper === 'REJECTED' ? '#fca5a5' : 'var(--border-light)')};">
+        <div class="offer-card" style="border: 1.5px solid ${statusUpper === 'ACCEPTED' ? '#86efac' : (statusUpper === 'REJECTED' ? '#fca5a5' : 'var(--border-light)')}; min-height: 430px; display: flex; flex-direction: column; justify-content: space-between;">
           <div>
             <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle);">
               <div>
-                <span style="font-size: 10px; font-weight: 800; color: var(--text-light);">${offer.agentId || 'AGENT-1042'}</span>
-                <h4 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 2px;">${offer.agentName}</h4>
+                <span style="font-size: 10px; font-weight: 800; color: var(--text-light);">${escapeHtml(offer.agentId || 'AGENT-1042')}</span>
+                <h4 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px;" title="${escapeHtml(offer.agentName || '')}">${escapeHtml(offer.agentName || '')}</h4>
               </div>
               <div>${statusBadgeHtml}</div>
             </div>
-              <div style="font-size: 12px; font-weight: 600; color: var(--text-muted);">${offer.packageName} • ${offer.duration}</div>
+            <div style="margin-top: 8px;">
+              <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(offer.packageName || '')}">${escapeHtml(offer.packageName || 'Package')} • ${escapeHtml(offer.duration || '')}</div>
               <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px;">
                 <div>
-                  <span class="offer-price-large">${offer.pricePerPerson}</span>
+                  <span class="offer-price-large">${escapeHtml(offer.pricePerPerson || '')}</span>
                   <span style="font-size: 12px; color: var(--text-muted);"> / person</span>
                 </div>
                 <div style="text-align: right;">
                   <span style="font-size: 10px; color: var(--text-light); font-weight: 600;">Total Price</span>
-                  <div style="font-size: 12px; font-weight: 800; color: var(--text-main);">${offer.totalPrice}</div>
+                  <div style="font-size: 12px; font-weight: 800; color: var(--text-main);">${escapeHtml(offer.totalPrice || '')}</div>
                 </div>
               </div>
             </div>
 
-            <div class="offer-amenity-grid">
-              <div class="amenity-box">
+            <div class="offer-amenity-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+              <div class="amenity-box" style="min-height: 58px; box-sizing: border-box;">
                 <div class="amenity-label">🏢 Makkah Hotel</div>
-                <div class="amenity-val">${offer.makkahHotel}</div>
-                <div class="amenity-dist">${offer.makkahDistance}</div>
+                <div class="amenity-val" title="${escapeHtml(offer.makkahHotel || '--')}">${escapeHtml(offer.makkahHotel || '--')}</div>
+                <div class="amenity-dist" title="${escapeHtml(offer.makkahDistance || '')}">${escapeHtml(offer.makkahDistance || '')}</div>
               </div>
 
-              <div class="amenity-box">
+              <div class="amenity-box" style="min-height: 58px; box-sizing: border-box;">
                 <div class="amenity-label">🏢 Madinah Hotel</div>
-                <div class="amenity-val">${offer.madinahHotel}</div>
-                <div class="amenity-dist">${offer.madinahDistance}</div>
+                <div class="amenity-val" title="${escapeHtml(offer.madinahHotel || '--')}">${escapeHtml(offer.madinahHotel || '--')}</div>
+                <div class="amenity-dist" title="${escapeHtml(offer.madinahDistance || '')}">${escapeHtml(offer.madinahDistance || '')}</div>
               </div>
 
-              <div class="amenity-box">
+              <div class="amenity-box" style="min-height: 50px; box-sizing: border-box;">
                 <div class="amenity-label">🚌 Transport</div>
-                <div class="amenity-val">${offer.transport}</div>
+                <div class="amenity-val" title="${escapeHtml(offer.transport || '--')}">${escapeHtml(offer.transport || '--')}</div>
               </div>
 
-              <div class="amenity-box">
+              <div class="amenity-box" style="min-height: 50px; box-sizing: border-box;">
                 <div class="amenity-label">🍽️ Meal Plan</div>
-                <div class="amenity-val">${offer.mealPlan}</div>
+                <div class="amenity-val" title="${escapeHtml(offer.mealPlan || '--')}">${escapeHtml(offer.mealPlan || '--')}</div>
               </div>
 
-              <div class="amenity-box" style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center;">
+              <div class="amenity-box" style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; min-height: 44px; box-sizing: border-box;">
                 <div class="amenity-label">🧭 Historical Ziyarat</div>
-                <div class="amenity-val" style="margin-top: 0;">${offer.ziyarat}</div>
+                <div class="amenity-val" style="margin-top: 0;" title="${escapeHtml(offer.ziyarat || '--')}">${escapeHtml(offer.ziyarat || '--')}</div>
               </div>
             </div>
           </div>
 
-          <div style="padding-top: 12px; border-top: 1px solid var(--border-subtle);">
+          <div style="padding-top: 12px; border-top: 1px solid var(--border-subtle); margin-top: 12px;">
             <div style="font-size: 10px; color: var(--text-light); margin-bottom: 10px;">
-              Received On: ${offer.receivedOn}
+              Received On: ${escapeHtml(offer.receivedOn || '')}
             </div>
 
             <div style="display: flex; gap: 8px;">
@@ -1437,7 +1438,12 @@ function toggleAdminMenu(e) {
 }
 
 function handleAdminLogout() {
+  localStorage.removeItem('umrah_admin_token');
+  localStorage.removeItem('umrah_admin_user');
   localStorage.removeItem('umrah_user');
+  localStorage.removeItem('umrah_token');
+  localStorage.removeItem('zilhaj_token');
+  sessionStorage.removeItem('zilhaj_token');
   showToast('Logged out successfully', 'info');
   setTimeout(() => {
     window.location.href = '/login.html';
@@ -2343,73 +2349,118 @@ function renderInventoryList() {
     return;
   }
 
-  grid.innerHTML = list.map(p => {
-    const isUmrah = (p.serviceType || '').toLowerCase() === 'umrah';
-    const priceFormatted = Number(p.pricePerPerson || 0).toLocaleString('en-IN');
-    return `
-      <div class="offer-card" style="display: flex; flex-direction: column; justify-content: space-between; border: 1.5px solid var(--border-light); border-radius: var(--radius-xl); padding: 18px; background: #ffffff; box-shadow: var(--shadow-sm);">
-        <div>
-          <!-- Header -->
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle);">
-            <div>
-              <span class="badge ${isUmrah ? 'badge-service-umrah' : 'badge-service-hajj'}" style="font-size: 10px; padding: 2px 8px;">
-                ${isUmrah ? '🕋 Umrah' : '🏛️ Hajj'}
-              </span>
-              <span style="font-size: 11px; font-weight: 800; color: var(--text-light); margin-left: 6px;">${escapeHtml(p.agentId || 'AGENT')}</span>
-              <h4 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin-top: 4px;">${escapeHtml(p.packageTitle)}</h4>
-              <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">${escapeHtml(p.agentName)}</div>
+  // Group packages by Agent ID for structured, symmetrical scrollable row presentation
+  const groupedByAgent = {};
+  list.forEach(p => {
+    const rawAgentId = (p.agentId || '').trim();
+    const agentKey = rawAgentId || 'OTHER';
+    if (!groupedByAgent[agentKey]) {
+      groupedByAgent[agentKey] = {
+        agentId: rawAgentId || 'AGENT-GENERAL',
+        agentName: p.agentName || 'Verified Travel Agency',
+        packages: []
+      };
+    }
+    groupedByAgent[agentKey].packages.push(p);
+  });
+
+  const agentKeys = Object.keys(groupedByAgent);
+
+  grid.className = 'agent-inventory-container';
+  grid.style.display = 'flex';
+  grid.style.flexDirection = 'column';
+  grid.style.gap = '20px';
+
+  grid.innerHTML = agentKeys.map(key => {
+    const group = groupedByAgent[key];
+    const cardsHtml = group.packages.map(p => {
+      const isUmrah = (p.serviceType || '').toLowerCase() === 'umrah';
+      const priceFormatted = Number(p.pricePerPerson || 0).toLocaleString('en-IN');
+      return `
+        <div class="offer-card" style="display: flex; flex-direction: column; justify-content: space-between; border: 1.5px solid var(--border-light); border-radius: var(--radius-xl); padding: 18px; background: #ffffff; box-shadow: var(--shadow-sm);">
+          <div>
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle);">
+              <div>
+                <span class="badge ${isUmrah ? 'badge-service-umrah' : 'badge-service-hajj'}" style="font-size: 10px; padding: 2px 8px;">
+                  ${isUmrah ? '🕋 Umrah' : '🏛️ Hajj'}
+                </span>
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-light); margin-left: 6px;">${escapeHtml(p.agentId || 'AGENT')}</span>
+                <h4 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;" title="${escapeHtml(p.packageTitle)}">${escapeHtml(p.packageTitle)}</h4>
+                <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;" title="${escapeHtml(p.agentName)}">${escapeHtml(p.agentName)}</div>
+              </div>
+              <div>
+                <span class="badge ${p.status === 'Active' ? 'badge-active' : 'badge-pending'}" style="font-size: 11px;">
+                  ${escapeHtml(p.status || 'Active')}
+                </span>
+              </div>
             </div>
-            <div>
-              <span class="badge ${p.status === 'Active' ? 'badge-active' : 'badge-pending'}" style="font-size: 11px;">
-                ${escapeHtml(p.status || 'Active')}
-              </span>
+
+            <!-- Price & Duration -->
+            <div style="margin: 12px 0; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: baseline;">
+              <div>
+                <span class="offer-price-large" style="font-size: 20px; font-weight: 900; color: var(--primary);">₹${priceFormatted}</span>
+                <span style="font-size: 11px; color: var(--text-muted);"> / person</span>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-size: 10px; color: var(--text-light); font-weight: 700;">Duration</span>
+                <div style="font-size: 13px; font-weight: 800; color: var(--text-main);">${escapeHtml(p.duration || '18 Days')}</div>
+              </div>
+            </div>
+
+            <!-- Hotels & Amenities Grid -->
+            <div class="offer-amenity-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
+              <div class="amenity-box" style="background: #f8fafc; padding: 8px 10px; border-radius: var(--radius-sm); min-height: 58px; box-sizing: border-box;">
+                <div class="amenity-label" style="font-weight: 800; color: var(--primary);">🏢 Makkah Hotel</div>
+                <div class="amenity-val" style="font-weight: 700; color: var(--text-main);" title="${escapeHtml(p.makkahHotel || '--')}">${escapeHtml(p.makkahHotel || '--')}</div>
+                <div class="amenity-dist" style="font-size: 10px; color: var(--text-muted);" title="${escapeHtml(p.makkahDistance || '')}">${escapeHtml(p.makkahDistance || '')}</div>
+              </div>
+
+              <div class="amenity-box" style="background: #f8fafc; padding: 8px 10px; border-radius: var(--radius-sm); min-height: 58px; box-sizing: border-box;">
+                <div class="amenity-label" style="font-weight: 800; color: #b45309;">🏢 Madinah Hotel</div>
+                <div class="amenity-val" style="font-weight: 700; color: var(--text-main);" title="${escapeHtml(p.madinahHotel || '--')}">${escapeHtml(p.madinahHotel || '--')}</div>
+                <div class="amenity-dist" style="font-size: 10px; color: var(--text-muted);" title="${escapeHtml(p.madinahDistance || '')}">${escapeHtml(p.madinahDistance || '')}</div>
+              </div>
+
+              <div class="amenity-box" style="background: #f8fafc; padding: 8px 10px; border-radius: var(--radius-sm); grid-column: 1 / -1; min-height: 48px; box-sizing: border-box;">
+                <div class="amenity-label" style="font-weight: 700; color: var(--text-light);">🚌 Transport</div>
+                <div class="amenity-val" title="${escapeHtml(p.transport || 'Dedicated AC Coach')}">${escapeHtml(p.transport || 'Dedicated AC Coach')}</div>
+              </div>
             </div>
           </div>
 
-          <!-- Price & Duration -->
-          <div style="margin: 12px 0; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: baseline;">
-            <div>
-              <span class="offer-price-large" style="font-size: 20px; font-weight: 900; color: var(--primary);">₹${priceFormatted}</span>
-              <span style="font-size: 11px; color: var(--text-muted);"> / person</span>
-            </div>
-            <div style="text-align: right;">
-              <span style="font-size: 10px; color: var(--text-light); font-weight: 700;">Duration</span>
-              <div style="font-size: 13px; font-weight: 800; color: var(--text-main);">${escapeHtml(p.duration || '18 Days')}</div>
-            </div>
-          </div>
-
-          <!-- Hotels & Amenities Grid -->
-          <div class="offer-amenity-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
-            <div class="amenity-box" style="background: #f8fafc; padding: 8px 10px; border-radius: var(--radius-sm);">
-              <div class="amenity-label" style="font-weight: 800; color: var(--primary);">🏢 Makkah Hotel</div>
-              <div class="amenity-val" style="font-weight: 700; color: var(--text-main);">${escapeHtml(p.makkahHotel || '--')}</div>
-              <div class="amenity-dist" style="font-size: 10px; color: var(--text-muted);">${escapeHtml(p.makkahDistance || '')}</div>
-            </div>
-
-            <div class="amenity-box" style="background: #f8fafc; padding: 8px 10px; border-radius: var(--radius-sm);">
-              <div class="amenity-label" style="font-weight: 800; color: #b45309;">🏢 Madinah Hotel</div>
-              <div class="amenity-val" style="font-weight: 700; color: var(--text-main);">${escapeHtml(p.madinahHotel || '--')}</div>
-              <div class="amenity-dist" style="font-size: 10px; color: var(--text-muted);">${escapeHtml(p.madinahDistance || '')}</div>
-            </div>
-
-            <div class="amenity-box" style="background: #f8fafc; padding: 8px 10px; border-radius: var(--radius-sm); grid-column: 1 / -1;">
-              <div class="amenity-label" style="font-weight: 700; color: var(--text-light);">🚌 Transport</div>
-              <div class="amenity-val">${escapeHtml(p.transport || 'Dedicated AC Coach')}</div>
-            </div>
+          <!-- Footer Actions -->
+          <div style="padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--border-subtle); display: flex; gap: 8px;">
+            <button onclick="useInventoryPackageInActiveRequest('${p.id}')" class="btn btn-primary btn-sm" style="flex: 2; font-weight: 800; background: #047857;">
+              <span>⚡ Attach to Request</span>
+            </button>
+            <button onclick="openEditInventoryPackageModal('${p.id}')" class="btn btn-secondary btn-sm" title="Edit Package" style="font-weight: 800; padding: 4px 10px;">
+              ✏️ Edit
+            </button>
+            <button onclick="deleteInventoryPackage('${p.id}')" class="btn btn-danger btn-sm" title="Delete from Inventory" style="font-weight: 800; padding: 4px 10px;">
+              ✕
+            </button>
           </div>
         </div>
+      `;
+    }).join('');
 
-        <!-- Footer Actions -->
-        <div style="padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--border-subtle); display: flex; gap: 8px;">
-          <button onclick="useInventoryPackageInActiveRequest('${p.id}')" class="btn btn-primary btn-sm" style="flex: 2; font-weight: 800; background: #047857;">
-            <span>⚡ Attach to Request</span>
-          </button>
-          <button onclick="openEditInventoryPackageModal('${p.id}')" class="btn btn-secondary btn-sm" title="Edit Package" style="font-weight: 800; padding: 4px 10px;">
-            ✏️ Edit
-          </button>
-          <button onclick="deleteInventoryPackage('${p.id}')" class="btn btn-danger btn-sm" title="Delete from Inventory" style="font-weight: 800; padding: 4px 10px;">
-            ✕
-          </button>
+    return `
+      <div class="agent-inventory-section">
+        <div class="agent-inventory-header">
+          <div class="agent-inventory-title-group">
+            <span class="agent-badge-pill">🆔 ${escapeHtml(group.agentId)}</span>
+            <span class="agent-name-text">${escapeHtml(group.agentName)}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--text-muted); background: #f1f5f9; padding: 3px 10px; border-radius: 99px;">
+              ${group.packages.length} Offer${group.packages.length === 1 ? '' : 's'}
+            </span>
+            ${group.packages.length > 2 ? '<span style="font-size: 11px; font-weight: 700; color: #047857;">Scroll row &rarr;</span>' : ''}
+          </div>
+        </div>
+        <div class="agent-offers-row">
+          ${cardsHtml}
         </div>
       </div>
     `;
@@ -2958,27 +3009,10 @@ async function initAdminApp() {
     localStorage.setItem('umrah_admin_token', adminToken);
   }
 
-  // If no authoritative admin token exists or stored user is customer, acquire admin session
+  // Check for admin token or active staff session
   if (!adminToken) {
-    try {
-      const apiBase = getApiBase();
-      const authRes = await fetch(`${apiBase}/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'admin@umrah.com', name: 'System Admin' })
-      });
-      if (authRes.ok) {
-        const authData = await authRes.json();
-        if (authData.token) {
-          adminToken = authData.token;
-          localStorage.setItem('umrah_admin_token', adminToken);
-          const adminObj = { ...(authData.user || {}), token: authData.token };
-          localStorage.setItem('umrah_admin_user', JSON.stringify(adminObj));
-        }
-      }
-    } catch (e) {
-      console.warn('[ADMIN] Initial session sync warning:', e.message);
-    }
+    showAdminAuthModal();
+    return;
   }
 
   // Update Admin Profile pill in header
@@ -3000,6 +3034,84 @@ async function initAdminApp() {
     refreshAllData(false);
   }, 6000);
 }
+
+function showAdminAuthModal() {
+  const modal = document.getElementById('admin-login-modal');
+  if (modal) {
+    modal.classList.add('open');
+    modal.style.display = 'flex';
+  }
+}
+
+async function handleAdminModalLoginSubmit(e) {
+  if (e) e.preventDefault();
+  const emailInput = document.getElementById('admin-login-email');
+  const passInput = document.getElementById('admin-login-password');
+  const errorBox = document.getElementById('admin-login-error');
+  const submitBtn = document.getElementById('admin-login-submit-btn');
+
+  if (!emailInput || !passInput) return;
+  const identifier = emailInput.value.trim();
+  const password = passInput.value;
+
+  if (errorBox) errorBox.style.display = 'none';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="zilhaj-spinner-circle sm white"></span> Verifying...';
+  }
+
+  try {
+    const apiBase = getApiBase();
+    const res = await fetch(`${apiBase}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: identifier, password })
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.token) {
+      throw new Error(data.error || data.message || 'Invalid admin credentials');
+    }
+
+    const user = data.user || {};
+    const role = String(user.role || '').toUpperCase();
+    const isStaff = role.includes('ADMIN') || role.includes('SUBADMIN') || user.email === 'admin@umrah.com';
+
+    if (!isStaff) {
+      throw new Error('Access denied: This account does not have administrator privileges.');
+    }
+
+    // Save tokens and user session
+    localStorage.setItem('umrah_admin_token', data.token);
+    localStorage.setItem('umrah_admin_user', JSON.stringify({ ...user, token: data.token }));
+    localStorage.setItem('umrah_user', JSON.stringify({ ...user, token: data.token }));
+    localStorage.setItem('umrah_token', data.token);
+    localStorage.setItem('zilhaj_token', data.token);
+    sessionStorage.setItem('zilhaj_token', data.token);
+
+    const modal = document.getElementById('admin-login-modal');
+    if (modal) {
+      modal.classList.remove('open');
+      modal.style.display = 'none';
+    }
+
+    showToast(`Welcome ${user.name || 'Admin'}! Access granted.`, 'success');
+    await initAdminApp();
+  } catch (err) {
+    if (errorBox) {
+      errorBox.textContent = err.message || 'Authentication failed.';
+      errorBox.style.display = 'block';
+    }
+    showToast(err.message || 'Authentication failed', 'danger');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>Unlock Admin Control Panel</span>';
+    }
+  }
+}
+
+window.handleAdminModalLoginSubmit = handleAdminModalLoginSubmit;
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initAdminApp);

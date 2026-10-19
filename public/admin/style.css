@@ -1029,11 +1029,116 @@ button {
   font-weight: 700;
   color: var(--text-main);
   margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .amenity-dist {
   font-size: 10px;
   color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Agent Inventory Row Section (Scrollable horizontal row per Agent ID) */
+.agent-inventory-section {
+  background: #ffffff;
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow 0.2s ease;
+}
+
+.agent-inventory-section:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.agent-inventory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid var(--border-subtle);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.agent-inventory-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.agent-badge-pill {
+  font-size: 12px;
+  font-weight: 800;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1.5px solid #a7f3d0;
+  padding: 4px 12px;
+  border-radius: 99px;
+  letter-spacing: 0.5px;
+}
+
+.agent-name-text {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.agent-offers-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 4px 14px 4px;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.agent-offers-row::-webkit-scrollbar {
+  height: 8px;
+}
+
+.agent-offers-row::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 99px;
+}
+
+.agent-offers-row::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 99px;
+}
+
+.agent-offers-row::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.agent-offers-row .offer-card {
+  flex: 0 0 350px;
+  min-width: 320px;
+  max-width: 360px;
+  scroll-snap-align: start;
+}
+
+/* Symmetrical alignment in Request Attached Offers */
+#req-offers-grid .offer-card {
+  min-height: 380px;
+  box-sizing: border-box;
+}
+
+#req-offers-grid .offer-amenity-grid .amenity-box {
+  min-height: 64px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Info Notice Banners */

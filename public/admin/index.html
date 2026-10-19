@@ -2183,6 +2183,41 @@
     </div>
   </div>
 
+  <!-- Admin Authentication Modal (Allows any authorized personnel from any laptop to sign in with admin credentials) -->
+  <div id="admin-login-modal" class="modal-overlay" style="z-index: 99999; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);">
+    <div class="modal-content" style="max-width: 440px; border-radius: 20px; box-shadow: 0 25px 60px rgba(0,0,0,0.3); border: 1.5px solid #e2e8f0; padding: 32px 28px;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="width: 56px; height: 56px; margin: 0 auto 12px; background: #ecfdf5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; border: 2px solid #a7f3d0;">
+          🔐
+        </div>
+        <h2 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 6px;">Admin Portal Login</h2>
+        <p style="font-size: 13px; color: #64748b; margin: 0;">Sign in with your authorized admin credentials from any device.</p>
+      </div>
+
+      <div id="admin-login-error" style="display: none; background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 16px;"></div>
+
+      <form id="admin-auth-form" onsubmit="handleAdminModalLoginSubmit(event)" style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="display: block; font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Email or Username</label>
+          <input type="text" id="admin-login-email" required placeholder="admin@umrah.com" class="form-input" style="height: 46px; font-size: 14px; padding: 0 14px; border-radius: 10px; border: 1.5px solid #cbd5e1; width: 100%; box-sizing: border-box;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="display: block; font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Password</label>
+          <input type="password" id="admin-login-password" required placeholder="••••••••" class="form-input" style="height: 46px; font-size: 14px; padding: 0 14px; border-radius: 10px; border: 1.5px solid #cbd5e1; width: 100%; box-sizing: border-box;">
+        </div>
+
+        <button type="submit" id="admin-login-submit-btn" class="btn btn-primary" style="height: 48px; font-size: 14px; font-weight: 800; background: #047857; border-radius: 10px; margin-top: 8px; justify-content: center;">
+          <span>Unlock Admin Control Panel</span>
+        </button>
+
+        <div style="text-align: center; margin-top: 4px;">
+          <a href="/login.html" style="font-size: 12.5px; color: #64748b; text-decoration: underline; font-weight: 600;">Go to Pilgrim Login</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
 
