@@ -901,8 +901,8 @@ class App {
     updatePageSEO(page) {
         const seoMap = {
             'home': {
-                title: 'Zilhaj.com – Umrah & Hajj Travel | Journey of Faith, Comfort & Blessings',
-                desc: 'Zilhaj.com Umrah & Hajj Travel Platform. Book 100% verified Umrah packages, Ramadan deals, VIP Hajj packages, Mecca Medina tours, Ziaraat, and custom pilgrimage bids. Hotels near Haram with 5-star comfort.',
+                title: 'Zilhaj.com – Umrah & Hajj | Journey of Faith, Comfort & Blessings',
+                desc: 'Zilhaj.com Umrah & Hajj Platform. Book 100% verified Umrah packages, Ramadan deals, VIP Hajj packages, Mecca Medina tours, Ziaraat, and custom pilgrimage bids. Hotels near Haram with 5-star comfort.',
                 url: 'https://onerequest.in/'
             },
             'umrah-packages': {
@@ -941,7 +941,7 @@ class App {
                 url: 'https://onerequest.in/dashboard'
             },
             'about': {
-                title: 'About Us – Zilhaj.com Umrah & Hajj Travel Platform',
+                title: 'About Us – Zilhaj.com Umrah & Hajj Platform',
                 desc: 'Discover Zilhaj.com, connecting pilgrims worldwide with verified Saudi-licensed tour operators for safe, escrow-backed Umrah and Hajj journeys.',
                 url: 'https://onerequest.in/about'
             },
@@ -956,7 +956,7 @@ class App {
                 url: 'https://onerequest.in/faqs'
             },
             'blog': {
-                title: 'Umrah & Hajj Travel Blog | Zilhaj.com Pilgrimage Insights',
+                title: 'Umrah & Hajj Blog | Zilhaj.com Pilgrimage Insights',
                 desc: 'Read expert advice, preparation tips, flight advice, and spiritual guides for your sacred journey to Makkah & Madinah.',
                 url: 'https://onerequest.in/blog'
             },
@@ -976,7 +976,7 @@ class App {
                 url: 'https://onerequest.in/blog/zilhaj-experience'
             },
             'terms': {
-                title: 'Terms & Conditions | Zilhaj.com Umrah & Hajj Travel Platform',
+                title: 'Terms & Conditions | Zilhaj.com Umrah & Hajj Platform',
                 desc: 'Official Terms of Service for pilgrims and tour operators: bookings, escrow payments, cancellations, refunds, liability, and governing law on Zilhaj.com.',
                 url: 'https://onerequest.in/terms'
             },
@@ -991,7 +991,7 @@ class App {
                 url: 'https://onerequest.in/support'
             },
             'request-form': {
-                title: 'Submit Umrah & Hajj Travel Request | Zilhaj.com',
+                title: 'Submit Umrah & Hajj Request | Zilhaj.com',
                 desc: 'Fill in your travel dates, group size, hotel preferences, and budget to receive personalized Umrah package quotes from verified Saudi tour operators.',
                 url: 'https://onerequest.in/request-form'
             }
